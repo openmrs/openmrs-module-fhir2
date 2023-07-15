@@ -53,6 +53,7 @@ import org.openmrs.module.fhir2.api.dao.FhirConditionDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.SearchQueryBundleProvider;
 import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
+import org.openmrs.module.fhir2.api.search.param.ConditionSearchParams;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.ConditionTranslator;
 
@@ -200,9 +201,6 @@ public class FhirConditionServiceImplTest {
 		TokenAndListParam codeList = new TokenAndListParam();
 		codeList.addValue(new TokenOrListParam().add(new TokenParam("test code")));
 		
-		TokenAndListParam clinicalList = new TokenAndListParam();
-		clinicalList.addValue(new TokenOrListParam().add(new TokenParam("test clinical")));
-		
 		DateRangeParam onsetDate = new DateRangeParam().setLowerBound("gt2020-05-01").setUpperBound("lt2021-05-01");
 		
 		QuantityAndListParam onsetAge = new QuantityAndListParam();
@@ -234,8 +232,8 @@ public class FhirConditionServiceImplTest {
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(translator.toFhirResource(obsCondition)).thenReturn(condition);
 		
-		IBundleProvider result = fhirConditionService.searchConditions(patientReference, codeList, clinicalList, onsetDate,
-		    onsetAge, recordDate, uuid, lastUpdated, sort, includes);
+		IBundleProvider result = fhirConditionService.searchConditions(new ConditionSearchParams(patientReference, codeList,
+		        null, onsetDate, onsetAge, recordDate, uuid, lastUpdated, sort, includes));
 		
 		List<IBaseResource> resultList = get(result);
 		

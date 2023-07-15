@@ -47,6 +47,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.openmrs.module.fhir2.api.FhirConditionService;
 import org.openmrs.module.fhir2.api.annotations.R3Provider;
 import org.openmrs.module.fhir2.api.search.SearchQueryBundleProviderR3Wrapper;
+import org.openmrs.module.fhir2.api.search.param.ConditionSearchParams;
 import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -121,7 +122,7 @@ public class ConditionFhirResourceProvider implements IResourceProvider {
 			includes = null;
 		}
 		
-		return new SearchQueryBundleProviderR3Wrapper(conditionService.searchConditions(patientParam, code, clinicalStatus,
-		    onsetDate, onsetAge, recordedDate, id, lastUpdated, sort, includes));
+		return new SearchQueryBundleProviderR3Wrapper(conditionService.searchConditions(new ConditionSearchParams(
+		        patientParam, code, clinicalStatus, onsetDate, onsetAge, recordedDate, id, lastUpdated, sort, includes)));
 	}
 }

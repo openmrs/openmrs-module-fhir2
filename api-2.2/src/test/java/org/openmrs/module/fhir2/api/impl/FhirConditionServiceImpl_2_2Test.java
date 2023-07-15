@@ -54,6 +54,7 @@ import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.SearchQueryBundleProvider;
 import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.SearchQueryInclude_2_2;
+import org.openmrs.module.fhir2.api.search.param.ConditionSearchParams;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.ConditionTranslator;
 
@@ -262,8 +263,8 @@ public class FhirConditionServiceImpl_2_2Test {
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(conditionTranslator.toFhirResource(openmrsCondition)).thenReturn(fhirCondition);
 		
-		IBundleProvider result = conditionService.searchConditions(patientReference, codeList, clinicalList, onsetDate,
-		    onsetAge, recordDate, uuid, lastUpdated, sort, includes);
+		IBundleProvider result = conditionService.searchConditions(new ConditionSearchParams(patientReference, codeList,
+		        clinicalList, onsetDate, onsetAge, recordDate, uuid, lastUpdated, sort, includes));
 		
 		List<IBaseResource> resultList = get(result);
 		

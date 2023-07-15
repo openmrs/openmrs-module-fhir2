@@ -18,7 +18,6 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.openmrs.module.fhir2.api.util.GeneralUtils.inputStreamToString;
@@ -30,15 +29,9 @@ import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Objects;
 
-import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
-import ca.uhn.fhir.rest.param.QuantityAndListParam;
-import ca.uhn.fhir.rest.param.ReferenceAndListParam;
-import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Getter;
 import org.apache.commons.lang3.time.DateUtils;
@@ -53,6 +46,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirConditionService;
+import org.openmrs.module.fhir2.api.search.param.ConditionSearchParams;
 import org.openmrs.module.fhir2.providers.r4.MockIBundleProvider;
 import org.springframework.mock.web.MockHttpServletResponse;
 
@@ -94,19 +88,7 @@ public class ConditionFhirR3ResourceProviderWebTest extends BaseFhirR3ResourcePr
 	private ConditionFhirResourceProvider resourceProvider;
 	
 	@Captor
-	private ArgumentCaptor<ReferenceAndListParam> referenceAndListParamArgumentCaptor;
-	
-	@Captor
-	private ArgumentCaptor<TokenAndListParam> tokenAndListParamArgumentCaptor;
-	
-	@Captor
-	private ArgumentCaptor<DateRangeParam> dateRangeParamArgumentCaptor;
-	
-	@Captor
-	private ArgumentCaptor<QuantityAndListParam> quantityAndListParamArgumentCaptor;
-	
-	@Captor
-	private ArgumentCaptor<HashSet<Include>> includeArgumentCaptor;
+	private ArgumentCaptor<ConditionSearchParams> conditionSearchParamsArgumentCaptor;
 	
 	@Before
 	@Override
@@ -162,16 +144,15 @@ public class ConditionFhirR3ResourceProviderWebTest extends BaseFhirR3ResourcePr
 	public void searchForConditions_shouldReturnBundleWithMatchingPatientUUID() throws Exception {
 		verifyURI(String.format("/Condition?patient=%s", PATIENT_UUID));
 		
-		verify(conditionService).searchConditions(referenceAndListParamArgumentCaptor.capture(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		verify(conditionService).searchConditions(conditionSearchParamsArgumentCaptor.capture());
 		
-		assertThat(referenceAndListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getValue(),
+		assertThat(conditionSearchParamsArgumentCaptor.getValue(), notNullValue());
+		assertThat(conditionSearchParamsArgumentCaptor.getValue().getPatientParam().getValuesAsQueryTokens(), not(empty()));
+		assertThat(conditionSearchParamsArgumentCaptor.getValue().getPatientParam().getValuesAsQueryTokens().get(0)
+		        .getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(PATIENT_UUID));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getChain(),
+		assertThat(conditionSearchParamsArgumentCaptor.getValue().getPatientParam().getValuesAsQueryTokens().get(0)
+		        .getValuesAsQueryTokens().get(0).getChain(),
 		    equalTo(null));
 	}
 	
@@ -179,16 +160,15 @@ public class ConditionFhirR3ResourceProviderWebTest extends BaseFhirR3ResourcePr
 	public void searchForConditions_shouldReturnBundleWithMatchingPatientName() throws Exception {
 		verifyURI(String.format("/Condition?patient.name=%s", PATIENT_NAME));
 		
-		verify(conditionService).searchConditions(referenceAndListParamArgumentCaptor.capture(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		verify(conditionService).searchConditions(conditionSearchParamsArgumentCaptor.capture());
 		
-		assertThat(referenceAndListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getValue(),
+		assertThat(conditionSearchParamsArgumentCaptor.getValue(), notNullValue());
+		assertThat(conditionSearchParamsArgumentCaptor.getValue().getPatientParam().getValuesAsQueryTokens(), not(empty()));
+		assertThat(conditionSearchParamsArgumentCaptor.getValue().getPatientParam().getValuesAsQueryTokens().get(0)
+		        .getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(PATIENT_NAME));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getChain(),
+		assertThat(conditionSearchParamsArgumentCaptor.getValue().getPatientParam().getValuesAsQueryTokens().get(0)
+		        .getValuesAsQueryTokens().get(0).getChain(),
 		    equalTo(Patient.SP_NAME));
 	}
 	
@@ -196,16 +176,15 @@ public class ConditionFhirR3ResourceProviderWebTest extends BaseFhirR3ResourcePr
 	public void searchForConditions_shouldReturnBundleWithMatchingPatientGivenName() throws Exception {
 		verifyURI(String.format("/Condition?patient.given=%s", PATIENT_GIVEN_NAME));
 		
-		verify(conditionService).searchConditions(referenceAndListParamArgumentCaptor.capture(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		verify(conditionService).searchConditions(conditionSearchParamsArgumentCaptor.capture());
 		
-		assertThat(referenceAndListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getValue(),
+		assertThat(conditionSearchParamsArgumentCaptor.getValue(), notNullValue());
+		assertThat(conditionSearchParamsArgumentCaptor.getValue().getPatientParam().getValuesAsQueryTokens(), not(empty()));
+		assertThat(conditionSearchParamsArgumentCaptor.getValue().getPatientParam().getValuesAsQueryTokens().get(0)
+		        .getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(PATIENT_GIVEN_NAME));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getChain(),
+		assertThat(conditionSearchParamsArgumentCaptor.getValue().getPatientParam().getValuesAsQueryTokens().get(0)
+		        .getValuesAsQueryTokens().get(0).getChain(),
 		    equalTo(Patient.SP_GIVEN));
 	}
 	
@@ -213,16 +192,15 @@ public class ConditionFhirR3ResourceProviderWebTest extends BaseFhirR3ResourcePr
 	public void searchForConditions_shouldReturnBundleWithMatchingPatientFamilyName() throws Exception {
 		verifyURI(String.format("/Condition?patient.family=%s", PATIENT_FAMILY_NAME));
 		
-		verify(conditionService).searchConditions(referenceAndListParamArgumentCaptor.capture(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		verify(conditionService).searchConditions(conditionSearchParamsArgumentCaptor.capture());
 		
-		assertThat(referenceAndListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getValue(),
+		assertThat(conditionSearchParamsArgumentCaptor.getValue(), notNullValue());
+		assertThat(conditionSearchParamsArgumentCaptor.getValue().getPatientParam().getValuesAsQueryTokens(), not(empty()));
+		assertThat(conditionSearchParamsArgumentCaptor.getValue().getPatientParam().getValuesAsQueryTokens().get(0)
+		        .getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(PATIENT_FAMILY_NAME));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getChain(),
+		assertThat(conditionSearchParamsArgumentCaptor.getValue().getPatientParam().getValuesAsQueryTokens().get(0)
+		        .getValuesAsQueryTokens().get(0).getChain(),
 		    equalTo(Patient.SP_FAMILY));
 	}
 	
@@ -230,16 +208,15 @@ public class ConditionFhirR3ResourceProviderWebTest extends BaseFhirR3ResourcePr
 	public void searchForConditions_shouldReturnBundleWithMatchingPatientIdentifier() throws Exception {
 		verifyURI(String.format("/Condition?patient.identifier=%s", PATIENT_IDENTIFIER));
 		
-		verify(conditionService).searchConditions(referenceAndListParamArgumentCaptor.capture(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		verify(conditionService).searchConditions(conditionSearchParamsArgumentCaptor.capture());
 		
-		assertThat(referenceAndListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getValue(),
+		assertThat(conditionSearchParamsArgumentCaptor.getValue(), notNullValue());
+		assertThat(conditionSearchParamsArgumentCaptor.getValue().getPatientParam().getValuesAsQueryTokens(), not(empty()));
+		assertThat(conditionSearchParamsArgumentCaptor.getValue().getPatientParam().getValuesAsQueryTokens().get(0)
+		        .getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(PATIENT_IDENTIFIER));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getChain(),
+		assertThat(conditionSearchParamsArgumentCaptor.getValue().getPatientParam().getValuesAsQueryTokens().get(0)
+		        .getValuesAsQueryTokens().get(0).getChain(),
 		    equalTo(Patient.SP_IDENTIFIER));
 	}
 	
@@ -247,13 +224,12 @@ public class ConditionFhirR3ResourceProviderWebTest extends BaseFhirR3ResourcePr
 	public void searchForConditions_shouldReturnBundleWithMatchingCode() throws Exception {
 		verifyURI(String.format("/Condition?code=%s", CONDITION_CODE));
 		
-		verify(conditionService).searchConditions(isNull(), tokenAndListParamArgumentCaptor.capture(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		verify(conditionService).searchConditions(conditionSearchParamsArgumentCaptor.capture());
 		
-		assertThat(tokenAndListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
-		        .getValue(),
+		assertThat(conditionSearchParamsArgumentCaptor.getValue(), notNullValue());
+		assertThat(conditionSearchParamsArgumentCaptor.getValue().getCode().getValuesAsQueryTokens(), not(empty()));
+		assertThat(conditionSearchParamsArgumentCaptor.getValue().getCode().getValuesAsQueryTokens().get(0)
+		        .getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(CONDITION_CODE));
 	}
 	
@@ -261,13 +237,13 @@ public class ConditionFhirR3ResourceProviderWebTest extends BaseFhirR3ResourcePr
 	public void searchForConditions_shouldReturnBundleWithMatchingClinicalStatus() throws Exception {
 		verifyURI(String.format("/Condition?clinical-status=%s", CLINICAL_STATUS));
 		
-		verify(conditionService).searchConditions(isNull(), isNull(), tokenAndListParamArgumentCaptor.capture(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		verify(conditionService).searchConditions(conditionSearchParamsArgumentCaptor.capture());
 		
-		assertThat(tokenAndListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
-		        .getValue(),
+		assertThat(conditionSearchParamsArgumentCaptor.getValue(), notNullValue());
+		assertThat(conditionSearchParamsArgumentCaptor.getValue().getClinicalStatus().getValuesAsQueryTokens(),
+		    not(empty()));
+		assertThat(conditionSearchParamsArgumentCaptor.getValue().getClinicalStatus().getValuesAsQueryTokens().get(0)
+		        .getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(CLINICAL_STATUS));
 	}
 	
@@ -275,15 +251,14 @@ public class ConditionFhirR3ResourceProviderWebTest extends BaseFhirR3ResourcePr
 	public void searchForConditions_shouldReturnBundleWithMatchingRecordedDate() throws Exception {
 		verifyURI(String.format("/Condition?asserted-date=%s", RECORDED_DATE));
 		
-		verify(conditionService).searchConditions(isNull(), isNull(), isNull(), isNull(), isNull(),
-		    dateRangeParamArgumentCaptor.capture(), isNull(), isNull(), isNull(), isNull());
+		verify(conditionService).searchConditions(conditionSearchParamsArgumentCaptor.capture());
 		
 		Calendar calendar = Calendar.getInstance();
 		calendar.set(1978, Calendar.FEBRUARY, 2);
 		
-		assertThat(dateRangeParamArgumentCaptor.getValue().getLowerBound().getValue(),
+		assertThat(conditionSearchParamsArgumentCaptor.getValue().getRecordedDate().getLowerBound().getValue(),
 		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
-		assertThat(dateRangeParamArgumentCaptor.getValue().getUpperBound().getValue(),
+		assertThat(conditionSearchParamsArgumentCaptor.getValue().getRecordedDate().getUpperBound().getValue(),
 		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
 	}
 	
@@ -291,28 +266,26 @@ public class ConditionFhirR3ResourceProviderWebTest extends BaseFhirR3ResourcePr
 	public void searchForConditions_shouldReturnBundleWithOnsetDateGreaterThanOrEqualTo() throws Exception {
 		verifyURI(String.format("/Condition?onset-date=%s", ONSET_DATE));
 		
-		verify(conditionService).searchConditions(isNull(), isNull(), isNull(), dateRangeParamArgumentCaptor.capture(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		verify(conditionService).searchConditions(conditionSearchParamsArgumentCaptor.capture());
 		
 		Calendar calendar = Calendar.getInstance();
 		calendar.set(1975, Calendar.FEBRUARY, 2);
 		
-		assertThat(dateRangeParamArgumentCaptor.getValue().getLowerBound().getValue(),
+		assertThat(conditionSearchParamsArgumentCaptor.getValue().getOnsetDate().getLowerBound().getValue(),
 		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
-		assertThat(dateRangeParamArgumentCaptor.getValue().getUpperBound(), nullValue());
+		assertThat(conditionSearchParamsArgumentCaptor.getValue().getOnsetDate().getUpperBound(), nullValue());
 	}
 	
 	@Test
 	public void searchForConditions_shouldReturnBundleWithMatchingUUID() throws Exception {
 		verifyURI(String.format("/Condition?_id=%s", CONDITION_UUID));
 		
-		verify(conditionService).searchConditions(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    tokenAndListParamArgumentCaptor.capture(), isNull(), isNull(), isNull());
+		verify(conditionService).searchConditions(conditionSearchParamsArgumentCaptor.capture());
 		
-		assertThat(tokenAndListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
-		        .getValue(),
+		assertThat(conditionSearchParamsArgumentCaptor.getValue(), notNullValue());
+		assertThat(conditionSearchParamsArgumentCaptor.getValue().getId().getValuesAsQueryTokens(), not(empty()));
+		assertThat(conditionSearchParamsArgumentCaptor.getValue().getId().getValuesAsQueryTokens().get(0)
+		        .getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(CONDITION_UUID));
 	}
 	
@@ -320,15 +293,14 @@ public class ConditionFhirR3ResourceProviderWebTest extends BaseFhirR3ResourcePr
 	public void searchForConditions_shouldReturnBundleWithLastUpdatedDateEqualTo() throws Exception {
 		verifyURI(String.format("/Condition?_lastUpdated=%s", LAST_UPDATED_DATE));
 		
-		verify(conditionService).searchConditions(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    dateRangeParamArgumentCaptor.capture(), isNull(), isNull());
+		verify(conditionService).searchConditions(conditionSearchParamsArgumentCaptor.capture());
 		
 		Calendar calendar = Calendar.getInstance();
 		calendar.set(2020, Calendar.SEPTEMBER, 3);
 		
-		assertThat(dateRangeParamArgumentCaptor.getValue().getLowerBound().getValue(),
+		assertThat(conditionSearchParamsArgumentCaptor.getValue().getLastUpdated().getLowerBound().getValue(),
 		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
-		assertThat(dateRangeParamArgumentCaptor.getValue().getUpperBound().getValue(),
+		assertThat(conditionSearchParamsArgumentCaptor.getValue().getLastUpdated().getUpperBound().getValue(),
 		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
 	}
 	
@@ -336,22 +308,21 @@ public class ConditionFhirR3ResourceProviderWebTest extends BaseFhirR3ResourcePr
 	public void searchForConditions_shouldReturnBundleWithOnsetAgeLessThanHour() throws Exception {
 		verifyURI(String.format("/Condition?onset-age=%s", ONSET_AGE));
 		
-		verify(conditionService).searchConditions(isNull(), isNull(), isNull(), isNull(),
-		    quantityAndListParamArgumentCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull());
+		verify(conditionService).searchConditions(conditionSearchParamsArgumentCaptor.capture());
 		
-		assertThat(quantityAndListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(quantityAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(quantityAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getPrefix(),
+		assertThat(conditionSearchParamsArgumentCaptor.getValue(), notNullValue());
+		assertThat(conditionSearchParamsArgumentCaptor.getValue().getOnsetAge().getValuesAsQueryTokens(), not(empty()));
+		assertThat(conditionSearchParamsArgumentCaptor.getValue().getOnsetAge().getValuesAsQueryTokens().get(0)
+		        .getValuesAsQueryTokens().get(0).getPrefix(),
 		    equalTo(ParamPrefixEnum.LESSTHAN));
-		assertThat(quantityAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getValue(),
+		assertThat(conditionSearchParamsArgumentCaptor.getValue().getOnsetAge().getValuesAsQueryTokens().get(0)
+		        .getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(BigDecimal.valueOf(2)));
-		assertThat(quantityAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getUnits(),
+		assertThat(conditionSearchParamsArgumentCaptor.getValue().getOnsetAge().getValuesAsQueryTokens().get(0)
+		        .getValuesAsQueryTokens().get(0).getUnits(),
 		    equalTo("h"));
-		assertThat(quantityAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getSystem(),
+		assertThat(conditionSearchParamsArgumentCaptor.getValue().getOnsetAge().getValuesAsQueryTokens().get(0)
+		        .getValuesAsQueryTokens().get(0).getSystem(),
 		    equalTo(null));
 	}
 	
@@ -359,20 +330,20 @@ public class ConditionFhirR3ResourceProviderWebTest extends BaseFhirR3ResourcePr
 	public void searchForConditions_shouldReturnBundleOfWithIncludedResources() throws Exception {
 		verifyURI("/Condition?_include=Condition:patient");
 		
-		verify(conditionService).searchConditions(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), includeArgumentCaptor.capture());
+		verify(conditionService).searchConditions(conditionSearchParamsArgumentCaptor.capture());
 		
-		assertThat(includeArgumentCaptor.getValue(), notNullValue());
-		assertThat(includeArgumentCaptor.getValue().size(), equalTo(1));
-		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamName(),
+		assertThat(conditionSearchParamsArgumentCaptor.getValue(), notNullValue());
+		assertThat(conditionSearchParamsArgumentCaptor.getValue().getIncludes().size(), equalTo(1));
+		assertThat(conditionSearchParamsArgumentCaptor.getValue().getIncludes().iterator().next().getParamName(),
 		    equalTo(FhirConstants.INCLUDE_PATIENT_PARAM));
-		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamType(), equalTo(FhirConstants.CONDITION));
+		assertThat(conditionSearchParamsArgumentCaptor.getValue().getIncludes().iterator().next().getParamType(),
+		    equalTo(FhirConstants.CONDITION));
 	}
 	
 	private void verifyURI(String uri) throws Exception {
 		Condition condition = new Condition();
 		condition.setId(CONDITION_UUID);
-		when(conditionService.searchConditions(any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
+		when(conditionService.searchConditions(any()))
 		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(condition), 10, 1));
 		
 		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.JSON).go();
