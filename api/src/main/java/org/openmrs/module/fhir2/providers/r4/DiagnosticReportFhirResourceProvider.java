@@ -48,6 +48,7 @@ import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
 import org.openmrs.module.fhir2.api.FhirDiagnosticReportService;
 import org.openmrs.module.fhir2.api.annotations.R4Provider;
+import org.openmrs.module.fhir2.api.search.param.DiagnosticReportSearchParams;
 import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -134,7 +135,7 @@ public class DiagnosticReportFhirResourceProvider implements IResourceProvider {
 			includes = null;
 		}
 		
-		return service.searchForDiagnosticReports(encounterReference, patientReference, issueDate, code, result, id,
-		    lastUpdated, sort, includes);
+		return service.searchForDiagnosticReports(new DiagnosticReportSearchParams(encounterReference, patientReference,
+		        issueDate, code, result, id, lastUpdated, sort, includes));
 	}
 }

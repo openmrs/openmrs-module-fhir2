@@ -17,9 +17,7 @@ import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
-import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -51,6 +49,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirDiagnosticReportService;
+import org.openmrs.module.fhir2.api.search.param.DiagnosticReportSearchParams;
 import org.openmrs.module.fhir2.providers.r4.MockIBundleProvider;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -178,8 +177,9 @@ public class DiagnosticReportFhirResourceProviderTest extends BaseFhirR3Provenan
 	
 	@Test
 	public void findDiagnosticReports_shouldReturnMatchingBundleOfDiagnosticReports() {
-		when(service.searchForDiagnosticReports(any(), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(
-		    new MockIBundleProvider<>(Collections.singletonList(diagnosticReport), PREFERRED_PAGE_SIZE, COUNT));
+		when(service.searchForDiagnosticReports(
+		    new DiagnosticReportSearchParams(null, null, null, null, null, null, null, null, null))).thenReturn(
+		        new MockIBundleProvider<>(Collections.singletonList(diagnosticReport), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchForDiagnosticReports(null, null, null, null, null, null, null, null,
 		    null, null);
@@ -198,8 +198,9 @@ public class DiagnosticReportFhirResourceProviderTest extends BaseFhirR3Provenan
 		ReferenceAndListParam subject = new ReferenceAndListParam();
 		subject.addValue(new ReferenceOrListParam().add(new ReferenceParam().setChain(Patient.SP_NAME)));
 		
-		when(service.searchForDiagnosticReports(any(), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(
-		    new MockIBundleProvider<>(Collections.singletonList(diagnosticReport), PREFERRED_PAGE_SIZE, COUNT));
+		when(service.searchForDiagnosticReports(
+		    new DiagnosticReportSearchParams(null, subject, null, null, null, null, null, null, null))).thenReturn(
+		        new MockIBundleProvider<>(Collections.singletonList(diagnosticReport), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchForDiagnosticReports(null, null, subject, null, null, null, null,
 		    null, null, null);
@@ -217,8 +218,8 @@ public class DiagnosticReportFhirResourceProviderTest extends BaseFhirR3Provenan
 		HashSet<Include> includes = new HashSet<>();
 		includes.add(new Include("DiagnosticReport:patient"));
 		
-		when(service.searchForDiagnosticReports(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), argThat(is(includes)))).thenReturn(
+		when(service.searchForDiagnosticReports(
+		    new DiagnosticReportSearchParams(null, null, null, null, null, null, null, null, includes))).thenReturn(
 		        new MockIBundleProvider<>(Arrays.asList(diagnosticReport, new Patient()), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchForDiagnosticReports(null, null, null, null, null, null, null, null,
@@ -237,8 +238,8 @@ public class DiagnosticReportFhirResourceProviderTest extends BaseFhirR3Provenan
 	public void findDiagnosticReports_shouldNotReturnRelatedResourcesIfIncludeIsEmpty() {
 		HashSet<Include> includes = new HashSet<>();
 		
-		when(service.searchForDiagnosticReports(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull())).thenReturn(
+		when(service.searchForDiagnosticReports(
+		    new DiagnosticReportSearchParams(null, null, null, null, null, null, null, null, null))).thenReturn(
 		        new MockIBundleProvider<>(Collections.singletonList(diagnosticReport), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchForDiagnosticReports(null, null, null, null, null, null, null, null,

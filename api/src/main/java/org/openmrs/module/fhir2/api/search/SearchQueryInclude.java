@@ -49,6 +49,7 @@ import org.openmrs.module.fhir2.api.FhirObservationService;
 import org.openmrs.module.fhir2.api.FhirPatientService;
 import org.openmrs.module.fhir2.api.FhirPractitionerService;
 import org.openmrs.module.fhir2.api.FhirServiceRequestService;
+import org.openmrs.module.fhir2.api.search.param.DiagnosticReportSearchParams;
 import org.openmrs.module.fhir2.api.search.param.EncounterSearchParams;
 import org.openmrs.module.fhir2.api.search.param.LocationSearchParams;
 import org.openmrs.module.fhir2.api.search.param.MedicationDispenseSearchParams;
@@ -255,8 +256,8 @@ public class SearchQueryInclude<U extends IBaseResource> {
 				observationSearchParams.setHasMember(params);
 				return observationService.searchForObservations(observationSearchParams);
 			case FhirConstants.DIAGNOSTIC_REPORT:
-				return diagnosticReportService.searchForDiagnosticReports(null, null, null, null, params, null, null, null,
-				    null);
+				return diagnosticReportService.searchForDiagnosticReports(
+				    new DiagnosticReportSearchParams(null, null, null, null, params, null, null, null, null));
 		}
 		
 		return null;
@@ -288,8 +289,8 @@ public class SearchQueryInclude<U extends IBaseResource> {
 				observationSearchParams.setEncounter(params);
 				return observationService.searchForObservations(observationSearchParams);
 			case FhirConstants.DIAGNOSTIC_REPORT:
-				return diagnosticReportService.searchForDiagnosticReports(params, null, null, null, null, null, null, null,
-				    null);
+				return diagnosticReportService.searchForDiagnosticReports(
+				    new DiagnosticReportSearchParams(params, null, null, null, null, null, null, null, null));
 			case FhirConstants.MEDICATION_REQUEST:
 				return medicationRequestService.searchForMedicationRequests(null, params, null, null, null, null, null, null,
 				    null, recursiveIncludes, recursiveRevIncludes);
@@ -330,8 +331,8 @@ public class SearchQueryInclude<U extends IBaseResource> {
 				observationSearchParams.setPatient(params);
 				return observationService.searchForObservations(observationSearchParams);
 			case FhirConstants.DIAGNOSTIC_REPORT:
-				return diagnosticReportService.searchForDiagnosticReports(null, params, null, null, null, null, null, null,
-				    null);
+				return diagnosticReportService.searchForDiagnosticReports(
+				    new DiagnosticReportSearchParams(null, params, null, null, null, null, null, null, null));
 			case FhirConstants.ALLERGY_INTOLERANCE:
 				return allergyIntoleranceService.searchForAllergies(params, null, null, null, null, null, null, null, null,
 				    null);
