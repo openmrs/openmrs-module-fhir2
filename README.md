@@ -121,6 +121,11 @@ than their XML equivalents, where possible.
 In addition to the default libraries, we should use [Lombok](https://projectlombok.org/)
 where feasible to avoid having to write so much repetitive code.
 
+Deployment
+------------
+For performance reasons it is recommended to set **hibernate.cache.use_query_cache=true** for openmrs-core versions lower than 2.6.2, where it is set by default. It is to benefit from caching of result counts. You can set it via [OpenMRS runtime properties](https://wiki.openmrs.org/display/docs/Overriding+OpenMRS+Default+Runtime+Properties).
+
+
 Unit Testing
 ------------
 
