@@ -4,7 +4,7 @@
 
     <groupId>org.openmrs.module</groupId>
     <artifactId>fhir2</artifactId>
-    <version>1.10.0</version>
+    <version>1.11.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>FHIR2</name>
     <description>Implementation of FHIR R4 for OpenMRS</description>
@@ -32,7 +32,7 @@
         <connection>scm:git:git@github.com:openmrs/openmrs-module-fhir2.git</connection>
         <developerConnection>scm:git:git@github.com:openmrs/openmrs-module-fhir2.git</developerConnection>
         <url>https://github.com/openmrs/openmrs-module-fhir2/</url>
-      <tag>1.10.0</tag>
+      <tag>HEAD</tag>
     </scm>
 
     <modules>
