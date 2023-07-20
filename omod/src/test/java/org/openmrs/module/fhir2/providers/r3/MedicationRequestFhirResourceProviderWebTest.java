@@ -557,10 +557,10 @@ public class MedicationRequestFhirResourceProviderWebTest extends BaseFhirR3Reso
 		        .searchForMedicationRequests(medicationRequestSearchParamsArgumentCaptor.capture());
 		
 		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue(), notNullValue());
-		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getFulfillerStatus().getValuesAsQueryTokens(),
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getStatus().getValuesAsQueryTokens(),
 		    not(empty()));
-		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getFulfillerStatus().getValuesAsQueryTokens()
-		        .get(0).getValuesAsQueryTokens().get(0).getValue(),
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getStatus().getValuesAsQueryTokens().get(0)
+		        .getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(STATUS));
 		
 	}

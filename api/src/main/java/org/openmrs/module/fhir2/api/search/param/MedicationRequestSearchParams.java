@@ -43,7 +43,7 @@ public class MedicationRequestSearchParams extends BaseResourceSearchParams {
 	@Builder
 	public MedicationRequestSearchParams(ReferenceAndListParam patientReference, ReferenceAndListParam encounterReference,
 	    TokenAndListParam code, ReferenceAndListParam participantReference, ReferenceAndListParam medicationReference,
-	    TokenAndListParam status, TokenAndListParam fulfillerStatus, TokenAndListParam id, DateRangeParam lastUpdated,
+	    TokenAndListParam id, TokenAndListParam status, TokenAndListParam fulfillerStatus, DateRangeParam lastUpdated,
 	    HashSet<Include> includes, HashSet<Include> revIncludes) {
 		
 		super(id, lastUpdated, null, includes, revIncludes);
