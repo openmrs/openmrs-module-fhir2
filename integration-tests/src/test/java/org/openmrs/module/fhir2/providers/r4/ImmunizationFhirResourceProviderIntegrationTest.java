@@ -38,6 +38,7 @@ import org.hl7.fhir.r4.model.Immunization;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.junit.Before;
 import org.junit.Test;
+import org.openmrs.module.fhir2.BaseFhirIntegrationTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -55,6 +56,8 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 	private static final String XML_CREATE_IMMUNIZATION_DOCUMENT = "org/openmrs/module/fhir2/providers/ImmunizationWebTest_create.xml";
 	
 	private static final String XML_CREATE_PARTIAL_IMMUNIZATION_DOCUMENT = "org/openmrs/module/fhir2/providers/ImmunizationWebTest_create_partial.xml";
+	
+	private static final String JSON_MERGE_PATCH_IMMUNIZATION_PATH = "org/openmrs/module/fhir2/providers/ImmunizationWebTest_json_merge_patch.json";
 	
 	private static final String IMMUNIZATION_UUID = "28668ca0-d7d7-4314-8a67-70f083bcf8ba";
 	
@@ -478,6 +481,30 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		
 		assertThat(operationOutcome, notNullValue());
 		assertThat(operationOutcome.hasIssue(), is(true));
+	}
+	
+	@Test
+	public void shouldPatchExistingImmunizationUsingJsonMergePatch() throws Exception {
+		String jsonImmunizationPatch;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_MERGE_PATCH_IMMUNIZATION_PATH)) {
+			Objects.requireNonNull(is);
+			jsonImmunizationPatch = inputStreamToString(is, UTF_8);
+		}
+		
+		MockHttpServletResponse response = patch("/Immunization/" + IMMUNIZATION_UUID).jsonMergePatch(jsonImmunizationPatch)
+		        .accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response, notNullValue());
+		assertThat(response.getContentType(), is(BaseFhirIntegrationTest.FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Immunization immunization = readResponse(response);
+		
+		assertThat(immunization, notNullValue());
+		assertThat(immunization.getIdElement().getIdPart(), equalTo(IMMUNIZATION_UUID));
+		assertThat(immunization.getExpirationDate(), sameDay(LocalDate.parse("2023-07-30")));
+		assertThat(immunization, validResource());
 	}
 	
 	@Test

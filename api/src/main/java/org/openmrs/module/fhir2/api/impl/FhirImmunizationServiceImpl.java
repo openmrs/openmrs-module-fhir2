@@ -15,8 +15,10 @@ import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslat
 
 import javax.annotation.Nonnull;
 
+import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -28,13 +30,19 @@ import org.hl7.fhir.r4.model.Immunization;
 import org.openmrs.Obs;
 import org.openmrs.api.EncounterService;
 import org.openmrs.api.ObsService;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.fhir2.api.FhirImmunizationService;
 import org.openmrs.module.fhir2.api.dao.FhirObservationDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.ImmunizationTranslator;
+import org.openmrs.module.fhir2.api.translators.OpenmrsFhirTranslator;
+import org.openmrs.module.fhir2.api.translators.OpenmrsFhirUpdatableTranslator;
+import org.openmrs.module.fhir2.api.translators.UpdatableOpenmrsTranslator;
 import org.openmrs.module.fhir2.api.util.ImmunizationObsGroupHelper;
+import org.openmrs.module.fhir2.api.util.JsonPatchUtils;
+import org.openmrs.module.fhir2.api.util.XmlPatchUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -116,6 +124,42 @@ public class FhirImmunizationServiceImpl extends BaseFhirService<Immunization, O
 	}
 	
 	@Override
+	public Immunization patch(@Nonnull String uuid, @Nonnull PatchTypeEnum patchType, @Nonnull String body,
+	        RequestDetails requestDetails) {
+		
+		if (uuid == null) {
+			throw new InvalidRequestException("id cannot be null");
+		}
+		
+		Obs existingImmunizationObs = dao.get(uuid);
+		
+		if (existingImmunizationObs == null) {
+			throw resourceNotFound(uuid);
+		}
+		
+		OpenmrsFhirTranslator<Obs, Immunization> translator = getTranslator();
+		
+		Immunization existingImmunization = translator.toFhirResource(existingImmunizationObs);
+		Immunization updatedImmunizationFhirObject = null;
+		
+		switch (patchType) {
+			case JSON_PATCH:
+				if (isJsonMergePatch(requestDetails)) {
+					updatedImmunizationFhirObject = JsonPatchUtils.applyJsonMergePatch(fhirContext, existingImmunization,
+					    body);
+				} else {
+					updatedImmunizationFhirObject = JsonPatchUtils.applyJsonPatch(fhirContext, existingImmunization, body);
+				}
+				break;
+			case XML_PATCH:
+				updatedImmunizationFhirObject = XmlPatchUtils.applyXmlPatch(fhirContext, existingImmunization, body);
+				break;
+		}
+		
+		return applyUpdate(existingImmunizationObs, updatedImmunizationFhirObject);
+	}
+	
+	@Override
 	public void delete(@Nonnull String uuid) {
 		if (uuid == null) {
 			throw new InvalidRequestException("Uuid cannot be null.");
@@ -143,6 +187,23 @@ public class FhirImmunizationServiceImpl extends BaseFhirService<Immunization, O
 		theParams.addParameter(CODED_SEARCH_HANDLER, conceptParam);
 		
 		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
+	}
+	
+	@Override
+	protected Immunization applyUpdate(Obs existingObject, Immunization updatedResource) {
+		OpenmrsFhirTranslator<Obs, Immunization> translator = getTranslator();
+		
+		org.openmrs.Obs updatedObject;
+		if (translator instanceof OpenmrsFhirUpdatableTranslator) {
+			UpdatableOpenmrsTranslator<org.openmrs.Obs, Immunization> updatableOpenmrsTranslator = (OpenmrsFhirUpdatableTranslator<org.openmrs.Obs, Immunization>) translator;
+			updatedObject = updatableOpenmrsTranslator.toOpenmrsType(existingObject, updatedResource);
+		} else {
+			updatedObject = translator.toOpenmrsType(updatedResource);
+		}
+		
+		validateObject(updatedObject);
+		
+		return translator.toFhirResource(Context.getObsService().saveObs(updatedObject, "Updated via the FHIR2 API"));
 	}
 	
 	@Override

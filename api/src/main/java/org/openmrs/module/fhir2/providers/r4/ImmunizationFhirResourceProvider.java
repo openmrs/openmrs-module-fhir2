@@ -17,14 +17,17 @@ import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
+import ca.uhn.fhir.rest.annotation.Patch;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Sort;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -79,6 +82,19 @@ public class ImmunizationFhirResourceProvider implements IResourceProvider {
 		existingImmunization.setId(id.getIdPart());
 		
 		return FhirProviderUtils.buildUpdate(immunizationService.update(id.getIdPart(), existingImmunization));
+	}
+	
+	@Patch
+	@SuppressWarnings("unused")
+	public MethodOutcome patchImmunization(@IdParam IdType id, PatchTypeEnum patchType, @ResourceParam String body,
+	        RequestDetails requestDetails) {
+		if (id == null || id.getIdPart() == null) {
+			throw new InvalidRequestException("id must be specified to patch the Immunization resource");
+		}
+		
+		Immunization immunization = immunizationService.patch(id.getIdPart(), patchType, body, requestDetails);
+		
+		return FhirProviderUtils.buildPatch(immunization);
 	}
 	
 	@Delete

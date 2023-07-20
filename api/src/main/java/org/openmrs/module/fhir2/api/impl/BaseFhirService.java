@@ -48,7 +48,7 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 	
 	@Autowired
 	@Qualifier("fhirR4")
-	private FhirContext fhirContext;
+	protected FhirContext fhirContext;
 	
 	protected BaseFhirService() {
 		// @formatter:off
@@ -247,7 +247,7 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 	 * checks the Content-Type header of the request to determine if it corresponds to a merge json
 	 * patch
 	 */
-	private Boolean isJsonMergePatch(RequestDetails requestDetails) {
+	protected Boolean isJsonMergePatch(RequestDetails requestDetails) {
 		String contentType = requestDetails.getHeader(Constants.HEADER_CONTENT_TYPE);
 		return contentType != null && contentType.equalsIgnoreCase("application/merge-patch+json");
 	}
