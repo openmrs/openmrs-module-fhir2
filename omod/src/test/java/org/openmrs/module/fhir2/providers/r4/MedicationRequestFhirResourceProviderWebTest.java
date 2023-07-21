@@ -19,7 +19,6 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -27,12 +26,7 @@ import javax.servlet.ServletException;
 
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.HashSet;
 
-import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.ReferenceAndListParam;
-import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Getter;
 import org.apache.commons.lang.time.DateUtils;
@@ -49,6 +43,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirMedicationRequestService;
+import org.openmrs.module.fhir2.api.search.param.MedicationRequestSearchParams;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -88,16 +83,7 @@ public class MedicationRequestFhirResourceProviderWebTest extends BaseFhirR4Reso
 	private FhirMedicationRequestService fhirMedicationRequestService;
 	
 	@Captor
-	private ArgumentCaptor<TokenAndListParam> tokenAndListParamArgumentCaptor;
-	
-	@Captor
-	private ArgumentCaptor<DateRangeParam> dateRangeParamArgumentCaptor;
-	
-	@Captor
-	private ArgumentCaptor<ReferenceAndListParam> referenceAndListParamArgumentCaptor;
-	
-	@Captor
-	private ArgumentCaptor<HashSet<Include>> includeArgumentCaptor;
+	private ArgumentCaptor<MedicationRequestSearchParams> medicationRequestSearchParamsArgumentCaptor;
 	
 	@Getter(AccessLevel.PUBLIC)
 	private MedicationRequestFhirResourceProvider resourceProvider;
@@ -142,13 +128,14 @@ public class MedicationRequestFhirResourceProviderWebTest extends BaseFhirR4Reso
 	public void searchForMedicationRequests_shouldSearchForMedicationRequestsByUUID() throws Exception {
 		verifyUri(String.format("/MedicationRequest?_id=%s", MEDICATION_REQUEST_UUID));
 		
-		verify(fhirMedicationRequestService).searchForMedicationRequests(isNull(), isNull(), isNull(), isNull(), isNull(),
-		    tokenAndListParamArgumentCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull());
+		verify(fhirMedicationRequestService)
+		        .searchForMedicationRequests(medicationRequestSearchParamsArgumentCaptor.capture());
 		
-		assertThat(tokenAndListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
-		        .getValue(),
+		System.out.println("value:" + medicationRequestSearchParamsArgumentCaptor.getValue());
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue(), notNullValue());
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getId().getValuesAsQueryTokens(), not(empty()));
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getId().getValuesAsQueryTokens().get(0)
+		        .getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(MEDICATION_REQUEST_UUID));
 	}
 	
@@ -156,17 +143,17 @@ public class MedicationRequestFhirResourceProviderWebTest extends BaseFhirR4Reso
 	public void searchForMedicationRequests_shouldSearchForMedicationRequestsByLastUpdatedDate() throws Exception {
 		verifyUri(String.format("/MedicationRequest?_lastUpdated=%s", LAST_UPDATED_DATE));
 		
-		verify(fhirMedicationRequestService).searchForMedicationRequests(isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), dateRangeParamArgumentCaptor.capture(), isNull(), isNull());
+		verify(fhirMedicationRequestService)
+		        .searchForMedicationRequests(medicationRequestSearchParamsArgumentCaptor.capture());
 		
-		assertThat(dateRangeParamArgumentCaptor.getValue(), notNullValue());
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue(), notNullValue());
 		
 		Calendar calendar = Calendar.getInstance();
 		calendar.set(2020, Calendar.SEPTEMBER, 3);
 		
-		assertThat(dateRangeParamArgumentCaptor.getValue().getLowerBound().getValue(),
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getLastUpdated().getLowerBound().getValue(),
 		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
-		assertThat(dateRangeParamArgumentCaptor.getValue().getUpperBound().getValue(),
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getLastUpdated().getUpperBound().getValue(),
 		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
 	}
 	
@@ -174,16 +161,17 @@ public class MedicationRequestFhirResourceProviderWebTest extends BaseFhirR4Reso
 	public void searchForMedicationRequests_shouldSearchForMedicationRequestsBySubjectUUID() throws Exception {
 		verifyUri(String.format("/MedicationRequest?subject=%s", PATIENT_UUID));
 		
-		verify(fhirMedicationRequestService).searchForMedicationRequests(referenceAndListParamArgumentCaptor.capture(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		verify(fhirMedicationRequestService)
+		        .searchForMedicationRequests(medicationRequestSearchParamsArgumentCaptor.capture());
 		
-		assertThat(referenceAndListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getValue(),
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue(), notNullValue());
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getPatientReference().getValuesAsQueryTokens(),
+		    not(empty()));
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getPatientReference().getValuesAsQueryTokens()
+		        .get(0).getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(PATIENT_UUID));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getChain(),
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getPatientReference().getValuesAsQueryTokens()
+		        .get(0).getValuesAsQueryTokens().get(0).getChain(),
 		    nullValue());
 	}
 	
@@ -191,16 +179,17 @@ public class MedicationRequestFhirResourceProviderWebTest extends BaseFhirR4Reso
 	public void searchForMedicationRequests_shouldSearchForMedicationRequestsBySubjectIdentifier() throws Exception {
 		verifyUri(String.format("/MedicationRequest?subject.identifier=%s", PATIENT_IDENTIFIER));
 		
-		verify(fhirMedicationRequestService).searchForMedicationRequests(referenceAndListParamArgumentCaptor.capture(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		verify(fhirMedicationRequestService)
+		        .searchForMedicationRequests(medicationRequestSearchParamsArgumentCaptor.capture());
 		
-		assertThat(referenceAndListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getValue(),
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue(), notNullValue());
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getPatientReference().getValuesAsQueryTokens(),
+		    not(empty()));
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getPatientReference().getValuesAsQueryTokens()
+		        .get(0).getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(PATIENT_IDENTIFIER));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getChain(),
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getPatientReference().getValuesAsQueryTokens()
+		        .get(0).getValuesAsQueryTokens().get(0).getChain(),
 		    equalTo(Patient.SP_IDENTIFIER));
 	}
 	
@@ -208,16 +197,17 @@ public class MedicationRequestFhirResourceProviderWebTest extends BaseFhirR4Reso
 	public void searchForMedicationRequests_shouldSearchForMedicationRequestsBySubjectGivenName() throws Exception {
 		verifyUri(String.format("/MedicationRequest?subject.given=%s", PATIENT_GIVEN_NAME));
 		
-		verify(fhirMedicationRequestService).searchForMedicationRequests(referenceAndListParamArgumentCaptor.capture(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		verify(fhirMedicationRequestService)
+		        .searchForMedicationRequests(medicationRequestSearchParamsArgumentCaptor.capture());
 		
-		assertThat(referenceAndListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getValue(),
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue(), notNullValue());
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getPatientReference().getValuesAsQueryTokens(),
+		    not(empty()));
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getPatientReference().getValuesAsQueryTokens()
+		        .get(0).getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(PATIENT_GIVEN_NAME));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getChain(),
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getPatientReference().getValuesAsQueryTokens()
+		        .get(0).getValuesAsQueryTokens().get(0).getChain(),
 		    equalTo(Patient.SP_GIVEN));
 	}
 	
@@ -225,16 +215,17 @@ public class MedicationRequestFhirResourceProviderWebTest extends BaseFhirR4Reso
 	public void searchForMedicationRequests_shouldSearchForMedicationRequestsBySubjectFamilyName() throws Exception {
 		verifyUri(String.format("/MedicationRequest?subject.family=%s", PATIENT_FAMILY_NAME));
 		
-		verify(fhirMedicationRequestService).searchForMedicationRequests(referenceAndListParamArgumentCaptor.capture(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		verify(fhirMedicationRequestService)
+		        .searchForMedicationRequests(medicationRequestSearchParamsArgumentCaptor.capture());
 		
-		assertThat(referenceAndListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getValue(),
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue(), notNullValue());
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getPatientReference().getValuesAsQueryTokens(),
+		    not(empty()));
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getPatientReference().getValuesAsQueryTokens()
+		        .get(0).getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(PATIENT_FAMILY_NAME));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getChain(),
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getPatientReference().getValuesAsQueryTokens()
+		        .get(0).getValuesAsQueryTokens().get(0).getChain(),
 		    equalTo(Patient.SP_FAMILY));
 	}
 	
@@ -242,16 +233,17 @@ public class MedicationRequestFhirResourceProviderWebTest extends BaseFhirR4Reso
 	public void searchForMedicationRequests_shouldSearchForMedicationRequestsBySubjectName() throws Exception {
 		verifyUri(String.format("/MedicationRequest?subject.name=%s", PATIENT_GIVEN_NAME));
 		
-		verify(fhirMedicationRequestService).searchForMedicationRequests(referenceAndListParamArgumentCaptor.capture(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		verify(fhirMedicationRequestService)
+		        .searchForMedicationRequests(medicationRequestSearchParamsArgumentCaptor.capture());
 		
-		assertThat(referenceAndListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getValue(),
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue(), notNullValue());
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getPatientReference().getValuesAsQueryTokens(),
+		    not(empty()));
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getPatientReference().getValuesAsQueryTokens()
+		        .get(0).getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(PATIENT_GIVEN_NAME));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getChain(),
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getPatientReference().getValuesAsQueryTokens()
+		        .get(0).getValuesAsQueryTokens().get(0).getChain(),
 		    equalTo(Patient.SP_NAME));
 	}
 	
@@ -261,17 +253,20 @@ public class MedicationRequestFhirResourceProviderWebTest extends BaseFhirR4Reso
 		verifyUri(String.format("/MedicationRequest?subject.given=%s&subject.identifier=%s", PATIENT_GIVEN_NAME,
 		    PATIENT_IDENTIFIER));
 		
-		verify(fhirMedicationRequestService).searchForMedicationRequests(referenceAndListParamArgumentCaptor.capture(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		verify(fhirMedicationRequestService)
+		        .searchForMedicationRequests(medicationRequestSearchParamsArgumentCaptor.capture());
 		
-		assertThat(referenceAndListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().size(), equalTo(2));
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue(), notNullValue());
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getPatientReference().getValuesAsQueryTokens(),
+		    not(empty()));
+		assertThat(
+		    medicationRequestSearchParamsArgumentCaptor.getValue().getPatientReference().getValuesAsQueryTokens().size(),
+		    equalTo(2));
 		
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(),
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getPatientReference().getValuesAsQueryTokens(),
 		    hasItem(hasProperty("valuesAsQueryTokens", hasItem(allOf(hasProperty("chain", equalTo(Patient.SP_IDENTIFIER)),
 		        hasProperty("value", equalTo(PATIENT_IDENTIFIER)))))));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(),
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getPatientReference().getValuesAsQueryTokens(),
 		    hasItem(hasProperty("valuesAsQueryTokens", hasItem(allOf(hasProperty("chain", equalTo(Patient.SP_GIVEN)),
 		        hasProperty("value", equalTo(PATIENT_GIVEN_NAME)))))));
 	}
@@ -280,16 +275,17 @@ public class MedicationRequestFhirResourceProviderWebTest extends BaseFhirR4Reso
 	public void searchForMedicationRequests_shouldSearchForMedicationRequestsByPatientUUID() throws Exception {
 		verifyUri(String.format("/MedicationRequest?patient=%s", PATIENT_UUID));
 		
-		verify(fhirMedicationRequestService).searchForMedicationRequests(referenceAndListParamArgumentCaptor.capture(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		verify(fhirMedicationRequestService)
+		        .searchForMedicationRequests(medicationRequestSearchParamsArgumentCaptor.capture());
 		
-		assertThat(referenceAndListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getValue(),
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue(), notNullValue());
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getPatientReference().getValuesAsQueryTokens(),
+		    not(empty()));
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getPatientReference().getValuesAsQueryTokens()
+		        .get(0).getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(PATIENT_UUID));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getChain(),
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getPatientReference().getValuesAsQueryTokens()
+		        .get(0).getValuesAsQueryTokens().get(0).getChain(),
 		    nullValue());
 	}
 	
@@ -297,16 +293,17 @@ public class MedicationRequestFhirResourceProviderWebTest extends BaseFhirR4Reso
 	public void searchForMedicationRequests_shouldSearchForMedicationRequestsByPatientIdentifier() throws Exception {
 		verifyUri(String.format("/MedicationRequest?patient.identifier=%s", PATIENT_IDENTIFIER));
 		
-		verify(fhirMedicationRequestService).searchForMedicationRequests(referenceAndListParamArgumentCaptor.capture(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		verify(fhirMedicationRequestService)
+		        .searchForMedicationRequests(medicationRequestSearchParamsArgumentCaptor.capture());
 		
-		assertThat(referenceAndListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getValue(),
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue(), notNullValue());
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getPatientReference().getValuesAsQueryTokens(),
+		    not(empty()));
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getPatientReference().getValuesAsQueryTokens()
+		        .get(0).getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(PATIENT_IDENTIFIER));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getChain(),
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getPatientReference().getValuesAsQueryTokens()
+		        .get(0).getValuesAsQueryTokens().get(0).getChain(),
 		    equalTo(Patient.SP_IDENTIFIER));
 	}
 	
@@ -314,16 +311,17 @@ public class MedicationRequestFhirResourceProviderWebTest extends BaseFhirR4Reso
 	public void searchForMedicationRequests_shouldSearchForMedicationRequestsByPatientGivenName() throws Exception {
 		verifyUri(String.format("/MedicationRequest?patient.given=%s", PATIENT_GIVEN_NAME));
 		
-		verify(fhirMedicationRequestService).searchForMedicationRequests(referenceAndListParamArgumentCaptor.capture(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		verify(fhirMedicationRequestService)
+		        .searchForMedicationRequests(medicationRequestSearchParamsArgumentCaptor.capture());
 		
-		assertThat(referenceAndListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getValue(),
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue(), notNullValue());
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getPatientReference().getValuesAsQueryTokens(),
+		    not(empty()));
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getPatientReference().getValuesAsQueryTokens()
+		        .get(0).getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(PATIENT_GIVEN_NAME));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getChain(),
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getPatientReference().getValuesAsQueryTokens()
+		        .get(0).getValuesAsQueryTokens().get(0).getChain(),
 		    equalTo(Patient.SP_GIVEN));
 	}
 	
@@ -331,16 +329,17 @@ public class MedicationRequestFhirResourceProviderWebTest extends BaseFhirR4Reso
 	public void searchForMedicationRequests_shouldSearchForMedicationRequestsByPatientFamilyName() throws Exception {
 		verifyUri(String.format("/MedicationRequest?patient.family=%s", PATIENT_FAMILY_NAME));
 		
-		verify(fhirMedicationRequestService).searchForMedicationRequests(referenceAndListParamArgumentCaptor.capture(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		verify(fhirMedicationRequestService)
+		        .searchForMedicationRequests(medicationRequestSearchParamsArgumentCaptor.capture());
 		
-		assertThat(referenceAndListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getValue(),
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue(), notNullValue());
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getPatientReference().getValuesAsQueryTokens(),
+		    not(empty()));
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getPatientReference().getValuesAsQueryTokens()
+		        .get(0).getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(PATIENT_FAMILY_NAME));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getChain(),
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getPatientReference().getValuesAsQueryTokens()
+		        .get(0).getValuesAsQueryTokens().get(0).getChain(),
 		    equalTo(Patient.SP_FAMILY));
 	}
 	
@@ -348,16 +347,17 @@ public class MedicationRequestFhirResourceProviderWebTest extends BaseFhirR4Reso
 	public void searchForMedicationRequests_shouldSearchForMedicationRequestsByPatientName() throws Exception {
 		verifyUri(String.format("/MedicationRequest?patient.name=%s", PATIENT_GIVEN_NAME));
 		
-		verify(fhirMedicationRequestService).searchForMedicationRequests(referenceAndListParamArgumentCaptor.capture(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		verify(fhirMedicationRequestService)
+		        .searchForMedicationRequests(medicationRequestSearchParamsArgumentCaptor.capture());
 		
-		assertThat(referenceAndListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getValue(),
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue(), notNullValue());
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getPatientReference().getValuesAsQueryTokens(),
+		    not(empty()));
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getPatientReference().getValuesAsQueryTokens()
+		        .get(0).getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(PATIENT_GIVEN_NAME));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getChain(),
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getPatientReference().getValuesAsQueryTokens()
+		        .get(0).getValuesAsQueryTokens().get(0).getChain(),
 		    equalTo(Patient.SP_NAME));
 	}
 	
@@ -367,17 +367,20 @@ public class MedicationRequestFhirResourceProviderWebTest extends BaseFhirR4Reso
 		verifyUri(String.format("/MedicationRequest?patient.given=%s&patient.identifier=%s", PATIENT_GIVEN_NAME,
 		    PATIENT_IDENTIFIER));
 		
-		verify(fhirMedicationRequestService).searchForMedicationRequests(referenceAndListParamArgumentCaptor.capture(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		verify(fhirMedicationRequestService)
+		        .searchForMedicationRequests(medicationRequestSearchParamsArgumentCaptor.capture());
 		
-		assertThat(referenceAndListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().size(), equalTo(2));
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue(), notNullValue());
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getPatientReference().getValuesAsQueryTokens(),
+		    not(empty()));
+		assertThat(
+		    medicationRequestSearchParamsArgumentCaptor.getValue().getPatientReference().getValuesAsQueryTokens().size(),
+		    equalTo(2));
 		
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(),
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getPatientReference().getValuesAsQueryTokens(),
 		    hasItem(hasProperty("valuesAsQueryTokens", hasItem(allOf(hasProperty("chain", equalTo(Patient.SP_IDENTIFIER)),
 		        hasProperty("value", equalTo(PATIENT_IDENTIFIER)))))));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(),
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getPatientReference().getValuesAsQueryTokens(),
 		    hasItem(hasProperty("valuesAsQueryTokens", hasItem(allOf(hasProperty("chain", equalTo(Patient.SP_GIVEN)),
 		        hasProperty("value", equalTo(PATIENT_GIVEN_NAME)))))));
 	}
@@ -386,17 +389,17 @@ public class MedicationRequestFhirResourceProviderWebTest extends BaseFhirR4Reso
 	public void searchForMedicationRequests_shouldSearchForMedicationRequestsByEncounterUUID() throws Exception {
 		verifyUri(String.format("/MedicationRequest?encounter=%s", ENCOUNTER_UUID));
 		
-		verify(fhirMedicationRequestService).searchForMedicationRequests(isNull(),
-		    referenceAndListParamArgumentCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull());
+		verify(fhirMedicationRequestService)
+		        .searchForMedicationRequests(medicationRequestSearchParamsArgumentCaptor.capture());
 		
-		assertThat(referenceAndListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getChain(),
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue(), notNullValue());
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getEncounterReference().getValuesAsQueryTokens(),
+		    not(empty()));
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getEncounterReference().getValuesAsQueryTokens()
+		        .get(0).getValuesAsQueryTokens().get(0).getChain(),
 		    equalTo(null));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getValue(),
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getEncounterReference().getValuesAsQueryTokens()
+		        .get(0).getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(ENCOUNTER_UUID));
 	}
 	
@@ -404,17 +407,17 @@ public class MedicationRequestFhirResourceProviderWebTest extends BaseFhirR4Reso
 	public void searchForMedicationRequests_shouldSearchForMedicationRequestsByParticipantUUID() throws Exception {
 		verifyUri(String.format("/MedicationRequest?requester=%s", PARTICIPANT_UUID));
 		
-		verify(fhirMedicationRequestService).searchForMedicationRequests(isNull(), isNull(), isNull(),
-		    referenceAndListParamArgumentCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull());
+		verify(fhirMedicationRequestService)
+		        .searchForMedicationRequests(medicationRequestSearchParamsArgumentCaptor.capture());
 		
-		assertThat(referenceAndListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getValue(),
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue(), notNullValue());
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getParticipantReference().getValuesAsQueryTokens(),
+		    not(empty()));
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getParticipantReference().getValuesAsQueryTokens()
+		        .get(0).getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(PARTICIPANT_UUID));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getChain(),
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getParticipantReference().getValuesAsQueryTokens()
+		        .get(0).getValuesAsQueryTokens().get(0).getChain(),
 		    nullValue());
 	}
 	
@@ -422,17 +425,17 @@ public class MedicationRequestFhirResourceProviderWebTest extends BaseFhirR4Reso
 	public void searchForMedicationRequests_shouldSearchForMedicationRequestsByParticipantIdentifier() throws Exception {
 		verifyUri(String.format("/MedicationRequest?requester.identifier=%s", PARTICIPANT_IDENTIFIER));
 		
-		verify(fhirMedicationRequestService).searchForMedicationRequests(isNull(), isNull(), isNull(),
-		    referenceAndListParamArgumentCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull());
+		verify(fhirMedicationRequestService)
+		        .searchForMedicationRequests(medicationRequestSearchParamsArgumentCaptor.capture());
 		
-		assertThat(referenceAndListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getValue(),
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue(), notNullValue());
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getParticipantReference().getValuesAsQueryTokens(),
+		    not(empty()));
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getParticipantReference().getValuesAsQueryTokens()
+		        .get(0).getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(PARTICIPANT_IDENTIFIER));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getChain(),
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getParticipantReference().getValuesAsQueryTokens()
+		        .get(0).getValuesAsQueryTokens().get(0).getChain(),
 		    equalTo(Practitioner.SP_IDENTIFIER));
 	}
 	
@@ -440,17 +443,17 @@ public class MedicationRequestFhirResourceProviderWebTest extends BaseFhirR4Reso
 	public void searchForMedicationRequests_shouldSearchForMedicationRequestsByParticipantGivenName() throws Exception {
 		verifyUri(String.format("/MedicationRequest?requester.given=%s", PARTICIPANT_GIVEN_NAME));
 		
-		verify(fhirMedicationRequestService).searchForMedicationRequests(isNull(), isNull(), isNull(),
-		    referenceAndListParamArgumentCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull());
+		verify(fhirMedicationRequestService)
+		        .searchForMedicationRequests(medicationRequestSearchParamsArgumentCaptor.capture());
 		
-		assertThat(referenceAndListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getValue(),
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue(), notNullValue());
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getParticipantReference().getValuesAsQueryTokens(),
+		    not(empty()));
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getParticipantReference().getValuesAsQueryTokens()
+		        .get(0).getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(PARTICIPANT_GIVEN_NAME));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getChain(),
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getParticipantReference().getValuesAsQueryTokens()
+		        .get(0).getValuesAsQueryTokens().get(0).getChain(),
 		    equalTo(Practitioner.SP_GIVEN));
 	}
 	
@@ -458,17 +461,17 @@ public class MedicationRequestFhirResourceProviderWebTest extends BaseFhirR4Reso
 	public void searchForMedicationRequests_shouldSearchForMedicationRequestsByParticipantFamilyName() throws Exception {
 		verifyUri(String.format("/MedicationRequest?requester.family=%s", PARTICIPANT_FAMILY_NAME));
 		
-		verify(fhirMedicationRequestService).searchForMedicationRequests(isNull(), isNull(), isNull(),
-		    referenceAndListParamArgumentCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull());
+		verify(fhirMedicationRequestService)
+		        .searchForMedicationRequests(medicationRequestSearchParamsArgumentCaptor.capture());
 		
-		assertThat(referenceAndListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getValue(),
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue(), notNullValue());
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getParticipantReference().getValuesAsQueryTokens(),
+		    not(empty()));
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getParticipantReference().getValuesAsQueryTokens()
+		        .get(0).getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(PARTICIPANT_FAMILY_NAME));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getChain(),
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getParticipantReference().getValuesAsQueryTokens()
+		        .get(0).getValuesAsQueryTokens().get(0).getChain(),
 		    equalTo(Practitioner.SP_FAMILY));
 	}
 	
@@ -476,17 +479,17 @@ public class MedicationRequestFhirResourceProviderWebTest extends BaseFhirR4Reso
 	public void searchForMedicationRequests_shouldSearchForMedicationRequestsByParticipantName() throws Exception {
 		verifyUri(String.format("/MedicationRequest?requester.name=%s", PARTICIPANT_GIVEN_NAME));
 		
-		verify(fhirMedicationRequestService).searchForMedicationRequests(isNull(), isNull(), isNull(),
-		    referenceAndListParamArgumentCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull());
+		verify(fhirMedicationRequestService)
+		        .searchForMedicationRequests(medicationRequestSearchParamsArgumentCaptor.capture());
 		
-		assertThat(referenceAndListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getValue(),
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue(), notNullValue());
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getParticipantReference().getValuesAsQueryTokens(),
+		    not(empty()));
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getParticipantReference().getValuesAsQueryTokens()
+		        .get(0).getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(PARTICIPANT_GIVEN_NAME));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getChain(),
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getParticipantReference().getValuesAsQueryTokens()
+		        .get(0).getValuesAsQueryTokens().get(0).getChain(),
 		    equalTo(Practitioner.SP_NAME));
 	}
 	
@@ -496,19 +499,21 @@ public class MedicationRequestFhirResourceProviderWebTest extends BaseFhirR4Reso
 		verifyUri(String.format("/MedicationRequest?requester.given=%s&requester.identifier=%s", PARTICIPANT_GIVEN_NAME,
 		    PARTICIPANT_IDENTIFIER));
 		
-		verify(fhirMedicationRequestService).searchForMedicationRequests(isNull(), isNull(), isNull(),
-		    referenceAndListParamArgumentCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull());
+		verify(fhirMedicationRequestService)
+		        .searchForMedicationRequests(medicationRequestSearchParamsArgumentCaptor.capture());
 		
-		assertThat(referenceAndListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().size(), equalTo(2));
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue(), notNullValue());
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getParticipantReference().getValuesAsQueryTokens(),
+		    not(empty()));
+		assertThat(
+		    medicationRequestSearchParamsArgumentCaptor.getValue().getParticipantReference().getValuesAsQueryTokens().size(),
+		    equalTo(2));
 		
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(),
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getParticipantReference().getValuesAsQueryTokens(),
 		    hasItem(
 		        hasProperty("valuesAsQueryTokens", hasItem(allOf(hasProperty("chain", equalTo(Practitioner.SP_IDENTIFIER)),
 		            hasProperty("value", equalTo(PARTICIPANT_IDENTIFIER)))))));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(),
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getParticipantReference().getValuesAsQueryTokens(),
 		    hasItem(hasProperty("valuesAsQueryTokens", hasItem(allOf(hasProperty("chain", equalTo(Practitioner.SP_GIVEN)),
 		        hasProperty("value", equalTo(PARTICIPANT_GIVEN_NAME)))))));
 	}
@@ -517,16 +522,17 @@ public class MedicationRequestFhirResourceProviderWebTest extends BaseFhirR4Reso
 	public void searchForMedicationRequests_shouldSearchForMedicationRequestsByMedicationUUID() throws Exception {
 		verifyUri(String.format("/MedicationRequest?medication=%s", MEDICATION_UUID));
 		
-		verify(fhirMedicationRequestService).searchForMedicationRequests(isNull(), isNull(), isNull(), isNull(),
-		    referenceAndListParamArgumentCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		verify(fhirMedicationRequestService)
+		        .searchForMedicationRequests(medicationRequestSearchParamsArgumentCaptor.capture());
 		
-		assertThat(referenceAndListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getValue(),
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue(), notNullValue());
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getMedicationReference().getValuesAsQueryTokens(),
+		    not(empty()));
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getMedicationReference().getValuesAsQueryTokens()
+		        .get(0).getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(MEDICATION_UUID));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getChain(),
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getMedicationReference().getValuesAsQueryTokens()
+		        .get(0).getValuesAsQueryTokens().get(0).getChain(),
 		    nullValue());
 	}
 	
@@ -534,14 +540,13 @@ public class MedicationRequestFhirResourceProviderWebTest extends BaseFhirR4Reso
 	public void searchForMedicationRequests_shouldSearchForMedicationRequestsByCode() throws Exception {
 		verifyUri(String.format("/MedicationRequest?code=%s", CODE));
 		
-		verify(fhirMedicationRequestService).searchForMedicationRequests(isNull(), isNull(),
-		    tokenAndListParamArgumentCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull());
+		verify(fhirMedicationRequestService)
+		        .searchForMedicationRequests(medicationRequestSearchParamsArgumentCaptor.capture());
 		
-		assertThat(tokenAndListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
-		        .getValue(),
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue(), notNullValue());
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getCode().getValuesAsQueryTokens(), not(empty()));
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getCode().getValuesAsQueryTokens().get(0)
+		        .getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(CODE));
 	}
 	
@@ -549,13 +554,14 @@ public class MedicationRequestFhirResourceProviderWebTest extends BaseFhirR4Reso
 	public void searchForMedicationRequests_shouldSearchForMedicationRequestsByStatus() throws Exception {
 		verifyUri(String.format("/MedicationRequest?status=%s", STATUS));
 		
-		verify(fhirMedicationRequestService).searchForMedicationRequests(isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), tokenAndListParamArgumentCaptor.capture(), isNull(), isNull(), isNull(), isNull());
+		verify(fhirMedicationRequestService)
+		        .searchForMedicationRequests(medicationRequestSearchParamsArgumentCaptor.capture());
 		
-		assertThat(tokenAndListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
-		        .getValue(),
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue(), notNullValue());
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getStatus().getValuesAsQueryTokens(),
+		    not(empty()));
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getStatus().getValuesAsQueryTokens().get(0)
+		        .getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(STATUS));
 		
 	}
@@ -564,14 +570,14 @@ public class MedicationRequestFhirResourceProviderWebTest extends BaseFhirR4Reso
 	public void searchForMedicationRequests_shouldAddRelatedRequesterWhenIncluded() throws Exception {
 		verifyUri("/MedicationRequest?_include=MedicationRequest:requester");
 		
-		verify(fhirMedicationRequestService).searchForMedicationRequests(isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), includeArgumentCaptor.capture(), isNull());
+		verify(fhirMedicationRequestService)
+		        .searchForMedicationRequests(medicationRequestSearchParamsArgumentCaptor.capture());
 		
-		assertThat(includeArgumentCaptor.getValue(), notNullValue());
-		assertThat(includeArgumentCaptor.getValue().size(), equalTo(1));
-		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamName(),
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue(), notNullValue());
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getIncludes().size(), equalTo(1));
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getIncludes().iterator().next().getParamName(),
 		    equalTo(FhirConstants.INCLUDE_REQUESTER_PARAM));
-		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamType(),
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getIncludes().iterator().next().getParamType(),
 		    equalTo(FhirConstants.MEDICATION_REQUEST));
 	}
 	
@@ -579,14 +585,14 @@ public class MedicationRequestFhirResourceProviderWebTest extends BaseFhirR4Reso
 	public void searchForMedicationRequests_shouldAddRelatedMedicationWhenIncluded() throws Exception {
 		verifyUri("/MedicationRequest?_include=MedicationRequest:medication");
 		
-		verify(fhirMedicationRequestService).searchForMedicationRequests(isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), includeArgumentCaptor.capture(), isNull());
+		verify(fhirMedicationRequestService)
+		        .searchForMedicationRequests(medicationRequestSearchParamsArgumentCaptor.capture());
 		
-		assertThat(includeArgumentCaptor.getValue(), notNullValue());
-		assertThat(includeArgumentCaptor.getValue().size(), equalTo(1));
-		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamName(),
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue(), notNullValue());
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getIncludes().size(), equalTo(1));
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getIncludes().iterator().next().getParamName(),
 		    equalTo(FhirConstants.INCLUDE_MEDICATION_PARAM));
-		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamType(),
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getIncludes().iterator().next().getParamType(),
 		    equalTo(FhirConstants.MEDICATION_REQUEST));
 	}
 	
@@ -594,14 +600,14 @@ public class MedicationRequestFhirResourceProviderWebTest extends BaseFhirR4Reso
 	public void searchForMedicationRequests_shouldAddRelatedPatientWhenIncluded() throws Exception {
 		verifyUri("/MedicationRequest?_include=MedicationRequest:patient");
 		
-		verify(fhirMedicationRequestService).searchForMedicationRequests(isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), includeArgumentCaptor.capture(), isNull());
+		verify(fhirMedicationRequestService)
+		        .searchForMedicationRequests(medicationRequestSearchParamsArgumentCaptor.capture());
 		
-		assertThat(includeArgumentCaptor.getValue(), notNullValue());
-		assertThat(includeArgumentCaptor.getValue().size(), equalTo(1));
-		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamName(),
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue(), notNullValue());
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getIncludes().size(), equalTo(1));
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getIncludes().iterator().next().getParamName(),
 		    equalTo(FhirConstants.INCLUDE_PATIENT_PARAM));
-		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamType(),
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getIncludes().iterator().next().getParamType(),
 		    equalTo(FhirConstants.MEDICATION_REQUEST));
 	}
 	
@@ -609,14 +615,14 @@ public class MedicationRequestFhirResourceProviderWebTest extends BaseFhirR4Reso
 	public void searchForMedicationRequests_shouldAddRelatedEncounterWhenIncluded() throws Exception {
 		verifyUri("/MedicationRequest?_include=MedicationRequest:encounter");
 		
-		verify(fhirMedicationRequestService).searchForMedicationRequests(isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), includeArgumentCaptor.capture(), isNull());
+		verify(fhirMedicationRequestService)
+		        .searchForMedicationRequests(medicationRequestSearchParamsArgumentCaptor.capture());
 		
-		assertThat(includeArgumentCaptor.getValue(), notNullValue());
-		assertThat(includeArgumentCaptor.getValue().size(), equalTo(1));
-		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamName(),
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue(), notNullValue());
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getIncludes().size(), equalTo(1));
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getIncludes().iterator().next().getParamName(),
 		    equalTo(FhirConstants.INCLUDE_ENCOUNTER_PARAM));
-		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamType(),
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getIncludes().iterator().next().getParamType(),
 		    equalTo(FhirConstants.MEDICATION_REQUEST));
 	}
 	
@@ -624,15 +630,15 @@ public class MedicationRequestFhirResourceProviderWebTest extends BaseFhirR4Reso
 	public void searchForMedicationRequests_shouldHandleMultipleIncludes() throws Exception {
 		verifyUri("/MedicationRequest?_include=MedicationRequest:medication&_include=MedicationRequest:requester");
 		
-		verify(fhirMedicationRequestService).searchForMedicationRequests(isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), includeArgumentCaptor.capture(), isNull());
+		verify(fhirMedicationRequestService)
+		        .searchForMedicationRequests(medicationRequestSearchParamsArgumentCaptor.capture());
 		
-		assertThat(includeArgumentCaptor.getValue(), notNullValue());
-		assertThat(includeArgumentCaptor.getValue().size(), equalTo(2));
-		assertThat(includeArgumentCaptor.getValue(),
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue(), notNullValue());
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getIncludes().size(), equalTo(2));
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getIncludes(),
 		    hasItem(allOf(hasProperty("paramName", equalTo(FhirConstants.INCLUDE_MEDICATION_PARAM)),
 		        hasProperty("paramType", equalTo(FhirConstants.MEDICATION_REQUEST)))));
-		assertThat(includeArgumentCaptor.getValue(),
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getIncludes(),
 		    hasItem(allOf(hasProperty("paramName", equalTo(FhirConstants.INCLUDE_REQUESTER_PARAM)),
 		        hasProperty("paramType", equalTo(FhirConstants.MEDICATION_REQUEST)))));
 	}
@@ -641,20 +647,20 @@ public class MedicationRequestFhirResourceProviderWebTest extends BaseFhirR4Reso
 	public void searchForMedicationRequests_shouldAddRelatedMedicationDispenseWhenRevIncluded() throws Exception {
 		verifyUri("/MedicationRequest?_revinclude=MedicationDispense:prescription");
 		
-		verify(fhirMedicationRequestService).searchForMedicationRequests(isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), includeArgumentCaptor.capture());
+		verify(fhirMedicationRequestService)
+		        .searchForMedicationRequests(medicationRequestSearchParamsArgumentCaptor.capture());
 		
-		assertThat(includeArgumentCaptor.getValue(), notNullValue());
-		assertThat(includeArgumentCaptor.getValue().size(), equalTo(1));
-		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamName(),
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue(), notNullValue());
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getRevIncludes().size(), equalTo(1));
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getRevIncludes().iterator().next().getParamName(),
 		    equalTo(FhirConstants.INCLUDE_PRESCRIPTION_PARAM));
-		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamType(),
+		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getRevIncludes().iterator().next().getParamType(),
 		    equalTo(FhirConstants.MEDICATION_DISPENSE));
 	}
 	
 	private void verifyUri(String uri) throws Exception {
-		when(fhirMedicationRequestService.searchForMedicationRequests(any(), any(), any(), any(), any(), any(), any(), any(),
-		    any(), any(), any())).thenReturn(new MockIBundleProvider<>(Collections.singletonList(medicationRequest), 10, 1));
+		when(fhirMedicationRequestService.searchForMedicationRequests(any()))
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(medicationRequest), 10, 1));
 		
 		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.JSON).go();
 		

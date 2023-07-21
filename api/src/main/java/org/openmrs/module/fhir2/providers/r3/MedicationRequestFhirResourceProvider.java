@@ -49,6 +49,7 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirMedicationRequestService;
 import org.openmrs.module.fhir2.api.annotations.R3Provider;
 import org.openmrs.module.fhir2.api.search.SearchQueryBundleProviderR3Wrapper;
+import org.openmrs.module.fhir2.api.search.param.MedicationRequestSearchParams;
 import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -137,8 +138,8 @@ public class MedicationRequestFhirResourceProvider implements IResourceProvider 
 			revIncludes = null;
 		}
 		
-		return new SearchQueryBundleProviderR3Wrapper(medicationRequestService.searchForMedicationRequests(patientReference,
-		    encounterReference, code, participantReference, medicationReference, id, status, fulfillerStatus, lastUpdated,
-		    includes, revIncludes));
+		return new SearchQueryBundleProviderR3Wrapper(medicationRequestService.searchForMedicationRequests(
+		    new MedicationRequestSearchParams(patientReference, encounterReference, code, participantReference,
+		            medicationReference, id, status, fulfillerStatus, lastUpdated, includes, revIncludes)));
 	}
 }

@@ -52,6 +52,7 @@ import org.openmrs.module.fhir2.api.FhirServiceRequestService;
 import org.openmrs.module.fhir2.api.search.param.EncounterSearchParams;
 import org.openmrs.module.fhir2.api.search.param.LocationSearchParams;
 import org.openmrs.module.fhir2.api.search.param.MedicationDispenseSearchParams;
+import org.openmrs.module.fhir2.api.search.param.MedicationRequestSearchParams;
 import org.openmrs.module.fhir2.api.search.param.ObservationSearchParams;
 import org.openmrs.module.fhir2.api.search.param.PropParam;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
@@ -270,8 +271,8 @@ public class SearchQueryInclude<U extends IBaseResource> {
 				encounterSearchParams.setParticipant(params);
 				return encounterService.searchForEncounters(encounterSearchParams);
 			case FhirConstants.MEDICATION_REQUEST:
-				return medicationRequestService.searchForMedicationRequests(null, null, null, params, null, null, null, null,
-				    null, recursiveIncludes, recursiveRevIncludes);
+				return medicationRequestService.searchForMedicationRequests(new MedicationRequestSearchParams(null, null,
+				        null, params, null, null, null, null, null, recursiveIncludes, recursiveRevIncludes));
 			case FhirConstants.PROCEDURE_REQUEST:
 			case FhirConstants.SERVICE_REQUEST:
 				return serviceRequestService.searchForServiceRequests(null, null, null, params, null, null, null, null);
@@ -291,8 +292,8 @@ public class SearchQueryInclude<U extends IBaseResource> {
 				return diagnosticReportService.searchForDiagnosticReports(params, null, null, null, null, null, null, null,
 				    null);
 			case FhirConstants.MEDICATION_REQUEST:
-				return medicationRequestService.searchForMedicationRequests(null, params, null, null, null, null, null, null,
-				    null, recursiveIncludes, recursiveRevIncludes);
+				return medicationRequestService.searchForMedicationRequests(new MedicationRequestSearchParams(null, params,
+				        null, null, null, null, null, null, null, recursiveIncludes, recursiveRevIncludes));
 			case FhirConstants.PROCEDURE_REQUEST:
 			case FhirConstants.SERVICE_REQUEST:
 				return serviceRequestService.searchForServiceRequests(null, null, params, null, null, null, null, null);
@@ -305,8 +306,8 @@ public class SearchQueryInclude<U extends IBaseResource> {
 	        HashSet<Include> recursiveIncludes, HashSet<Include> recursiveRevIncludes) {
 		switch (targetType) {
 			case FhirConstants.MEDICATION_REQUEST:
-				return medicationRequestService.searchForMedicationRequests(null, null, null, null, params, null, null, null,
-				    null, recursiveIncludes, recursiveRevIncludes);
+				return medicationRequestService.searchForMedicationRequests(new MedicationRequestSearchParams(null, null,
+				        null, null, params, null, null, null, null, recursiveIncludes, recursiveRevIncludes));
 		}
 		
 		return null;
@@ -340,8 +341,8 @@ public class SearchQueryInclude<U extends IBaseResource> {
 				encounterSearchParams.setSubject(params);
 				return encounterService.searchForEncounters(encounterSearchParams);
 			case FhirConstants.MEDICATION_REQUEST:
-				return medicationRequestService.searchForMedicationRequests(params, null, null, null, null, null, null, null,
-				    null, recursiveIncludes, recursiveRevIncludes);
+				return medicationRequestService.searchForMedicationRequests(new MedicationRequestSearchParams(params, null,
+				        null, null, null, null, null, null, null, recursiveIncludes, recursiveRevIncludes));
 			case FhirConstants.SERVICE_REQUEST:
 			case FhirConstants.PROCEDURE_REQUEST:
 				return serviceRequestService.searchForServiceRequests(params, null, null, null, null, null, null, null);
