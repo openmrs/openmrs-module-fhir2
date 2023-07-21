@@ -57,6 +57,8 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 	
 	private static final String JSON_PATCH_ENCOUNTER_PATH = "org/openmrs/module/fhir2/providers/Encounter_json_patch.json";
 	
+	private static final String XML_PATCH_ENCOUNTER_PATH = "org/openmrs/module/fhir2/providers/Encounter_xml_patch.xml";
+	
 	private static final String ENCOUNTER_JSON_CREATE_ENCOUNTER_PATH = "org/openmrs/module/fhir2/providers/EncounterWebTest_create.json";
 	
 	private static final String ENCOUNTER_XML_CREATE_ENCOUNTER_PATH = "org/openmrs/module/fhir2/providers/EncounterWebTest_create.xml";
@@ -823,7 +825,7 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 	}
 	
 	@Test
-	public void shouldPatchExistingMedicationUsingJsonMergePatch() throws Exception {
+	public void shouldPatchExistingEncounterUsingJsonMergePatch() throws Exception {
 		String jsonEncounterPatch;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_MERGE_PATCH_ENCOUNTER_PATH)) {
 			Objects.requireNonNull(is);
@@ -851,7 +853,7 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 	}
 	
 	@Test
-	public void shouldPatchExistingMedicationUsingJsonPatch() throws Exception {
+	public void shouldPatchExistingEncounterUsingJsonPatch() throws Exception {
 		String jsonEncounterPatch;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_PATCH_ENCOUNTER_PATH)) {
 			Objects.requireNonNull(is);
@@ -876,6 +878,34 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 		assertThat(encounter.getPeriod().getStart(),
 		    sameDay(LocalDate.of(2005, 2, 1).atStartOfDay(ZoneId.ofOffset("UTC", ZoneOffset.of("+05:30")))
 		            .withZoneSameInstant(ZoneId.systemDefault()).toLocalDate()));
+	}
+	
+	@Test
+	public void shouldPatchExistingEncounterUsingXmlPatch() throws Exception {
+		String xmlEncounterPatch;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(XML_PATCH_ENCOUNTER_PATH)) {
+			Objects.requireNonNull(is);
+			xmlEncounterPatch = inputStreamToString(is, UTF_8);
+		}
+		
+		MockHttpServletResponse response = patch("/Encounter/" + ENCOUNTER_UUID).xmlPatch(xmlEncounterPatch)
+				.accept(FhirMediaTypes.XML).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Encounter encounter = readResponse(response);
+		
+		assertThat(encounter, notNullValue());
+		assertThat(encounter.getIdElement().getIdPart(), equalTo(ENCOUNTER_UUID));
+		assertThat(encounter, validResource());
+		
+		assertThat(encounter.getPeriod(), notNullValue());
+		assertThat(encounter.getPeriod().hasStart(), is(true));
+		assertThat(encounter.getPeriod().getStart(),
+				sameDay(LocalDate.of(2005, 2, 1).atStartOfDay(ZoneId.ofOffset("UTC", ZoneOffset.of("+05:30")))
+						.withZoneSameInstant(ZoneId.systemDefault()).toLocalDate()));
 	}
 	
 	@Test
