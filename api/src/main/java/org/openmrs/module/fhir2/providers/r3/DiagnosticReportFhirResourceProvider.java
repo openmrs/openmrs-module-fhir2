@@ -46,6 +46,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.openmrs.module.fhir2.api.FhirDiagnosticReportService;
 import org.openmrs.module.fhir2.api.annotations.R3Provider;
 import org.openmrs.module.fhir2.api.search.SearchQueryBundleProviderR3Wrapper;
+import org.openmrs.module.fhir2.api.search.param.DiagnosticReportSearchParams;
 import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -126,7 +127,8 @@ public class DiagnosticReportFhirResourceProvider implements IResourceProvider {
 			includes = null;
 		}
 		
-		return new SearchQueryBundleProviderR3Wrapper(diagnosticReportService.searchForDiagnosticReports(encounterReference,
-		    patientReference, issueDate, code, result, id, lastUpdated, sort, includes));
+		return new SearchQueryBundleProviderR3Wrapper(
+		        diagnosticReportService.searchForDiagnosticReports(new DiagnosticReportSearchParams(encounterReference,
+		                patientReference, issueDate, code, result, id, lastUpdated, sort, includes)));
 	}
 }
