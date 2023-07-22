@@ -24,6 +24,8 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import com.google.common.reflect.TypeToken;
+import lombok.AccessLevel;
+import lombok.Getter;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.openmrs.Auditable;
 import org.openmrs.OpenmrsObject;
@@ -48,7 +50,8 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 	
 	@Autowired
 	@Qualifier("fhirR4")
-	protected FhirContext fhirContext;
+	@Getter(AccessLevel.PROTECTED)
+	private FhirContext fhirContext;
 	
 	protected BaseFhirService() {
 		// @formatter:off

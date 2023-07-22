@@ -1,0 +1,7 @@
+[
+  {
+    "op": "add",
+    "path": "/expirationDate",
+    "value": "2023-07-30"
+  }
+]
