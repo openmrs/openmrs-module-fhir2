@@ -89,67 +89,6 @@ public class FhirObservationServiceImpl extends BaseFhirService<Observation, org
 	}
 	
 	@Override
-	public Observation update(@Nonnull String uuid, @Nonnull Observation updatedObservation) {
-		if (uuid == null) {
-			throw new InvalidRequestException("Uuid cannot be null.");
-		}
-		
-		if (updatedObservation == null) {
-			throw new InvalidRequestException("Resource cannot be null.");
-		}
-		
-		if (updatedObservation.getId() == null) {
-			throw new InvalidRequestException("Observation resource is missing id.");
-		}
-		
-		if (!updatedObservation.getIdElement().getIdPart().equals(uuid)) {
-			throw new InvalidRequestException("Observation id does not match resource id.");
-		}
-		
-		Obs existingObservation = dao.get(uuid);
-		
-		if (existingObservation == null) {
-			throw resourceNotFound(uuid);
-		}
-		
-		return applyUpdate(existingObservation, updatedObservation);
-	}
-	
-	@Override
-	public Observation patch(@Nonnull String uuid, @Nonnull PatchTypeEnum patchType, @Nonnull String body,
-	        RequestDetails requestDetails) {
-		if (uuid == null) {
-			throw new InvalidRequestException("id cannot be null");
-		}
-		
-		Obs existingObs = dao.get(uuid);
-		
-		if (existingObs == null) {
-			throw resourceNotFound(uuid);
-		}
-		
-		OpenmrsFhirTranslator<Obs, Observation> translator = getTranslator();
-		
-		Observation existingObservation = translator.toFhirResource(existingObs);
-		Observation updatedObservationFhirResource = null;
-		
-		switch (patchType) {
-			case JSON_PATCH:
-				if (isJsonMergePatch(requestDetails)) {
-					updatedObservationFhirResource = JsonPatchUtils.applyJsonMergePatch(fhirContext, existingObservation,
-					    body);
-				} else {
-					updatedObservationFhirResource = JsonPatchUtils.applyJsonPatch(fhirContext, existingObservation, body);
-				}
-				break;
-			case XML_PATCH:
-				updatedObservationFhirResource = XmlPatchUtils.applyXmlPatch(fhirContext, existingObservation, body);
-				break;
-		}
-		return applyUpdate(existingObs, updatedObservationFhirResource);
-	}
-	
-	@Override
 	protected Observation applyUpdate(org.openmrs.Obs existingObject, Observation updatedResource) {
 		OpenmrsFhirTranslator<Obs, Observation> translator = getTranslator();
 		
