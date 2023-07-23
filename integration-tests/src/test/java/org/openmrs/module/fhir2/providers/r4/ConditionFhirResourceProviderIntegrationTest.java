@@ -353,7 +353,7 @@ public class ConditionFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 	
 	@Test
 	public void shouldReturnSortedAndFilteredSearchResultsForConditionsAsJson() throws Exception {
-		MockHttpServletResponse response = get("/Condition?onset-date=2008&_sort=-onset-date").accept(FhirMediaTypes.JSON)
+		MockHttpServletResponse response = get("/Condition?clinical-status=active?onset-date=2008&_sort=-onset-date").accept(FhirMediaTypes.JSON)
 		        .go();
 		
 		assertThat(response, isOk());

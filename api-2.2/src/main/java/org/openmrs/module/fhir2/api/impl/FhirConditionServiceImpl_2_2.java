@@ -50,6 +50,7 @@ public class FhirConditionServiceImpl_2_2 extends BaseFhirService<Condition, org
 	public IBundleProvider searchConditions(ConditionSearchParams conditionSearchParams) {
 		conditionSearchParams.toSearchParameterMap().addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, "onsetDate",
 		    conditionSearchParams.getOnsetDate());
+		
 		return searchQuery.getQueryResults(conditionSearchParams.toSearchParameterMap(), dao, translator,
 		    searchQueryInclude);
 	}

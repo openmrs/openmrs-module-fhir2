@@ -49,18 +49,10 @@ public class FhirConditionServiceImpl extends BaseFhirService<Condition, Obs> im
 	
 	@Override
 	public IBundleProvider searchConditions(ConditionSearchParams conditionSearchParams) {
-		if (conditionSearchParams.getClinicalStatus() != null
-		        && !conditionSearchParams.getClinicalStatus().getValuesAsQueryTokens().isEmpty()) {
-			throw new IllegalArgumentException(
-			        "The clinicalStatus parameter in Condition is not supported in OpenMRS versions lower than 2.2.0");
-		}
-		
 		conditionSearchParams.toSearchParameterMap().addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, "obsDatetime",
 		    conditionSearchParams.getOnsetDate());
 		
-		IBundleProvider providerBundle = searchQuery.getQueryResults(conditionSearchParams.toSearchParameterMap(), dao,
+		return searchQuery.getQueryResults(conditionSearchParams.toSearchParameterMap(), dao,
 		    translator, searchQueryInclude);
-		
-		return providerBundle;
 	}
 }
