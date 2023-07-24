@@ -30,4 +30,13 @@ public class FhirTranslatorUtils {
 		return null;
 	}
 	
+	public static String getVersionId(OpenmrsObject object) {
+		Date lastUpdate = getLastUpdated(object);
+		if (lastUpdate == null) {
+			return null;
+		}
+		
+		return String.valueOf(lastUpdate.getTime());
+	}
+	
 }

@@ -812,6 +812,66 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR4Integr
 		assertThat(entries, everyItem(hasResource(hasProperty("resourceType", in(getEverythingValidResourceTypes())))));
 	}
 	
+	@Test
+	public void shouldReturnAnEtagHeaderWhenRetrievingAnExistingPatient() throws Exception {
+		MockHttpServletResponse response = get("/Patient/" + PATIENT_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		
+		assertThat(response.getHeader("etag"), notNullValue());
+		assertThat(response.getHeader("etag"), startsWith("W/"));
+		
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Patient patient = readResponse(response);
+		
+		assertThat(patient, notNullValue());
+		assertThat(patient.getMeta().getVersionId(), notNullValue());
+		assertThat(patient, validResource());
+	}
+	
+	@Test
+	public void shouldReturnNotModifiedWhenRetrievingAnExistingPatientWithAnEtag() throws Exception {
+		MockHttpServletResponse response = get("/Patient/" + PATIENT_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		assertThat(response.getHeader("etag"), notNullValue());
+		
+		String etagValue = response.getHeader("etag");
+		
+		response = get("/Patient/" + PATIENT_UUID).accept(FhirMediaTypes.JSON).ifNoneMatchHeader(etagValue).go();
+		
+		assertThat(response, isOk());
+		assertThat(response, statusEquals(HttpStatus.NOT_MODIFIED));
+	}
+	
+	@Test
+	public void shouldReturnAnUpdatedPatientWithNewEtagWhenRetrievingAnExistingPatientWithAnEtag() throws Exception {
+		MockHttpServletResponse response = get("/Patient/" + PATIENT_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		assertThat(response.getHeader("etag"), notNullValue());
+		
+		String etagValue = response.getHeader("etag");
+		
+		Patient patient = readResponse(response);
+		patient.setGender(Enumerations.AdministrativeGender.FEMALE);
+		
+		//send update to the server
+		put("/Patient/" + PATIENT_UUID).jsonContent(toJson(patient)).accept(FhirMediaTypes.JSON).go();
+		
+		//send a new GET request, with the “If-None-Match” header specifying the ETag that we previously stored
+		response = get("/Patient/" + PATIENT_UUID).accept(FhirMediaTypes.JSON).ifNoneMatchHeader(etagValue).go();
+		
+		assertThat(response, isOk());
+		assertThat(response, statusEquals(HttpStatus.OK));
+	}
+	
 	private Set<String> getValidResources() {
 		Set<String> validResources = new HashSet<>();
 		validResources.add(PATIENT_UUID_2);
