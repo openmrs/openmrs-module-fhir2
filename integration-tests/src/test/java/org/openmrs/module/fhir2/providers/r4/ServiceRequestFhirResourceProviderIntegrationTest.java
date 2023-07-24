@@ -19,15 +19,20 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.startsWith;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import lombok.AccessLevel;
 import lombok.Getter;
+import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 public class ServiceRequestFhirResourceProviderIntegrationTest extends BaseFhirR4IntegrationTest<ServiceRequestFhirResourceProvider, ServiceRequest> {
@@ -215,5 +220,67 @@ public class ServiceRequestFhirResourceProviderIntegrationTest extends BaseFhirR
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(result, hasProperty("total", equalTo(4)));
+	}
+	
+	@Test
+	public void shouldReturnAnEtagHeaderWhenRetrievingAnExistingServiceRequest() throws Exception {
+		MockHttpServletResponse response = get("/ServiceRequest/" + SERVICE_REQUEST_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		
+		assertThat(response.getHeader("etag"), notNullValue());
+		assertThat(response.getHeader("etag"), startsWith("W/"));
+		
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		ServiceRequest serviceRequest = readResponse(response);
+		
+		assertThat(serviceRequest, notNullValue());
+		assertThat(serviceRequest.getMeta().getVersionId(), notNullValue());
+		assertThat(serviceRequest, validResource());
+	}
+	
+	@Test
+	public void shouldReturnNotModifiedWhenRetrievingAnExistingServiceRequestWithAnEtag() throws Exception {
+		MockHttpServletResponse response = get("/ServiceRequest/" + SERVICE_REQUEST_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		assertThat(response.getHeader("etag"), notNullValue());
+		
+		String etagValue = response.getHeader("etag");
+		
+		response = get("/ServiceRequest/" + SERVICE_REQUEST_UUID).accept(FhirMediaTypes.JSON).ifNoneMatchHeader(etagValue).go();
+		
+		assertThat(response, isOk());
+		assertThat(response, statusEquals(HttpStatus.NOT_MODIFIED));
+	}
+	
+	@Ignore
+	public void shouldReturnAnUpdatedServiceRequestWithNewEtagWhenRetrievingAnExistingServiceRequestWithAnEtag() throws Exception {
+		MockHttpServletResponse response = get("/ServiceRequest/" + SERVICE_REQUEST_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		assertThat(response.getHeader("etag"), notNullValue());
+		
+		String etagValue = response.getHeader("etag");
+		
+		ServiceRequest serviceRequest = readResponse(response);
+		
+		Date authoredOn = DateUtils.truncate(new Date(), Calendar.DATE);
+		serviceRequest.setAuthoredOn(authoredOn);
+		
+		//send update to the server
+		put("/ServiceRequest/" + SERVICE_REQUEST_UUID).jsonContent(toJson(serviceRequest)).accept(FhirMediaTypes.JSON).go();
+		
+		//send a new GET request, with the “If-None-Match” header specifying the ETag that we previously stored
+		response = get("/ServiceRequest/" + SERVICE_REQUEST_UUID).accept(FhirMediaTypes.JSON).ifNoneMatchHeader(etagValue).go();
+		
+		assertThat(response, isOk());
+		assertThat(response, statusEquals(HttpStatus.OK));
 	}
 }

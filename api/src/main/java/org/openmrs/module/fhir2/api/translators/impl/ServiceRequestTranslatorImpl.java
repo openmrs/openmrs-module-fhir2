@@ -10,6 +10,8 @@
 package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.apache.commons.lang3.Validate.notNull;
+import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getLastUpdated;
+import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getVersionId;
 
 import javax.annotation.Nonnull;
 
@@ -94,8 +96,6 @@ public class ServiceRequestTranslatorImpl extends BaseReferenceHandlingTranslato
 		serviceRequest
 		        .setOccurrence(new Period().setStart(order.getEffectiveStartDate()).setEnd(order.getEffectiveStopDate()));
 		
-		serviceRequest.getMeta().setLastUpdated(order.getDateChanged());
-		
 		if (order.getPreviousOrder() != null
 		        && (order.getAction() == Order.Action.DISCONTINUE || order.getAction() == Order.Action.REVISE)) {
 			serviceRequest.setReplaces((Collections.singletonList(createOrderReference(order.getPreviousOrder())
@@ -104,6 +104,9 @@ public class ServiceRequestTranslatorImpl extends BaseReferenceHandlingTranslato
 			serviceRequest.setBasedOn(Collections.singletonList(createOrderReference(order.getPreviousOrder())
 			        .setIdentifier(orderIdentifierTranslator.toFhirResource(order.getPreviousOrder()))));
 		}
+		
+		serviceRequest.getMeta().setLastUpdated(getLastUpdated(order));
+		serviceRequest.getMeta().setVersionId(getVersionId(order));
 		
 		return serviceRequest;
 	}
