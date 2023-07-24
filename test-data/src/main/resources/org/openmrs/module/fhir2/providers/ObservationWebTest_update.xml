@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    This Source Code Form is subject to the terms of the Mozilla Public License,
+    v. 2.0. If a copy of the MPL was not distributed with this file, You can
+    obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+    the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+
+    Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+    graphic logo is a trademark of OpenMRS Inc.
+-->
+<Observation xmlns="http://hl7.org/fhir">
+	<id value="39fb7f47-e80a-4056-9285-bd798be13c63" />
+	<status value="preliminary"/>
+	<code>
+		<coding>
+			<code value="5089AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+		</coding>
+	</code>
+	<subject>
+		<reference value="Patient/5946f880-b197-400b-9caa-a3c661d23041"/>
+	</subject>
+	<encounter>
+		<reference value="Encounter/6519d653-393b-4118-9c83-a3715b82d4ac"/>
+	</encounter>
+	<effectiveDateTime value="2014-11-25T22:17:00+11:00"/>
+	<valueQuantity>
+		<value value="156"/>
+		<unit value="cm"/>
+	</valueQuantity>
+</Observation>

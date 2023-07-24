@@ -24,13 +24,17 @@ import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
+import ca.uhn.fhir.rest.annotation.Patch;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Sort;
+import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.QuantityAndListParam;
@@ -38,6 +42,7 @@ import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.Setter;
 import org.apache.commons.collections.CollectionUtils;
@@ -81,6 +86,29 @@ public class ObservationFhirResourceProvider implements IResourceProvider {
 	@Create
 	public MethodOutcome createObservationResource(@ResourceParam Observation observation) {
 		return FhirProviderUtils.buildCreate(observationService.create(observation));
+	}
+	
+	@Update
+	@SuppressWarnings("unused")
+	public MethodOutcome updateObservation(@IdParam IdType id, @ResourceParam Observation observation) {
+		if (id == null || id.getIdPart() == null) {
+			throw new InvalidRequestException("id must be specified to update");
+		}
+		
+		observation.setId(id.getIdPart());
+		
+		return FhirProviderUtils.buildUpdate(observationService.update(id.getIdPart(), observation));
+	}
+	
+	@Patch
+	public MethodOutcome patchObservation(@IdParam IdType id, PatchTypeEnum patchType, @ResourceParam String body,
+	        RequestDetails requestDetails) {
+		if (id == null || id.getIdPart() == null) {
+			throw new InvalidRequestException("id must be specified to update Patient resource");
+		}
+		
+		Observation observation = observationService.patch(id.getIdPart(), patchType, body, requestDetails);
+		return FhirProviderUtils.buildPatch(observation);
 	}
 	
 	@Delete
