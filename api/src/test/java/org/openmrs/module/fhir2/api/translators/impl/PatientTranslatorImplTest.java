@@ -375,6 +375,17 @@ public class PatientTranslatorImplTest {
 	}
 	
 	@Test
+	public void shouldTranslateOpenMrsDateChangedToVersionId() {
+		org.openmrs.Patient patient = new org.openmrs.Patient();
+		patient.setDateChanged(new Date());
+		
+		Patient result = patientTranslator.toFhirResource(patient);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getMeta().getVersionId(), notNullValue());
+	}
+	
+	@Test
 	public void shouldTranslateToOpenMRSBirthDate() {
 		org.hl7.fhir.r4.model.Patient openMRSPatient = new org.hl7.fhir.r4.model.Patient();
 		Date date = new Date();

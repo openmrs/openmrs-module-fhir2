@@ -11,6 +11,8 @@ package org.openmrs.module.fhir2;
 
 import static org.springframework.http.HttpHeaders.ACCEPT;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
+import static org.springframework.http.HttpHeaders.IF_MATCH;
+import static org.springframework.http.HttpHeaders.IF_NONE_MATCH;
 
 import javax.annotation.Nonnull;
 import javax.servlet.ServletConfig;
@@ -375,6 +377,16 @@ public abstract class BaseFhirIntegrationTest<T extends IResourceProvider, U ext
 		
 		public FhirRequestBuilder accept(@Nonnull MediaType mediaType) {
 			request.addHeader(ACCEPT, mediaType.toString());
+			return this;
+		}
+		
+		public FhirRequestBuilder ifNoneMatchHeader(@Nonnull String etag) {
+			request.addHeader(IF_NONE_MATCH, etag.toString());
+			return this;
+		}
+		
+		public FhirRequestBuilder ifMatchHeader(@Nonnull String etag) {
+			request.addHeader(IF_MATCH, etag.toString());
 			return this;
 		}
 		
