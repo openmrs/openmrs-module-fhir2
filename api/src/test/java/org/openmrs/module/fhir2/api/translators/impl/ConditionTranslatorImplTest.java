@@ -20,6 +20,7 @@ import java.util.Date;
 
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.exparity.hamcrest.date.DateMatchers;
+import org.hamcrest.Matchers;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Condition;
@@ -263,5 +264,27 @@ public class ConditionTranslatorImplTest {
 		assertThat(condition, notNullValue());
 		assertThat(condition.getRecorder(), notNullValue());
 		assertThat(condition.getRecorder().getReference(), equalTo(PRACTITIONER_REFERENCE));
+	}
+	
+	@Test
+	public void shouldTranslateOpenMrsDateChangedToLastUpdatedDate() {
+		org.openmrs.Obs obsCondition = new org.openmrs.Obs();
+		obsCondition.setDateChanged(new Date());
+		
+		org.hl7.fhir.r4.model.Condition result = conditionTranslator.toFhirResource(obsCondition);
+		
+		assertThat(result, Matchers.notNullValue());
+		assertThat(result.getMeta().getLastUpdated(), Matchers.notNullValue());
+	}
+	
+	@Test
+	public void shouldTranslateOpenMrsDateChangedToVersionId() {
+		org.openmrs.Obs obsCondition = new org.openmrs.Obs();
+		obsCondition.setDateChanged(new Date());
+		
+		org.hl7.fhir.r4.model.Condition result = conditionTranslator.toFhirResource(obsCondition);
+		
+		assertThat(result, Matchers.notNullValue());
+		assertThat(result.getMeta().getVersionId(), Matchers.notNullValue());
 	}
 }
