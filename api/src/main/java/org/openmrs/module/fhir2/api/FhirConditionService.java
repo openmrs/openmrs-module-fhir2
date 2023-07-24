@@ -9,22 +9,11 @@
  */
 package org.openmrs.module.fhir2.api;
 
-import java.util.HashSet;
-
-import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.rest.annotation.Sort;
-import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.QuantityAndListParam;
-import ca.uhn.fhir.rest.param.ReferenceAndListParam;
-import ca.uhn.fhir.rest.param.TokenAndListParam;
 import org.hl7.fhir.r4.model.Condition;
+import org.openmrs.module.fhir2.api.search.param.ConditionSearchParams;
 
 public interface FhirConditionService extends FhirService<Condition> {
 	
-	IBundleProvider searchConditions(ReferenceAndListParam patientParam, TokenAndListParam code,
-	        TokenAndListParam clinicalStatus, DateRangeParam onsetDate, QuantityAndListParam onsetAge,
-	        DateRangeParam recordedDate, TokenAndListParam id, DateRangeParam lastUpdated, @Sort SortSpec sort,
-	        HashSet<Include> includes);
+	IBundleProvider searchConditions(ConditionSearchParams conditionSearchParams);
 }

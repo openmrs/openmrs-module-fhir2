@@ -50,6 +50,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirConditionService;
+import org.openmrs.module.fhir2.api.search.param.ConditionSearchParams;
 import org.openmrs.module.fhir2.providers.BaseFhirProvenanceResourceTest;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -175,9 +176,9 @@ public class ConditionFhirResourceProviderTest extends BaseFhirProvenanceResourc
 		
 		HashSet<Include> includes = new HashSet<>();
 		
-		when(conditionService.searchConditions(patientReference, codeList, clinicalList, onsetDate, onsetAge, recordDate,
-		    uuid, lastUpdated, sort, null))
-		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(condition), 10, 1));
+		when(conditionService.searchConditions(new ConditionSearchParams(patientReference, codeList, clinicalList, onsetDate,
+		        onsetAge, recordDate, uuid, lastUpdated, sort, null)))
+		                .thenReturn(new MockIBundleProvider<>(Collections.singletonList(condition), 10, 1));
 		
 		IBundleProvider result = resourceProvider.searchConditions(patientReference, subjectReference, codeList,
 		    clinicalList, onsetDate, onsetAge, recordDate, uuid, lastUpdated, sort, includes);
@@ -215,9 +216,9 @@ public class ConditionFhirResourceProviderTest extends BaseFhirProvenanceResourc
 		
 		HashSet<Include> includes = new HashSet<>();
 		
-		when(conditionService.searchConditions(subjectReference, codeList, clinicalList, onsetDate, onsetAge, recordDate,
-		    uuid, lastUpdated, sort, null))
-		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(condition), 10, 1));
+		when(conditionService.searchConditions(new ConditionSearchParams(subjectReference, codeList, clinicalList, onsetDate,
+		        onsetAge, recordDate, uuid, lastUpdated, sort, null)))
+		                .thenReturn(new MockIBundleProvider<>(Collections.singletonList(condition), 10, 1));
 		
 		IBundleProvider result = resourceProvider.searchConditions(subjectReference, subjectReference, codeList,
 		    clinicalList, onsetDate, onsetAge, recordDate, uuid, lastUpdated, sort, includes);

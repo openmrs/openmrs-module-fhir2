@@ -358,8 +358,8 @@ public class ConditionFhirResourceProviderIntegrationTest extends BaseFhirR3Inte
 	
 	@Test
 	public void shouldReturnSortedAndFilteredSearchResultsForConditionsAsJson() throws Exception {
-		MockHttpServletResponse response = get("/Condition?clinical-status=active&onset-date=2008&_sort=-onset-date")
-		        .accept(FhirMediaTypes.JSON).go();
+		MockHttpServletResponse response = get("/Condition?clinical-status=active?onset-date=2008&_sort=-onset-date").accept(FhirMediaTypes.JSON)
+		        .go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
@@ -410,8 +410,8 @@ public class ConditionFhirResourceProviderIntegrationTest extends BaseFhirR3Inte
 	
 	@Test
 	public void shouldReturnSortedAndFilteredSearchResultsForConditionsAsXML() throws Exception {
-		MockHttpServletResponse response = get("/Condition?clinical-status=active&onset-date=2008&_sort=-onset-date")
-		        .accept(FhirMediaTypes.XML).go();
+		MockHttpServletResponse response = get("/Condition?onset-date=2008&_sort=-onset-date").accept(FhirMediaTypes.XML)
+		        .go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
