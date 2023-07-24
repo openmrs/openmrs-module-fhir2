@@ -467,4 +467,15 @@ public class PersonTranslatorImplTest {
 		assertThat(result, notNullValue());
 		assertThat(result.getMeta().getLastUpdated(), DateMatchers.sameDay(new Date()));
 	}
+	
+	@Test
+	public void shouldTranslateOpenMrsDateChangedToVersionId() {
+		org.openmrs.Person person = new org.openmrs.Person();
+		person.setDateChanged(new Date());
+		
+		org.hl7.fhir.r4.model.Person result = personTranslator.toFhirResource(person);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getMeta().getVersionId(), notNullValue());
+	}
 }
