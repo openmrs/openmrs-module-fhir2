@@ -637,4 +637,40 @@ public class AllergyIntoleranceFhirResourceProviderIntegrationTest extends BaseF
 		assertThat(result, hasProperty("total", equalTo(6)));
 	}
 	
+	@Test
+	public void shouldReturnAnEtagHeaderWhenRetrievingAnExistingAllergyIntolerance() throws Exception {
+		MockHttpServletResponse response = get("/AllergyIntolerance/" + ALLERGY_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		
+		assertThat(response.getHeader("etag"), notNullValue());
+		assertThat(response.getHeader("etag"), startsWith("W/"));
+		
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		AllergyIntolerance allergyIntolerance = readResponse(response);
+		
+		assertThat(allergyIntolerance, notNullValue());
+		assertThat(allergyIntolerance.getMeta().getVersionId(), notNullValue());
+		assertThat(allergyIntolerance, validResource());
+	}
+	
+	@Test
+	public void shouldReturnNotModifiedWhenRetrievingAnExistingAllergyIntoleranceWithAnEtag() throws Exception {
+		MockHttpServletResponse response = get("/AllergyIntolerance/" + ALLERGY_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		assertThat(response.getHeader("etag"), notNullValue());
+		
+		String etagValue = response.getHeader("etag");
+		
+		response = get("/AllergyIntolerance/" + ALLERGY_UUID).accept(FhirMediaTypes.JSON).ifNoneMatchHeader(etagValue).go();
+		
+		assertThat(response, isOk());
+		assertThat(response, statusEquals(HttpStatus.NOT_MODIFIED));
+	}
+	
 }
