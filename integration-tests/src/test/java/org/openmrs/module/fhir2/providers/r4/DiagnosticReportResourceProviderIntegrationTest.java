@@ -686,7 +686,8 @@ public class DiagnosticReportResourceProviderIntegrationTest extends BaseFhirR4I
 	
 	@Test
 	public void shouldReturnAnEtagHeaderWhenRetrievingAnExistingDiagnosticReport() throws Exception {
-		MockHttpServletResponse response = get("/DiagnosticReport/" + DIAGNOSTIC_REPORT_UUID).accept(FhirMediaTypes.JSON).go();
+		MockHttpServletResponse response = get("/DiagnosticReport/" + DIAGNOSTIC_REPORT_UUID).accept(FhirMediaTypes.JSON)
+		        .go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
@@ -705,7 +706,8 @@ public class DiagnosticReportResourceProviderIntegrationTest extends BaseFhirR4I
 	
 	@Test
 	public void shouldReturnNotModifiedWhenRetrievingAnExistingDiagnosticReportWithAnEtag() throws Exception {
-		MockHttpServletResponse response = get("/DiagnosticReport/" + DIAGNOSTIC_REPORT_UUID).accept(FhirMediaTypes.JSON).go();
+		MockHttpServletResponse response = get("/DiagnosticReport/" + DIAGNOSTIC_REPORT_UUID).accept(FhirMediaTypes.JSON)
+		        .go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
@@ -714,7 +716,8 @@ public class DiagnosticReportResourceProviderIntegrationTest extends BaseFhirR4I
 		
 		String etagValue = response.getHeader("etag");
 		
-		response = get("/DiagnosticReport/" + DIAGNOSTIC_REPORT_UUID).accept(FhirMediaTypes.JSON).ifNoneMatchHeader(etagValue).go();
+		response = get("/DiagnosticReport/" + DIAGNOSTIC_REPORT_UUID).accept(FhirMediaTypes.JSON)
+		        .ifNoneMatchHeader(etagValue).go();
 		
 		assertThat(response, isOk());
 		assertThat(response, statusEquals(HttpStatus.NOT_MODIFIED));

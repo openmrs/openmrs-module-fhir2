@@ -890,7 +890,7 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 		}
 		
 		MockHttpServletResponse response = patch("/Encounter/" + ENCOUNTER_UUID).xmlPatch(xmlEncounterPatch)
-				.accept(FhirMediaTypes.XML).go();
+		        .accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
@@ -905,8 +905,8 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 		assertThat(encounter.getPeriod(), notNullValue());
 		assertThat(encounter.getPeriod().hasStart(), is(true));
 		assertThat(encounter.getPeriod().getStart(),
-				sameDay(LocalDate.of(2005, 2, 1).atStartOfDay(ZoneId.ofOffset("UTC", ZoneOffset.of("+05:30")))
-						.withZoneSameInstant(ZoneId.systemDefault()).toLocalDate()));
+		    sameDay(LocalDate.of(2005, 2, 1).atStartOfDay(ZoneId.ofOffset("UTC", ZoneOffset.of("+05:30")))
+		            .withZoneSameInstant(ZoneId.systemDefault()).toLocalDate()));
 	}
 	
 	@Test

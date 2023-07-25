@@ -208,7 +208,7 @@ public class DiagnosticReportTranslatorImplTest {
 		DiagnosticReport result = translator.toFhirResource(fhirDiagnosticReport);
 		
 		assertThat(result, notNullValue());
-		assertThat(result.getMeta().getVersionId(),  notNullValue());
+		assertThat(result.getMeta().getVersionId(), notNullValue());
 	}
 	
 	@Test

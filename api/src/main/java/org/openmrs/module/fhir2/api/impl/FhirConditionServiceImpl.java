@@ -52,7 +52,7 @@ public class FhirConditionServiceImpl extends BaseFhirService<Condition, Obs> im
 		conditionSearchParams.toSearchParameterMap().addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, "obsDatetime",
 		    conditionSearchParams.getOnsetDate());
 		
-		return searchQuery.getQueryResults(conditionSearchParams.toSearchParameterMap(), dao,
-		    translator, searchQueryInclude);
+		return searchQuery.getQueryResults(conditionSearchParams.toSearchParameterMap(), dao, translator,
+		    searchQueryInclude);
 	}
 }

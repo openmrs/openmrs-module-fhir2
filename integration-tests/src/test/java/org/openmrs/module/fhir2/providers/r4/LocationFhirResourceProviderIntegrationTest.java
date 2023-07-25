@@ -56,7 +56,7 @@ public class LocationFhirResourceProviderIntegrationTest extends BaseFhirR4Integ
 	
 	private static final String JSON_PATCH_LOCATION_PATH = "org/openmrs/module/fhir2/providers/Location_json_patch.json";
 	
-	private static final String XML_PATCH_LOCATION_PATH= "org/openmrs/module/fhir2/providers/Location_xml_patch.xml";
+	private static final String XML_PATCH_LOCATION_PATH = "org/openmrs/module/fhir2/providers/Location_xml_patch.xml";
 	
 	@Getter(AccessLevel.PUBLIC)
 	@Autowired
@@ -488,7 +488,7 @@ public class LocationFhirResourceProviderIntegrationTest extends BaseFhirR4Integ
 			xmlLocationPatch = inputStreamToString(is, UTF_8);
 		}
 		MockHttpServletResponse response = patch("/Location/" + LOCATION_UUID).xmlPatch(xmlLocationPatch)
-				.accept(FhirMediaTypes.XML).go();
+		        .accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
 		assertThat(response, notNullValue());

@@ -252,14 +252,16 @@ public class ServiceRequestFhirResourceProviderIntegrationTest extends BaseFhirR
 		
 		String etagValue = response.getHeader("etag");
 		
-		response = get("/ServiceRequest/" + SERVICE_REQUEST_UUID).accept(FhirMediaTypes.JSON).ifNoneMatchHeader(etagValue).go();
+		response = get("/ServiceRequest/" + SERVICE_REQUEST_UUID).accept(FhirMediaTypes.JSON).ifNoneMatchHeader(etagValue)
+		        .go();
 		
 		assertThat(response, isOk());
 		assertThat(response, statusEquals(HttpStatus.NOT_MODIFIED));
 	}
 	
 	@Ignore
-	public void shouldReturnAnUpdatedServiceRequestWithNewEtagWhenRetrievingAnExistingServiceRequestWithAnEtag() throws Exception {
+	public void shouldReturnAnUpdatedServiceRequestWithNewEtagWhenRetrievingAnExistingServiceRequestWithAnEtag()
+	        throws Exception {
 		MockHttpServletResponse response = get("/ServiceRequest/" + SERVICE_REQUEST_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
@@ -278,7 +280,8 @@ public class ServiceRequestFhirResourceProviderIntegrationTest extends BaseFhirR
 		put("/ServiceRequest/" + SERVICE_REQUEST_UUID).jsonContent(toJson(serviceRequest)).accept(FhirMediaTypes.JSON).go();
 		
 		//send a new GET request, with the “If-None-Match” header specifying the ETag that we previously stored
-		response = get("/ServiceRequest/" + SERVICE_REQUEST_UUID).accept(FhirMediaTypes.JSON).ifNoneMatchHeader(etagValue).go();
+		response = get("/ServiceRequest/" + SERVICE_REQUEST_UUID).accept(FhirMediaTypes.JSON).ifNoneMatchHeader(etagValue)
+		        .go();
 		
 		assertThat(response, isOk());
 		assertThat(response, statusEquals(HttpStatus.OK));

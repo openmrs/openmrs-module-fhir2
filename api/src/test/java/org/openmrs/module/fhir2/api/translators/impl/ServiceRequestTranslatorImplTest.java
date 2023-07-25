@@ -589,7 +589,7 @@ public class ServiceRequestTranslatorImplTest {
 		testOrder.setDateChanged(new Date());
 		
 		when(taskService.searchForTasks(any()))
-				.thenReturn(new MockIBundleProvider<>(Collections.emptyList(), PREFERRED_PAGE_SIZE, COUNT));
+		        .thenReturn(new MockIBundleProvider<>(Collections.emptyList(), PREFERRED_PAGE_SIZE, COUNT));
 		
 		org.hl7.fhir.r4.model.ServiceRequest result = translator.toFhirResource(testOrder);
 		
