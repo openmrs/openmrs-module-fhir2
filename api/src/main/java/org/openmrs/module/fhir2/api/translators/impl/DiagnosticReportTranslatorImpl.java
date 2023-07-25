@@ -11,6 +11,7 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.apache.commons.lang3.Validate.notNull;
 import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getLastUpdated;
+import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getVersionId;
 
 import javax.annotation.Nonnull;
 
@@ -88,6 +89,7 @@ public class DiagnosticReportTranslatorImpl implements DiagnosticReportTranslato
 		}
 		
 		diagnosticReport.getMeta().setLastUpdated(getLastUpdated(fhirDiagnosticReport));
+		diagnosticReport.getMeta().setVersionId(getVersionId(fhirDiagnosticReport));
 		
 		return diagnosticReport;
 	}
