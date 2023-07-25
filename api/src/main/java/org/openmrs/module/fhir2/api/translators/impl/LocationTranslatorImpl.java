@@ -11,6 +11,7 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.apache.commons.lang3.Validate.notNull;
 import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getLastUpdated;
+import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getVersionId;
 import static org.openmrs.module.fhir2.api.util.FhirUtils.getMetadataTranslation;
 
 import javax.annotation.Nonnull;
@@ -115,6 +116,7 @@ public class LocationTranslatorImpl extends BaseReferenceHandlingTranslator impl
 		}
 		
 		fhirLocation.getMeta().setLastUpdated(getLastUpdated(openmrsLocation));
+		fhirLocation.getMeta().setVersionId(getVersionId(openmrsLocation));
 		
 		return fhirLocation;
 	}
