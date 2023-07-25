@@ -39,6 +39,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.junit.Before;
@@ -1048,5 +1049,41 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 		validTypes.add(ResourceType.MedicationDispense);
 		
 		return validTypes;
+	}
+	
+	@Test
+	public void shouldReturnAnEtagHeaderWhenRetrievingAnExistingEncounter() throws Exception {
+		MockHttpServletResponse response = get("/Encounter/" + ENCOUNTER_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		
+		assertThat(response.getHeader("etag"), notNullValue());
+		assertThat(response.getHeader("etag"), startsWith("W/"));
+		
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Encounter encounter = readResponse(response);
+		
+		assertThat(encounter, notNullValue());
+		assertThat(encounter.getMeta().getVersionId(), notNullValue());
+		assertThat(encounter, validResource());
+	}
+	
+	@Test
+	public void shouldReturnNotModifiedWhenRetrievingAnExistingEncounterWithAnEtag() throws Exception {
+		MockHttpServletResponse response = get("/Encounter/" + ENCOUNTER_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		assertThat(response.getHeader("etag"), notNullValue());
+		
+		String etagValue = response.getHeader("etag");
+		
+		response = get("/Encounter/" + ENCOUNTER_UUID).accept(FhirMediaTypes.JSON).ifNoneMatchHeader(etagValue).go();
+		
+		assertThat(response, isOk());
+		assertThat(response, statusEquals(HttpStatus.NOT_MODIFIED));
 	}
 }

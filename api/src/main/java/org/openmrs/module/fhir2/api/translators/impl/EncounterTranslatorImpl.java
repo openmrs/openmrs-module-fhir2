@@ -11,6 +11,7 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.apache.commons.lang3.Validate.notNull;
 import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getLastUpdated;
+import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getVersionId;
 
 import javax.annotation.Nonnull;
 
@@ -83,6 +84,7 @@ public class EncounterTranslatorImpl extends BaseEncounterTranslator implements 
 		
 		encounter.getMeta().addTag(FhirConstants.OPENMRS_FHIR_EXT_ENCOUNTER_TAG, "encounter", "Encounter");
 		encounter.getMeta().setLastUpdated(getLastUpdated(openmrsEncounter));
+		encounter.getMeta().setVersionId(getVersionId(openmrsEncounter));
 		encounter.setClass_(mapLocationToClass(openmrsEncounter.getLocation()));
 		
 		return encounter;
