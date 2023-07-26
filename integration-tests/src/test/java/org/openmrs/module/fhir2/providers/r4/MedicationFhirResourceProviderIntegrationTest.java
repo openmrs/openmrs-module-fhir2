@@ -619,7 +619,7 @@ public class MedicationFhirResourceProviderIntegrationTest extends BaseFhirR4Int
 	}
 	
 	@Test
-	public void shouldReturnNotModifiedWhenRetrievingAnExistingLocationWithAnEtag() throws Exception {
+	public void shouldReturnNotModifiedWhenRetrievingAnExistingMedicationWithAnEtag() throws Exception {
 		MockHttpServletResponse response = get("/Medication/" + MEDICATION_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());

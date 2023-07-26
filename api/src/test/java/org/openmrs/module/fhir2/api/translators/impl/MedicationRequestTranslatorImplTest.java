@@ -23,6 +23,7 @@ import java.lang.reflect.Field;
 import java.util.Date;
 
 import lombok.SneakyThrows;
+import org.exparity.hamcrest.date.DateMatchers;
 import org.hl7.fhir.r4.model.Annotation;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -638,6 +639,24 @@ public class MedicationRequestTranslatorImplTest {
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getAuthoredOn(), equalTo(now));
+	}
+	
+	@Test
+	public void toFhirResource_shouldTranslateOpenMrsDateChangedToLastUpdated() {
+		drugOrder.setDateChanged(new Date());
+		
+		org.hl7.fhir.r4.model.MedicationRequest medicationRequest = medicationRequestTranslator.toFhirResource(drugOrder);
+		assertThat(medicationRequest, notNullValue());
+		assertThat(medicationRequest.getMeta().getLastUpdated(), DateMatchers.sameDay(new Date()));
+	}
+	
+	@Test
+	public void toFhirResource_shouldTranslateOpenMrsDateChangedToVersionId() {
+		drugOrder.setDateChanged(new Date());
+		
+		org.hl7.fhir.r4.model.MedicationRequest medicationRequest = medicationRequestTranslator.toFhirResource(drugOrder);
+		assertThat(medicationRequest, notNullValue());
+		assertThat(medicationRequest.getMeta().getVersionId(), notNullValue());
 	}
 	
 	@SneakyThrows
