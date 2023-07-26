@@ -34,6 +34,9 @@ import org.openmrs.module.fhir2.model.FhirConceptSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getLastUpdated;
+import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getVersionId;
+
 @Slf4j
 @Component
 @Setter(AccessLevel.PACKAGE)
@@ -125,6 +128,9 @@ public class ValueSetTranslatorImpl implements ValueSetTranslator {
 		
 		compose.setInclude(new ArrayList<ValueSet.ConceptSetComponent>(sets.values()));
 		valueSet.setCompose(compose);
+		
+		valueSet.getMeta().setLastUpdated(getLastUpdated(concept));
+		valueSet.getMeta().setVersionId(getVersionId(concept));
 		return valueSet;
 	}
 	
