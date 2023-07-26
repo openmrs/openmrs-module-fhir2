@@ -35,6 +35,7 @@ import lombok.Getter;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Immunization;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.junit.Before;
 import org.junit.Test;
@@ -608,6 +609,42 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		assertThat(entries, everyItem(hasResource(
 		    hasProperty("patient", hasProperty("referenceElement", hasProperty("idPart", equalTo(PATIENT_UUID)))))));
 		assertThat(entries, everyItem(hasResource(validResource())));
+	}
+	
+	@Test
+	public void shouldReturnAnEtagHeaderWhenRetrievingAnExistingImmunization() throws Exception {
+		MockHttpServletResponse response = get("/Immunization/" + IMMUNIZATION_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		
+		assertThat(response.getHeader("etag"), notNullValue());
+		assertThat(response.getHeader("etag"), startsWith("W/"));
+		
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Immunization immunization = readResponse(response);
+		
+		assertThat(immunization, notNullValue());
+		assertThat(immunization.getMeta().getVersionId(), notNullValue());
+		assertThat(immunization, validResource());
+	}
+	
+	@Test
+	public void shouldReturnNotModifiedWhenRetrievingAnExistingImmunizationWithAnEtag() throws Exception {
+		MockHttpServletResponse response = get("/Immunization/" + IMMUNIZATION_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		assertThat(response.getHeader("etag"), notNullValue());
+		
+		String etagValue = response.getHeader("etag");
+		
+		response = get("/Immunization/" + IMMUNIZATION_UUID).accept(FhirMediaTypes.JSON).ifNoneMatchHeader(etagValue).go();
+		
+		assertThat(response, isOk());
+		assertThat(response, statusEquals(HttpStatus.NOT_MODIFIED));
 	}
 	
 }
