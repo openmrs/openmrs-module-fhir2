@@ -11,6 +11,7 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.apache.commons.lang3.Validate.notNull;
 import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getLastUpdated;
+import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getVersionId;
 
 import javax.annotation.Nonnull;
 
@@ -135,6 +136,7 @@ public class ObservationTranslatorImpl extends BaseReferenceHandlingTranslator i
 		obs.addBasedOn(basedOnReferenceTranslator.toFhirResource(observation.getOrder()));
 		
 		obs.getMeta().setLastUpdated(getLastUpdated(observation));
+		obs.getMeta().setVersionId(getVersionId(observation));
 		
 		return obs;
 	}
