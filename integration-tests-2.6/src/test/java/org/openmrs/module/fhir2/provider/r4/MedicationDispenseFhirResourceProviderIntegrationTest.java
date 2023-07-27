@@ -36,6 +36,7 @@ import org.openmrs.module.fhir2.api.FhirConceptSourceService;
 import org.openmrs.module.fhir2.providers.r4.BaseFhirR4IntegrationTest;
 import org.openmrs.module.fhir2.providers.r4.MedicationDispenseFhirResourceProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 public class MedicationDispenseFhirResourceProviderIntegrationTest extends BaseFhirR4IntegrationTest<MedicationDispenseFhirResourceProvider, MedicationDispense> {
@@ -302,5 +303,42 @@ public class MedicationDispenseFhirResourceProviderIntegrationTest extends BaseF
 		assertThat(medicationDispense, validResource());
 		
 		assertThat(medicationDispense.getStatus(), is(MedicationDispense.MedicationDispenseStatus.COMPLETED));
+	}
+	
+	@Test
+	public void shouldReturnAnEtagHeaderWhenRetrievingAnExistingMedicationDispense() throws Exception {
+		MockHttpServletResponse response = get("/MedicationDispense/" + EXISTING_DISPENSE_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
+		
+		assertThat(response.getHeader("etag"), notNullValue());
+		assertThat(response.getHeader("etag"), startsWith("W/"));
+		
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		MedicationDispense medicationDispense = readResponse(response);
+		
+		assertThat(medicationDispense, notNullValue());
+		assertThat(medicationDispense.getMeta().getVersionId(), notNullValue());
+		assertThat(medicationDispense, validResource());
+	}
+	
+	@Test
+	public void shouldReturnNotModifiedWhenRetrievingAnExistingMedicationDispenseWithAnEtag() throws Exception {
+		MockHttpServletResponse response = get("/MedicationDispense/" + EXISTING_DISPENSE_UUID).accept(FhirMediaTypes.JSON)
+				.go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		assertThat(response.getHeader("etag"), notNullValue());
+		
+		String etagValue = response.getHeader("etag");
+		
+		response = get("/MedicationDispense/" + EXISTING_DISPENSE_UUID).accept(FhirMediaTypes.JSON).ifNoneMatchHeader(etagValue).go();
+		
+		assertThat(response, isOk());
+		assertThat(response, statusEquals(HttpStatus.NOT_MODIFIED));
 	}
 }
