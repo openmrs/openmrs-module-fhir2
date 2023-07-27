@@ -47,7 +47,6 @@ import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Task.ParameterComponent;
 import org.hl7.fhir.r4.model.Task.TaskOutputComponent;
-import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;

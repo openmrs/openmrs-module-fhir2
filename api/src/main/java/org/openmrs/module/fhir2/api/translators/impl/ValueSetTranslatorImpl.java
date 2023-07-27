@@ -9,6 +9,9 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getLastUpdated;
+import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getVersionId;
+
 import javax.annotation.Nonnull;
 
 import java.util.ArrayList;
@@ -33,9 +36,6 @@ import org.openmrs.module.fhir2.api.translators.ValueSetTranslator;
 import org.openmrs.module.fhir2.model.FhirConceptSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getLastUpdated;
-import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getVersionId;
 
 @Slf4j
 @Component

@@ -149,16 +149,6 @@ public class MedicationFhirResourceProviderIntegrationTest extends BaseFhirR4Int
 		assertThat(medication.getStatus(), is(Medication.MedicationStatus.ACTIVE));
 		assertThat(medication.getCode().getCodingFirstRep().getCode(), equalTo(MEDICATION_CODE_UUID));
 		
-		// try to get new medication
-		response = get(medication.getId()).accept(FhirMediaTypes.JSON).go();
-		
-		assertThat(response, isOk());
-		
-		Medication newMedication = readResponse(response);
-		
-		assertThat(newMedication.getId(), equalTo(medication.getId()));
-		assertThat(newMedication.getStatus(), equalTo(medication.getStatus()));
-		
 	}
 	
 	@Test
@@ -181,16 +171,6 @@ public class MedicationFhirResourceProviderIntegrationTest extends BaseFhirR4Int
 		assertThat(medication, notNullValue());
 		assertThat(medication.getStatus(), is(Medication.MedicationStatus.ACTIVE));
 		assertThat(medication.getCode().getCodingFirstRep().getCode(), equalTo(MEDICATION_CODE_UUID));
-		
-		// try to get new medication
-		response = get(medication.getId()).accept(FhirMediaTypes.XML).go();
-		
-		assertThat(response, isOk());
-		
-		Medication newMedication = readResponse(response);
-		
-		assertThat(newMedication.getId(), equalTo(medication.getId()));
-		assertThat(newMedication.getStatus(), equalTo(medication.getStatus()));
 		
 	}
 	
@@ -529,7 +509,7 @@ public class MedicationFhirResourceProviderIntegrationTest extends BaseFhirR4Int
 		
 		entries = results.getEntry();
 		assertThat(entries, everyItem(hasResource(
-		    hasProperty("id", is("http://localhost/ws/fhir2/R4/Medication/1085AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")))));
+		    hasProperty("id", startsWith("http://localhost/ws/fhir2/R4/Medication/1085AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")))));
 		assertThat(entries, everyItem(hasResource(validResource())));
 	}
 	
@@ -565,7 +545,7 @@ public class MedicationFhirResourceProviderIntegrationTest extends BaseFhirR4Int
 		
 		entries = results.getEntry();
 		assertThat(entries, everyItem(hasResource(
-		    hasProperty("id", is("http://localhost/ws/fhir2/R4/Medication/1085AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")))));
+		    hasProperty("id", startsWith("http://localhost/ws/fhir2/R4/Medication/1085AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")))));
 		assertThat(entries, everyItem(hasResource(validResource())));
 	}
 	

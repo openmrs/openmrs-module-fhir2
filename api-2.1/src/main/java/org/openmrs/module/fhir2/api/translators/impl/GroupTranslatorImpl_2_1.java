@@ -10,6 +10,8 @@
 package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.apache.commons.lang3.Validate.notNull;
+import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getLastUpdated;
+import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getVersionId;
 
 import javax.annotation.Nonnull;
 
@@ -53,6 +55,9 @@ public class GroupTranslatorImpl_2_1 extends BaseGroupTranslator implements Grou
 		group.setQuantity(memberships.size());
 		memberships.forEach(membership -> group
 		        .addMember(componentTranslator.toFhirResource(groupMemberTranslator21.toFhirResource(membership))));
+		
+		group.getMeta().setLastUpdated(getLastUpdated(cohort));
+		group.getMeta().setVersionId(getVersionId(cohort));
 		
 		return group;
 	}

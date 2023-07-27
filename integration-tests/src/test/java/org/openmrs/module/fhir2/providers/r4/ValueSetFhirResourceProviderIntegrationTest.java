@@ -277,7 +277,8 @@ public class ValueSetFhirResourceProviderIntegrationTest extends BaseFhirR4Integ
 		
 		String etagValue = response.getHeader("etag");
 		
-		response = get("/ValueSet/" + FARM_ANIMAL_CONCEPT_SET_UUID).accept(FhirMediaTypes.JSON).ifNoneMatchHeader(etagValue).go();
+		response = get("/ValueSet/" + FARM_ANIMAL_CONCEPT_SET_UUID).accept(FhirMediaTypes.JSON).ifNoneMatchHeader(etagValue)
+		        .go();
 		
 		assertThat(response, isOk());
 		assertThat(response, statusEquals(HttpStatus.NOT_MODIFIED));

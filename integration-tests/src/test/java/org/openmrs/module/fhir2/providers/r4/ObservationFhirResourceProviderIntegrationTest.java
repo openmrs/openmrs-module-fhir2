@@ -44,7 +44,6 @@ import lombok.Getter;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationOutcome;
-import org.hl7.fhir.r4.model.Task;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.module.fhir2.BaseFhirIntegrationTest;

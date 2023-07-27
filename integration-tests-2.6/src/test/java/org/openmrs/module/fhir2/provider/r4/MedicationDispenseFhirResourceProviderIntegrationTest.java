@@ -307,7 +307,8 @@ public class MedicationDispenseFhirResourceProviderIntegrationTest extends BaseF
 	
 	@Test
 	public void shouldReturnAnEtagHeaderWhenRetrievingAnExistingMedicationDispense() throws Exception {
-		MockHttpServletResponse response = get("/MedicationDispense/" + EXISTING_DISPENSE_UUID).accept(FhirMediaTypes.JSON).go();
+		MockHttpServletResponse response = get("/MedicationDispense/" + EXISTING_DISPENSE_UUID).accept(FhirMediaTypes.JSON)
+		        .go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
@@ -327,7 +328,7 @@ public class MedicationDispenseFhirResourceProviderIntegrationTest extends BaseF
 	@Test
 	public void shouldReturnNotModifiedWhenRetrievingAnExistingMedicationDispenseWithAnEtag() throws Exception {
 		MockHttpServletResponse response = get("/MedicationDispense/" + EXISTING_DISPENSE_UUID).accept(FhirMediaTypes.JSON)
-				.go();
+		        .go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
@@ -336,7 +337,8 @@ public class MedicationDispenseFhirResourceProviderIntegrationTest extends BaseF
 		
 		String etagValue = response.getHeader("etag");
 		
-		response = get("/MedicationDispense/" + EXISTING_DISPENSE_UUID).accept(FhirMediaTypes.JSON).ifNoneMatchHeader(etagValue).go();
+		response = get("/MedicationDispense/" + EXISTING_DISPENSE_UUID).accept(FhirMediaTypes.JSON)
+		        .ifNoneMatchHeader(etagValue).go();
 		
 		assertThat(response, isOk());
 		assertThat(response, statusEquals(HttpStatus.NOT_MODIFIED));

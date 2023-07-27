@@ -19,8 +19,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
+import org.exparity.hamcrest.date.DateMatchers;
+import org.hamcrest.Matchers;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Reference;
@@ -271,5 +274,27 @@ public class GroupTranslatorImpl_2_1Test {
 		assertThat(updateCohort, notNullValue());
 		assertThat(updateCohort.getMemberships(), notNullValue());
 		assertThat(updateCohort.getMemberships(), hasSize(1));
+	}
+	
+	@Test
+	public void shouldTranslateOpenMrsDateChangedToLastUpdated() {
+		org.openmrs.Cohort cohort = new org.openmrs.Cohort();
+		cohort.setDateChanged(new Date());
+		
+		org.hl7.fhir.r4.model.Group result = groupTranslator.toFhirResource(cohort);
+		
+		assertThat(result, Matchers.notNullValue());
+		assertThat(result.getMeta().getLastUpdated(), DateMatchers.sameDay(new Date()));
+	}
+	
+	@Test
+	public void shouldTranslateOpenMrsDateChangedToVersionId() {
+		org.openmrs.Cohort cohort = new org.openmrs.Cohort();
+		cohort.setDateChanged(new Date());
+		
+		org.hl7.fhir.r4.model.Group result = groupTranslator.toFhirResource(cohort);
+		
+		assertThat(result, Matchers.notNullValue());
+		assertThat(result.getMeta().getVersionId(), Matchers.notNullValue());
 	}
 }

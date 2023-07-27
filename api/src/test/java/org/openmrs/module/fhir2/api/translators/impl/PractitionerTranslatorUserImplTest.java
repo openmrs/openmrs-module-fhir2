@@ -199,6 +199,15 @@ public class PractitionerTranslatorUserImplTest {
 	}
 	
 	@Test
+	public void shouldTranslateOpenMrsDateChangedToVersionId() {
+		user.setDateChanged(new Date());
+		
+		Practitioner result = practitionerTranslatorUser.toFhirResource(user);
+		assertThat(result, notNullValue());
+		assertThat(result.getMeta().getVersionId(), notNullValue());
+	}
+	
+	@Test
 	public void shouldTranslateLastUpdatedDateToDateChanged() {
 		practitioner.getMeta().setLastUpdated(new Date());
 		

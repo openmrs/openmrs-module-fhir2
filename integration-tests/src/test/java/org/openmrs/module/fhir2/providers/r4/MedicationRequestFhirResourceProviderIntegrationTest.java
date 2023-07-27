@@ -216,7 +216,8 @@ public class MedicationRequestFhirResourceProviderIntegrationTest extends BaseFh
 	
 	@Test
 	public void shouldReturnAnEtagHeaderWhenRetrievingAnExistingMedicationRequest() throws Exception {
-		MockHttpServletResponse response = get("/MedicationRequest/" + MEDICATION_REQUEST_UUID).accept(FhirMediaTypes.JSON).go();
+		MockHttpServletResponse response = get("/MedicationRequest/" + MEDICATION_REQUEST_UUID).accept(FhirMediaTypes.JSON)
+		        .go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
@@ -235,7 +236,8 @@ public class MedicationRequestFhirResourceProviderIntegrationTest extends BaseFh
 	
 	@Test
 	public void shouldReturnNotModifiedWhenRetrievingAnExistingMedicationRequestWithAnEtag() throws Exception {
-		MockHttpServletResponse response = get("/MedicationRequest/" + MEDICATION_REQUEST_UUID).accept(FhirMediaTypes.JSON).go();
+		MockHttpServletResponse response = get("/MedicationRequest/" + MEDICATION_REQUEST_UUID).accept(FhirMediaTypes.JSON)
+		        .go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
@@ -244,7 +246,8 @@ public class MedicationRequestFhirResourceProviderIntegrationTest extends BaseFh
 		
 		String etagValue = response.getHeader("etag");
 		
-		response = get("/MedicationRequest/" + MEDICATION_REQUEST_UUID).accept(FhirMediaTypes.JSON).ifNoneMatchHeader(etagValue).go();
+		response = get("/MedicationRequest/" + MEDICATION_REQUEST_UUID).accept(FhirMediaTypes.JSON)
+		        .ifNoneMatchHeader(etagValue).go();
 		
 		assertThat(response, isOk());
 		assertThat(response, statusEquals(HttpStatus.NOT_MODIFIED));

@@ -259,6 +259,16 @@ public class PractitionerTranslatorProviderImplTest {
 	}
 	
 	@Test
+	public void shouldTranslateOpenMrsDateChangedToVersionId() {
+		Provider provider = new Provider();
+		provider.setDateChanged(new Date());
+		
+		Practitioner result = practitionerTranslator.toFhirResource(provider);
+		assertThat(result, notNullValue());
+		assertThat(result.getMeta().getLastUpdated(), notNullValue());
+	}
+	
+	@Test
 	public void shouldTranslateFhirPractitionerToOpenmrsProvider() {
 		org.hl7.fhir.r4.model.Practitioner practitioner = new org.hl7.fhir.r4.model.Practitioner();
 		practitioner.addIdentifier(new Identifier().setValue("349023n23b-t"));

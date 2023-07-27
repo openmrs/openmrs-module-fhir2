@@ -29,6 +29,7 @@ import org.hl7.fhir.dstu3.model.ValueSet;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 public class ValueSetFhirResourceProviderIntegrationTest extends BaseFhirR3IntegrationTest<ValueSetFhirResourceProvider, ValueSet> {
@@ -185,6 +186,42 @@ public class ValueSetFhirResourceProviderIntegrationTest extends BaseFhirR3Integ
 		assertThat(entries, everyItem(hasResource(instanceOf(ValueSet.class))));
 		assertThat(entries, everyItem(hasResource(validResource())));
 		assertThat(entries, everyItem(hasResource(hasProperty("title", equalTo("DEMO")))));
+	}
+	
+	@Test
+	public void shouldReturnAnEtagHeaderWhenRetrievingAnExistingValueSet() throws Exception {
+		MockHttpServletResponse response = get("/ValueSet/" + ROOT_CONCEPT_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		
+		assertThat(response.getHeader("etag"), notNullValue());
+		assertThat(response.getHeader("etag"), startsWith("W/"));
+		
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		ValueSet valueSet = readResponse(response);
+		
+		assertThat(valueSet, notNullValue());
+		assertThat(valueSet.getMeta().getVersionId(), notNullValue());
+		assertThat(valueSet, validResource());
+	}
+	
+	@Test
+	public void shouldReturnNotModifiedWhenRetrievingAnExistingValueSetWithAnEtag() throws Exception {
+		MockHttpServletResponse response = get("/ValueSet/" + ROOT_CONCEPT_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		assertThat(response.getHeader("etag"), notNullValue());
+		
+		String etagValue = response.getHeader("etag");
+		
+		response = get("/ValueSet/" + ROOT_CONCEPT_UUID).accept(FhirMediaTypes.JSON).ifNoneMatchHeader(etagValue).go();
+		
+		assertThat(response, isOk());
+		assertThat(response, statusEquals(HttpStatus.NOT_MODIFIED));
 	}
 	
 }
