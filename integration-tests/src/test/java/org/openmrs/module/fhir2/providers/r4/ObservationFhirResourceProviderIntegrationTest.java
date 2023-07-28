@@ -1507,7 +1507,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR4In
 		}
 		
 		MockHttpServletResponse response = patch("/Observation/" + OBS_UUID).jsonMergePatch(jsonObservationPatch)
-				.accept(FhirMediaTypes.JSON).go();
+		        .accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
 		assertThat(response, notNullValue());
@@ -1531,8 +1531,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR4In
 		}
 		
 		MockHttpServletResponse response = patch("/Observation/" + OBS_UUID).jsonPatch(jsonObservationPatch)
-				.accept(FhirMediaTypes.JSON).go();
-		
+		        .accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
 		assertThat(response, notNullValue());
@@ -1540,7 +1539,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR4In
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Observation observation = readResponse(response);
-		System.out.println("entire obs resource: "+ observation.getCode());
+		System.out.println("entire obs resource: " + observation.getCode());
 		assertThat(observation, notNullValue());
 		assertThat(observation.getIdElement().getIdPart(), not(equalTo(OBS_UUID)));
 		assertThat(observation.getCode().getCodingFirstRep().getCode(), is("5090AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"));
@@ -1556,19 +1555,55 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR4In
 		}
 		
 		MockHttpServletResponse response = patch("/Observation/" + OBS_UUID).xmlPatch(xmlObservationPatch)
-				.accept(FhirMediaTypes.XML).go();
-				
+		        .accept(FhirMediaTypes.XML).go();
+		
 		assertThat(response, isOk());
 		assertThat(response, notNullValue());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Observation observation = readResponse(response);
-	
+		
 		assertThat(observation, notNullValue());
 		assertThat(observation.getIdElement().getIdPart(), not(equalTo(OBS_UUID)));
 		assertThat(observation.getCode().getCodingFirstRep().getCode(), is("5090AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"));
 		assertThat(observation, validResource());
+	}
+	
+	@Test
+	public void shouldReturnAnEtagHeaderWhenRetrievingAnExistingObservation() throws Exception {
+		MockHttpServletResponse response = get("/Observation/" + OBS_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		
+		assertThat(response.getHeader("etag"), notNullValue());
+		assertThat(response.getHeader("etag"), startsWith("W/"));
+		
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Observation observation = readResponse(response);
+		
+		assertThat(observation, notNullValue());
+		assertThat(observation.getMeta().getVersionId(), notNullValue());
+		assertThat(observation, validResource());
+	}
+	
+	@Test
+	public void shouldReturnNotModifiedWhenRetrievingAnExistingObservationWithAnEtag() throws Exception {
+		MockHttpServletResponse response = get("/Observation/" + OBS_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		assertThat(response.getHeader("etag"), notNullValue());
+		
+		String etagValue = response.getHeader("etag");
+		
+		response = get("/Observation/" + OBS_UUID).accept(FhirMediaTypes.JSON).ifNoneMatchHeader(etagValue).go();
+		
+		assertThat(response, isOk());
+		assertThat(response, statusEquals(HttpStatus.NOT_MODIFIED));
 	}
 	
 	private int getDistinctEncounterDatetime(List<Bundle.BundleEntryComponent> resultList) {

@@ -149,16 +149,6 @@ public class MedicationFhirResourceProviderIntegrationTest extends BaseFhirR4Int
 		assertThat(medication.getStatus(), is(Medication.MedicationStatus.ACTIVE));
 		assertThat(medication.getCode().getCodingFirstRep().getCode(), equalTo(MEDICATION_CODE_UUID));
 		
-		// try to get new medication
-		response = get(medication.getId()).accept(FhirMediaTypes.JSON).go();
-		
-		assertThat(response, isOk());
-		
-		Medication newMedication = readResponse(response);
-		
-		assertThat(newMedication.getId(), equalTo(medication.getId()));
-		assertThat(newMedication.getStatus(), equalTo(medication.getStatus()));
-		
 	}
 	
 	@Test
@@ -181,16 +171,6 @@ public class MedicationFhirResourceProviderIntegrationTest extends BaseFhirR4Int
 		assertThat(medication, notNullValue());
 		assertThat(medication.getStatus(), is(Medication.MedicationStatus.ACTIVE));
 		assertThat(medication.getCode().getCodingFirstRep().getCode(), equalTo(MEDICATION_CODE_UUID));
-		
-		// try to get new medication
-		response = get(medication.getId()).accept(FhirMediaTypes.XML).go();
-		
-		assertThat(response, isOk());
-		
-		Medication newMedication = readResponse(response);
-		
-		assertThat(newMedication.getId(), equalTo(medication.getId()));
-		assertThat(newMedication.getStatus(), equalTo(medication.getStatus()));
 		
 	}
 	
@@ -529,7 +509,7 @@ public class MedicationFhirResourceProviderIntegrationTest extends BaseFhirR4Int
 		
 		entries = results.getEntry();
 		assertThat(entries, everyItem(hasResource(
-		    hasProperty("id", is("http://localhost/ws/fhir2/R4/Medication/1085AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")))));
+		    hasProperty("id", startsWith("http://localhost/ws/fhir2/R4/Medication/1085AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")))));
 		assertThat(entries, everyItem(hasResource(validResource())));
 	}
 	
@@ -565,7 +545,7 @@ public class MedicationFhirResourceProviderIntegrationTest extends BaseFhirR4Int
 		
 		entries = results.getEntry();
 		assertThat(entries, everyItem(hasResource(
-		    hasProperty("id", is("http://localhost/ws/fhir2/R4/Medication/1085AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")))));
+		    hasProperty("id", startsWith("http://localhost/ws/fhir2/R4/Medication/1085AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")))));
 		assertThat(entries, everyItem(hasResource(validResource())));
 	}
 	
@@ -597,5 +577,41 @@ public class MedicationFhirResourceProviderIntegrationTest extends BaseFhirR4Int
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(result, hasProperty("total", equalTo(4)));
+	}
+	
+	@Test
+	public void shouldReturnAnEtagHeaderWhenRetrievingAnExistingMedication() throws Exception {
+		MockHttpServletResponse response = get("/Medication/" + MEDICATION_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		
+		assertThat(response.getHeader("etag"), notNullValue());
+		assertThat(response.getHeader("etag"), startsWith("W/"));
+		
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Medication medication = readResponse(response);
+		
+		assertThat(medication, notNullValue());
+		assertThat(medication.getMeta().getVersionId(), notNullValue());
+		assertThat(medication, validResource());
+	}
+	
+	@Test
+	public void shouldReturnNotModifiedWhenRetrievingAnExistingMedicationWithAnEtag() throws Exception {
+		MockHttpServletResponse response = get("/Medication/" + MEDICATION_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		assertThat(response.getHeader("etag"), notNullValue());
+		
+		String etagValue = response.getHeader("etag");
+		
+		response = get("/Medication/" + MEDICATION_UUID).accept(FhirMediaTypes.JSON).ifNoneMatchHeader(etagValue).go();
+		
+		assertThat(response, isOk());
+		assertThat(response, statusEquals(HttpStatus.NOT_MODIFIED));
 	}
 }

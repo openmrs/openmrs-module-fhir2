@@ -302,6 +302,16 @@ public class ObservationTranslatorImplTest {
 	}
 	
 	@Test
+	public void toFhirResource_shouldTranslateOpenMrsDateChangedToVersionId() {
+		Obs observation = new Obs();
+		observation.setDateChanged(new Date());
+		Observation result = observationTranslator.toFhirResource(observation);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getMeta().getVersionId(), notNullValue());
+	}
+	
+	@Test
 	public void toFhirResource_shouldTranslateOpenMrsDateCreatedToDateIssued() {
 		Obs observation = new Obs();
 		observation.setDateCreated(new Date());

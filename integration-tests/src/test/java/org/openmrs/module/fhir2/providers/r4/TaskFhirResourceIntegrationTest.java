@@ -798,4 +798,40 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(result, hasProperty("total", equalTo(2)));
 	}
+	
+	@Test
+	public void shouldReturnAnEtagHeaderWhenRetrievingAnExistingTask() throws Exception {
+		MockHttpServletResponse response = get("/Task/" + TASK_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		
+		assertThat(response.getHeader("etag"), notNullValue());
+		assertThat(response.getHeader("etag"), startsWith("W/"));
+		
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Task task = readResponse(response);
+		
+		assertThat(task, notNullValue());
+		assertThat(task.getMeta().getVersionId(), notNullValue());
+		assertThat(task, validResource());
+	}
+	
+	@Test
+	public void shouldReturnNotModifiedWhenRetrievingAnExistingTaskWithAnEtag() throws Exception {
+		MockHttpServletResponse response = get("/Task/" + TASK_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		assertThat(response.getHeader("etag"), notNullValue());
+		
+		String etagValue = response.getHeader("etag");
+		
+		response = get("/Task/" + TASK_UUID).accept(FhirMediaTypes.JSON).ifNoneMatchHeader(etagValue).go();
+		
+		assertThat(response, isOk());
+		assertThat(response, statusEquals(HttpStatus.NOT_MODIFIED));
+	}
 }

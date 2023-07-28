@@ -839,6 +839,42 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR3Inte
 		    everyItem(hasResource(hasProperty("resourceType", in(getEncounterWithMedicationRequestsValidResourceTypes())))));
 	}
 	
+	@Test
+	public void shouldReturnAnEtagHeaderWhenRetrievingAnExistingEncounter() throws Exception {
+		MockHttpServletResponse response = get("/Encounter/" + ENCOUNTER_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		
+		assertThat(response.getHeader("etag"), notNullValue());
+		assertThat(response.getHeader("etag"), startsWith("W/"));
+		
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Encounter encounter = readResponse(response);
+		
+		assertThat(encounter, notNullValue());
+		assertThat(encounter.getMeta().getVersionId(), notNullValue());
+		assertThat(encounter, validResource());
+	}
+	
+	@Test
+	public void shouldReturnNotModifiedWhenRetrievingAnExistingEncounterWithAnEtag() throws Exception {
+		MockHttpServletResponse response = get("/Encounter/" + ENCOUNTER_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		assertThat(response.getHeader("etag"), notNullValue());
+		
+		String etagValue = response.getHeader("etag");
+		
+		response = get("/Encounter/" + ENCOUNTER_UUID).accept(FhirMediaTypes.JSON).ifNoneMatchHeader(etagValue).go();
+		
+		assertThat(response, isOk());
+		assertThat(response, statusEquals(HttpStatus.NOT_MODIFIED));
+	}
+	
 	private Set<ResourceType> getEncounterWithMedicationRequestsValidResourceTypes() {
 		Set<ResourceType> validTypes = new HashSet<>();
 		

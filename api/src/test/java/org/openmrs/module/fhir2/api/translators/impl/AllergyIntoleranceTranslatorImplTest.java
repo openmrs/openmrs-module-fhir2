@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.Date;
 
 import org.exparity.hamcrest.date.DateMatchers;
+import org.hamcrest.Matchers;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
 import org.hl7.fhir.r4.model.Annotation;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -256,6 +257,15 @@ public class AllergyIntoleranceTranslatorImplTest {
 		AllergyIntolerance allergyIntolerance = allergyIntoleranceTranslator.toFhirResource(omrsAllergy);
 		assertThat(allergyIntolerance, notNullValue());
 		assertThat(allergyIntolerance.getMeta().getLastUpdated(), DateMatchers.sameDay(new Date()));
+	}
+	
+	@Test
+	public void toFhirResource_shouldTranslateOpenMrsDateChangedToVersionId() {
+		omrsAllergy.setDateChanged(new Date());
+		
+		AllergyIntolerance allergyIntolerance = allergyIntoleranceTranslator.toFhirResource(omrsAllergy);
+		assertThat(allergyIntolerance, notNullValue());
+		assertThat(allergyIntolerance.getMeta().getVersionId(), Matchers.notNullValue());
 	}
 	
 	@Test

@@ -10,6 +10,8 @@
 package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.apache.commons.lang3.Validate.notNull;
+import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getLastUpdated;
+import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getVersionId;
 
 import javax.annotation.Nonnull;
 
@@ -124,7 +126,8 @@ public class TaskTranslatorImpl implements TaskTranslator {
 		fhirTask.setIdentifier(Collections.singletonList(
 		    new Identifier().setSystem(FhirConstants.OPENMRS_FHIR_EXT_TASK_IDENTIFIER).setValue(openmrsTask.getUuid())));
 		
-		fhirTask.getMeta().setLastUpdated(openmrsTask.getDateChanged());
+		fhirTask.getMeta().setLastUpdated(getLastUpdated(openmrsTask));
+		fhirTask.getMeta().setVersionId(getVersionId(openmrsTask));
 	}
 	
 	private void setOpenmrsTaskFields(FhirTask openmrsTask, Task fhirTask) {

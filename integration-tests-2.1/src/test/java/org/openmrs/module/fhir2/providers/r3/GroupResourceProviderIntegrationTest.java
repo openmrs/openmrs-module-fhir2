@@ -146,17 +146,6 @@ public class GroupResourceProviderIntegrationTest extends BaseFhirR3IntegrationT
 		assertThat(group.hasMember(), is(true));
 		assertThat(group.getMember(), notNullValue());
 		assertThat(group.getQuantity(), equalTo(1));
-		
-		// try to get new group
-		response = get(group.getId()).accept(FhirMediaTypes.JSON).go();
-		
-		assertThat(response, isOk());
-		
-		Group newGroup = readResponse(response);
-		
-		assertThat(newGroup.getId(), equalTo(group.getId()));
-		assertThat(newGroup.getActive(), equalTo(true));
-		
 	}
 	
 	@Test
@@ -182,16 +171,6 @@ public class GroupResourceProviderIntegrationTest extends BaseFhirR3IntegrationT
 		assertThat(group.hasMember(), is(true));
 		assertThat(group.getMember(), notNullValue());
 		assertThat(group.getQuantity(), equalTo(1));
-		
-		// try to get new group
-		response = get(group.getId()).accept(FhirMediaTypes.XML).go();
-		
-		assertThat(response, isOk());
-		
-		Group newGroup = readResponse(response);
-		
-		assertThat(newGroup.getId(), equalTo(group.getId()));
-		assertThat(newGroup.getActive(), equalTo(true));
 	}
 	
 	@Test

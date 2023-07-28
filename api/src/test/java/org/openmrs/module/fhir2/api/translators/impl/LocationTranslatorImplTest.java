@@ -365,6 +365,15 @@ public class LocationTranslatorImplTest {
 	}
 	
 	@Test
+	public void toFhirResource_shouldTranslateOpenMrsDateChangedToVersionId() {
+		omrsLocation.setDateChanged(new Date());
+		
+		org.hl7.fhir.r4.model.Location location = locationTranslator.toFhirResource(omrsLocation);
+		assertThat(location, notNullValue());
+		assertThat(location.getMeta().getVersionId(), notNullValue());
+	}
+	
+	@Test
 	public void getOpenmrsParentLocation_shouldReturnNullIfReferenceIsNull() {
 		Location result = locationTranslator.getOpenmrsParentLocation(null);
 		

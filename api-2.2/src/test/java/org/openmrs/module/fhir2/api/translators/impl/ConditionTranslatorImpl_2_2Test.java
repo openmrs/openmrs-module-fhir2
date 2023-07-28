@@ -20,6 +20,7 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.Date;
 
+import org.hamcrest.Matchers;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Condition;
@@ -394,5 +395,27 @@ public class ConditionTranslatorImpl_2_2Test {
 		assertThat(condition, notNullValue());
 		assertThat(condition.getRecorder(), notNullValue());
 		assertThat(condition.getRecorder().getReference(), equalTo(PRACTITIONER_REFERENCE));
+	}
+	
+	@Test
+	public void shouldTranslateOpenMrsDateChangedToLastUpdatedDate() {
+		org.openmrs.Condition condition = new org.openmrs.Condition();
+		condition.setDateChanged(new Date());
+		
+		org.hl7.fhir.r4.model.Condition result = conditionTranslator.toFhirResource(condition);
+		
+		assertThat(result, Matchers.notNullValue());
+		assertThat(result.getMeta().getLastUpdated(), Matchers.notNullValue());
+	}
+	
+	@Test
+	public void shouldTranslateOpenMrsDateChangedToVersionId() {
+		org.openmrs.Condition condition = new org.openmrs.Condition();
+		condition.setDateChanged(new Date());
+		
+		org.hl7.fhir.r4.model.Condition result = conditionTranslator.toFhirResource(condition);
+		
+		assertThat(result, Matchers.notNullValue());
+		assertThat(result.getMeta().getVersionId(), Matchers.notNullValue());
 	}
 }

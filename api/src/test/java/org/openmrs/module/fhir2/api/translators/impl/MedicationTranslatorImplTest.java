@@ -134,6 +134,15 @@ public class MedicationTranslatorImplTest {
 	}
 	
 	@Test
+	public void toFhirResource_shouldTranslateOpenMrsDateChangedToVersionId() {
+		drug.setDateChanged(new Date());
+		
+		org.hl7.fhir.r4.model.Medication medication = medicationTranslator.toFhirResource(drug);
+		assertThat(medication, notNullValue());
+		assertThat(medication.getMeta().getVersionId(), notNullValue());
+	}
+	
+	@Test
 	public void toFhirResource_shouldSetFhirMedicationToActiveIfDrugIsNotRetired() {
 		drug.setRetired(false);
 		org.hl7.fhir.r4.model.Medication medication = medicationTranslator.toFhirResource(drug);

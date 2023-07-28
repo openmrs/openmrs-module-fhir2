@@ -1366,6 +1366,42 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		assertThat(getDistinctEncounterDatetime(entries), lessThanOrEqualTo(1));
 	}
 	
+	@Test
+	public void shouldReturnAnEtagHeaderWhenRetrievingAnExistingObservation() throws Exception {
+		MockHttpServletResponse response = get("/Observation/" + OBS_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		
+		assertThat(response.getHeader("etag"), notNullValue());
+		assertThat(response.getHeader("etag"), startsWith("W/"));
+		
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Observation observation = readResponse(response);
+		
+		assertThat(observation, notNullValue());
+		assertThat(observation.getMeta().getVersionId(), notNullValue());
+		assertThat(observation, validResource());
+	}
+	
+	@Test
+	public void shouldReturnNotModifiedWhenRetrievingAnExistingObservationWithAnEtag() throws Exception {
+		MockHttpServletResponse response = get("/Observation/" + OBS_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		assertThat(response.getHeader("etag"), notNullValue());
+		
+		String etagValue = response.getHeader("etag");
+		
+		response = get("/Observation/" + OBS_UUID).accept(FhirMediaTypes.JSON).ifNoneMatchHeader(etagValue).go();
+		
+		assertThat(response, isOk());
+		assertThat(response, statusEquals(HttpStatus.NOT_MODIFIED));
+	}
+	
 	private int getDistinctEncounterDatetime(List<Bundle.BundleEntryComponent> resultList) {
 		List<Date> results = resultList.stream().map(Bundle.BundleEntryComponent::getResource)
 		        .filter(it -> it instanceof Observation)

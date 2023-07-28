@@ -18,6 +18,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Date;
 
+import org.hamcrest.Matchers;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -282,6 +283,17 @@ public class MedicationDispenseTranslatorImpl_2_6Test {
 		assertThat(dispense.getMeta().getLastUpdated(), notNullValue());
 		assertThat(dispense.getMeta().getLastUpdated(), equalTo(openmrsDispense.getDateChanged()));
 		
+	}
+	
+	@Test
+	public void shouldTranslateOpenMrsDateChangedToVersionId() {
+		org.openmrs.MedicationDispense medicationDispense = new org.openmrs.MedicationDispense();
+		medicationDispense.setDateChanged(new Date());
+		
+		org.hl7.fhir.r4.model.MedicationDispense result = translator.toFhirResource(medicationDispense);
+		
+		assertThat(result, Matchers.notNullValue());
+		assertThat(result.getMeta().getVersionId(), Matchers.notNullValue());
 	}
 	
 	@Test

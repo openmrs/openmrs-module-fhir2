@@ -987,6 +987,19 @@ public class TaskTranslatorImplTest {
 		assertThat(result.getLastModified(), equalTo(dateModified));
 	}
 	
+	@Test
+	public void toFhirResource_shouldTranslateVersionId() {
+		FhirTask task = new FhirTask();
+		Date dateModified = new Date();
+		
+		task.setDateChanged(dateModified);
+		
+		Task result = taskTranslator.toFhirResource(task);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getMeta().getVersionId(), notNullValue());
+	}
+	
 	// Task.Identifier
 	@Test
 	public void toFhirResource_shouldSetBusinessIdentifier() {

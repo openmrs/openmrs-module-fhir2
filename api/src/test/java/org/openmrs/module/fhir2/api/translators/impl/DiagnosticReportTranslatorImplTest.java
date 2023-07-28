@@ -203,6 +203,15 @@ public class DiagnosticReportTranslatorImplTest {
 	}
 	
 	@Test
+	public void toFhirResource_shouldTranslateOpenMrsDateChangedToVersionId() {
+		fhirDiagnosticReport.setDateChanged(new Date());
+		DiagnosticReport result = translator.toFhirResource(fhirDiagnosticReport);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getMeta().getVersionId(), notNullValue());
+	}
+	
+	@Test
 	public void toOpenmrsType_shouldConvertDiagnosticReportToObsGroup() {
 		FhirDiagnosticReport result = translator.toOpenmrsType(diagnosticReport);
 		

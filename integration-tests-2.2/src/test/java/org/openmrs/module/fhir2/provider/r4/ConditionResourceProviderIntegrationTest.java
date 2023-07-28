@@ -623,4 +623,40 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR4Integrat
 		        hasResource(hasProperty("onsetDateTimeType", hasProperty("value", equalTo(
 		            Date.from(LocalDateTime.of(2020, 3, 5, 19, 0, 0).atZone(ZoneId.systemDefault()).toInstant())))))));
 	}
+	
+	@Test
+	public void shouldReturnAnEtagHeaderWhenRetrievingAnExistingCondition() throws Exception {
+		MockHttpServletResponse response = get("/Condition/" + CONDITION_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		
+		assertThat(response.getHeader("etag"), notNullValue());
+		assertThat(response.getHeader("etag"), startsWith("W/"));
+		
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Condition condition = readResponse(response);
+		
+		assertThat(condition, notNullValue());
+		assertThat(condition.getMeta().getVersionId(), notNullValue());
+		assertThat(condition, validResource());
+	}
+	
+	@Test
+	public void shouldReturnNotModifiedWhenRetrievingAnExistingConditionWithAnEtag() throws Exception {
+		MockHttpServletResponse response = get("/Condition/" + CONDITION_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		assertThat(response.getHeader("etag"), notNullValue());
+		
+		String etagValue = response.getHeader("etag");
+		
+		response = get("/Condition/" + CONDITION_UUID).accept(FhirMediaTypes.JSON).ifNoneMatchHeader(etagValue).go();
+		
+		assertThat(response, isOk());
+		assertThat(response, statusEquals(HttpStatus.NOT_MODIFIED));
+	}
 }

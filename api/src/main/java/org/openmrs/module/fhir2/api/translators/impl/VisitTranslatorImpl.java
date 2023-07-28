@@ -10,6 +10,8 @@
 package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.apache.commons.lang3.Validate.notNull;
+import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getLastUpdated;
+import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getVersionId;
 
 import javax.annotation.Nonnull;
 
@@ -64,7 +66,8 @@ public class VisitTranslatorImpl extends BaseEncounterTranslator implements Enco
 		encounter.setPeriod(visitPeriodTranslator.toFhirResource(visit));
 		
 		encounter.getMeta().addTag(FhirConstants.OPENMRS_FHIR_EXT_ENCOUNTER_TAG, "visit", "Visit");
-		encounter.getMeta().setLastUpdated(visit.getDateChanged());
+		encounter.getMeta().setLastUpdated(getLastUpdated(visit));
+		encounter.getMeta().setVersionId(getVersionId(visit));
 		
 		return encounter;
 	}

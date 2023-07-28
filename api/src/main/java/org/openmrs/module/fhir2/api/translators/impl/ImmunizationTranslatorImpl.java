@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getLastUpdated;
+import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getVersionId;
 import static org.openmrs.module.fhir2.api.util.ImmunizationObsGroupHelper.createImmunizationRequestValidationError;
 
 import javax.annotation.Nonnull;
@@ -434,6 +435,7 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 		}
 		
 		immunization.getMeta().setLastUpdated(getLastUpdated(openmrsImmunization));
+		immunization.getMeta().setVersionId(getVersionId(openmrsImmunization));
 		
 		return immunization;
 	}

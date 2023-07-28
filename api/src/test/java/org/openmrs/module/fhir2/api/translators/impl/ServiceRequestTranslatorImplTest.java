@@ -583,6 +583,20 @@ public class ServiceRequestTranslatorImplTest {
 		assertThat(result.getMeta().getLastUpdated(), DateMatchers.sameDay(new Date()));
 	}
 	
+	@Test
+	public void shouldTranslateOpenMrsDateChangedToVersionId() {
+		org.openmrs.TestOrder testOrder = new org.openmrs.TestOrder();
+		testOrder.setDateChanged(new Date());
+		
+		when(taskService.searchForTasks(any()))
+		        .thenReturn(new MockIBundleProvider<>(Collections.emptyList(), PREFERRED_PAGE_SIZE, COUNT));
+		
+		org.hl7.fhir.r4.model.ServiceRequest result = translator.toFhirResource(testOrder);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getMeta().getVersionId(), notNullValue());
+	}
+	
 	private TestOrder setOrderNumberByReflection(TestOrder order, String orderNumber) {
 		try {
 			Class clazz = order.getClass();

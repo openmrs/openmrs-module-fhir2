@@ -430,6 +430,16 @@ public class EncounterTranslatorImplTest {
 	}
 	
 	@Test
+	public void toFhirResource_shouldTranslateToVersionId() {
+		omrsEncounter.setDateChanged(new Date());
+		
+		Encounter result = encounterTranslator.toFhirResource(omrsEncounter);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getMeta().getVersionId(), notNullValue());
+	}
+	
+	@Test
 	public void toFhirResource_shouldTranslateToEncounterClassFhirType() {
 		when(encounterClassMap.getFhirClass(LOCATION_UUID)).thenReturn(TEST_FHIR_CLASS);
 		omrsEncounter.setLocation(location);

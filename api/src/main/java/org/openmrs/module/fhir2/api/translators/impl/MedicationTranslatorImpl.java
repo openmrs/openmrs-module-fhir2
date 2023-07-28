@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getLastUpdated;
+import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getVersionId;
 
 import javax.annotation.Nonnull;
 
@@ -75,6 +76,7 @@ public class MedicationTranslatorImpl implements MedicationTranslator {
 		}
 		
 		medication.getMeta().setLastUpdated(getLastUpdated(drug));
+		medication.getMeta().setVersionId(getVersionId(drug));
 		
 		return medication;
 	}

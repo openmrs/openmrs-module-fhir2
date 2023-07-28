@@ -276,6 +276,16 @@ public class VisitTranslatorImplTest {
 	}
 	
 	@Test
+	public void toFhirResource_shouldTranslateToVersionId() {
+		Visit visit = new Visit();
+		visit.setDateChanged(new Date());
+		
+		Encounter result = visitTranslator.toFhirResource(visit);
+		assertThat(result, notNullValue());
+		assertThat(result.getMeta().getVersionId(), notNullValue());
+	}
+	
+	@Test
 	public void toOpenMrsType_shouldTranslateTypeToVisitType() {
 		Encounter encounter = new Encounter();
 		encounter.setId(VISIT_UUID);

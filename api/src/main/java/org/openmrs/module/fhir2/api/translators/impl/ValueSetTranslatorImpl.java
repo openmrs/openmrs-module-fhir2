@@ -9,6 +9,9 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getLastUpdated;
+import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getVersionId;
+
 import javax.annotation.Nonnull;
 
 import java.util.ArrayList;
@@ -125,6 +128,9 @@ public class ValueSetTranslatorImpl implements ValueSetTranslator {
 		
 		compose.setInclude(new ArrayList<ValueSet.ConceptSetComponent>(sets.values()));
 		valueSet.setCompose(compose);
+		
+		valueSet.getMeta().setLastUpdated(getLastUpdated(concept));
+		valueSet.getMeta().setVersionId(getVersionId(concept));
 		return valueSet;
 	}
 	

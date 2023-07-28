@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getLastUpdated;
+import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getVersionId;
 
 import javax.annotation.Nonnull;
 
@@ -141,6 +142,7 @@ public class PractitionerTranslatorProviderImpl implements PractitionerTranslato
 		}
 		
 		practitioner.getMeta().setLastUpdated(getLastUpdated(provider));
+		practitioner.getMeta().setVersionId(getVersionId(provider));
 		
 		return practitioner;
 	}

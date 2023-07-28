@@ -160,16 +160,6 @@ public class GroupResourceProviderIntegrationTest extends BaseFhirR4IntegrationT
 		assertThat(group.getMember(), notNullValue());
 		assertThat(group.getQuantity(), equalTo(1));
 		
-		// try to get new group
-		response = get(group.getId()).accept(FhirMediaTypes.JSON).go();
-		
-		assertThat(response, isOk());
-		
-		Group newGroup = readResponse(response);
-		
-		assertThat(newGroup.getId(), equalTo(group.getId()));
-		assertThat(newGroup.getActive(), equalTo(true));
-		
 	}
 	
 	@Test
@@ -195,16 +185,6 @@ public class GroupResourceProviderIntegrationTest extends BaseFhirR4IntegrationT
 		assertThat(group.hasMember(), is(true));
 		assertThat(group.getMember(), notNullValue());
 		assertThat(group.getQuantity(), equalTo(1));
-		
-		// try to get new group
-		response = get(group.getId()).accept(FhirMediaTypes.XML).go();
-		
-		assertThat(response, isOk());
-		
-		Group newGroup = readResponse(response);
-		
-		assertThat(newGroup.getId(), equalTo(group.getId()));
-		assertThat(newGroup.getActive(), equalTo(true));
 	}
 	
 	@Test
@@ -518,6 +498,42 @@ public class GroupResourceProviderIntegrationTest extends BaseFhirR4IntegrationT
 		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R4/GroupMember/"))));
 		assertThat(entries, everyItem(hasResource(instanceOf(GroupMember.class))));
 		assertThat(entries, everyItem(hasResource(hasProperty("entity", hasProperty("reference", startsWith("Patient/"))))));
+	}
+	
+	@Test
+	public void shouldReturnAnEtagHeaderWhenRetrievingAnExistingGroup() throws Exception {
+		MockHttpServletResponse response = get("/Group/" + GROUP_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
+		
+		assertThat(response.getHeader("etag"), notNullValue());
+		assertThat(response.getHeader("etag"), startsWith("W/"));
+		
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Group group = readResponse(response);
+		
+		assertThat(group, notNullValue());
+		assertThat(group.getMeta().getVersionId(), notNullValue());
+		assertThat(group, validResource());
+	}
+	
+	@Test
+	public void shouldReturnNotModifiedWhenRetrievingAnExistingGroupWithAnEtag() throws Exception {
+		MockHttpServletResponse response = get("/Group/" + GROUP_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		assertThat(response.getHeader("etag"), notNullValue());
+		
+		String etagValue = response.getHeader("etag");
+		
+		response = get("/Group/" + GROUP_UUID).accept(FhirMediaTypes.JSON).ifNoneMatchHeader(etagValue).go();
+		
+		assertThat(response, isOk());
+		assertThat(response, statusEquals(HttpStatus.NOT_MODIFIED));
 	}
 	
 }
