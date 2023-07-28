@@ -24,6 +24,8 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import com.google.common.reflect.TypeToken;
+import lombok.AccessLevel;
+import lombok.Getter;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.openmrs.Auditable;
 import org.openmrs.OpenmrsObject;
@@ -48,6 +50,7 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 	
 	@Autowired
 	@Qualifier("fhirR4")
+	@Getter(AccessLevel.PROTECTED)
 	private FhirContext fhirContext;
 	
 	protected BaseFhirService() {
@@ -247,7 +250,7 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 	 * checks the Content-Type header of the request to determine if it corresponds to a merge json
 	 * patch
 	 */
-	private Boolean isJsonMergePatch(RequestDetails requestDetails) {
+	protected Boolean isJsonMergePatch(RequestDetails requestDetails) {
 		String contentType = requestDetails.getHeader(Constants.HEADER_CONTENT_TYPE);
 		return contentType != null && contentType.equalsIgnoreCase("application/merge-patch+json");
 	}
