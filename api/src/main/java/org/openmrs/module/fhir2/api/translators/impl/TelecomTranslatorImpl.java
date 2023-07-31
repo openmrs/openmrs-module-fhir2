@@ -9,97 +9,57 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static org.apache.commons.lang3.Validate.notNull;
+
 import javax.annotation.Nonnull;
 
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.ContactPoint;
-import org.openmrs.BaseOpenmrsData;
-import org.openmrs.LocationAttribute;
-import org.openmrs.PersonAttribute;
-import org.openmrs.ProviderAttribute;
-import org.openmrs.api.LocationService;
-import org.openmrs.api.PersonService;
-import org.openmrs.api.ProviderService;
-import org.openmrs.module.fhir2.FhirConstants;
-import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.openmrs.module.fhir2.model.FhirContactPoint;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class TelecomTranslatorImpl implements TelecomTranslator<BaseOpenmrsData> {
-	
-	@Autowired
-	private PersonService personService;
-	
-	@Autowired
-	private LocationService locationService;
-	
-	@Autowired
-	private ProviderService providerService;
-	
-	@Autowired
-	private FhirGlobalPropertyService globalPropertyService;
+public class TelecomTranslatorImpl implements TelecomTranslator<FhirContactPoint> {
 	
 	@Override
-	public BaseOpenmrsData toOpenmrsType(@Nonnull BaseOpenmrsData attribute, @Nonnull ContactPoint contactPoint) {
-		if (attribute == null || contactPoint == null) {
-			return attribute;
-		}
-		
-		if (attribute instanceof PersonAttribute) {
-			PersonAttribute personAttribute = (PersonAttribute) attribute;
-			if (contactPoint.hasId()) {
-				personAttribute.setUuid(contactPoint.getId());
-			}
-			personAttribute.setValue(contactPoint.getValue());
-			personAttribute.setAttributeType(personService.getPersonAttributeTypeByUuid(
-			    globalPropertyService.getGlobalProperty(FhirConstants.PERSON_CONTACT_POINT_ATTRIBUTE_TYPE)));
-		} else if (attribute instanceof LocationAttribute) {
-			LocationAttribute locationAttribute = (LocationAttribute) attribute;
-			if (contactPoint.hasId()) {
-				locationAttribute.setUuid(contactPoint.getId());
-			}
-			locationAttribute.setValue(contactPoint.getValue());
-			locationAttribute.setAttributeType(locationService.getLocationAttributeTypeByUuid(
-			    globalPropertyService.getGlobalProperty(FhirConstants.LOCATION_CONTACT_POINT_ATTRIBUTE_TYPE)));
-		} else if (attribute instanceof ProviderAttribute) {
-			ProviderAttribute providerAttribute = (ProviderAttribute) attribute;
-			if (contactPoint.hasId()) {
-				providerAttribute.setUuid(contactPoint.getId());
-			}
-			providerAttribute.setValue(contactPoint.getValue());
-			providerAttribute.setAttributeType(providerService.getProviderAttributeTypeByUuid(
-			    globalPropertyService.getGlobalProperty(FhirConstants.PROVIDER_CONTACT_POINT_ATTRIBUTE_TYPE)));
-		}
-		
-		return attribute;
-	}
-	
-	@Override
-	public ContactPoint toFhirResource(@Nonnull BaseOpenmrsData attribute) {
-		if (attribute == null || attribute.getVoided()) {
-			return null;
-		}
+	public ContactPoint toFhirResource(@Nonnull FhirContactPoint openmrsContactPoint) {
+		notNull(openmrsContactPoint, "The Openmrs FhirContactPoint object should not be null");
 		
 		ContactPoint contactPoint = new ContactPoint();
 		
-		if (attribute instanceof PersonAttribute) {
-			PersonAttribute personAttribute = (PersonAttribute) attribute;
-			contactPoint.setId(personAttribute.getUuid());
-			contactPoint.setValue(personAttribute.getValue());
-		} else if (attribute instanceof LocationAttribute) {
-			LocationAttribute locationAttribute = (LocationAttribute) attribute;
-			contactPoint.setId(locationAttribute.getUuid());
-			contactPoint.setValue(locationAttribute.getValue().toString());
-		} else if (attribute instanceof ProviderAttribute) {
-			ProviderAttribute providerAttribute = (ProviderAttribute) attribute;
-			contactPoint.setId(providerAttribute.getUuid());
-			contactPoint.setValue(providerAttribute.getValue().toString());
-		}
+		contactPoint.setId(openmrsContactPoint.getUuid());
+		contactPoint.setSystem(openmrsContactPoint.getSystem());
+		contactPoint.setValue(openmrsContactPoint.getValue());
+		contactPoint.setUse(openmrsContactPoint.getUse());
 		
 		return contactPoint;
+	}
+	
+	@Override
+	public FhirContactPoint toOpenmrsType(@Nonnull FhirContactPoint existingOpenmrsContactPoint,
+	        @Nonnull ContactPoint contactPoint) {
+		notNull(existingOpenmrsContactPoint, "The existing Openmrs FhirContactPoint object should not be null");
+		notNull(contactPoint, "The ContactPoint object should not be null");
+		
+		if (contactPoint.hasId()) {
+			existingOpenmrsContactPoint.setUuid(contactPoint.getId());
+		}
+		
+		if (contactPoint.hasSystem()) {
+			existingOpenmrsContactPoint.setSystem(contactPoint.getSystem());
+		}
+		
+		if (contactPoint.hasValue()) {
+			existingOpenmrsContactPoint.setValue(contactPoint.getValue());
+		}
+		
+		if (contactPoint.hasUse()) {
+			existingOpenmrsContactPoint.setUse(contactPoint.getUse());
+		}
+		
+		return existingOpenmrsContactPoint;
 	}
 }

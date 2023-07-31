@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
+import javax.annotation.Nonnull;
+
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -46,5 +48,10 @@ public class FhirLocationServiceImpl extends BaseFhirService<Location, org.openm
 	@Transactional(readOnly = true)
 	public IBundleProvider searchForLocations(LocationSearchParams locationSearchParams) {
 		return searchQuery.getQueryResults(locationSearchParams.toSearchParameterMap(), dao, translator, searchQueryInclude);
+	}
+	
+	@Override
+	public Location get(@Nonnull String uuid) {
+		return super.get(uuid);
 	}
 }
