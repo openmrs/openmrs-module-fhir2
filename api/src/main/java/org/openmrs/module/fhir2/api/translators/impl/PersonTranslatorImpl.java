@@ -20,6 +20,7 @@ import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.HumanName;
+import org.openmrs.BaseOpenmrsData;
 import org.openmrs.Person;
 import org.openmrs.PersonAddress;
 import org.openmrs.PersonAttribute;
@@ -32,6 +33,7 @@ import org.openmrs.module.fhir2.api.translators.PersonAddressTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonNameTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonTranslator;
 import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
+import org.openmrs.module.fhir2.model.FhirContactPoint;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -52,7 +54,7 @@ public class PersonTranslatorImpl implements PersonTranslator {
 	private PersonAddressTranslator addressTranslator;
 	
 	@Autowired
-	private TelecomTranslator<PersonAttribute> telecomTranslator;
+	private TelecomTranslator<BaseOpenmrsData> telecomTranslator;
 	
 	@Autowired
 	private PatientReferenceTranslator patientReferenceTranslator;
@@ -82,8 +84,7 @@ public class PersonTranslatorImpl implements PersonTranslator {
 			person.addAddress(addressTranslator.toFhirResource(address));
 		}
 		
-		person.addTelecom(telecomTranslator.toFhirResource(openmrsPerson.getAttribute("telecom")));
-		
+		person.addTelecom(telecomTranslator.toFhirResource(openmrsPerson));
 		if (openmrsPerson.getIsPatient()) {
 			person.addLink(new org.hl7.fhir.r4.model.Person.PersonLinkComponent()
 			        .setTarget(patientReferenceTranslator.toFhirResource(patientDao.get(openmrsPerson.getUuid()))));
