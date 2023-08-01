@@ -14,6 +14,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import lombok.Data;
@@ -22,6 +24,7 @@ import lombok.NoArgsConstructor;
 import org.hl7.fhir.r4.model.ContactPoint.ContactPointSystem;
 import org.hl7.fhir.r4.model.ContactPoint.ContactPointUse;
 import org.openmrs.BaseOpenmrsData;
+import org.openmrs.Person;
 
 @Data
 @NoArgsConstructor
@@ -46,4 +49,8 @@ public class FhirContactPoint extends BaseOpenmrsData {
 	
 	@Column(nullable = false)
 	private ContactPointUse use;
+	
+	@ManyToOne
+	@JoinColumn(name = "person_id")
+	private Person person;
 }

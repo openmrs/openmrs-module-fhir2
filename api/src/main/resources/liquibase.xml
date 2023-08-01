@@ -30,6 +30,7 @@
             <column name="use" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
+            <column name="person_id" type="int"/>
             <column name="creator" type="int">
                 <constraints nullable="false"/>
             </column>
@@ -50,6 +51,9 @@
                 <constraints nullable="false" unique="true"/>
             </column>
         </createTable>
+        <addForeignKeyConstraint baseTableName="fhir_contact_point" baseColumnNames="person_id"
+                                 constraintName="fhir_contact_point_person_id_fk"
+                                 referencedTableName="person" referencedColumnNames="person_id"/>
         <addForeignKeyConstraint baseTableName="fhir_contact_point" baseColumnNames="creator"
                                  constraintName="fhir_contact_point_creator_fk"
                                  referencedTableName="users" referencedColumnNames="user_id"/>

@@ -20,7 +20,6 @@ import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.HumanName;
-import org.openmrs.BaseOpenmrsData;
 import org.openmrs.Person;
 import org.openmrs.PersonAddress;
 import org.openmrs.PersonAttribute;
@@ -53,7 +52,7 @@ public class PersonTranslatorImpl implements PersonTranslator {
 	private PersonAddressTranslator addressTranslator;
 	
 	@Autowired
-	private TelecomTranslator<BaseOpenmrsData> telecomTranslator;
+	private TelecomTranslator<PersonAttribute> telecomTranslator;
 	
 	@Autowired
 	private PatientReferenceTranslator patientReferenceTranslator;
@@ -83,7 +82,7 @@ public class PersonTranslatorImpl implements PersonTranslator {
 			person.addAddress(addressTranslator.toFhirResource(address));
 		}
 		
-		person.addTelecom(telecomTranslator.toFhirResource(openmrsPerson));
+		person.addTelecom(telecomTranslator.toFhirResource(openmrsPerson.getAttribute("telecom")));
 		
 		if (openmrsPerson.getIsPatient()) {
 			person.addLink(new org.hl7.fhir.r4.model.Person.PersonLinkComponent()
