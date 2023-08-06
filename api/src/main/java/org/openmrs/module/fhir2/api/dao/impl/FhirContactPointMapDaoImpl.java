@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import javax.annotation.Nonnull;
+
 import java.util.Optional;
 
 import lombok.AccessLevel;
@@ -18,7 +19,6 @@ import org.hibernate.SessionFactory;
 import org.openmrs.LocationAttributeType;
 import org.openmrs.PersonAttributeType;
 import org.openmrs.ProviderAttributeType;
-import org.openmrs.api.PersonService;
 import org.openmrs.attribute.BaseAttributeType;
 import org.openmrs.module.fhir2.api.dao.FhirContactPointMapDao;
 import org.openmrs.module.fhir2.model.FhirContactPointMap;
@@ -34,22 +34,21 @@ public class FhirContactPointMapDaoImpl implements FhirContactPointMapDao {
 	@Qualifier("sessionFactory")
 	private SessionFactory sessionFactory;
 	
-	@Autowired
-	private PersonService personService;
-	
 	@Override
-	public Optional<FhirContactPointMap> getFhirContactPointMapForPersonAttributeType(@Nonnull PersonAttributeType attributeType) {
+	public Optional<FhirContactPointMap> getFhirContactPointMapForPersonAttributeType(
+	        @Nonnull PersonAttributeType attributeType) {
 		if (attributeType == null) {
 			return Optional.empty();
 		}
 		
 		return Optional.ofNullable((FhirContactPointMap) sessionFactory.getCurrentSession().createQuery(
-						"from fhir_contact_point_map fcp where fcp.attribute_type_domain = 'person' and fcp.attribute_type_id = :attribute_type_id")
-				.setParameter("attribute_type_id", attributeType.getId()).uniqueResult());
+		    "from fhir_contact_point_map fcp where fcp.attribute_type_domain = 'person' and fcp.attribute_type_id = :attribute_type_id")
+		        .setParameter("attribute_type_id", attributeType.getId()).uniqueResult());
 	}
 	
 	@Override
-	public Optional<FhirContactPointMap> getFhirContactPointMapForAttributeType(@Nonnull BaseAttributeType<?> attributeType) {
+	public Optional<FhirContactPointMap> getFhirContactPointMapForAttributeType(
+	        @Nonnull BaseAttributeType<?> attributeType) {
 		if (attributeType == null) {
 			return Optional.empty();
 		}
@@ -66,9 +65,9 @@ public class FhirContactPointMapDaoImpl implements FhirContactPointMapDao {
 		}
 		
 		return Optional.ofNullable((FhirContactPointMap) sessionFactory.getCurrentSession().createQuery(
-						"from fhir_contact_point_map fcp where fcp.attribute_type_domain = :attribute_type_domain and fcp.attribute_type_id = :attribute_type_id")
-				.setParameter("attribute_type_domain", attributeTypeDomain)
-				.setParameter("attribute_type_id", attributeType.getId()).uniqueResult());
+		    "from fhir_contact_point_map fcp where fcp.attribute_type_domain = :attribute_type_domain and fcp.attribute_type_id = :attribute_type_id")
+		        .setParameter("attribute_type_domain", attributeTypeDomain)
+		        .setParameter("attribute_type_id", attributeType.getId()).uniqueResult());
 	}
 	
 	@Override

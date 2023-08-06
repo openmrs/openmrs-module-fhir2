@@ -31,7 +31,9 @@ import org.openmrs.api.LocationService;
 import org.openmrs.api.PersonService;
 import org.openmrs.api.ProviderService;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.FhirContactPointMapService;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
+import org.openmrs.module.fhir2.model.FhirContactPointMap;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TelecomTranslatorImplTest {
@@ -45,6 +47,8 @@ public class TelecomTranslatorImplTest {
 	private static final String PERSON_ATTRIBUTE_VALUE = "254723723456";
 	
 	private static final String PERSON_ATTRIBUTE_TYPE_UUID = "14d4f066-15f5-102d-96e4-000c29c2a5d7";
+	
+	private static final String FHIR_CONTACT_POINT_MAP_TYPE_UUID = "fe637eac-7698-4763-8de0-923437fd3132";
 	
 	private static final String ATTRIBUTE_TYPE_NAME = "Contact";
 	
@@ -77,6 +81,9 @@ public class TelecomTranslatorImplTest {
 	private static final String NEW_PROVIDER_ATTRIBUTE_VALUE = "+254712 XXX XXX";
 	
 	@Mock
+	private FhirContactPointMapService fhirContactPointMapService;
+	
+	@Mock
 	private PersonService personService;
 	
 	@Mock
@@ -92,7 +99,15 @@ public class TelecomTranslatorImplTest {
 	
 	private LocationAttribute locationAttribute;
 	
+	private PersonAttribute personAttribute;
+	
+	private PersonAttributeType personAttributeType;
+	
+	private ProviderAttribute providerAttribute;
+	
 	private ContactPoint contactPoint;
+	
+	private FhirContactPointMap openmrsContactPointMap;
 	
 	@Before
 	public void setUp() {
@@ -101,14 +116,19 @@ public class TelecomTranslatorImplTest {
 		telecomTranslator.setLocationService(locationService);
 		telecomTranslator.setProviderService(providerService);
 		telecomTranslator.setGlobalPropertyService(globalPropertyService);
+		telecomTranslator.setFhirContactPointMapService(fhirContactPointMapService);
 		
 		locationAttribute = new LocationAttribute();
+		personAttribute = new PersonAttribute();
+		providerAttribute = new ProviderAttribute();
+		personAttributeType = new PersonAttributeType();
+		
 		contactPoint = new ContactPoint();
+		openmrsContactPointMap = new FhirContactPointMap();
 	}
 	
 	@Test
 	public void shouldTranslatePersonAttributeUuidToFhirContactPointId() {
-		PersonAttribute personAttribute = new PersonAttribute();
 		personAttribute.setUuid(PERSON_ATTRIBUTE_UUID);
 		ContactPoint contactPoint = telecomTranslator.toFhirResource(personAttribute);
 		assertThat(contactPoint, notNullValue());
@@ -117,7 +137,6 @@ public class TelecomTranslatorImplTest {
 	
 	@Test
 	public void shouldTranslatePersonAttributeValueToFhirContactPointValue() {
-		PersonAttribute personAttribute = new PersonAttribute();
 		personAttribute.setValue(PERSON_ATTRIBUTE_VALUE);
 		ContactPoint contactPoint = telecomTranslator.toFhirResource(personAttribute);
 		assertThat(contactPoint, notNullValue());
@@ -144,7 +163,6 @@ public class TelecomTranslatorImplTest {
 	
 	@Test
 	public void shouldUpdatePersonAttributeUuid() {
-		PersonAttribute personAttribute = new PersonAttribute();
 		personAttribute.setUuid(PERSON_ATTRIBUTE_UUID);
 		
 		ContactPoint contactPoint = new ContactPoint();
@@ -158,7 +176,6 @@ public class TelecomTranslatorImplTest {
 	
 	@Test
 	public void shouldUpdatePersonAttributeValue() {
-		PersonAttribute personAttribute = new PersonAttribute();
 		personAttribute.setValue(PERSON_ATTRIBUTE_VALUE);
 		
 		ContactPoint contactPoint = new ContactPoint();
@@ -172,13 +189,11 @@ public class TelecomTranslatorImplTest {
 	
 	@Test
 	public void shouldUpdatePersonAttributeWithTheCorrectPersonAttributeTypeUuid() {
-		PersonAttribute personAttribute = new PersonAttribute();
 		personAttribute.setUuid(PERSON_ATTRIBUTE_UUID);
 		personAttribute.setValue(PERSON_ATTRIBUTE_VALUE);
-		PersonAttributeType attributeType = new PersonAttributeType();
-		attributeType.setName(ATTRIBUTE_TYPE_NAME);
-		attributeType.setUuid(PERSON_ATTRIBUTE_TYPE_UUID);
-		personAttribute.setAttributeType(attributeType);
+		personAttributeType.setName(ATTRIBUTE_TYPE_NAME);
+		personAttributeType.setUuid(PERSON_ATTRIBUTE_TYPE_UUID);
+		personAttribute.setAttributeType(personAttributeType);
 		
 		ContactPoint contactPoint = new ContactPoint();
 		contactPoint.setId(NEW_PERSON_ATTRIBUTE_UUID);
@@ -186,7 +201,7 @@ public class TelecomTranslatorImplTest {
 		
 		when(globalPropertyService.getGlobalProperty(FhirConstants.PERSON_CONTACT_POINT_ATTRIBUTE_TYPE))
 		        .thenReturn(PERSON_ATTRIBUTE_TYPE_UUID);
-		when(personService.getPersonAttributeTypeByUuid(PERSON_ATTRIBUTE_TYPE_UUID)).thenReturn(attributeType);
+		when(personService.getPersonAttributeTypeByUuid(PERSON_ATTRIBUTE_TYPE_UUID)).thenReturn(personAttributeType);
 		
 		PersonAttribute result = (PersonAttribute) telecomTranslator.toOpenmrsType(personAttribute, contactPoint);
 		assertThat(result, notNullValue());
@@ -199,13 +214,12 @@ public class TelecomTranslatorImplTest {
 		ContactPoint contactPoint = new ContactPoint();
 		contactPoint.setId(CONTACT_POINT_ID);
 		contactPoint.setValue(CONTACT_POINT_VALUE);
-		PersonAttributeType attributeType = new PersonAttributeType();
-		attributeType.setName(ATTRIBUTE_TYPE_NAME);
-		attributeType.setUuid(PERSON_ATTRIBUTE_TYPE_UUID);
+		personAttributeType.setName(ATTRIBUTE_TYPE_NAME);
+		personAttributeType.setUuid(PERSON_ATTRIBUTE_TYPE_UUID);
 		
 		when(globalPropertyService.getGlobalProperty(FhirConstants.PERSON_CONTACT_POINT_ATTRIBUTE_TYPE))
 		        .thenReturn(PERSON_ATTRIBUTE_TYPE_UUID);
-		when(personService.getPersonAttributeTypeByUuid(PERSON_ATTRIBUTE_TYPE_UUID)).thenReturn(attributeType);
+		when(personService.getPersonAttributeTypeByUuid(PERSON_ATTRIBUTE_TYPE_UUID)).thenReturn(personAttributeType);
 		
 		PersonAttribute result = (PersonAttribute) telecomTranslator.toOpenmrsType(new PersonAttribute(), contactPoint);
 		assertThat(result, notNullValue());
@@ -400,7 +414,6 @@ public class TelecomTranslatorImplTest {
 	
 	@Test
 	public void shouldUpdateProviderAttributeWithTheCorrectPersonAttributeTypeUuid() {
-		ProviderAttribute providerAttribute = new ProviderAttribute();
 		providerAttribute.setUuid(PERSON_ATTRIBUTE_UUID);
 		providerAttribute.setValue(PERSON_ATTRIBUTE_VALUE);
 		ProviderAttributeType attributeType = new ProviderAttributeType();

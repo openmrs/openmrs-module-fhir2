@@ -520,7 +520,7 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		}
 		
 		MockHttpServletResponse response = patch("/Immunization/" + IMMUNIZATION_UUID).jsonPatch(jsonImmunizationPatch)
-				.accept(FhirMediaTypes.JSON).go();
+		        .accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
 		assertThat(response, notNullValue());
@@ -544,7 +544,7 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		}
 		
 		MockHttpServletResponse response = patch("/Immunization/" + IMMUNIZATION_UUID).xmlPatch(xmlImmunizationPatch)
-				.accept(FhirMediaTypes.XML).go();
+		        .accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
 		assertThat(response, notNullValue());
