@@ -42,7 +42,7 @@ public class FhirContactPointMapDaoImpl implements FhirContactPointMapDao {
 		}
 		
 		return Optional.ofNullable((FhirContactPointMap) sessionFactory.getCurrentSession().createQuery(
-		    "from fhir_contact_point_map fcp where fcp.attribute_type_domain = 'person' and fcp.attribute_type_id = :attribute_type_id")
+		    "from FhirContactPointMap fcp where fcp.attributeTypeDomain = 'person' and fcp.attributeTypeId = :attribute_type_id")
 		        .setParameter("attribute_type_id", attributeType.getId()).uniqueResult());
 	}
 	
@@ -65,7 +65,7 @@ public class FhirContactPointMapDaoImpl implements FhirContactPointMapDao {
 		}
 		
 		return Optional.ofNullable((FhirContactPointMap) sessionFactory.getCurrentSession().createQuery(
-		    "from fhir_contact_point_map fcp where fcp.attribute_type_domain = :attribute_type_domain and fcp.attribute_type_id = :attribute_type_id")
+		    "from FhirContactPointMap fcp where fcp.attributeTypeDomain = :attribute_type_domain and fcp.attributeTypeId = :attribute_type_id")
 		        .setParameter("attribute_type_domain", attributeTypeDomain)
 		        .setParameter("attribute_type_id", attributeType.getId()).uniqueResult());
 	}
