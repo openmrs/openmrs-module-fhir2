@@ -20,16 +20,18 @@ import javax.persistence.Table;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.hl7.fhir.r4.model.ContactPoint.ContactPointSystem;
 import org.hl7.fhir.r4.model.ContactPoint.ContactPointUse;
 import org.openmrs.BaseOpenmrsData;
 
 @Data
-@NoArgsConstructor
+@AllArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @Entity
 @Table(name = "fhir_contact_point_map")
+@NoArgsConstructor
 public class FhirContactPointMap extends BaseOpenmrsData {
 	
 	private static final long serialVersionUID = 1742113L;
