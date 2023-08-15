@@ -15,6 +15,7 @@ import java.util.Optional;
 
 import lombok.AccessLevel;
 import lombok.Setter;
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.SessionFactory;
 import org.openmrs.LocationAttributeType;
 import org.openmrs.PersonAttributeType;
@@ -53,7 +54,13 @@ public class FhirContactPointMapDaoImpl implements FhirContactPointMapDao {
 			return Optional.empty();
 		}
 		
-		String attributeTypeDomain = null;
+		String attributeTypeClassName = attributeType.getClass().getSimpleName();
+		if (attributeTypeClassName == null || "".equals(attributeTypeClassName)
+		        || !attributeTypeClassName.endsWith("AttributeType")) {
+			return Optional.empty();
+		}
+		
+		String attributeTypeDomain = StringUtils.removeEnd(attributeTypeClassName.toLowerCase(), "attributetype");
 		if (attributeType instanceof LocationAttributeType) {
 			attributeTypeDomain = "location";
 		} else if (attributeType instanceof ProviderAttributeType) {
@@ -72,7 +79,21 @@ public class FhirContactPointMapDaoImpl implements FhirContactPointMapDao {
 	
 	@Override
 	public FhirContactPointMap saveFhirContactPointMap(@Nonnull FhirContactPointMap contactPointMap) {
-		sessionFactory.getCurrentSession().saveOrUpdate(contactPointMap);
-		return contactPointMap;
+		FhirContactPointMap existingContactPointMap = (FhirContactPointMap) sessionFactory.getCurrentSession().createQuery(
+		    "from FhirContactPointMap fcp where fcp.attributeTypeDomain = :attribute_type_domain and fcp.attributeTypeId = :attribute_type_id")
+		        .setParameter("attribute_type_domain", contactPointMap.getAttributeTypeDomain())
+		        .setParameter("attribute_type_id", contactPointMap.getAttributeTypeId()).uniqueResult();
+		
+		if (existingContactPointMap != null) {
+			existingContactPointMap.setSystem(contactPointMap.getSystem());
+			existingContactPointMap.setUse(contactPointMap.getUse());
+			existingContactPointMap.setRank(contactPointMap.getRank());
+			sessionFactory.getCurrentSession().merge(existingContactPointMap);
+			return existingContactPointMap;
+		} else {
+			sessionFactory.getCurrentSession().saveOrUpdate(contactPointMap);
+			return contactPointMap;
+		}
 	}
+	
 }

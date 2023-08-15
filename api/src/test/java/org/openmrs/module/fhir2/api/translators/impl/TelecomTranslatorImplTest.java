@@ -16,6 +16,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import java.util.Optional;
+
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,8 +37,6 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirContactPointMapService;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.model.FhirContactPointMap;
-
-import java.util.Optional;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TelecomTranslatorImplTest {
@@ -138,8 +138,8 @@ public class TelecomTranslatorImplTest {
 	
 	@Test
 	public void toFhirResource_shouldTranslatePersonAttributeUseToFhirContactPointUse() {
-		when(fhirContactPointMapService.getFhirContactPointMapForPersonAttributeType(any()))
-				.thenReturn(Optional.of(new FhirContactPointMap(null,"person",null,null, ContactPoint.ContactPointUse.WORK,null)));
+		when(fhirContactPointMapService.getFhirContactPointMapForPersonAttributeType(any())).thenReturn(
+		    Optional.of(new FhirContactPointMap(null, "person", null, null, ContactPoint.ContactPointUse.WORK, null)));
 		
 		contactPoint = telecomTranslator.toFhirResource(personAttribute);
 		assertThat(contactPoint, notNullValue());
@@ -148,8 +148,8 @@ public class TelecomTranslatorImplTest {
 	
 	@Test
 	public void toFhirResource_shouldTranslatePersonAttributeSystemToFhirContactPointSystem() {
-		when(fhirContactPointMapService.getFhirContactPointMapForPersonAttributeType(any()))
-				.thenReturn(Optional.of(new FhirContactPointMap(null,"person",null, ContactPoint.ContactPointSystem.EMAIL, null,null)));
+		when(fhirContactPointMapService.getFhirContactPointMapForPersonAttributeType(any())).thenReturn(
+		    Optional.of(new FhirContactPointMap(null, "person", null, ContactPoint.ContactPointSystem.EMAIL, null, null)));
 		
 		contactPoint = telecomTranslator.toFhirResource(personAttribute);
 		assertThat(contactPoint, notNullValue());
@@ -159,7 +159,7 @@ public class TelecomTranslatorImplTest {
 	@Test
 	public void toFhirResource_shouldTranslatePersonAttributeRankToFhirContactPointRank() {
 		when(fhirContactPointMapService.getFhirContactPointMapForPersonAttributeType(any()))
-				.thenReturn(Optional.of(new FhirContactPointMap(null,"person",null, null, null,1)));
+		        .thenReturn(Optional.of(new FhirContactPointMap(null, "person", null, null, null, 1)));
 		
 		contactPoint = telecomTranslator.toFhirResource(personAttribute);
 		assertThat(contactPoint, notNullValue());
@@ -187,8 +187,8 @@ public class TelecomTranslatorImplTest {
 		providerAttribute.setUuid(PROVIDER_ATTRIBUTE_UUID);
 		providerAttribute.setValue(PROVIDER_ATTRIBUTE_VALUE);
 		
-		when(fhirContactPointMapService.getFhirContactPointMapForAttributeType(any()))
-				.thenReturn(Optional.of(new FhirContactPointMap(null,"provider",null,null, ContactPoint.ContactPointUse.WORK,null)));
+		when(fhirContactPointMapService.getFhirContactPointMapForAttributeType(any())).thenReturn(
+		    Optional.of(new FhirContactPointMap(null, "provider", null, null, ContactPoint.ContactPointUse.WORK, null)));
 		
 		contactPoint = telecomTranslator.toFhirResource(providerAttribute);
 		assertThat(contactPoint, notNullValue());
@@ -202,8 +202,8 @@ public class TelecomTranslatorImplTest {
 		providerAttribute.setUuid(PROVIDER_ATTRIBUTE_UUID);
 		providerAttribute.setValue(PROVIDER_ATTRIBUTE_VALUE);
 		
-		when(fhirContactPointMapService.getFhirContactPointMapForAttributeType(any()))
-				.thenReturn(Optional.of(new FhirContactPointMap(null,"provider",null, ContactPoint.ContactPointSystem.EMAIL, null,null)));
+		when(fhirContactPointMapService.getFhirContactPointMapForAttributeType(any())).thenReturn(
+		    Optional.of(new FhirContactPointMap(null, "provider", null, ContactPoint.ContactPointSystem.EMAIL, null, null)));
 		
 		contactPoint = telecomTranslator.toFhirResource(providerAttribute);
 		assertThat(contactPoint, notNullValue());
@@ -218,7 +218,7 @@ public class TelecomTranslatorImplTest {
 		providerAttribute.setValue(PROVIDER_ATTRIBUTE_VALUE);
 		
 		when(fhirContactPointMapService.getFhirContactPointMapForAttributeType(any()))
-				.thenReturn(Optional.of(new FhirContactPointMap(null,"provider",null, null, null,1)));
+		        .thenReturn(Optional.of(new FhirContactPointMap(null, "provider", null, null, null, 1)));
 		
 		contactPoint = telecomTranslator.toFhirResource(providerAttribute);
 		assertThat(contactPoint, notNullValue());
@@ -232,8 +232,8 @@ public class TelecomTranslatorImplTest {
 		locationAttribute.setUuid(LOCATION_ATTRIBUTE_UUID);
 		locationAttribute.setValue(LOCATION_ATTRIBUTE_VALUE);
 		
-		when(fhirContactPointMapService.getFhirContactPointMapForAttributeType(any()))
-				.thenReturn(Optional.of(new FhirContactPointMap(null,"location",null,null, ContactPoint.ContactPointUse.WORK,null)));
+		when(fhirContactPointMapService.getFhirContactPointMapForAttributeType(any())).thenReturn(
+		    Optional.of(new FhirContactPointMap(null, "location", null, null, ContactPoint.ContactPointUse.WORK, null)));
 		
 		contactPoint = telecomTranslator.toFhirResource(locationAttribute);
 		assertThat(contactPoint, notNullValue());
@@ -247,8 +247,8 @@ public class TelecomTranslatorImplTest {
 		locationAttribute.setUuid(LOCATION_ATTRIBUTE_UUID);
 		locationAttribute.setValue(LOCATION_ATTRIBUTE_VALUE);
 		
-		when(fhirContactPointMapService.getFhirContactPointMapForAttributeType(any()))
-				.thenReturn(Optional.of(new FhirContactPointMap(null,"location",null, ContactPoint.ContactPointSystem.EMAIL, null,null)));
+		when(fhirContactPointMapService.getFhirContactPointMapForAttributeType(any())).thenReturn(
+		    Optional.of(new FhirContactPointMap(null, "location", null, ContactPoint.ContactPointSystem.EMAIL, null, null)));
 		
 		contactPoint = telecomTranslator.toFhirResource(locationAttribute);
 		assertThat(contactPoint, notNullValue());
@@ -263,7 +263,7 @@ public class TelecomTranslatorImplTest {
 		locationAttribute.setValue(LOCATION_ATTRIBUTE_VALUE);
 		
 		when(fhirContactPointMapService.getFhirContactPointMapForAttributeType(any()))
-				.thenReturn(Optional.of(new FhirContactPointMap(null,"location",null, null, null,1)));
+		        .thenReturn(Optional.of(new FhirContactPointMap(null, "location", null, null, null, 1)));
 		
 		contactPoint = telecomTranslator.toFhirResource(locationAttribute);
 		assertThat(contactPoint, notNullValue());

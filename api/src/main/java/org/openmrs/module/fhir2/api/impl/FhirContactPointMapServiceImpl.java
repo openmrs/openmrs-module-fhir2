@@ -42,7 +42,6 @@ public class FhirContactPointMapServiceImpl implements FhirContactPointMapServic
 		return dao.getFhirContactPointMapForAttributeType(attributeType);
 	}
 	
-	@Transactional
 	@Override
 	public FhirContactPointMap saveFhirContactPointMap(FhirContactPointMap contactPointMap) {
 		return dao.saveFhirContactPointMap(contactPointMap);

@@ -123,4 +123,38 @@ public class FhirContactPointMapServiceImplTest {
 		assertThat(result.getUse(), equalTo(ContactPoint.ContactPointUse.WORK));
 		assertThat(result.getRank(), equalTo(2));
 	}
+	
+	@Test
+	public void saveFhirContactPointMap_ShouldUpdateExistingFhirContactPointMap() {
+		FhirContactPointMap existingFhirContactPointMap = new FhirContactPointMap();
+		existingFhirContactPointMap.setId(1);
+		existingFhirContactPointMap.setAttributeTypeDomain("person");
+		existingFhirContactPointMap.setAttributeTypeId(10001);
+		existingFhirContactPointMap.setSystem(ContactPoint.ContactPointSystem.PHONE);
+		existingFhirContactPointMap.setUse(ContactPoint.ContactPointUse.WORK);
+		existingFhirContactPointMap.setRank(1);
+		when(fhirContactPointMapDao.saveFhirContactPointMap(existingFhirContactPointMap))
+		        .thenReturn(existingFhirContactPointMap);
+		
+		FhirContactPointMap result = fhirContactPointMapService.saveFhirContactPointMap(existingFhirContactPointMap);
+		assertThat(result.getAttributeTypeDomain(), equalTo("person"));
+		assertThat(result.getAttributeTypeId(), equalTo(10001));
+		assertThat(result.getSystem(), equalTo(ContactPoint.ContactPointSystem.PHONE));
+		assertThat(result.getUse(), equalTo(ContactPoint.ContactPointUse.WORK));
+		assertThat(result.getRank(), equalTo(1));
+		
+		fhirContactPointMap.setAttributeTypeDomain("person");
+		fhirContactPointMap.setAttributeTypeId(10001);
+		fhirContactPointMap.setSystem(ContactPoint.ContactPointSystem.EMAIL);
+		fhirContactPointMap.setUse(ContactPoint.ContactPointUse.HOME);
+		fhirContactPointMap.setRank(2);
+		when(fhirContactPointMapDao.saveFhirContactPointMap(fhirContactPointMap)).thenReturn(fhirContactPointMap);
+		
+		result = fhirContactPointMapService.saveFhirContactPointMap(fhirContactPointMap);
+		assertThat(result.getAttributeTypeDomain(), equalTo("person"));
+		assertThat(result.getAttributeTypeId(), equalTo(10001));
+		assertThat(result.getSystem(), equalTo(ContactPoint.ContactPointSystem.EMAIL));
+		assertThat(result.getUse(), equalTo(ContactPoint.ContactPointUse.HOME));
+		assertThat(result.getRank(), equalTo(2));
+	}
 }
