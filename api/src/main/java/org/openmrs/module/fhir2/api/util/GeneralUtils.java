@@ -16,6 +16,9 @@ import java.nio.charset.Charset;
 import java.util.Objects;
 
 import lombok.extern.slf4j.Slf4j;
+import org.openmrs.OpenmrsObject;
+import org.openmrs.Retireable;
+import org.openmrs.Voidable;
 
 @Slf4j
 public final class GeneralUtils {
@@ -36,5 +39,15 @@ public final class GeneralUtils {
 	public static String resourceToString(final String resource, final Charset charset, final ClassLoader cl)
 	        throws IOException {
 		return inputStreamToString(Objects.requireNonNull(cl.getResourceAsStream(resource)), charset);
+	}
+	
+	public static boolean isVoidedOrRetired(OpenmrsObject object) {
+		if (object instanceof Retireable) {
+			return ((Retireable) object).getRetired();
+		} else if (object instanceof Voidable) {
+			return ((Voidable) object).getVoided();
+		}
+		
+		return false;
 	}
 }

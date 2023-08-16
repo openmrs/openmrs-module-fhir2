@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+    This Source Code Form is subject to the terms of the Mozilla Public License,
+    v. 2.0. If a copy of the MPL was not distributed with this file, You can
+    obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+    the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+
+    Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+    graphic logo is a trademark of OpenMRS Inc.
+-->
+<dataset>
+	<!--for person -->
+	<person person_id="7" gender="F" birthdate="1976-08-25 00:00:00.0" birthdate_estimated="1" dead="false" creator="1" date_created="2006-01-18 00:00:00.0" voided="false" uuid="5946f880-b197-400b-9caa-a3c661d23041"/>
+	<person_address person_address_id="7" person_id="7" preferred="false" address1="" address2="" city_village="Kapina" state_province="" postal_code="" country="" latitude="" longitude="" start_date="2005-01-01 00:00:00.0" creator="1" date_created="2006-01-18 00:00:00.0" voided="false" void_reason="" uuid="921c0e23-d941-4bac-8ce4-ab0d0f7d8a91"/>
+	<person_attribute_type person_attribute_type_id="8" name="telecom" format="" searchable="false" creator="1" date_created="2008-08-15 15:53:36.0" retired="false" uuid="a0f5521c-dbbd-4c10-81b2-1b7ab18330df" sort_weight="2"/>
+	<person_attribute person_attribute_id="17" person_id="7" value="256777041946" person_attribute_type_id="8" creator="1" date_created="2008-08-18 12:25:57.0" voided="false" uuid="3d5c1fdc-accf-4ee6-83e4-1de437452f29"/>
+	<person_name person_name_id="7" preferred="false" person_id="7" given_name="Collet" middle_name="Test" family_name="Chebaskwony" creator="1" date_created="2006-01-18 00:00:00.0" voided="false" void_reason="" uuid="a65c347e-1384-493a-a55b-d325924acd94"/>
+	<fhir_contact_point_map fhir_contact_point_map_id="167" attribute_type_domain="person" attribute_type_id="8" rank="2" system="PHONE" use="HOME" creator="1" uuid="e7453f34-3134-49c9-80d1-2527f82ba149" date_created="2023-08-07 12:34:56" voided="false"/>
+	<!--for location -->
+	<location location_id="2" name="Xanadu" description="A metaphor for opulence, most famously in the English Romantic Samuel Taylor Coleridge&apos;s poem Kubla Khan." address1="800 Boylston Street" address2="" city_village="Boston" state_province="MA" postal_code="02115" country="USA" latitude="" longitude="" creator="1" date_created="2008-08-15 13:46:50.0" retired="false" uuid="9356400c-a5a2-4532-8f2b-2361b3446eb8"/>
+	<location_attribute_type location_attribute_type_id="10" name="telecom" datatype="" uuid="9516cc50-6f9f-11e0-8414-001e378eb67e" creator="1" date_created="2005-01-01 00:00:00.0" min_occurs="0" retired="false" />
+	<location_attribute location_attribute_id="1" location_id="2" attribute_type_id="10" value_reference="2011-04-25" uuid="3a2bdb18-6faa-11e0-8414-001e378eb67e" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" />
+	<fhir_contact_point_map fhir_contact_point_map_id="168" attribute_type_domain="location" attribute_type_id="10" rank="2" system="PHONE" use="HOME" creator="1" uuid="348da134-efe1-4e58-b61a-c4d99e192eba" date_created="2023-08-07 12:34:56" voided="false"/>
+	<!-- for provider -->
+	<provider provider_id="11" person_id="7" identifier="Test" creator="1" date_created="2005-01-01 00:00:00.0" retired="false" uuid="a0c47603-4e92-4be9-af61-c2a32c78926c" />
+	<provider_attribute_type provider_attribute_type_id="12" name="telecom" datatype="" uuid="257daea3-5750-4ff6-8d11-518c49f73556" creator="1" date_created="2005-01-01 00:00:00.0" min_occurs="0" max_occurs="1" retired="false" />
+	<provider_attribute provider_attribute_id="13" provider_id="11" attribute_type_id="12" value_reference="2011-04-25" uuid="3a2bdb18-6faa-11e0-8414-001e378eb67e" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" />
+	<fhir_contact_point_map fhir_contact_point_map_id="169" attribute_type_domain="provider" attribute_type_id="12" rank="2" system="PHONE" use="HOME" creator="1" uuid="398b14b0-2437-47a3-b709-fdd6b150e5fe" date_created="2023-08-07 12:34:56" voided="false"/>
+</dataset>

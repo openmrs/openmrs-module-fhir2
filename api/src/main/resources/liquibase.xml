@@ -1015,4 +1015,56 @@
                                  referencedTableName="fhir_reference"
                                  referencedColumnNames="reference_id"/>
     </changeSet>
+
+    <changeSet id="add_fhir_contact_point_map_20230730" author="mherman22">
+        <preConditions onFail="MARK_RAN" onError="WARN">
+            <not>
+                <tableExists tableName="fhir_contact_point_map"/>
+            </not>
+        </preConditions>
+        <createTable tableName="fhir_contact_point_map">
+            <column name="fhir_contact_point_map_id" type="int" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="attribute_type_domain" type="varchar(100)">
+                <constraints nullable="false" />
+            </column>
+            <column name="attribute_type_id" type="int">
+                <constraints nullable="false" />
+            </column>
+            <column name="rank" type="integer"/>
+            <column name="system" type="varchar(50)" />
+            <column name="use" type="varchar(50)" />
+            <column name="creator" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_created" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="changed_by" type="int" />
+            <column name="date_changed" type="datetime"/>
+            <column name="voided" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_voided" type="datetime"/>
+            <column name="voided_by" type="int"/>
+            <column name="void_reason" type="varchar(255)"/>
+            <column name="uuid" type="varchar(38)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="fhir_contact_point_map" baseColumnNames="creator"
+                                 constraintName="fhir_contact_point_map_creator_fk"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint baseTableName="fhir_contact_point_map" baseColumnNames="changed_by"
+                                 constraintName="fhir_contact_point_map_changed_by_fk"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint baseTableName="fhir_contact_point_map" baseColumnNames="voided_by"
+                                 constraintName="fhir_contact_point_map_voided_by_fk"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <createIndex tableName="fhir_contact_point_map" indexName="fhir_contact_point_map_attribute_type_domain_id">
+            <column name="attribute_type_domain" />
+            <column name="attribute_type_id" />
+        </createIndex>
+    </changeSet>
 </databaseChangeLog>

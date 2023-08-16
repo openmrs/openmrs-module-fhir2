@@ -15,10 +15,8 @@ import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslat
 
 import javax.annotation.Nonnull;
 
-import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -41,8 +39,6 @@ import org.openmrs.module.fhir2.api.translators.OpenmrsFhirTranslator;
 import org.openmrs.module.fhir2.api.translators.OpenmrsFhirUpdatableTranslator;
 import org.openmrs.module.fhir2.api.translators.UpdatableOpenmrsTranslator;
 import org.openmrs.module.fhir2.api.util.ImmunizationObsGroupHelper;
-import org.openmrs.module.fhir2.api.util.JsonPatchUtils;
-import org.openmrs.module.fhir2.api.util.XmlPatchUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

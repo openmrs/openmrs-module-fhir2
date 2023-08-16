@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static org.openmrs.module.fhir2.api.util.GeneralUtils.isVoidedOrRetired;
+
 import javax.annotation.Nonnull;
 
 import lombok.AccessLevel;
@@ -21,9 +23,13 @@ import org.openmrs.ProviderAttribute;
 import org.openmrs.api.LocationService;
 import org.openmrs.api.PersonService;
 import org.openmrs.api.ProviderService;
+import org.openmrs.attribute.BaseAttribute;
+import org.openmrs.attribute.BaseAttributeType;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.FhirContactPointMapService;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
+import org.openmrs.module.fhir2.model.FhirContactPointMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -41,6 +47,9 @@ public class TelecomTranslatorImpl implements TelecomTranslator<BaseOpenmrsData>
 	private ProviderService providerService;
 	
 	@Autowired
+	private FhirContactPointMapService fhirContactPointMapService;
+	
+	@Autowired
 	private FhirGlobalPropertyService globalPropertyService;
 	
 	@Override
@@ -54,6 +63,7 @@ public class TelecomTranslatorImpl implements TelecomTranslator<BaseOpenmrsData>
 			if (contactPoint.hasId()) {
 				personAttribute.setUuid(contactPoint.getId());
 			}
+			
 			personAttribute.setValue(contactPoint.getValue());
 			personAttribute.setAttributeType(personService.getPersonAttributeTypeByUuid(
 			    globalPropertyService.getGlobalProperty(FhirConstants.PERSON_CONTACT_POINT_ATTRIBUTE_TYPE)));
@@ -80,7 +90,7 @@ public class TelecomTranslatorImpl implements TelecomTranslator<BaseOpenmrsData>
 	
 	@Override
 	public ContactPoint toFhirResource(@Nonnull BaseOpenmrsData attribute) {
-		if (attribute == null || attribute.getVoided()) {
+		if (attribute == null || isVoidedOrRetired(attribute)) {
 			return null;
 		}
 		
@@ -90,6 +100,10 @@ public class TelecomTranslatorImpl implements TelecomTranslator<BaseOpenmrsData>
 			PersonAttribute personAttribute = (PersonAttribute) attribute;
 			contactPoint.setId(personAttribute.getUuid());
 			contactPoint.setValue(personAttribute.getValue());
+			
+			fhirContactPointMapService
+			        .getFhirContactPointMapForPersonAttributeType(((PersonAttribute) attribute).getAttributeType())
+			        .ifPresent(contactPointMap -> mapContactPoint(contactPoint, contactPointMap));
 		} else if (attribute instanceof LocationAttribute) {
 			LocationAttribute locationAttribute = (LocationAttribute) attribute;
 			contactPoint.setId(locationAttribute.getUuid());
@@ -100,6 +114,21 @@ public class TelecomTranslatorImpl implements TelecomTranslator<BaseOpenmrsData>
 			contactPoint.setValue(providerAttribute.getValue().toString());
 		}
 		
+		if (attribute instanceof BaseAttribute) {
+			fhirContactPointMapService
+			        .getFhirContactPointMapForAttributeType(
+			            (BaseAttributeType<?>) ((BaseAttribute<?, ?>) attribute).getAttributeType())
+			        .ifPresent(contactPointMap -> mapContactPoint(contactPoint, contactPointMap));
+		}
+		
 		return contactPoint;
+	}
+	
+	private static void mapContactPoint(ContactPoint contactPoint, FhirContactPointMap contactPointMap) {
+		contactPoint.setSystem(contactPointMap.getSystem());
+		contactPoint.setUse(contactPointMap.getUse());
+		if (contactPointMap.getRank() != null) {
+			contactPoint.setRank(contactPointMap.getRank());
+		}
 	}
 }
