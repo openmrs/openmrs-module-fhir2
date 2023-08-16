@@ -9,25 +9,17 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
-import java.util.HashSet;
-
-import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.ReferenceAndListParam;
-import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
 import org.openmrs.Allergy;
-import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirAllergyIntoleranceService;
 import org.openmrs.module.fhir2.api.dao.FhirAllergyIntoleranceDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
-import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
+import org.openmrs.module.fhir2.api.search.param.FhirAllergyIntoleranceSearchParams;
 import org.openmrs.module.fhir2.api.translators.AllergyIntoleranceTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -53,22 +45,8 @@ public class FhirAllergyIntoleranceServiceImpl extends BaseFhirService<AllergyIn
 	
 	@Override
 	@Transactional(readOnly = true)
-	public IBundleProvider searchForAllergies(ReferenceAndListParam patientReference, TokenAndListParam category,
-	        TokenAndListParam allergen, TokenAndListParam severity, TokenAndListParam manifestationCode,
-	        TokenAndListParam clinicalStatus, TokenAndListParam id, DateRangeParam lastUpdated, SortSpec sort,
-	        HashSet<Include> includes) {
-		
-		SearchParameterMap theParams = new SearchParameterMap()
-		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientReference)
-		        .addParameter(FhirConstants.CATEGORY_SEARCH_HANDLER, category)
-		        .addParameter(FhirConstants.ALLERGEN_SEARCH_HANDLER, allergen)
-		        .addParameter(FhirConstants.SEVERITY_SEARCH_HANDLER, severity)
-		        .addParameter(FhirConstants.CODED_SEARCH_HANDLER, manifestationCode)
-		        .addParameter(FhirConstants.BOOLEAN_SEARCH_HANDLER, clinicalStatus)
-		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, id)
-		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated)
-		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes).setSortSpec(sort);
-		
-		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
+	public IBundleProvider searchForAllergies(FhirAllergyIntoleranceSearchParams allergyIntoleranceSearchParams) {
+		return searchQuery.getQueryResults(allergyIntoleranceSearchParams.toSearchParameterMap(), dao, translator,
+		    searchQueryInclude);
 	}
 }
