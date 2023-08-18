@@ -48,6 +48,7 @@ import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
 import org.openmrs.module.fhir2.api.FhirAllergyIntoleranceService;
 import org.openmrs.module.fhir2.api.annotations.R4Provider;
+import org.openmrs.module.fhir2.api.search.param.FhirAllergyIntoleranceSearchParams;
 import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -100,8 +101,8 @@ public class AllergyIntoleranceFhirResourceProvider implements IResourceProvider
 			includes = null;
 		}
 		
-		return fhirAllergyIntoleranceService.searchForAllergies(patientReference, category, allergen, severity,
-		    manifestationCode, clinicalStatus, id, lastUpdated, sort, includes);
+		return fhirAllergyIntoleranceService.searchForAllergies(new FhirAllergyIntoleranceSearchParams(patientReference,
+		        category, allergen, severity, manifestationCode, clinicalStatus, id, lastUpdated, sort, includes));
 	}
 	
 	@Create

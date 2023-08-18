@@ -51,6 +51,7 @@ import org.openmrs.module.fhir2.api.FhirPractitionerService;
 import org.openmrs.module.fhir2.api.FhirServiceRequestService;
 import org.openmrs.module.fhir2.api.search.param.DiagnosticReportSearchParams;
 import org.openmrs.module.fhir2.api.search.param.EncounterSearchParams;
+import org.openmrs.module.fhir2.api.search.param.FhirAllergyIntoleranceSearchParams;
 import org.openmrs.module.fhir2.api.search.param.LocationSearchParams;
 import org.openmrs.module.fhir2.api.search.param.MedicationDispenseSearchParams;
 import org.openmrs.module.fhir2.api.search.param.MedicationRequestSearchParams;
@@ -335,8 +336,8 @@ public class SearchQueryInclude<U extends IBaseResource> {
 				return diagnosticReportService.searchForDiagnosticReports(
 				    new DiagnosticReportSearchParams(null, params, null, null, null, null, null, null, null));
 			case FhirConstants.ALLERGY_INTOLERANCE:
-				return allergyIntoleranceService.searchForAllergies(params, null, null, null, null, null, null, null, null,
-				    null);
+				return allergyIntoleranceService.searchForAllergies(
+				    new FhirAllergyIntoleranceSearchParams(params, null, null, null, null, null, null, null, null, null));
 			case FhirConstants.ENCOUNTER:
 				EncounterSearchParams encounterSearchParams = new EncounterSearchParams();
 				encounterSearchParams.setSubject(params);

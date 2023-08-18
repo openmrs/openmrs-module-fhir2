@@ -9,20 +9,11 @@
  */
 package org.openmrs.module.fhir2.api;
 
-import java.util.HashSet;
-
-import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.ReferenceAndListParam;
-import ca.uhn.fhir.rest.param.TokenAndListParam;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
+import org.openmrs.module.fhir2.api.search.param.FhirAllergyIntoleranceSearchParams;
 
 public interface FhirAllergyIntoleranceService extends FhirService<AllergyIntolerance> {
 	
-	IBundleProvider searchForAllergies(ReferenceAndListParam patientReference, TokenAndListParam category,
-	        TokenAndListParam allergen, TokenAndListParam severity, TokenAndListParam manifestationCode,
-	        TokenAndListParam clinicalStatus, TokenAndListParam id, DateRangeParam lastUpdated, SortSpec sort,
-	        HashSet<Include> includes);
+	IBundleProvider searchForAllergies(FhirAllergyIntoleranceSearchParams allergyIntoleranceSearchParams);
 }
