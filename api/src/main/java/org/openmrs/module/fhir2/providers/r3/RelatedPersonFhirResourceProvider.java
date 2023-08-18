@@ -16,28 +16,36 @@ import javax.annotation.Nonnull;
 import java.util.HashSet;
 
 import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.rest.annotation.Create;
+import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Sort;
+import ca.uhn.fhir.rest.annotation.Update;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.Setter;
 import org.apache.commons.collections.CollectionUtils;
 import org.hl7.fhir.convertors.conv30_40.RelatedPerson30_40;
 import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.RelatedPerson;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.openmrs.module.fhir2.api.FhirRelatedPersonService;
 import org.openmrs.module.fhir2.api.annotations.R3Provider;
 import org.openmrs.module.fhir2.api.search.SearchQueryBundleProviderR3Wrapper;
+import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -62,6 +70,34 @@ public class RelatedPersonFhirResourceProvider implements IResourceProvider {
 			throw new ResourceNotFoundException("Could not find relatedPerson with Id " + id.getIdPart());
 		}
 		return RelatedPerson30_40.convertRelatedPerson(relatedPerson);
+	}
+	
+	@Create
+	public MethodOutcome createRelatedPerson(@ResourceParam RelatedPerson relatedPerson) {
+		return FhirProviderUtils.buildCreate(RelatedPerson30_40
+		        .convertRelatedPerson(relatedPersonService.create(RelatedPerson30_40.convertRelatedPerson(relatedPerson))));
+	}
+	
+	@Update
+	public MethodOutcome updateRelatedPerson(@IdParam IdType id, @ResourceParam RelatedPerson relatedPerson) {
+		if (id == null || id.getIdPart() == null) {
+			throw new InvalidRequestException("id must be specified to update");
+		}
+		
+		relatedPerson.setId(id.getIdPart());
+		
+		return FhirProviderUtils.buildUpdate(RelatedPerson30_40.convertRelatedPerson(
+		    relatedPersonService.update(id.getIdPart(), RelatedPerson30_40.convertRelatedPerson(relatedPerson))));
+	}
+	
+	@Delete
+	public OperationOutcome deleteRelatedPerson(@IdParam @Nonnull IdType id) {
+		org.hl7.fhir.r4.model.RelatedPerson relatedPerson = relatedPersonService.delete(id.getIdPart());
+		if (relatedPerson == null) {
+			throw new ResourceNotFoundException("Could not find person to delete with id " + id.getIdPart());
+		}
+		
+		return FhirProviderUtils.buildDelete(RelatedPerson30_40.convertRelatedPerson(relatedPerson));
 	}
 	
 	@Search

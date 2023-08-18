@@ -1,0 +1,10 @@
+{
+  "resourceType": "RelatedPerson",
+  "id": "9bf0d1ac-62a8-4440-a5a1-eb1015a7cc65",
+  "name": "adam",
+  "gender": "male",
+  "birthdate": "2004-08-12 00:00:00.0",
+  "state": "mukono",
+  "city": "kampala",
+  "country": "uganda"
+}

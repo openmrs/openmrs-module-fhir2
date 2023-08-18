@@ -15,8 +15,11 @@ import javax.annotation.Nonnull;
 
 import java.util.Date;
 
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import lombok.AccessLevel;
 import lombok.Setter;
+import org.hl7.fhir.r4.model.Address;
+import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.RelatedPerson;
@@ -110,6 +113,42 @@ public class RelatedPersonTranslatorImpl implements RelatedPersonTranslator {
 	
 	@Override
 	public Relationship toOpenmrsType(@Nonnull RelatedPerson resource) {
-		throw new UnsupportedOperationException();
+		Relationship relationship = new Relationship();
+		relationship.setUuid(resource.getId());
+		
+		Person personA = new Person();
+		
+		if (resource.getBirthDateElement().getPrecision() == TemporalPrecisionEnum.DAY) {
+			personA.setBirthdate(resource.getBirthDate());
+		}
+		
+		if (resource.getBirthDateElement().getPrecision() == TemporalPrecisionEnum.MONTH
+		        || resource.getBirthDateElement().getPrecision() == TemporalPrecisionEnum.YEAR) {
+			personA.setBirthdate(resource.getBirthDate());
+			personA.setBirthdateEstimated(true);
+		}
+		
+		if (resource.hasGender()) {
+			personA.setGender(genderTranslator.toOpenmrsType(resource.getGender()));
+		}
+		
+		for (HumanName name : resource.getName()) {
+			personA.addName(nameTranslator.toOpenmrsType(name));
+		}
+		
+		for (Address address : resource.getAddress()) {
+			personA.addAddress(addressTranslator.toOpenmrsType(address));
+		}
+		
+		relationship.setStartDate(resource.getPeriod().getStart());
+		relationship.setEndDate(resource.getPeriod().getEnd());
+		
+		if (resource.getPatient() != null) {
+			relationship.setPersonB(patientReferenceTranslator.toOpenmrsType(resource.getPatient()));
+		}
+		
+		relationship.setPersonA(personA);
+		
+		return relationship;
 	}
 }
