@@ -16,9 +16,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
-import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -49,6 +47,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirRelatedPersonService;
+import org.openmrs.module.fhir2.api.search.param.RelatedPersonSearchParams;
 import org.openmrs.module.fhir2.providers.BaseFhirProvenanceResourceTest;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -143,9 +142,10 @@ public class RelatedPersonFhirResourceProviderTest extends BaseFhirProvenanceRes
 	public void searchRelatedPeople_shouldReturnMatchingBundleOfRelatedPeopleByName() {
 		StringAndListParam nameParam = new StringAndListParam()
 		        .addAnd(new StringOrListParam().add(new StringParam(GIVEN_NAME)));
-		when(relatedPersonService.searchForRelatedPeople(argThat(is(nameParam)), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull())).thenReturn(
-		        new MockIBundleProvider<>(Collections.singletonList(relatedPerson), PREFERRED_PAGE_SIZE, COUNT));
+		when(relatedPersonService.searchForRelatedPeople(
+		    new RelatedPersonSearchParams(nameParam, null, null, null, null, null, null, null, null, null, null)))
+		            .thenReturn(
+		                new MockIBundleProvider<>(Collections.singletonList(relatedPerson), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchRelatedPerson(nameParam, null, null, null, null, null, null, null,
 		    null, null, null);
@@ -160,9 +160,10 @@ public class RelatedPersonFhirResourceProviderTest extends BaseFhirProvenanceRes
 	@Test
 	public void searchForPeople_shouldReturnMatchingBundleOfPeopleByGender() {
 		TokenAndListParam genderParam = new TokenAndListParam().addAnd(new TokenOrListParam().add(GENDER));
-		when(relatedPersonService.searchForRelatedPeople(isNull(), argThat(is(genderParam)), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull())).thenReturn(
-		        new MockIBundleProvider<>(Collections.singletonList(relatedPerson), PREFERRED_PAGE_SIZE, COUNT));
+		when(relatedPersonService.searchForRelatedPeople(
+		    new RelatedPersonSearchParams(null, genderParam, null, null, null, null, null, null, null, null, null)))
+		            .thenReturn(
+		                new MockIBundleProvider<>(Collections.singletonList(relatedPerson), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchRelatedPerson(null, genderParam, null, null, null, null, null, null,
 		    null, null, null);
@@ -177,9 +178,10 @@ public class RelatedPersonFhirResourceProviderTest extends BaseFhirProvenanceRes
 	@Test
 	public void searchForRelatedPeople_shouldReturnMatchingBundleOfRelatedPeopleByBirthDate() {
 		DateRangeParam birthDateParam = new DateRangeParam().setLowerBound(BIRTH_DATE).setUpperBound(BIRTH_DATE);
-		when(relatedPersonService.searchForRelatedPeople(isNull(), isNull(), argThat(is(birthDateParam)), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull())).thenReturn(
-		        new MockIBundleProvider<>(Collections.singletonList(relatedPerson), PREFERRED_PAGE_SIZE, COUNT));
+		when(relatedPersonService.searchForRelatedPeople(
+		    new RelatedPersonSearchParams(null, null, birthDateParam, null, null, null, null, null, null, null, null)))
+		            .thenReturn(
+		                new MockIBundleProvider<>(Collections.singletonList(relatedPerson), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchRelatedPerson(null, null, birthDateParam, null, null, null, null,
 		    null, null, null, null);
@@ -194,9 +196,10 @@ public class RelatedPersonFhirResourceProviderTest extends BaseFhirProvenanceRes
 	@Test
 	public void searchForRelatedPeople_shouldReturnMatchingBundleOfRelatedPeopleByCity() {
 		StringAndListParam cityParam = new StringAndListParam().addAnd(new StringOrListParam().add(new StringParam(CITY)));
-		when(relatedPersonService.searchForRelatedPeople(isNull(), isNull(), isNull(), argThat(is(cityParam)), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull())).thenReturn(
-		        new MockIBundleProvider<>(Collections.singletonList(relatedPerson), PREFERRED_PAGE_SIZE, COUNT));
+		when(relatedPersonService.searchForRelatedPeople(
+		    new RelatedPersonSearchParams(null, null, null, cityParam, null, null, null, null, null, null, null)))
+		            .thenReturn(
+		                new MockIBundleProvider<>(Collections.singletonList(relatedPerson), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchRelatedPerson(null, null, null, cityParam, null, null, null, null,
 		    null, null, null);
@@ -211,9 +214,10 @@ public class RelatedPersonFhirResourceProviderTest extends BaseFhirProvenanceRes
 	@Test
 	public void searchForRelatedPeople_shouldReturnMatchingBundleOfRelatedPeopleByState() {
 		StringAndListParam stateParam = new StringAndListParam().addAnd(new StringOrListParam().add(new StringParam(STATE)));
-		when(relatedPersonService.searchForRelatedPeople(isNull(), isNull(), isNull(), isNull(), argThat(is(stateParam)),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull())).thenReturn(
-		        new MockIBundleProvider<>(Collections.singletonList(relatedPerson), PREFERRED_PAGE_SIZE, COUNT));
+		when(relatedPersonService.searchForRelatedPeople(
+		    new RelatedPersonSearchParams(null, null, null, null, stateParam, null, null, null, null, null, null)))
+		            .thenReturn(
+		                new MockIBundleProvider<>(Collections.singletonList(relatedPerson), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchRelatedPerson(null, null, null, null, stateParam, null, null, null,
 		    null, null, null);
@@ -229,9 +233,10 @@ public class RelatedPersonFhirResourceProviderTest extends BaseFhirProvenanceRes
 	public void searchForRelatedPeople_shouldReturnMatchingBundleOfRelatedPeopleByPostalCode() {
 		StringAndListParam postalCodeParam = new StringAndListParam()
 		        .addAnd(new StringOrListParam().add(new StringParam(POSTAL_CODE)));
-		when(relatedPersonService.searchForRelatedPeople(isNull(), isNull(), isNull(), isNull(), isNull(),
-		    argThat(is(postalCodeParam)), isNull(), isNull(), isNull(), isNull(), isNull())).thenReturn(
-		        new MockIBundleProvider<>(Collections.singletonList(relatedPerson), PREFERRED_PAGE_SIZE, COUNT));
+		when(relatedPersonService.searchForRelatedPeople(
+		    new RelatedPersonSearchParams(null, null, null, null, null, postalCodeParam, null, null, null, null, null)))
+		            .thenReturn(
+		                new MockIBundleProvider<>(Collections.singletonList(relatedPerson), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchRelatedPerson(null, null, null, null, null, postalCodeParam, null,
 		    null, null, null, null);
@@ -247,9 +252,10 @@ public class RelatedPersonFhirResourceProviderTest extends BaseFhirProvenanceRes
 	public void searchForRelatedPeople_shouldReturnMatchingBundleOfRelatedPeopleByCountry() {
 		StringAndListParam countryParam = new StringAndListParam()
 		        .addAnd(new StringOrListParam().add(new StringParam(COUNTRY)));
-		when(relatedPersonService.searchForRelatedPeople(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    argThat(is(countryParam)), isNull(), isNull(), isNull(), isNull())).thenReturn(
-		        new MockIBundleProvider<>(Collections.singletonList(relatedPerson), PREFERRED_PAGE_SIZE, COUNT));
+		when(relatedPersonService.searchForRelatedPeople(
+		    new RelatedPersonSearchParams(null, null, null, null, null, null, countryParam, null, null, null, null)))
+		            .thenReturn(
+		                new MockIBundleProvider<>(Collections.singletonList(relatedPerson), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchRelatedPerson(null, null, null, null, null, null, countryParam,
 		    null, null, null, null);
@@ -264,8 +270,8 @@ public class RelatedPersonFhirResourceProviderTest extends BaseFhirProvenanceRes
 	@Test
 	public void searchForRelatedPeople_shouldReturnMatchingBundleOfRelatedPeopleByUUID() {
 		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(RELATED_PERSON_UUID));
-		when(relatedPersonService.searchForRelatedPeople(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), argThat(is(uuid)), isNull(), isNull(), isNull())).thenReturn(
+		when(relatedPersonService.searchForRelatedPeople(
+		    new RelatedPersonSearchParams(null, null, null, null, null, null, null, uuid, null, null, null))).thenReturn(
 		        new MockIBundleProvider<>(Collections.singletonList(relatedPerson), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchRelatedPerson(null, null, null, null, null, null, null, uuid, null,
@@ -281,9 +287,10 @@ public class RelatedPersonFhirResourceProviderTest extends BaseFhirProvenanceRes
 	@Test
 	public void searchForRelatedPeople_shouldReturnMatchingBundleOfRelatedPeopleByLastUpdated() {
 		DateRangeParam lastUpdated = new DateRangeParam().setLowerBound(LAST_UPDATED_DATE).setUpperBound(LAST_UPDATED_DATE);
-		when(relatedPersonService.searchForRelatedPeople(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), argThat(is(lastUpdated)), isNull(), isNull())).thenReturn(
-		        new MockIBundleProvider<>(Collections.singletonList(relatedPerson), PREFERRED_PAGE_SIZE, COUNT));
+		when(relatedPersonService.searchForRelatedPeople(
+		    new RelatedPersonSearchParams(null, null, null, null, null, null, null, null, lastUpdated, null, null)))
+		            .thenReturn(
+		                new MockIBundleProvider<>(Collections.singletonList(relatedPerson), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchRelatedPerson(null, null, null, null, null, null, null, null,
 		    lastUpdated, null, null);
@@ -300,8 +307,8 @@ public class RelatedPersonFhirResourceProviderTest extends BaseFhirProvenanceRes
 		HashSet<Include> includes = new HashSet<>();
 		includes.add(new Include("RelatedPerson:patient"));
 		
-		when(relatedPersonService.searchForRelatedPeople(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), argThat(is(includes)))).thenReturn(
+		when(relatedPersonService.searchForRelatedPeople(
+		    new RelatedPersonSearchParams(null, null, null, null, null, null, null, null, null, null, includes))).thenReturn(
 		        new MockIBundleProvider<>(Arrays.asList(relatedPerson, new Patient()), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchRelatedPerson(null, null, null, null, null, null, null, null, null,
@@ -319,8 +326,8 @@ public class RelatedPersonFhirResourceProviderTest extends BaseFhirProvenanceRes
 	public void searchForRelatedPeople_shouldNotAddRelatedResourcesForEmptyInclude() {
 		HashSet<Include> includes = new HashSet<>();
 		
-		when(relatedPersonService.searchForRelatedPeople(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull())).thenReturn(
+		when(relatedPersonService.searchForRelatedPeople(
+		    new RelatedPersonSearchParams(null, null, null, null, null, null, null, null, null, null, null))).thenReturn(
 		        new MockIBundleProvider<>(Collections.singletonList(relatedPerson), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchRelatedPerson(null, null, null, null, null, null, null, null, null,

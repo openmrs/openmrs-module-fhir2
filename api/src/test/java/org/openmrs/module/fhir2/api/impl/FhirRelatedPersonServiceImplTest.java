@@ -61,6 +61,7 @@ import org.openmrs.module.fhir2.api.dao.FhirRelatedPersonDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.SearchQueryBundleProvider;
 import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
+import org.openmrs.module.fhir2.api.search.param.RelatedPersonSearchParams;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.RelatedPersonTranslator;
 
@@ -229,8 +230,8 @@ public class FhirRelatedPersonServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		
-		IBundleProvider results = relatedPersonService.searchForRelatedPeople(stringAndListParam, null, null, null, null,
-		    null, null, null, null, null, null);
+		IBundleProvider results = relatedPersonService.searchForRelatedPeople(
+		    new RelatedPersonSearchParams(stringAndListParam, null, null, null, null, null, null, null, null, null, null));
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -253,8 +254,8 @@ public class FhirRelatedPersonServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		
-		IBundleProvider results = relatedPersonService.searchForRelatedPeople(stringAndListParam, null, null, null, null,
-		    null, null, null, null, null, null);
+		IBundleProvider results = relatedPersonService.searchForRelatedPeople(
+		    new RelatedPersonSearchParams(stringAndListParam, null, null, null, null, null, null, null, null, null, null));
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -274,8 +275,8 @@ public class FhirRelatedPersonServiceImplTest {
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		
-		IBundleProvider results = relatedPersonService.searchForRelatedPeople(stringAndListParam, null, null, null, null,
-		    null, null, null, null, null, null);
+		IBundleProvider results = relatedPersonService.searchForRelatedPeople(
+		    new RelatedPersonSearchParams(stringAndListParam, null, null, null, null, null, null, null, null, null, null));
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -296,8 +297,8 @@ public class FhirRelatedPersonServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		
-		IBundleProvider results = relatedPersonService.searchForRelatedPeople(null, tokenAndListParam, null, null, null,
-		    null, null, null, null, null, null);
+		IBundleProvider results = relatedPersonService.searchForRelatedPeople(
+		    new RelatedPersonSearchParams(null, tokenAndListParam, null, null, null, null, null, null, null, null, null));
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -316,8 +317,8 @@ public class FhirRelatedPersonServiceImplTest {
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		
-		IBundleProvider results = relatedPersonService.searchForRelatedPeople(null, tokenAndListParam, null, null, null,
-		    null, null, null, null, null, null);
+		IBundleProvider results = relatedPersonService.searchForRelatedPeople(
+		    new RelatedPersonSearchParams(null, tokenAndListParam, null, null, null, null, null, null, null, null, null));
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -343,8 +344,8 @@ public class FhirRelatedPersonServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		
-		IBundleProvider results = relatedPersonService.searchForRelatedPeople(null, null, dateRangeParam, null, null, null,
-		    null, null, null, null, null);
+		IBundleProvider results = relatedPersonService.searchForRelatedPeople(
+		    new RelatedPersonSearchParams(null, null, dateRangeParam, null, null, null, null, null, null, null, null));
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -364,8 +365,8 @@ public class FhirRelatedPersonServiceImplTest {
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		
-		IBundleProvider results = relatedPersonService.searchForRelatedPeople(null, null, dateRangeParam, null, null, null,
-		    null, null, null, null, null);
+		IBundleProvider results = relatedPersonService.searchForRelatedPeople(
+		    new RelatedPersonSearchParams(null, null, dateRangeParam, null, null, null, null, null, null, null, null));
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -387,8 +388,8 @@ public class FhirRelatedPersonServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		
-		IBundleProvider results = relatedPersonService.searchForRelatedPeople(null, null, null, stringAndListParam, null,
-		    null, null, null, null, null, null);
+		IBundleProvider results = relatedPersonService.searchForRelatedPeople(
+		    new RelatedPersonSearchParams(null, null, null, stringAndListParam, null, null, null, null, null, null, null));
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -408,8 +409,8 @@ public class FhirRelatedPersonServiceImplTest {
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		
-		IBundleProvider results = relatedPersonService.searchForRelatedPeople(null, null, null, stringAndListParam, null,
-		    null, null, null, null, null, null);
+		IBundleProvider results = relatedPersonService.searchForRelatedPeople(
+		    new RelatedPersonSearchParams(null, null, null, stringAndListParam, null, null, null, null, null, null, null));
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -431,8 +432,8 @@ public class FhirRelatedPersonServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		
-		IBundleProvider results = relatedPersonService.searchForRelatedPeople(null, null, null, null, stringAndListParam,
-		    null, null, null, null, null, null);
+		IBundleProvider results = relatedPersonService.searchForRelatedPeople(
+		    new RelatedPersonSearchParams(null, null, null, null, stringAndListParam, null, null, null, null, null, null));
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -452,8 +453,8 @@ public class FhirRelatedPersonServiceImplTest {
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		
-		IBundleProvider results = relatedPersonService.searchForRelatedPeople(null, null, null, null, stringAndListParam,
-		    null, null, null, null, null, null);
+		IBundleProvider results = relatedPersonService.searchForRelatedPeople(
+		    new RelatedPersonSearchParams(null, null, null, null, stringAndListParam, null, null, null, null, null, null));
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -475,8 +476,8 @@ public class FhirRelatedPersonServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		
-		IBundleProvider results = relatedPersonService.searchForRelatedPeople(null, null, null, null, null,
-		    stringAndListParam, null, null, null, null, null);
+		IBundleProvider results = relatedPersonService.searchForRelatedPeople(
+		    new RelatedPersonSearchParams(null, null, null, null, null, stringAndListParam, null, null, null, null, null));
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -496,8 +497,8 @@ public class FhirRelatedPersonServiceImplTest {
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		
-		IBundleProvider results = relatedPersonService.searchForRelatedPeople(null, null, null, null, null,
-		    stringAndListParam, null, null, null, null, null);
+		IBundleProvider results = relatedPersonService.searchForRelatedPeople(
+		    new RelatedPersonSearchParams(null, null, null, null, null, stringAndListParam, null, null, null, null, null));
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -519,8 +520,8 @@ public class FhirRelatedPersonServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		
-		IBundleProvider results = relatedPersonService.searchForRelatedPeople(null, null, null, null, null, null,
-		    stringAndListParam, null, null, null, null);
+		IBundleProvider results = relatedPersonService.searchForRelatedPeople(
+		    new RelatedPersonSearchParams(null, null, null, null, null, null, stringAndListParam, null, null, null, null));
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -540,8 +541,8 @@ public class FhirRelatedPersonServiceImplTest {
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		
-		IBundleProvider results = relatedPersonService.searchForRelatedPeople(null, null, null, null, null, null,
-		    stringAndListParam, null, null, null, null);
+		IBundleProvider results = relatedPersonService.searchForRelatedPeople(
+		    new RelatedPersonSearchParams(null, null, null, null, null, null, stringAndListParam, null, null, null, null));
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -563,8 +564,8 @@ public class FhirRelatedPersonServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		
-		IBundleProvider results = relatedPersonService.searchForRelatedPeople(null, null, null, null, null, null, null, uuid,
-		    null, null, null);
+		IBundleProvider results = relatedPersonService.searchForRelatedPeople(
+		    new RelatedPersonSearchParams(null, null, null, null, null, null, null, uuid, null, null, null));
 		
 		assertThat(results, notNullValue());
 		assertThat(get(results), not(empty()));
@@ -581,8 +582,8 @@ public class FhirRelatedPersonServiceImplTest {
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		
-		IBundleProvider results = relatedPersonService.searchForRelatedPeople(null, null, null, null, null, null, null, uuid,
-		    null, null, null);
+		IBundleProvider results = relatedPersonService.searchForRelatedPeople(
+		    new RelatedPersonSearchParams(null, null, null, null, null, null, null, uuid, null, null, null));
 		
 		assertThat(results, notNullValue());
 		assertThat(get(results), empty());
@@ -602,8 +603,8 @@ public class FhirRelatedPersonServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		
-		IBundleProvider results = relatedPersonService.searchForRelatedPeople(null, null, null, null, null, null, null, null,
-		    lastUpdated, null, null);
+		IBundleProvider results = relatedPersonService.searchForRelatedPeople(
+		    new RelatedPersonSearchParams(null, null, null, null, null, null, null, null, lastUpdated, null, null));
 		
 		assertThat(results, notNullValue());
 		assertThat(get(results), not(empty()));
@@ -621,8 +622,8 @@ public class FhirRelatedPersonServiceImplTest {
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		
-		IBundleProvider results = relatedPersonService.searchForRelatedPeople(null, null, null, null, null, null, null, null,
-		    lastUpdated, null, null);
+		IBundleProvider results = relatedPersonService.searchForRelatedPeople(
+		    new RelatedPersonSearchParams(null, null, null, null, null, null, null, null, lastUpdated, null, null));
 		
 		assertThat(results, notNullValue());
 		assertThat(get(results), empty());
@@ -641,8 +642,8 @@ public class FhirRelatedPersonServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.singleton(new Patient()));
 		
-		IBundleProvider results = relatedPersonService.searchForRelatedPeople(null, null, null, null, null, null, null, null,
-		    null, null, includes);
+		IBundleProvider results = relatedPersonService.searchForRelatedPeople(
+		    new RelatedPersonSearchParams(null, null, null, null, null, null, null, null, null, null, includes));
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -664,8 +665,8 @@ public class FhirRelatedPersonServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		
-		IBundleProvider results = relatedPersonService.searchForRelatedPeople(null, null, null, null, null, null, null, null,
-		    null, null, includes);
+		IBundleProvider results = relatedPersonService.searchForRelatedPeople(
+		    new RelatedPersonSearchParams(null, null, null, null, null, null, null, null, null, null, includes));
 		
 		List<IBaseResource> resultList = get(results);
 		

@@ -17,7 +17,6 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -25,12 +24,7 @@ import javax.servlet.ServletException;
 
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.HashSet;
 
-import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.StringAndListParam;
-import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Getter;
 import org.apache.commons.lang3.time.DateUtils;
@@ -46,6 +40,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirRelatedPersonService;
+import org.openmrs.module.fhir2.api.search.param.RelatedPersonSearchParams;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -72,16 +67,7 @@ public class RelatedPersonFhirResourceProviderWebTest extends BaseFhirR4Resource
 	private RelatedPersonFhirResourceProvider resourceProvider;
 	
 	@Captor
-	private ArgumentCaptor<StringAndListParam> stringAndListCaptor;
-	
-	@Captor
-	private ArgumentCaptor<TokenAndListParam> tokenAndListCaptor;
-	
-	@Captor
-	private ArgumentCaptor<DateRangeParam> dateRangeCaptor;
-	
-	@Captor
-	private ArgumentCaptor<HashSet<Include>> includeArgumentCaptor;
+	private ArgumentCaptor<RelatedPersonSearchParams> relatedPersonSearchParamsArgumentCaptor;
 	
 	@Before
 	@Override
@@ -120,12 +106,12 @@ public class RelatedPersonFhirResourceProviderWebTest extends BaseFhirR4Resource
 	public void shouldGetRelatedPersonByName() throws Exception {
 		verifyUri(String.format("/RelatedPerson/?name=%s", PERSON_NAME));
 		
-		verify(relatedPersonService).searchForRelatedPeople(stringAndListCaptor.capture(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		verify(relatedPersonService).searchForRelatedPeople(relatedPersonSearchParamsArgumentCaptor.capture());
 		
-		assertThat(stringAndListCaptor.getValue(), notNullValue());
-		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
+		assertThat(relatedPersonSearchParamsArgumentCaptor.getValue(), notNullValue());
+		assertThat(relatedPersonSearchParamsArgumentCaptor.getValue().getName().getValuesAsQueryTokens(), not(empty()));
+		assertThat(relatedPersonSearchParamsArgumentCaptor.getValue().getName().getValuesAsQueryTokens().get(0)
+		        .getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(PERSON_NAME));
 	}
 	
@@ -133,12 +119,12 @@ public class RelatedPersonFhirResourceProviderWebTest extends BaseFhirR4Resource
 	public void shouldGetRelatedPersonByGender() throws Exception {
 		verifyUri(String.format("/RelatedPerson/?gender=%s", PERSON_GENDER));
 		
-		verify(relatedPersonService).searchForRelatedPeople(isNull(), tokenAndListCaptor.capture(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		verify(relatedPersonService).searchForRelatedPeople(relatedPersonSearchParamsArgumentCaptor.capture());
 		
-		assertThat(tokenAndListCaptor.getValue(), notNullValue());
-		assertThat(tokenAndListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(tokenAndListCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
+		assertThat(relatedPersonSearchParamsArgumentCaptor.getValue(), notNullValue());
+		assertThat(relatedPersonSearchParamsArgumentCaptor.getValue().getGender().getValuesAsQueryTokens(), not(empty()));
+		assertThat(relatedPersonSearchParamsArgumentCaptor.getValue().getGender().getValuesAsQueryTokens().get(0)
+		        .getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(PERSON_GENDER));
 	}
 	
@@ -146,16 +132,15 @@ public class RelatedPersonFhirResourceProviderWebTest extends BaseFhirR4Resource
 	public void shouldGetRelatedPersonByBirthDate() throws Exception {
 		verifyUri("/RelatedPerson/?birthdate=eq1975-02-02");
 		
-		verify(relatedPersonService).searchForRelatedPeople(isNull(), isNull(), dateRangeCaptor.capture(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
-		assertThat(dateRangeCaptor.getValue(), notNullValue());
+		verify(relatedPersonService).searchForRelatedPeople(relatedPersonSearchParamsArgumentCaptor.capture());
+		assertThat(relatedPersonSearchParamsArgumentCaptor.getValue(), notNullValue());
 		
 		Calendar calendar = Calendar.getInstance();
 		calendar.set(1975, Calendar.FEBRUARY, 2);
 		
-		assertThat(dateRangeCaptor.getValue().getLowerBound().getValue(),
+		assertThat(relatedPersonSearchParamsArgumentCaptor.getValue().getBirthDate().getLowerBound().getValue(),
 		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
-		assertThat(dateRangeCaptor.getValue().getUpperBound().getValue(),
+		assertThat(relatedPersonSearchParamsArgumentCaptor.getValue().getBirthDate().getUpperBound().getValue(),
 		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
 	}
 	
@@ -163,47 +148,44 @@ public class RelatedPersonFhirResourceProviderWebTest extends BaseFhirR4Resource
 	public void shouldGetRelatedPersonByBirthDateGreaterThanOrEqualTo() throws Exception {
 		verifyUri("/RelatedPerson/?birthdate=ge1975-02-02");
 		
-		verify(relatedPersonService).searchForRelatedPeople(isNull(), isNull(), dateRangeCaptor.capture(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
-		assertThat(dateRangeCaptor.getValue(), notNullValue());
+		verify(relatedPersonService).searchForRelatedPeople(relatedPersonSearchParamsArgumentCaptor.capture());
+		assertThat(relatedPersonSearchParamsArgumentCaptor.getValue(), notNullValue());
 		
 		Calendar calendar = Calendar.getInstance();
 		calendar.set(1975, Calendar.FEBRUARY, 2);
 		
-		assertThat(dateRangeCaptor.getValue().getLowerBound().getValue(),
+		assertThat(relatedPersonSearchParamsArgumentCaptor.getValue().getBirthDate().getLowerBound().getValue(),
 		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
-		assertThat(dateRangeCaptor.getValue().getUpperBound(), nullValue());
+		assertThat(relatedPersonSearchParamsArgumentCaptor.getValue().getBirthDate().getUpperBound(), nullValue());
 	}
 	
 	@Test
 	public void shouldGetRelatedPersonByBirthDateGreaterThan() throws Exception {
 		verifyUri("/RelatedPerson/?birthdate=gt1975-02-02");
 		
-		verify(relatedPersonService).searchForRelatedPeople(isNull(), isNull(), dateRangeCaptor.capture(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
-		assertThat(dateRangeCaptor.getValue(), notNullValue());
+		verify(relatedPersonService).searchForRelatedPeople(relatedPersonSearchParamsArgumentCaptor.capture());
+		assertThat(relatedPersonSearchParamsArgumentCaptor.getValue(), notNullValue());
 		
 		Calendar calendar = Calendar.getInstance();
 		calendar.set(1975, Calendar.FEBRUARY, 2);
 		
-		assertThat(dateRangeCaptor.getValue().getLowerBound().getValue(),
+		assertThat(relatedPersonSearchParamsArgumentCaptor.getValue().getBirthDate().getLowerBound().getValue(),
 		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
-		assertThat(dateRangeCaptor.getValue().getUpperBound(), nullValue());
+		assertThat(relatedPersonSearchParamsArgumentCaptor.getValue().getBirthDate().getUpperBound(), nullValue());
 	}
 	
 	@Test
 	public void shouldGetRelatedPersonByBirthDateLessThanOrEqualTo() throws Exception {
 		verifyUri("/RelatedPerson/?birthdate=le1975-02-02");
 		
-		verify(relatedPersonService).searchForRelatedPeople(isNull(), isNull(), dateRangeCaptor.capture(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
-		assertThat(dateRangeCaptor.getValue(), notNullValue());
+		verify(relatedPersonService).searchForRelatedPeople(relatedPersonSearchParamsArgumentCaptor.capture());
+		assertThat(relatedPersonSearchParamsArgumentCaptor.getValue(), notNullValue());
 		
 		Calendar calendar = Calendar.getInstance();
 		calendar.set(1975, Calendar.FEBRUARY, 2);
 		
-		assertThat(dateRangeCaptor.getValue().getLowerBound(), nullValue());
-		assertThat(dateRangeCaptor.getValue().getUpperBound().getValue(),
+		assertThat(relatedPersonSearchParamsArgumentCaptor.getValue().getBirthDate().getLowerBound(), nullValue());
+		assertThat(relatedPersonSearchParamsArgumentCaptor.getValue().getBirthDate().getUpperBound().getValue(),
 		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
 	}
 	
@@ -211,15 +193,14 @@ public class RelatedPersonFhirResourceProviderWebTest extends BaseFhirR4Resource
 	public void shouldGetRelatedPersonByBirthDateLessThan() throws Exception {
 		verifyUri("/RelatedPerson/?birthdate=lt1975-02-02");
 		
-		verify(relatedPersonService).searchForRelatedPeople(isNull(), isNull(), dateRangeCaptor.capture(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
-		assertThat(dateRangeCaptor.getValue(), notNullValue());
+		verify(relatedPersonService).searchForRelatedPeople(relatedPersonSearchParamsArgumentCaptor.capture());
+		assertThat(relatedPersonSearchParamsArgumentCaptor.getValue(), notNullValue());
 		
 		Calendar calendar = Calendar.getInstance();
 		calendar.set(1975, Calendar.FEBRUARY, 2);
 		
-		assertThat(dateRangeCaptor.getValue().getLowerBound(), nullValue());
-		assertThat(dateRangeCaptor.getValue().getUpperBound().getValue(),
+		assertThat(relatedPersonSearchParamsArgumentCaptor.getValue().getBirthDate().getLowerBound(), nullValue());
+		assertThat(relatedPersonSearchParamsArgumentCaptor.getValue().getBirthDate().getUpperBound().getValue(),
 		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
 	}
 	
@@ -227,18 +208,17 @@ public class RelatedPersonFhirResourceProviderWebTest extends BaseFhirR4Resource
 	public void shouldGetRelatedPersonByBirthDateBetween() throws Exception {
 		verifyUri("/RelatedPerson/?birthdate=ge1975-02-02&birthdate=le1980-02-02");
 		
-		verify(relatedPersonService).searchForRelatedPeople(isNull(), isNull(), dateRangeCaptor.capture(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		verify(relatedPersonService).searchForRelatedPeople(relatedPersonSearchParamsArgumentCaptor.capture());
 		
 		Calendar lowerBound = Calendar.getInstance();
 		lowerBound.set(1975, Calendar.FEBRUARY, 2);
 		Calendar upperBound = Calendar.getInstance();
 		upperBound.set(1980, Calendar.FEBRUARY, 2);
 		
-		assertThat(dateRangeCaptor.getValue(), notNullValue());
-		assertThat(dateRangeCaptor.getValue().getLowerBound().getValue(),
+		assertThat(relatedPersonSearchParamsArgumentCaptor.getValue(), notNullValue());
+		assertThat(relatedPersonSearchParamsArgumentCaptor.getValue().getBirthDate().getLowerBound().getValue(),
 		    equalTo(DateUtils.truncate(lowerBound.getTime(), Calendar.DATE)));
-		assertThat(dateRangeCaptor.getValue().getUpperBound().getValue(),
+		assertThat(relatedPersonSearchParamsArgumentCaptor.getValue().getBirthDate().getUpperBound().getValue(),
 		    equalTo(DateUtils.truncate(upperBound.getTime(), Calendar.DATE)));
 	}
 	
@@ -246,12 +226,12 @@ public class RelatedPersonFhirResourceProviderWebTest extends BaseFhirR4Resource
 	public void shouldGetRelatedPersonByCity() throws Exception {
 		verifyUri(String.format("/RelatedPerson/?address-city=%s", ADDRESS_FIELD));
 		
-		verify(relatedPersonService).searchForRelatedPeople(isNull(), isNull(), isNull(), stringAndListCaptor.capture(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		verify(relatedPersonService).searchForRelatedPeople(relatedPersonSearchParamsArgumentCaptor.capture());
 		
-		assertThat(stringAndListCaptor.getValue(), notNullValue());
-		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
+		assertThat(relatedPersonSearchParamsArgumentCaptor.getValue(), notNullValue());
+		assertThat(relatedPersonSearchParamsArgumentCaptor.getValue().getCity().getValuesAsQueryTokens(), not(empty()));
+		assertThat(relatedPersonSearchParamsArgumentCaptor.getValue().getCity().getValuesAsQueryTokens().get(0)
+		        .getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(ADDRESS_FIELD));
 	}
 	
@@ -259,12 +239,12 @@ public class RelatedPersonFhirResourceProviderWebTest extends BaseFhirR4Resource
 	public void shouldGetRelatedPersonByState() throws Exception {
 		verifyUri(String.format("/RelatedPerson/?address-state=%s", ADDRESS_FIELD));
 		
-		verify(relatedPersonService).searchForRelatedPeople(isNull(), isNull(), isNull(), isNull(),
-		    stringAndListCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		verify(relatedPersonService).searchForRelatedPeople(relatedPersonSearchParamsArgumentCaptor.capture());
 		
-		assertThat(stringAndListCaptor.getValue(), notNullValue());
-		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
+		assertThat(relatedPersonSearchParamsArgumentCaptor.getValue(), notNullValue());
+		assertThat(relatedPersonSearchParamsArgumentCaptor.getValue().getState().getValuesAsQueryTokens(), not(empty()));
+		assertThat(relatedPersonSearchParamsArgumentCaptor.getValue().getState().getValuesAsQueryTokens().get(0)
+		        .getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(ADDRESS_FIELD));
 	}
 	
@@ -272,12 +252,13 @@ public class RelatedPersonFhirResourceProviderWebTest extends BaseFhirR4Resource
 	public void shouldGetRelatedPersonByPostalCode() throws Exception {
 		verifyUri(String.format("/RelatedPerson/?address-postalcode=%s", POSTAL_CODE));
 		
-		verify(relatedPersonService).searchForRelatedPeople(isNull(), isNull(), isNull(), isNull(), isNull(),
-		    stringAndListCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull());
+		verify(relatedPersonService).searchForRelatedPeople(relatedPersonSearchParamsArgumentCaptor.capture());
 		
-		assertThat(stringAndListCaptor.getValue(), notNullValue());
-		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
+		assertThat(relatedPersonSearchParamsArgumentCaptor.getValue(), notNullValue());
+		assertThat(relatedPersonSearchParamsArgumentCaptor.getValue().getPostalCode().getValuesAsQueryTokens(),
+		    not(empty()));
+		assertThat(relatedPersonSearchParamsArgumentCaptor.getValue().getPostalCode().getValuesAsQueryTokens().get(0)
+		        .getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(POSTAL_CODE));
 	}
 	
@@ -285,12 +266,12 @@ public class RelatedPersonFhirResourceProviderWebTest extends BaseFhirR4Resource
 	public void shouldGetRelatedPersonByCountry() throws Exception {
 		verifyUri(String.format("/RelatedPerson/?address-country=%s", ADDRESS_FIELD));
 		
-		verify(relatedPersonService).searchForRelatedPeople(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    stringAndListCaptor.capture(), isNull(), isNull(), isNull(), isNull());
+		verify(relatedPersonService).searchForRelatedPeople(relatedPersonSearchParamsArgumentCaptor.capture());
 		
-		assertThat(stringAndListCaptor.getValue(), notNullValue());
-		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
+		assertThat(relatedPersonSearchParamsArgumentCaptor.getValue(), notNullValue());
+		assertThat(relatedPersonSearchParamsArgumentCaptor.getValue().getCountry().getValuesAsQueryTokens(), not(empty()));
+		assertThat(relatedPersonSearchParamsArgumentCaptor.getValue().getCountry().getValuesAsQueryTokens().get(0)
+		        .getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(ADDRESS_FIELD));
 	}
 	
@@ -298,12 +279,12 @@ public class RelatedPersonFhirResourceProviderWebTest extends BaseFhirR4Resource
 	public void shouldGetRelatedPersonByUUID() throws Exception {
 		verifyUri(String.format("/RelatedPerson?_id=%s", RELATED_PERSON_UUID));
 		
-		verify(relatedPersonService).searchForRelatedPeople(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), tokenAndListCaptor.capture(), isNull(), isNull(), isNull());
+		verify(relatedPersonService).searchForRelatedPeople(relatedPersonSearchParamsArgumentCaptor.capture());
 		
-		assertThat(tokenAndListCaptor.getValue(), notNullValue());
-		assertThat(tokenAndListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(tokenAndListCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
+		assertThat(relatedPersonSearchParamsArgumentCaptor.getValue(), notNullValue());
+		assertThat(relatedPersonSearchParamsArgumentCaptor.getValue().getId().getValuesAsQueryTokens(), not(empty()));
+		assertThat(relatedPersonSearchParamsArgumentCaptor.getValue().getId().getValuesAsQueryTokens().get(0)
+		        .getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(RELATED_PERSON_UUID));
 	}
 	
@@ -311,17 +292,16 @@ public class RelatedPersonFhirResourceProviderWebTest extends BaseFhirR4Resource
 	public void shouldGetRelatedPersonByLastUpdatedDate() throws Exception {
 		verifyUri(String.format("/RelatedPerson?_lastUpdated=%s", LAST_UPDATED_DATE));
 		
-		verify(relatedPersonService).searchForRelatedPeople(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), dateRangeCaptor.capture(), isNull(), isNull());
+		verify(relatedPersonService).searchForRelatedPeople(relatedPersonSearchParamsArgumentCaptor.capture());
 		
-		assertThat(dateRangeCaptor.getValue(), notNullValue());
+		assertThat(relatedPersonSearchParamsArgumentCaptor.getValue(), notNullValue());
 		
 		Calendar calendar = Calendar.getInstance();
 		calendar.set(2020, Calendar.SEPTEMBER, 3);
 		
-		assertThat(dateRangeCaptor.getValue().getLowerBound().getValue(),
+		assertThat(relatedPersonSearchParamsArgumentCaptor.getValue().getLastUpdated().getLowerBound().getValue(),
 		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
-		assertThat(dateRangeCaptor.getValue().getUpperBound().getValue(),
+		assertThat(relatedPersonSearchParamsArgumentCaptor.getValue().getLastUpdated().getUpperBound().getValue(),
 		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
 	}
 	
@@ -329,27 +309,28 @@ public class RelatedPersonFhirResourceProviderWebTest extends BaseFhirR4Resource
 	public void shouldGetRelatedPersonByComplexQuery() throws Exception {
 		verifyUri(String.format("/RelatedPerson/?name=%s&gender=%s&birthdate=eq1975-02-02", PERSON_NAME, PERSON_GENDER));
 		
-		verify(relatedPersonService).searchForRelatedPeople(stringAndListCaptor.capture(), tokenAndListCaptor.capture(),
-		    dateRangeCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		verify(relatedPersonService).searchForRelatedPeople(relatedPersonSearchParamsArgumentCaptor.capture());
 		
-		assertThat(stringAndListCaptor.getValue(), notNullValue());
-		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
+		assertThat(relatedPersonSearchParamsArgumentCaptor.getValue(), notNullValue());
+		assertThat(relatedPersonSearchParamsArgumentCaptor.getValue().getName().getValuesAsQueryTokens(), not(empty()));
+		assertThat(relatedPersonSearchParamsArgumentCaptor.getValue().getName().getValuesAsQueryTokens().get(0)
+		        .getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(PERSON_NAME));
 		
-		assertThat(tokenAndListCaptor.getValue(), notNullValue());
-		assertThat(tokenAndListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(tokenAndListCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
+		assertThat(relatedPersonSearchParamsArgumentCaptor.getValue(), notNullValue());
+		assertThat(relatedPersonSearchParamsArgumentCaptor.getValue().getGender().getValuesAsQueryTokens(), not(empty()));
+		assertThat(relatedPersonSearchParamsArgumentCaptor.getValue().getGender().getValuesAsQueryTokens().get(0)
+		        .getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(PERSON_GENDER));
 		
-		assertThat(dateRangeCaptor.getValue(), notNullValue());
+		assertThat(relatedPersonSearchParamsArgumentCaptor.getValue(), notNullValue());
 		
 		Calendar calendar = Calendar.getInstance();
 		calendar.set(1975, Calendar.FEBRUARY, 2);
 		
-		assertThat(dateRangeCaptor.getValue().getLowerBound().getValue(),
+		assertThat(relatedPersonSearchParamsArgumentCaptor.getValue().getBirthDate().getLowerBound().getValue(),
 		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
-		assertThat(dateRangeCaptor.getValue().getUpperBound().getValue(),
+		assertThat(relatedPersonSearchParamsArgumentCaptor.getValue().getBirthDate().getUpperBound().getValue(),
 		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
 	}
 	
@@ -357,21 +338,21 @@ public class RelatedPersonFhirResourceProviderWebTest extends BaseFhirR4Resource
 	public void shouldAddPatientsToResultListWhenIncluded() throws Exception {
 		verifyUri("/RelatedPerson?_include=RelatedPerson:patient");
 		
-		verify(relatedPersonService).searchForRelatedPeople(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), includeArgumentCaptor.capture());
+		verify(relatedPersonService).searchForRelatedPeople(relatedPersonSearchParamsArgumentCaptor.capture());
 		
-		assertThat(includeArgumentCaptor.getValue(), notNullValue());
-		assertThat(includeArgumentCaptor.getValue().size(), equalTo(1));
-		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamName(),
+		assertThat(relatedPersonSearchParamsArgumentCaptor.getValue(), notNullValue());
+		assertThat(relatedPersonSearchParamsArgumentCaptor.getValue().getIncludes().size(), equalTo(1));
+		assertThat(relatedPersonSearchParamsArgumentCaptor.getValue().getIncludes().iterator().next().getParamName(),
 		    equalTo(FhirConstants.INCLUDE_PATIENT_PARAM));
-		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamType(), equalTo(FhirConstants.RELATED_PERSON));
+		assertThat(relatedPersonSearchParamsArgumentCaptor.getValue().getIncludes().iterator().next().getParamType(),
+		    equalTo(FhirConstants.RELATED_PERSON));
 	}
 	
 	private void verifyUri(String uri) throws Exception {
 		RelatedPerson relatedPerson = new RelatedPerson();
 		relatedPerson.setId(RELATED_PERSON_UUID);
-		when(relatedPersonService.searchForRelatedPeople(any(), any(), any(), any(), any(), any(), any(), any(), any(),
-		    any(), any())).thenReturn(new MockIBundleProvider<>(Collections.singletonList(relatedPerson), 10, 1));
+		when(relatedPersonService.searchForRelatedPeople(any()))
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(relatedPerson), 10, 1));
 		
 		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.JSON).go();
 		
