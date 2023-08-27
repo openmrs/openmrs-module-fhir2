@@ -30,6 +30,11 @@ public class FhirContactPointMapServiceImpl implements FhirContactPointMapServic
 	@Autowired
 	private FhirContactPointMapDao dao;
 	
+	@Override
+	public Optional<FhirContactPointMap> getFhirContactPointMapByUuid(String uuid) {
+		return dao.getFhirContactPointMapByUuid(uuid);
+	}
+	
 	@Transactional(readOnly = true)
 	@Override
 	public Optional<FhirContactPointMap> getFhirContactPointMapForPersonAttributeType(PersonAttributeType attributeType) {

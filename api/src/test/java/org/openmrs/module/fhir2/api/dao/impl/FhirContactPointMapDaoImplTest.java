@@ -11,11 +11,13 @@ package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 
 import java.util.Optional;
 
 import org.hibernate.SessionFactory;
+import org.hl7.fhir.r4.model.ContactPoint;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.LocationAttributeType;
@@ -25,6 +27,7 @@ import org.openmrs.api.LocationService;
 import org.openmrs.api.PersonService;
 import org.openmrs.api.ProviderService;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
+import org.openmrs.module.fhir2.api.FhirContactPointMapService;
 import org.openmrs.module.fhir2.model.FhirContactPointMap;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +48,9 @@ public class FhirContactPointMapDaoImplTest extends BaseModuleContextSensitiveTe
 	@Autowired
 	private ProviderService providerService;
 	
+	@Autowired
+	private FhirContactPointMapService fhirContactPointMapService;
+	
 	private FhirContactPointMapDaoImpl fhirContactPointMapDao;
 	
 	private FhirContactPointMap fhirContactPointMap;
@@ -56,6 +62,8 @@ public class FhirContactPointMapDaoImplTest extends BaseModuleContextSensitiveTe
 	private ProviderAttributeType providerAttributeType;
 	
 	private static final String FHIR_CONTACT_POINT_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirContactPointMapDaoImplTest_initial_data.xml";
+	
+	private static final String FHIR_CONTACT_POINT_MAP_UUID = "497daha3-5750-4yf6-8g11-518c49f73445";
 	
 	private static final String PERSON_ATTRIBUTE_TYPE_UUID = "a0f5521c-dbbd-4c10-81b2-1b7ab18330df";
 	
@@ -70,8 +78,29 @@ public class FhirContactPointMapDaoImplTest extends BaseModuleContextSensitiveTe
 		personAttributeType = new PersonAttributeType();
 		locationAttributeType = new LocationAttributeType();
 		providerAttributeType = new ProviderAttributeType();
+		
 		fhirContactPointMap = new FhirContactPointMap();
+		fhirContactPointMap.setUuid("497daha3-5750-4yf6-8g11-518c49f73445");
+		fhirContactPointMap.setSystem(ContactPoint.ContactPointSystem.PHONE);
+		fhirContactPointMap.setUse(ContactPoint.ContactPointUse.WORK);
+		fhirContactPointMap.setRank(3);
+		fhirContactPointMap.setAttributeTypeId(1);
+		fhirContactPointMap.setAttributeTypeDomain("provider");
+		fhirContactPointMapService.saveFhirContactPointMap(fhirContactPointMap);
+		
 		executeDataSet(FHIR_CONTACT_POINT_INITIAL_DATA_XML);
+	}
+	
+	@Test
+	public void getFhirContactPointMapByUuid_shouldGetFhirContactPointMapByUuid() {
+		Optional<FhirContactPointMap> result = fhirContactPointMapDao
+		        .getFhirContactPointMapByUuid(FHIR_CONTACT_POINT_MAP_UUID);
+		
+		assertThat(result.isPresent(), is(true));
+		assertThat(result.get().getUuid(), is(FHIR_CONTACT_POINT_MAP_UUID));
+		assertThat(result.get().getSystem(), is(ContactPoint.ContactPointSystem.PHONE));
+		assertThat(result.get().getUse(), is(ContactPoint.ContactPointUse.WORK));
+		assertThat(result.get().getRank(), is(3));
 	}
 	
 	@Test

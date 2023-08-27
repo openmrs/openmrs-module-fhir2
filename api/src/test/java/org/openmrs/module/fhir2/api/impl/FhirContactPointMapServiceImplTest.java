@@ -57,6 +57,27 @@ public class FhirContactPointMapServiceImplTest {
 	}
 	
 	@Test
+	public void getFhirContactPointMapByUuid_shouldFhirContactPointMapByUuid() {
+		when(fhirContactPointMapDao.getFhirContactPointMapByUuid("497daha3-5750-4yf6-8g11-518c49f73445"))
+		        .thenReturn(Optional.of(fhirContactPointMap));
+		
+		Optional<FhirContactPointMap> result = fhirContactPointMapService
+		        .getFhirContactPointMapByUuid("497daha3-5750-4yf6-8g11-518c49f73445");
+		
+		assertThat(result.isPresent(), is(true));
+		assertThat(result.get(), equalTo(fhirContactPointMap));
+	}
+	
+	@Test
+	public void getFhirContactPointMapByUuid_shouldReturnEmptyFhirContactPointMapWhenNoUuidIsFound() {
+		when(fhirContactPointMapDao.getFhirContactPointMapByUuid(null)).thenReturn(Optional.empty());
+		
+		Optional<FhirContactPointMap> result = fhirContactPointMapService.getFhirContactPointMapByUuid(null);
+		
+		assertThat(result.isPresent(), is(false));
+	}
+	
+	@Test
 	public void getFhirContactPointMapForPersonAttributeType_shouldReturnEmptyFhirContactPointMapWhenNoPersonAttributeTypeIsFound() {
 		when(fhirContactPointMapDao.getFhirContactPointMapForPersonAttributeType(null)).thenReturn(Optional.empty());
 		
