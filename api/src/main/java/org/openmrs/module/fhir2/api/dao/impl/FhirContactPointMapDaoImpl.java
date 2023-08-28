@@ -40,7 +40,7 @@ public class FhirContactPointMapDaoImpl implements FhirContactPointMapDao {
 	@Override
 	public Optional<FhirContactPointMap> getFhirContactPointMapByUuid(String uuid) {
 		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(FhirContactPointMap.class);
-		criteria.add(Restrictions.eq("uuid", uuid)).uniqueResult();
+		criteria.add(Restrictions.eq("uuid", uuid));
 		return Optional.ofNullable((FhirContactPointMap) criteria.uniqueResult());
 	}
 	
