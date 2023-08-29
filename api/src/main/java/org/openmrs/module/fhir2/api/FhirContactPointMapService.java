@@ -17,6 +17,8 @@ import org.openmrs.module.fhir2.model.FhirContactPointMap;
 
 public interface FhirContactPointMapService {
 	
+	Optional<FhirContactPointMap> getFhirContactPointMapByUuid(String uuid);
+	
 	Optional<FhirContactPointMap> getFhirContactPointMapForPersonAttributeType(PersonAttributeType attributeType);
 	
 	Optional<FhirContactPointMap> getFhirContactPointMapForAttributeType(BaseAttributeType<?> attributeType);

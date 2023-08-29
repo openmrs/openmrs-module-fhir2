@@ -16,7 +16,9 @@ import java.util.Optional;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.apache.commons.lang.StringUtils;
+import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
+import org.hibernate.criterion.Restrictions;
 import org.openmrs.LocationAttributeType;
 import org.openmrs.PersonAttributeType;
 import org.openmrs.ProviderAttributeType;
@@ -34,6 +36,13 @@ public class FhirContactPointMapDaoImpl implements FhirContactPointMapDao {
 	@Autowired
 	@Qualifier("sessionFactory")
 	private SessionFactory sessionFactory;
+	
+	@Override
+	public Optional<FhirContactPointMap> getFhirContactPointMapByUuid(String uuid) {
+		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(FhirContactPointMap.class);
+		criteria.add(Restrictions.eq("uuid", uuid));
+		return Optional.ofNullable((FhirContactPointMap) criteria.uniqueResult());
+	}
 	
 	@Override
 	public Optional<FhirContactPointMap> getFhirContactPointMapForPersonAttributeType(
