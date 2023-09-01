@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.providers.r3;
 
 import static lombok.AccessLevel.PACKAGE;
+import static org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40.convertResource;
 
 import javax.annotation.Nonnull;
 
@@ -32,7 +33,6 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.Setter;
 import org.apache.commons.collections.CollectionUtils;
-import org.hl7.fhir.convertors.VersionConvertor_30_40;
 import org.hl7.fhir.dstu3.model.Encounter;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
@@ -68,13 +68,12 @@ public class ProcedureRequestFhirResourceProvider implements IResourceProvider {
 		if (serviceRequest == null) {
 			throw new ResourceNotFoundException("Could not find serviceRequest with Id " + id.getIdPart());
 		}
-		return (ProcedureRequest) VersionConvertor_30_40.convertResource(serviceRequest, false);
+		return (ProcedureRequest) convertResource(serviceRequest);
 	}
 	
 	public MethodOutcome createProcedureRequest(@ResourceParam ProcedureRequest procedureRequest) {
-		return FhirProviderUtils.buildCreate(VersionConvertor_30_40.convertResource(
-		    serviceRequestService.create((ServiceRequest) VersionConvertor_30_40.convertResource(procedureRequest, false)),
-		    false));
+		return FhirProviderUtils.buildCreate(
+		    convertResource(serviceRequestService.create((ServiceRequest) convertResource(procedureRequest))));
 	}
 	
 	public MethodOutcome updateProcedureRequest(@IdParam IdType id, @ResourceParam ProcedureRequest procedureRequest) {
@@ -84,9 +83,8 @@ public class ProcedureRequestFhirResourceProvider implements IResourceProvider {
 		
 		procedureRequest.setId(id.getIdPart());
 		
-		return FhirProviderUtils
-		        .buildUpdate(VersionConvertor_30_40.convertResource(serviceRequestService.update(id.getIdPart(),
-		            (ServiceRequest) VersionConvertor_30_40.convertResource(procedureRequest, false)), false));
+		return FhirProviderUtils.buildUpdate(convertResource(
+		    serviceRequestService.update(id.getIdPart(), (ServiceRequest) convertResource(procedureRequest))));
 	}
 	
 	public OperationOutcome deleteProcedureRequest(@IdParam @Nonnull IdType id) {

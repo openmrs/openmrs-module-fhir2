@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.search;
 
+import static org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40.convertResource;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -19,7 +21,6 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import org.hl7.fhir.convertors.VersionConvertor_30_40;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Resource;
@@ -88,7 +89,7 @@ public class SearchQueryBundleProviderR3Wrapper implements IBundleProvider, Seri
 				return TaskVersionConverter.convertTask((Task) resource);
 			}
 			
-			return VersionConvertor_30_40.convertResource((Resource) resource, true);
+			return convertResource((Resource) resource);
 		}
 		
 		return null;

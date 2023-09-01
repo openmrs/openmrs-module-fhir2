@@ -36,7 +36,7 @@ import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Getter;
-import org.hl7.fhir.convertors.conv30_40.DiagnosticReport30_40;
+import org.hl7.fhir.convertors.conv30_40.resources30_40.DiagnosticReport30_40;
 import org.hl7.fhir.dstu3.model.DiagnosticReport;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
