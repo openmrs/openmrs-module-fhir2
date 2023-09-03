@@ -39,6 +39,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.Setter;
 import org.apache.commons.collections.CollectionUtils;
+import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40;
 import org.hl7.fhir.dstu3.model.Condition;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
@@ -72,13 +73,14 @@ public class ConditionFhirResourceProvider implements IResourceProvider {
 			throw new ResourceNotFoundException("Could not find condition with Id " + id.getIdPart());
 		}
 		
-		return convertCondition(condition);
+		return (Condition) VersionConvertorFactory_30_40.convertResource(condition);
 	}
 	
 	@Create
 	@SuppressWarnings("unused")
 	public MethodOutcome createCondition(@ResourceParam Condition newCondition) {
-		return FhirProviderUtils.buildCreate(convertCondition(conditionService.create(convertCondition(newCondition))));
+		return FhirProviderUtils.buildCreate(VersionConvertorFactory_30_40.convertResource(conditionService.create(
+				(org.hl7.fhir.r4.model.Condition) VersionConvertorFactory_30_40.convertResource(newCondition))));
 	}
 	
 	@Update
@@ -90,7 +92,8 @@ public class ConditionFhirResourceProvider implements IResourceProvider {
 		updatedCondition.setId(id);
 		
 		return FhirProviderUtils
-		        .buildUpdate(convertCondition(conditionService.update(id.getIdPart(), convertCondition(updatedCondition))));
+		        .buildUpdate(VersionConvertorFactory_30_40.convertResource(conditionService.update(id.getIdPart(),
+				        (org.hl7.fhir.r4.model.Condition) VersionConvertorFactory_30_40.convertResource(updatedCondition))));
 	}
 	
 	@Delete

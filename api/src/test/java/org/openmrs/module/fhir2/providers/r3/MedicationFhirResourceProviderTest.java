@@ -36,7 +36,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import org.hl7.fhir.convertors.conv30_40.resources30_40.Medication30_40;
+import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Medication;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
@@ -244,7 +244,8 @@ public class MedicationFhirResourceProviderTest {
 	public void createMedication_shouldCreateNewMedication() {
 		when(fhirMedicationService.create(any(org.hl7.fhir.r4.model.Medication.class))).thenReturn(medication);
 		
-		MethodOutcome result = resourceProvider.createMedication(Medication30_40.convertMedication(medication));
+		MethodOutcome result = resourceProvider.createMedication(
+				(Medication) VersionConvertorFactory_30_40.convertResource(medication));
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getCreated(), is(true));
@@ -260,7 +261,7 @@ public class MedicationFhirResourceProviderTest {
 		        .thenReturn(medication);
 		
 		MethodOutcome result = resourceProvider.updateMedication(new IdType().setValue(MEDICATION_UUID),
-		    Medication30_40.convertMedication(medication));
+				(Medication) VersionConvertorFactory_30_40.convertResource(medication));
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getResource(), notNullValue());
@@ -273,7 +274,7 @@ public class MedicationFhirResourceProviderTest {
 		        .thenThrow(InvalidRequestException.class);
 		
 		resourceProvider.updateMedication(new IdType().setValue(WRONG_MEDICATION_UUID),
-		    Medication30_40.convertMedication(medication));
+				(Medication) VersionConvertorFactory_30_40.convertResource(medication));
 	}
 	
 	@Test(expected = InvalidRequestException.class)
@@ -284,7 +285,7 @@ public class MedicationFhirResourceProviderTest {
 		        .thenThrow(InvalidRequestException.class);
 		
 		resourceProvider.updateMedication(new IdType().setValue(MEDICATION_UUID),
-		    Medication30_40.convertMedication(noIdMedication));
+				(Medication) VersionConvertorFactory_30_40.convertResource(noIdMedication));
 	}
 	
 	@Test(expected = MethodNotAllowedException.class)
@@ -296,7 +297,7 @@ public class MedicationFhirResourceProviderTest {
 		        .thenThrow(MethodNotAllowedException.class);
 		
 		resourceProvider.updateMedication(new IdType().setValue(WRONG_MEDICATION_UUID),
-		    Medication30_40.convertMedication(wrongMedication));
+				(Medication) VersionConvertorFactory_30_40.convertResource(wrongMedication));
 	}
 	
 	@Test

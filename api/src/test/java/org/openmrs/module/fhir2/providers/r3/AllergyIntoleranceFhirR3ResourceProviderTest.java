@@ -39,7 +39,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import org.hl7.fhir.convertors.conv30_40.resources30_40.AllergyIntolerance30_40;
+import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40;
 import org.hl7.fhir.dstu3.model.AllergyIntolerance;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
@@ -430,7 +430,8 @@ public class AllergyIntoleranceFhirR3ResourceProviderTest extends BaseFhirR3Prov
 		when(service.create(any(org.hl7.fhir.r4.model.AllergyIntolerance.class))).thenReturn(allergyIntolerance);
 		
 		MethodOutcome result = resourceProvider
-		        .creatAllergyIntolerance(AllergyIntolerance30_40.convertAllergyIntolerance(allergyIntolerance));
+		        .creatAllergyIntolerance(
+				        (AllergyIntolerance) VersionConvertorFactory_30_40.convertResource(allergyIntolerance));
 		assertThat(result, notNullValue());
 		assertThat(result.getCreated(), is(true));
 		assertThat(result.getResource(), notNullValue());
@@ -443,7 +444,7 @@ public class AllergyIntoleranceFhirR3ResourceProviderTest extends BaseFhirR3Prov
 		        .thenReturn(allergyIntolerance);
 		
 		MethodOutcome result = resourceProvider.updateAllergyIntolerance(new IdType().setValue(ALLERGY_UUID),
-		    AllergyIntolerance30_40.convertAllergyIntolerance(allergyIntolerance));
+				(AllergyIntolerance) VersionConvertorFactory_30_40.convertResource(allergyIntolerance));
 		assertThat(result, notNullValue());
 		assertThat(result.getResource(), notNullValue());
 		assertThat(result.getResource().getIdElement().getIdPart(), equalTo(ALLERGY_UUID));
@@ -455,7 +456,7 @@ public class AllergyIntoleranceFhirR3ResourceProviderTest extends BaseFhirR3Prov
 		        .thenThrow(InvalidRequestException.class);
 		
 		resourceProvider.updateAllergyIntolerance(new IdType().setValue(WRONG_ALLERGY_UUID),
-		    AllergyIntolerance30_40.convertAllergyIntolerance(allergyIntolerance));
+				(AllergyIntolerance) VersionConvertorFactory_30_40.convertResource(allergyIntolerance));
 	}
 	
 	@Test(expected = InvalidRequestException.class)
@@ -466,7 +467,7 @@ public class AllergyIntoleranceFhirR3ResourceProviderTest extends BaseFhirR3Prov
 		        .thenThrow(InvalidRequestException.class);
 		
 		resourceProvider.updateAllergyIntolerance(new IdType().setValue(ALLERGY_UUID),
-		    AllergyIntolerance30_40.convertAllergyIntolerance(noIdAllergyIntolerance));
+				(AllergyIntolerance) VersionConvertorFactory_30_40.convertResource(noIdAllergyIntolerance));
 	}
 	
 	@Test(expected = MethodNotAllowedException.class)
@@ -478,7 +479,7 @@ public class AllergyIntoleranceFhirR3ResourceProviderTest extends BaseFhirR3Prov
 		        .thenThrow(MethodNotAllowedException.class);
 		
 		resourceProvider.updateAllergyIntolerance(new IdType().setValue(WRONG_ALLERGY_UUID),
-		    AllergyIntolerance30_40.convertAllergyIntolerance(wrongAllergyIntolerance));
+				(AllergyIntolerance) VersionConvertorFactory_30_40.convertResource(wrongAllergyIntolerance));
 	}
 	
 	@Test

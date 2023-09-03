@@ -45,7 +45,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Getter;
-import org.hl7.fhir.convertors.conv30_40.resources30_40.Observation30_40;
+import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
@@ -284,7 +284,8 @@ public class ObservationFhirResourceProviderTest extends BaseFhirR3ProvenanceRes
 	public void createObservation_shouldCreateNewObservation() {
 		when(observationService.create(any(org.hl7.fhir.r4.model.Observation.class))).thenReturn(observation);
 		
-		MethodOutcome result = resourceProvider.createObservationResource(Observation30_40.convertObservation(observation));
+		MethodOutcome result = resourceProvider.createObservationResource(
+				(Observation) VersionConvertorFactory_30_40.convertResource(observation));
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getCreated(), is(true));

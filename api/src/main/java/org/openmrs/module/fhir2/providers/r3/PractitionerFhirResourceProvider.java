@@ -35,7 +35,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.Setter;
 import org.apache.commons.collections.CollectionUtils;
-import org.hl7.fhir.convertors.conv30_40.resources30_40.Practitioner30_40;
+import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40;
 import org.hl7.fhir.dstu3.model.Encounter;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.MedicationDispense;
@@ -73,13 +73,14 @@ public class PractitionerFhirResourceProvider implements IResourceProvider {
 			throw new ResourceNotFoundException("Could not find practitioner with Id " + id.getIdPart());
 		}
 		
-		return Practitioner30_40.convertPractitioner(practitioner);
+		return (Practitioner) VersionConvertorFactory_30_40.convertResource(practitioner);
 	}
 	
 	@Create
 	public MethodOutcome createPractitioner(@ResourceParam Practitioner practitioner) {
-		return FhirProviderUtils.buildCreate(Practitioner30_40
-		        .convertPractitioner(practitionerService.create(Practitioner30_40.convertPractitioner(practitioner))));
+		return FhirProviderUtils.buildCreate(VersionConvertorFactory_30_40
+		        .convertResource(practitionerService.create(
+				        (org.hl7.fhir.r4.model.Practitioner) VersionConvertorFactory_30_40.convertResource(practitioner))));
 	}
 	
 	@Update
@@ -91,8 +92,9 @@ public class PractitionerFhirResourceProvider implements IResourceProvider {
 		
 		practitioner.setId(id.getIdPart());
 		
-		return FhirProviderUtils.buildUpdate(Practitioner30_40.convertPractitioner(
-		    practitionerService.update(id.getIdPart(), Practitioner30_40.convertPractitioner(practitioner))));
+		return FhirProviderUtils.buildUpdate(VersionConvertorFactory_30_40.convertResource(
+		    practitionerService.update(id.getIdPart(),
+				    (org.hl7.fhir.r4.model.Practitioner) VersionConvertorFactory_30_40.convertResource(practitioner))));
 	}
 	
 	@Delete

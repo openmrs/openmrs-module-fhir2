@@ -38,7 +38,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.Setter;
 import org.apache.commons.collections.CollectionUtils;
-import org.hl7.fhir.convertors.conv30_40.resources30_40.Location30_40;
+import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40;
 import org.hl7.fhir.dstu3.model.Encounter;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Location;
@@ -73,13 +73,14 @@ public class LocationFhirResourceProvider implements IResourceProvider {
 			throw new ResourceNotFoundException("Could not find location with Id " + id.getIdPart());
 		}
 		
-		return Location30_40.convertLocation(location);
+		return (Location) VersionConvertorFactory_30_40.convertResource(location);
 	}
 	
 	@Create
 	public MethodOutcome createLocation(@ResourceParam Location location) {
 		return FhirProviderUtils
-		        .buildCreate(Location30_40.convertLocation(locationService.create(Location30_40.convertLocation(location))));
+		        .buildCreate(VersionConvertorFactory_30_40.convertResource(locationService.create(
+				        (org.hl7.fhir.r4.model.Location) VersionConvertorFactory_30_40.convertResource(location))));
 	}
 	
 	@Update
@@ -92,7 +93,8 @@ public class LocationFhirResourceProvider implements IResourceProvider {
 		location.setId(id.getIdPart());
 		
 		return FhirProviderUtils.buildUpdate(
-		    Location30_40.convertLocation(locationService.update(id.getIdPart(), Location30_40.convertLocation(location))));
+				VersionConvertorFactory_30_40.convertResource(locationService.update(id.getIdPart(),
+						(org.hl7.fhir.r4.model.Location) VersionConvertorFactory_30_40.convertResource(location))));
 	}
 	
 	@Delete

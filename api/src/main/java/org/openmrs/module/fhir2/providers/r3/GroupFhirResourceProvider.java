@@ -24,7 +24,7 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.Setter;
-import org.hl7.fhir.convertors.conv30_40.resources30_40.Group30_40;
+import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40;
 import org.hl7.fhir.dstu3.model.Group;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
@@ -54,13 +54,14 @@ public class GroupFhirResourceProvider implements IResourceProvider {
 		if (group == null) {
 			throw new ResourceNotFoundException("Could not find Group with Id " + id.getIdPart());
 		}
-		return Group30_40.convertGroup(group);
+		return (Group) VersionConvertorFactory_30_40.convertResource(group);
 	}
 	
 	@Create
 	@SuppressWarnings("unused")
 	public MethodOutcome createGroup(@ResourceParam Group group) {
-		return FhirProviderUtils.buildCreate(Group30_40.convertGroup(groupService.create(Group30_40.convertGroup(group))));
+		return FhirProviderUtils.buildCreate(VersionConvertorFactory_30_40.convertResource(groupService.create(
+				(org.hl7.fhir.r4.model.Group) VersionConvertorFactory_30_40.convertResource(group))));
 	}
 	
 	@Update
@@ -73,7 +74,8 @@ public class GroupFhirResourceProvider implements IResourceProvider {
 		group.setId(id.getIdPart());
 		
 		return FhirProviderUtils
-		        .buildUpdate(Group30_40.convertGroup(groupService.update(id.getIdPart(), Group30_40.convertGroup(group))));
+		        .buildUpdate(VersionConvertorFactory_30_40.convertResource(groupService.update(id.getIdPart(),
+				        (org.hl7.fhir.r4.model.Group) VersionConvertorFactory_30_40.convertResource(group))));
 	}
 	
 	@Delete

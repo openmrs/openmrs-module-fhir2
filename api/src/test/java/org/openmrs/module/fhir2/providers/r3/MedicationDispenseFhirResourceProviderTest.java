@@ -36,6 +36,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.convertors.conv30_40.resources30_40.MedicationDispense30_40;
+import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.MedicationDispense;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
@@ -130,7 +131,8 @@ public class MedicationDispenseFhirResourceProviderTest {
 		when(fhirMedicationDispenseService.create(any(org.hl7.fhir.r4.model.MedicationDispense.class)))
 		        .thenReturn(medicationDispense);
 		MethodOutcome result = resourceProvider
-		        .createMedicationDispense(MedicationDispense30_40.convertMedicationDispense(medicationDispense));
+		        .createMedicationDispense(
+				        (MedicationDispense) VersionConvertorFactory_30_40.convertResource(medicationDispense));
 		assertThat(result, notNullValue());
 		assertThat(result.getCreated(), is(true));
 		assertThat(result.getResource().getIdElement().getIdPart(), equalTo(medicationDispense.getId()));
@@ -142,7 +144,7 @@ public class MedicationDispenseFhirResourceProviderTest {
 		    any(org.hl7.fhir.r4.model.MedicationDispense.class))).thenReturn(medicationDispense);
 		
 		MethodOutcome result = resourceProvider.updateMedicationDispense(new IdType().setValue(MEDICATION_DISPENSE_UUID),
-		    MedicationDispense30_40.convertMedicationDispense(medicationDispense));
+				(MedicationDispense) VersionConvertorFactory_30_40.convertResource(medicationDispense));
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getResource(), notNullValue());
@@ -155,7 +157,7 @@ public class MedicationDispenseFhirResourceProviderTest {
 		    any(org.hl7.fhir.r4.model.MedicationDispense.class))).thenThrow(InvalidRequestException.class);
 		
 		resourceProvider.updateMedicationDispense(new IdType().setValue(WRONG_MEDICATION_DISPENSE_UUID),
-		    MedicationDispense30_40.convertMedicationDispense(medicationDispense));
+				(MedicationDispense) VersionConvertorFactory_30_40.convertResource(medicationDispense));
 	}
 	
 	@Test(expected = InvalidRequestException.class)

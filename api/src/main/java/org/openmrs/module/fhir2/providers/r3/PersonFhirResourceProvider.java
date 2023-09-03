@@ -37,7 +37,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.Setter;
 import org.apache.commons.collections.CollectionUtils;
-import org.hl7.fhir.convertors.conv30_40.resources30_40.Person30_40;
+import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Person;
@@ -71,13 +71,14 @@ public class PersonFhirResourceProvider implements IResourceProvider {
 			throw new ResourceNotFoundException("Could not find person with Id " + id.getIdPart());
 		}
 		
-		return Person30_40.convertPerson(person);
+		return (Person) VersionConvertorFactory_30_40.convertResource(person);
 	}
 	
 	@Create
 	public MethodOutcome createPerson(@ResourceParam Person person) {
 		return FhirProviderUtils
-		        .buildCreate(Person30_40.convertPerson(personService.create(Person30_40.convertPerson(person))));
+		        .buildCreate(VersionConvertorFactory_30_40.convertResource(personService.create(
+				        (org.hl7.fhir.r4.model.Person) VersionConvertorFactory_30_40.convertResource(person))));
 	}
 	
 	@Update
@@ -90,7 +91,8 @@ public class PersonFhirResourceProvider implements IResourceProvider {
 		person.setId(id.getIdPart());
 		
 		return FhirProviderUtils.buildUpdate(
-		    Person30_40.convertPerson(personService.update(id.getIdPart(), Person30_40.convertPerson(person))));
+				VersionConvertorFactory_30_40.convertResource(personService.update(id.getIdPart(),
+						(org.hl7.fhir.r4.model.Person) VersionConvertorFactory_30_40.convertResource(person))));
 	}
 	
 	@Delete
