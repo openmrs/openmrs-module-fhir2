@@ -76,9 +76,8 @@ public class PersonFhirResourceProvider implements IResourceProvider {
 	
 	@Create
 	public MethodOutcome createPerson(@ResourceParam Person person) {
-		return FhirProviderUtils
-		        .buildCreate(VersionConvertorFactory_30_40.convertResource(personService.create(
-				        (org.hl7.fhir.r4.model.Person) VersionConvertorFactory_30_40.convertResource(person))));
+		return FhirProviderUtils.buildCreate(VersionConvertorFactory_30_40.convertResource(
+		    personService.create((org.hl7.fhir.r4.model.Person) VersionConvertorFactory_30_40.convertResource(person))));
 	}
 	
 	@Update
@@ -90,9 +89,9 @@ public class PersonFhirResourceProvider implements IResourceProvider {
 		
 		person.setId(id.getIdPart());
 		
-		return FhirProviderUtils.buildUpdate(
-				VersionConvertorFactory_30_40.convertResource(personService.update(id.getIdPart(),
-						(org.hl7.fhir.r4.model.Person) VersionConvertorFactory_30_40.convertResource(person))));
+		return FhirProviderUtils
+		        .buildUpdate(VersionConvertorFactory_30_40.convertResource(personService.update(id.getIdPart(),
+		            (org.hl7.fhir.r4.model.Person) VersionConvertorFactory_30_40.convertResource(person))));
 	}
 	
 	@Delete

@@ -370,7 +370,7 @@ public class PersonFhirResourceProviderTest extends BaseFhirR3ProvenanceResource
 		when(fhirPersonService.update(eq(PERSON_UUID), any(org.hl7.fhir.r4.model.Person.class))).thenReturn(person);
 		
 		MethodOutcome result = resourceProvider.updatePerson(new IdType().setValue(PERSON_UUID),
-				(Person) VersionConvertorFactory_30_40.convertResource(person));
+		    (Person) VersionConvertorFactory_30_40.convertResource(person));
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getResource(), notNullValue());
@@ -383,7 +383,7 @@ public class PersonFhirResourceProviderTest extends BaseFhirR3ProvenanceResource
 		        .thenThrow(InvalidRequestException.class);
 		
 		resourceProvider.updatePerson(new IdType().setValue(WRONG_PERSON_UUID),
-				(Person) VersionConvertorFactory_30_40.convertResource(person));
+		    (Person) VersionConvertorFactory_30_40.convertResource(person));
 	}
 	
 	@Test(expected = InvalidRequestException.class)
@@ -394,7 +394,7 @@ public class PersonFhirResourceProviderTest extends BaseFhirR3ProvenanceResource
 		        .thenThrow(InvalidRequestException.class);
 		
 		resourceProvider.updatePerson(new IdType().setValue(PERSON_UUID),
-				(Person) VersionConvertorFactory_30_40.convertResource(noIdPerson));
+		    (Person) VersionConvertorFactory_30_40.convertResource(noIdPerson));
 	}
 	
 	@Test(expected = MethodNotAllowedException.class)
@@ -406,7 +406,7 @@ public class PersonFhirResourceProviderTest extends BaseFhirR3ProvenanceResource
 		        .thenThrow(MethodNotAllowedException.class);
 		
 		resourceProvider.updatePerson(new IdType().setValue(WRONG_PERSON_UUID),
-				(Person) VersionConvertorFactory_30_40.convertResource(wrongPerson));
+		    (Person) VersionConvertorFactory_30_40.convertResource(wrongPerson));
 	}
 	
 }

@@ -94,9 +94,8 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 	@Create
 	@SuppressWarnings("unused")
 	public MethodOutcome createEncounter(@ResourceParam Encounter encounter) {
-		return FhirProviderUtils.buildCreate(
-				VersionConvertorFactory_30_40.convertResource(encounterService.create(
-				    (org.hl7.fhir.r4.model.Encounter) VersionConvertorFactory_30_40.convertResource(encounter))));
+		return FhirProviderUtils.buildCreate(VersionConvertorFactory_30_40.convertResource(encounterService
+		        .create((org.hl7.fhir.r4.model.Encounter) VersionConvertorFactory_30_40.convertResource(encounter))));
 	}
 	
 	@Update
@@ -108,9 +107,9 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 		
 		encounter.setId(id.getIdPart());
 		
-		return FhirProviderUtils.buildUpdate(VersionConvertorFactory_30_40
-		        .convertResource(encounterService.update(id.getIdPart(),
-				        (org.hl7.fhir.r4.model.Encounter) VersionConvertorFactory_30_40.convertResource(encounter))));
+		return FhirProviderUtils
+		        .buildUpdate(VersionConvertorFactory_30_40.convertResource(encounterService.update(id.getIdPart(),
+		            (org.hl7.fhir.r4.model.Encounter) VersionConvertorFactory_30_40.convertResource(encounter))));
 	}
 	
 	@Delete

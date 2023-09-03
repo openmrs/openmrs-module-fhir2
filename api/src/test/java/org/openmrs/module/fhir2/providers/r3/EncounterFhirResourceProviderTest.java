@@ -291,8 +291,8 @@ public class EncounterFhirResourceProviderTest extends BaseFhirR3ProvenanceResou
 	public void createEncounter_shouldCreateNewEncounter() {
 		when(encounterService.create(any(org.hl7.fhir.r4.model.Encounter.class))).thenReturn(encounter);
 		
-		MethodOutcome result = resourceProvider.createEncounter(
-				(Encounter) VersionConvertorFactory_30_40.convertResource(encounter));
+		MethodOutcome result = resourceProvider
+		        .createEncounter((Encounter) VersionConvertorFactory_30_40.convertResource(encounter));
 		assertThat(result, notNullValue());
 		assertThat(result.getCreated(), is(true));
 		assertThat(result.getResource(), notNullValue());
@@ -304,7 +304,7 @@ public class EncounterFhirResourceProviderTest extends BaseFhirR3ProvenanceResou
 		when(encounterService.update(eq(ENCOUNTER_UUID), any(org.hl7.fhir.r4.model.Encounter.class))).thenReturn(encounter);
 		
 		MethodOutcome result = resourceProvider.updateEncounter(new IdType().setValue(ENCOUNTER_UUID),
-				(Encounter) VersionConvertorFactory_30_40.convertResource(encounter));
+		    (Encounter) VersionConvertorFactory_30_40.convertResource(encounter));
 		assertThat(result, notNullValue());
 		assertThat(result.getResource(), notNullValue());
 		assertThat(result.getResource().getIdElement().getIdPart(), equalTo(ENCOUNTER_UUID));
@@ -316,7 +316,7 @@ public class EncounterFhirResourceProviderTest extends BaseFhirR3ProvenanceResou
 		        .thenThrow(InvalidRequestException.class);
 		
 		resourceProvider.updateEncounter(new IdType().setValue(WRONG_ENCOUNTER_UUID),
-				(Encounter) VersionConvertorFactory_30_40.convertResource(encounter));
+		    (Encounter) VersionConvertorFactory_30_40.convertResource(encounter));
 	}
 	
 	@Test(expected = InvalidRequestException.class)
@@ -327,7 +327,7 @@ public class EncounterFhirResourceProviderTest extends BaseFhirR3ProvenanceResou
 		        .thenThrow(InvalidRequestException.class);
 		
 		resourceProvider.updateEncounter(new IdType().setValue(ENCOUNTER_UUID),
-				(Encounter) VersionConvertorFactory_30_40.convertResource(noIdEncounter));
+		    (Encounter) VersionConvertorFactory_30_40.convertResource(noIdEncounter));
 	}
 	
 	@Test(expected = MethodNotAllowedException.class)
@@ -339,7 +339,7 @@ public class EncounterFhirResourceProviderTest extends BaseFhirR3ProvenanceResou
 		        .thenThrow(MethodNotAllowedException.class);
 		
 		resourceProvider.updateEncounter(new IdType().setValue(WRONG_ENCOUNTER_UUID),
-				(Encounter) VersionConvertorFactory_30_40.convertResource(wrongEncounter));
+		    (Encounter) VersionConvertorFactory_30_40.convertResource(wrongEncounter));
 	}
 	
 	@Test

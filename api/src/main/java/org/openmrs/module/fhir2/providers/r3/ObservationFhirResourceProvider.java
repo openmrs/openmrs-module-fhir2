@@ -83,9 +83,8 @@ public class ObservationFhirResourceProvider implements IResourceProvider {
 	
 	@Create
 	public MethodOutcome createObservationResource(@ResourceParam Observation observation) {
-		return FhirProviderUtils.buildCreate(VersionConvertorFactory_30_40
-		        .convertResource(observationService.create(
-				        (org.hl7.fhir.r4.model.Observation) VersionConvertorFactory_30_40.convertResource(observation))));
+		return FhirProviderUtils.buildCreate(VersionConvertorFactory_30_40.convertResource(observationService
+		        .create((org.hl7.fhir.r4.model.Observation) VersionConvertorFactory_30_40.convertResource(observation))));
 	}
 	
 	@Delete

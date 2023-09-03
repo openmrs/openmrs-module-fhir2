@@ -244,8 +244,8 @@ public class MedicationFhirResourceProviderTest {
 	public void createMedication_shouldCreateNewMedication() {
 		when(fhirMedicationService.create(any(org.hl7.fhir.r4.model.Medication.class))).thenReturn(medication);
 		
-		MethodOutcome result = resourceProvider.createMedication(
-				(Medication) VersionConvertorFactory_30_40.convertResource(medication));
+		MethodOutcome result = resourceProvider
+		        .createMedication((Medication) VersionConvertorFactory_30_40.convertResource(medication));
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getCreated(), is(true));
@@ -261,7 +261,7 @@ public class MedicationFhirResourceProviderTest {
 		        .thenReturn(medication);
 		
 		MethodOutcome result = resourceProvider.updateMedication(new IdType().setValue(MEDICATION_UUID),
-				(Medication) VersionConvertorFactory_30_40.convertResource(medication));
+		    (Medication) VersionConvertorFactory_30_40.convertResource(medication));
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getResource(), notNullValue());
@@ -274,7 +274,7 @@ public class MedicationFhirResourceProviderTest {
 		        .thenThrow(InvalidRequestException.class);
 		
 		resourceProvider.updateMedication(new IdType().setValue(WRONG_MEDICATION_UUID),
-				(Medication) VersionConvertorFactory_30_40.convertResource(medication));
+		    (Medication) VersionConvertorFactory_30_40.convertResource(medication));
 	}
 	
 	@Test(expected = InvalidRequestException.class)
@@ -285,7 +285,7 @@ public class MedicationFhirResourceProviderTest {
 		        .thenThrow(InvalidRequestException.class);
 		
 		resourceProvider.updateMedication(new IdType().setValue(MEDICATION_UUID),
-				(Medication) VersionConvertorFactory_30_40.convertResource(noIdMedication));
+		    (Medication) VersionConvertorFactory_30_40.convertResource(noIdMedication));
 	}
 	
 	@Test(expected = MethodNotAllowedException.class)
@@ -297,7 +297,7 @@ public class MedicationFhirResourceProviderTest {
 		        .thenThrow(MethodNotAllowedException.class);
 		
 		resourceProvider.updateMedication(new IdType().setValue(WRONG_MEDICATION_UUID),
-				(Medication) VersionConvertorFactory_30_40.convertResource(wrongMedication));
+		    (Medication) VersionConvertorFactory_30_40.convertResource(wrongMedication));
 	}
 	
 	@Test

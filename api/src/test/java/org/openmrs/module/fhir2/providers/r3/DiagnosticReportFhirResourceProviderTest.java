@@ -137,7 +137,7 @@ public class DiagnosticReportFhirResourceProviderTest extends BaseFhirR3Provenan
 		when(service.update(eq(UUID), any(org.hl7.fhir.r4.model.DiagnosticReport.class))).thenReturn(diagnosticReport);
 		
 		MethodOutcome result = resourceProvider.updateDiagnosticReport(new IdType().setValue(UUID),
-				(DiagnosticReport) VersionConvertorFactory_30_40.convertResource(diagnosticReport));
+		    (DiagnosticReport) VersionConvertorFactory_30_40.convertResource(diagnosticReport));
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getResource(), notNullValue());
@@ -150,7 +150,7 @@ public class DiagnosticReportFhirResourceProviderTest extends BaseFhirR3Provenan
 		        .thenThrow(InvalidRequestException.class);
 		
 		resourceProvider.updateDiagnosticReport(new IdType().setValue(WRONG_UUID),
-				(DiagnosticReport) VersionConvertorFactory_30_40.convertResource(diagnosticReport));
+		    (DiagnosticReport) VersionConvertorFactory_30_40.convertResource(diagnosticReport));
 	}
 	
 	@Test(expected = InvalidRequestException.class)

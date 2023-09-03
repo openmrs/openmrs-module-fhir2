@@ -10,7 +10,6 @@
 package org.openmrs.module.fhir2.providers.r3;
 
 import static lombok.AccessLevel.PACKAGE;
-import static org.hl7.fhir.convertors.conv30_40.resources30_40.Condition30_40.convertCondition;
 
 import javax.annotation.Nonnull;
 
@@ -79,8 +78,8 @@ public class ConditionFhirResourceProvider implements IResourceProvider {
 	@Create
 	@SuppressWarnings("unused")
 	public MethodOutcome createCondition(@ResourceParam Condition newCondition) {
-		return FhirProviderUtils.buildCreate(VersionConvertorFactory_30_40.convertResource(conditionService.create(
-				(org.hl7.fhir.r4.model.Condition) VersionConvertorFactory_30_40.convertResource(newCondition))));
+		return FhirProviderUtils.buildCreate(VersionConvertorFactory_30_40.convertResource(conditionService
+		        .create((org.hl7.fhir.r4.model.Condition) VersionConvertorFactory_30_40.convertResource(newCondition))));
 	}
 	
 	@Update
@@ -93,7 +92,7 @@ public class ConditionFhirResourceProvider implements IResourceProvider {
 		
 		return FhirProviderUtils
 		        .buildUpdate(VersionConvertorFactory_30_40.convertResource(conditionService.update(id.getIdPart(),
-				        (org.hl7.fhir.r4.model.Condition) VersionConvertorFactory_30_40.convertResource(updatedCondition))));
+		            (org.hl7.fhir.r4.model.Condition) VersionConvertorFactory_30_40.convertResource(updatedCondition))));
 	}
 	
 	@Delete

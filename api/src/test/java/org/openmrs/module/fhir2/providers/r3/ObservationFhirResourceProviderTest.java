@@ -284,8 +284,8 @@ public class ObservationFhirResourceProviderTest extends BaseFhirR3ProvenanceRes
 	public void createObservation_shouldCreateNewObservation() {
 		when(observationService.create(any(org.hl7.fhir.r4.model.Observation.class))).thenReturn(observation);
 		
-		MethodOutcome result = resourceProvider.createObservationResource(
-				(Observation) VersionConvertorFactory_30_40.convertResource(observation));
+		MethodOutcome result = resourceProvider
+		        .createObservationResource((Observation) VersionConvertorFactory_30_40.convertResource(observation));
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getCreated(), is(true));

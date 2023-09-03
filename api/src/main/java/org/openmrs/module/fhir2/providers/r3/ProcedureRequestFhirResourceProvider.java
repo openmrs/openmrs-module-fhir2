@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.providers.r3;
 
 import static lombok.AccessLevel.PACKAGE;
+
 import javax.annotation.Nonnull;
 
 import java.util.HashSet;
@@ -71,8 +72,8 @@ public class ProcedureRequestFhirResourceProvider implements IResourceProvider {
 	}
 	
 	public MethodOutcome createProcedureRequest(@ResourceParam ProcedureRequest procedureRequest) {
-		return FhirProviderUtils.buildCreate(
-				VersionConvertorFactory_30_40.convertResource(serviceRequestService.create((ServiceRequest) VersionConvertorFactory_30_40.convertResource(procedureRequest))));
+		return FhirProviderUtils.buildCreate(VersionConvertorFactory_30_40.convertResource(
+		    serviceRequestService.create((ServiceRequest) VersionConvertorFactory_30_40.convertResource(procedureRequest))));
 	}
 	
 	public MethodOutcome updateProcedureRequest(@IdParam IdType id, @ResourceParam ProcedureRequest procedureRequest) {
@@ -82,8 +83,8 @@ public class ProcedureRequestFhirResourceProvider implements IResourceProvider {
 		
 		procedureRequest.setId(id.getIdPart());
 		
-		return FhirProviderUtils.buildUpdate(VersionConvertorFactory_30_40.convertResource(
-		    serviceRequestService.update(id.getIdPart(), (ServiceRequest) VersionConvertorFactory_30_40.convertResource(procedureRequest))));
+		return FhirProviderUtils.buildUpdate(VersionConvertorFactory_30_40.convertResource(serviceRequestService
+		        .update(id.getIdPart(), (ServiceRequest) VersionConvertorFactory_30_40.convertResource(procedureRequest))));
 	}
 	
 	public OperationOutcome deleteProcedureRequest(@IdParam @Nonnull IdType id) {

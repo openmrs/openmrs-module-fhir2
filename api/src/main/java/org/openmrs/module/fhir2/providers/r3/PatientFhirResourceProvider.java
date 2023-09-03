@@ -88,9 +88,8 @@ public class PatientFhirResourceProvider implements IResourceProvider {
 	
 	@Create
 	public MethodOutcome createPatient(@ResourceParam Patient patient) {
-		return FhirProviderUtils
-		        .buildCreate(VersionConvertorFactory_30_40.convertResource(patientService.create(
-				        (org.hl7.fhir.r4.model.Patient) VersionConvertorFactory_30_40.convertResource(patient))));
+		return FhirProviderUtils.buildCreate(VersionConvertorFactory_30_40.convertResource(
+		    patientService.create((org.hl7.fhir.r4.model.Patient) VersionConvertorFactory_30_40.convertResource(patient))));
 	}
 	
 	@Update
@@ -102,9 +101,9 @@ public class PatientFhirResourceProvider implements IResourceProvider {
 		
 		patient.setId(id.getIdPart());
 		
-		return FhirProviderUtils.buildUpdate(
-				VersionConvertorFactory_30_40.convertResource(patientService.update(id.getIdPart(),
-						(org.hl7.fhir.r4.model.Patient) VersionConvertorFactory_30_40.convertResource(patient))));
+		return FhirProviderUtils
+		        .buildUpdate(VersionConvertorFactory_30_40.convertResource(patientService.update(id.getIdPart(),
+		            (org.hl7.fhir.r4.model.Patient) VersionConvertorFactory_30_40.convertResource(patient))));
 	}
 	
 	@Delete

@@ -75,9 +75,8 @@ public class MedicationFhirResourceProvider implements IResourceProvider {
 	@Create
 	@SuppressWarnings("unused")
 	public MethodOutcome createMedication(@ResourceParam Medication medication) {
-		return FhirProviderUtils.buildCreate(
-				VersionConvertorFactory_30_40.convertResource(medicationService.create(
-						(org.hl7.fhir.r4.model.Medication) VersionConvertorFactory_30_40.convertResource(medication))));
+		return FhirProviderUtils.buildCreate(VersionConvertorFactory_30_40.convertResource(medicationService
+		        .create((org.hl7.fhir.r4.model.Medication) VersionConvertorFactory_30_40.convertResource(medication))));
 	}
 	
 	@Update
@@ -87,9 +86,9 @@ public class MedicationFhirResourceProvider implements IResourceProvider {
 			medication.setId(id.getIdPart());
 		}
 		
-		return FhirProviderUtils.buildUpdate(VersionConvertorFactory_30_40.convertResource(
-		    medicationService.update(id == null ? null : id.getIdPart(),
-				    (org.hl7.fhir.r4.model.Medication) VersionConvertorFactory_30_40.convertResource(medication))));
+		return FhirProviderUtils.buildUpdate(
+		    VersionConvertorFactory_30_40.convertResource(medicationService.update(id == null ? null : id.getIdPart(),
+		        (org.hl7.fhir.r4.model.Medication) VersionConvertorFactory_30_40.convertResource(medication))));
 	}
 	
 	@Delete

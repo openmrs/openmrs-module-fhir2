@@ -78,9 +78,8 @@ public class DiagnosticReportFhirResourceProvider implements IResourceProvider {
 	@Create
 	@SuppressWarnings("unused")
 	public MethodOutcome createDiagnosticReport(@ResourceParam DiagnosticReport diagnosticReport) {
-		return FhirProviderUtils.buildCreate(VersionConvertorFactory_30_40.convertResource(
-		    diagnosticReportService.create(
-				    (org.hl7.fhir.r4.model.DiagnosticReport) VersionConvertorFactory_30_40.convertResource(diagnosticReport))));
+		return FhirProviderUtils.buildCreate(VersionConvertorFactory_30_40.convertResource(diagnosticReportService.create(
+		    (org.hl7.fhir.r4.model.DiagnosticReport) VersionConvertorFactory_30_40.convertResource(diagnosticReport))));
 	}
 	
 	@Update
@@ -92,9 +91,9 @@ public class DiagnosticReportFhirResourceProvider implements IResourceProvider {
 			idPart = id.getIdPart();
 		}
 		
-		return FhirProviderUtils.buildUpdate(VersionConvertorFactory_30_40.convertResource(
-		    diagnosticReportService.update(idPart,
-				    (org.hl7.fhir.r4.model.DiagnosticReport) VersionConvertorFactory_30_40.convertResource(diagnosticReport))));
+		return FhirProviderUtils.buildUpdate(
+		    VersionConvertorFactory_30_40.convertResource(diagnosticReportService.update(idPart,
+		        (org.hl7.fhir.r4.model.DiagnosticReport) VersionConvertorFactory_30_40.convertResource(diagnosticReport))));
 	}
 	
 	@Delete

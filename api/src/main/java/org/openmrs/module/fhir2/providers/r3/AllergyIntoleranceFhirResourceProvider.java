@@ -79,9 +79,8 @@ public class AllergyIntoleranceFhirResourceProvider implements IResourceProvider
 	@Create
 	@SuppressWarnings("unused")
 	public MethodOutcome creatAllergyIntolerance(@ResourceParam AllergyIntolerance allergyIntolerance) {
-		return FhirProviderUtils.buildCreate(VersionConvertorFactory_30_40.convertResource(
-		    allergyIntoleranceService.create(
-				    (org.hl7.fhir.r4.model.AllergyIntolerance) VersionConvertorFactory_30_40.convertResource(allergyIntolerance))));
+		return FhirProviderUtils.buildCreate(VersionConvertorFactory_30_40.convertResource(allergyIntoleranceService.create(
+		    (org.hl7.fhir.r4.model.AllergyIntolerance) VersionConvertorFactory_30_40.convertResource(allergyIntolerance))));
 	}
 	
 	@Update
@@ -93,9 +92,9 @@ public class AllergyIntoleranceFhirResourceProvider implements IResourceProvider
 		
 		allergyIntolerance.setId(id.getIdPart());
 		
-		return FhirProviderUtils.buildUpdate(VersionConvertorFactory_30_40.convertResource(allergyIntoleranceService
-		        .update(id.getIdPart(),
-				        (org.hl7.fhir.r4.model.AllergyIntolerance) VersionConvertorFactory_30_40.convertResource(allergyIntolerance))));
+		return FhirProviderUtils.buildUpdate(VersionConvertorFactory_30_40.convertResource(allergyIntoleranceService.update(
+		    id.getIdPart(),
+		    (org.hl7.fhir.r4.model.AllergyIntolerance) VersionConvertorFactory_30_40.convertResource(allergyIntolerance))));
 	}
 	
 	@Delete

@@ -60,8 +60,8 @@ public class GroupFhirResourceProvider implements IResourceProvider {
 	@Create
 	@SuppressWarnings("unused")
 	public MethodOutcome createGroup(@ResourceParam Group group) {
-		return FhirProviderUtils.buildCreate(VersionConvertorFactory_30_40.convertResource(groupService.create(
-				(org.hl7.fhir.r4.model.Group) VersionConvertorFactory_30_40.convertResource(group))));
+		return FhirProviderUtils.buildCreate(VersionConvertorFactory_30_40.convertResource(
+		    groupService.create((org.hl7.fhir.r4.model.Group) VersionConvertorFactory_30_40.convertResource(group))));
 	}
 	
 	@Update
@@ -75,7 +75,7 @@ public class GroupFhirResourceProvider implements IResourceProvider {
 		
 		return FhirProviderUtils
 		        .buildUpdate(VersionConvertorFactory_30_40.convertResource(groupService.update(id.getIdPart(),
-				        (org.hl7.fhir.r4.model.Group) VersionConvertorFactory_30_40.convertResource(group))));
+		            (org.hl7.fhir.r4.model.Group) VersionConvertorFactory_30_40.convertResource(group))));
 	}
 	
 	@Delete

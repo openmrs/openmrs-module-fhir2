@@ -147,8 +147,8 @@ public class PatientFhirResourceProviderTest extends BaseFhirR3ProvenanceResourc
 	public void createPatient_shouldCreateNewPatient() {
 		when(patientService.create(any(org.hl7.fhir.r4.model.Patient.class))).thenReturn(patient);
 		
-		MethodOutcome result = patientFhirResourceProvider.createPatient(
-				(Patient) VersionConvertorFactory_30_40.convertResource(patient));
+		MethodOutcome result = patientFhirResourceProvider
+		        .createPatient((Patient) VersionConvertorFactory_30_40.convertResource(patient));
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getCreated(), is(true));
@@ -161,7 +161,7 @@ public class PatientFhirResourceProviderTest extends BaseFhirR3ProvenanceResourc
 		when(patientService.update(eq(PATIENT_UUID), any(org.hl7.fhir.r4.model.Patient.class))).thenReturn(patient);
 		
 		MethodOutcome result = patientFhirResourceProvider.updatePatient(new IdType().setValue(PATIENT_UUID),
-				(Patient) VersionConvertorFactory_30_40.convertResource(patient));
+		    (Patient) VersionConvertorFactory_30_40.convertResource(patient));
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getResource(), notNullValue());
@@ -174,7 +174,7 @@ public class PatientFhirResourceProviderTest extends BaseFhirR3ProvenanceResourc
 		        .thenThrow(InvalidRequestException.class);
 		
 		patientFhirResourceProvider.updatePatient(new IdType().setValue(WRONG_PATIENT_UUID),
-				(Patient) VersionConvertorFactory_30_40.convertResource(patient));
+		    (Patient) VersionConvertorFactory_30_40.convertResource(patient));
 	}
 	
 	@Test(expected = InvalidRequestException.class)
@@ -185,7 +185,7 @@ public class PatientFhirResourceProviderTest extends BaseFhirR3ProvenanceResourc
 		        .thenThrow(InvalidRequestException.class);
 		
 		patientFhirResourceProvider.updatePatient(new IdType().setValue(PATIENT_UUID),
-				(Patient) VersionConvertorFactory_30_40.convertResource(noIdPatient));
+		    (Patient) VersionConvertorFactory_30_40.convertResource(noIdPatient));
 	}
 	
 	@Test(expected = MethodNotAllowedException.class)
@@ -197,7 +197,7 @@ public class PatientFhirResourceProviderTest extends BaseFhirR3ProvenanceResourc
 		        .thenThrow(MethodNotAllowedException.class);
 		
 		patientFhirResourceProvider.updatePatient(new IdType().setValue(WRONG_PATIENT_UUID),
-				(Patient) VersionConvertorFactory_30_40.convertResource(wrongPatient));
+		    (Patient) VersionConvertorFactory_30_40.convertResource(wrongPatient));
 	}
 	
 	@Test

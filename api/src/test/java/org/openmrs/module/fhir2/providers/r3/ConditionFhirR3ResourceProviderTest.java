@@ -123,8 +123,8 @@ public class ConditionFhirR3ResourceProviderTest extends BaseFhirR3ProvenanceRes
 	public void createCondition_shouldCreateNewCondition() {
 		when(conditionService.create(any(org.hl7.fhir.r4.model.Condition.class))).thenReturn(condition);
 		
-		MethodOutcome result = resourceProvider.createCondition(
-				(Condition) VersionConvertorFactory_30_40.convertResource(condition));
+		MethodOutcome result = resourceProvider
+		        .createCondition((Condition) VersionConvertorFactory_30_40.convertResource(condition));
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getCreated(), is(true));
@@ -137,7 +137,7 @@ public class ConditionFhirR3ResourceProviderTest extends BaseFhirR3ProvenanceRes
 		when(conditionService.update(anyString(), any(org.hl7.fhir.r4.model.Condition.class))).thenReturn(condition);
 		
 		MethodOutcome result = resourceProvider.updateCondition(new IdType().setValue(CONDITION_UUID),
-				(Condition) VersionConvertorFactory_30_40.convertResource(condition));
+		    (Condition) VersionConvertorFactory_30_40.convertResource(condition));
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getResource().getIdElement().getIdPart(), equalTo(CONDITION_UUID));
