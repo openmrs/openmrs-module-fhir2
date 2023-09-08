@@ -81,7 +81,7 @@ public class FhirGroupDaoImpl extends BaseFhirDao<Cohort> implements FhirGroupDa
 								criteria.createAlias(PERSON_ALIAS, "ps").createAlias(NAMES_ALIAS, "pn");
 							}
 							
-							List<Optional<Criterion>> criterionList = new ArrayList<>();
+							List<Optional<? extends Criterion>> criterionList = new ArrayList<>();
 							
 							for (String token : StringUtils.split(participantToken.getValue(), " \t,")) {
 								criterionList.add(propertyLike("pn.givenName", token));

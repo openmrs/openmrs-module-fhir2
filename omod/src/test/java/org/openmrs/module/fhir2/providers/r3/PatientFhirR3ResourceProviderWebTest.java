@@ -56,6 +56,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirPatientService;
+import org.openmrs.module.fhir2.api.search.param.OpenmrsPatientSearchParams;
 import org.openmrs.module.fhir2.api.search.param.PatientSearchParams;
 import org.openmrs.module.fhir2.providers.r4.MockIBundleProvider;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -88,6 +89,9 @@ public class PatientFhirR3ResourceProviderWebTest extends BaseFhirR3ResourceProv
 	
 	@Captor
 	private ArgumentCaptor<PatientSearchParams> patientSearchParamsCaptor;
+	
+	@Captor
+	private ArgumentCaptor<OpenmrsPatientSearchParams> openmrsPatientSearchParamsCaptor;
 	
 	@Override
 	@Before
@@ -587,10 +591,25 @@ public class PatientFhirR3ResourceProviderWebTest extends BaseFhirR3ResourceProv
 		    hasProperty("paramType", equalTo(FhirConstants.ALLERGY_INTOLERANCE)))));
 	}
 	
+	@Test
+	public void shouldSupportCustomOpenmrsQuery() throws Exception {
+		verifyUri("/Patient/?_query=openmrsPatients&q=Hannibal Lector");
+		
+		verify(patientService).searchForPatients(openmrsPatientSearchParamsCaptor.capture());
+		StringAndListParam queryParam = openmrsPatientSearchParamsCaptor.getValue().getQuery();
+		
+		assertThat(queryParam, notNullValue());
+		assertThat(queryParam.getValuesAsQueryTokens(), not(empty()));
+		assertThat(queryParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
+		    equalTo("Hannibal Lector"));
+	}
+	
 	private void verifyUri(String uri) throws Exception {
 		Patient patient = new Patient();
 		patient.setId(PATIENT_UUID);
-		when(patientService.searchForPatients(any()))
+		when(patientService.searchForPatients(any(PatientSearchParams.class)))
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
+		when(patientService.searchForPatients(any(OpenmrsPatientSearchParams.class)))
 		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
 		
 		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.JSON).go();

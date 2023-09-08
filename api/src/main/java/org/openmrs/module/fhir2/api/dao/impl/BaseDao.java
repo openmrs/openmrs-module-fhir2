@@ -81,6 +81,7 @@ import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.internal.CriteriaImpl;
+import org.hibernate.sql.JoinType;
 import org.hl7.fhir.dstu3.model.Encounter;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Location;
@@ -621,7 +622,7 @@ public abstract class BaseDao {
 								        .createAlias("ps.names", "pn");
 							}
 							
-							List<Optional<Criterion>> criterionList = new ArrayList<>();
+							List<Optional<? extends Criterion>> criterionList = new ArrayList<>();
 							
 							for (String token : StringUtils.split(participantToken.getValue(), " \t,")) {
 								criterionList.add(propertyLike("pn.givenName", token));
@@ -668,7 +669,7 @@ public abstract class BaseDao {
 								criteria.createAlias("or.person", "ps").createAlias("ps.names", "pn");
 							}
 							
-							List<Optional<Criterion>> criterionList = new ArrayList<>();
+							List<Optional<? extends Criterion>> criterionList = new ArrayList<>();
 							
 							for (String token : StringUtils.split(participantToken.getValue(), " \t,")) {
 								criterionList.add(propertyLike("pn.givenName", token));
@@ -723,9 +724,10 @@ public abstract class BaseDao {
 		
 		if (lacksAlias(criteria, "pn")) {
 			if (StringUtils.isNotBlank(personAlias)) {
-				criteria.createAlias(String.format("%s.names", personAlias), "pn");
+				criteria.createAlias(String.format("%s.names", personAlias), "pn", JoinType.INNER_JOIN,
+				    eq("pn.voided", false));
 			} else {
-				criteria.createAlias("names", "pn");
+				criteria.createAlias("names", "pn", JoinType.INNER_JOIN, eq("pn.voided", false));
 			}
 		}
 		
@@ -779,7 +781,7 @@ public abstract class BaseDao {
 							if (lacksAlias(criteria, "pn")) {
 								criteria.createAlias("p.names", "pn");
 							}
-							List<Optional<Criterion>> criterionList = new ArrayList<>();
+							List<Optional<? extends Criterion>> criterionList = new ArrayList<>();
 							
 							for (String token : StringUtils.split(patientToken.getValue(), " \t,")) {
 								criterionList.add(propertyLike("pn.givenName", token));
@@ -799,7 +801,7 @@ public abstract class BaseDao {
 	}
 	
 	protected Optional<Criterion> handleCommonSearchParameters(List<PropParam<?>> theCommonParams) {
-		List<Optional<Criterion>> criterionList = new ArrayList<>();
+		List<Optional<? extends Criterion>> criterionList = new ArrayList<>();
 		
 		for (PropParam<?> commonSearchParam : theCommonParams) {
 			switch (commonSearchParam.getPropertyName()) {
@@ -831,7 +833,7 @@ public abstract class BaseDao {
 			return Optional.empty();
 		}
 		
-		List<Optional<Criterion>> criterionList = new ArrayList<>();
+		List<Optional<? extends Criterion>> criterionList = new ArrayList<>();
 		
 		if (city != null) {
 			criterionList.add(handleAndListParam(city, c -> propertyLike(String.format("%s.cityVillage", aliasPrefix), c)));
@@ -849,10 +851,6 @@ public abstract class BaseDao {
 		
 		if (country != null) {
 			criterionList.add(handleAndListParam(country, c -> propertyLike(String.format("%s.country", aliasPrefix), c)));
-		}
-		
-		if (criterionList.size() == 0) {
-			return Optional.empty();
 		}
 		
 		return Optional.of(and(toCriteriaArray(criterionList.stream())));
@@ -1096,15 +1094,15 @@ public abstract class BaseDao {
 	
 	@SafeVarargs
 	@SuppressWarnings("unused")
-	protected final Criterion[] toCriteriaArray(Optional<Criterion>... criteria) {
+	protected final Criterion[] toCriteriaArray(Optional<? extends Criterion>... criteria) {
 		return toCriteriaArray(Arrays.stream(criteria));
 	}
 	
-	protected Criterion[] toCriteriaArray(Collection<Optional<Criterion>> collection) {
+	protected Criterion[] toCriteriaArray(Collection<Optional<? extends Criterion>> collection) {
 		return toCriteriaArray(collection.stream());
 	}
 	
-	protected Criterion[] toCriteriaArray(Stream<Optional<Criterion>> criteriaStream) {
+	protected Criterion[] toCriteriaArray(Stream<Optional<? extends Criterion>> criteriaStream) {
 		return criteriaStream.filter(Optional::isPresent).map(Optional::get).toArray(Criterion[]::new);
 	}
 	
