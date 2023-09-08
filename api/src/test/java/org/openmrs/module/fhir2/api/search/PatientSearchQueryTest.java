@@ -372,6 +372,50 @@ public class PatientSearchQueryTest extends BaseModuleContextSensitiveTest {
 	}
 	
 	@Test
+	public void searchForPatients_shouldSearchForPatientWithQueryByGivenName() {
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.QUERY_SEARCH_HANDLER,
+		    new StringAndListParam().addAnd(new StringParam(PATIENT_GIVEN_NAME)));
+		IBundleProvider results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), greaterThanOrEqualTo(1));
+		
+		List<Patient> resultList = get(results);
+		
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.get(0).getNameFirstRep().getGiven().get(0).toString(), startsWith(PATIENT_GIVEN_NAME));
+	}
+	
+	@Test
+	public void searchForPatients_shouldSearchForPatientWithQueryByFamilyName() {
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.QUERY_SEARCH_HANDLER,
+		    new StringAndListParam().addAnd(new StringParam(PATIENT_FAMILY_NAME)));
+		IBundleProvider results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), greaterThanOrEqualTo(1));
+		
+		List<Patient> resultList = get(results);
+		
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.get(0).getNameFirstRep().getFamily(), startsWith(PATIENT_FAMILY_NAME));
+	}
+	
+	@Test
+	public void searchForPatients_shouldSearchForPatientWithQueryByIdentifier() {
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.QUERY_SEARCH_HANDLER,
+		    new StringAndListParam().addAnd(new StringParam(PATIENT_IDENTIFIER)));
+		IBundleProvider results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(1));
+		
+		List<Patient> resultList = get(results);
+		
+		assertThat(resultList, hasSize(equalTo(1)));
+	}
+	
+	@Test
 	public void searchForPatients_shouldReturnPatientsByGender() {
 		final String GENDER_PROPERTY = "gender";
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.GENDER_SEARCH_HANDLER, "gender",

@@ -17,16 +17,21 @@ import static org.hl7.fhir.r4.model.Patient.SP_DEATH_DATE;
 
 import javax.annotation.Nonnull;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.StringAndListParam;
+import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Criteria;
+import org.hibernate.criterion.Criterion;
 import org.hibernate.sql.JoinType;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifierType;
@@ -78,6 +83,9 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
+				case FhirConstants.QUERY_SEARCH_HANDLER:
+					entry.getValue().forEach(query -> handlePatientQuery(criteria, (StringAndListParam) query.getParam()));
+					break;
 				case FhirConstants.NAME_SEARCH_HANDLER:
 					handleNames(criteria, entry.getValue());
 					break;
@@ -107,6 +115,37 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 		});
 	}
 	
+	private void handlePatientQuery(Criteria criteria, @Nonnull StringAndListParam query) {
+		if (query == null) {
+			return;
+		}
+		
+		if (lacksAlias(criteria, "pn")) {
+			criteria.createAlias("names", "pn");
+		}
+		
+		if (lacksAlias(criteria, "pi")) {
+			criteria.createAlias("identifiers", "pi");
+		}
+		
+		handleAndListParam(query, q -> {
+			List<Optional<? extends Criterion>> criterionList = new ArrayList<>();
+			
+			for (String token : StringUtils.split(q.getValueNotNull(), " \t,")) {
+				StringParam param = new StringParam(token).setContains(q.isContains()).setExact(q.isExact());
+				criterionList.add(propertyLike("pn.givenName", param).map(c -> and(c, eq("pn.voided", false))));
+				criterionList.add(propertyLike("pn.middleName", param).map(c -> and(c, eq("pn.voided", false))));
+				criterionList.add(propertyLike("pn.familyName", param).map(c -> and(c, eq("pn.voided", false))));
+			}
+			
+			criterionList.add(propertyLike("pi.identifier",
+			    new StringParam(q.getValueNotNull()).setContains(q.isContains()).setExact(q.isExact()))
+			            .map(c -> and(c, eq("pi.voided", false))));
+			
+			return Optional.of(or(toCriteriaArray(criterionList)));
+		}).ifPresent(criteria::add);
+	}
+	
 	protected void handleIdentifier(Criteria criteria, TokenAndListParam identifier) {
 		if (identifier == null) {
 			return;
@@ -119,7 +158,7 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 				return Optional.of(in("pi.identifier", tokensToList(tokens)));
 			} else {
 				if (lacksAlias(criteria, "pit")) {
-					criteria.createAlias("pi.identifierType", "pit");
+					criteria.createAlias("pi.identifierType", "pit", JoinType.INNER_JOIN, eq("pit.retired", false));
 				}
 				
 				return Optional.of(and(eq("pit.name", system), in("pi.identifier", tokensToList(tokens))));
@@ -139,5 +178,10 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 		}
 		
 		return super.paramToProp(param);
+	}
+	
+	@Override
+	public boolean hasDistinctResults() {
+		return false;
 	}
 }

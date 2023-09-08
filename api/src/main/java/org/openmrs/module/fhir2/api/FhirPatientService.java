@@ -19,6 +19,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.openmrs.PatientIdentifierType;
+import org.openmrs.module.fhir2.api.search.param.OpenmrsPatientSearchParams;
 import org.openmrs.module.fhir2.api.search.param.PatientSearchParams;
 
 public interface FhirPatientService extends FhirService<Patient> {
@@ -33,6 +34,8 @@ public interface FhirPatientService extends FhirService<Patient> {
 	PatientIdentifierType getPatientIdentifierTypeByIdentifier(Identifier identifier);
 	
 	IBundleProvider searchForPatients(PatientSearchParams patientSearchParams);
+	
+	IBundleProvider searchForPatients(OpenmrsPatientSearchParams patientSearchParams);
 	
 	IBundleProvider getPatientEverything(TokenParam identifier);
 	

@@ -476,6 +476,47 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR3Integr
 	}
 	
 	@Test
+	public void shouldAllowNamedQueryForPatientsAsJson() throws Exception {
+		MockHttpServletResponse response = get("/Patient?_query=openmrsPatients&q=Doe&_sort=given")
+		        .accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle results = readBundleResponse(response);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(results.hasEntry(), is(true));
+		
+		List<Bundle.BundleEntryComponent> entries = results.getEntry();
+		
+		assertThat(entries, everyItem(hasResource(hasProperty("nameFirstRep", hasProperty("family", startsWith("Doe"))))));
+		assertThat(entries,
+		    containsInRelativeOrder(
+		        hasResource(hasProperty("nameFirstRep", hasProperty("givenAsSingleString", containsString("Jean")))),
+		        hasResource(hasProperty("nameFirstRep", hasProperty("givenAsSingleString", containsString("John"))))));
+		assertThat(entries, everyItem(hasResource(validResource())));
+	}
+	
+	@Test
+	public void shouldReturnCountForPatientAsJson() throws Exception {
+		MockHttpServletResponse response = get("/Patient?family=Doe&_summary=count").accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle result = readBundleResponse(response);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(result, hasProperty("total", equalTo(3)));
+		
+	}
+	
+	@Test
 	public void shouldSearchForAllPatientsAsXML() throws Exception {
 		MockHttpServletResponse response = get("/Patient").accept(FhirMediaTypes.XML).go();
 		
@@ -521,19 +562,28 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR3Integr
 	}
 	
 	@Test
-	public void shouldReturnCountForPatientAsJson() throws Exception {
-		MockHttpServletResponse response = get("/Patient?family=Doe&_summary=count").accept(FhirMediaTypes.JSON).go();
+	public void shouldAllowNamedQueryForPatientsAsXml() throws Exception {
+		MockHttpServletResponse response = get("/Patient?_query=openmrsPatients&q=Doe&_sort=given")
+		        .accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
-		Bundle result = readBundleResponse(response);
+		Bundle results = readBundleResponse(response);
 		
-		assertThat(result, notNullValue());
-		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
-		assertThat(result, hasProperty("total", equalTo(3)));
+		assertThat(results, notNullValue());
+		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(results.hasEntry(), is(true));
 		
+		List<Bundle.BundleEntryComponent> entries = results.getEntry();
+		
+		assertThat(entries, everyItem(hasResource(hasProperty("nameFirstRep", hasProperty("family", startsWith("Doe"))))));
+		assertThat(entries,
+		    containsInRelativeOrder(
+		        hasResource(hasProperty("nameFirstRep", hasProperty("givenAsSingleString", containsString("Jean")))),
+		        hasResource(hasProperty("nameFirstRep", hasProperty("givenAsSingleString", containsString("John"))))));
+		assertThat(entries, everyItem(hasResource(validResource())));
 	}
 	
 	@Test

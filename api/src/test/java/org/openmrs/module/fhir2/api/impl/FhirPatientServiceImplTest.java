@@ -58,6 +58,7 @@ import org.openmrs.module.fhir2.api.dao.FhirPatientDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.SearchQueryBundleProvider;
 import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
+import org.openmrs.module.fhir2.api.search.param.OpenmrsPatientSearchParams;
 import org.openmrs.module.fhir2.api.search.param.PatientSearchParams;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.PatientTranslator;
@@ -780,6 +781,30 @@ public class FhirPatientServiceImplTest {
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
 		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void searchForPatients_shouldSearchForPatientsByOpenmrsQuery() {
+		List<Patient> patients = new ArrayList<>();
+		patients.add(patient);
+		StringAndListParam stringAndListParam = new StringAndListParam().addAnd(new StringParam(PATIENT_GIVEN_NAME));
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.QUERY_SEARCH_HANDLER,
+		    stringAndListParam);
+		
+		when(dao.getSearchResults(any())).thenReturn(patients);
+		when(dao.getSearchResultsCount(any())).thenReturn(1);
+		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
+		    new SearchQueryBundleProvider<>(theParams, dao, patientTranslator, globalPropertyService, searchQueryInclude));
+		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
+		when(patientTranslator.toFhirResource(patient)).thenReturn(fhirPatient);
+		
+		IBundleProvider results = patientService
+		        .searchForPatients(OpenmrsPatientSearchParams.builder().query(stringAndListParam).build());
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(1));
+		
+		assertThat(get(results), hasSize(equalTo(1)));
 	}
 	
 	@Test

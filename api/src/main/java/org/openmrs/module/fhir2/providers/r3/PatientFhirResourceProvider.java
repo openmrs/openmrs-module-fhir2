@@ -52,9 +52,11 @@ import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.ProcedureRequest;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.ServiceRequest;
 import org.openmrs.module.fhir2.api.FhirPatientService;
 import org.openmrs.module.fhir2.api.annotations.R3Provider;
 import org.openmrs.module.fhir2.api.search.SearchQueryBundleProviderR3Wrapper;
+import org.openmrs.module.fhir2.api.search.param.OpenmrsPatientSearchParams;
 import org.openmrs.module.fhir2.api.search.param.PatientSearchParams;
 import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -138,6 +140,35 @@ public class PatientFhirResourceProvider implements IResourceProvider {
 		return new SearchQueryBundleProviderR3Wrapper(
 		        patientService.searchForPatients(new PatientSearchParams(name, given, family, identifier, gender, birthDate,
 		                deathDate, deceased, city, state, postalCode, country, id, lastUpdated, sort, revIncludes)));
+	}
+	
+	@Search(queryName = "openmrsPatients")
+	@SuppressWarnings("unused")
+	public IBundleProvider searchOpenmrsPatients(@OptionalParam(name = "q") StringAndListParam query,
+	        @OptionalParam(name = org.hl7.fhir.r4.model.Patient.SP_GENDER) TokenAndListParam gender,
+	        @OptionalParam(name = org.hl7.fhir.r4.model.Patient.SP_BIRTHDATE) DateRangeParam birthDate,
+	        @OptionalParam(name = org.hl7.fhir.r4.model.Patient.SP_DEATH_DATE) DateRangeParam deathDate,
+	        @OptionalParam(name = org.hl7.fhir.r4.model.Patient.SP_DECEASED) TokenAndListParam deceased,
+	        @OptionalParam(name = org.hl7.fhir.r4.model.Patient.SP_ADDRESS_CITY) StringAndListParam city,
+	        @OptionalParam(name = org.hl7.fhir.r4.model.Patient.SP_ADDRESS_STATE) StringAndListParam state,
+	        @OptionalParam(name = org.hl7.fhir.r4.model.Patient.SP_ADDRESS_POSTALCODE) StringAndListParam postalCode,
+	        @OptionalParam(name = org.hl7.fhir.r4.model.Patient.SP_ADDRESS_COUNTRY) StringAndListParam country,
+	        @OptionalParam(name = org.hl7.fhir.r4.model.Patient.SP_RES_ID) TokenAndListParam id,
+	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated, @Sort SortSpec sort,
+	        @IncludeParam(reverse = true, allow = { "Observation:" + org.hl7.fhir.r4.model.Observation.SP_PATIENT,
+	                "AllergyIntolerance:" + org.hl7.fhir.r4.model.AllergyIntolerance.SP_PATIENT,
+	                "DiagnosticReport:" + org.hl7.fhir.r4.model.DiagnosticReport.SP_PATIENT,
+	                "Encounter:" + org.hl7.fhir.r4.model.Encounter.SP_PATIENT,
+	                "MedicationRequest:" + org.hl7.fhir.r4.model.MedicationRequest.SP_PATIENT,
+	                "ServiceRequest:" + ServiceRequest.SP_PATIENT, "MedicationDispense:"
+	                        + org.hl7.fhir.r4.model.MedicationDispense.SP_PRESCRIPTION }) HashSet<Include> revIncludes) {
+		if (CollectionUtils.isEmpty(revIncludes)) {
+			revIncludes = null;
+		}
+		
+		return new SearchQueryBundleProviderR3Wrapper(
+		        patientService.searchForPatients(new OpenmrsPatientSearchParams(query, gender, birthDate, deathDate,
+		                deceased, city, state, postalCode, country, id, lastUpdated, sort, revIncludes)));
 	}
 	
 	/**

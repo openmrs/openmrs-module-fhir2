@@ -56,6 +56,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.openmrs.module.fhir2.api.FhirPatientService;
 import org.openmrs.module.fhir2.api.annotations.R4Provider;
+import org.openmrs.module.fhir2.api.search.param.OpenmrsPatientSearchParams;
 import org.openmrs.module.fhir2.api.search.param.PatientSearchParams;
 import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -102,6 +103,7 @@ public class PatientFhirResourceProvider implements IResourceProvider {
 	}
 	
 	@Patch
+	@SuppressWarnings("unused")
 	public MethodOutcome patchPatient(@IdParam IdType id, PatchTypeEnum patchType, @ResourceParam String body,
 	        RequestDetails requestDetails) {
 		if (id == null || id.getIdPart() == null) {
@@ -146,6 +148,32 @@ public class PatientFhirResourceProvider implements IResourceProvider {
 		
 		return patientService.searchForPatients(new PatientSearchParams(name, given, family, identifier, gender, birthDate,
 		        deathDate, deceased, city, state, postalCode, country, id, lastUpdated, sort, revIncludes));
+	}
+	
+	@Search(queryName = "openmrsPatients")
+	@SuppressWarnings("unused")
+	public IBundleProvider searchOpenmrsPatients(@OptionalParam(name = "q") StringAndListParam query,
+	        @OptionalParam(name = Patient.SP_GENDER) TokenAndListParam gender,
+	        @OptionalParam(name = Patient.SP_BIRTHDATE) DateRangeParam birthDate,
+	        @OptionalParam(name = Patient.SP_DEATH_DATE) DateRangeParam deathDate,
+	        @OptionalParam(name = Patient.SP_DECEASED) TokenAndListParam deceased,
+	        @OptionalParam(name = Patient.SP_ADDRESS_CITY) StringAndListParam city,
+	        @OptionalParam(name = Patient.SP_ADDRESS_STATE) StringAndListParam state,
+	        @OptionalParam(name = Patient.SP_ADDRESS_POSTALCODE) StringAndListParam postalCode,
+	        @OptionalParam(name = Patient.SP_ADDRESS_COUNTRY) StringAndListParam country,
+	        @OptionalParam(name = Patient.SP_RES_ID) TokenAndListParam id,
+	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated, @Sort SortSpec sort,
+	        @IncludeParam(reverse = true, allow = { "Observation:" + Observation.SP_PATIENT,
+	                "AllergyIntolerance:" + AllergyIntolerance.SP_PATIENT, "DiagnosticReport:" + DiagnosticReport.SP_PATIENT,
+	                "Encounter:" + Encounter.SP_PATIENT, "MedicationRequest:" + MedicationRequest.SP_PATIENT,
+	                "ServiceRequest:" + ServiceRequest.SP_PATIENT,
+	                "MedicationDispense:" + MedicationDispense.SP_PRESCRIPTION }) HashSet<Include> revIncludes) {
+		if (CollectionUtils.isEmpty(revIncludes)) {
+			revIncludes = null;
+		}
+		
+		return patientService.searchForPatients(new OpenmrsPatientSearchParams(query, gender, birthDate, deathDate, deceased,
+		        city, state, postalCode, country, id, lastUpdated, sort, revIncludes));
 	}
 	
 	/**

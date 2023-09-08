@@ -32,6 +32,7 @@ import org.openmrs.module.fhir2.api.FhirPatientService;
 import org.openmrs.module.fhir2.api.dao.FhirPatientDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
+import org.openmrs.module.fhir2.api.search.param.OpenmrsPatientSearchParams;
 import org.openmrs.module.fhir2.api.search.param.PatientSearchParams;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.PatientTranslator;
@@ -81,6 +82,12 @@ public class FhirPatientServiceImpl extends BaseFhirService<Patient, org.openmrs
 	@Override
 	@Transactional(readOnly = true)
 	public IBundleProvider searchForPatients(PatientSearchParams patientSearchParams) {
+		return searchQuery.getQueryResults(patientSearchParams.toSearchParameterMap(), dao, translator, searchQueryInclude);
+	}
+	
+	@Override
+	@Transactional(readOnly = true)
+	public IBundleProvider searchForPatients(OpenmrsPatientSearchParams patientSearchParams) {
 		return searchQuery.getQueryResults(patientSearchParams.toSearchParameterMap(), dao, translator, searchQueryInclude);
 	}
 	

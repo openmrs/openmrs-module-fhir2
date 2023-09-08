@@ -11,7 +11,7 @@ package org.openmrs.module.fhir2;
 
 import org.springframework.beans.factory.annotation.Value;
 
-public class FhirConstants {
+public final class FhirConstants {
 	
 	private FhirConstants() {
 	}
@@ -216,6 +216,8 @@ public class FhirConstants {
 	public static final String ADDRESS_SEARCH_HANDLER = "address.search.handler";
 	
 	public static final String NAME_SEARCH_HANDLER = "name.search.handler";
+	
+	public static final String QUERY_SEARCH_HANDLER = "query.search.handler";
 	
 	public static final String NAME_PROPERTY = "name.property";
 	
