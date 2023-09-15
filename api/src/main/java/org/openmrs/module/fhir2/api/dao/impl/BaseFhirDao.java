@@ -174,7 +174,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	 * removed from the results. Note that it has performance implications as it requires "select
 	 * distinct" and 2 queries instead of 1 for getting the results.
 	 * 
-	 * @return
+	 * @return See the above explanation
 	 */
 	public boolean hasDistinctResults() {
 		return true;
@@ -207,6 +207,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<T> getSearchResults(@Nonnull SearchParameterMap theParams) {
 		Criteria criteria = getSearchResultCriteria(theParams);
