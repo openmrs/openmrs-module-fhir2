@@ -38,7 +38,6 @@
     <modules>
         <module>test-data</module>
         <module>api</module>
-        <module>api-2.1</module>
         <module>api-2.2</module>
         <module>api-2.5</module>
         <module>api-2.6</module>
@@ -886,7 +885,6 @@
             <id>release</id>
             <modules>
                 <module>api</module>
-                <module>api-2.1</module>
                 <module>api-2.2</module>
                 <module>api-2.5</module>
                 <module>api-2.6</module>

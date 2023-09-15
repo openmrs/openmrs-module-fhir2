@@ -18,16 +18,21 @@ import org.openmrs.module.fhir2.api.translators.ObservationStatusTranslator;
 import org.springframework.stereotype.Component;
 
 @Component
-@OpenmrsProfile(openmrsPlatformVersion = "2.0.* - 2.0.*")
+@OpenmrsProfile(openmrsPlatformVersion = "2.1.* - 2.*")
 public class ObservationStatusTranslatorImpl implements ObservationStatusTranslator {
 	
 	@Override
-	public Observation.ObservationStatus toFhirResource(@Nonnull Obs observation) {
-		return Observation.ObservationStatus.UNKNOWN;
+	public Observation.ObservationStatus toFhirResource(@Nonnull Obs obs) {
+		return Observation.ObservationStatus.valueOf(obs.getStatus().toString());
 	}
 	
 	@Override
 	public Obs toOpenmrsType(@Nonnull Obs observation, @Nonnull Observation.ObservationStatus observationStatus) {
+		if (observationStatus.equals(Observation.ObservationStatus.PRELIMINARY)
+		        || observationStatus.equals(Observation.ObservationStatus.FINAL)
+		        || observationStatus.equals(Observation.ObservationStatus.AMENDED)) {
+			observation.setStatus(Obs.Status.valueOf(observationStatus.toString()));
+		}
 		return observation;
 	}
 }
