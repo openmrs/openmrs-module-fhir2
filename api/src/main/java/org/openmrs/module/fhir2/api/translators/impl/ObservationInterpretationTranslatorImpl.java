@@ -15,13 +15,11 @@ import org.apache.commons.lang.WordUtils;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.openmrs.Obs;
-import org.openmrs.annotation.OpenmrsProfile;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.ObservationInterpretationTranslator;
 import org.springframework.stereotype.Component;
 
 @Component
-@OpenmrsProfile(openmrsPlatformVersion = "2.1.* - 2.*")
 public class ObservationInterpretationTranslatorImpl implements ObservationInterpretationTranslator {
 	
 	@Override

@@ -9,16 +9,11 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
-import javax.transaction.Transactional;
-
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Condition;
-import org.openmrs.Obs;
-import org.openmrs.annotation.OpenmrsProfile;
-import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirConditionService;
 import org.openmrs.module.fhir2.api.dao.FhirConditionDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
@@ -27,31 +22,28 @@ import org.openmrs.module.fhir2.api.search.param.ConditionSearchParams;
 import org.openmrs.module.fhir2.api.translators.ConditionTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @Transactional
-@Getter(AccessLevel.PROTECTED)
 @Setter(AccessLevel.PACKAGE)
-@OpenmrsProfile(openmrsPlatformVersion = "2.0.5 - 2.1.*")
-public class FhirConditionServiceImpl extends BaseFhirService<Condition, Obs> implements FhirConditionService {
+@Getter(AccessLevel.PROTECTED)
+public class FhirConditionServiceImpl extends BaseFhirService<Condition, org.openmrs.Condition> implements FhirConditionService {
 	
 	@Autowired
-	private FhirConditionDao<org.openmrs.Obs> dao;
+	private FhirConditionDao<org.openmrs.Condition> dao;
 	
 	@Autowired
-	private ConditionTranslator<org.openmrs.Obs> translator;
+	private ConditionTranslator<org.openmrs.Condition> translator;
 	
 	@Autowired
-	private SearchQueryInclude<Condition> searchQueryInclude;
+	private SearchQueryInclude searchQueryInclude;
 	
 	@Autowired
-	private SearchQuery<org.openmrs.Obs, Condition, FhirConditionDao<org.openmrs.Obs>, ConditionTranslator<org.openmrs.Obs>, SearchQueryInclude<Condition>> searchQuery;
+	private SearchQuery<org.openmrs.Condition, Condition, FhirConditionDao<org.openmrs.Condition>, ConditionTranslator<org.openmrs.Condition>, SearchQueryInclude<Condition>> searchQuery;
 	
 	@Override
 	public IBundleProvider searchConditions(ConditionSearchParams conditionSearchParams) {
-		conditionSearchParams.toSearchParameterMap().addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, "obsDatetime",
-		    conditionSearchParams.getOnsetDate());
-		
 		return searchQuery.getQueryResults(conditionSearchParams.toSearchParameterMap(), dao, translator,
 		    searchQueryInclude);
 	}

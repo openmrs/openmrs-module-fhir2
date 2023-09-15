@@ -21,11 +21,13 @@ import lombok.Getter;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.NoSuchMessageException;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
 import org.springframework.web.context.WebApplicationContext;
@@ -113,6 +115,16 @@ public class DelegatingWebApplicationContext implements WebApplicationContext {
 	}
 	
 	@Override
+	public <T> ObjectProvider<T> getBeanProvider(Class<T> aClass) {
+		return applicationContext.getBeanProvider(aClass);
+	}
+	
+	@Override
+	public <T> ObjectProvider<T> getBeanProvider(ResolvableType resolvableType) {
+		return applicationContext.getBeanProvider(resolvableType);
+	}
+	
+	@Override
 	public boolean containsBean(String name) {
 		return applicationContext.containsBean(name);
 	}
@@ -128,6 +140,11 @@ public class DelegatingWebApplicationContext implements WebApplicationContext {
 	}
 	
 	@Override
+	public boolean isTypeMatch(String s, ResolvableType resolvableType) throws NoSuchBeanDefinitionException {
+		return applicationContext.isTypeMatch(s, resolvableType);
+	}
+	
+	@Override
 	public boolean isTypeMatch(String name, Class<?> targetType) throws NoSuchBeanDefinitionException {
 		return applicationContext.isTypeMatch(name, targetType);
 	}
@@ -135,6 +152,11 @@ public class DelegatingWebApplicationContext implements WebApplicationContext {
 	@Override
 	public Class<?> getType(String name) throws NoSuchBeanDefinitionException {
 		return applicationContext.getType(name);
+	}
+	
+	@Override
+	public Class<?> getType(String s, boolean b) throws NoSuchBeanDefinitionException {
+		return applicationContext.getType(s,b);
 	}
 	
 	@Override
@@ -173,6 +195,11 @@ public class DelegatingWebApplicationContext implements WebApplicationContext {
 	}
 	
 	@Override
+	public void publishEvent(Object o) {
+		applicationContext.publishEvent(o);
+	}
+	
+	@Override
 	public Resource[] getResources(String locationPattern) throws IOException {
 		return applicationContext.getResources(locationPattern);
 	}
@@ -195,6 +222,16 @@ public class DelegatingWebApplicationContext implements WebApplicationContext {
 	@Override
 	public String[] getBeanDefinitionNames() {
 		return applicationContext.getBeanDefinitionNames();
+	}
+	
+	@Override
+	public String[] getBeanNamesForType(ResolvableType resolvableType) {
+		return applicationContext.getBeanNamesForType(resolvableType);
+	}
+	
+	@Override
+	public String[] getBeanNamesForType(ResolvableType resolvableType, boolean b, boolean b1) {
+		return applicationContext.getBeanNamesForType(resolvableType,b,b1);
 	}
 	
 	@Override

@@ -9,6 +9,9 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.notNullValue;
+
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.r4.model.Observation;
@@ -17,9 +20,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Obs;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.notNullValue;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ObservationStatusTranslatorImplTest {

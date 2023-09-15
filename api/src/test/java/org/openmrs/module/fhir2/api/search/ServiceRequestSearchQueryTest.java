@@ -158,6 +158,7 @@ public class ServiceRequestSearchQueryTest extends BaseModuleContextSensitiveTes
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
+		
 		assertThat(results.size(), equalTo(4));
 		
 		List<ServiceRequest> resultList = get(results);

@@ -16,7 +16,6 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Group;
 import org.openmrs.Cohort;
-import org.openmrs.annotation.OpenmrsProfile;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGroupService;
 import org.openmrs.module.fhir2.api.dao.FhirGroupDao;
@@ -32,7 +31,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @Setter(AccessLevel.PACKAGE)
 @Getter(AccessLevel.PROTECTED)
-@OpenmrsProfile(openmrsPlatformVersion = "2.0.0 - 2.*")
 public class FhirGroupServiceImpl extends BaseFhirService<Group, Cohort> implements FhirGroupService {
 	
 	@Autowired

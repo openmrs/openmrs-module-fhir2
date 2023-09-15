@@ -55,23 +55,23 @@ import org.springframework.mock.web.MockHttpServletResponse;
 
 public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3IntegrationTest<ObservationFhirResourceProvider, Observation> {
 	
-	private static final String OBS_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirObservationDaoImplTest_initial_data_suppl.xml";
+	private static final String OBS_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirObservationDaoImplTest_initial_data_2.1.xml";
 	
 	private static final String JSON_CREATE_OBS_DOCUMENT = "org/openmrs/module/fhir2/providers/ObservationWebTest_create_r3.json";
 	
 	private static final String XML_CREATE_OBS_DOCUMENT = "org/openmrs/module/fhir2/providers/ObservationWebTest_create_r3.xml";
 	
-	private static final String OBS_UUID = "39fb7f47-e80a-4056-9285-bd798be13c63";
+	private static final String OBS_UUID = "b0b9c14f-2123-4c0f-9a5c-918e192629f0";
 	
-	private static final String OBS_CONCEPT_UUID = "5089AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	private static final String OBS_CONCEPT_UUID = "5085AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	
-	private static final String OBS_CONCEPT_DISPLAY_NAME = "Weight";
+	private static final String OBS_CONCEPT_DISPLAY_NAME = "Systolic blood pressure";
 	
-	private static final String CIEL_SYSTEM_URI = "https://openconceptlab.org/orgs/CIEL/sources/CIEL";
+	private static final String CIEL_SYSTEM_URN = "https://openconceptlab.org/orgs/CIEL/sources/CIEL";
 	
-	private static final String OBS_CONCEPT_CIEL_ID = "5089";
+	private static final String OBS_CONCEPT_CIEL_ID = "5085";
 	
-	private static final BigDecimal OBS_CONCEPT_VALUE = BigDecimal.valueOf(50.0);
+	private static final BigDecimal OBS_CONCEPT_VALUE = BigDecimal.valueOf(115.0);
 	
 	private static final BigDecimal OBS_LOW_REFERENCE_RANGE = BigDecimal.valueOf(0.0);
 	
@@ -94,7 +94,6 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 	@Override
 	public void setup() throws Exception {
 		super.setup();
-		
 		executeDataSet(OBS_DATA_XML);
 	}
 	
@@ -115,7 +114,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		assertThat(observation.getCode().getCoding(),
 		    hasItem(allOf(hasProperty("system", nullValue()), hasProperty("code", equalTo(OBS_CONCEPT_UUID)))));
 		assertThat(observation.getCode().getCoding(), hasItem(
-		    allOf(hasProperty("system", equalTo(CIEL_SYSTEM_URI)), hasProperty("code", equalTo(OBS_CONCEPT_CIEL_ID)))));
+		    allOf(hasProperty("system", equalTo(CIEL_SYSTEM_URN)), hasProperty("code", equalTo(OBS_CONCEPT_CIEL_ID)))));
 		assertThat(observation.getCode().getCodingFirstRep().getDisplay(), equalTo(OBS_CONCEPT_DISPLAY_NAME));
 		
 		// verify expected value
@@ -176,7 +175,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		assertThat(observation.getCode().getCoding(),
 		    hasItem(allOf(hasProperty("system", nullValue()), hasProperty("code", equalTo(OBS_CONCEPT_UUID)))));
 		assertThat(observation.getCode().getCoding(), hasItem(
-		    allOf(hasProperty("system", equalTo(CIEL_SYSTEM_URI)), hasProperty("code", equalTo(OBS_CONCEPT_CIEL_ID)))));
+		    allOf(hasProperty("system", equalTo(CIEL_SYSTEM_URN)), hasProperty("code", equalTo(OBS_CONCEPT_CIEL_ID)))));
 		assertThat(observation.getCode().getCodingFirstRep().getDisplay(), equalTo(OBS_CONCEPT_DISPLAY_NAME));
 		
 		// verify expected value
@@ -1401,6 +1400,75 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		assertThat(response, isOk());
 		assertThat(response, statusEquals(HttpStatus.NOT_MODIFIED));
 	}
+	
+	@Test
+	public void shouldReturnCorrectInterpretationAsJson() throws Exception {
+		MockHttpServletResponse response = get("/Observation/" + OBS_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Observation observation = readResponse(response);
+		
+		assertThat(observation, notNullValue());
+		assertThat(observation.getIdElement().getIdPart(), equalTo(OBS_UUID));
+		
+		assertThat(observation.getInterpretation().getCodingFirstRep().getSystem(),
+				equalTo(FhirConstants.INTERPRETATION_SYSTEM_URI));
+		assertThat(observation.getInterpretation().getCodingFirstRep().getCode(), equalTo("N"));
+		assertThat(observation.getInterpretation().getCodingFirstRep().getDisplay(), equalTo("Normal"));
+	}
+	
+	@Test
+	public void shouldReturnCorrectInterpretationAsXML() throws Exception {
+		MockHttpServletResponse response = get("/Observation/" + OBS_UUID).accept(FhirMediaTypes.XML).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Observation observation = readResponse(response);
+		
+		assertThat(observation, notNullValue());
+		assertThat(observation.getIdElement().getIdPart(), equalTo(OBS_UUID));
+		
+		assertThat(observation.getInterpretation().getCodingFirstRep().getSystem(),
+				equalTo(FhirConstants.INTERPRETATION_SYSTEM_URI));
+		assertThat(observation.getInterpretation().getCodingFirstRep().getCode(), equalTo("N"));
+		assertThat(observation.getInterpretation().getCodingFirstRep().getDisplay(), equalTo("Normal"));
+	}
+	
+	@Test
+	public void shouldReturnCorrectStatusAsJSON() throws Exception {
+		MockHttpServletResponse response = get("/Observation/" + OBS_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Observation observation = readResponse(response);
+		
+		assertThat(observation, notNullValue());
+		assertThat(observation.getIdElement().getIdPart(), equalTo(OBS_UUID));
+		assertThat(observation.getStatus(), equalTo(Observation.ObservationStatus.FINAL));
+	}
+	
+	@Test
+	public void shouldReturnCorrectStatusAsXML() throws Exception {
+		MockHttpServletResponse response = get("/Observation/" + OBS_UUID).accept(FhirMediaTypes.XML).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Observation observation = readResponse(response);
+		
+		assertThat(observation, notNullValue());
+		assertThat(observation.getIdElement().getIdPart(), equalTo(OBS_UUID));
+		assertThat(observation.getStatus(), equalTo(Observation.ObservationStatus.FINAL));
+	}
+	
 	
 	private int getDistinctEncounterDatetime(List<Bundle.BundleEntryComponent> resultList) {
 		List<Date> results = resultList.stream().map(Bundle.BundleEntryComponent::getResource)

@@ -73,13 +73,17 @@ import org.springframework.test.context.ContextConfiguration;
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
 public class MedicationRequestSearchQueryTest extends BaseModuleContextSensitiveTest {
 	
-	private static final String MEDICATION_REQUEST_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirMedicationRequestDaoImpl_initial_data.xml";
+	private static final String MEDICATION_REQUEST_DATA_XMLS = "org/openmrs/module/fhir2/api/dao/impl/FhirMedicationRequestDaoImpl_initial_data.xml";
+	
+	private static final String DATA_XMLS = "org/openmrs/module/fhir2/api/dao/impl/FhirEncounterDaoImpl_2_2Test_initial_data.xml";
 	
 	private static final String MEDICATION_REQUEST_UUID = "6d0ae116-707a-4629-9850-f15206e63ab0";
 	
 	private static final String DISCONTINUE_ORDER_UUID = "b951a436-c775-4dfc-9432-e19446d18c28";
 	
 	private static final String NON_ACTIVE_ORDER_UUID = "dfca4077-493c-496b-8312-856ee5d1cc26";
+	
+	private static final String DRUG_ORDER_WITH_FULFILLER_STATUS_COMPLETED_UUID = "ac463525-9b1a-44f2-99f1-0d6a10d5b60d";
 	
 	private static final String PATIENT_UUID = "86526ed5-3c11-11de-a0ba-001e3766667a";
 	
@@ -145,7 +149,7 @@ public class MedicationRequestSearchQueryTest extends BaseModuleContextSensitive
 	
 	@Before
 	public void setup() throws Exception {
-		executeDataSet(MEDICATION_REQUEST_DATA_XML);
+		executeDataSet(MEDICATION_REQUEST_DATA_XMLS);
 	}
 	
 	@Test
@@ -1276,6 +1280,30 @@ public class MedicationRequestSearchQueryTest extends BaseModuleContextSensitive
 	private List<MedicationRequest> get(IBundleProvider results) {
 		return results.getAllResources().stream().filter(it -> it instanceof MedicationRequest)
 		        .map(it -> (MedicationRequest) it).collect(Collectors.toList());
+	}
+	
+	@Test
+	public void searchForMedicationRequests_shouldSearchForMedicationRequestsByFulfillerStatus() {
+		executeDataSet(DATA_XMLS);
+		TokenAndListParam fulfillerStatus = new TokenAndListParam().addAnd(new TokenParam("received"));
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.FULFILLER_STATUS_SEARCH_HANDLER,
+		    "fulfillerStatus", fulfillerStatus);
+		IBundleProvider results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		List<MedicationRequest> resultList = get(results);
+		assertThat(resultList, hasSize(equalTo(4)));
+		
+		// there is one tests in the test data set with "completed" fulfiller status
+		fulfillerStatus = new TokenAndListParam().addAnd(new TokenParam("completed"));
+		theParams = new SearchParameterMap().addParameter(FhirConstants.FULFILLER_STATUS_SEARCH_HANDLER, "fulfillerStatus",
+		    fulfillerStatus);
+		results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		resultList = get(results);
+		assertThat(resultList, hasSize(equalTo(1)));
+		assertThat(resultList.get(0).getId(), equalTo(DRUG_ORDER_WITH_FULFILLER_STATUS_COMPLETED_UUID));
 	}
 	
 }

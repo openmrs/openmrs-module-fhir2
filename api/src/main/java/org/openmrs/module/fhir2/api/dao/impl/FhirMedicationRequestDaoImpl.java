@@ -20,13 +20,13 @@ import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.openmrs.DrugOrder;
 import org.openmrs.Order;
-import org.openmrs.annotation.OpenmrsProfile;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirMedicationRequestDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
@@ -35,7 +35,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-@OpenmrsProfile(openmrsPlatformVersion = "2.0.5 - 2.1.*")
 public class FhirMedicationRequestDaoImpl extends BaseFhirDao<DrugOrder> implements FhirMedicationRequestDao {
 	
 	@Override
@@ -77,6 +76,10 @@ public class FhirMedicationRequestDaoImpl extends BaseFhirDao<DrugOrder> impleme
 	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
+				case FhirConstants.FULFILLER_STATUS_SEARCH_HANDLER:
+					entry.getValue().forEach(
+					    param -> handleFulfillerStatus((TokenAndListParam) param.getParam()).ifPresent(criteria::add));
+					break;
 				case FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER:
 					entry.getValue()
 					        .forEach(e -> handleEncounterReference(criteria, (ReferenceAndListParam) e.getParam(), "e"));
@@ -123,6 +126,28 @@ public class FhirMedicationRequestDaoImpl extends BaseFhirDao<DrugOrder> impleme
 			
 			return Optional.empty();
 		});
+	}
+	
+	private Optional<Criterion> handleFulfillerStatus(TokenAndListParam tokenAndListParam) {
+		return handleAndListParam(tokenAndListParam, token -> {
+			if (token.getValue() != null) {
+				return Optional.of(
+				    generateFulfillerStatusRestriction(Order.FulfillerStatus.valueOf(token.getValue().toUpperCase())));
+			}
+			return Optional.empty();
+		});
+	}
+	
+	protected Criterion generateFulfillerStatusRestriction(Order.FulfillerStatus fulfillerStatus) {
+		return generateFulfillerStatusRestriction("", fulfillerStatus);
+	}
+	
+	protected Criterion generateFulfillerStatusRestriction(String path, Order.FulfillerStatus fulfillerStatus) {
+		if (StringUtils.isNotBlank(path)) {
+			path = path + ".";
+		}
+		
+		return Restrictions.eq(path + "fulfillerStatus", fulfillerStatus);
 	}
 	
 	private void handleCodedConcept(Criteria criteria, TokenAndListParam code) {

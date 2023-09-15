@@ -21,12 +21,9 @@ import java.util.Date;
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.DrugOrder;
 import org.openmrs.Order;
 
-@RunWith(MockitoJUnitRunner.class)
 public class MedicationRequestStatusTranslatorImplTest {
 	
 	private static final String DRUG_ORDER_UUID = "44fdc8ad-fe4d-499b-93a8-8a991c1d477e";
@@ -79,4 +76,13 @@ public class MedicationRequestStatusTranslatorImplTest {
 		assertThat(status, notNullValue());
 		assertThat(status, equalTo(MedicationRequest.MedicationRequestStatus.CANCELLED));
 	}
+	
+	@Test
+	public void toFhirResource_shouldTranslatedOrderWithFulfillerStatusCompletedToCompleted() {
+		drugOrder.setFulfillerStatus(Order.FulfillerStatus.COMPLETED);
+		MedicationRequest.MedicationRequestStatus status = statusTranslator.toFhirResource(drugOrder);
+		assertThat(status, notNullValue());
+		assertThat(status, equalTo(MedicationRequest.MedicationRequestStatus.COMPLETED));
+	}
+	
 }

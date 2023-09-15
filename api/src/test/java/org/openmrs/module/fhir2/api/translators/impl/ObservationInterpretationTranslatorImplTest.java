@@ -204,7 +204,8 @@ public class ObservationInterpretationTranslatorImplTest {
 		MatcherAssert.assertThat(interpretation.getCoding().get(0).getCode(), Matchers.is("VS"));
 		MatcherAssert.assertThat(interpretation.getCoding().get(0).getDisplay(), Matchers.is("Very Susceptible"));
 		MatcherAssert.assertThat(interpretation.getText(), Matchers.is("Very Susceptible"));
-		MatcherAssert.assertThat(interpretation.getCoding().get(0).getSystem(), Matchers.is(FhirConstants.OPENMRS_FHIR_EXT_VS_INTERPRETATION));
+		MatcherAssert.assertThat(interpretation.getCoding().get(0).getSystem(),
+		    Matchers.is(FhirConstants.OPENMRS_FHIR_EXT_VS_INTERPRETATION));
 	}
 	
 	@Test

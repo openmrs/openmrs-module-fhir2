@@ -23,7 +23,7 @@
     <global_property property="fhir2.immunizationsEncounterTypeUuid" property_value="29c02aff-9a93-46c9-bf6f-48b552fcb1fa" uuid="2a5d20df-4843-4046-afb1-e14314d5f7b7"/>
 
     <!-- CIEL source -->
-    <concept_reference_source concept_source_id="60000" creator="1" date_created="2020-07-07 19:08:19.0" name="CIEL" retired="false" uuid="88e98cff-fbcf-42bf-a074-0ab798555766"/>
+    <concept_reference_source concept_source_id="60000" creator="1" date_created="2020-07-07 19:08:19.0" name="CIEL" description="for CIEL" retired="false" uuid="88e98cff-fbcf-42bf-a074-0ab798555766"/>
 
     <!-- CIEL:1421 Immunization History -->
     <concept changed_by="1" class_id="5" concept_id="70000" creator="1" datatype_id="4" date_changed="2020-07-07 19:08:19.0" date_created="2020-07-07 19:08:19.0" is_set="false" retired="false" uuid="1421AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
@@ -48,7 +48,7 @@
     <concept_reference_term code="1418" concept_reference_term_id="12011" concept_source_id="60000" creator="1" date_created="2020-07-07 19:08:19.0" name="" retired="false" uuid="9b7f154e-6530-46e2-b2d8-28859eddfd79"/>
     <concept_reference_map concept_id="70011" concept_map_id="11011" concept_map_type_id="2" concept_reference_term_id="12011" creator="1" date_created="2020-07-07 19:08:19.0" uuid="f48c9d06-53e8-47b5-b652-b7a99f7af468"/>
     <concept_name concept_id="70011" concept_name_id="70011" concept_name_type="FULLY_SPECIFIED" creator="1" date_created="2020-07-07 19:30:26.0" locale="en" locale_preferred="true" name="Immunization sequence number" uuid="8b3e4651-1c37-4b5f-bd41-4b57a3f1f6a2" voided="false"/>
-    <concept_numeric concept_id="70011" display_precision="0" hi_normal="50.0" low_critical="0.0" precise="false" units=""/>
+    <concept_numeric concept_id="70011" display_precision="0" hi_normal="50.0" low_critical="0.0" allow_decimal="false" units=""/>
 
     <!-- CIEL:1419 Vaccine manufacturer -->
     <concept changed_by="1" class_id="5" concept_id="70012" creator="1" datatype_id="3" date_changed="2020-07-07 19:08:19.0" date_created="2020-07-07 19:08:19.0" is_set="false" retired="false" uuid="1419AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>

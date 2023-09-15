@@ -68,7 +68,6 @@ public class DiagnosticReportResourceProviderIntegrationTest extends BaseFhirR3I
 	@Override
 	public void setup() throws Exception {
 		super.setup();
-		
 		executeDataSet(DATA_XML);
 	}
 	
