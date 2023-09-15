@@ -46,6 +46,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.openmrs.BaseOpenmrsMetadata;
 import org.openmrs.Concept;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.model.FhirReference;
@@ -684,14 +685,7 @@ public class TaskTranslatorImplTest {
 		assertThat(result.getOutput().iterator().next().getType().getUuid(), equalTo(CONCEPT_UUID));
 		
 		List<FhirTaskOutput> outputList = new ArrayList<>(result.getOutput());
-		Collections.sort(outputList, new Comparator<FhirTaskOutput>() {
-			
-			@Override
-			public int compare(FhirTaskOutput o1, FhirTaskOutput o2) {
-				
-				return o1.getName().compareTo(o2.getName().toString());
-			}
-		});
+		outputList.sort(Comparator.comparing(BaseOpenmrsMetadata::getName));
 		
 		assertThat(outputList.get(0).getValueDatetime(), DateMatchers.sameDay(new Date()));
 		assertThat(outputList.get(1).getValueNumeric(), equalTo(numericValue));
@@ -943,14 +937,7 @@ public class TaskTranslatorImplTest {
 		assertThat(result.getInput().iterator().next().getType().getUuid(), equalTo(CONCEPT_UUID));
 		
 		List<FhirTaskInput> inputList = new ArrayList<>(result.getInput());
-		Collections.sort(inputList, new Comparator<FhirTaskInput>() {
-			
-			@Override
-			public int compare(FhirTaskInput o1, FhirTaskInput o2) {
-				
-				return o1.getName().compareTo(o2.getName().toString());
-			}
-		});
+		inputList.sort(Comparator.comparing(BaseOpenmrsMetadata::getName));
 		
 		assertThat(inputList.get(0).getValueDatetime(), DateMatchers.sameDay(new Date()));
 		assertThat(inputList.get(1).getValueNumeric(), equalTo(numericValue));

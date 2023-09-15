@@ -76,7 +76,7 @@ public class ValueSetTranslatorImpl implements ValueSetTranslator {
 		
 		ValueSet.ValueSetComposeComponent compose = new ValueSet.ValueSetComposeComponent();
 		
-		Map<String, ValueSet.ConceptSetComponent> sets = new HashMap<String, ValueSet.ConceptSetComponent>();
+		Map<String, ValueSet.ConceptSetComponent> sets = new HashMap<>();
 		ValueSet.ConceptSetComponent conceptUuidSet = new ValueSet.ConceptSetComponent();
 		sets.put("conceptUuid", conceptUuidSet);
 		
@@ -126,7 +126,7 @@ public class ValueSetTranslatorImpl implements ValueSetTranslator {
 			}
 		}
 		
-		compose.setInclude(new ArrayList<ValueSet.ConceptSetComponent>(sets.values()));
+		compose.setInclude(new ArrayList<>(sets.values()));
 		valueSet.setCompose(compose);
 		
 		valueSet.getMeta().setLastUpdated(getLastUpdated(concept));

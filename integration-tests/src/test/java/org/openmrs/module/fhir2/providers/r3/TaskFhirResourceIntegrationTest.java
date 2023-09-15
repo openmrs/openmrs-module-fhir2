@@ -30,7 +30,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -188,13 +187,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR3IntegrationTest<T
 		assertThat(newTask.getInput(), hasSize(4));
 		
 		List<TaskOutputComponent> outputList = newTask.getOutput();
-		Collections.sort(outputList, new Comparator<TaskOutputComponent>() {
-			
-			@Override
-			public int compare(TaskOutputComponent o1, TaskOutputComponent o2) {
-				return o1.getValue().toString().compareTo(o2.getValue().toString());
-			}
-		});
+		outputList.sort(Comparator.comparing(o -> o.getValue().toString()));
 		
 		assertTrue(outputList.get(0).getValue() instanceof StringType);
 		assertThat(outputList.get(0).getValue().toString(), equalTo("Blood Pressure"));
@@ -211,14 +204,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR3IntegrationTest<T
 		    equalTo("DiagnosticReport/9b6f11dd-55d2-4ff6-8ec2-73f6ad1b759e"));
 		
 		List<ParameterComponent> inputList = newTask.getInput();
-		Collections.sort(inputList, new Comparator<ParameterComponent>() {
-			
-			@Override
-			public int compare(ParameterComponent o1, ParameterComponent o2) {
-				
-				return o1.getValue().toString().compareTo(o2.getValue().toString());
-			}
-		});
+		inputList.sort(Comparator.comparing(o -> o.getValue().toString()));
 		
 		assertTrue(inputList.get(0).getValue() instanceof DateTimeType);
 		assertThat(((DateTimeType) inputList.get(0).getValue()).getValue(),
@@ -315,13 +301,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR3IntegrationTest<T
 		assertThat(newTask.getInput(), hasSize(4));
 		
 		List<TaskOutputComponent> outputList = newTask.getOutput();
-		Collections.sort(outputList, new Comparator<TaskOutputComponent>() {
-			
-			@Override
-			public int compare(TaskOutputComponent o1, TaskOutputComponent o2) {
-				return o1.getValue().toString().compareTo(o2.getValue().toString());
-			}
-		});
+		outputList.sort(Comparator.comparing(o -> o.getValue().toString()));
 		
 		assertTrue(outputList.get(0).getValue() instanceof StringType);
 		assertThat(outputList.get(0).getValue().toString(), equalTo("Blood Pressure"));
@@ -338,14 +318,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR3IntegrationTest<T
 		    equalTo("DiagnosticReport/9b6f11dd-55d2-4ff6-8ec2-73f6ad1b759e"));
 		
 		List<ParameterComponent> inputList = newTask.getInput();
-		Collections.sort(inputList, new Comparator<ParameterComponent>() {
-			
-			@Override
-			public int compare(ParameterComponent o1, ParameterComponent o2) {
-				
-				return o1.getValue().toString().compareTo(o2.getValue().toString());
-			}
-		});
+		inputList.sort(Comparator.comparing(o -> o.getValue().toString()));
 		
 		assertTrue(inputList.get(0).getValue() instanceof DateTimeType);
 		assertThat(((DateTimeType) inputList.get(0).getValue()).getValue(),

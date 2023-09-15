@@ -253,7 +253,7 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 		params.setLocation(location);
 		
 		// include all medication requests associated with the encounter, and then all dispenses associated with those requests
-		HashSet<Include> revIncludes = new HashSet<Include>();
+		HashSet<Include> revIncludes = new HashSet<>();
 		Include medicationRequestInclude = new Include("MedicationRequest:encounter", false);
 		Include medicationDispenseInclude = new Include("MedicationDispense:prescription", true);
 		revIncludes.add(medicationRequestInclude);

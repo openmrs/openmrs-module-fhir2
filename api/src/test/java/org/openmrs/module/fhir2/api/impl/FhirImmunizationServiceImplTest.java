@@ -178,10 +178,8 @@ public class FhirImmunizationServiceImplTest extends BaseModuleContextSensitiveT
 		assertObsCommons(obs, "a7e04421-525f-442f-8138-05b619d16def", "7d8c1980-6b78-11e0-93c3-18a905e044dc",
 		    "f9badd80-ab76-11e2-9e96-0800200c9a66");
 		
-		obs.getGroupMembers().forEach(o -> {
-			assertObsCommons(o, "a7e04421-525f-442f-8138-05b619d16def", "7d8c1980-6b78-11e0-93c3-18a905e044dc",
-			    "f9badd80-ab76-11e2-9e96-0800200c9a66");
-		});
+		obs.getGroupMembers().forEach(o -> assertObsCommons(o, "a7e04421-525f-442f-8138-05b619d16def",
+		    "7d8c1980-6b78-11e0-93c3-18a905e044dc", "f9badd80-ab76-11e2-9e96-0800200c9a66"));
 		
 		Map<String, Obs> members = helper.getObsMembersMap(obs);
 		assertThat(members.get(CIEL_984).getValueCoded().getUuid(), is("d144d24f-6913-4b63-9660-a9108c2bebef"));

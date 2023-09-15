@@ -82,7 +82,7 @@ public class LocationTypeTranslatorImpl implements LocationTypeTranslator {
 		    globalPropertyService.getGlobalProperty(FhirConstants.LOCATION_TYPE_ATTRIBUTE_TYPE));
 		
 		if (typeAttributeType != null) {
-			Optional<Concept> typeConcept = types.stream().filter(Objects::nonNull).filter(t -> t.hasCoding())
+			Optional<Concept> typeConcept = types.stream().filter(Objects::nonNull).filter(CodeableConcept::hasCoding)
 			        .map(conceptTranslator::toOpenmrsType).findFirst();
 			
 			if (typeConcept.isPresent()) {

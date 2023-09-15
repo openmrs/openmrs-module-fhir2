@@ -20,7 +20,7 @@ public interface TaskOutputTranslator extends ToFhirTranslator<FhirTaskOutput, T
 	 * Maps an {@link org.openmrs.module.fhir2.model.FhirTaskOutput} to a corresponding
 	 * {@link org.hl7.fhir.r4.model.Task.TaskOutputComponent}
 	 * 
-	 * @param openmrsOutput the Openmrs Task output to translate
+	 * @param openmrsTaskOutput the Openmrs Task output to translate
 	 * @return the corresponding FHIR Task output
 	 */
 	@Override
@@ -30,7 +30,7 @@ public interface TaskOutputTranslator extends ToFhirTranslator<FhirTaskOutput, T
 	 * Maps an {@link org.hl7.fhir.r4.model.Task.TaskOutputComponent} to a existing
 	 * {@link org.openmrs.module.fhir2.model.FhirTaskOutput}
 	 * 
-	 * @param fhirOutput FHIR Task output to translate
+	 * @param fhirTaskOutput FHIR Task output to translate
 	 * @return corresponding Openmrs Task output
 	 */
 	@Override

@@ -93,7 +93,7 @@ public class ValueSetTranslatorImplTest extends BaseModuleContextSensitiveTest {
 		conceptSet.setConceptSet(concept);
 		conceptSet.setConcept(concept1);
 		
-		Collection<ConceptSet> conceptSets = new ArrayList<ConceptSet>();
+		Collection<ConceptSet> conceptSets = new ArrayList<>();
 		conceptSets.add(conceptSet);
 		
 		when(concept.getConceptSets()).thenReturn(conceptSets);

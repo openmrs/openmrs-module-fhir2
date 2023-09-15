@@ -228,9 +228,8 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 			ProjectionList projectionList = Projections.projectionList();
 			projectionList.add(Projections.distinct(Projections.projectionList().add(Projections.property("id"))));
 			// Sort parameters must be included in projections
-			handleSort(criteria, theParams.getSortSpec(), this::paramToProps).ifPresent(orders -> orders.forEach(order -> {
-				projectionList.add(Projections.property(order.getPropertyName()));
-			}));
+			handleSort(criteria, theParams.getSortSpec(), this::paramToProps).ifPresent(
+			    orders -> orders.forEach(order -> projectionList.add(Projections.property(order.getPropertyName()))));
 			criteria.setProjection(projectionList);
 			List<Integer> ids = new ArrayList<>();
 			if (projectionList.getLength() > 1) {

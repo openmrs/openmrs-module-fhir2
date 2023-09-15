@@ -23,7 +23,8 @@ import org.openmrs.module.fhir2.FhirConstants;
 
 /**
  * Class containing shared search (and search result) parameters that apply to all resources See
- * https://www.hl7.org/fhir/search.html#Summary for a comprehensive description of these parameters
+ * <a href="https://www.hl7.org/fhir/search.html#Summary">The HL7 Search API</a> for a comprehensive
+ * description of these parameters
  */
 @Data
 @NoArgsConstructor

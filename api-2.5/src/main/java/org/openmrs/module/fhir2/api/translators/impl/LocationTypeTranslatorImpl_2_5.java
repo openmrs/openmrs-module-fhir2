@@ -47,12 +47,10 @@ public class LocationTypeTranslatorImpl_2_5 implements LocationTypeTranslator {
 	
 	@Override
 	public Location toOpenmrsType(@Nonnull Location location, @Nonnull List<CodeableConcept> types) {
-		Optional<CodeableConcept> typeConcept = types.stream().filter(Objects::nonNull).filter(t -> t.hasCoding())
+		Optional<CodeableConcept> typeConcept = types.stream().filter(Objects::nonNull).filter(CodeableConcept::hasCoding)
 		        .findFirst();
 		
-		if (typeConcept.isPresent()) {
-			location.setType(conceptTranslator.toOpenmrsType(typeConcept.get()));
-		}
+		typeConcept.ifPresent(codeableConcept -> location.setType(conceptTranslator.toOpenmrsType(codeableConcept)));
 		
 		return location;
 	}

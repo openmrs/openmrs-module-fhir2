@@ -20,7 +20,7 @@ public interface TaskInputTranslator extends ToFhirTranslator<FhirTaskInput, Tas
 	 * Maps an {@link org.openmrs.module.fhir2.model.FhirTaskInput} to a corresponding
 	 * {@link org.hl7.fhir.r4.model.Task.ParameterComponent}
 	 * 
-	 * @param openmrsInput the Openmrs Task input to translate
+	 * @param openmrsTaskInput the Openmrs Task input to translate
 	 * @return the corresponding FHIR Task input
 	 */
 	@Override
@@ -30,7 +30,7 @@ public interface TaskInputTranslator extends ToFhirTranslator<FhirTaskInput, Tas
 	 * Maps an {@link org.hl7.fhir.r4.model.Task.ParameterComponent} to a existing
 	 * {@link org.openmrs.module.fhir2.model.FhirTaskInput}
 	 * 
-	 * @param fhirInput FHIR Task input to translate
+	 * @param fhirTaskInput FHIR Task input to translate
 	 * @return corresponding Openmrs Task input
 	 */
 	@Override

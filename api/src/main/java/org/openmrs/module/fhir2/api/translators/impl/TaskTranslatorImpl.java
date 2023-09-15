@@ -16,6 +16,7 @@ import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.
 import javax.annotation.Nonnull;
 
 import java.util.Collections;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import lombok.AccessLevel;
@@ -107,12 +108,12 @@ public class TaskTranslatorImpl implements TaskTranslator {
 		
 		if (openmrsTask.getInput() != null && !openmrsTask.getInput().isEmpty()) {
 			fhirTask.setInput(openmrsTask.getInput().stream().map(taskInputTranslator::toFhirResource)
-			        .filter(obj -> obj != null).collect(Collectors.toList()));
+			        .filter(Objects::nonNull).collect(Collectors.toList()));
 		}
 		
 		if (openmrsTask.getOutput() != null && !openmrsTask.getOutput().isEmpty()) {
 			fhirTask.setOutput(openmrsTask.getOutput().stream().map(taskOutputTranslator::toFhirResource)
-			        .filter(obj -> obj != null).collect(Collectors.toList()));
+			        .filter(Objects::nonNull).collect(Collectors.toList()));
 		}
 		
 		fhirTask.setAuthoredOn(openmrsTask.getDateCreated());
@@ -174,12 +175,12 @@ public class TaskTranslatorImpl implements TaskTranslator {
 		
 		if (!fhirTask.getInput().isEmpty()) {
 			openmrsTask.setInput(fhirTask.getInput().stream().map(taskInputTranslator::toOpenmrsType)
-			        .filter(obj -> obj != null).collect(Collectors.toSet()));
+			        .filter(Objects::nonNull).collect(Collectors.toSet()));
 		}
 		
 		if (!fhirTask.getOutput().isEmpty()) {
 			openmrsTask.setOutput(fhirTask.getOutput().stream().map(taskOutputTranslator::toOpenmrsType)
-			        .filter(obj -> obj != null).collect(Collectors.toSet()));
+			        .filter(Objects::nonNull).collect(Collectors.toSet()));
 		}
 		
 		openmrsTask.setName(FhirConstants.TASK + "/" + fhirTask.getId());

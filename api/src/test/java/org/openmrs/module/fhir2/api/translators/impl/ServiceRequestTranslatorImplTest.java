@@ -102,12 +102,10 @@ public class ServiceRequestTranslatorImplTest {
 	@Mock
 	private PractitionerReferenceTranslator<Provider> practitionerReferenceTranslator;
 	
-	private TestOrder order;
-	
 	private TestOrder discontinuedTestOrder;
 	
 	@Before
-	public void setup() {
+	public void setup() throws Exception {
 		translator = new ServiceRequestTranslatorImpl();
 		translator.setConceptTranslator(conceptTranslator);
 		translator.setTaskService(taskService);
@@ -116,7 +114,7 @@ public class ServiceRequestTranslatorImplTest {
 		translator.setProviderReferenceTranslator(practitionerReferenceTranslator);
 		translator.setOrderIdentifierTranslator(new OrderIdentifierTranslatorImpl());
 		
-		order = new TestOrder();
+		TestOrder order = new TestOrder();
 		order.setUuid(SERVICE_REQUEST_UUID);
 		setOrderNumberByReflection(order, TEST_ORDER_NUMBER);
 		
@@ -597,19 +595,13 @@ public class ServiceRequestTranslatorImplTest {
 		assertThat(result.getMeta().getVersionId(), notNullValue());
 	}
 	
-	private TestOrder setOrderNumberByReflection(TestOrder order, String orderNumber) {
-		try {
-			Class clazz = order.getClass();
-			Field orderNumberField = clazz.getSuperclass().getDeclaredField("orderNumber");
-			Boolean isAccessible = orderNumberField.isAccessible();
-			if (!isAccessible) {
-				orderNumberField.setAccessible(true);
-			}
-			orderNumberField.set(((Order) order), orderNumber);
+	private void setOrderNumberByReflection(TestOrder order, String orderNumber) throws Exception {
+		Class<? extends TestOrder> clazz = order.getClass();
+		Field orderNumberField = clazz.getSuperclass().getDeclaredField("orderNumber");
+		boolean isAccessible = orderNumberField.isAccessible();
+		if (!isAccessible) {
+			orderNumberField.setAccessible(true);
 		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}
-		return order;
+		orderNumberField.set(((Order) order), orderNumber);
 	}
 }
