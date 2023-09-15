@@ -123,7 +123,7 @@ public class MedicationRequestDispenseRequestComponentTranslatorImplTest {
 		assertThat(dispenseRequest, notNullValue());
 		assertThat(dispenseRequest.getNumberOfRepeatsAllowed(), equalTo(9));
 	}
-
+	
 	@Test
 	public void toFhirResource_shouldTranslateDateActivatedToValidityPeriodStart() {
 		Date now = new Date();
@@ -170,21 +170,21 @@ public class MedicationRequestDispenseRequestComponentTranslatorImplTest {
 		drugOrder = requestTimingComponentTranslator.toOpenmrsType(drugOrder, dispenseRequest);
 		assertThat(drugOrder.getNumRefills(), equalTo(32));
 	}
-
+	
 	@Test
 	public void toOpenmrsType_translateToNumRefillsShouldPresesrveZero() {
 		dispenseRequest.setNumberOfRepeatsAllowed(0);
 		drugOrder = requestTimingComponentTranslator.toOpenmrsType(drugOrder, dispenseRequest);
 		assertThat(drugOrder.getNumRefills(), equalTo(0));
 	}
-
+	
 	@Test
 	public void toOpenmrsType_translateToNumRefillsShouldPreserveNull() {
 		dispenseRequest.setNumberOfRepeatsAllowedElement(null);
 		drugOrder = requestTimingComponentTranslator.toOpenmrsType(drugOrder, dispenseRequest);
 		assertNull(drugOrder.getNumRefills());
 	}
-
+	
 	@Test
 	public void toOpenmrsType_shouldTranslateValidityPeriodStartToDateActivated() {
 		Date now = new Date();
