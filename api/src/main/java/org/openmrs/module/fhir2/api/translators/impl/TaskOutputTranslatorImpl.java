@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import javax.annotation.Nonnull;
+
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -39,7 +41,7 @@ public class TaskOutputTranslatorImpl implements TaskOutputTranslator {
 	private ReferenceTranslator referenceTranslator;
 	
 	@Override
-	public TaskOutputComponent toFhirResource(FhirTaskOutput openmrsTaskOutput) {
+	public TaskOutputComponent toFhirResource(@Nonnull FhirTaskOutput openmrsTaskOutput) {
 		CodeableConcept type = conceptTranslator.toFhirResource(openmrsTaskOutput.getType());
 		Task.TaskOutputComponent output = new Task.TaskOutputComponent().setType(type);
 		if (openmrsTaskOutput.getValueReference() != null) {
@@ -59,7 +61,7 @@ public class TaskOutputTranslatorImpl implements TaskOutputTranslator {
 	}
 	
 	@Override
-	public FhirTaskOutput toOpenmrsType(TaskOutputComponent taskOutputComponent) {
+	public FhirTaskOutput toOpenmrsType(@Nonnull TaskOutputComponent taskOutputComponent) {
 		FhirTaskOutput output = new FhirTaskOutput();
 		Concept type = conceptTranslator.toOpenmrsType(taskOutputComponent.getType());
 		output.setType(type);

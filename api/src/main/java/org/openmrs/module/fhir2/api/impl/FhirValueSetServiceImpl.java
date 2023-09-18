@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
+import static org.openmrs.module.fhir2.FhirConstants.TITLE_SEARCH_HANDLER;
+
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import lombok.AccessLevel;
@@ -16,7 +18,6 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.openmrs.Concept;
-import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirValueSetService;
 import org.openmrs.module.fhir2.api.dao.FhirConceptDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
@@ -47,7 +48,10 @@ public class FhirValueSetServiceImpl extends BaseFhirService<ValueSet, Concept> 
 	
 	@Override
 	public IBundleProvider searchForValueSets(StringAndListParam title) {
-		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.TITLE_SEARCH_HANDLER, title);
+		SearchParameterMap theParams = new SearchParameterMap();
+		if (title != null && title.size() > 0) {
+			theParams.addParameter(TITLE_SEARCH_HANDLER, title);
+		}
 		
 		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}

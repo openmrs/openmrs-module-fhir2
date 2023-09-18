@@ -39,7 +39,7 @@ public class OrderIdentifierTranslatorImpl implements OrderIdentifierTranslator 
 	}
 	
 	@Override
-	public Order toOpenmrsType(Identifier resource) {
+	public Order toOpenmrsType(@Nonnull Identifier resource) {
 		throw new InvalidRequestException("Order Identifier cannot be manualy set");
 	}
 	

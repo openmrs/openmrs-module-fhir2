@@ -56,19 +56,7 @@ public class FhirConceptDaoImpl extends BaseFhirDao<Concept> implements FhirConc
 			return Optional.empty();
 		}
 		
-		Criteria criteria = getSessionFactory().getCurrentSession().createCriteria(ConceptMap.class);
-		criteria.setProjection(property("concept"));
-		criteria.createAlias("conceptReferenceTerm", "term");
-		criteria.createAlias("conceptMapType", "mapType");
-		criteria.createAlias("concept", "concept");
-		
-		if (Context.getAdministrationService().isDatabaseStringComparisonCaseSensitive()) {
-			criteria.add(eq("term.code", mappingCode).ignoreCase());
-		} else {
-			criteria.add(eq("term.code", mappingCode));
-		}
-		
-		criteria.add(eq("term.conceptSource", conceptSource));
+		Criteria criteria = createConceptMapCriteria(conceptSource, mappingCode);
 		criteria.add(or(eq("mapType.uuid", ConceptMapType.SAME_AS_MAP_TYPE_UUID), eq("mapType.name", "SAME-AS")));
 		criteria.addOrder(asc("concept.retired"));
 		criteria.setResultTransformer(DistinctRootEntityResultTransformer.INSTANCE);
@@ -80,9 +68,34 @@ public class FhirConceptDaoImpl extends BaseFhirDao<Concept> implements FhirConc
 	public List<Concept> getConceptsWithAnyMappingInSource(@Nonnull ConceptSource conceptSource,
 	        @Nonnull String mappingCode) {
 		if (conceptSource == null || mappingCode == null) {
-			return Collections.<Concept> emptyList();
+			return Collections.emptyList();
 		}
 		
+		Criteria criteria = createConceptMapCriteria(conceptSource, mappingCode);
+		criteria.addOrder(asc("concept.retired"));
+		criteria.setResultTransformer(DistinctRootEntityResultTransformer.INSTANCE);
+		
+		return criteria.list();
+	}
+	
+	@Override
+	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
+		criteria.add(eq("set", true));
+		theParams.getParameters().forEach(entry -> {
+			switch (entry.getKey()) {
+				case TITLE_SEARCH_HANDLER:
+					entry.getValue().forEach(param -> handleTitle(criteria, (StringAndListParam) param.getParam()));
+					break;
+			}
+		});
+	}
+	
+	protected void handleTitle(Criteria criteria, StringAndListParam titlePattern) {
+		criteria.createAlias("names", "cn");
+		handleAndListParam(titlePattern, (title) -> propertyLike("cn.name", title)).ifPresent(criteria::add);
+	}
+	
+	protected Criteria createConceptMapCriteria(@Nonnull ConceptSource conceptSource, @Nonnull String mappingCode) {
 		Criteria criteria = getSessionFactory().getCurrentSession().createCriteria(ConceptMap.class);
 		criteria.setProjection(property("concept"));
 		criteria.createAlias("conceptReferenceTerm", "term");
@@ -96,26 +109,6 @@ public class FhirConceptDaoImpl extends BaseFhirDao<Concept> implements FhirConc
 		}
 		
 		criteria.add(eq("term.conceptSource", conceptSource));
-		criteria.addOrder(asc("concept.retired"));
-		criteria.setResultTransformer(DistinctRootEntityResultTransformer.INSTANCE);
-		
-		return criteria.list();
-	}
-	
-	@Override
-	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
-		theParams.getParameters().forEach(entry -> {
-			switch (entry.getKey()) {
-				case TITLE_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handleTitle(criteria, (StringAndListParam) param.getParam()));
-					break;
-			}
-		});
-	}
-	
-	private void handleTitle(Criteria criteria, StringAndListParam titlePattern) {
-		criteria.add(eq("set", true));
-		criteria.createAlias("names", "csn");
-		handleAndListParam(titlePattern, (title) -> propertyLike("csn.name", title)).ifPresent(criteria::add);
+		return criteria;
 	}
 }

@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import javax.annotation.Nonnull;
+
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Coding;
@@ -26,7 +28,7 @@ public class LocationTagTranslatorImpl implements LocationTagTranslator {
 	private FhirLocationDao fhirLocationDao;
 	
 	@Override
-	public LocationTag toOpenmrsType(Coding tag) {
+	public LocationTag toOpenmrsType(@Nonnull Coding tag) {
 		LocationTag existingTag = fhirLocationDao.getLocationTagByName(tag.getCode());
 		return existingTag != null ? existingTag
 		        : fhirLocationDao.saveLocationTag(new LocationTag(tag.getCode(), tag.getDisplay()));

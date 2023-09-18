@@ -88,7 +88,6 @@ public class ValueSetTranslatorImpl implements ValueSetTranslator {
 			if (conceptSetMember != null) {
 				// if it's a set, just add a reference to the concept uuid set
 				if (conceptSetMember.getSet()) {
-					;
 					conceptUuidSet.addValueSet(valueSetReferenceTranslator.toFhirResource(conceptSetMember).getReference());
 				} else {
 					// first, add the uuid and display to the concept uuid set
