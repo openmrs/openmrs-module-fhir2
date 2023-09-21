@@ -66,7 +66,7 @@ public class MedicationRequestDispenseRequestComponentTranslatorImpl implements 
 				drugOrder.setQuantityUnits(units);
 			}
 		}
-		drugOrder.setNumRefills(resource.getNumberOfRepeatsAllowed());
+		drugOrder.setNumRefills(resource.hasNumberOfRepeatsAllowed() ? resource.getNumberOfRepeatsAllowed() : null);
 		if (resource.getValidityPeriod() != null && resource.getValidityPeriod().getStart() != null) {
 			drugOrder.setDateActivated(resource.getValidityPeriod().getStart());
 		}

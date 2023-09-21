@@ -13,6 +13,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
@@ -168,6 +169,20 @@ public class MedicationRequestDispenseRequestComponentTranslatorImplTest {
 		dispenseRequest.setNumberOfRepeatsAllowed(32);
 		drugOrder = requestTimingComponentTranslator.toOpenmrsType(drugOrder, dispenseRequest);
 		assertThat(drugOrder.getNumRefills(), equalTo(32));
+	}
+	
+	@Test
+	public void toOpenmrsType_translateToNumRefillsShouldPresesrveZero() {
+		dispenseRequest.setNumberOfRepeatsAllowed(0);
+		drugOrder = requestTimingComponentTranslator.toOpenmrsType(drugOrder, dispenseRequest);
+		assertThat(drugOrder.getNumRefills(), equalTo(0));
+	}
+	
+	@Test
+	public void toOpenmrsType_translateToNumRefillsShouldPreserveNull() {
+		dispenseRequest.setNumberOfRepeatsAllowedElement(null);
+		drugOrder = requestTimingComponentTranslator.toOpenmrsType(drugOrder, dispenseRequest);
+		assertNull(drugOrder.getNumRefills());
 	}
 	
 	@Test
