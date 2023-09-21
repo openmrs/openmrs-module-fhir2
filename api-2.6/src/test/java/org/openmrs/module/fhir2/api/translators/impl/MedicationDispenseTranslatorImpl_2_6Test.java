@@ -13,6 +13,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -320,17 +321,17 @@ public class MedicationDispenseTranslatorImpl_2_6Test {
 	
 	@Test
 	public void toFhirResource_shouldTranslateDoseQuantityAndUnits() {
-		Concept openmrsObject = new Concept();
-		CodeableConcept fhirObject = newCodeableConcept();
-		when(conceptTranslator.toFhirResource(any())).thenReturn(fhirObject);
+		String uuid = "b485f97d-3836-4aed-8c90-81b536cc6e3a";
+		Concept concept = new Concept();
+		concept.setUuid(uuid);
 		openmrsDispense.setDose(100d);
-		openmrsDispense.setDoseUnits(openmrsObject);
+		openmrsDispense.setDoseUnits(concept);
 		org.hl7.fhir.r4.model.MedicationDispense dispense = translator.toFhirResource(openmrsDispense);
 		Quantity quantity = dispense.getDosageInstructionFirstRep().getDoseAndRateFirstRep().getDoseQuantity();
 		assertThat(quantity, notNullValue());
 		assertThat(quantity.getValue().doubleValue(), equalTo(openmrsDispense.getDose()));
-		assertThat(quantity.getSystem(), equalTo("system"));
-		assertThat(quantity.getCode(), equalTo("code"));
+		assertNull(quantity.getSystem());
+		assertThat(quantity.getCode(), equalTo(uuid));
 	}
 	
 	@Test
@@ -375,17 +376,17 @@ public class MedicationDispenseTranslatorImpl_2_6Test {
 	
 	@Test
 	public void toFhirResource_shouldTranslateDispenseQuantityAndUnits() {
-		Concept openmrsObject = new Concept();
-		CodeableConcept fhirObject = newCodeableConcept();
-		when(conceptTranslator.toFhirResource(openmrsObject)).thenReturn(fhirObject);
+		String uuid = "b485f97d-3836-4aed-8c90-81b536cc6e3a";
+		Concept concept = new Concept();
+		concept.setUuid(uuid);
 		openmrsDispense.setQuantity(100d);
-		openmrsDispense.setQuantityUnits(openmrsObject);
+		openmrsDispense.setQuantityUnits(concept);
 		org.hl7.fhir.r4.model.MedicationDispense dispense = translator.toFhirResource(openmrsDispense);
 		Quantity quantity = dispense.getQuantity();
 		assertThat(quantity, notNullValue());
 		assertThat(quantity.getValue().doubleValue(), equalTo(openmrsDispense.getQuantity()));
-		assertThat(quantity.getSystem(), equalTo("system"));
-		assertThat(quantity.getCode(), equalTo("code"));
+		assertNull(quantity.getSystem());
+		assertThat(quantity.getCode(), equalTo(uuid));
 	}
 	
 	@Test

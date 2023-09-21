@@ -11,43 +11,68 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import javax.annotation.Nonnull;
 
-import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.openmrs.Concept;
+import org.openmrs.ConceptMap;
+import org.openmrs.ConceptMapType;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.FhirConceptSourceService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
  * This is an implementation of Coding Translator that maps a Medication Quantity Concept to/from a
  * Coding in FHIR with a preferred set of systems and codes to prioritize. This will first favor
- * using RxNorm as the coding system. If this is not present on the OpenMRS concept, it will next
- * favor SNOMED-CT. Finally, if neither are present, it will favor the Concept UUID with a null
- * system.
+ * using RxNorm coding with SAME-AS mapping. If this is not present on the OpenMRS concept, it will
+ * next favor SNOMED-CT, also with SAME-AS mapping. Finally, if neither are present, it will favor
+ * the Concept UUID with a null system.
  */
 @Component
 public class MedicationQuantityCodingTranslatorImpl extends BaseCodingTranslator {
 	
+	@Autowired
+	private FhirConceptSourceService conceptSourceService;
+	
 	@Override
 	public Coding toFhirResource(@Nonnull Concept concept) {
-		CodeableConcept codeableConcept = conceptTranslator.toFhirResource(concept);
-		if (codeableConcept == null) {
-			return null;
+		
+		Coding coding = null;
+		
+		if (concept.getConceptMappings() != null && !concept.getConceptMappings().isEmpty()) {
+			coding = getSameAsCodingForSystem(concept, FhirConstants.RX_NORM_SYSTEM_URI);
+			if (coding == null) {
+				coding = getSameAsCodingForSystem(concept, FhirConstants.SNOMED_SYSTEM_URI);
+			}
 		}
 		
-		Coding coding = getCodingForSystem(codeableConcept, FhirConstants.RX_NORM_SYSTEM_URI);
 		if (coding == null) {
-			coding = getCodingForSystem(codeableConcept, FhirConstants.SNOMED_SYSTEM_URI);
+			coding = createCoding(null, concept.getUuid(), concept);
 		}
-		if (coding == null) {
-			coding = getCodingForSystem(codeableConcept, null);
-		}
-		if (coding == null) {
-			coding = codeableConcept.getCodingFirstRep();
-		}
-		
-		coding.setDisplay(codeableConcept.getCoding().stream().filter(c -> c.getSystem() == null || c.getSystem().isEmpty())
-		        .findFirst().map(Coding::getDisplay).orElse(null));
 		
 		return coding;
+	}
+	
+	private Coding getSameAsCodingForSystem(Concept concept, String system) {
+		for (ConceptMap conceptMap : concept.getConceptMappings()) {
+			String conceptSourceUrl = conceptSourceService
+			        .getUrlForConceptSource(conceptMap.getConceptReferenceTerm().getConceptSource());
+			if (conceptSourceUrl != null && conceptSourceUrl.equals(system)
+			        && conceptMap.getConceptMapType().getUuid().equals(ConceptMapType.SAME_AS_MAP_TYPE_UUID)) {
+				return createCoding(system, conceptMap.getConceptReferenceTerm().getCode(), concept);
+			}
+		}
+		return null;
+	}
+	
+	private Coding createCoding(String system, String code, Concept concept) {
+		Coding coding = new Coding();
+		coding.setSystem(system);
+		coding.setCode(code);
+		coding.setDisplay(concept.getDisplayString());
+		return coding;
+	}
+	
+	public void setConceptSourceService(FhirConceptSourceService conceptSourceService) {
+		this.conceptSourceService = conceptSourceService;
 	}
 }

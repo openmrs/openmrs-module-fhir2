@@ -61,7 +61,7 @@ public class MedicationQuantityCodingTranslatorImplTest {
 		
 		quantityCodingTranslator = new MedicationQuantityCodingTranslatorImpl();
 		quantityCodingTranslator.setConceptTranslator(conceptTranslator);
-		
+		quantityCodingTranslator.setConceptSourceService(conceptSourceService);
 		LocaleUtility.setLocalesAllowedListCache(Arrays.asList(Locale.ENGLISH));
 	}
 	
@@ -112,9 +112,19 @@ public class MedicationQuantityCodingTranslatorImplTest {
 	
 	@Test
 	public void toFhirResource_shouldTranslateMedicationQuantityDefaultingToUuid() {
+		
+		ConceptMapType notSameAs = new ConceptMapType();
+		notSameAs.setUuid("5d4b9c92-ed26-45ca-8f6e-08c48b00648d"); // this is just a random uuid, so should *not* be a match for SAME_AS_MAP_TYPE_UUID
+		
+		ConceptSource snomed = new ConceptSource();
+		snomed.setHl7Code(Duration.SNOMED_CT_CONCEPT_SOURCE_HL7_CODE);
+		when(conceptSourceService.getUrlForConceptSource(snomed)).thenReturn(FhirConstants.SNOMED_SYSTEM_URI);
+		
 		Concept mg = new Concept();
 		mg.setUuid(CONCEPT_UUID);
 		mg.addName(new ConceptName("mg", Locale.ENGLISH));
+		mg.addConceptMapping(
+		    new ConceptMap(new ConceptReferenceTerm(snomed, "snomed-ct-mg-code-not-same-as", "snomed"), notSameAs));
 		
 		Coding result = quantityCodingTranslator.toFhirResource(mg);
 		assertThat(result, notNullValue());
