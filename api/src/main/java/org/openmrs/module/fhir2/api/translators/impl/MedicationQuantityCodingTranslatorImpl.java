@@ -46,7 +46,7 @@ public class MedicationQuantityCodingTranslatorImpl extends BaseCodingTranslator
 		}
 		
 		if (coding == null) {
-			coding = createConceptCoding(null, concept.getUuid(), concept);
+			coding = createCoding(null, concept.getUuid(), concept);
 		}
 		
 		return coding;
@@ -58,13 +58,13 @@ public class MedicationQuantityCodingTranslatorImpl extends BaseCodingTranslator
 			        .getUrlForConceptSource(conceptMap.getConceptReferenceTerm().getConceptSource());
 			if (conceptSourceUrl != null && conceptSourceUrl.equals(system)
 			        && conceptMap.getConceptMapType().getUuid().equals(ConceptMapType.SAME_AS_MAP_TYPE_UUID)) {
-				return createConceptCoding(system, conceptMap.getConceptReferenceTerm().getCode(), concept);
+				return createCoding(system, conceptMap.getConceptReferenceTerm().getCode(), concept);
 			}
 		}
 		return null;
 	}
 	
-	private Coding createConceptCoding(String system, String code, Concept concept) {
+	private Coding createCoding(String system, String code, Concept concept) {
 		Coding coding = new Coding();
 		coding.setSystem(system);
 		coding.setCode(code);
