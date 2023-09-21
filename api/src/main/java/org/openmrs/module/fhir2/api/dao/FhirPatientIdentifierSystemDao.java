@@ -22,6 +22,8 @@ public interface FhirPatientIdentifierSystemDao {
 	
 	String getUrlByPatientIdentifierType(PatientIdentifierType patientIdentifierType);
 	
+	PatientIdentifierType getPatientIdentifierTypeByUrl(String url);
+	
 	@Authorized(PrivilegeConstants.GET_IDENTIFIER_TYPES)
 	Optional<FhirPatientIdentifierSystem> getFhirPatientIdentifierSystem(@Nonnull PatientIdentifierType identifierType);
 	

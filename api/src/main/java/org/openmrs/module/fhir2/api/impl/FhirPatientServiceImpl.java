@@ -30,6 +30,7 @@ import org.openmrs.PatientIdentifierType;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirPatientService;
 import org.openmrs.module.fhir2.api.dao.FhirPatientDao;
+import org.openmrs.module.fhir2.api.dao.FhirPatientIdentifierSystemDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.OpenmrsPatientSearchParams;
@@ -53,6 +54,9 @@ public class FhirPatientServiceImpl extends BaseFhirService<Patient, org.openmrs
 	private FhirPatientDao dao;
 	
 	@Autowired
+	private FhirPatientIdentifierSystemDao systemDao;
+	
+	@Autowired
 	private SearchQueryInclude<Patient> searchQueryInclude;
 	
 	@Autowired
@@ -72,10 +76,12 @@ public class FhirPatientServiceImpl extends BaseFhirService<Patient, org.openmrs
 	@Override
 	@Transactional(readOnly = true)
 	public PatientIdentifierType getPatientIdentifierTypeByIdentifier(Identifier identifier) {
+		if (identifier.hasSystem()) {
+			return systemDao.getPatientIdentifierTypeByUrl(identifier.getSystem());
+		}
 		if (identifier.getType() == null || StringUtils.isBlank(identifier.getType().getText())) {
 			return null;
 		}
-		
 		return dao.getPatientIdentifierTypeByNameOrUuid(identifier.getType().getText(), null);
 	}
 	
