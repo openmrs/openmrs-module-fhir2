@@ -23,6 +23,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.MedicationDispense;
+import org.openmrs.annotation.OpenmrsProfile;
 import org.openmrs.module.fhir2.api.FhirMedicationDispenseService;
 import org.openmrs.module.fhir2.api.search.param.MedicationDispenseSearchParams;
 import org.springframework.stereotype.Component;
@@ -32,6 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @Setter(AccessLevel.PACKAGE)
 @Getter(AccessLevel.PROTECTED)
+@OpenmrsProfile(openmrsPlatformVersion = "2.* - 2.5.*")
 public class FhirMedicationDispenseServiceImpl implements FhirMedicationDispenseService {
 	
 	@Override

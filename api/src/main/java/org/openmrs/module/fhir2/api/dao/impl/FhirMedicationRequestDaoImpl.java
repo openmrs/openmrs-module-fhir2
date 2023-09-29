@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
+import static org.hibernate.criterion.Restrictions.ne;
+
 import javax.annotation.Nonnull;
 
 import java.util.Collection;
@@ -60,19 +62,6 @@ public class FhirMedicationRequestDaoImpl extends BaseFhirDao<DrugOrder> impleme
 	}
 	
 	@Override
-	public List<DrugOrder> getSearchResults(@Nonnull SearchParameterMap theParams) {
-		List<DrugOrder> results = super.getSearchResults(theParams);
-		if (results == null) {
-			return results;
-		} else {
-			return results.stream()
-			        .filter(order -> order.getAction() == null || order.getAction() != Order.Action.DISCONTINUE)
-			        .collect(Collectors.toList());
-		}
-		
-	}
-	
-	@Override
 	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
@@ -107,6 +96,7 @@ public class FhirMedicationRequestDaoImpl extends BaseFhirDao<DrugOrder> impleme
 					break;
 			}
 		});
+		
 		excludeDiscontinueOrders(criteria);
 	}
 	
@@ -162,6 +152,6 @@ public class FhirMedicationRequestDaoImpl extends BaseFhirDao<DrugOrder> impleme
 	
 	private void excludeDiscontinueOrders(Criteria criteria) {
 		// exclude "discontinue" orders, see: https://issues.openmrs.org/browse/FM2-532
-		criteria.add(Restrictions.ne("action", Order.Action.DISCONTINUE));
+		criteria.add(ne("action", Order.Action.DISCONTINUE));
 	}
 }
