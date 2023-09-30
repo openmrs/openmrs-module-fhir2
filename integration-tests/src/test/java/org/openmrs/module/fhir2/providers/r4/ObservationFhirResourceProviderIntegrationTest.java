@@ -64,7 +64,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR4In
 	private static final String OBS_JSON_UPDATE_PATH = "org/openmrs/module/fhir2/providers/ObservationWebTest_update.json";
 	
 	private static final String OBS_XML_UPDATE_PATH = "org/openmrs/module/fhir2/providers/ObservationWebTest_update.xml";
-
+	
 	private static final String JSON_MERGE_PATCH_OBSERVATION_PATH = "org/openmrs/module/fhir2/providers/ObservationWebTest_json_patch.json";
 	
 	private static final String JSON_PATCH_OBSERVATION_PATH = "org/openmrs/module/fhir2/providers/ObservationWebTest_patch.json";
@@ -1574,7 +1574,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR4In
 		assertThat(observation.getIdElement().getIdPart(), equalTo(OBS_UUID));
 		
 		assertThat(observation.getInterpretationFirstRep().getCodingFirstRep().getSystem(),
-				equalTo(FhirConstants.INTERPRETATION_SYSTEM_URI));
+		    equalTo(FhirConstants.INTERPRETATION_SYSTEM_URI));
 		assertThat(observation.getInterpretationFirstRep().getCodingFirstRep().getCode(), equalTo("N"));
 		assertThat(observation.getInterpretationFirstRep().getCodingFirstRep().getDisplay(), equalTo("Normal"));
 	}
@@ -1593,7 +1593,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR4In
 		assertThat(observation.getIdElement().getIdPart(), equalTo(OBS_UUID));
 		
 		assertThat(observation.getInterpretationFirstRep().getCodingFirstRep().getSystem(),
-				equalTo(FhirConstants.INTERPRETATION_SYSTEM_URI));
+		    equalTo(FhirConstants.INTERPRETATION_SYSTEM_URI));
 		assertThat(observation.getInterpretationFirstRep().getCodingFirstRep().getCode(), equalTo("N"));
 		assertThat(observation.getInterpretationFirstRep().getCodingFirstRep().getDisplay(), equalTo("Normal"));
 	}

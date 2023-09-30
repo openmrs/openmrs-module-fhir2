@@ -25,8 +25,6 @@ import lombok.Getter;
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.junit.Before;
 import org.junit.Test;
-import org.openmrs.module.fhir2.providers.r4.BaseFhirR4IntegrationTest;
-import org.openmrs.module.fhir2.providers.r4.MedicationRequestFhirResourceProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletResponse;
 

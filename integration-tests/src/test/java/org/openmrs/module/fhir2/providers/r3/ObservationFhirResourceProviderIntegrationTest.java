@@ -1415,7 +1415,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		assertThat(observation.getIdElement().getIdPart(), equalTo(OBS_UUID));
 		
 		assertThat(observation.getInterpretation().getCodingFirstRep().getSystem(),
-				equalTo(FhirConstants.INTERPRETATION_SYSTEM_URI));
+		    equalTo(FhirConstants.INTERPRETATION_SYSTEM_URI));
 		assertThat(observation.getInterpretation().getCodingFirstRep().getCode(), equalTo("N"));
 		assertThat(observation.getInterpretation().getCodingFirstRep().getDisplay(), equalTo("Normal"));
 	}
@@ -1434,7 +1434,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		assertThat(observation.getIdElement().getIdPart(), equalTo(OBS_UUID));
 		
 		assertThat(observation.getInterpretation().getCodingFirstRep().getSystem(),
-				equalTo(FhirConstants.INTERPRETATION_SYSTEM_URI));
+		    equalTo(FhirConstants.INTERPRETATION_SYSTEM_URI));
 		assertThat(observation.getInterpretation().getCodingFirstRep().getCode(), equalTo("N"));
 		assertThat(observation.getInterpretation().getCodingFirstRep().getDisplay(), equalTo("Normal"));
 	}
@@ -1468,7 +1468,6 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		assertThat(observation.getIdElement().getIdPart(), equalTo(OBS_UUID));
 		assertThat(observation.getStatus(), equalTo(Observation.ObservationStatus.FINAL));
 	}
-	
 	
 	private int getDistinctEncounterDatetime(List<Bundle.BundleEntryComponent> resultList) {
 		List<Date> results = resultList.stream().map(Bundle.BundleEntryComponent::getResource)

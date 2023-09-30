@@ -156,7 +156,7 @@ public class DelegatingWebApplicationContext implements WebApplicationContext {
 	
 	@Override
 	public Class<?> getType(String s, boolean b) throws NoSuchBeanDefinitionException {
-		return applicationContext.getType(s,b);
+		return applicationContext.getType(s, b);
 	}
 	
 	@Override
@@ -231,7 +231,7 @@ public class DelegatingWebApplicationContext implements WebApplicationContext {
 	
 	@Override
 	public String[] getBeanNamesForType(ResolvableType resolvableType, boolean b, boolean b1) {
-		return applicationContext.getBeanNamesForType(resolvableType,b,b1);
+		return applicationContext.getBeanNamesForType(resolvableType, b, b1);
 	}
 	
 	@Override
