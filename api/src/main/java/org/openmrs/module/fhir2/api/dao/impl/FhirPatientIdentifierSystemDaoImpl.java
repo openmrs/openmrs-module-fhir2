@@ -45,6 +45,12 @@ public class FhirPatientIdentifierSystemDaoImpl implements FhirPatientIdentifier
 	}
 	
 	@Override
+	public PatientIdentifierType getPatientIdentifierTypeByUrl(String url) {
+		return (PatientIdentifierType) sessionFactory.getCurrentSession().createCriteria(FhirPatientIdentifierSystem.class)
+		        .add(eq("url", url)).setProjection(Projections.property("patientIdentifierType")).uniqueResult();
+	}
+	
+	@Override
 	public Optional<FhirPatientIdentifierSystem> getFhirPatientIdentifierSystem(
 	        @Nonnull PatientIdentifierType patientIdentifierType) {
 		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(FhirPatientIdentifierSystem.class);

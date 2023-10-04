@@ -13,6 +13,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import java.util.Optional;
 
@@ -22,6 +25,7 @@ import org.junit.Test;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.api.PatientService;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
+import org.openmrs.module.fhir2.api.FhirPatientIdentifierSystemService;
 import org.openmrs.module.fhir2.model.FhirPatientIdentifierSystem;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +44,9 @@ public class FhirPatientIdentifierSystemDaoImplTest extends BaseModuleContextSen
 	@Autowired
 	PatientService patientService;
 	
+	@Autowired
+	FhirPatientIdentifierSystemService systemService;
+	
 	@Before
 	public void setup() throws Exception {
 		dao = new FhirPatientIdentifierSystemDaoImpl();
@@ -53,6 +60,28 @@ public class FhirPatientIdentifierSystemDaoImplTest extends BaseModuleContextSen
 		String url = dao.getUrlByPatientIdentifierType(patientIdentifierType);
 		assertThat(url, notNullValue());
 		assertThat(url, equalTo("www.example.com"));
+	}
+	
+	@Test
+	public void shouldReturnPatientIdentifierTypeByUrl() {
+		PatientIdentifierType expectedIdentifierType = patientService.getPatientIdentifierType(1);
+		String url = systemService.getUrlByPatientIdentifierType(expectedIdentifierType);
+		
+		PatientIdentifierType actualIdentifierType = dao.getPatientIdentifierTypeByUrl(url);
+		assertNotNull(actualIdentifierType);
+		assertEquals(expectedIdentifierType, actualIdentifierType);
+	}
+	
+	@Test
+	public void shouldReturnNullForInvalidUrl() {
+		PatientIdentifierType actualIdentifierType = dao.getPatientIdentifierTypeByUrl("invalidUrl");
+		assertNull(actualIdentifierType);
+	}
+	
+	@Test
+	public void shouldReturnNullForNullUrl() {
+		PatientIdentifierType actualIdentifierType = dao.getPatientIdentifierTypeByUrl(null);
+		assertNull(actualIdentifierType);
 	}
 	
 	@Test

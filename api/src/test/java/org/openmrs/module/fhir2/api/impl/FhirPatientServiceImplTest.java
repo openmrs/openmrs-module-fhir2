@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
+import static junit.framework.TestCase.assertEquals;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -19,6 +20,10 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anySet;
@@ -41,8 +46,11 @@ import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import com.github.dnault.xmlpatch.repackaged.joptsimple.internal.Strings;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.HumanName;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Observation;
 import org.junit.Before;
 import org.junit.Test;
@@ -50,11 +58,13 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Patient;
+import org.openmrs.PatientIdentifierType;
 import org.openmrs.PersonAddress;
 import org.openmrs.PersonName;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirPatientDao;
+import org.openmrs.module.fhir2.api.dao.FhirPatientIdentifierSystemDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.SearchQueryBundleProvider;
 import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
@@ -115,6 +125,9 @@ public class FhirPatientServiceImplTest {
 	private FhirPatientDao dao;
 	
 	@Mock
+	private FhirPatientIdentifierSystemDao systemDao;
+	
+	@Mock
 	private FhirGlobalPropertyService globalPropertyService;
 	
 	@Mock
@@ -139,6 +152,7 @@ public class FhirPatientServiceImplTest {
 		};
 		
 		patientService.setDao(dao);
+		patientService.setSystemDao(systemDao);
 		patientService.setTranslator(patientTranslator);
 		patientService.setSearchQuery(searchQuery);
 		patientService.setSearchQueryInclude(searchQueryInclude);
@@ -871,6 +885,90 @@ public class FhirPatientServiceImplTest {
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
 		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void getPatientIdentifierTypeByIdentifier_shouldReturnIdentifierTypeWhenPresent() {
+		String typeName = "some-type";
+		
+		Identifier identifier = new Identifier();
+		identifier.setType(new CodeableConcept().setText(typeName));
+		
+		PatientIdentifierType expectedType = new PatientIdentifierType();
+		expectedType.setName(typeName);
+		
+		when(dao.getPatientIdentifierTypeByNameOrUuid(typeName, null)).thenReturn(expectedType);
+		
+		PatientIdentifierType result = patientService.getPatientIdentifierTypeByIdentifier(identifier);
+		assertNull(identifier.getSystem());
+		assertEquals(expectedType, result);
+	}
+	
+	@Test
+	public void getPatientIdentifierTypeByIdentifier_shouldReturnIdentifierTypeWithSystemWhenSystemIsPresent() {
+		String systemName = "some-system";
+		String expectedTypeName = "some-type";
+		String anotherTypeName = "another-type";
+		
+		Identifier identifierWithSystem = new Identifier();
+		identifierWithSystem.setSystem(systemName);
+		identifierWithSystem.setType(new CodeableConcept().setText(expectedTypeName));
+		
+		PatientIdentifierType expectedType = new PatientIdentifierType();
+		expectedType.setName(expectedTypeName);
+		
+		PatientIdentifierType unexpectedType = new PatientIdentifierType();
+		unexpectedType.setName(anotherTypeName);
+		
+		when(systemDao.getPatientIdentifierTypeByUrl(systemName)).thenReturn(expectedType);
+		
+		PatientIdentifierType result = patientService.getPatientIdentifierTypeByIdentifier(identifierWithSystem);
+		assertNotEquals(expectedType, unexpectedType);
+		assertEquals(expectedType, result);
+	}
+	
+	@Test
+	public void getPatientIdentifierTypeByIdentifier_shouldReturnNullWhenSystemAndIdentifierTypeNotPresent() {
+		Identifier identifier = new Identifier();
+		identifier.setType(null);
+		
+		PatientIdentifierType result = patientService.getPatientIdentifierTypeByIdentifier(identifier);
+		assertNull(identifier.getSystem());
+		assertFalse(identifier.hasType());
+		assertNull(result);
+	}
+
+	@Test
+	public void getPatientIdentifierTypeByIdentifier_shouldReturnNullWhenIdentifierTypeIsNull() {
+		Identifier identifier = new Identifier();
+		identifier.setType(null);
+
+		PatientIdentifierType result = patientService.getPatientIdentifierTypeByIdentifier(identifier);
+		assertNull(identifier.getSystem());
+		assertTrue(identifier.getType().isEmpty());
+		assertNull(result);
+	}
+
+	@Test
+	public void getPatientIdentifierTypeByIdentifier_shouldReturnNullWhenIdentifierTypeTextIsNull() {
+		Identifier identifier = new Identifier();
+		identifier.setType(new CodeableConcept().setText(null));
+
+		PatientIdentifierType result = patientService.getPatientIdentifierTypeByIdentifier(identifier);
+		assertNull(identifier.getSystem());
+		assertTrue(identifier.getType().isEmpty());
+		assertNull(result);
+	}
+	
+	@Test
+	public void getPatientIdentifierTypeByIdentifier_shouldReturnNullWhenIdentifierTypeTextEmpty() {
+		Identifier identifier = new Identifier();
+		identifier.setType(new CodeableConcept().setText(Strings.EMPTY));
+		
+		PatientIdentifierType result = patientService.getPatientIdentifierTypeByIdentifier(identifier);
+		assertNull(identifier.getSystem());
+		assertTrue(identifier.getType().isEmpty());
+		assertNull(result);
 	}
 	
 	private List<IBaseResource> get(IBundleProvider results) {
