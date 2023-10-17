@@ -15,25 +15,24 @@ import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.
 
 import javax.annotation.Nonnull;
 
-import java.util.Date;
+import java.util.Optional;
 
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import lombok.AccessLevel;
 import lombok.Setter;
-import org.hibernate.proxy.HibernateProxy;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.DateTimeType;
-import org.openmrs.Concept;
-import org.openmrs.Obs;
-import org.openmrs.Patient;
-import org.openmrs.Person;
+import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.StringType;
+import org.openmrs.CodedOrFreeText;
+import org.openmrs.Condition;
+import org.openmrs.ConditionClinicalStatus;
+import org.openmrs.ConditionVerificationStatus;
 import org.openmrs.User;
-import org.openmrs.annotation.OpenmrsProfile;
-import org.openmrs.api.ConceptService;
-import org.openmrs.api.db.hibernate.HibernateUtil;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
+import org.openmrs.module.fhir2.api.translators.ConditionClinicalStatusTranslator;
 import org.openmrs.module.fhir2.api.translators.ConditionTranslator;
+import org.openmrs.module.fhir2.api.translators.ConditionVerificationStatusTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,11 +40,16 @@ import org.springframework.stereotype.Component;
 
 @Setter(AccessLevel.PACKAGE)
 @Component
-@OpenmrsProfile(openmrsPlatformVersion = "2.0.5 - 2.1.*")
-public class ConditionTranslatorImpl implements ConditionTranslator<Obs> {
+public class ConditionTranslatorImpl implements ConditionTranslator<Condition> {
 	
 	@Autowired
 	private PatientReferenceTranslator patientReferenceTranslator;
+	
+	@Autowired
+	private ConditionClinicalStatusTranslator<ConditionClinicalStatus> clinicalStatusTranslator;
+	
+	@Autowired
+	private ConditionVerificationStatusTranslator<ConditionVerificationStatus> verificationStatusTranslator;
 	
 	@Autowired
 	private PractitionerReferenceTranslator<User> practitionerReferenceTranslator;
@@ -53,75 +57,84 @@ public class ConditionTranslatorImpl implements ConditionTranslator<Obs> {
 	@Autowired
 	private ConceptTranslator conceptTranslator;
 	
-	@Autowired
-	private ConceptService conceptService;
-	
 	@Override
-	public org.hl7.fhir.r4.model.Condition toFhirResource(@Nonnull Obs obsCondition) {
-		notNull(obsCondition, "The Openmrs Condition object should not be null");
+	public org.hl7.fhir.r4.model.Condition toFhirResource(@Nonnull Condition condition) {
+		notNull(condition, "The Openmrs Condition object should not be null");
 		
 		org.hl7.fhir.r4.model.Condition fhirCondition = new org.hl7.fhir.r4.model.Condition();
-		fhirCondition.setId(obsCondition.getUuid());
+		fhirCondition.setId(condition.getUuid());
+		fhirCondition.setSubject(patientReferenceTranslator.toFhirResource(condition.getPatient()));
+		fhirCondition.setClinicalStatus(clinicalStatusTranslator.toFhirResource(condition.getClinicalStatus()));
+		fhirCondition.setVerificationStatus(verificationStatusTranslator.toFhirResource(condition.getVerificationStatus()));
 		
-		Person obsPerson = obsCondition.getPerson();
-		if (obsPerson != null) {
-			if (obsPerson instanceof HibernateProxy) {
-				obsPerson = HibernateUtil.getRealObjectFromProxy(obsPerson);
-			}
-			
-			if (obsPerson instanceof Patient) {
-				fhirCondition.setSubject(patientReferenceTranslator.toFhirResource((Patient) obsPerson));
+		CodedOrFreeText codedOrFreeTextCondition = condition.getCondition();
+		if (codedOrFreeTextCondition != null) {
+			fhirCondition.setCode(conceptTranslator.toFhirResource(codedOrFreeTextCondition.getCoded()));
+			if (codedOrFreeTextCondition.getNonCoded() != null) {
+				Extension extension = new Extension();
+				extension.setUrl(FhirConstants.OPENMRS_FHIR_EXT_NON_CODED_CONDITION);
+				extension.setValue(new StringType(codedOrFreeTextCondition.getNonCoded()));
+				fhirCondition.addExtension(extension);
 			}
 		}
 		
-		if (obsCondition.getValueCoded() != null) {
-			fhirCondition.setCode(conceptTranslator.toFhirResource(obsCondition.getValueCoded()));
+		fhirCondition.setOnset(new DateTimeType().setValue(condition.getOnsetDate()));
+		if (condition.getEndDate() != null) {
+			fhirCondition.setAbatement(new DateTimeType().setValue(condition.getEndDate()));
 		}
 		
-		fhirCondition.setOnset(new DateTimeType().setValue(obsCondition.getObsDatetime()));
-		fhirCondition.setRecorder(practitionerReferenceTranslator.toFhirResource(obsCondition.getCreator()));
-		fhirCondition.setRecordedDate(obsCondition.getDateCreated());
+		fhirCondition.setRecorder(practitionerReferenceTranslator.toFhirResource(condition.getCreator()));
+		fhirCondition.setRecordedDate(condition.getDateCreated());
 		
-		fhirCondition.getMeta().setLastUpdated(getLastUpdated(obsCondition));
-		fhirCondition.getMeta().setVersionId(getVersionId(obsCondition));
+		fhirCondition.getMeta().setLastUpdated(getLastUpdated(condition));
+		fhirCondition.getMeta().setVersionId(getVersionId(condition));
 		
 		return fhirCondition;
 	}
 	
 	@Override
-	public Obs toOpenmrsType(@Nonnull org.hl7.fhir.r4.model.Condition condition) {
+	public Condition toOpenmrsType(@Nonnull org.hl7.fhir.r4.model.Condition condition) {
 		notNull(condition, "The Condition object should not be null");
-		return this.toOpenmrsType(new Obs(), condition);
+		return this.toOpenmrsType(new Condition(), condition);
 	}
 	
 	@Override
-	public Obs toOpenmrsType(@Nonnull Obs existingObsCondition, @Nonnull org.hl7.fhir.r4.model.Condition condition) {
-		notNull(existingObsCondition, "The existing Openmrs Obs Condition object should not be null");
+	public Condition toOpenmrsType(@Nonnull Condition existingCondition,
+	        @Nonnull org.hl7.fhir.r4.model.Condition condition) {
+		notNull(existingCondition, "The existing Openmrs Condition object should not be null");
 		notNull(condition, "The Condition object should not be null");
 		
 		if (condition.hasId()) {
-			existingObsCondition.setUuid(condition.getIdElement().getIdPart());
+			existingCondition.setUuid(condition.getIdElement().getIdPart());
 		}
+		
+		existingCondition.setPatient(patientReferenceTranslator.toOpenmrsType(condition.getSubject()));
+		existingCondition.setClinicalStatus(clinicalStatusTranslator.toOpenmrsType(condition.getClinicalStatus()));
+		existingCondition
+		        .setVerificationStatus(verificationStatusTranslator.toOpenmrsType(condition.getVerificationStatus()));
 		
 		CodeableConcept codeableConcept = condition.getCode();
-		existingObsCondition.setValueCoded(conceptTranslator.toOpenmrsType(codeableConcept));
-		existingObsCondition.setPerson(patientReferenceTranslator.toOpenmrsType(condition.getSubject()));
-		Concept problemList = conceptService.getConceptByUuid(FhirConstants.CONDITION_OBSERVATION_CONCEPT_UUID);
-		if (problemList != null) {
-			existingObsCondition.setConcept(problemList);
-		} else {
-			throw new InternalErrorException(
-			        "Concept " + FhirConstants.CONDITION_OBSERVATION_CONCEPT_UUID + " ProblemList Not found");
-		}
-		Date onsetTime = condition.getOnsetDateTimeType().getValue();
-		Date recordTime = condition.getRecordedDateElement().getValue();
-		if (onsetTime != null) {
-			existingObsCondition.setObsDatetime(onsetTime);
-		} else if (recordTime != null) {
-			existingObsCondition.setObsDatetime(recordTime);
-		}
-		existingObsCondition.setCreator(practitionerReferenceTranslator.toOpenmrsType(condition.getRecorder()));
+		CodedOrFreeText conditionCodedOrText = new CodedOrFreeText();
+		Optional<Extension> extension = Optional
+		        .ofNullable(condition.getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_NON_CODED_CONDITION));
+		extension.ifPresent(value -> conditionCodedOrText.setNonCoded(String.valueOf(value.getValue())));
+		conditionCodedOrText.setCoded(conceptTranslator.toOpenmrsType(codeableConcept));
+		existingCondition.setCondition(conditionCodedOrText);
 		
-		return existingObsCondition;
+		if (condition.hasOnsetDateTimeType()) {
+			existingCondition.setOnsetDate(condition.getOnsetDateTimeType().getValue());
+		} else if (condition.hasOnsetPeriod()) {
+			existingCondition.setOnsetDate(condition.getOnsetPeriod().getStart());
+		}
+		
+		if (condition.hasAbatementDateTimeType()) {
+			existingCondition.setEndDate(condition.getAbatementDateTimeType().getValue());
+		} else if (condition.hasAbatementPeriod()) {
+			existingCondition.setEndDate(condition.getAbatementPeriod().getEnd());
+		}
+		
+		existingCondition.setCreator(practitionerReferenceTranslator.toOpenmrsType(condition.getRecorder()));
+		
+		return existingCondition;
 	}
 }

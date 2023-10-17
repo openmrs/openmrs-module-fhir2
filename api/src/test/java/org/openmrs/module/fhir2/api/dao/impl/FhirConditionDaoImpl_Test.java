@@ -33,7 +33,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
-public class FhirConditionDaoImpl_2_2Test extends BaseModuleContextSensitiveTest {
+public class FhirConditionDaoImpl_Test extends BaseModuleContextSensitiveTest {
 	
 	private static final String CONDITION_UUID = "2cc6880e-2c46-15e4-9038-a6c5e4d22fb7";
 	
@@ -62,11 +62,11 @@ public class FhirConditionDaoImpl_2_2Test extends BaseModuleContextSensitiveTest
 	@Autowired
 	private ConceptService conceptService;
 	
-	private FhirConditionDaoImpl_2_2 dao;
+	private FhirConditionDaoImpl dao;
 	
 	@Before
 	public void setUp() {
-		dao = new FhirConditionDaoImpl_2_2();
+		dao = new FhirConditionDaoImpl();
 		dao.setSessionFactory(sessionFactory);
 		
 		executeDataSet(CONDITION_INITIAL_DATA_XML);

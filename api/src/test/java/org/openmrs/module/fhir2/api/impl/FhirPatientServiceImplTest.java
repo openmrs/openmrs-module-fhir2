@@ -937,23 +937,23 @@ public class FhirPatientServiceImplTest {
 		assertFalse(identifier.hasType());
 		assertNull(result);
 	}
-
+	
 	@Test
 	public void getPatientIdentifierTypeByIdentifier_shouldReturnNullWhenIdentifierTypeIsNull() {
 		Identifier identifier = new Identifier();
 		identifier.setType(null);
-
+		
 		PatientIdentifierType result = patientService.getPatientIdentifierTypeByIdentifier(identifier);
 		assertNull(identifier.getSystem());
 		assertTrue(identifier.getType().isEmpty());
 		assertNull(result);
 	}
-
+	
 	@Test
 	public void getPatientIdentifierTypeByIdentifier_shouldReturnNullWhenIdentifierTypeTextIsNull() {
 		Identifier identifier = new Identifier();
 		identifier.setType(new CodeableConcept().setText(null));
-
+		
 		PatientIdentifierType result = patientService.getPatientIdentifierTypeByIdentifier(identifier);
 		assertNull(identifier.getSystem());
 		assertTrue(identifier.getType().isEmpty());

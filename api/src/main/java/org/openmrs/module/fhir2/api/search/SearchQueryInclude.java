@@ -287,15 +287,14 @@ public class SearchQueryInclude<U extends IBaseResource> {
 	        HashSet<Include> recursiveIncludes, HashSet<Include> recursiveRevIncludes) {
 		switch (targetType) {
 			case FhirConstants.OBSERVATION:
-				ObservationSearchParams observationSearchParams = new ObservationSearchParams();
-				observationSearchParams.setEncounter(params);
-				return observationService.searchForObservations(observationSearchParams);
+				return observationService
+				        .searchForObservations(ObservationSearchParams.builder().encounterReference(params).build());
 			case FhirConstants.DIAGNOSTIC_REPORT:
 				return diagnosticReportService.searchForDiagnosticReports(
-				    new DiagnosticReportSearchParams(params, null, null, null, null, null, null, null, null));
+				    DiagnosticReportSearchParams.builder().encounterReference(params).build());
 			case FhirConstants.MEDICATION_REQUEST:
-				return medicationRequestService.searchForMedicationRequests(new MedicationRequestSearchParams(null, params,
-				        null, null, null, null, null, null, null, recursiveIncludes, recursiveRevIncludes));
+				return medicationRequestService.searchForMedicationRequests(MedicationRequestSearchParams.builder()
+				        .encounterReference(params).includes(recursiveIncludes).revIncludes(recursiveRevIncludes).build());
 			case FhirConstants.PROCEDURE_REQUEST:
 			case FhirConstants.SERVICE_REQUEST:
 				return serviceRequestService.searchForServiceRequests(null, null, params, null, null, null, null, null);

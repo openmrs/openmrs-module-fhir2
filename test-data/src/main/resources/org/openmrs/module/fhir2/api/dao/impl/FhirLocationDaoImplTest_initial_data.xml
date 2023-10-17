@@ -26,7 +26,7 @@
     <concept_map_type concept_map_type_id="2" name="same-as" description="Indicates similarity" is_hidden="0" retired="0" creator="1" date_created="2004-08-12 00:00:00.0" uuid="35543629-7d8c-11e1-909d-c80aa9edcf4e"/>
     <concept_class concept_class_id="8" name="LabSet" description="Term to describe laboratory sets" creator="1" date_created="2004-03-02 00:00:00.0" retired="false" uuid="4719138c-8553-4c81-bb92-753f41f8be16"/>
     <concept_datatype concept_datatype_id="3" name="Text" hl7_abbreviation="ST" description="Free text" creator="1" date_created="2004-02-02 00:00:00.0" retired="false" uuid="8d4a4ab4-c2cc-11de-8d13-0010c6dffd0f"/>
-    <concept_reference_source concept_source_id="6" name="LocationType" creator="1" date_created="2005-01-01 00:00:00.0" retired="0" uuid="2b3c1ff8-748a-102f-83f4-12313b04a615" />
+    <concept_reference_source concept_source_id="6" name="LocationType" description="for location type" creator="1" date_created="2005-01-01 00:00:00.0" retired="0" uuid="2b3c1ff8-748a-102f-83f4-12313b04a615" />
     <concept_reference_term concept_reference_term_id="1" retired="false" concept_source_id="6" code="1000-1" creator="1" date_created="2005-01-01 00:00:00.0" uuid="d421950d-0ef5-424c-b72a-3fff29af6b0b" />
     <concept concept_id="3" retired="0" datatype_id="3" class_id="8" is_set="false" creator="1" date_created="2005-01-01 00:00:00.0" uuid="378e63b1-6c73-46ed-95e3-797b48ddc9f8" />
     <concept_reference_map concept_map_id="1" concept_reference_term_id="1" concept_map_type_id="2" creator="1" date_created="2005-01-01 00:00:00.0" concept_id="3" uuid="2f7e0cd7-5836-4345-a24a-9c75cd3a876f" />

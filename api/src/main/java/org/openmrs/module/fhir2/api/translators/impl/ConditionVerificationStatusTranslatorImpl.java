@@ -16,14 +16,12 @@ import java.util.Optional;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.openmrs.ConditionVerificationStatus;
-import org.openmrs.annotation.OpenmrsProfile;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.ConditionVerificationStatusTranslator;
 import org.springframework.stereotype.Component;
 
 @Component
-@OpenmrsProfile(openmrsPlatformVersion = "2.2.* - 2.*")
-public class ConditionVerificationStatusTranslatorImpl_2_2 implements ConditionVerificationStatusTranslator<ConditionVerificationStatus> {
+public class ConditionVerificationStatusTranslatorImpl implements ConditionVerificationStatusTranslator<ConditionVerificationStatus> {
 	
 	@Override
 	public CodeableConcept toFhirResource(@Nonnull ConditionVerificationStatus verificationStatus) {

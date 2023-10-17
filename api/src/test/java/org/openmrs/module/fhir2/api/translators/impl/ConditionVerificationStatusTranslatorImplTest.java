@@ -22,7 +22,7 @@ import org.junit.Test;
 import org.openmrs.ConditionVerificationStatus;
 import org.openmrs.module.fhir2.FhirConstants;
 
-public class ConditionVerificationStatusTranslatorImpl_2_2Test {
+public class ConditionVerificationStatusTranslatorImplTest {
 	
 	private static final String FHIR_CONFIRMED = "confirmed";
 	
@@ -30,11 +30,11 @@ public class ConditionVerificationStatusTranslatorImpl_2_2Test {
 	
 	private static final String FHIR_ENTERED_IN_ERROR = "entered-in-error";
 	
-	private ConditionVerificationStatusTranslatorImpl_2_2 verificationStatusTranslator;
+	private ConditionVerificationStatusTranslatorImpl verificationStatusTranslator;
 	
 	@Before
 	public void setup() {
-		verificationStatusTranslator = new ConditionVerificationStatusTranslatorImpl_2_2();
+		verificationStatusTranslator = new ConditionVerificationStatusTranslatorImpl();
 	}
 	
 	@Test

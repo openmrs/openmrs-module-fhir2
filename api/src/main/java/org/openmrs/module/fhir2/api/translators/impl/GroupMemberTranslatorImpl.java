@@ -15,7 +15,6 @@ import javax.annotation.Nonnull;
 
 import lombok.AccessLevel;
 import lombok.Setter;
-import org.openmrs.annotation.OpenmrsProfile;
 import org.openmrs.module.fhir2.api.dao.FhirPatientDao;
 import org.openmrs.module.fhir2.api.translators.GroupMemberTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
@@ -25,7 +24,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.MODULE)
-@OpenmrsProfile(openmrsPlatformVersion = "2.0.* - 2.0.*")
 public class GroupMemberTranslatorImpl implements GroupMemberTranslator {
 	
 	@Autowired

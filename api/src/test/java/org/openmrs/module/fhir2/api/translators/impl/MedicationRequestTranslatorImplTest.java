@@ -18,6 +18,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.openmrs.module.fhir2.FhirConstants.OPENMRS_FHIR_EXT_MEDICATION_REQUEST_FULFILLER_STATUS;
 
 import java.lang.reflect.Field;
 import java.util.Date;
@@ -26,9 +27,11 @@ import lombok.SneakyThrows;
 import org.exparity.hamcrest.date.DateMatchers;
 import org.hl7.fhir.r4.model.Annotation;
 import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Dosage;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
@@ -142,10 +145,10 @@ public class MedicationRequestTranslatorImplTest {
 		medicationRequestTranslator.setPractitionerReferenceTranslator(providerPractitionerReferenceTranslator);
 		medicationRequestTranslator.setMedicationRequestPriorityTranslator(medicationRequestPriorityTranslator);
 		medicationRequestTranslator.setMedicationReferenceTranslator(medicationReferenceTranslator);
-		medicationRequestTranslator.setConceptTranslator(conceptTranslator);
-		medicationRequestTranslator.setDosageTranslator(dosageTranslator);
 		medicationRequestTranslator.setEncounterReferenceTranslator(encounterReferenceTranslator);
 		medicationRequestTranslator.setPatientReferenceTranslator(patientReferenceTranslator);
+		medicationRequestTranslator.setConceptTranslator(conceptTranslator);
+		medicationRequestTranslator.setDosageTranslator(dosageTranslator);
 		medicationRequestTranslator.setOrderIdentifierTranslator(new OrderIdentifierTranslatorImpl());
 		medicationRequestTranslator
 		        .setMedicationRequestDispenseRequestComponentTranslator(dispenseRequestComponentTranslator);
@@ -657,6 +660,49 @@ public class MedicationRequestTranslatorImplTest {
 		org.hl7.fhir.r4.model.MedicationRequest medicationRequest = medicationRequestTranslator.toFhirResource(drugOrder);
 		assertThat(medicationRequest, notNullValue());
 		assertThat(medicationRequest.getMeta().getVersionId(), notNullValue());
+	}
+	
+	@Test
+	public void toFhirResource_shouldTranslateToFulfillerStatusExtenstion() {
+		DrugOrder drugOrder = new DrugOrder();
+		drugOrder.setFulfillerStatus(Order.FulfillerStatus.COMPLETED);
+		MedicationRequest medicationRequest = medicationRequestTranslator.toFhirResource(drugOrder);
+		assertThat(medicationRequest, notNullValue());
+		assertThat(
+		    medicationRequest.getExtensionByUrl(OPENMRS_FHIR_EXT_MEDICATION_REQUEST_FULFILLER_STATUS).getValue().toString(),
+		    equalTo("COMPLETED"));
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldTranslateFulfillerStatusExtension() {
+		MedicationRequest medicationRequest = new MedicationRequest();
+		
+		Extension extension = new Extension();
+		extension.setUrl(OPENMRS_FHIR_EXT_MEDICATION_REQUEST_FULFILLER_STATUS);
+		extension.setValue(new CodeType("COMPLETED"));
+		
+		medicationRequest.addExtension(extension);
+		
+		DrugOrder drugOrder = medicationRequestTranslator.toOpenmrsType(medicationRequest);
+		assertThat(drugOrder, notNullValue());
+		assertThat(drugOrder.getFulfillerStatus(), equalTo(Order.FulfillerStatus.COMPLETED));
+		
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldTranslateNullFulfillerStatusExtension() {
+		MedicationRequest medicationRequest = new MedicationRequest();
+		
+		Extension extension = new Extension();
+		extension.setUrl(OPENMRS_FHIR_EXT_MEDICATION_REQUEST_FULFILLER_STATUS);
+		extension.setValue(new CodeType(null));
+		
+		medicationRequest.addExtension(extension);
+		
+		DrugOrder drugOrder = medicationRequestTranslator.toOpenmrsType(medicationRequest);
+		assertThat(drugOrder, notNullValue());
+		assertThat(drugOrder.getFulfillerStatus(), equalTo(null));
+		
 	}
 	
 	@SneakyThrows

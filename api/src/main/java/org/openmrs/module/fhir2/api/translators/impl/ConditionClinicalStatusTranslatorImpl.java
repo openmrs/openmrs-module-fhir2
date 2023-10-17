@@ -14,14 +14,12 @@ import javax.annotation.Nonnull;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.openmrs.ConditionClinicalStatus;
-import org.openmrs.annotation.OpenmrsProfile;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.ConditionClinicalStatusTranslator;
 import org.springframework.stereotype.Component;
 
 @Component
-@OpenmrsProfile(openmrsPlatformVersion = "2.2.* - 2.*")
-public class ConditionClinicalStatusTranslatorImpl_2_2 implements ConditionClinicalStatusTranslator<ConditionClinicalStatus> {
+public class ConditionClinicalStatusTranslatorImpl implements ConditionClinicalStatusTranslator<ConditionClinicalStatus> {
 	
 	@Override
 	public CodeableConcept toFhirResource(@Nonnull ConditionClinicalStatus clinicalStatus) {

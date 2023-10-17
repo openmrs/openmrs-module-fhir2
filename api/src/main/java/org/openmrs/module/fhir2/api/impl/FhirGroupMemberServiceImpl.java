@@ -12,14 +12,12 @@ package org.openmrs.module.fhir2.api.impl;
 import javax.annotation.Nonnull;
 
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import org.openmrs.annotation.OpenmrsProfile;
 import org.openmrs.module.fhir2.api.FhirGroupMemberService;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @Transactional
-@OpenmrsProfile(openmrsPlatformVersion = "2.0.0 - 2.0.*")
 public class FhirGroupMemberServiceImpl implements FhirGroupMemberService {
 	
 	@Override

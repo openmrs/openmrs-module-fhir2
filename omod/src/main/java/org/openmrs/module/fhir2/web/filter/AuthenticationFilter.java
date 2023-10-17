@@ -24,6 +24,8 @@ import java.nio.charset.StandardCharsets;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.api.context.Context;
+import org.openmrs.api.context.UsernamePasswordAuthenticationScheme;
+import org.openmrs.api.context.UsernamePasswordCredentials;
 
 public class AuthenticationFilter implements Filter {
 	
@@ -50,7 +52,9 @@ public class AuthenticationFilter implements Filter {
 							basicAuth = basicAuth.substring(6); // remove the leading "Basic "
 							String decoded = new String(Base64.decodeBase64(basicAuth), StandardCharsets.UTF_8);
 							String[] userAndPass = decoded.split(":");
-							Context.authenticate(userAndPass[0], userAndPass[1]);
+							UsernamePasswordAuthenticationScheme usernamePasswordAuthenticationScheme = new UsernamePasswordAuthenticationScheme();
+							usernamePasswordAuthenticationScheme
+							        .authenticate(new UsernamePasswordCredentials(userAndPass[0], userAndPass[1]));
 						}
 						catch (Exception e) {
 							HttpServletResponse httpResponse = (HttpServletResponse) response;
