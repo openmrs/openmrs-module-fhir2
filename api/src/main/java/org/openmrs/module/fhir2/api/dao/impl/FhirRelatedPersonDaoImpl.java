@@ -9,11 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
-import static org.hibernate.criterion.Restrictions.and;
-import static org.hibernate.criterion.Restrictions.eq;
-import static org.hibernate.criterion.Restrictions.isNull;
-import static org.hibernate.criterion.Restrictions.or;
-import static org.hibernate.criterion.Restrictions.sqlRestriction;
 import static org.hl7.fhir.r4.model.Patient.SP_FAMILY;
 import static org.hl7.fhir.r4.model.Patient.SP_GIVEN;
 import static org.hl7.fhir.r4.model.Person.SP_ADDRESS_CITY;
@@ -24,26 +19,26 @@ import static org.hl7.fhir.r4.model.Person.SP_BIRTHDATE;
 import static org.hl7.fhir.r4.model.Person.SP_NAME;
 
 import javax.annotation.Nonnull;
+import javax.persistence.EntityManager;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Order;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
-import org.hibernate.Criteria;
-import org.hibernate.criterion.DetachedCriteria;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Subqueries;
-import org.hibernate.sql.JoinType;
 import org.openmrs.PersonName;
 import org.openmrs.Relationship;
+import org.openmrs.TestOrder;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirRelatedPersonDao;
 import org.openmrs.module.fhir2.api.search.param.PropParam;
@@ -55,27 +50,33 @@ import org.springframework.stereotype.Component;
 public class FhirRelatedPersonDaoImpl extends BaseFhirDao<Relationship> implements FhirRelatedPersonDao {
 	
 	@Override
-	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
-		criteria.createAlias("personA", "m"); //inner join with person table
+	protected void setupSearchParams(CriteriaBuilder criteriaBuilder, SearchParameterMap theParams) {
+		EntityManager em = sessionFactory.getCurrentSession();
+		criteriaBuilder = em.getCriteriaBuilder();
+		CriteriaQuery<Relationship> criteriaQuery = criteriaBuilder.createQuery(Relationship.class);
+		Root<Relationship> root = criteriaQuery.from(Relationship.class);
+		
+		root.join("personA", javax.persistence.criteria.JoinType.INNER).alias("m");
+		CriteriaBuilder finalCriteriaBuilder = criteriaBuilder;
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.NAME_SEARCH_HANDLER:
-					entry.getValue()
-					        .forEach(param -> handleNames(criteria, (StringAndListParam) param.getParam(), null, null, "m"));
+					entry.getValue().forEach(
+					    param -> handleNames(finalCriteriaBuilder, (StringAndListParam) param.getParam(), null, null, "m"));
 					break;
 				case FhirConstants.GENDER_SEARCH_HANDLER:
-					entry.getValue().forEach(
-					    param -> handleGender("m.gender", (TokenAndListParam) param.getParam()).ifPresent(criteria::add));
+					entry.getValue().forEach(param -> handleGender("m.gender", (TokenAndListParam) param.getParam())
+					        .ifPresent(finalCriteriaBuilder::and));
 					break;
 				case FhirConstants.DATE_RANGE_SEARCH_HANDLER:
-					entry.getValue().forEach(
-					    param -> handleDateRange("m.birthdate", (DateRangeParam) param.getParam()).ifPresent(criteria::add));
+					entry.getValue().forEach(param -> handleDateRange("m.birthdate", (DateRangeParam) param.getParam())
+					        .ifPresent(finalCriteriaBuilder::and));
 					break;
 				case FhirConstants.ADDRESS_SEARCH_HANDLER:
-					handleAddresses(criteria, entry);
+					handleAddresses(finalCriteriaBuilder, entry);
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(entry.getValue()).ifPresent(criteria::add);
+					handleCommonSearchParameters(entry.getValue()).ifPresent(finalCriteriaBuilder::and);
 					break;
 			}
 		});
@@ -83,36 +84,51 @@ public class FhirRelatedPersonDaoImpl extends BaseFhirDao<Relationship> implemen
 	
 	@Override
 	protected Collection<Order> paramToProps(@Nonnull SortState sortState) {
+		EntityManager em = sessionFactory.getCurrentSession();
+		CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
+		CriteriaQuery<Relationship> criteriaQuery = criteriaBuilder.createQuery(Relationship.class);
+		Root<Relationship> root = criteriaQuery.from(Relationship.class);
 		String param = sortState.getParameter();
 		
 		if (param == null) {
 			return null;
 		}
 		
-		Criteria criteria = sortState.getCriteria();
-		if (param.startsWith("address") && lacksAlias(criteria, "pad")) {
-			criteria.createAlias("m.addresses", "pad", JoinType.LEFT_OUTER_JOIN);
+		CriteriaBuilder cb = sortState.getCriteriaBuilder();
+		if (param.startsWith("address") && lacksAlias(cb, "pad")) {
+			root.join("m.addresses", javax.persistence.criteria.JoinType.LEFT).alias("pad");
 		} else if (param.equals(SP_NAME) || param.equals(SP_GIVEN) || param.equals(SP_FAMILY)) {
-			if (lacksAlias(criteria, "pn")) {
-				criteria.createAlias("m.names", "pn", JoinType.LEFT_OUTER_JOIN);
+			if (lacksAlias(cb, "pn")) {
+				root.join("m.names", javax.persistence.criteria.JoinType.LEFT).alias("pn");
 			}
 			
-			criteria.add(and(eq("pn.voided", false), or(
-			    and(eq("pn.preferred", true),
-			        Subqueries.propertyEq("pn.personNameId",
-			            DetachedCriteria.forClass(PersonName.class, "pn1").add(eq("pn1.preferred", true))
-			                    .add(sqlRestriction(String.format("pn1_.person_id = %s.person_a", "this_")))
-			                    .setProjection(Projections.min("pn1.personNameId")))),
-			    and(Subqueries.notExists(DetachedCriteria.forClass(PersonName.class, "pn2").add(eq("pn2.preferred", true))
-			            // WARNING this is fragile
-			            .add(sqlRestriction(String.format("pn2_.person_id = %s.person_a", "this_")))
-			            .setProjection(Projections.id())),
-			        Subqueries.propertyEq("pn.personNameId",
-			            DetachedCriteria.forClass(PersonName.class, "pn3").add(eq("pn3.preferred", false))
-			                    // WARNING this is fragile
-			                    .add(sqlRestriction(String.format("pn3_.person_id = %s.person_a", "this_")))
-			                    .setProjection(Projections.min("pn3.personNameId")))),
-			    isNull("pn.personNameId"))));
+			Root<PersonName> subRoot = criteriaQuery.subquery(Integer.class).from(PersonName.class);
+			
+			Predicate predicate = criteriaBuilder
+			        .and(criteriaBuilder.equal(root.get("pn").get("voided"), false),
+			            criteriaBuilder.or(
+			                criteriaBuilder.and(criteriaBuilder.equal(root.get("pn").get("preferred"), true),
+			                    criteriaBuilder.equal(root.get("pn").get("personNameId"),
+			                        criteriaQuery.subquery(Integer.class)
+			                                .select(criteriaBuilder.min(root.get("pn1").get("personNameId")))
+			                                .where(criteriaBuilder.and(
+			                                    criteriaBuilder.equal(subRoot.get("preferred"), true),
+			                                    criteriaBuilder.equal(subRoot.get("person_id"), root.get("person_id")))))),
+			                criteriaBuilder.and(
+			                    criteriaBuilder.not(criteriaBuilder.exists(
+			                        criteriaQuery.subquery(Integer.class).select(root.get("pn2").get("personNameId")).where(
+			                            criteriaBuilder.and(criteriaBuilder.equal(subRoot.get("pn2").get("preferred"), true),
+			                                criteriaBuilder.equal(subRoot.get("pn2").get("person").get("personId"),
+			                                    root.get("personId")))))),
+			                    criteriaBuilder.equal(root.get("pn").get("personNameId"),
+			                        criteriaQuery.subquery(Integer.class)
+			                                .select(criteriaBuilder.min(root.get("pn3").get("personNameId")))
+			                                .where(criteriaBuilder.and(
+			                                    criteriaBuilder.equal(subRoot.get("pn3").get("preferred"), false),
+			                                    criteriaBuilder.equal(subRoot.get("pn3").get("person").get("personId"),
+			                                        root.get("personId")))))),
+			                criteriaBuilder.isNull(root.get("pn").get("personNameId"))));
+			criteriaQuery.where(predicate);
 			
 			String[] properties = null;
 			switch (param) {
@@ -128,12 +144,22 @@ public class FhirRelatedPersonDaoImpl extends BaseFhirDao<Relationship> implemen
 					break;
 			}
 			
+			List<Order> sortStateOrders = new ArrayList<>();
 			switch (sortState.getSortOrder()) {
 				case ASC:
-					return Arrays.stream(properties).map(Order::asc).collect(Collectors.toList());
+					for (String property : properties) {
+						sortStateOrders.add(cb.asc(root.get(property)));
+					}
+					break;
 				case DESC:
-					return Arrays.stream(properties).map(Order::desc).collect(Collectors.toList());
+					for (String property : properties) {
+						sortStateOrders.add(cb.desc(root.get(property)));
+					}
+					break;
 			}
+			
+			criteriaQuery.orderBy(sortStateOrders);
+			return sortStateOrders;
 		}
 		
 		return super.paramToProps(sortState);
@@ -157,7 +183,7 @@ public class FhirRelatedPersonDaoImpl extends BaseFhirDao<Relationship> implemen
 		}
 	}
 	
-	private void handleAddresses(Criteria criteria, Map.Entry<String, List<PropParam<?>>> entry) {
+	private void handleAddresses(CriteriaBuilder criteriaBuilder, Map.Entry<String, List<PropParam<?>>> entry) {
 		StringAndListParam city = null;
 		StringAndListParam country = null;
 		StringAndListParam postalCode = null;
@@ -179,9 +205,15 @@ public class FhirRelatedPersonDaoImpl extends BaseFhirDao<Relationship> implemen
 			}
 		}
 		
+		EntityManager em = sessionFactory.getCurrentSession();
+		criteriaBuilder = em.getCriteriaBuilder();
+		CriteriaQuery<Relationship> criteriaQuery = criteriaBuilder.createQuery(Relationship.class);
+		Root<Relationship> root = criteriaQuery.from(Relationship.class);
+		
+		CriteriaBuilder finalCriteriaBuilder = criteriaBuilder;
 		handlePersonAddress("pad", city, state, postalCode, country).ifPresent(c -> {
-			criteria.createAlias("m.addresses", "pad");
-			criteria.add(c);
+			root.join("m.addresses").alias("pad");
+			finalCriteriaBuilder.and(c);
 		});
 	}
 }

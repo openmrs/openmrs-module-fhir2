@@ -9,9 +9,11 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
-import static org.hibernate.criterion.Restrictions.eq;
-import static org.hibernate.criterion.Restrictions.ilike;
-import static org.hibernate.criterion.Restrictions.or;
+import javax.persistence.EntityManager;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,9 +23,6 @@ import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.Criteria;
-import org.hibernate.criterion.Criterion;
-import org.hibernate.criterion.MatchMode;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.openmrs.Cohort;
 import org.openmrs.module.fhir2.FhirConstants;
@@ -40,10 +39,11 @@ public class FhirGroupDaoImpl extends BaseFhirDao<Cohort> implements FhirGroupDa
 	private static final String PERSON_ALIAS = "cr.person";
 	
 	@Override
-	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
+	protected void setupSearchParams(CriteriaBuilder criteriaBuilder, SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			if (FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER.equals(entry.getKey())) {
-				entry.getValue().forEach(param -> handleManagingEntity(criteria, (ReferenceAndListParam) param.getParam()));
+				entry.getValue()
+				        .forEach(param -> handleManagingEntity(criteriaBuilder, (ReferenceAndListParam) param.getParam()));
 			}
 		});
 	}
@@ -53,35 +53,45 @@ public class FhirGroupDaoImpl extends BaseFhirDao<Cohort> implements FhirGroupDa
 	 * Find a way to merge this logic into handleParticipantReference logic in the BaseDao class
 	 * make it reusable
 	 */
-	protected void handleManagingEntity(Criteria criteria, ReferenceAndListParam participantReference) {
+	protected void handleManagingEntity(CriteriaBuilder criteriaBuilder, ReferenceAndListParam participantReference) {
+		EntityManager em = sessionFactory.getCurrentSession();
+		criteriaBuilder = em.getCriteriaBuilder();
+		CriteriaQuery<Cohort> cq = criteriaBuilder.createQuery(Cohort.class);
+		Root<Cohort> root = cq.from(Cohort.class);
+		
+		List<Predicate> predicates = new ArrayList<>();
 		if (participantReference != null) {
-			criteria.createAlias("creator", "cr");
+			root.join("creator");
 			
+			CriteriaBuilder finalCriteriaBuilder = criteriaBuilder;
 			handleAndListParam(participantReference, participantToken -> {
 				if (participantToken.getChain() != null) {
 					switch (participantToken.getChain()) {
 						// Search by person (the person who created the cohort - creator) uuid
 						case Practitioner.SP_RES_ID:
-							if ((lacksAlias(criteria, "ps"))) {
-								criteria.createAlias(PERSON_ALIAS, "ps");
+							if ((lacksAlias(finalCriteriaBuilder, "ps"))) {
+								root.join(PERSON_ALIAS);
 							}
-							return Optional.of(ilike("ps.uuid", participantToken.getValue()));
+							return Optional.of(finalCriteriaBuilder.like(root.get("ps.uuid"), participantToken.getValue()));
 						case Practitioner.SP_GIVEN:
-							if ((lacksAlias(criteria, "ps") && (lacksAlias(criteria, "pn")))) {
-								criteria.createAlias(PERSON_ALIAS, "ps").createAlias(NAMES_ALIAS, "pn");
+							if ((lacksAlias(finalCriteriaBuilder, "ps") && (lacksAlias(finalCriteriaBuilder, "pn")))) {
+								root.join(PERSON_ALIAS);
+								root.join(NAMES_ALIAS);
 							}
-							return Optional.of(ilike("pn.givenName", participantToken.getValue(), MatchMode.START));
+							return Optional.of(finalCriteriaBuilder.like(root.get("pn.givenName"), participantToken.getValue()));
 						case Practitioner.SP_FAMILY:
-							if ((lacksAlias(criteria, "ps") && (lacksAlias(criteria, "pn")))) {
-								criteria.createAlias(PERSON_ALIAS, "ps").createAlias(NAMES_ALIAS, "pn");
+							if ((lacksAlias(finalCriteriaBuilder, "ps") && (lacksAlias(finalCriteriaBuilder, "pn")))) {
+								root.join(PERSON_ALIAS);
+								root.join(NAMES_ALIAS);
 							}
-							return Optional.of(ilike("pn.familyName", participantToken.getValue(), MatchMode.START));
+							return Optional.of(finalCriteriaBuilder.like(root.get("pn.familyName"), participantToken.getValue()));
 						case Practitioner.SP_NAME:
-							if ((lacksAlias(criteria, "ps") && (lacksAlias(criteria, "pn")))) {
-								criteria.createAlias(PERSON_ALIAS, "ps").createAlias(NAMES_ALIAS, "pn");
+							if ((lacksAlias(finalCriteriaBuilder, "ps") && (lacksAlias(finalCriteriaBuilder, "pn")))) {
+								root.join(PERSON_ALIAS);
+								root.join(NAMES_ALIAS);
 							}
 							
-							List<Optional<? extends Criterion>> criterionList = new ArrayList<>();
+							List<Optional<? extends Predicate>> criterionList = new ArrayList<>();
 							
 							for (String token : StringUtils.split(participantToken.getValue(), " \t,")) {
 								criterionList.add(propertyLike("pn.givenName", token));
@@ -89,15 +99,16 @@ public class FhirGroupDaoImpl extends BaseFhirDao<Cohort> implements FhirGroupDa
 								criterionList.add(propertyLike("pn.familyName", token));
 							}
 							
-							return Optional.of(or(toCriteriaArray(criterionList)));
+							return Optional.of(finalCriteriaBuilder.or(toCriteriaArray(criterionList)));
 					}
 				} else {
 					// Search by creator uuid
-					return Optional.of(eq("cr.uuid", participantToken.getValue()));
+					return Optional.of(finalCriteriaBuilder.equal(root.get("cr.uuid"), participantToken.getValue()));
 				}
 				
 				return Optional.empty();
-			}).ifPresent(criteria::add);
+			}).ifPresent(predicates::add);
+			cq.distinct(true).where(predicates.toArray(new Predicate[] {}));
 		}
 	}
 }

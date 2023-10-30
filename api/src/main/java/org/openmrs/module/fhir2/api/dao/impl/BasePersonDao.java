@@ -9,11 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
-import static org.hibernate.criterion.Restrictions.and;
-import static org.hibernate.criterion.Restrictions.eq;
-import static org.hibernate.criterion.Restrictions.isNull;
-import static org.hibernate.criterion.Restrictions.or;
-import static org.hibernate.criterion.Restrictions.sqlRestriction;
 import static org.hl7.fhir.r4.model.Patient.SP_FAMILY;
 import static org.hl7.fhir.r4.model.Patient.SP_GIVEN;
 import static org.hl7.fhir.r4.model.Person.SP_ADDRESS_CITY;
@@ -24,20 +19,20 @@ import static org.hl7.fhir.r4.model.Person.SP_BIRTHDATE;
 import static org.hl7.fhir.r4.model.Person.SP_NAME;
 
 import javax.annotation.Nonnull;
+import javax.persistence.EntityManager;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Order;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import ca.uhn.fhir.rest.param.StringAndListParam;
-import org.hibernate.Criteria;
-import org.hibernate.criterion.DetachedCriteria;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Subqueries;
-import org.hibernate.sql.JoinType;
 import org.openmrs.Auditable;
 import org.openmrs.OpenmrsObject;
 import org.openmrs.Patient;
@@ -79,39 +74,54 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 	}
 	
 	@Override
+	@SuppressWarnings("unchecked")
 	protected Collection<Order> paramToProps(@Nonnull SortState sortState) {
+		EntityManager em = sessionFactory.getCurrentSession();
+		CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
+		CriteriaQuery<T> criteriaQuery = (CriteriaQuery<T>) criteriaBuilder.createQuery(typeToken.getRawType());
+		Root<T> root = (Root<T>) criteriaQuery.from(typeToken.getRawType());
+		
 		String param = sortState.getParameter();
 		
 		if (param == null) {
 			return null;
 		}
 		
-		Criteria criteria = sortState.getCriteria();
-		if (param.startsWith("address") && lacksAlias(criteria, "pad")) {
-			criteria.createAlias(getAssociationPath("addresses"), "pad", JoinType.LEFT_OUTER_JOIN);
+		CriteriaBuilder cb = sortState.getCriteriaBuilder();
+		if (param.startsWith("address") && lacksAlias(cb, "pad")) {
+			root.join(getAssociationPath("addresses"), JoinType.LEFT).alias("pad");
 		} else if (param.equals(SP_NAME) || param.equals(SP_GIVEN) || param.equals(SP_FAMILY)) {
-			if (lacksAlias(criteria, "pn")) {
-				criteria.createAlias(getAssociationPath("names"), "pn", JoinType.LEFT_OUTER_JOIN);
+			if (lacksAlias(cb, "pn")) {
+				root.join(getAssociationPath("names"), JoinType.LEFT).alias("pn");
 			}
 			
-			String sqlAlias = getSqlAlias();
+			Root<PersonName> subRoot = criteriaQuery.subquery(Integer.class).from(PersonName.class);
 			
-			criteria.add(and(eq("pn.voided", false), or(
-			    and(eq("pn.preferred", true),
-			        Subqueries.propertyEq("pn.personNameId",
-			            DetachedCriteria.forClass(PersonName.class, "pn1").add(eq("pn1.preferred", true))
-			                    .add(sqlRestriction(String.format("pn1_.person_id = %s.person_id", sqlAlias)))
-			                    .setProjection(Projections.min("pn1.personNameId")))),
-			    and(Subqueries.notExists(DetachedCriteria.forClass(PersonName.class, "pn2").add(eq("pn2.preferred", true))
-			            // WARNING this is fragile
-			            .add(sqlRestriction(String.format("pn2_.person_id = %s.person_id", sqlAlias)))
-			            .setProjection(Projections.id())),
-			        Subqueries.propertyEq("pn.personNameId",
-			            DetachedCriteria.forClass(PersonName.class, "pn3").add(eq("pn3.preferred", false))
-			                    // WARNING this is fragile
-			                    .add(sqlRestriction(String.format("pn3_.person_id = %s.person_id", sqlAlias)))
-			                    .setProjection(Projections.min("pn3.personNameId")))),
-			    isNull("pn.personNameId"))));
+			Predicate predicate = criteriaBuilder
+			        .and(criteriaBuilder.equal(root.get("pn").get("voided"), false),
+			            criteriaBuilder.or(
+			                criteriaBuilder.and(criteriaBuilder.equal(root.get("pn").get("preferred"), true),
+			                    criteriaBuilder.equal(root.get("pn").get("personNameId"),
+			                        criteriaQuery.subquery(Integer.class)
+			                                .select(criteriaBuilder.min(root.get("pn1").get("personNameId")))
+			                                .where(criteriaBuilder.and(
+			                                    criteriaBuilder.equal(subRoot.get("preferred"), true),
+			                                    criteriaBuilder.equal(subRoot.get("person_id"), root.get("person_id")))))),
+			                criteriaBuilder.and(
+			                    criteriaBuilder.not(criteriaBuilder.exists(
+			                        criteriaQuery.subquery(Integer.class).select(root.get("pn2").get("personNameId")).where(
+			                            criteriaBuilder.and(criteriaBuilder.equal(subRoot.get("pn2").get("preferred"), true),
+			                                criteriaBuilder.equal(subRoot.get("pn2").get("person").get("personId"),
+			                                    root.get("personId")))))),
+			                    criteriaBuilder.equal(root.get("pn").get("personNameId"),
+			                        criteriaQuery.subquery(Integer.class)
+			                                .select(criteriaBuilder.min(root.get("pn3").get("personNameId")))
+			                                .where(criteriaBuilder.and(
+			                                    criteriaBuilder.equal(subRoot.get("pn3").get("preferred"), false),
+			                                    criteriaBuilder.equal(subRoot.get("pn3").get("person").get("personId"),
+			                                        root.get("personId")))))),
+			                criteriaBuilder.isNull(root.get("pn").get("personNameId"))));
+			criteriaQuery.where(predicate);
 			
 			String[] properties = null;
 			switch (param) {
@@ -127,12 +137,23 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 					break;
 			}
 			
+			List<Order> sortStateOrders = new ArrayList<>();
 			switch (sortState.getSortOrder()) {
 				case ASC:
-					return Arrays.stream(properties).map(Order::asc).collect(Collectors.toList());
+					for (String property : properties) {
+						sortStateOrders.add(cb.asc(root.get(property)));
+					}
+					break;
 				case DESC:
-					return Arrays.stream(properties).map(Order::desc).collect(Collectors.toList());
+					for (String property : properties) {
+						sortStateOrders.add(cb.desc(root.get(property)));
+					}
+					break;
 			}
+			
+			criteriaQuery.orderBy(sortStateOrders);
+			return sortStateOrders;
+			
 		}
 		
 		return super.paramToProps(sortState);
@@ -156,7 +177,8 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 		}
 	}
 	
-	protected void handleAddresses(Criteria criteria, Map.Entry<String, List<PropParam<?>>> entry) {
+	@SuppressWarnings("unchecked")
+	protected void handleAddresses(CriteriaBuilder criteriaBuilder, Map.Entry<String, List<PropParam<?>>> entry) {
 		StringAndListParam city = null;
 		StringAndListParam country = null;
 		StringAndListParam postalCode = null;
@@ -178,13 +200,19 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 			}
 		}
 		
+		EntityManager em = sessionFactory.getCurrentSession();
+		criteriaBuilder = em.getCriteriaBuilder();
+		CriteriaQuery<T> criteriaQuery = (CriteriaQuery<T>) em.getCriteriaBuilder().createQuery(typeToken.getRawType());
+		Root<T> root = (Root<T>) criteriaQuery.from(typeToken.getRawType());
+		
+		CriteriaBuilder finalCriteriaBuilder = criteriaBuilder;
 		handlePersonAddress("pad", city, state, postalCode, country).ifPresent(c -> {
-			criteria.createAlias(getAssociationPath("addresses"), "pad");
-			criteria.add(c);
+			root.join(getAssociationPath("addresses")).alias("pad");
+			finalCriteriaBuilder.and(c);
 		});
 	}
 	
-	protected void handleNames(Criteria criteria, List<PropParam<?>> params) {
+	protected void handleNames(CriteriaBuilder criteriaBuilder, List<PropParam<?>> params) {
 		StringAndListParam name = null;
 		StringAndListParam given = null;
 		StringAndListParam family = null;
@@ -203,7 +231,7 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 			}
 		}
 		
-		handleNames(criteria, name, given, family, getPersonProperty());
+		handleNames(criteriaBuilder, name, given, family, getPersonProperty());
 	}
 	
 	private String getAssociationPath(String property) {

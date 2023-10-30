@@ -9,13 +9,18 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
-import static org.hibernate.criterion.Projections.property;
-import static org.hibernate.criterion.Restrictions.eq;
 import static org.hl7.fhir.r4.model.Encounter.SP_DATE;
 import static org.openmrs.module.fhir2.api.util.LastnOperationUtils.getTopNRankedIds;
 
 import javax.annotation.Nonnull;
+import javax.persistence.EntityManager;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -27,11 +32,9 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.Criteria;
-import org.hibernate.criterion.Criterion;
-import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.openmrs.Encounter;
+import org.openmrs.EncounterType;
 import org.openmrs.Order;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirEncounterDao;
@@ -50,31 +53,33 @@ public class FhirEncounterDaoImpl extends BaseEncounterDao<Encounter> implements
 	
 	@Override
 	public List<String> getSearchResultUuids(@Nonnull SearchParameterMap theParams) {
+		EntityManager em = sessionFactory.getCurrentSession();
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<Encounter> criteriaQuery = cb.createQuery(Encounter.class);
+		Root<Encounter> root = criteriaQuery.from(Encounter.class);
+		
 		if (!theParams.getParameters(FhirConstants.LASTN_ENCOUNTERS_SEARCH_HANDLER).isEmpty()) {
-			Criteria criteria = getSessionFactory().getCurrentSession().createCriteria(Encounter.class);
+			CriteriaQuery<Object[]> cq = cb.createQuery(Object[].class);
 			
-			setupSearchParams(criteria, theParams);
+			setupSearchParams(cb, theParams);
 			
-			criteria.setProjection(Projections.projectionList().add(property("uuid")).add(property("encounterDatetime")));
+			cq.multiselect(root.get("uuid"), root.get("encounterDatetime"));
 			
-			@SuppressWarnings("unchecked")
-			List<LastnResult<String>> results = ((List<Object[]>) criteria.list()).stream()
+			List<LastnResult<String>> results = em.createQuery(cq).getResultList().stream()
 			        .map(array -> new LastnResult<String>(array)).collect(Collectors.toList());
 			
 			return getTopNRankedIds(results, getMaxParameter(theParams));
 		}
 		
-		Criteria criteria = getSessionFactory().getCurrentSession().createCriteria(Encounter.class);
+		CriteriaQuery<String> cbQuery = cb.createQuery(String.class);
 		
-		handleVoidable(criteria);
+		handleVoidable(cb);
 		
-		setupSearchParams(criteria, theParams);
-		handleSort(criteria, theParams.getSortSpec());
+		setupSearchParams(cb, theParams);
+		handleSort(cb, theParams.getSortSpec());
+		cbQuery.select(root.get("uuid"));
 		
-		criteria.setProjection(Projections.property("uuid"));
-		
-		@SuppressWarnings("unchecked")
-		List<String> results = criteria.list();
+		List<String> results = em.createQuery(cbQuery).getResultList();
 		
 		return results.stream().distinct().collect(Collectors.toList());
 	}
@@ -85,20 +90,40 @@ public class FhirEncounterDaoImpl extends BaseEncounterDao<Encounter> implements
 	}
 	
 	@Override
-	protected void handleDate(Criteria criteria, DateRangeParam dateRangeParam) {
-		handleDateRange("encounterDatetime", dateRangeParam).ifPresent(criteria::add);
+	protected void handleDate(CriteriaBuilder criteriaBuilder, DateRangeParam dateRangeParam) {
+		List<Predicate> predicates = new ArrayList<>();
+		EntityManager em = sessionFactory.getCurrentSession();
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<Encounter> criteriaQuery = cb.createQuery(Encounter.class);
+		
+		handleDateRange("encounterDatetime", dateRangeParam).ifPresent(predicates::add);
+		criteriaQuery.where(predicates.toArray(new Predicate[] {}));
 	}
 	
 	@Override
-	protected void handleEncounterType(Criteria criteria, TokenAndListParam tokenAndListParam) {
-		handleAndListParam(tokenAndListParam, t -> Optional.of(eq("et.uuid", t.getValue())))
-		        .ifPresent(t -> criteria.createAlias("encounterType", "et").add(t));
+	protected void handleEncounterType(CriteriaBuilder criteriaBuilder, TokenAndListParam tokenAndListParam) {
+		List<Predicate> predicates = new ArrayList<>();
+		EntityManager em = sessionFactory.getCurrentSession();
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<Encounter> criteriaQuery = cb.createQuery(Encounter.class);
+		Root<Encounter> root = criteriaQuery.from(Encounter.class);
+		
+		handleAndListParam(tokenAndListParam, t -> {
+			Join<Encounter, EncounterType> et = root.join("encounterType");
+			return Optional.of(criteriaBuilder.equal(et.get("uuid"), t.getValue()));
+		}).ifPresent(predicates::add);
+		criteriaQuery.where(predicates.toArray(new Predicate[] {}));
 	}
 	
 	@Override
-	protected void handleParticipant(Criteria criteria, ReferenceAndListParam referenceAndListParam) {
-		criteria.createAlias("encounterProviders", "ep");
-		handleParticipantReference(criteria, referenceAndListParam);
+	protected void handleParticipant(CriteriaBuilder criteriaBuilder, ReferenceAndListParam referenceAndListParam) {
+		EntityManager em = sessionFactory.getCurrentSession();
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<Encounter> criteriaQuery = cb.createQuery(Encounter.class);
+		Root<Encounter> root = criteriaQuery.from(Encounter.class);
+		
+		root.join("encounterProviders");
+		handleParticipantReference(criteriaBuilder, referenceAndListParam);
 	}
 	
 	@Override
@@ -112,34 +137,35 @@ public class FhirEncounterDaoImpl extends BaseEncounterDao<Encounter> implements
 	}
 	
 	@Override
-	protected Criterion generateNotCompletedOrderQuery(String path) {
+	protected Predicate generateNotCompletedOrderQuery(String path) {
 		if (StringUtils.isNotBlank(path)) {
 			path = path + ".";
 		}
 		
-		return Restrictions.or(Restrictions.isNull(path + "fulfillerStatus"),
-		    Restrictions.ne(path + "fulfillerStatus", org.openmrs.Order.FulfillerStatus.COMPLETED));
+		return (Predicate) Restrictions.or(Restrictions.isNull(path + "fulfillerStatus"),
+		    Restrictions.ne(path + "fulfillerStatus", Order.FulfillerStatus.COMPLETED));
 		
 	}
 	
 	@Override
-	protected Criterion generateFulfillerStatusRestriction(String path, String fulfillerStatus) {
+	protected Predicate generateFulfillerStatusRestriction(String path, String fulfillerStatus) {
 		
 		if (StringUtils.isNotBlank(path)) {
 			path = path + ".";
 		}
 		
-		return Restrictions.eq(path + "fulfillerStatus", Order.FulfillerStatus.valueOf(fulfillerStatus.toUpperCase()));
+		return (Predicate) Restrictions.eq(path + "fulfillerStatus",
+		    Order.FulfillerStatus.valueOf(fulfillerStatus.toUpperCase()));
 	}
 	
 	@Override
-	protected Criterion generateNotFulfillerStatusRestriction(String path, String fulfillerStatus) {
+	protected Predicate generateNotFulfillerStatusRestriction(String path, String fulfillerStatus) {
 		
 		if (StringUtils.isNotBlank(path)) {
 			path = path + ".";
 		}
 		
-		return Restrictions.or(Restrictions.isNull(path + "fulfillerStatus"),
+		return (Predicate) Restrictions.or(Restrictions.isNull(path + "fulfillerStatus"),
 		    Restrictions.ne(path + "fulfillerStatus", Order.FulfillerStatus.valueOf(fulfillerStatus.toUpperCase())));
 	}
 }

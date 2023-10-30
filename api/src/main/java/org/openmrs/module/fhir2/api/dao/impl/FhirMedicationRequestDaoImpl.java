@@ -9,10 +9,14 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
-import static org.hibernate.criterion.Restrictions.ne;
-
 import javax.annotation.Nonnull;
+import javax.persistence.EntityManager;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -23,11 +27,9 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.Criteria;
-import org.hibernate.criterion.Criterion;
-import org.hibernate.criterion.Restrictions;
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.openmrs.DrugOrder;
+import org.openmrs.Obs;
 import org.openmrs.Order;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirMedicationRequestDao;
@@ -49,7 +51,6 @@ public class FhirMedicationRequestDaoImpl extends BaseFhirDao<DrugOrder> impleme
 	
 	@Override
 	@Transactional(readOnly = true)
-	@SuppressWarnings("unchecked")
 	public List<DrugOrder> get(@Nonnull Collection<String> uuids) {
 		List<DrugOrder> results = super.get(uuids);
 		if (results == null) {
@@ -62,45 +63,59 @@ public class FhirMedicationRequestDaoImpl extends BaseFhirDao<DrugOrder> impleme
 	}
 	
 	@Override
-	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
+	protected void setupSearchParams(CriteriaBuilder criteriaBuilder, SearchParameterMap theParams) {
+		EntityManager em = sessionFactory.getCurrentSession();
+		criteriaBuilder = em.getCriteriaBuilder();
+		CriteriaQuery<DrugOrder> criteriaQuery = criteriaBuilder.createQuery(DrugOrder.class);
+		Root<DrugOrder> root = criteriaQuery.from(DrugOrder.class);
+		
+		List<Predicate> predicates = new ArrayList<>();
+		CriteriaBuilder finalCriteriaBuilder = criteriaBuilder;
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.FULFILLER_STATUS_SEARCH_HANDLER:
 					entry.getValue().forEach(
-					    param -> handleFulfillerStatus((TokenAndListParam) param.getParam()).ifPresent(criteria::add));
+					    param -> handleFulfillerStatus((TokenAndListParam) param.getParam()).ifPresent(predicates::add));
+					criteriaQuery.where(predicates.toArray(new Predicate[] {}));
 					break;
 				case FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER:
-					entry.getValue()
-					        .forEach(e -> handleEncounterReference(criteria, (ReferenceAndListParam) e.getParam(), "e"));
+					entry.getValue().forEach(
+					    e -> handleEncounterReference(finalCriteriaBuilder, (ReferenceAndListParam) e.getParam(), "e"));
 					break;
 				case FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER:
-					entry.getValue().forEach(patientReference -> handlePatientReference(criteria,
+					entry.getValue().forEach(patientReference -> handlePatientReference(finalCriteriaBuilder,
 					    (ReferenceAndListParam) patientReference.getParam(), "patient"));
 					break;
 				case FhirConstants.CODED_SEARCH_HANDLER:
-					entry.getValue().forEach(code -> handleCodedConcept(criteria, (TokenAndListParam) code.getParam()));
+					entry.getValue()
+					        .forEach(code -> handleCodedConcept(finalCriteriaBuilder, (TokenAndListParam) code.getParam()));
 					break;
 				case FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER:
-					entry.getValue().forEach(participantReference -> handleProviderReference(criteria,
+					entry.getValue().forEach(participantReference -> handleProviderReference(finalCriteriaBuilder,
 					    (ReferenceAndListParam) participantReference.getParam()));
 					break;
 				case FhirConstants.MEDICATION_REFERENCE_SEARCH_HANDLER:
-					entry.getValue().forEach(d -> handleMedicationReference("d", (ReferenceAndListParam) d.getParam())
-					        .ifPresent(c -> criteria.createAlias("drug", "d").add(c)));
+					entry.getValue().forEach(
+					    d -> handleMedicationReference("d", (ReferenceAndListParam) d.getParam()).ifPresent(c -> {
+						    root.join("drug").alias("d");
+						    predicates.add(c);
+						    criteriaQuery.where(predicates.toArray(new Predicate[] {}));
+					    }));
 					break;
 				case FhirConstants.STATUS_SEARCH_HANDLER:
 					entry.getValue()
-					        .forEach(param -> handleStatus((TokenAndListParam) param.getParam()).ifPresent(criteria::add));
+					        .forEach(param -> handleStatus((TokenAndListParam) param.getParam()).ifPresent(predicates::add));
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(entry.getValue()).ifPresent(criteria::add);
+					handleCommonSearchParameters(entry.getValue()).ifPresent(predicates::add);
+					criteriaQuery.where(predicates.toArray(new Predicate[] {}));
 					break;
 			}
 		});
 		
-		excludeDiscontinueOrders(criteria);
+		excludeDiscontinueOrders(criteriaBuilder);
 	}
 	
-	private Optional<Criterion> handleStatus(TokenAndListParam tokenAndListParam) {
+	private Optional<Predicate> handleStatus(TokenAndListParam tokenAndListParam) {
 		return handleAndListParam(tokenAndListParam, token -> {
 			if (token.getValue() != null) {
 				try {
@@ -118,7 +133,7 @@ public class FhirMedicationRequestDaoImpl extends BaseFhirDao<DrugOrder> impleme
 		});
 	}
 	
-	private Optional<Criterion> handleFulfillerStatus(TokenAndListParam tokenAndListParam) {
+	private Optional<Predicate> handleFulfillerStatus(TokenAndListParam tokenAndListParam) {
 		return handleAndListParam(tokenAndListParam, token -> {
 			if (token.getValue() != null) {
 				return Optional.of(
@@ -128,30 +143,46 @@ public class FhirMedicationRequestDaoImpl extends BaseFhirDao<DrugOrder> impleme
 		});
 	}
 	
-	protected Criterion generateFulfillerStatusRestriction(Order.FulfillerStatus fulfillerStatus) {
+	protected Predicate generateFulfillerStatusRestriction(Order.FulfillerStatus fulfillerStatus) {
 		return generateFulfillerStatusRestriction("", fulfillerStatus);
 	}
 	
-	protected Criterion generateFulfillerStatusRestriction(String path, Order.FulfillerStatus fulfillerStatus) {
+	protected Predicate generateFulfillerStatusRestriction(String path, Order.FulfillerStatus fulfillerStatus) {
+		EntityManager em = sessionFactory.getCurrentSession();
+		CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
+		CriteriaQuery<DrugOrder> criteriaQuery = criteriaBuilder.createQuery(DrugOrder.class);
+		Root<DrugOrder> root = criteriaQuery.from(DrugOrder.class);
+		
 		if (StringUtils.isNotBlank(path)) {
 			path = path + ".";
 		}
 		
-		return Restrictions.eq(path + "fulfillerStatus", fulfillerStatus);
+		return criteriaBuilder.equal(root.get(path + "fulfillerStatus"), fulfillerStatus);
 	}
 	
-	private void handleCodedConcept(Criteria criteria, TokenAndListParam code) {
+	private void handleCodedConcept(CriteriaBuilder criteriaBuilder, TokenAndListParam code) {
+		EntityManager em = sessionFactory.getCurrentSession();
+		criteriaBuilder = em.getCriteriaBuilder();
+		CriteriaQuery<DrugOrder> criteriaQuery = criteriaBuilder.createQuery(DrugOrder.class);
+		Root<DrugOrder> root = criteriaQuery.from(DrugOrder.class);
+		
+		List<Predicate> predicates = new ArrayList<>();
 		if (code != null) {
-			if (lacksAlias(criteria, "c")) {
-				criteria.createAlias("concept", "c");
+			if (lacksAlias(criteriaBuilder, "c")) {
+				root.join("concept").alias("c");
 			}
 			
-			handleCodeableConcept(criteria, code, "c", "cm", "crt").ifPresent(criteria::add);
+			handleCodeableConcept(criteriaBuilder, code, "c", "cm", "crt").ifPresent(predicates::add);
+			criteriaQuery.where(predicates.toArray(new Predicate[] {}));
 		}
 	}
 	
-	private void excludeDiscontinueOrders(Criteria criteria) {
+	private void excludeDiscontinueOrders(CriteriaBuilder criteriaBuilder) {
+		EntityManager em = sessionFactory.getCurrentSession();
+		criteriaBuilder = em.getCriteriaBuilder();
+		CriteriaQuery<DrugOrder> criteriaQuery = criteriaBuilder.createQuery(DrugOrder.class);
+		Root<DrugOrder> root = criteriaQuery.from(DrugOrder.class);
 		// exclude "discontinue" orders, see: https://issues.openmrs.org/browse/FM2-532
-		criteria.add(ne("action", Order.Action.DISCONTINUE));
+		criteriaBuilder.and(criteriaBuilder.notEqual(root.get("action"), Order.Action.DISCONTINUE));
 	}
 }

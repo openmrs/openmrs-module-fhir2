@@ -9,17 +9,21 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
-import static org.hibernate.criterion.Restrictions.and;
-import static org.hibernate.criterion.Restrictions.eq;
-import static org.hibernate.criterion.Restrictions.in;
-import static org.hibernate.criterion.Restrictions.isNull;
-import static org.hibernate.criterion.Restrictions.or;
+import static org.hibernate.jpa.QueryHints.HINT_CACHEABLE;
 import static org.openmrs.module.fhir2.FhirConstants.COUNT_QUERY_CACHE;
 import static org.openmrs.module.fhir2.FhirConstants.EXACT_TOTAL_SEARCH_PARAMETER;
 
 import javax.annotation.Nonnull;
+import javax.persistence.CacheStoreMode;
+import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -33,13 +37,8 @@ import com.google.common.reflect.TypeToken;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.CacheMode;
-import org.hibernate.Criteria;
 import org.hibernate.Hibernate;
 import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Criterion;
-import org.hibernate.criterion.ProjectionList;
-import org.hibernate.criterion.Projections;
 import org.hibernate.proxy.HibernateProxy;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.openmrs.Auditable;
@@ -83,9 +82,9 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	@Getter(AccessLevel.PUBLIC)
 	@Setter(AccessLevel.PUBLIC)
 	@Qualifier("sessionFactory")
-	private SessionFactory sessionFactory;
+	protected SessionFactory sessionFactory;
 	
-	@SuppressWarnings("UnstableApiUsage")
+	@SuppressWarnings({ "UnstableApiUsage"})
 	protected BaseFhirDao() {
 		// @formatter:off
 		typeToken = new TypeToken<T>(getClass()) {};
@@ -99,32 +98,43 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	
 	@Override
 	@Transactional(readOnly = true)
+	@SuppressWarnings("unchecked")
 	public T get(@Nonnull String uuid) {
-		@SuppressWarnings("unchecked")
-		T result = (T) sessionFactory.getCurrentSession().createCriteria(typeToken.getRawType()).add(eq("uuid", uuid))
-		        .uniqueResult();
+		EntityManager em = sessionFactory.getCurrentSession();
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<T> cq = (CriteriaQuery<T>) cb.createQuery(typeToken.getRawType());
+		Root<T> rt = (Root<T>) cq.from(typeToken.getRawType());
+		cq.select(rt).where(cb.equal(rt.get("uuid"), uuid));
+		TypedQuery<T> result = em.createQuery(cq);
 		
-		if (result == null) {
+		//try-catch phrase is a workaround for https://github.com/jakartaee/persistence/issues/298
+		try {
+			return deproxyResult(result.getSingleResult());
+		}
+		catch (NoResultException e) {
 			return null;
 		}
-		
-		return deproxyResult(result);
 	}
 	
 	@Override
 	@Transactional(readOnly = true)
 	@SuppressWarnings("unchecked")
 	public List<T> get(@Nonnull Collection<String> uuids) {
-		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(typeToken.getRawType());
-		criteria.add(in("uuid", uuids));
+		EntityManager em = sessionFactory.getCurrentSession();
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<T> cq = (CriteriaQuery<T>) cb.createQuery(typeToken.getRawType());
+		Root<T> rt = (Root<T>) cq.from(typeToken.getRawType());
+		
+		cq.select(rt).where(cb.in(rt.in(uuids)));
 		
 		if (isVoidable) {
-			handleVoidable(criteria);
+			handleVoidable(cb);
 		} else if (isRetireable) {
-			handleRetireable(criteria);
+			handleRetireable(cb);
 		}
 		
-		List<T> results = criteria.list();
+		TypedQuery<T> tq = em.createQuery(cq);
+		List<T> results = tq.getResultList();
 		
 		return results.stream().filter(Objects::nonNull).map(this::deproxyResult).collect(Collectors.toList());
 	}
@@ -155,18 +165,20 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 		return existing;
 	}
 	
-	private Criteria getSearchResultCriteria(SearchParameterMap theParams) {
-		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(typeToken.getRawType());
+	@SuppressWarnings("unchecked")
+	private CriteriaBuilder getSearchResultCriteria(SearchParameterMap theParams) {
+		EntityManager em = sessionFactory.getCurrentSession();
+		CriteriaBuilder cb = em.getCriteriaBuilder();
 		
 		if (isVoidable) {
-			handleVoidable(criteria);
+			handleVoidable(cb);
 		} else if (isRetireable) {
-			handleRetireable(criteria);
+			handleRetireable(cb);
 		}
 		
-		setupSearchParams(criteria, theParams);
+		setupSearchParams(cb, theParams);
 		
-		return criteria;
+		return cb;
 	}
 	
 	/**
@@ -181,79 +193,113 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	}
 	
 	@Override
+	@SuppressWarnings("unchecked")
 	public int getSearchResultsCount(@Nonnull SearchParameterMap theParams) {
-		Criteria criteria = getSearchResultCriteria(theParams);
+		EntityManager manager = sessionFactory.getCurrentSession();
+		CriteriaBuilder criteriaBuilder = manager.getCriteriaBuilder();
+		CriteriaQuery<Long> criteriaQuery = criteriaBuilder.createQuery(Long.class);
+		Root<T> root = (Root<T>) criteriaQuery.from(typeToken.getRawType());
 		
-		applyExactTotal(theParams, criteria);
+		criteriaBuilder = getSearchResultCriteria(theParams);
+		
+		applyExactTotal(theParams, criteriaBuilder);
 		
 		if (hasDistinctResults()) {
-			return ((Long) criteria.setProjection(Projections.rowCount()).uniqueResult()).intValue();
+			criteriaQuery.select(criteriaBuilder.count(root));
+			TypedQuery<Long> query = manager.createQuery(criteriaQuery);
+			return query.getSingleResult().intValue();
 		} else {
-			return ((Long) criteria.setProjection(Projections.countDistinct("id")).uniqueResult()).intValue();
+			criteriaQuery.select(criteriaBuilder.countDistinct(root.get("id")));
+			TypedQuery<Long> query = manager.createQuery(criteriaQuery);
+			return query.getSingleResult().intValue();
 		}
 	}
 	
-	protected void applyExactTotal(SearchParameterMap theParams, Criteria criteria) {
+	@SuppressWarnings("unchecked")
+	protected void applyExactTotal(SearchParameterMap theParams, CriteriaBuilder criteriaBuilder) {
+		EntityManager em = sessionFactory.getCurrentSession();
+		CriteriaQuery<T> criteriaQuery = (CriteriaQuery<T>) criteriaBuilder.createQuery(typeToken.getRawType());
 		
 		List<PropParam<?>> exactTotal = theParams.getParameters(EXACT_TOTAL_SEARCH_PARAMETER);
 		if (!exactTotal.isEmpty()) {
 			PropParam<Boolean> propParam = (PropParam<Boolean>) exactTotal.get(0);
 			if (propParam.getParam()) {
-				criteria.setCacheMode(CacheMode.REFRESH);
+				em.createQuery(criteriaQuery).setHint("javax.persistence.cache.storeMode", CacheStoreMode.REFRESH);
 			}
 		} else {
-			criteria.setCacheable(true);
-			criteria.setCacheRegion(COUNT_QUERY_CACHE);
+			em.createQuery(criteriaQuery).setHint(HINT_CACHEABLE, "true");
+			em.createQuery(criteriaQuery).setHint("org.hibernate.cacheRegion", COUNT_QUERY_CACHE);
 		}
 	}
 	
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<T> getSearchResults(@Nonnull SearchParameterMap theParams) {
-		Criteria criteria = getSearchResultCriteria(theParams);
+		EntityManager em = sessionFactory.getCurrentSession();
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<T> cq = (CriteriaQuery<T>) cb.createQuery(typeToken.getRawType());
+		Root<T> rt = (Root<T>) cq.from(typeToken.getRawType());
 		
-		handleSort(criteria, theParams.getSortSpec());
-		criteria.addOrder(org.hibernate.criterion.Order.asc("id"));
+		cb = getSearchResultCriteria(theParams);
 		
-		criteria.setFirstResult(theParams.getFromIndex());
+		handleSort(cb, theParams.getSortSpec());
+		cq.orderBy(cb.asc(rt.get("id")));
+		
+		em.createQuery(cq).setFirstResult(theParams.getFromIndex());
 		if (theParams.getToIndex() != Integer.MAX_VALUE) {
 			int maxResults = theParams.getToIndex() - theParams.getFromIndex();
-			criteria.setMaxResults(maxResults);
+			em.createQuery(cq).setMaxResults(maxResults);
 		}
 		
 		List<T> results;
 		if (hasDistinctResults()) {
-			results = criteria.list();
+			results = em.createQuery(cq).getResultList();
 		} else {
-			ProjectionList projectionList = Projections.projectionList();
-			projectionList.add(Projections.distinct(Projections.projectionList().add(Projections.property("id"))));
-			// Sort parameters must be included in projections
-			handleSort(criteria, theParams.getSortSpec(), this::paramToProps).ifPresent(
-			    orders -> orders.forEach(order -> projectionList.add(Projections.property(order.getPropertyName()))));
-			criteria.setProjection(projectionList);
-			List<Integer> ids = new ArrayList<>();
-			if (projectionList.getLength() > 1) {
-				for (Object[] o : ((List<Object[]>) criteria.list())) {
-					ids.add((Integer) o[0]);
-				}
-			} else {
-				ids = criteria.list();
-			}
+			EntityManager projectionManager = sessionFactory.getCurrentSession();
+			CriteriaBuilder projectionCriteriaBuilder = projectionManager.getCriteriaBuilder();
+			CriteriaQuery<Integer> projectionCriteriaQuery = projectionCriteriaBuilder.createQuery(Integer.class);
+			
+			Root<Integer> projectionRoot = projectionCriteriaQuery.from(Integer.class);
+			Subquery<Long> subquery = projectionCriteriaQuery.subquery(Long.class);
+			
+			subquery.select(projectionCriteriaBuilder.countDistinct(projectionRoot.get("id")));
+			
+			projectionCriteriaQuery.select(projectionRoot)
+			        .where(projectionCriteriaBuilder.in(projectionRoot.get("id")).value(subquery));
+			TypedQuery<Integer> projectionTypedQuery = projectionManager.createQuery(projectionCriteriaQuery);
+			
+			//TODO: gonna come back to it later
+			//			handleSort(projectionCriteriaBuilder, theParams.getSortSpec(), this::paramToProps).ifPresent(
+			//					orders -> orders.forEach(order -> projectionList.add(Projections.property(order.getPropertyName()))));
+			//			criteria.setProjection(projectionList);
+			//			List<Integer> ids = new ArrayList<>();
+			//			if (projectionList.getLength() > 1) {
+			//				for (Object[] o : ((List<Object[]>) criteria.list())) {
+			//					ids.add((Integer) o[0]);
+			//				}
+			//			} else {
+			//				ids = criteria.list();
+			//			}
 			
 			// Use distinct ids from the original query to return entire objects
-			Criteria idsCriteria = sessionFactory.getCurrentSession().createCriteria(typeToken.getRawType())
-			        .add(in("id", ids));
-			// Need to reapply ordering
-			handleSort(idsCriteria, theParams.getSortSpec());
-			idsCriteria.addOrder(org.hibernate.criterion.Order.asc("id"));
+			EntityManager idsManager = sessionFactory.getCurrentSession();
+			CriteriaBuilder idsCriteriaBuilder = idsManager.getCriteriaBuilder();
+			CriteriaQuery<T> idsCriteriaQuery = (CriteriaQuery<T>) idsCriteriaBuilder.createQuery(typeToken.getRawType());
+			Root<T> idsRoot = (Root<T>) idsCriteriaQuery.from(typeToken.getRawType());
+			TypedQuery<T> idsTypedQuery = idsManager.createQuery(idsCriteriaQuery);
 			
-			results = idsCriteria.list();
+			idsCriteriaQuery.select(idsRoot).where(idsCriteriaBuilder.in(idsRoot.get("id")));
+			// Need to reapply ordering
+			handleSort(idsCriteriaBuilder, theParams.getSortSpec());
+			idsCriteriaQuery.orderBy(idsCriteriaBuilder.asc(idsRoot.get("id")));
+			
+			results = idsTypedQuery.getResultList();
 		}
 		return results.stream().map(this::deproxyResult).collect(Collectors.toList());
 	}
 	
 	@Override
-	protected Optional<Criterion> handleLastUpdated(DateRangeParam param) {
+	protected Optional<Predicate> handleLastUpdated(DateRangeParam param) {
 		if (isImmutable) {
 			return handleLastUpdatedImmutable(param);
 		}
@@ -261,15 +307,21 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 		return handleLastUpdatedMutable(param);
 	}
 	
-	protected Optional<Criterion> handleLastUpdatedMutable(DateRangeParam param) {
+	@SuppressWarnings("unchecked")
+	protected Optional<Predicate> handleLastUpdatedMutable(DateRangeParam param) {
+		EntityManager em = sessionFactory.getCurrentSession();
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<T> cq = (CriteriaQuery<T>) cb.createQuery(typeToken.getRawType());
+		Root<T> rt = (Root<T>) cq.from(typeToken.getRawType());
+		
 		// @formatter:off
-		return Optional.of(or(toCriteriaArray(handleDateRange("dateChanged", param), Optional.of(
-		    and(toCriteriaArray(Stream.of(Optional.of(isNull("dateChanged")), handleDateRange("dateCreated", param))))))));
+		return Optional.of(cb.or(toCriteriaArray(handleDateRange("dateChanged", param), Optional.of(
+		    cb.and(toCriteriaArray(Stream.of(Optional.of(cb.isNull(rt.get("dateChanged"))), handleDateRange("dateCreated", param))))))));
 		// @formatter:on
 	}
 	
 	// Implementation of handleLastUpdated for "immutable" types, that is, those that cannot be changed
-	protected Optional<Criterion> handleLastUpdatedImmutable(DateRangeParam param) {
+	protected Optional<Predicate> handleLastUpdatedImmutable(DateRangeParam param) {
 		return handleDateRange("dateCreated", param);
 	}
 	
@@ -277,20 +329,30 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	 * This provides a default implementation for dealing with voidable objects. By default, voided
 	 * objects are excluded from searches, but not from get
 	 *
-	 * @param criteria the criteria object representing the current search
+	 * @param criteriaBuilder The JPA CriteriaBuilder to create predicates.
 	 */
-	protected void handleVoidable(Criteria criteria) {
-		criteria.add(eq("voided", false));
+	@SuppressWarnings("unchecked")
+	protected void handleVoidable(CriteriaBuilder criteriaBuilder) {
+		EntityManager em = sessionFactory.getCurrentSession();
+		criteriaBuilder = em.getCriteriaBuilder();
+		CriteriaQuery<T> cq = (CriteriaQuery<T>) criteriaBuilder.createQuery(typeToken.getRawType());
+		Root<T> rt = (Root<T>) cq.from(typeToken.getRawType());
+		
+		criteriaBuilder.and(criteriaBuilder.equal(rt.get("voided"), false));
 	}
 	
 	/**
-	 * This provides a default implementation for dealing with retireable objects. By default, retired
-	 * objects are excluded from searches, but not from get
-	 *
-	 * @param criteria the criteria object representing the current search
+	 * This provides a default implementation for dealing with retireable objects. By default, retired objects are excluded
+	 * from searches, but not from get
 	 */
-	protected void handleRetireable(Criteria criteria) {
-		criteria.add(eq("retired", false));
+	@SuppressWarnings("unchecked")
+	protected void handleRetireable(CriteriaBuilder criteriaBuilder) {
+		EntityManager em = sessionFactory.getCurrentSession();
+		criteriaBuilder = em.getCriteriaBuilder();
+		CriteriaQuery<T> cq = (CriteriaQuery<T>) criteriaBuilder.createQuery(typeToken.getRawType());
+		Root<T> rt = (Root<T>) cq.from(typeToken.getRawType());
+		
+		criteriaBuilder.and(criteriaBuilder.equal(rt.get("retired"), false));
 	}
 	
 	/**
@@ -319,24 +381,30 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	 * This is intended to be overridden by subclasses to implement any special handling they might
 	 * require
 	 *
-	 * @param criteria the criteria object representing this search
+	 * @param criteriaBuilder the criteria object representing this search
 	 * @param theParams the parameters for this search
 	 */
-	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
+	protected void setupSearchParams(CriteriaBuilder criteriaBuilder, SearchParameterMap theParams) {
 		
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
-	protected Collection<org.hibernate.criterion.Order> paramToProps(@Nonnull SortState sortState) {
+	protected Collection<javax.persistence.criteria.Order> paramToProps(@Nonnull SortState sortState) {
+		EntityManager em = sessionFactory.getCurrentSession();
+		CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
+		CriteriaQuery<T> cq = (CriteriaQuery<T>) criteriaBuilder.createQuery(typeToken.getRawType());
+		Root<T> rt = (Root<T>) cq.from(typeToken.getRawType());
+		
 		String param = sortState.getParameter();
 		
 		if (FhirConstants.SP_LAST_UPDATED.equalsIgnoreCase(param)) {
 			if (isImmutable) {
 				switch (sortState.getSortOrder()) {
 					case ASC:
-						return Collections.singletonList(org.hibernate.criterion.Order.asc("dateCreated"));
+						return Collections.singletonList(criteriaBuilder.asc(rt.get("dateCreated")));
 					case DESC:
-						return Collections.singletonList(org.hibernate.criterion.Order.desc("dateCreated"));
+						return Collections.singletonList(criteriaBuilder.desc(rt.get("dateCreated")));
 				}
 			}
 			
@@ -375,7 +443,13 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 		return deproxyObject(result);
 	}
 	
-	protected Criteria createAlias(Criteria criteria, String referencedEntity, String alias) {
-		return criteria.createAlias(referencedEntity, alias);
+	@SuppressWarnings("unchecked")
+	protected void createAlias(CriteriaBuilder criteriaBuilder, String referencedEntity, String alias) {
+		EntityManager em = sessionFactory.getCurrentSession();
+		criteriaBuilder = em.getCriteriaBuilder();
+		CriteriaQuery<T> cq = (CriteriaQuery<T>) criteriaBuilder.createQuery(typeToken.getRawType());
+		Root<T> rt = (Root<T>) cq.from(typeToken.getRawType());
+		
+		rt.join(referencedEntity).alias(alias);
 	}
 }
