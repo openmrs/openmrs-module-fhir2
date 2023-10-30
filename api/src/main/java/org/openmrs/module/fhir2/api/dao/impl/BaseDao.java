@@ -26,6 +26,13 @@ import static org.hibernate.criterion.Restrictions.or;
 import static org.hibernate.criterion.Subqueries.propertyEq;
 
 import javax.annotation.Nonnull;
+import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.metamodel.EntityType;
 
 import java.math.BigDecimal;
 import java.time.Duration;
@@ -68,13 +75,18 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.Criteria;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.MatchMode;
@@ -93,6 +105,7 @@ import org.openmrs.module.fhir2.api.search.param.PropParam;
 import org.openmrs.module.fhir2.api.util.LocalDateTimeFactory;
 import org.openmrs.module.fhir2.model.FhirConceptSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 /**
  * <p>
@@ -173,6 +186,12 @@ public abstract class BaseDao {
 	
 	@Autowired
 	private LocalDateTimeFactory localDateTimeFactory;
+	
+	@Autowired
+	@Getter(AccessLevel.PUBLIC)
+	@Setter(AccessLevel.PUBLIC)
+	@Qualifier("sessionFactory")
+	protected SessionFactory sessionFactory;
 	
 	/**
 	 * Converts an {@link Iterable} to a {@link Stream}
@@ -258,34 +277,46 @@ public abstract class BaseDao {
 	 * @return the resulting criterion, which is the intersection of all of the unions of contained
 	 *         parameters
 	 */
-	protected <T extends IQueryParameterOr<U>, U extends IQueryParameterType> Optional<Criterion> handleAndListParam(
-	        IQueryParameterAnd<T> andListParam, Function<U, Optional<Criterion>> handler) {
+	protected <T extends IQueryParameterOr<U>, U extends IQueryParameterType> Optional<Predicate> handleAndListParam(
+	        IQueryParameterAnd<T> andListParam, Function<U, Optional<Predicate>> handler) {
 		if (andListParam == null) {
 			return Optional.empty();
 		}
 		
-		return Optional.of(and(
-		    toCriteriaArray(handleAndListParam(andListParam).map(orListParam -> handleOrListParam(orListParam, handler)))));
+		EntityManager entityManager = sessionFactory.getCurrentSession();
+		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+		Predicate predicate = criteriaBuilder.and(toCriteriaArray(handleAndListParam(andListParam).map(orListParam ->
+				handleOrListParam(orListParam,handler))));
+		
+		return Optional.ofNullable(predicate);
 	}
 	
 	@SuppressWarnings("unused")
-	protected <T extends IQueryParameterOr<U>, U extends IQueryParameterType> Optional<Criterion> handleAndListParamBy(
-	        IQueryParameterAnd<T> andListParam, Function<IQueryParameterOr<U>, Optional<Criterion>> handler) {
+	protected <T extends IQueryParameterOr<U>, U extends IQueryParameterType> Optional<Predicate> handleAndListParamBy(
+	        IQueryParameterAnd<T> andListParam, Function<IQueryParameterOr<U>, Optional<Predicate>> handler) {
 		if (andListParam == null) {
 			return Optional.empty();
 		}
 		
-		return Optional.of(and(toCriteriaArray(handleAndListParam(andListParam).map(handler))));
+		EntityManager entityManager = sessionFactory.getCurrentSession();
+		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+		Predicate predicate = criteriaBuilder.and((toCriteriaArray(handleAndListParam(andListParam).map(handler))));
+		
+		return Optional.of(predicate);
 	}
 	
-	protected <T extends IQueryParameterOr<U>, U extends IQueryParameterType> Optional<Criterion> handleAndListParamAsStream(
-	        IQueryParameterAnd<T> andListParam, Function<U, Stream<Optional<Criterion>>> handler) {
+	protected <T extends IQueryParameterOr<U>, U extends IQueryParameterType> Optional<Predicate> handleAndListParamAsStream(
+	        IQueryParameterAnd<T> andListParam, Function<U, Stream<Optional<Predicate>>> handler) {
 		if (andListParam == null) {
 			return Optional.empty();
 		}
 		
-		return Optional.of(and(toCriteriaArray(
-		    handleAndListParam(andListParam).map(orListParam -> handleOrListParamAsStream(orListParam, handler)))));
+		EntityManager entityManager = sessionFactory.getCurrentSession();
+		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+		Predicate predicate = criteriaBuilder.and((toCriteriaArray(
+				handleAndListParam(andListParam).map(orListParam -> handleOrListParamAsStream(orListParam, handler)))));
+		
+		return Optional.of(predicate);
 	}
 	
 	/**
@@ -297,22 +328,30 @@ public abstract class BaseDao {
 	 * @param <T> the subtype of {@link IQueryParameterType} for this parameter
 	 * @return the resulting criterion, which is the union of all contained parameters
 	 */
-	protected <T extends IQueryParameterType> Optional<Criterion> handleOrListParam(IQueryParameterOr<T> orListParam,
-	        Function<T, Optional<Criterion>> handler) {
+	protected <T extends IQueryParameterType> Optional<Predicate> handleOrListParam(IQueryParameterOr<T> orListParam,
+	        Function<T, Optional<Predicate>> handler) {
 		if (orListParam == null) {
 			return Optional.empty();
 		}
 		
-		return Optional.of(or(toCriteriaArray(handleOrListParam(orListParam).map(handler))));
+		EntityManager entityManager = sessionFactory.getCurrentSession();
+		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+		Predicate predicate = criteriaBuilder.or(toCriteriaArray(handleOrListParam(orListParam).map(handler)));
+		
+		return Optional.of(predicate);
 	}
 	
-	protected <T extends IQueryParameterType> Optional<Criterion> handleOrListParamAsStream(IQueryParameterOr<T> orListParam,
-	        Function<T, Stream<Optional<Criterion>>> handler) {
+	protected <T extends IQueryParameterType> Optional<Predicate> handleOrListParamAsStream(IQueryParameterOr<T> orListParam,
+	        Function<T, Stream<Optional<Predicate>>> handler) {
 		if (orListParam == null) {
 			return Optional.empty();
 		}
 		
-		return Optional.of(or(toCriteriaArray(handleOrListParam(orListParam).flatMap(handler))));
+		EntityManager entityManager = sessionFactory.getCurrentSession();
+		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+		Predicate predicate = criteriaBuilder.or(toCriteriaArray(handleOrListParam(orListParam).flatMap(handler)));
+		
+		return Optional.of(predicate);
 	}
 	
 	/**
@@ -325,15 +364,19 @@ public abstract class BaseDao {
 	 *            {@link TokenParam}s and returning a {@link Criterion}
 	 * @return a {@link Criterion} representing the intersection of all produced {@link Criterion}
 	 */
-	protected <T extends IQueryParameterOr<TokenParam>> Optional<Criterion> handleAndListParamBySystem(
+	protected <T extends IQueryParameterOr<TokenParam>> Optional<Predicate> handleAndListParamBySystem(
 	        IQueryParameterAnd<T> andListParam,
-	        BiFunction<String, List<TokenParam>, Optional<Criterion>> systemTokenHandler) {
+	        BiFunction<String, List<TokenParam>, Optional<Predicate>> systemTokenHandler) {
 		if (andListParam == null) {
 			return Optional.empty();
 		}
 		
-		return Optional.of(and(toCriteriaArray(
-		    handleAndListParam(andListParam).map(param -> handleOrListParamBySystem(param, systemTokenHandler)))));
+		EntityManager entityManager = sessionFactory.getCurrentSession();
+		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+		Predicate predicate = criteriaBuilder.and(toCriteriaArray(
+				handleAndListParam(andListParam).map(param -> handleOrListParamBySystem(param, systemTokenHandler)))));
+		
+		return Optional.of(predicate);
 	}
 	
 	/**
@@ -346,16 +389,19 @@ public abstract class BaseDao {
 	 *            {@link TokenParam}s and returning a {@link Criterion}
 	 * @return a {@link Criterion} representing the union of all produced {@link Criterion}
 	 */
-	protected Optional<Criterion> handleOrListParamBySystem(IQueryParameterOr<TokenParam> orListParam,
-	        BiFunction<String, List<TokenParam>, Optional<Criterion>> systemTokenHandler) {
+	protected Optional<Predicate> handleOrListParamBySystem(IQueryParameterOr<TokenParam> orListParam,
+	        BiFunction<String, List<TokenParam>, Optional<Predicate>> systemTokenHandler) {
 		
 		if (orListParam == null) {
 			return Optional.empty();
 		}
 		
-		return Optional
-		        .of(or(toCriteriaArray(handleOrListParam(orListParam).collect(Collectors.groupingBy(this::groupBySystem))
-		                .entrySet().stream().map(e -> systemTokenHandler.apply(e.getKey(), e.getValue())))));
+		EntityManager entityManager = sessionFactory.getCurrentSession();
+		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+		Predicate predicate = criteriaBuilder.or(toCriteriaArray(handleOrListParam(orListParam).collect(Collectors.groupingBy(this::groupBySystem))
+				.entrySet().stream().map(e -> systemTokenHandler.apply(e.getKey(), e.getValue()))));
+		
+		return Optional.of(predicate);
 	}
 	
 	/**
@@ -366,7 +412,7 @@ public abstract class BaseDao {
 	 * @return a {@link Criterion} to be added to the query indicating that the property matches the
 	 *         given value
 	 */
-	protected Optional<Criterion> handleBoolean(String propertyName, TokenAndListParam booleanToken) {
+	protected Optional<Predicate> handleBoolean(String propertyName, TokenAndListParam booleanToken) {
 		if (booleanToken == null) {
 			return Optional.empty();
 		}
@@ -384,8 +430,11 @@ public abstract class BaseDao {
 		});
 	}
 	
-	protected Optional<Criterion> handleBooleanProperty(String propertyName, boolean booleanVal) {
-		return Optional.of(eq(propertyName, booleanVal));
+	protected Optional<Predicate> handleBooleanProperty(String propertyName, boolean booleanVal) {
+		EntityManager entityManager = sessionFactory.getCurrentSession();
+		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+		Predicate predicate = criteriaBuilder.eq(propertyName, booleanVal);
+		return Optional.of(predicate);
 	}
 	
 	/**
@@ -395,13 +444,20 @@ public abstract class BaseDao {
 	 * @param dateRangeParam the {@link DateRangeParam} to handle
 	 * @return a {@link Criterion} to be added to the query for the indicated date range
 	 */
-	protected Optional<Criterion> handleDateRange(String propertyName, DateRangeParam dateRangeParam) {
+	protected Optional<Predicate> handleDateRange(String propertyName, DateRangeParam dateRangeParam) {
 		if (dateRangeParam == null) {
 			return Optional.empty();
 		}
 		
-		return Optional.of(and(toCriteriaArray(Stream.of(handleDate(propertyName, dateRangeParam.getLowerBound()),
-		    handleDate(propertyName, dateRangeParam.getUpperBound())))));
+		EntityManager entityManager = sessionFactory.getCurrentSession();
+		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+		CriteriaQuery<EntityType> criteriaQuery = criteriaBuilder.createQuery(EntityType.class);
+		Root<EntityType> root = criteriaQuery.from(EntityType.class);
+		
+		Predicate predicate = criteriaBuilder.and(toCriteriaArray(Stream.of(handleDate(propertyName,dateRangeParam.getLowerBound()),
+				handleDate(propertyName,dateRangeParam.getUpperBound()))));
+		
+		return Optional.ofNullable(predicate);
 	}
 	
 	/**
@@ -411,7 +467,7 @@ public abstract class BaseDao {
 	 * @param dateParam the {@link DateParam} to handle
 	 * @return a {@link Criterion} to be added to the query for the indicate date param
 	 */
-	protected Optional<Criterion> handleDate(String propertyName, DateParam dateParam) {
+	protected Optional<Predicate> handleDate(String propertyName, DateParam dateParam) {
 		if (dateParam == null) {
 			return Optional.empty();
 		}
@@ -428,28 +484,33 @@ public abstract class BaseDao {
 		// see https://www.hl7.org/fhir/search.html#date
 		switch (dateParam.getPrefix()) {
 			case EQUAL:
-				return Optional.of(and(ge(propertyName, dateStart), lt(propertyName, dateEnd)));
+				return Optional.of((Predicate) and(ge(propertyName, dateStart), lt(propertyName, dateEnd)));
 			case NOT_EQUAL:
-				return Optional.of(not(and(ge(propertyName, dateStart), lt(propertyName, dateEnd))));
+				return Optional.of((Predicate) not(and(ge(propertyName, dateStart), lt(propertyName, dateEnd))));
 			case LESSTHAN_OR_EQUALS:
 			case LESSTHAN:
-				return Optional.of(le(propertyName, dateEnd));
+				return Optional.of((Predicate) le(propertyName, dateEnd));
 			case GREATERTHAN_OR_EQUALS:
 			case GREATERTHAN:
-				return Optional.of(ge(propertyName, dateStart));
+				return Optional.of((Predicate) ge(propertyName, dateStart));
 			case STARTS_AFTER:
-				return Optional.of(gt(propertyName, dateEnd));
+				return Optional.of((Predicate) gt(propertyName, dateEnd));
 			case ENDS_BEFORE:
-				return Optional.of(lt(propertyName, dateStart));
+				return Optional.of((Predicate) lt(propertyName, dateStart));
 		}
 		
 		return Optional.empty();
 	}
 	
-	protected Optional<Criterion> handleQuantity(String propertyName, QuantityParam quantityParam) {
+	protected Optional<Predicate> handleQuantity(String propertyName, QuantityParam quantityParam) {
 		if (quantityParam == null) {
 			return Optional.empty();
 		}
+		
+		EntityManager entityManager = sessionFactory.getCurrentSession();
+		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+		CriteriaQuery<EntityType> criteriaQuery = criteriaBuilder.createQuery(EntityType.class);
+		Root<EntityType> root = criteriaQuery.from(EntityType.class);
 		
 		BigDecimal value = quantityParam.getValue();
 		if (quantityParam.getPrefix() == null || quantityParam.getPrefix() == ParamPrefixEnum.APPROXIMATE) {
@@ -458,37 +519,47 @@ public abstract class BaseDao {
 			
 			BigDecimal approxRange = APPROX_RANGE.multiply(value);
 			if (dotIdx == -1) {
-				return Optional.of(
-				    between(propertyName, value.subtract(approxRange).doubleValue(), value.add(approxRange).doubleValue()));
+				double lowerBound = value.subtract(approxRange).doubleValue();
+				double upperBound = value.add(approxRange).doubleValue();
+				Predicate predicate = criteriaBuilder.between(root.get("propertyName"),lowerBound,upperBound);
+				return Optional.of(predicate);
 			} else {
 				int precision = plainString.length() - (dotIdx);
 				double mul = Math.pow(10, -precision);
 				double val = mul * 5.0d;
-				return Optional.of(between(propertyName, value.subtract(new BigDecimal(val)).doubleValue(),
-				    value.add(new BigDecimal(val)).doubleValue()));
+				double lowerBound = value.subtract(new BigDecimal(val)).doubleValue();
+				double upperBound = value.add(new BigDecimal(val)).doubleValue();
+				Predicate predicate = criteriaBuilder.between(root.get("propertyName"),lowerBound,upperBound);
+				return Optional.of(predicate);
 			}
 		} else {
 			double val = value.doubleValue();
 			switch (quantityParam.getPrefix()) {
 				case EQUAL:
-					return Optional.of(eq(propertyName, val));
+					Predicate predicate = criteriaBuilder.equal(root.get(propertyName),val);
+					return Optional.of(predicate);
 				case NOT_EQUAL:
-					return Optional.of(ne(propertyName, val));
+					predicate = criteriaBuilder.notEqual(root.get(propertyName),val);
+					return Optional.of(predicate);
 				case LESSTHAN_OR_EQUALS:
-					return Optional.of(le(propertyName, val));
+					predicate = criteriaBuilder.lessThanOrEqualTo(root.get(propertyName),val);
+					return Optional.of(predicate);
 				case LESSTHAN:
-					return Optional.of(lt(propertyName, val));
+					predicate = criteriaBuilder.lessThan(root.get(propertyName),val);
+					return Optional.of(predicate);
 				case GREATERTHAN_OR_EQUALS:
-					return Optional.of(ge(propertyName, val));
+					predicate = criteriaBuilder.greaterThanOrEqualTo(root.get(propertyName),val);
+					return Optional.of(predicate);
 				case GREATERTHAN:
-					return Optional.of(gt(propertyName, val));
+					predicate = criteriaBuilder.greaterThan(root.get(propertyName),val);
+					return Optional.of(predicate);
 			}
 		}
 		
 		return Optional.empty();
 	}
 	
-	protected Optional<Criterion> handleQuantity(@Nonnull String propertyName, QuantityAndListParam quantityAndListParam) {
+	protected Optional<Predicate> handleQuantity(@Nonnull String propertyName, QuantityAndListParam quantityAndListParam) {
 		if (quantityAndListParam == null) {
 			return Optional.empty();
 		}
@@ -528,7 +599,7 @@ public abstract class BaseDao {
 		}).ifPresent(criteria::add);
 	}
 	
-	protected Optional<Criterion> handleGender(@Nonnull String propertyName, TokenAndListParam gender) {
+	protected Optional<Predicate> handleGender(@Nonnull String propertyName, TokenAndListParam gender) {
 		if (gender == null) {
 			return Optional.empty();
 		}
@@ -881,19 +952,19 @@ public abstract class BaseDao {
 	 * you must override one or more of: {@link #paramToProps(SortState)},
 	 * {@link #paramToProps(String)}, or {@link #paramToProp(String)}.
 	 *
-	 * @param criteria the current criteria
+	 * @param criteriaBuilder the current criteria
 	 * @param sort the {@link SortSpec} which defines the sorting to be translated
 	 */
-	protected void handleSort(Criteria criteria, SortSpec sort) {
-		handleSort(criteria, sort, this::paramToProps).ifPresent(l -> l.forEach(criteria::addOrder));
+	protected void handleSort(CriteriaBuilder criteriaBuilder, SortSpec sort) {
+		handleSort(criteriaBuilder, sort, this::paramToProps).ifPresent(l -> l.forEach(criteriaBuilder::addOrder));
 	}
 	
-	protected Optional<List<Order>> handleSort(Criteria criteria, SortSpec sort,
+	protected Optional<List<javax.persistence.criteria.Order>> handleSort(CriteriaBuilder criteriaBuilder, SortSpec sort,
 	        Function<SortState, Collection<Order>> paramToProp) {
 		List<Order> orderings = new ArrayList<>();
 		SortSpec sortSpec = sort;
 		while (sortSpec != null) {
-			SortState state = SortState.builder().criteria(criteria).sortOrder(sortSpec.getOrder())
+			SortState state = SortState.builder().criteriaBuilder(criteriaBuilder).sortOrder(sortSpec.getOrder())
 			        .parameter(sortSpec.getParamName().toLowerCase()).build();
 			
 			Collection<Order> orders = paramToProp.apply(state);
@@ -1094,16 +1165,16 @@ public abstract class BaseDao {
 	
 	@SafeVarargs
 	@SuppressWarnings("unused")
-	protected final Criterion[] toCriteriaArray(Optional<? extends Criterion>... criteria) {
-		return toCriteriaArray(Arrays.stream(criteria));
+	protected final Predicate[] toCriteriaArray(Optional<? extends Predicate>... predicate) {
+		return toCriteriaArray(Arrays.stream(predicate));
 	}
 	
-	protected Criterion[] toCriteriaArray(Collection<Optional<? extends Criterion>> collection) {
+	protected Predicate[] toCriteriaArray(Collection<Optional<? extends Predicate>> collection) {
 		return toCriteriaArray(collection.stream());
 	}
 	
-	protected Criterion[] toCriteriaArray(Stream<Optional<? extends Criterion>> criteriaStream) {
-		return criteriaStream.filter(Optional::isPresent).map(Optional::get).toArray(Criterion[]::new);
+	protected Predicate[] toCriteriaArray(Stream<Optional<? extends Predicate>> predicateStream) {
+		return predicateStream.filter(Optional::isPresent).map(Optional::get).toArray(Predicate[]::new);
 	}
 	
 	/**
@@ -1114,14 +1185,14 @@ public abstract class BaseDao {
 	@EqualsAndHashCode
 	public static final class SortState {
 		
-		private Criteria criteria;
+		private CriteriaBuilder criteriaBuilder;
 		
 		private SortOrderEnum sortOrder;
 		
 		private String parameter;
 	}
 	
-	protected Optional<Criterion> handleAgeByDateProperty(@Nonnull String datePropertyName, @Nonnull QuantityParam age) {
+	protected Optional<Predicate> handleAgeByDateProperty(@Nonnull String datePropertyName, @Nonnull QuantityParam age) {
 		BigDecimal value = age.getValue();
 		if (value == null) {
 			throw new IllegalArgumentException("Age value should be provided in " + age);
@@ -1199,9 +1270,29 @@ public abstract class BaseDao {
 			Date upperBound = Date.from(upperBoundDateTime.atZone(ZoneId.systemDefault()).toInstant());
 			
 			if (prefix == ParamPrefixEnum.EQUAL) {
-				return Optional.of(and(ge(datePropertyName, lowerBound), le(datePropertyName, upperBound)));
+				EntityManager entityManager = sessionFactory.getCurrentSession();
+				CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+				CriteriaQuery<EntityType> criteriaQuery = criteriaBuilder.createQuery(EntityType.class);
+				Root<EntityType> root = criteriaQuery.from(EntityType.class);
+				
+				Predicate predicate = criteriaBuilder.and(
+						criteriaBuilder.greaterThanOrEqualTo(root.get("datePropertyName"), lowerBound),
+						criteriaBuilder.lessThanOrEqualTo(root.get("datePropertyName"), upperBound)
+				);
+				
+				return Optional.ofNullable(predicate);
 			} else {
-				return Optional.of(not(and(ge(datePropertyName, lowerBound), le(datePropertyName, upperBound))));
+				EntityManager entityManager = sessionFactory.getCurrentSession();
+				CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+				CriteriaQuery<EntityType> criteriaQuery = criteriaBuilder.createQuery(EntityType.class);
+				Root<EntityType> root = criteriaQuery.from(EntityType.class);
+				
+				Predicate predicate = criteriaBuilder.and(
+						criteriaBuilder.greaterThanOrEqualTo(root.get("datePropertyName"), lowerBound),
+						criteriaBuilder.lessThanOrEqualTo(root.get("datePropertyName"), upperBound)
+				);
+				
+				return Optional.ofNullable(predicate);
 			}
 		}
 		
@@ -1209,12 +1300,26 @@ public abstract class BaseDao {
 			case LESSTHAN_OR_EQUALS:
 			case LESSTHAN:
 			case STARTS_AFTER:
-				return Optional
-				        .of(ge(datePropertyName, Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant())));
+				EntityManager entityManager = sessionFactory.getCurrentSession();
+				CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+				CriteriaQuery<EntityType> criteriaQuery = criteriaBuilder.createQuery(EntityType.class);
+				Root<EntityType> root = criteriaQuery.from(EntityType.class);
+				
+				Date dateToCompare = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+				Predicate predicate = criteriaBuilder.greaterThanOrEqualTo(root.get("datePropertyName"), dateToCompare);
+				
+				return Optional.ofNullable(predicate);
 			case GREATERTHAN_OR_EQUALS:
 			case GREATERTHAN:
-				return Optional
-				        .of(le(datePropertyName, Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant())));
+				entityManager = sessionFactory.getCurrentSession();
+				criteriaBuilder = entityManager.getCriteriaBuilder();
+				criteriaQuery = criteriaBuilder.createQuery(EntityType.class);
+				root = criteriaQuery.from(EntityType.class);
+				
+				dateToCompare = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+				predicate = criteriaBuilder.lessThanOrEqualTo(root.get("datePropertyName"), dateToCompare);
+				
+				return Optional.ofNullable(predicate);
 			// Ignoring ENDS_BEFORE as it is not meaningful for age.
 		}
 		

@@ -15,6 +15,11 @@ import static org.hl7.fhir.r4.model.Encounter.SP_DATE;
 import static org.openmrs.module.fhir2.api.util.LastnOperationUtils.getTopNRankedIds;
 
 import javax.annotation.Nonnull;
+import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 
 import java.util.List;
 import java.util.Optional;
@@ -51,30 +56,38 @@ public class FhirEncounterDaoImpl extends BaseEncounterDao<Encounter> implements
 	@Override
 	public List<String> getSearchResultUuids(@Nonnull SearchParameterMap theParams) {
 		if (!theParams.getParameters(FhirConstants.LASTN_ENCOUNTERS_SEARCH_HANDLER).isEmpty()) {
-			Criteria criteria = getSessionFactory().getCurrentSession().createCriteria(Encounter.class);
+			EntityManager entityManager = sessionFactory.getCurrentSession();
+			CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+			CriteriaQuery<Object[]> criteriaQuery = criteriaBuilder.createQuery(Object[].class);
+			Root<Encounter> encounterRoot = criteriaQuery.from(Encounter.class);
 			
-			setupSearchParams(criteria, theParams);
+			setupSearchParams(criteriaQuery, theParams);
 			
-			criteria.setProjection(Projections.projectionList().add(property("uuid")).add(property("encounterDatetime")));
+			criteriaQuery.multiselect(encounterRoot.get("uuid"),encounterRoot.get("encounterDatetime"));
 			
 			@SuppressWarnings("unchecked")
-			List<LastnResult<String>> results = ((List<Object[]>) criteria.list()).stream()
+			TypedQuery<Object[]> encounterTypedQuery = entityManager.createQuery(criteriaQuery);
+			List<LastnResult<String>> results = encounterTypedQuery.getResultList().stream()
 			        .map(array -> new LastnResult<String>(array)).collect(Collectors.toList());
 			
 			return getTopNRankedIds(results, getMaxParameter(theParams));
 		}
 		
-		Criteria criteria = getSessionFactory().getCurrentSession().createCriteria(Encounter.class);
+		EntityManager entityManager = sessionFactory.getCurrentSession();
+		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+		CriteriaQuery<String> criteriaQuery = criteriaBuilder.createQuery(String.class);
+		Root<Encounter> encounterRoot = criteriaQuery.from(Encounter.class);
 		
-		handleVoidable(criteria);
+		handleVoidable(criteriaBuilder,criteriaQuery,encounterRoot);
 		
-		setupSearchParams(criteria, theParams);
-		handleSort(criteria, theParams.getSortSpec());
+		setupSearchParams(criteriaQuery, theParams);
+		handleSort(criteriaBuilder, theParams.getSortSpec());
 		
-		criteria.setProjection(Projections.property("uuid"));
+		criteriaQuery.multiselect(encounterRoot.get("uuid"));
 		
 		@SuppressWarnings("unchecked")
-		List<String> results = criteria.list();
+		TypedQuery<String> encounterTypedQuery = entityManager.createQuery(criteriaQuery);
+		List<String> results = encounterTypedQuery.getResultList();
 		
 		return results.stream().distinct().collect(Collectors.toList());
 	}
