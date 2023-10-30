@@ -12,7 +12,13 @@ package org.openmrs.module.fhir2.api.dao.impl;
 import static org.hibernate.criterion.Restrictions.eq;
 
 import javax.annotation.Nonnull;
+import javax.persistence.EntityManager;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,8 +27,8 @@ import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
-import org.hibernate.Criteria;
 import org.hibernate.sql.JoinType;
+import org.openmrs.DrugOrder;
 import org.openmrs.Location;
 import org.openmrs.LocationAttribute;
 import org.openmrs.LocationAttributeType;
@@ -42,78 +48,137 @@ public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLo
 	LocationService locationService;
 	
 	@Override
-	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
+	protected void setupSearchParams(CriteriaBuilder criteriaBuilder, SearchParameterMap theParams) {
+		EntityManager em = sessionFactory.getCurrentSession();
+		criteriaBuilder = em.getCriteriaBuilder();
+		CriteriaQuery<Location> criteriaQuery = criteriaBuilder.createQuery(Location.class);
+		
+		List<Predicate> predicates = new ArrayList<>();
+		CriteriaBuilder finalCriteriaBuilder = criteriaBuilder;
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.NAME_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handleName(criteria, (StringAndListParam) param.getParam()));
+					entry.getValue().forEach(param -> handleName(finalCriteriaBuilder, (StringAndListParam) param.getParam()));
 					break;
 				case FhirConstants.CITY_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handleCity(criteria, (StringAndListParam) param.getParam()));
+					entry.getValue().forEach(param -> handleCity(finalCriteriaBuilder, (StringAndListParam) param.getParam()));
 					break;
 				case FhirConstants.STATE_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handleState(criteria, (StringAndListParam) param.getParam()));
+					entry.getValue().forEach(param -> handleState(finalCriteriaBuilder, (StringAndListParam) param.getParam()));
 					break;
 				case FhirConstants.COUNTRY_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handleCountry(criteria, (StringAndListParam) param.getParam()));
+					entry.getValue().forEach(param -> handleCountry(finalCriteriaBuilder, (StringAndListParam) param.getParam()));
 					break;
 				case FhirConstants.POSTALCODE_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handlePostalCode(criteria, (StringAndListParam) param.getParam()));
+					entry.getValue()
+					        .forEach(param -> handlePostalCode(finalCriteriaBuilder, (StringAndListParam) param.getParam()));
 					break;
 				case FhirConstants.LOCATION_REFERENCE_SEARCH_HANDLER:
-					entry.getValue()
-					        .forEach(param -> handleParentLocation(criteria, (ReferenceAndListParam) param.getParam()));
+					entry.getValue().forEach(
+					    param -> handleParentLocation(finalCriteriaBuilder, (ReferenceAndListParam) param.getParam()));
 					break;
 				case FhirConstants.TAG_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handleTag(criteria, (TokenAndListParam) param.getParam()));
+					entry.getValue().forEach(param -> handleTag(finalCriteriaBuilder, (TokenAndListParam) param.getParam()));
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(entry.getValue()).ifPresent(criteria::add);
+					handleCommonSearchParameters(entry.getValue()).ifPresent(predicates::add);
+					criteriaQuery.distinct(true).where(predicates.toArray(new Predicate[] {}));
 					break;
 			}
 		});
 	}
 	
+	// TODO: to be looked into
 	@Override
 	@SuppressWarnings("unchecked")
 	public List<LocationAttribute> getActiveAttributesByLocationAndAttributeTypeUuid(@Nonnull Location location,
 	        @Nonnull String locationAttributeTypeUuid) {
+		List<Predicate> predicates = new ArrayList<>();
 		return (List<LocationAttribute>) getSessionFactory().getCurrentSession().createCriteria(LocationAttribute.class)
 		        .createAlias("location", "l", JoinType.INNER_JOIN, eq("l.id", location.getId()))
 		        .createAlias("attributeType", "lat").add(eq("lat.uuid", locationAttributeTypeUuid)).add(eq("voided", false))
 		        .list();
 	}
 	
-	private void handleName(Criteria criteria, StringAndListParam namePattern) {
-		handleAndListParam(namePattern, (name) -> propertyLike("name", name)).ifPresent(criteria::add);
+	private void handleName(CriteriaBuilder criteriaBuilder, StringAndListParam namePattern) {
+		EntityManager em = sessionFactory.getCurrentSession();
+		criteriaBuilder = em.getCriteriaBuilder();
+		CriteriaQuery<Location> criteriaQuery = criteriaBuilder.createQuery(Location.class);
+		
+		List<Predicate> predicates = new ArrayList<>();
+		handleAndListParam(namePattern, (name) -> propertyLike("name", name)).ifPresent(predicates::add);
+		criteriaQuery.distinct(true).where(predicates.toArray(new Predicate[] {}));
 	}
 	
-	private void handleCity(Criteria criteria, StringAndListParam cityPattern) {
-		handleAndListParam(cityPattern, (city) -> propertyLike("cityVillage", city)).ifPresent(criteria::add);
+	private void handleCity(CriteriaBuilder criteriaBuilder, StringAndListParam cityPattern) {
+		EntityManager em = sessionFactory.getCurrentSession();
+		criteriaBuilder = em.getCriteriaBuilder();
+		CriteriaQuery<Location> criteriaQuery = criteriaBuilder.createQuery(Location.class);
+		
+		List<Predicate> predicates = new ArrayList<>();
+		handleAndListParam(cityPattern, (city) -> propertyLike("cityVillage", city)).ifPresent(predicates::add);
+		criteriaQuery.distinct(true).where(predicates.toArray(new Predicate[] {}));
 	}
 	
-	private void handleCountry(Criteria criteria, StringAndListParam countryPattern) {
-		handleAndListParam(countryPattern, (country) -> propertyLike("country", country)).ifPresent(criteria::add);
+	private void handleCountry(CriteriaBuilder criteriaBuilder, StringAndListParam countryPattern) {
+		EntityManager em = sessionFactory.getCurrentSession();
+		criteriaBuilder = em.getCriteriaBuilder();
+		CriteriaQuery<Location> criteriaQuery = criteriaBuilder.createQuery(Location.class);
+		
+		List<Predicate> predicates = new ArrayList<>();
+		handleAndListParam(countryPattern, (country) -> propertyLike("country", country)).ifPresent(predicates::add);
+		criteriaQuery.distinct(true).where(predicates.toArray(new Predicate[] {}));
 	}
 	
-	private void handlePostalCode(Criteria criteria, StringAndListParam postalCodePattern) {
+	private void handlePostalCode(CriteriaBuilder criteriaBuilder, StringAndListParam postalCodePattern) {
+		EntityManager em = sessionFactory.getCurrentSession();
+		criteriaBuilder = em.getCriteriaBuilder();
+		CriteriaQuery<Location> criteriaQuery = criteriaBuilder.createQuery(Location.class);
+		
+		List<Predicate> predicates = new ArrayList<>();
 		handleAndListParam(postalCodePattern, (postalCode) -> propertyLike("postalCode", postalCode))
-		        .ifPresent(criteria::add);
+		        .ifPresent(predicates::add);
+		criteriaQuery.distinct(true).where(predicates.toArray(new Predicate[] {}));
 	}
 	
-	private void handleState(Criteria criteria, StringAndListParam statePattern) {
-		handleAndListParam(statePattern, (state) -> propertyLike("stateProvince", state)).ifPresent(criteria::add);
+	private void handleState(CriteriaBuilder criteriaBuilder, StringAndListParam statePattern) {
+		EntityManager em = sessionFactory.getCurrentSession();
+		criteriaBuilder = em.getCriteriaBuilder();
+		CriteriaQuery<Location> criteriaQuery = criteriaBuilder.createQuery(Location.class);
+		
+		List<Predicate> predicates = new ArrayList<>();
+		handleAndListParam(statePattern, (state) -> propertyLike("stateProvince", state)).ifPresent(predicates::add);
+		criteriaQuery.where(predicates.toArray(new Predicate[] {}));
 	}
 	
-	private void handleTag(Criteria criteria, TokenAndListParam tags) {
+	private void handleTag(CriteriaBuilder criteriaBuilder, TokenAndListParam tags) {
+		EntityManager em = sessionFactory.getCurrentSession();
+		criteriaBuilder = em.getCriteriaBuilder();
+		CriteriaQuery<Location> criteriaQuery = criteriaBuilder.createQuery(Location.class);
+		Root<Location> root = criteriaQuery.from(Location.class);
+		
+		List<Predicate> predicates = new ArrayList<>();
 		if (tags != null) {
-			criteria.createAlias("tags", "t");
-			handleAndListParam(tags, (tag) -> Optional.of(eq("t.name", tag.getValue()))).ifPresent(criteria::add);
+			root.join("tags").alias("t");
+			CriteriaBuilder finalCriteriaBuilder = criteriaBuilder;
+			handleAndListParam(tags, (tag) -> Optional.of(finalCriteriaBuilder.equal(root.get("t.name"), tag.getValue())))
+			        .ifPresent(predicates::add);
+			criteriaQuery.distinct(true).where(predicates.toArray(new Predicate[] {}));
 		}
 	}
 	
-	private void handleParentLocation(Criteria criteria, ReferenceAndListParam parent) {
-		handleLocationReference("loc", parent).ifPresent(loc -> criteria.createAlias("parentLocation", "loc").add(loc));
+	private void handleParentLocation(CriteriaBuilder criteriaBuilder, ReferenceAndListParam parent) {
+		EntityManager em = sessionFactory.getCurrentSession();
+		criteriaBuilder = em.getCriteriaBuilder();
+		CriteriaQuery<Location> criteriaQuery = criteriaBuilder.createQuery(Location.class);
+		Root<Location> root = criteriaQuery.from(Location.class);
+		
+		List<Predicate> predicates = new ArrayList<>();
+		handleLocationReference("loc", parent).ifPresent(loc -> {
+			root.join("parentLocation").alias("loc");
+			predicates.add(loc);
+			criteriaQuery.distinct(true).where(predicates.toArray(new Predicate[] {}));
+		});
 	}
 	
 	@Override

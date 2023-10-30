@@ -10,6 +10,8 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import javax.annotation.Nonnull;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Predicate;
 
 import java.util.List;
 import java.util.Optional;
@@ -59,31 +61,35 @@ public class FhirMedicationDispenseDaoImpl_2_6 extends BaseFhirDao<MedicationDis
 	}
 	
 	@Override
-	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
+	protected void setupSearchParams(CriteriaBuilder criteriaBuilder, SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER:
 					entry.getValue()
-					        .forEach(param -> handlePatientReference(criteria, (ReferenceAndListParam) param.getParam()));
+					        .forEach(param -> handlePatientReference(criteriaBuilder, (ReferenceAndListParam) param.getParam()));
 					break;
 				case FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER:
 					entry.getValue()
-					        .forEach(e -> handleEncounterReference(criteria, (ReferenceAndListParam) e.getParam(), "e"));
+					        .forEach(e -> handleEncounterReference(criteriaBuilder, (ReferenceAndListParam) e.getParam(), "e"));
 					break;
 				case FhirConstants.MEDICATION_REQUEST_REFERENCE_SEARCH_HANDLER:
 					entry.getValue()
 					        .forEach(e -> handleMedicationRequestReference("drugOrder", (ReferenceAndListParam) e.getParam())
-					                .ifPresent(c -> createAlias(criteria, "drugOrder", "drugOrder").add(c)));
+					                .ifPresent(c -> {
+										createAlias(criteriaBuilder, "drugOrder", "drugOrder");
+										criteriaBuilder.and(c);
+									}
+					                ));
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(entry.getValue()).ifPresent(criteria::add);
+					handleCommonSearchParameters(entry.getValue()).ifPresent(criteriaBuilder::and);
 					break;
 			}
 		});
 	}
 	
 	@Override
-	protected Optional<Criterion> handleLastUpdated(DateRangeParam param) {
+	protected Optional<Predicate> handleLastUpdated(DateRangeParam param) {
 		return super.handleLastUpdatedImmutable(param);
 	}
 	
