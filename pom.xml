@@ -883,7 +883,7 @@
         <lombokVersion>1.18.26</lombokVersion>
         <openmrsPlatformVersion>2.4.1</openmrsPlatformVersion>
         <openmrsPlatformToolsVersion>2.4.1</openmrsPlatformToolsVersion>
-        <hapifhirVersion>5.4.0</hapifhirVersion>
+        <hapifhirVersion>5.7.9</hapifhirVersion>
         <ucumVersion>1.0.3</ucumVersion>
     </properties>
 

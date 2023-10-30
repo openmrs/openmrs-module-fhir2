@@ -37,7 +37,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.Setter;
 import org.apache.commons.collections.CollectionUtils;
-import org.hl7.fhir.convertors.conv30_40.AllergyIntolerance30_40;
+import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40;
 import org.hl7.fhir.dstu3.model.AllergyIntolerance;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
@@ -73,14 +73,14 @@ public class AllergyIntoleranceFhirResourceProvider implements IResourceProvider
 			throw new ResourceNotFoundException("Could not find allergyIntolerance with Id " + id.getIdPart());
 		}
 		
-		return AllergyIntolerance30_40.convertAllergyIntolerance(allergyIntolerance);
+		return (AllergyIntolerance) VersionConvertorFactory_30_40.convertResource(allergyIntolerance);
 	}
 	
 	@Create
 	@SuppressWarnings("unused")
 	public MethodOutcome creatAllergyIntolerance(@ResourceParam AllergyIntolerance allergyIntolerance) {
-		return FhirProviderUtils.buildCreate(AllergyIntolerance30_40.convertAllergyIntolerance(
-		    allergyIntoleranceService.create(AllergyIntolerance30_40.convertAllergyIntolerance(allergyIntolerance))));
+		return FhirProviderUtils.buildCreate(VersionConvertorFactory_30_40.convertResource(allergyIntoleranceService.create(
+		    (org.hl7.fhir.r4.model.AllergyIntolerance) VersionConvertorFactory_30_40.convertResource(allergyIntolerance))));
 	}
 	
 	@Update
@@ -92,8 +92,9 @@ public class AllergyIntoleranceFhirResourceProvider implements IResourceProvider
 		
 		allergyIntolerance.setId(id.getIdPart());
 		
-		return FhirProviderUtils.buildUpdate(AllergyIntolerance30_40.convertAllergyIntolerance(allergyIntoleranceService
-		        .update(id.getIdPart(), AllergyIntolerance30_40.convertAllergyIntolerance(allergyIntolerance))));
+		return FhirProviderUtils.buildUpdate(VersionConvertorFactory_30_40.convertResource(allergyIntoleranceService.update(
+		    id.getIdPart(),
+		    (org.hl7.fhir.r4.model.AllergyIntolerance) VersionConvertorFactory_30_40.convertResource(allergyIntolerance))));
 	}
 	
 	@Delete

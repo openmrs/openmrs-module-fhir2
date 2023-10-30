@@ -43,7 +43,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import org.hl7.fhir.convertors.conv30_40.Location30_40;
+import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40;
 import org.hl7.fhir.dstu3.model.Encounter;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Location;
@@ -517,7 +517,8 @@ public class LocationFhirResourceProviderTest extends BaseFhirR3ProvenanceResour
 	public void createLocation_shouldCreateNewLocation() {
 		when(locationService.create(any(org.hl7.fhir.r4.model.Location.class))).thenReturn(location);
 		
-		MethodOutcome result = resourceProvider.createLocation(Location30_40.convertLocation(location));
+		MethodOutcome result = resourceProvider
+		        .createLocation((Location) VersionConvertorFactory_30_40.convertResource(location));
 		assertThat(result, notNullValue());
 		assertThat(result.getCreated(), is(true));
 		assertThat(result.getResource(), notNullValue());
@@ -540,7 +541,7 @@ public class LocationFhirResourceProviderTest extends BaseFhirR3ProvenanceResour
 		when(locationService.update(eq(LOCATION_UUID), any(org.hl7.fhir.r4.model.Location.class))).thenReturn(location);
 		
 		MethodOutcome result = resourceProvider.updateLocation(new IdType().setValue(LOCATION_UUID),
-		    Location30_40.convertLocation(location));
+		    (Location) VersionConvertorFactory_30_40.convertResource(location));
 		assertThat(result, notNullValue());
 		assertThat(result.getResource(), notNullValue());
 		assertThat(result.getResource().getIdElement().getIdPart(), equalTo(LOCATION_UUID));
@@ -551,7 +552,8 @@ public class LocationFhirResourceProviderTest extends BaseFhirR3ProvenanceResour
 		when(locationService.update(eq(WRONG_LOCATION_UUID), any(org.hl7.fhir.r4.model.Location.class)))
 		        .thenThrow(InvalidRequestException.class);
 		
-		resourceProvider.updateLocation(new IdType().setValue(WRONG_LOCATION_UUID), Location30_40.convertLocation(location));
+		resourceProvider.updateLocation(new IdType().setValue(WRONG_LOCATION_UUID),
+		    (Location) VersionConvertorFactory_30_40.convertResource(location));
 	}
 	
 	@Test(expected = InvalidRequestException.class)

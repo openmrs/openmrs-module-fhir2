@@ -41,7 +41,7 @@ import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hamcrest.Matchers;
-import org.hl7.fhir.convertors.conv30_40.Condition30_40;
+import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40;
 import org.hl7.fhir.dstu3.model.Condition;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
@@ -123,7 +123,8 @@ public class ConditionFhirR3ResourceProviderTest extends BaseFhirR3ProvenanceRes
 	public void createCondition_shouldCreateNewCondition() {
 		when(conditionService.create(any(org.hl7.fhir.r4.model.Condition.class))).thenReturn(condition);
 		
-		MethodOutcome result = resourceProvider.createCondition(Condition30_40.convertCondition(condition));
+		MethodOutcome result = resourceProvider
+		        .createCondition((Condition) VersionConvertorFactory_30_40.convertResource(condition));
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getCreated(), is(true));
@@ -136,7 +137,7 @@ public class ConditionFhirR3ResourceProviderTest extends BaseFhirR3ProvenanceRes
 		when(conditionService.update(anyString(), any(org.hl7.fhir.r4.model.Condition.class))).thenReturn(condition);
 		
 		MethodOutcome result = resourceProvider.updateCondition(new IdType().setValue(CONDITION_UUID),
-		    Condition30_40.convertCondition(condition));
+		    (Condition) VersionConvertorFactory_30_40.convertResource(condition));
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getResource().getIdElement().getIdPart(), equalTo(CONDITION_UUID));

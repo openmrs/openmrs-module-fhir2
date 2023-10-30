@@ -24,7 +24,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import org.hl7.fhir.convertors.conv30_40.Group30_40;
+import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40;
 import org.hl7.fhir.dstu3.model.Group;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
@@ -88,7 +88,7 @@ public class GroupFhirResourceProviderTest {
 	public void shouldCreateNewGroup() {
 		when(fhirGroupService.create(any(org.hl7.fhir.r4.model.Group.class))).thenReturn(group);
 		
-		MethodOutcome result = resourceProvider.createGroup(Group30_40.convertGroup(group));
+		MethodOutcome result = resourceProvider.createGroup((Group) VersionConvertorFactory_30_40.convertResource(group));
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getCreated(), is(true));
@@ -108,7 +108,7 @@ public class GroupFhirResourceProviderTest {
 		when(fhirGroupService.update(eq(COHORT_UUID), any(org.hl7.fhir.r4.model.Group.class))).thenReturn(group);
 		
 		MethodOutcome result = resourceProvider.updateGroup(new IdType().setValue(COHORT_UUID),
-		    Group30_40.convertGroup(group));
+		    (Group) VersionConvertorFactory_30_40.convertResource(group));
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getResource(), notNullValue());
@@ -121,7 +121,8 @@ public class GroupFhirResourceProviderTest {
 		when(fhirGroupService.update(eq(BAD_COHORT_UUID), any(org.hl7.fhir.r4.model.Group.class)))
 		        .thenThrow(InvalidRequestException.class);
 		
-		resourceProvider.updateGroup(new IdType().setValue(BAD_COHORT_UUID), Group30_40.convertGroup(group));
+		resourceProvider.updateGroup(new IdType().setValue(BAD_COHORT_UUID),
+		    (Group) VersionConvertorFactory_30_40.convertResource(group));
 	}
 	
 	@Test(expected = InvalidRequestException.class)
@@ -131,7 +132,8 @@ public class GroupFhirResourceProviderTest {
 		when(fhirGroupService.update(eq(COHORT_UUID), any(org.hl7.fhir.r4.model.Group.class)))
 		        .thenThrow(InvalidRequestException.class);
 		
-		resourceProvider.updateGroup(new IdType().setValue(COHORT_UUID), Group30_40.convertGroup(noIdGroup));
+		resourceProvider.updateGroup(new IdType().setValue(COHORT_UUID),
+		    (Group) VersionConvertorFactory_30_40.convertResource(noIdGroup));
 	}
 	
 	@Test(expected = MethodNotAllowedException.class)
@@ -142,7 +144,8 @@ public class GroupFhirResourceProviderTest {
 		when(fhirGroupService.update(eq(BAD_COHORT_UUID), any(org.hl7.fhir.r4.model.Group.class)))
 		        .thenThrow(MethodNotAllowedException.class);
 		
-		resourceProvider.updateGroup(new IdType().setValue(BAD_COHORT_UUID), Group30_40.convertGroup(wrongGroup));
+		resourceProvider.updateGroup(new IdType().setValue(BAD_COHORT_UUID),
+		    (Group) VersionConvertorFactory_30_40.convertResource(wrongGroup));
 	}
 	
 	@Test

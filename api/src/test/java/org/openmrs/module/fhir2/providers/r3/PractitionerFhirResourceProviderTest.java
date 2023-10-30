@@ -39,7 +39,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import org.hl7.fhir.convertors.conv30_40.Practitioner30_40;
+import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Practitioner;
@@ -553,7 +553,8 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirR3ProvenanceRe
 	public void createPractitioner_shouldCreateNewPractitioner() {
 		when(practitionerService.create(any(org.hl7.fhir.r4.model.Practitioner.class))).thenReturn(practitioner);
 		
-		MethodOutcome result = resourceProvider.createPractitioner(Practitioner30_40.convertPractitioner(practitioner));
+		MethodOutcome result = resourceProvider
+		        .createPractitioner((Practitioner) VersionConvertorFactory_30_40.convertResource(practitioner));
 		assertThat(result, notNullValue());
 		assertThat(result.getCreated(), is(true));
 		assertThat(result.getResource(), notNullValue());
@@ -566,7 +567,7 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirR3ProvenanceRe
 		        .thenReturn(practitioner);
 		
 		MethodOutcome result = resourceProvider.updatePractitioner(new IdType().setValue(PRACTITIONER_UUID),
-		    Practitioner30_40.convertPractitioner(practitioner));
+		    (Practitioner) VersionConvertorFactory_30_40.convertResource(practitioner));
 		assertThat(result, notNullValue());
 		assertThat(result.getResource(), notNullValue());
 		assertThat(result.getResource().getIdElement().getIdPart(), equalTo(PRACTITIONER_UUID));
@@ -578,7 +579,7 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirR3ProvenanceRe
 		        .thenThrow(InvalidRequestException.class);
 		
 		resourceProvider.updatePractitioner(new IdType().setValue(WRONG_PRACTITIONER_UUID),
-		    Practitioner30_40.convertPractitioner(practitioner));
+		    (Practitioner) VersionConvertorFactory_30_40.convertResource(practitioner));
 	}
 	
 	@Test(expected = InvalidRequestException.class)
@@ -589,7 +590,7 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirR3ProvenanceRe
 		        .thenThrow(InvalidRequestException.class);
 		
 		resourceProvider.updatePractitioner(new IdType().setValue(PRACTITIONER_UUID),
-		    Practitioner30_40.convertPractitioner(noIdPractitioner));
+		    (Practitioner) VersionConvertorFactory_30_40.convertResource(noIdPractitioner));
 	}
 	
 	@Test(expected = MethodNotAllowedException.class)
@@ -601,7 +602,7 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirR3ProvenanceRe
 		        .thenThrow(MethodNotAllowedException.class);
 		
 		resourceProvider.updatePractitioner(new IdType().setValue(WRONG_PRACTITIONER_UUID),
-		    Practitioner30_40.convertPractitioner(wrongPractitioner));
+		    (Practitioner) VersionConvertorFactory_30_40.convertResource(wrongPractitioner));
 	}
 	
 	@Test

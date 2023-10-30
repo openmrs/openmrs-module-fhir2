@@ -33,7 +33,7 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.Setter;
 import org.apache.commons.collections.CollectionUtils;
-import org.hl7.fhir.convertors.conv30_40.Medication30_40;
+import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Medication;
 import org.hl7.fhir.dstu3.model.MedicationDispense;
@@ -69,14 +69,14 @@ public class MedicationFhirResourceProvider implements IResourceProvider {
 			throw new ResourceNotFoundException("Could not find medication with Id " + id.getIdPart());
 		}
 		
-		return Medication30_40.convertMedication(medication);
+		return (Medication) VersionConvertorFactory_30_40.convertResource(medication);
 	}
 	
 	@Create
 	@SuppressWarnings("unused")
 	public MethodOutcome createMedication(@ResourceParam Medication medication) {
-		return FhirProviderUtils.buildCreate(
-		    Medication30_40.convertMedication(medicationService.create(Medication30_40.convertMedication(medication))));
+		return FhirProviderUtils.buildCreate(VersionConvertorFactory_30_40.convertResource(medicationService
+		        .create((org.hl7.fhir.r4.model.Medication) VersionConvertorFactory_30_40.convertResource(medication))));
 	}
 	
 	@Update
@@ -86,8 +86,9 @@ public class MedicationFhirResourceProvider implements IResourceProvider {
 			medication.setId(id.getIdPart());
 		}
 		
-		return FhirProviderUtils.buildUpdate(Medication30_40.convertMedication(
-		    medicationService.update(id == null ? null : id.getIdPart(), Medication30_40.convertMedication(medication))));
+		return FhirProviderUtils.buildUpdate(
+		    VersionConvertorFactory_30_40.convertResource(medicationService.update(id == null ? null : id.getIdPart(),
+		        (org.hl7.fhir.r4.model.Medication) VersionConvertorFactory_30_40.convertResource(medication))));
 	}
 	
 	@Delete
