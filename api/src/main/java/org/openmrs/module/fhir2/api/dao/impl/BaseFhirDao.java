@@ -9,11 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
-import static org.hibernate.criterion.Restrictions.and;
-import static org.hibernate.criterion.Restrictions.eq;
-import static org.hibernate.criterion.Restrictions.in;
-import static org.hibernate.criterion.Restrictions.isNull;
-import static org.hibernate.criterion.Restrictions.or;
 import static org.hibernate.jpa.QueryHints.HINT_CACHEABLE;
 import static org.openmrs.module.fhir2.FhirConstants.COUNT_QUERY_CACHE;
 import static org.openmrs.module.fhir2.FhirConstants.EXACT_TOTAL_SEARCH_PARAMETER;
@@ -27,10 +22,8 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Selection;
 import javax.persistence.criteria.Subquery;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -44,14 +37,9 @@ import com.google.common.reflect.TypeToken;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.CacheMode;
 import org.hibernate.Criteria;
 import org.hibernate.Hibernate;
-import org.hibernate.SessionFactory;
-import org.hibernate.annotations.QueryHints;
-import org.hibernate.criterion.Criterion;
-import org.hibernate.criterion.ProjectionList;
-import org.hibernate.criterion.Projections;
+import org.hibernate.SessionFactory;;
 import org.hibernate.proxy.HibernateProxy;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.openmrs.Auditable;
@@ -315,7 +303,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	}
 	
 	@Override
-	protected Optional<Criterion> handleLastUpdated(DateRangeParam param) {
+	protected Optional<Predicate> handleLastUpdated(DateRangeParam param) {
 		if (isImmutable) {
 			return handleLastUpdatedImmutable(param);
 		}
@@ -323,15 +311,20 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 		return handleLastUpdatedMutable(param);
 	}
 	
-	protected Optional<Criterion> handleLastUpdatedMutable(DateRangeParam param) {
+	@SuppressWarnings("unchecked")
+	protected Optional<Predicate> handleLastUpdatedMutable(DateRangeParam param) {
+		EntityManager manager = sessionFactory.getCurrentSession();
+		CriteriaBuilder criteriaBuilder = manager.getCriteriaBuilder();
+		CriteriaQuery<T> criteriaQuery = (CriteriaQuery<T>) criteriaBuilder.createQuery(typeToken.getRawType());
+		Root<T> root = (Root<T>) criteriaQuery.from(typeToken.getRawType());
 		// @formatter:off
-		return Optional.of(or(toCriteriaArray(handleDateRange("dateChanged", param), Optional.of(
-		    and(toCriteriaArray(Stream.of(Optional.of(isNull("dateChanged")), handleDateRange("dateCreated", param))))))));
+		return Optional.of(criteriaBuilder.or(toCriteriaArray(handleDateRange("dateChanged", param), Optional.of(
+		    criteriaBuilder.and(toCriteriaArray(Stream.of(Optional.of(criteriaBuilder.isNull(root.get("dateChanged"))), handleDateRange("dateCreated", param))))))));
 		// @formatter:on
 	}
 	
 	// Implementation of handleLastUpdated for "immutable" types, that is, those that cannot be changed
-	protected Optional<Criterion> handleLastUpdatedImmutable(DateRangeParam param) {
+	protected Optional<Predicate> handleLastUpdatedImmutable(DateRangeParam param) {
 		return handleDateRange("dateCreated", param);
 	}
 	
