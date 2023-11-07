@@ -15,7 +15,9 @@ import java.util.List;
 
 import org.hibernate.Criteria;
 import org.hibernate.criterion.CriteriaQuery;
-import org.hibernate.criterion.Order;
+
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Order;
 import org.hibernate.dialect.function.SQLFunction;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.type.Type;
@@ -24,14 +26,14 @@ import org.hibernate.type.Type;
  * Provides Hibernate Criteria API ordering using the SQL COALESCE() function to merge multiple
  * properties
  */
-public class CoalescedOrder extends Order {
+public class CoalescedOrder implements Order {
 	
 	private final String firstProperty;
 	
 	private final String secondProperty;
 	
 	protected CoalescedOrder(String firstProperty, String secondProperty, boolean ascending) {
-		super(firstProperty, ascending);
+		super();
 		this.firstProperty = firstProperty;
 		this.secondProperty = secondProperty;
 	}
@@ -44,7 +46,6 @@ public class CoalescedOrder extends Order {
 		return new CoalescedOrder(firstPropertyName, secondPropertyName, false);
 	}
 	
-	@Override
 	public String toSqlString(Criteria criteria, CriteriaQuery criteriaQuery) {
 		final Type type = criteriaQuery.getTypeUsingProjection(criteria, firstProperty);
 		final SessionFactoryImplementor factory = criteriaQuery.getFactory();
@@ -69,5 +70,20 @@ public class CoalescedOrder extends Order {
 	@Override
 	public String toString() {
 		return "coalesce(" + firstProperty + ", " + secondProperty + ") " + (isAscending() ? "asc" : "desc");
+	}
+	
+	@Override
+	public Order reverse() {
+		return null;
+	}
+	
+	@Override
+	public boolean isAscending() {
+		return false;
+	}
+	
+	@Override
+	public Expression<?> getExpression() {
+		return null;
 	}
 }

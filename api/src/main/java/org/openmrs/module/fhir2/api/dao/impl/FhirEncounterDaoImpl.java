@@ -19,6 +19,9 @@ import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import java.util.List;
@@ -61,7 +64,7 @@ public class FhirEncounterDaoImpl extends BaseEncounterDao<Encounter> implements
 			CriteriaQuery<Object[]> criteriaQuery = criteriaBuilder.createQuery(Object[].class);
 			Root<Encounter> encounterRoot = criteriaQuery.from(Encounter.class);
 			
-			setupSearchParams(criteriaQuery, theParams);
+			setupSearchParams(criteriaBuilder, theParams);
 			
 			criteriaQuery.multiselect(encounterRoot.get("uuid"),encounterRoot.get("encounterDatetime"));
 			
@@ -80,7 +83,7 @@ public class FhirEncounterDaoImpl extends BaseEncounterDao<Encounter> implements
 		
 		handleVoidable(criteriaBuilder,criteriaQuery,encounterRoot);
 		
-		setupSearchParams(criteriaQuery, theParams);
+		setupSearchParams(criteriaBuilder, theParams);
 		handleSort(criteriaBuilder, theParams.getSortSpec());
 		
 		criteriaQuery.multiselect(encounterRoot.get("uuid"));
@@ -98,20 +101,33 @@ public class FhirEncounterDaoImpl extends BaseEncounterDao<Encounter> implements
 	}
 	
 	@Override
-	protected void handleDate(Criteria criteria, DateRangeParam dateRangeParam) {
-		handleDateRange("encounterDatetime", dateRangeParam).ifPresent(criteria::add);
+	protected void handleDate(CriteriaBuilder criteriaBuilder, DateRangeParam dateRangeParam) {
+		handleDateRange("encounterDatetime", dateRangeParam).ifPresent(criteriaBuilder::and);
 	}
 	
 	@Override
-	protected void handleEncounterType(Criteria criteria, TokenAndListParam tokenAndListParam) {
-		handleAndListParam(tokenAndListParam, t -> Optional.of(eq("et.uuid", t.getValue())))
-		        .ifPresent(t -> criteria.createAlias("encounterType", "et").add(t));
+	protected void handleEncounterType(CriteriaBuilder criteriaBuilder, TokenAndListParam tokenAndListParam) {
+		EntityManager manager = sessionFactory.getCurrentSession();
+		criteriaBuilder = manager.getCriteriaBuilder();
+		CriteriaQuery<?> criteriaQuery = criteriaBuilder.createQuery();
+		Root<Object> root = criteriaQuery.from(Object.class);
+		CriteriaBuilder finalCriteriaBuilder = criteriaBuilder;
+		
+		handleAndListParam(tokenAndListParam, t -> {
+			Join<?, ?> et = (Join<?, ?>) root.join("encounterType", JoinType.INNER).alias("et");
+			return Optional.of(finalCriteriaBuilder.equal(et.get("uuid"), t.getValue()));
+		}).ifPresent(criteriaQuery::where);
 	}
 	
 	@Override
-	protected void handleParticipant(Criteria criteria, ReferenceAndListParam referenceAndListParam) {
-		criteria.createAlias("encounterProviders", "ep");
-		handleParticipantReference(criteria, referenceAndListParam);
+	protected void handleParticipant(CriteriaBuilder criteriaBuilder, ReferenceAndListParam referenceAndListParam) {
+		EntityManager manager = sessionFactory.getCurrentSession();
+		criteriaBuilder = manager.getCriteriaBuilder();
+		CriteriaQuery<?> criteriaQuery = criteriaBuilder.createQuery();
+		Root<Object> root = criteriaQuery.from(Object.class);
+		
+		root.join("encounterProviders").alias("ep");
+		handleParticipantReference(criteriaBuilder, referenceAndListParam);
 	}
 	
 	@Override
@@ -125,34 +141,34 @@ public class FhirEncounterDaoImpl extends BaseEncounterDao<Encounter> implements
 	}
 	
 	@Override
-	protected Criterion generateNotCompletedOrderQuery(String path) {
+	protected Predicate generateNotCompletedOrderQuery(String path) {
 		if (StringUtils.isNotBlank(path)) {
 			path = path + ".";
 		}
 		
-		return Restrictions.or(Restrictions.isNull(path + "fulfillerStatus"),
-		    Restrictions.ne(path + "fulfillerStatus", org.openmrs.Order.FulfillerStatus.COMPLETED));
+		return (Predicate) Restrictions.or(Restrictions.isNull(path + "fulfillerStatus"),
+		    Restrictions.ne(path + "fulfillerStatus", Order.FulfillerStatus.COMPLETED));
 		
 	}
 	
 	@Override
-	protected Criterion generateFulfillerStatusRestriction(String path, String fulfillerStatus) {
+	protected Predicate generateFulfillerStatusRestriction(String path, String fulfillerStatus) {
 		
 		if (StringUtils.isNotBlank(path)) {
 			path = path + ".";
 		}
 		
-		return Restrictions.eq(path + "fulfillerStatus", Order.FulfillerStatus.valueOf(fulfillerStatus.toUpperCase()));
+		return (Predicate) Restrictions.eq(path + "fulfillerStatus", Order.FulfillerStatus.valueOf(fulfillerStatus.toUpperCase()));
 	}
 	
 	@Override
-	protected Criterion generateNotFulfillerStatusRestriction(String path, String fulfillerStatus) {
+	protected Predicate generateNotFulfillerStatusRestriction(String path, String fulfillerStatus) {
 		
 		if (StringUtils.isNotBlank(path)) {
 			path = path + ".";
 		}
 		
-		return Restrictions.or(Restrictions.isNull(path + "fulfillerStatus"),
+		return (Predicate) Restrictions.or(Restrictions.isNull(path + "fulfillerStatus"),
 		    Restrictions.ne(path + "fulfillerStatus", Order.FulfillerStatus.valueOf(fulfillerStatus.toUpperCase())));
 	}
 }

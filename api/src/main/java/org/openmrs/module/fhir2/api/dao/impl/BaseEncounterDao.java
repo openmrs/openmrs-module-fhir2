@@ -32,11 +32,21 @@ import org.openmrs.Order;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 
+import javax.persistence.EntityManager;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+
 @Slf4j
 public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> extends BaseFhirDao<T> {
 	
 	@Override
-	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
+	protected void setupSearchParams(CriteriaBuilder criteria, SearchParameterMap theParams) {
+		EntityManager manager = sessionFactory.getCurrentSession();
+		CriteriaBuilder criteriaBuilder = manager.getCriteriaBuilder();
+		CriteriaQuery<Encounter> criteriaQuery = criteriaBuilder.createQuery(Encounter.class);
+		Root<Encounter> root = criteriaQuery.from(Encounter.class);
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.DATE_RANGE_SEARCH_HANDLER:
@@ -44,6 +54,7 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 					break;
 				case FhirConstants.LOCATION_REFERENCE_SEARCH_HANDLER:
 					entry.getValue().forEach(param -> handleLocationReference("l", (ReferenceAndListParam) param.getParam())
+					        .ifPresent(l -> root.join("location").alias("l"));
 					        .ifPresent(l -> criteria.createAlias("location", "l").add(l)));
 					break;
 				case FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER:
@@ -70,9 +81,15 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 	 * Handle _has parameters that are passed in to constrain the Encounter resource on properties of
 	 * dependent resources
 	 */
-	protected void handleHasAndListParam(Criteria criteria, HasAndListParam hasAndListParam) {
+	protected void handleHasAndListParam(CriteriaBuilder criteriaBuilder, HasAndListParam hasAndListParam) {
 		if (hasAndListParam != null) {
+			EntityManager manager = sessionFactory.getCurrentSession();
+			criteriaBuilder = manager.getCriteriaBuilder();
+			CriteriaQuery<Encounter> criteriaQuery = criteriaBuilder.createQuery(Encounter.class);
+			Root<Encounter> root = criteriaQuery.from(Encounter.class);
+			
 			log.debug("Handling hasAndListParam");
+			CriteriaBuilder finalCriteriaBuilder = criteriaBuilder;
 			hasAndListParam.getValuesAsQueryTokens().forEach(hasOrListParam -> {
 				if (!hasOrListParam.getValuesAsQueryTokens().isEmpty()) {
 					
@@ -90,20 +107,20 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 					// Support constraining encounter resources to those that contain only certain Medication Requests
 					if (FhirConstants.MEDICATION_REQUEST.equals(hasParam.getTargetResourceType())) {
 						if (MedicationRequest.SP_ENCOUNTER.equals(hasParam.getReferenceFieldName())) {
-							if (lacksAlias(criteria, "orders")) {
+							if (lacksAlias(finalCriteriaBuilder, "orders")) {
 								if (Encounter.class.isAssignableFrom(typeToken.getRawType())) {
-									criteria.createAlias("orders", "orders");
+									root.join("orders").alias("orders");
 								} else {
-									if (lacksAlias(criteria, "en")) {
-										criteria.createAlias("encounters", "en");
+									if (lacksAlias(finalCriteriaBuilder, "en")) {
+										root.join("encounters").alias("en");
 									}
-									criteria.createAlias("en.orders", "orders");
+									root.join("en.orders").alias("orders");
 								}
 							}
 							// Constrain only on non-voided Drug Orders
-							criteria.add(Restrictions.eq("orders.class", DrugOrder.class));
-							criteria.add(Restrictions.eq("orders.voided", false));
-							criteria.add(Restrictions.ne("orders.action", Order.Action.DISCONTINUE));
+							finalCriteriaBuilder.add(finalCriteriaBuilder.equal(root.get("orders.class"), DrugOrder.class));
+							finalCriteriaBuilder.add(finalCriteriaBuilder.equal(root.get("orders.voided"), false));
+							finalCriteriaBuilder.add(finalCriteriaBuilder.notEqual(root.get("orders.action"), Order.Action.DISCONTINUE));
 							
 							String paramName = hasParam.getParameterName();
 							String paramValue = hasParam.getParameterValue();
@@ -117,7 +134,7 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 								if (paramValue != null) {
 									if (MedicationRequest.MedicationRequestStatus.ACTIVE.toString()
 									        .equalsIgnoreCase(paramValue)) {
-										criteria.add(generateActiveOrderQuery("orders"));
+										finalCriteriaBuilder.add(generateActiveOrderQuery("orders"));
 									}
 								}
 								handled = true;
@@ -125,24 +142,24 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 								if (paramValue != null) {
 									if (MedicationRequest.MedicationRequestStatus.CANCELLED.toString()
 									        .equalsIgnoreCase(paramValue)) {
-										criteria.add(generateNotCancelledOrderQuery("orders"));
+										finalCriteriaBuilder.add(generateNotCancelledOrderQuery("orders"));
 									}
 									if (MedicationRequest.MedicationRequestStatus.COMPLETED.toString()
 									        .equalsIgnoreCase(paramValue)) {
-										Criterion notCompletedCriterion = generateNotCompletedOrderQuery("orders");
+										Predicate notCompletedCriterion = generateNotCompletedOrderQuery("orders");
 										if (notCompletedCriterion != null) {
-											criteria.add(notCompletedCriterion);
+											finalCriteriaBuilder.add(notCompletedCriterion);
 										}
 									}
 								}
 								handled = true;
 							} else if ((FhirConstants.SP_FULFILLER_STATUS).equalsIgnoreCase(paramName)) {
 								if (paramValue != null) {
-									criteria.add(generateFulfillerStatusRestriction("orders", paramValue));
+									finalCriteriaBuilder.add(generateFulfillerStatusRestriction("orders", paramValue));
 								}
 							} else if ((FhirConstants.SP_FULFILLER_STATUS + ":not").equalsIgnoreCase(paramName)) {
 								if (paramValue != null) {
-									criteria.add(generateNotFulfillerStatusRestriction("orders", paramValue));
+									finalCriteriaBuilder.add(generateNotFulfillerStatusRestriction("orders", paramValue));
 								}
 							}
 						}
@@ -156,23 +173,23 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 		}
 	}
 	
-	protected abstract void handleDate(Criteria criteria, DateRangeParam dateRangeParam);
+	protected abstract void handleDate(CriteriaBuilder criteriaBuilder, DateRangeParam dateRangeParam);
 	
-	protected abstract void handleEncounterType(Criteria criteria, TokenAndListParam tokenAndListParam);
+	protected abstract void handleEncounterType(CriteriaBuilder criteriaBuilder, TokenAndListParam tokenAndListParam);
 	
-	protected abstract void handleParticipant(Criteria criteria, ReferenceAndListParam referenceAndListParam);
+	protected abstract void handleParticipant(CriteriaBuilder criteriaBuilder, ReferenceAndListParam referenceAndListParam);
 	
-	protected Criterion generateNotCompletedOrderQuery(String path) {
+	protected Predicate generateNotCompletedOrderQuery(String path) {
 		// not implemented in Core until 2.2; see override in FhirEncounterDaoImpl_2_2
 		return null;
 	}
 	
-	protected Criterion generateFulfillerStatusRestriction(String path, String fulfillerStatus) {
+	protected Predicate generateFulfillerStatusRestriction(String path, String fulfillerStatus) {
 		// not implemented in Core until 2.2; see override in FhirEncounterDaoImpl_2_2
 		return null;
 	}
 	
-	protected Criterion generateNotFulfillerStatusRestriction(String path, String fulfillerStatus) {
+	protected Predicate generateNotFulfillerStatusRestriction(String path, String fulfillerStatus) {
 		// not implemented in Core until 2.2; see override in FhirEncounterDaoImpl_2_2
 		return null;
 	}

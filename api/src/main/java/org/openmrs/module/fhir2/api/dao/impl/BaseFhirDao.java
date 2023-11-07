@@ -85,7 +85,17 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	@Qualifier("sessionFactory")
 	protected SessionFactory sessionFactory;
 	
-	@SuppressWarnings("UnstableApiUsage")
+	protected EntityManager manager;
+	
+	protected CriteriaBuilder criteriaBuilder;
+	
+	protected CriteriaQuery<T> criteriaQuery;
+	
+	protected Root<T> root;
+	
+	protected TypedQuery<T> typedQuery;
+	
+	@SuppressWarnings({ "UnstableApiUsage", "unchecked" })
 	protected BaseFhirDao() {
 		// @formatter:off
 		typeToken = new TypeToken<T>(getClass()) {};
@@ -96,17 +106,16 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 		this.isImmutable = Order.class.isAssignableFrom(typeToken.getRawType())
 		        || Obs.class.isAssignableFrom(typeToken.getRawType());
 		
-		
+		manager = sessionFactory.getCurrentSession();
+		criteriaBuilder = manager.getCriteriaBuilder();
+		criteriaQuery = (CriteriaQuery<T>) criteriaBuilder.createQuery(typeToken.getRawType());
+		root = (Root<T>) criteriaQuery.from(typeToken.getRawType());
+		typedQuery = manager.createQuery(criteriaQuery);
 	}
 	
 	@Override
 	@Transactional(readOnly = true)
-	@SuppressWarnings("unchecked")
 	public T get(@Nonnull String uuid) {
-		EntityManager manager = sessionFactory.getCurrentSession();
-		CriteriaBuilder criteriaBuilder = manager.getCriteriaBuilder();
-		CriteriaQuery<T> criteriaQuery = (CriteriaQuery<T>) criteriaBuilder.createQuery(typeToken.getRawType());
-		Root<T> root = (Root<T>) criteriaQuery.from(typeToken.getRawType());
 		criteriaQuery.select(root).where(criteriaBuilder.equal(root.get("uuid"),uuid));
 		
 		TypedQuery<T> result = manager.createQuery(criteriaQuery);
@@ -121,12 +130,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	
 	@Override
 	@Transactional(readOnly = true)
-	@SuppressWarnings("unchecked")
 	public List<T> get(@Nonnull Collection<String> uuids) {
-		EntityManager manager = sessionFactory.getCurrentSession();
-		CriteriaBuilder criteriaBuilder = manager.getCriteriaBuilder();
-		CriteriaQuery<T> criteriaQuery = (CriteriaQuery<T>) criteriaBuilder.createQuery(typeToken.getRawType());
-		Root<T> root = (Root<T>) criteriaQuery.from(typeToken.getRawType());
 		criteriaQuery.select(root).where(criteriaBuilder.in(root.in(uuids)));
 		
 		if (isVoidable) {
@@ -166,20 +170,14 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 		return existing;
 	}
 	
-	@SuppressWarnings("unchecked")
 	private CriteriaBuilder getSearchResultCriteria(SearchParameterMap theParams) {
-		EntityManager manager = sessionFactory.getCurrentSession();
-		CriteriaBuilder criteriaBuilder = manager.getCriteriaBuilder();
-		CriteriaQuery<T> criteriaQuery = (CriteriaQuery<T>) criteriaBuilder.createQuery(typeToken.getRawType());
-		Root<T> root = (Root<T>) criteriaQuery.from(typeToken.getRawType());
-		
 		if (isVoidable) {
 			handleVoidable(criteriaBuilder,criteriaQuery,root);
 		} else if (isRetireable) {
 			handleRetireable(criteriaBuilder,criteriaQuery,root);
 		}
 		
-		setupSearchParams(criteriaQuery, theParams);
+		setupSearchParams(criteriaBuilder, theParams);
 		
 		return criteriaBuilder;
 	}
@@ -220,7 +218,6 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	
 	@SuppressWarnings("unchecked")
 	protected void applyExactTotal(SearchParameterMap theParams, CriteriaBuilder criteriaBuilder) {
-		EntityManager manager = (EntityManager) sessionFactory.getCurrentSession().getCriteriaBuilder();
 		CriteriaQuery<T> criteriaQuery = (CriteriaQuery<T>) criteriaBuilder.createQuery(typeToken.getRawType());
 		TypedQuery<T> typedQuery = manager.createQuery(criteriaQuery);
 		
@@ -239,17 +236,11 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<T> getSearchResults(@Nonnull SearchParameterMap theParams) {
-		EntityManager manager = sessionFactory.getCurrentSession();
-		CriteriaBuilder criteriaBuilder = manager.getCriteriaBuilder();
-		CriteriaQuery<T> criteriaQuery = (CriteriaQuery<T>) criteriaBuilder.createQuery(typeToken.getRawType());
-		Root<T> root = (Root<T>) criteriaQuery.from(typeToken.getRawType());
-		
 		criteriaBuilder = getSearchResultCriteria(theParams);
 		
 		handleSort(criteriaBuilder, theParams.getSortSpec());
 		criteriaQuery.orderBy(criteriaBuilder.asc(root.get("id")));
-		
-		TypedQuery<T> typedQuery = manager.createQuery(criteriaQuery);
+
 		typedQuery.setFirstResult(theParams.getFromIndex());
 		if (theParams.getToIndex() != Integer.MAX_VALUE) {
 			int maxResults = theParams.getToIndex() - theParams.getFromIndex();
@@ -311,12 +302,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 		return handleLastUpdatedMutable(param);
 	}
 	
-	@SuppressWarnings("unchecked")
 	protected Optional<Predicate> handleLastUpdatedMutable(DateRangeParam param) {
-		EntityManager manager = sessionFactory.getCurrentSession();
-		CriteriaBuilder criteriaBuilder = manager.getCriteriaBuilder();
-		CriteriaQuery<T> criteriaQuery = (CriteriaQuery<T>) criteriaBuilder.createQuery(typeToken.getRawType());
-		Root<T> root = (Root<T>) criteriaQuery.from(typeToken.getRawType());
 		// @formatter:off
 		return Optional.of(criteriaBuilder.or(toCriteriaArray(handleDateRange("dateChanged", param), Optional.of(
 		    criteriaBuilder.and(toCriteriaArray(Stream.of(Optional.of(criteriaBuilder.isNull(root.get("dateChanged"))), handleDateRange("dateCreated", param))))))));
@@ -337,8 +323,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	 * @param root The JPA Root representing the entity being queried.
 	 */
 	protected void handleVoidable(CriteriaBuilder criteriaBuilder, CriteriaQuery<?> criteriaQuery, Root<?> root) {
-		Predicate predicate = criteriaBuilder.equal(root.get("voided"), false);
-		criteriaQuery.where(predicate);
+		criteriaQuery.where(criteriaBuilder.equal(root.get("voided"), false));
 	}
 	
 	/**
@@ -350,8 +335,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	 * @param root The JPA Root representing the entity being queried.
 	 */
 	protected void handleRetireable(CriteriaBuilder criteriaBuilder, CriteriaQuery<?> criteriaQuery, Root<?> root) {
-		Predicate predicate = criteriaBuilder.equal(root.get("retired"), false);
-		criteriaQuery.where(predicate);
+		criteriaQuery.where(criteriaBuilder.equal(root.get("retired"), false));
 	}
 	
 	/**
@@ -380,24 +364,24 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	 * This is intended to be overridden by subclasses to implement any special handling they might
 	 * require
 	 *
-	 * @param criteriaQuery the criteria object representing this search
+	 * @param criteriaBuilder the criteria object representing this search
 	 * @param theParams the parameters for this search
 	 */
-	protected void setupSearchParams(CriteriaQuery<?> criteriaQuery, SearchParameterMap theParams) {
+	protected void setupSearchParams(CriteriaBuilder criteriaBuilder, SearchParameterMap theParams) {
 		
 	}
 	
 	@Override
-	protected Collection<org.hibernate.criterion.Order> paramToProps(@Nonnull SortState sortState) {
+	protected Collection<javax.persistence.criteria.Order> paramToProps(@Nonnull SortState sortState) {
 		String param = sortState.getParameter();
 		
 		if (FhirConstants.SP_LAST_UPDATED.equalsIgnoreCase(param)) {
 			if (isImmutable) {
 				switch (sortState.getSortOrder()) {
 					case ASC:
-						return Collections.singletonList(org.hibernate.criterion.Order.asc("dateCreated"));
+						return Collections.singletonList(criteriaBuilder.asc(root.get("dateCreated")));
 					case DESC:
-						return Collections.singletonList(org.hibernate.criterion.Order.desc("dateCreated"));
+						return Collections.singletonList(criteriaBuilder.desc(root.get("dateCreated")));
 				}
 			}
 			

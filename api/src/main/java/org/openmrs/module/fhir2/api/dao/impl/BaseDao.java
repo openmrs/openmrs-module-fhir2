@@ -69,10 +69,12 @@ import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.time.DateUtils;
+import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
 import org.hibernate.internal.CriteriaImpl;
+import org.hibernate.search.query.dsl.sort.SortOrder;
 import org.hibernate.sql.JoinType;
 import org.hl7.fhir.dstu3.model.Encounter;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -359,7 +361,7 @@ public abstract class BaseDao {
 		EntityManager entityManager = sessionFactory.getCurrentSession();
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 		Predicate predicate = criteriaBuilder.and(toCriteriaArray(
-				handleAndListParam(andListParam).map(param -> handleOrListParamBySystem(param, systemTokenHandler)))));
+				handleAndListParam(andListParam).map(param -> handleOrListParamBySystem(param, systemTokenHandler))));
 		
 		return Optional.of(predicate);
 	}
@@ -578,7 +580,7 @@ public abstract class BaseDao {
 				switch (token.getChain()) {
 					case Encounter.SP_TYPE:
 						if (lacksAlias(finalCriteriaBuilder, "et")) {
-							finalCriteriaBuilder.createAlias(String.format("%s.encounterType", encounterAlias), "et");
+							root.join(String.format("%s.encounterType", encounterAlias)).alias("et");
 						}
 						return propertyLike("et.uuid", new StringParam(token.getValue(), true));
 				}
@@ -587,7 +589,7 @@ public abstract class BaseDao {
 			}
 			
 			return Optional.empty();
-		}).ifPresent(criteria::add);
+		}).ifPresent(criteriaQuery::where);
 	}
 	
 	protected Optional<Predicate> handleGender(@Nonnull String propertyName, TokenAndListParam gender) {
@@ -674,28 +676,31 @@ public abstract class BaseDao {
 					switch (participantToken.getChain()) {
 						case Practitioner.SP_IDENTIFIER:
 							if (lacksAlias(finalCriteriaBuilder, "p")) {
-								finalCriteriaBuilder.createAlias("ep.provider", "p");
+								root.join("ep.provider").alias("p");
 							}
 							return Optional.of(finalCriteriaBuilder.like(root.get("p.identifier"), participantToken.getValue()));
 						case Practitioner.SP_GIVEN:
 							if ((lacksAlias(finalCriteriaBuilder, "pro")
 							        && (lacksAlias(finalCriteriaBuilder, "ps") && (lacksAlias(finalCriteriaBuilder, "pn"))))) {
-								finalCriteriaBuilder.createAlias("ep.provider", "pro").createAlias("pro.person", "ps")
-								        .createAlias("ps.names", "pn");
+								root.join("ep.provider").alias("pro");
+								root.join("pro.person").alias("ps");
+								root.join("ps.names").alias("pn");
 							}
 							return Optional.of(finalCriteriaBuilder.like(root.get("pn.givenName"), participantToken.getValue()));
 						case Practitioner.SP_FAMILY:
 							if ((lacksAlias(finalCriteriaBuilder, "pro")
 							        && (lacksAlias(finalCriteriaBuilder, "ps") && (lacksAlias(finalCriteriaBuilder, "pn"))))) {
-								finalCriteriaBuilder.createAlias("ep.provider", "pro").createAlias("pro.person", "ps")
-								        .createAlias("ps.names", "pn");
+								root.join("ep.provider").alias("pro");
+								root.join("pro.person").alias("ps");
+								root.join("ps.names").alias("pn");
 							}
 							return Optional.of(finalCriteriaBuilder.like(root.get("pn.familyName"), participantToken.getValue()));
 						case Practitioner.SP_NAME:
 							if ((lacksAlias(finalCriteriaBuilder, "pro")
 							        && (lacksAlias(finalCriteriaBuilder, "ps") && (lacksAlias(finalCriteriaBuilder, "pn"))))) {
-								finalCriteriaBuilder.createAlias("ep.provider", "pro").createAlias("pro.person", "ps")
-								        .createAlias("ps.names", "pn");
+								root.join("ep.provider").alias("pro");
+								root.join("pro.person").alias("ps");
+								root.join("ps.names").alias("pn");
 							}
 							
 							List<Optional<? extends Predicate>> predicateList = new ArrayList<>();
@@ -710,13 +715,13 @@ public abstract class BaseDao {
 					}
 				} else {
 					if (lacksAlias(finalCriteriaBuilder, "pro")) {
-						finalCriteriaBuilder.createAlias("ep.provider", "pro");
+						root.join("ep.provider").alias("pro");
 					}
 					return Optional.of(finalCriteriaBuilder.equal(root.get("pro.uuid"),participantToken.getValue()));
 				}
 				
 				return Optional.empty();
-			}).ifPresent(finalCriteriaBuilder::add);
+			}).ifPresent(criteriaQuery::where);
 		}
 	}
 	
@@ -770,7 +775,7 @@ public abstract class BaseDao {
 				}
 				
 				return Optional.empty();
-			}).ifPresent(finalCriteriaBuilder::add);
+			}).ifPresent(criteriaQuery::where);
 		}
 	}
 	
@@ -788,15 +793,16 @@ public abstract class BaseDao {
 		CriteriaBuilder finalCriteriaBuilder = criteriaBuilder;
 		return handleAndListParamBySystem(concepts, (system, tokens) -> {
 			if (system.isEmpty()) {
-				return Optional.of(or(
-				    in(String.format("%s.conceptId", conceptAlias),
-				        tokensToParams(tokens).map(NumberUtils::toInt).collect(Collectors.toList())),
-				    in(String.format("%s.uuid", conceptAlias), tokensToList(tokens))));
+				finalCriteriaBuilder.literal(tokensToParams(tokens).map(NumberUtils::toInt).collect(Collectors.toList()));
+				return Optional.of(finalCriteriaBuilder.or(
+				    finalCriteriaBuilder.in(root.get(String.format("%s.conceptId", conceptAlias)).in(
+							finalCriteriaBuilder.literal(tokensToParams(tokens).map(NumberUtils::toInt).collect(Collectors.toList())))),
+				    finalCriteriaBuilder.in(root.get(String.format("%s.uuid", conceptAlias)).in(finalCriteriaBuilder.literal(tokensToList(tokens))))));
 				
 			} else {
 				if (lacksAlias(finalCriteriaBuilder, conceptMapAlias)) {
-					finalCriteriaBuilder.createAlias(String.format("%s.conceptMappings", conceptAlias), conceptMapAlias).createAlias(
-					    String.format("%s.conceptReferenceTerm", conceptMapAlias), conceptReferenceTermAlias);
+					root.join(String.format("%s.conceptMappings", conceptAlias)).alias(conceptMapAlias);
+					root.join(String.format("%s.conceptReferenceTerm", conceptMapAlias)).alias(conceptReferenceTermAlias);
 				}
 				
 				return Optional.of(generateSystemQuery(system, tokensToList(tokens), conceptReferenceTermAlias));
@@ -823,10 +829,11 @@ public abstract class BaseDao {
 		
 		if (lacksAlias(criteriaBuilder, "pn")) {
 			if (StringUtils.isNotBlank(personAlias)) {
-				criteriaBuilder.createAlias(String.format("%s.names", personAlias), "pn", JoinType.INNER_JOIN,
-				    eq("pn.voided", false));
+				root.join(String.format("%s.names", personAlias), javax.persistence.criteria.JoinType.INNER).alias("pn");
+				criteriaBuilder.equal(root.get("pn.voided"), false);
 			} else {
-				criteriaBuilder.createAlias("names", "pn", JoinType.INNER_JOIN, eq("pn.voided", false));
+				root.join("names", javax.persistence.criteria.JoinType.INNER).alias("pn");
+				criteriaBuilder.equal(root.get("pn.voided"), false);
 			}
 		}
 		
@@ -837,15 +844,15 @@ public abstract class BaseDao {
 			                    .setContains(nameParam.isContains()))
 			            .map(tokenParam -> Arrays.asList(propertyLike("pn.givenName", tokenParam),
 			                propertyLike("pn.middleName", tokenParam), propertyLike("pn.familyName", tokenParam)))
-			            .flatMap(Collection::stream)).ifPresent(criteria::add);
+			            .flatMap(Collection::stream)).ifPresent(criteriaQuery::where);
 		}
 		
 		if (given != null) {
-			handleAndListParam(given, (givenName) -> propertyLike("pn.givenName", givenName)).ifPresent(criteria::add);
+			handleAndListParam(given, (givenName) -> propertyLike("pn.givenName", givenName)).ifPresent(criteriaQuery::where);
 		}
 		
 		if (family != null) {
-			handleAndListParam(family, (familyName) -> propertyLike("pn.familyName", familyName)).ifPresent(criteria::add);
+			handleAndListParam(family, (familyName) -> propertyLike("pn.familyName", familyName)).ifPresent(criteriaQuery::where);
 		}
 	}
 	
@@ -903,7 +910,7 @@ public abstract class BaseDao {
 				}
 				
 				return Optional.empty();
-			}).ifPresent(finalCriteriaBuilder::add);
+			}).ifPresent(criteriaQuery::where);
 		}
 	}
 	
@@ -1012,20 +1019,26 @@ public abstract class BaseDao {
 	 * @param sort the {@link SortSpec} which defines the sorting to be translated
 	 */
 	protected void handleSort(CriteriaBuilder criteriaBuilder, SortSpec sort) {
-		handleSort(criteriaBuilder, sort, this::paramToProps).ifPresent(l -> l.forEach(criteriaBuilder::addOrder));
+		EntityManager manager = sessionFactory.getCurrentSession();
+		criteriaBuilder = manager.getCriteriaBuilder();
+		CriteriaQuery<Object> criteriaQuery = criteriaBuilder.createQuery(Object.class);
+		
+		handleSort(criteriaBuilder, sort, this::paramToProps).ifPresent(l -> l.forEach(criteriaQuery::orderBy));
 	}
 	
+	
+	@SuppressWarnings("unchecked")
 	protected Optional<List<javax.persistence.criteria.Order>> handleSort(CriteriaBuilder criteriaBuilder, SortSpec sort,
-	        Function<SortState, Collection<Order>> paramToProp) {
+	        Function<SortState, Collection<javax.persistence.criteria.Order>> paramToProp) {
 		List<javax.persistence.criteria.Order> orderings = new ArrayList<>();
 		SortSpec sortSpec = sort;
 		while (sortSpec != null) {
 			SortState state = SortState.builder().criteriaBuilder(criteriaBuilder).sortOrder(sortSpec.getOrder())
 			        .parameter(sortSpec.getParamName().toLowerCase()).build();
 			
-			Collection<Order> orders = paramToProp.apply(state);
+			Collection<javax.persistence.criteria.Order> orders = paramToProp.apply(state);
 			if (orders != null) {
-				orderings.addAll((Collection<? extends javax.persistence.criteria.Order>) orders);
+				orderings.addAll(orders);
 			}
 			
 			sortSpec = sortSpec.getChain();
@@ -1048,14 +1061,11 @@ public abstract class BaseDao {
 				.where(criteriaBuilder.equal(root.get("url"), system));
 		
 		if (codes.size() > 1) {
-			Predicate predicate = criteriaBuilder.and(criteriaBuilder.equal(root.get(String.format("%s.conceptSource",conceptReferenceTermAlias)),criteriaQuery),
+			return criteriaBuilder.and(criteriaBuilder.equal(root.get(String.format("%s.conceptSource",conceptReferenceTermAlias)),criteriaQuery),
 					criteriaBuilder.in(root.get(String.format("%s.code",conceptReferenceTermAlias)).get(codes.toString())));
-			return predicate;
 		} else {
-			Predicate predicate = criteriaBuilder.and(criteriaBuilder.equal(root.get(String.format("%s.conceptSource",conceptReferenceTermAlias)),criteriaQuery),
+			return criteriaBuilder.and(criteriaBuilder.equal(root.get(String.format("%s.conceptSource",conceptReferenceTermAlias)),criteriaQuery),
 					criteriaBuilder.equal(root.get(String.format("%s.code",conceptReferenceTermAlias)), codes.get(0)));
-			
-			return predicate;
 		}
 	}
 	
@@ -1068,12 +1078,10 @@ public abstract class BaseDao {
 			path = path + ".";
 		}
 		
-		Predicate predicate = criteriaBuilder.and(criteriaBuilder.or(criteriaBuilder.isNull(root.get(path + "dateActivated")), criteriaBuilder.lessThan(root.get(path + "dateActivated"),onDate)),
+		// ACTIVE = date activated null or less than or equal to current datetime, date stopped null or in the future, auto expire date null or in the future
+		return criteriaBuilder.and(criteriaBuilder.or(criteriaBuilder.isNull(root.get(path + "dateActivated")), criteriaBuilder.lessThan(root.get(path + "dateActivated"),onDate)),
 				criteriaBuilder.or(criteriaBuilder.isNull(root.get(path + "dateStopped")),criteriaBuilder.greaterThan(root.get(path + "dateStopped"), onDate)),
 				criteriaBuilder.or(criteriaBuilder.isNull(root.get(path + "autoExpireDate")),criteriaBuilder.greaterThan(root.get(path + "autoExpireDate"), onDate)));
-		
-		// ACTIVE = date activated null or less than or equal to current datetime, date stopped null or in the future, auto expire date null or in the future
-		return predicate;
 	}
 	
 	protected Predicate generateActiveOrderQuery(String path) {
@@ -1103,10 +1111,8 @@ public abstract class BaseDao {
 		
 		Date now = new Date();
 		
-		Predicate predicate = criteriaBuilder.or(criteriaBuilder.isNull(root.get(path + "dateStopped")),
+		return criteriaBuilder.or(criteriaBuilder.isNull(root.get(path + "dateStopped")),
 				criteriaBuilder.greaterThan(root.get(path + "dateStopped"),now));
-		
-		return predicate;
 	}
 	
 	protected TokenOrListParam convertStringStatusToBoolean(TokenOrListParam statusParam) {
@@ -1143,15 +1149,17 @@ public abstract class BaseDao {
 	 * @param sortState a {@link SortState} object describing the current sort state
 	 * @return the corresponding ordering(s) needed for this property
 	 */
-	protected Collection<Order> paramToProps(@Nonnull SortState sortState) {
+	protected Collection<javax.persistence.criteria.Order> paramToProps(@Nonnull SortState sortState) {
 		Collection<String> prop = paramToProps(sortState.getParameter());
-		
+		// TODO : Look into this and convert it correctly
 		if (prop != null) {
 			switch (sortState.getSortOrder()) {
 				case ASC:
-					return prop.stream().map(Order::asc).collect(Collectors.toList());
+					return null;
+//					return prop.stream().map(Order::asc).collect(Collectors.toList());
 				case DESC:
-					return prop.stream().map(Order::desc).collect(Collectors.toList());
+					return null;
+//					return prop.stream().map(Order::desc).collect(Collectors.toList());
 			}
 		}
 		
@@ -1217,7 +1225,7 @@ public abstract class BaseDao {
 		return Optional.of(likePredicate);
 	}
 	
-	
+	@SuppressWarnings("unchecked")
 	protected Optional<CriteriaBuilder> asImpl(CriteriaBuilder criteriaBuilder) {
 		if (CriteriaBuilder.class.isAssignableFrom(criteriaBuilder.getClass())) {
 			return Optional.of(criteriaBuilder);
@@ -1389,9 +1397,8 @@ public abstract class BaseDao {
 				Root<EntityType> root = criteriaQuery.from(EntityType.class);
 				
 				Date dateToCompare = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
-				Predicate predicate = criteriaBuilder.greaterThanOrEqualTo(root.get("datePropertyName"), dateToCompare);
 				
-				return Optional.ofNullable(predicate);
+				return Optional.ofNullable(criteriaBuilder.greaterThanOrEqualTo(root.get("datePropertyName"), dateToCompare));
 			case GREATERTHAN_OR_EQUALS:
 			case GREATERTHAN:
 				entityManager = sessionFactory.getCurrentSession();
@@ -1400,9 +1407,8 @@ public abstract class BaseDao {
 				root = criteriaQuery.from(EntityType.class);
 				
 				dateToCompare = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
-				predicate = criteriaBuilder.lessThanOrEqualTo(root.get("datePropertyName"), dateToCompare);
 				
-				return Optional.ofNullable(predicate);
+				return Optional.ofNullable(criteriaBuilder.lessThanOrEqualTo(root.get("datePropertyName"), dateToCompare));
 			// Ignoring ENDS_BEFORE as it is not meaningful for age.
 		}
 		

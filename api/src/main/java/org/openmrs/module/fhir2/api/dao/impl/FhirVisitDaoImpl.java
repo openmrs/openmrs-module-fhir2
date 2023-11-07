@@ -13,6 +13,7 @@ import static org.hibernate.criterion.Restrictions.eq;
 import static org.hl7.fhir.r4.model.Encounter.SP_DATE;
 
 import javax.annotation.Nonnull;
+import javax.persistence.criteria.CriteriaBuilder;
 
 import java.util.Optional;
 
@@ -31,21 +32,21 @@ import org.springframework.stereotype.Component;
 public class FhirVisitDaoImpl extends BaseEncounterDao<Visit> implements FhirVisitDao {
 	
 	@Override
-	protected void handleDate(Criteria criteria, DateRangeParam dateRangeParam) {
-		handleDateRange("startDatetime", dateRangeParam).ifPresent(criteria::add);
+	protected void handleDate(CriteriaBuilder criteriaBuilder, DateRangeParam dateRangeParam) {
+		handleDateRange("startDatetime", dateRangeParam).ifPresent(criteriaBuilder::add);
 	}
 	
 	@Override
-	protected void handleEncounterType(Criteria criteria, TokenAndListParam tokenAndListParam) {
+	protected void handleEncounterType(CriteriaBuilder criteriaBuilder, TokenAndListParam tokenAndListParam) {
 		handleAndListParam((TokenAndListParam) tokenAndListParam, t -> Optional.of(eq("vt.uuid", t.getValue())))
-		        .ifPresent(t -> criteria.createAlias("visitType", "vt").add(t));
+				.ifPresent(t -> criteriaBuilder.createAlias("visitType", "vt").add(t));
 	}
 	
 	@Override
-	protected void handleParticipant(Criteria criteria, ReferenceAndListParam referenceAndListParam) {
-		criteria.createAlias("encounters", "en");
-		criteria.createAlias("en.encounterProviders", "ep");
-		handleParticipantReference(criteria, (ReferenceAndListParam) referenceAndListParam);
+	protected void handleParticipant(CriteriaBuilder criteriaBuilder, ReferenceAndListParam referenceAndListParam) {
+		criteriaBuilder.createAlias("encounters", "en");
+		criteriaBuilder.createAlias("en.encounterProviders", "ep");
+		handleParticipantReference(criteriaBuilder, (ReferenceAndListParam) referenceAndListParam);
 	}
 	
 	@Override
