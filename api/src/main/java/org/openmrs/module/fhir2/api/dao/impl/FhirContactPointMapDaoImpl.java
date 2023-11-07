@@ -10,6 +10,11 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import javax.annotation.Nonnull;
+import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 
 import java.util.Optional;
 
@@ -24,6 +29,7 @@ import org.openmrs.PersonAttributeType;
 import org.openmrs.ProviderAttributeType;
 import org.openmrs.attribute.BaseAttributeType;
 import org.openmrs.module.fhir2.api.dao.FhirContactPointMapDao;
+import org.openmrs.module.fhir2.model.FhirConceptSource;
 import org.openmrs.module.fhir2.model.FhirContactPointMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -37,11 +43,28 @@ public class FhirContactPointMapDaoImpl implements FhirContactPointMapDao {
 	@Qualifier("sessionFactory")
 	private SessionFactory sessionFactory;
 	
+	private EntityManager entityManager;
+	
+	private CriteriaBuilder criteriaBuilder;
+	
+	private CriteriaQuery<FhirContactPointMap> criteriaQuery;
+	
+	private Root<FhirContactPointMap> fhirFhirContactPointMapRoot;
+	
+	private TypedQuery<FhirContactPointMap> fhirFhirContactPointMapTypedQuery;
+	
+	public FhirContactPointMapDaoImpl() {
+		entityManager = sessionFactory.getCurrentSession();
+		criteriaBuilder = entityManager.getCriteriaBuilder();
+		criteriaQuery = criteriaBuilder.createQuery(FhirContactPointMap.class);
+		fhirFhirContactPointMapRoot = criteriaQuery.from(FhirContactPointMap.class);
+		fhirFhirContactPointMapTypedQuery = entityManager.createQuery(criteriaQuery);
+	}
+	
 	@Override
 	public Optional<FhirContactPointMap> getFhirContactPointMapByUuid(String uuid) {
-		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(FhirContactPointMap.class);
-		criteria.add(Restrictions.eq("uuid", uuid));
-		return Optional.ofNullable((FhirContactPointMap) criteria.uniqueResult());
+		criteriaBuilder.and(criteriaBuilder.equal(fhirFhirContactPointMapRoot.get("uuid"), uuid));
+		return Optional.ofNullable(fhirFhirContactPointMapTypedQuery.getSingleResult());
 	}
 	
 	@Override

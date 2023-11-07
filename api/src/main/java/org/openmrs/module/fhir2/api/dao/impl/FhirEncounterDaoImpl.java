@@ -81,7 +81,7 @@ public class FhirEncounterDaoImpl extends BaseEncounterDao<Encounter> implements
 		CriteriaQuery<String> criteriaQuery = criteriaBuilder.createQuery(String.class);
 		Root<Encounter> encounterRoot = criteriaQuery.from(Encounter.class);
 		
-		handleVoidable(criteriaBuilder,criteriaQuery,encounterRoot);
+		handleVoidable(criteriaBuilder);
 		
 		setupSearchParams(criteriaBuilder, theParams);
 		handleSort(criteriaBuilder, theParams.getSortSpec());

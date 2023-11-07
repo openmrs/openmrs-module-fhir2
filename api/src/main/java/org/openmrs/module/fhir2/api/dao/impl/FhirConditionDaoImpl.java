@@ -12,6 +12,8 @@ package org.openmrs.module.fhir2.api.dao.impl;
 import static org.hibernate.criterion.Restrictions.eq;
 
 import javax.annotation.Nonnull;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Predicate;
 
 import java.util.List;
 import java.util.Optional;
@@ -74,53 +76,53 @@ public class FhirConditionDaoImpl extends BaseFhirDao<Condition> implements Fhir
 	}
 	
 	@Override
-	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
+	protected void setupSearchParams(CriteriaBuilder criteriaBuilder, SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER:
 					entry.getValue()
-					        .forEach(param -> handlePatientReference(criteria, (ReferenceAndListParam) param.getParam()));
+					        .forEach(param -> handlePatientReference(criteriaBuilder, (ReferenceAndListParam) param.getParam()));
 					break;
 				case FhirConstants.CODED_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handleCode(criteria, (TokenAndListParam) param.getParam()));
+					entry.getValue().forEach(param -> handleCode(criteriaBuilder, (TokenAndListParam) param.getParam()));
 					break;
 				case FhirConstants.CONDITION_CLINICAL_STATUS_HANDLER:
-					entry.getValue().forEach(param -> handleClinicalStatus(criteria, (TokenAndListParam) param.getParam()));
+					entry.getValue().forEach(param -> handleClinicalStatus(criteriaBuilder, (TokenAndListParam) param.getParam()));
 					break;
 				case FhirConstants.DATE_RANGE_SEARCH_HANDLER:
 					entry.getValue()
 					        .forEach(param -> handleDateRange(param.getPropertyName(), (DateRangeParam) param.getParam())
-					                .ifPresent(criteria::add));
+					                .ifPresent(criteriaBuilder::and));
 					break;
 				case FhirConstants.QUANTITY_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handleOnsetAge(criteria, (QuantityAndListParam) param.getParam()));
+					entry.getValue().forEach(param -> handleOnsetAge(criteriaBuilder, (QuantityAndListParam) param.getParam()));
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(entry.getValue()).ifPresent(criteria::add);
+					handleCommonSearchParameters(entry.getValue()).ifPresent(criteriaBuilder::and);
 					break;
 			}
 		});
 	}
 	
-	private void handleCode(Criteria criteria, TokenAndListParam code) {
+	private void handleCode(CriteriaBuilder criteriaBuilder, TokenAndListParam code) {
 		if (code != null) {
-			criteria.createAlias("condition.coded", "cd");
-			handleCodeableConcept(criteria, code, "cd", "map", "term").ifPresent(criteria::add);
+			root.join("condition.coded").alias("cd");
+			handleCodeableConcept(criteriaBuilder, code, "cd", "map", "term").ifPresent(criteriaBuilder::and);
 		}
 	}
 	
-	private void handleClinicalStatus(Criteria criteria, TokenAndListParam status) {
-		handleAndListParam(status, tokenParam -> Optional.of(eq("clinicalStatus", convertStatus(tokenParam.getValue()))))
-		        .ifPresent(criteria::add);
+	private void handleClinicalStatus(CriteriaBuilder criteriaBuilder, TokenAndListParam status) {
+		handleAndListParam(status, tokenParam -> Optional.of(criteriaBuilder.equal(root.get("clinicalStatus"), convertStatus(tokenParam.getValue()))))
+		        .ifPresent(criteriaBuilder::and);
 	}
 	
-	private void handleOnsetAge(Criteria criteria, QuantityAndListParam onsetAge) {
+	private void handleOnsetAge(CriteriaBuilder criteriaBuilder, QuantityAndListParam onsetAge) {
 		handleAndListParam(onsetAge, onsetAgeParam -> handleAgeByDateProperty("onsetDate", onsetAgeParam))
-		        .ifPresent(criteria::add);
+		        .ifPresent(criteriaBuilder::and);
 	}
 	
 	@Override
-	protected Optional<Criterion> handleLastUpdated(DateRangeParam param) {
+	protected Optional<Predicate> handleLastUpdated(DateRangeParam param) {
 		return super.handleLastUpdatedImmutable(param);
 	}
 	

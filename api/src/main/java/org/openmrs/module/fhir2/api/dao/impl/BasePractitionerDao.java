@@ -16,6 +16,8 @@ import org.openmrs.OpenmrsObject;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 
+import javax.persistence.criteria.CriteriaBuilder;
+
 /**
  * Base class for DAOs implementing the search for FHIR Practitioners
  *
@@ -24,27 +26,27 @@ import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 public abstract class BasePractitionerDao<T extends OpenmrsObject & Auditable> extends BasePersonDao<T> {
 	
 	@Override
-	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
-		criteria.createAlias("person", "p");
+	protected void setupSearchParams(CriteriaBuilder criteriaBuilder, SearchParameterMap theParams) {
+		root.join("person").alias("p");
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.IDENTIFIER_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handleIdentifier(criteria, (TokenAndListParam) param.getParam()));
+					entry.getValue().forEach(param -> handleIdentifier(criteriaBuilder, (TokenAndListParam) param.getParam()));
 					break;
 				case FhirConstants.NAME_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handleNames(criteria, entry.getValue()));
+					entry.getValue().forEach(param -> handleNames(criteriaBuilder, entry.getValue()));
 					break;
 				case FhirConstants.ADDRESS_SEARCH_HANDLER:
-					handleAddresses(criteria, entry);
+					handleAddresses(criteriaBuilder, entry);
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(entry.getValue()).ifPresent(criteria::add);
+					handleCommonSearchParameters(entry.getValue()).ifPresent(criteriaBuilder::and);
 					break;
 			}
 		});
 	}
 	
-	protected abstract void handleIdentifier(Criteria criteria, TokenAndListParam identifier);
+	protected abstract void handleIdentifier(CriteriaBuilder criteriaBuilder, TokenAndListParam identifier);
 	
 	@Override
 	protected String getSqlAlias() {

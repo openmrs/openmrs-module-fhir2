@@ -12,6 +12,11 @@ package org.openmrs.module.fhir2.api.dao.impl;
 import static org.hibernate.criterion.Restrictions.eq;
 
 import javax.annotation.Nonnull;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -115,14 +120,18 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 	
 	@Override
 	public int getSearchResultsCount(@Nonnull SearchParameterMap theParams) {
+		CriteriaQuery<Object[]> criteriaQuery = criteriaBuilder.createQuery(Object[].class);
+		Root<Object[]> root = criteriaQuery.from(Object[].class);
+		TypedQuery<Object[]> typedQuery = manager.createQuery(criteriaQuery);
 		if (!theParams.getParameters(FhirConstants.LASTN_OBSERVATION_SEARCH_HANDLER).isEmpty()) {
-			Criteria criteria = getSessionFactory().getCurrentSession().createCriteria(typeToken.getRawType());
-			setupSearchParams(criteria, theParams);
-			criteria.addOrder(Order.asc("concept")).addOrder(Order.desc("obsDatetime"));
-			criteria.setProjection(Projections.projectionList().add(Projections.groupProperty("concept.id"))
+			setupSearchParams(criteriaBuilder, theParams);
+			criteriaQuery.orderBy(criteriaBuilder.asc(root.get("concept"))).orderBy(criteriaBuilder.desc(root.get("obsDatetime")));
+			
+			criteriaBuilder.setProjection(Projections.projectionList().add(Projections.groupProperty("concept.id"))
 			        .add(Projections.groupProperty("obsDatetime")).add(Projections.rowCount()));
-			applyExactTotal(theParams, criteria);
-			List<Object[]> rows = criteria.list();
+			
+			applyExactTotal(theParams, criteriaBuilder);
+			List<Object[]> rows = typedQuery.getResultList();
 			final int maxGroupCount = getMaxParameter(theParams);
 			int groupCount = maxGroupCount;
 			int count = 0;
@@ -146,7 +155,7 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 	}
 	
 	@Override
-	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
+	protected void setupSearchParams(CriteriaBuilder criteriaBuilder, SearchParameterMap theParams) {
 		if (!theParams.getParameters(FhirConstants.LASTN_ENCOUNTERS_SEARCH_HANDLER).isEmpty()) {
 			ReferenceAndListParam encountersReferences = new ReferenceAndListParam();
 			ReferenceOrListParam referenceOrListParam = new ReferenceOrListParam();
@@ -163,52 +172,52 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 			switch (entry.getKey()) {
 				case FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER:
 					entry.getValue()
-					        .forEach(p -> handleEncounterReference(criteria, (ReferenceAndListParam) p.getParam(), "e"));
+					        .forEach(p -> handleEncounterReference(criteriaBuilder, (ReferenceAndListParam) p.getParam(), "e"));
 					break;
 				case FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER:
-					entry.getValue().forEach(patientReference -> handlePatientReference(criteria,
+					entry.getValue().forEach(patientReference -> handlePatientReference(criteriaBuilder,
 					    (ReferenceAndListParam) patientReference.getParam(), "person"));
 					break;
 				case FhirConstants.CODED_SEARCH_HANDLER:
-					entry.getValue().forEach(code -> handleCodedConcept(criteria, (TokenAndListParam) code.getParam()));
+					entry.getValue().forEach(code -> handleCodedConcept(criteriaBuilder, (TokenAndListParam) code.getParam()));
 					break;
 				case FhirConstants.CATEGORY_SEARCH_HANDLER:
 					entry.getValue()
-					        .forEach(category -> handleConceptClass(criteria, (TokenAndListParam) category.getParam()));
+					        .forEach(category -> handleConceptClass(criteriaBuilder, (TokenAndListParam) category.getParam()));
 					break;
 				case FhirConstants.VALUE_CODED_SEARCH_HANDLER:
 					entry.getValue().forEach(
-					    valueCoded -> handleValueCodedConcept(criteria, (TokenAndListParam) valueCoded.getParam()));
+					    valueCoded -> handleValueCodedConcept(criteriaBuilder, (TokenAndListParam) valueCoded.getParam()));
 					break;
 				case FhirConstants.DATE_RANGE_SEARCH_HANDLER:
 					entry.getValue().forEach(dateRangeParam -> handleDateRange(dateRangeParam.getPropertyName(),
-					    (DateRangeParam) dateRangeParam.getParam()).ifPresent(criteria::add));
+					    (DateRangeParam) dateRangeParam.getParam()).ifPresent(criteriaBuilder::and));
 					break;
 				case FhirConstants.HAS_MEMBER_SEARCH_HANDLER:
-					entry.getValue().forEach(hasMemberReference -> handleHasMemberReference(criteria,
+					entry.getValue().forEach(hasMemberReference -> handleHasMemberReference(criteriaBuilder,
 					    (ReferenceAndListParam) hasMemberReference.getParam()));
 					break;
 				case FhirConstants.QUANTITY_SEARCH_HANDLER:
 					entry.getValue().forEach(
 					    quantity -> handleQuantity(quantity.getPropertyName(), (QuantityAndListParam) quantity.getParam())
-					            .ifPresent(criteria::add));
+					            .ifPresent(criteriaBuilder::and));
 					break;
 				case FhirConstants.VALUE_STRING_SEARCH_HANDLER:
 					entry.getValue().forEach(
 					    string -> handleValueStringParam(string.getPropertyName(), (StringAndListParam) string.getParam())
-					            .ifPresent(criteria::add));
+					            .ifPresent(criteriaBuilder::and));
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(entry.getValue()).ifPresent(criteria::add);
+					handleCommonSearchParameters(entry.getValue()).ifPresent(criteriaBuilder::and);
 					break;
 			}
 		});
 	}
 	
-	private void handleHasMemberReference(Criteria criteria, ReferenceAndListParam hasMemberReference) {
+	private void handleHasMemberReference(CriteriaBuilder criteriaBuilder, ReferenceAndListParam hasMemberReference) {
 		if (hasMemberReference != null) {
-			if (lacksAlias(criteria, "gm")) {
-				criteria.createAlias("groupMembers", "gm");
+			if (lacksAlias(criteriaBuilder, "gm")) {
+				criteriaBuilder.createAlias("groupMembers", "gm");
 			}
 			
 			handleAndListParam(hasMemberReference, hasMemberRef -> {
@@ -217,45 +226,45 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 						TokenAndListParam code = new TokenAndListParam()
 						        .addAnd(new TokenParam().setValue(hasMemberRef.getValue()));
 						
-						if (lacksAlias(criteria, "c")) {
-							criteria.createAlias("gm.concept", "c");
+						if (lacksAlias(criteriaBuilder, "c")) {
+							root.join("gm.concept").alias("c");
 						}
 						
-						return handleCodeableConcept(criteria, code, "c", "cm", "crt");
+						return handleCodeableConcept(criteriaBuilder, code, "c", "cm", "crt");
 					}
 				} else {
 					if (StringUtils.isNotBlank(hasMemberRef.getIdPart())) {
-						return Optional.of(eq("gm.uuid", hasMemberRef.getIdPart()));
+						return Optional.of(criteriaBuilder.equal(root.get("gm.uuid"), hasMemberRef.getIdPart()));
 					}
 				}
 				
 				return Optional.empty();
-			}).ifPresent(criteria::add);
+			}).ifPresent(criteriaBuilder::and);
 		}
 	}
 	
-	private Optional<Criterion> handleValueStringParam(@Nonnull String propertyName, StringAndListParam valueStringParam) {
+	private Optional<Predicate> handleValueStringParam(@Nonnull String propertyName, StringAndListParam valueStringParam) {
 		return handleAndListParam(valueStringParam, v -> propertyLike(propertyName, v.getValue()));
 	}
 	
-	private void handleCodedConcept(Criteria criteria, TokenAndListParam code) {
+	private void handleCodedConcept(CriteriaBuilder criteriaBuilder, TokenAndListParam code) {
 		if (code != null) {
-			if (lacksAlias(criteria, "c")) {
-				criteria.createAlias("concept", "c");
+			if (lacksAlias(criteriaBuilder, "c")) {
+				root.join("concept").alias("c");
 			}
 			
-			handleCodeableConcept(criteria, code, "c", "cm", "crt").ifPresent(criteria::add);
+			handleCodeableConcept(criteriaBuilder, code, "c", "cm", "crt").ifPresent(criteria::add);
 		}
 	}
 	
-	private void handleConceptClass(Criteria criteria, TokenAndListParam category) {
+	private void handleConceptClass(CriteriaBuilder criteriaBuilder, TokenAndListParam category) {
 		if (category != null) {
-			if (lacksAlias(criteria, "c")) {
-				criteria.createAlias("concept", "c");
+			if (lacksAlias(criteriaBuilder, "c")) {
+				root.join("concept").alias("c");
 			}
 			
-			if (lacksAlias(criteria, "cc")) {
-				criteria.createAlias("c.conceptClass", "cc");
+			if (lacksAlias(criteriaBuilder, "cc")) {
+				root.join("c.conceptClass").alias("cc");
 			}
 		}
 		
@@ -265,15 +274,15 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 			}
 			
 			return Optional.of(Subqueries.propertyIn("cc.uuid", categoryMap.queryConceptClassByCategory(param.getValue())));
-		}).ifPresent(criteria::add);
+		}).ifPresent(criteriaBuilder::and);
 	}
 	
-	private void handleValueCodedConcept(Criteria criteria, TokenAndListParam valueConcept) {
+	private void handleValueCodedConcept(CriteriaBuilder criteriaBuilder, TokenAndListParam valueConcept) {
 		if (valueConcept != null) {
-			if (lacksAlias(criteria, "vc")) {
-				criteria.createAlias("valueCoded", "vc");
+			if (lacksAlias(criteriaBuilder, "vc")) {
+				root.join("valueCoded").alias("vc");
 			}
-			handleCodeableConcept(criteria, valueConcept, "vc", "vcm", "vcrt").ifPresent(criteria::add);
+			handleCodeableConcept(criteriaBuilder, valueConcept, "vc", "vcm", "vcrt").ifPresent(criteria::add);
 		}
 	}
 	

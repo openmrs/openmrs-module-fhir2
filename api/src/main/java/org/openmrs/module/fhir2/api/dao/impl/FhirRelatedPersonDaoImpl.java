@@ -24,6 +24,7 @@ import static org.hl7.fhir.r4.model.Person.SP_BIRTHDATE;
 import static org.hl7.fhir.r4.model.Person.SP_NAME;
 
 import javax.annotation.Nonnull;
+import javax.persistence.criteria.CriteriaBuilder;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -55,50 +56,50 @@ import org.springframework.stereotype.Component;
 public class FhirRelatedPersonDaoImpl extends BaseFhirDao<Relationship> implements FhirRelatedPersonDao {
 	
 	@Override
-	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
-		criteria.createAlias("personA", "m"); //inner join with person table
+	protected void setupSearchParams(CriteriaBuilder criteriaBuilder, SearchParameterMap theParams) {
+		root.join("personA", javax.persistence.criteria.JoinType.INNER).alias("m");
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.NAME_SEARCH_HANDLER:
 					entry.getValue()
-					        .forEach(param -> handleNames(criteria, (StringAndListParam) param.getParam(), null, null, "m"));
+					        .forEach(param -> handleNames(criteriaBuilder, (StringAndListParam) param.getParam(), null, null, "m"));
 					break;
 				case FhirConstants.GENDER_SEARCH_HANDLER:
 					entry.getValue().forEach(
-					    param -> handleGender("m.gender", (TokenAndListParam) param.getParam()).ifPresent(criteria::add));
+					    param -> handleGender("m.gender", (TokenAndListParam) param.getParam()).ifPresent(criteriaBuilder::and));
 					break;
 				case FhirConstants.DATE_RANGE_SEARCH_HANDLER:
 					entry.getValue().forEach(
-					    param -> handleDateRange("m.birthdate", (DateRangeParam) param.getParam()).ifPresent(criteria::add));
+					    param -> handleDateRange("m.birthdate", (DateRangeParam) param.getParam()).ifPresent(criteriaBuilder::and));
 					break;
 				case FhirConstants.ADDRESS_SEARCH_HANDLER:
-					handleAddresses(criteria, entry);
+					handleAddresses(criteriaBuilder, entry);
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(entry.getValue()).ifPresent(criteria::add);
+					handleCommonSearchParameters(entry.getValue()).ifPresent(criteriaBuilder::and);
 					break;
 			}
 		});
 	}
 	
 	@Override
-	protected Collection<Order> paramToProps(@Nonnull SortState sortState) {
+	protected Collection<javax.persistence.criteria.Order> paramToProps(@Nonnull SortState sortState) {
 		String param = sortState.getParameter();
 		
 		if (param == null) {
 			return null;
 		}
 		
-		Criteria criteria = sortState.getCriteria();
-		if (param.startsWith("address") && lacksAlias(criteria, "pad")) {
-			criteria.createAlias("m.addresses", "pad", JoinType.LEFT_OUTER_JOIN);
+		criteriaBuilder = sortState.getCriteriaBuilder();
+		if (param.startsWith("address") && lacksAlias(criteriaBuilder, "pad")) {
+			root.join("m.addresses", javax.persistence.criteria.JoinType.LEFT).alias("pad");
 		} else if (param.equals(SP_NAME) || param.equals(SP_GIVEN) || param.equals(SP_FAMILY)) {
-			if (lacksAlias(criteria, "pn")) {
-				criteria.createAlias("m.names", "pn", JoinType.LEFT_OUTER_JOIN);
+			if (lacksAlias(criteriaBuilder, "pn")) {
+				root.join("m.names", javax.persistence.criteria.JoinType.LEFT).alias("pn");
 			}
 			
-			criteria.add(and(eq("pn.voided", false), or(
-			    and(eq("pn.preferred", true),
+			criteriaBuilder.and(and(criteriaBuilder.equal(root.get("pn.voided"), false), criteriaBuilder.or(
+			    criteriaBuilder.and(criteriaBuilder.equal(root.get("pn.preferred"), true),
 			        Subqueries.propertyEq("pn.personNameId",
 			            DetachedCriteria.forClass(PersonName.class, "pn1").add(eq("pn1.preferred", true))
 			                    .add(sqlRestriction(String.format("pn1_.person_id = %s.person_a", "this_")))
@@ -157,7 +158,7 @@ public class FhirRelatedPersonDaoImpl extends BaseFhirDao<Relationship> implemen
 		}
 	}
 	
-	private void handleAddresses(Criteria criteria, Map.Entry<String, List<PropParam<?>>> entry) {
+	private void handleAddresses(CriteriaBuilder criteriaBuilder, Map.Entry<String, List<PropParam<?>>> entry) {
 		StringAndListParam city = null;
 		StringAndListParam country = null;
 		StringAndListParam postalCode = null;
@@ -180,8 +181,8 @@ public class FhirRelatedPersonDaoImpl extends BaseFhirDao<Relationship> implemen
 		}
 		
 		handlePersonAddress("pad", city, state, postalCode, country).ifPresent(c -> {
-			criteria.createAlias("m.addresses", "pad");
-			criteria.add(c);
+			root.join("m.addresses").alias("pad");
+			criteriaBuilder.and(c);
 		});
 	}
 }

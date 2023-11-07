@@ -15,6 +15,8 @@ import static org.hibernate.criterion.Restrictions.isNull;
 import static org.hibernate.criterion.Restrictions.or;
 
 import javax.annotation.Nonnull;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Predicate;
 
 import java.util.List;
 import java.util.Optional;
@@ -49,34 +51,34 @@ public class FhirPersonDaoImpl extends BasePersonDao<Person> implements FhirPers
 	}
 	
 	@Override
-	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
+	protected void setupSearchParams(CriteriaBuilder criteriaBuilder, SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.NAME_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handleNames(criteria, entry.getValue()));
+					entry.getValue().forEach(param -> handleNames(criteriaBuilder, entry.getValue()));
 					break;
 				case FhirConstants.GENDER_SEARCH_HANDLER:
 					entry.getValue().forEach(
-					    param -> handleGender("gender", (TokenAndListParam) param.getParam()).ifPresent(criteria::add));
+					    param -> handleGender("gender", (TokenAndListParam) param.getParam()).ifPresent(criteriaBuilder::and));
 					break;
 				case FhirConstants.DATE_RANGE_SEARCH_HANDLER:
 					entry.getValue().forEach(
-					    param -> handleDateRange("birthdate", (DateRangeParam) param.getParam()).ifPresent(criteria::add));
+					    param -> handleDateRange("birthdate", (DateRangeParam) param.getParam()).ifPresent(criteriaBuilder::and));
 					break;
 				case FhirConstants.ADDRESS_SEARCH_HANDLER:
-					handleAddresses(criteria, entry);
+					handleAddresses(criteriaBuilder, entry);
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(entry.getValue()).ifPresent(criteria::add);
+					handleCommonSearchParameters(entry.getValue()).ifPresent(criteriaBuilder::and);
 					break;
 			}
 		});
 	}
 	
 	@Override
-	protected Optional<Criterion> handleLastUpdated(DateRangeParam param) {
-		return Optional.of(or(toCriteriaArray(handleDateRange("personDateChanged", param), Optional.of(and(toCriteriaArray(
-		    Stream.of(Optional.of(isNull("personDateChanged")), handleDateRange("personDateCreated", param))))))));
+	protected Optional<Predicate> handleLastUpdated(DateRangeParam param) {
+		return Optional.of(criteriaBuilder.or(toCriteriaArray(handleDateRange("personDateChanged", param), Optional.of(criteriaBuilder.and(toCriteriaArray(
+		    Stream.of(Optional.of(criteriaBuilder.isNull(root.get("personDateChanged"))), handleDateRange("personDateCreated", param))))))));
 	}
 	
 	@Override
@@ -85,8 +87,8 @@ public class FhirPersonDaoImpl extends BasePersonDao<Person> implements FhirPers
 	}
 	
 	@Override
-	protected void handleVoidable(Criteria criteria) {
-		criteria.add(eq("personVoided", false));
+	protected void handleVoidable(CriteriaBuilder criteriaBuilder) {
+		criteriaBuilder.and(criteriaBuilder.equal(root.get("personVoided"), false));
 	}
 	
 }

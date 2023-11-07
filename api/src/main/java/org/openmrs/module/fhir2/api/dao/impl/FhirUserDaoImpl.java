@@ -21,18 +21,20 @@ import org.openmrs.User;
 import org.openmrs.module.fhir2.api.dao.FhirUserDao;
 import org.springframework.stereotype.Component;
 
+import javax.persistence.criteria.CriteriaBuilder;
+
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class FhirUserDaoImpl extends BasePractitionerDao<User> implements FhirUserDao {
 	
 	@Override
 	public User getUserByUserName(String username) {
-		return (User) getSessionFactory().getCurrentSession().createCriteria(User.class).add(eq("username", username))
-		        .uniqueResult();
+		criteriaBuilder.and(criteriaBuilder.equal(root.get("username"),username));
+		return typedQuery.getSingleResult();
 	}
 	
 	@Override
-	protected void handleIdentifier(Criteria criteria, TokenAndListParam identifier) {
-		handleAndListParam(identifier, param -> Optional.of(eq("username", param.getValue()))).ifPresent(criteria::add);
+	protected void handleIdentifier(CriteriaBuilder criteriaBuilder, TokenAndListParam identifier) {
+		handleAndListParam(identifier, param -> Optional.of(criteriaBuilder.equal(root.get("username"), param.getValue()))).ifPresent(criteriaBuilder::and);
 	}
 }

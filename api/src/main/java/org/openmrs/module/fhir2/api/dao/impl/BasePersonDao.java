@@ -24,6 +24,7 @@ import static org.hl7.fhir.r4.model.Person.SP_BIRTHDATE;
 import static org.hl7.fhir.r4.model.Person.SP_NAME;
 
 import javax.annotation.Nonnull;
+import javax.persistence.criteria.CriteriaBuilder;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -79,14 +80,14 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 	}
 	
 	@Override
-	protected Collection<Order> paramToProps(@Nonnull SortState sortState) {
+	protected Collection<javax.persistence.criteria.Order> paramToProps(@Nonnull SortState sortState) {
 		String param = sortState.getParameter();
 		
 		if (param == null) {
 			return null;
 		}
 		
-		Criteria criteria = sortState.getCriteria();
+		CriteriaBuilder criteria = sortState.getCriteriaBuilder();
 		if (param.startsWith("address") && lacksAlias(criteria, "pad")) {
 			criteria.createAlias(getAssociationPath("addresses"), "pad", JoinType.LEFT_OUTER_JOIN);
 		} else if (param.equals(SP_NAME) || param.equals(SP_GIVEN) || param.equals(SP_FAMILY)) {
@@ -156,7 +157,7 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 		}
 	}
 	
-	protected void handleAddresses(Criteria criteria, Map.Entry<String, List<PropParam<?>>> entry) {
+	protected void handleAddresses(CriteriaBuilder criteriaBuilder, Map.Entry<String, List<PropParam<?>>> entry) {
 		StringAndListParam city = null;
 		StringAndListParam country = null;
 		StringAndListParam postalCode = null;
@@ -179,12 +180,12 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 		}
 		
 		handlePersonAddress("pad", city, state, postalCode, country).ifPresent(c -> {
-			criteria.createAlias(getAssociationPath("addresses"), "pad");
-			criteria.add(c);
+			root.join(getAssociationPath("addresses")).alias("pad");
+			criteriaBuilder.and(c);
 		});
 	}
 	
-	protected void handleNames(Criteria criteria, List<PropParam<?>> params) {
+	protected void handleNames(CriteriaBuilder criteriaBuilder, List<PropParam<?>> params) {
 		StringAndListParam name = null;
 		StringAndListParam given = null;
 		StringAndListParam family = null;
@@ -203,7 +204,7 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 			}
 		}
 		
-		handleNames(criteria, name, given, family, getPersonProperty());
+		handleNames(criteriaBuilder, name, given, family, getPersonProperty());
 	}
 	
 	private String getAssociationPath(String property) {

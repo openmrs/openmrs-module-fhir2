@@ -20,9 +20,6 @@ import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.Criteria;
-import org.hibernate.criterion.Criterion;
-import org.hibernate.criterion.Restrictions;
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.openmrs.Auditable;
 import org.openmrs.DrugOrder;
@@ -35,6 +32,7 @@ import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
@@ -42,36 +40,35 @@ import javax.persistence.criteria.Root;
 public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> extends BaseFhirDao<T> {
 	
 	@Override
-	protected void setupSearchParams(CriteriaBuilder criteria, SearchParameterMap theParams) {
-		EntityManager manager = sessionFactory.getCurrentSession();
-		CriteriaBuilder criteriaBuilder = manager.getCriteriaBuilder();
-		CriteriaQuery<Encounter> criteriaQuery = criteriaBuilder.createQuery(Encounter.class);
-		Root<Encounter> root = criteriaQuery.from(Encounter.class);
+	protected void setupSearchParams(CriteriaBuilder criteriaBuilder, SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.DATE_RANGE_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handleDate(criteria, (DateRangeParam) param.getParam()));
+					entry.getValue().forEach(param -> handleDate(criteriaBuilder, (DateRangeParam) param.getParam()));
 					break;
 				case FhirConstants.LOCATION_REFERENCE_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handleLocationReference("l", (ReferenceAndListParam) param.getParam())
-					        .ifPresent(l -> root.join("location").alias("l"));
-					        .ifPresent(l -> criteria.createAlias("location", "l").add(l)));
+					entry.getValue().forEach(param -> {
+						handleLocationReference("l", (ReferenceAndListParam) param.getParam()).ifPresent(l -> {
+							root.join("location", JoinType.INNER).alias("l");
+							criteriaBuilder.and(l);
+						});
+					});
 					break;
 				case FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handleParticipant(criteria, (ReferenceAndListParam) param.getParam()));
+					entry.getValue().forEach(param -> handleParticipant(criteriaBuilder, (ReferenceAndListParam) param.getParam()));
 					break;
 				case FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER:
 					entry.getValue()
-					        .forEach(param -> handlePatientReference(criteria, (ReferenceAndListParam) param.getParam()));
+					        .forEach(param -> handlePatientReference(criteriaBuilder, (ReferenceAndListParam) param.getParam()));
 					break;
 				case ENCOUNTER_TYPE_REFERENCE_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handleEncounterType(criteria, (TokenAndListParam) param.getParam()));
+					entry.getValue().forEach(param -> handleEncounterType(criteriaBuilder, (TokenAndListParam) param.getParam()));
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(entry.getValue()).ifPresent(criteria::add);
+					handleCommonSearchParameters(entry.getValue()).ifPresent(criteriaBuilder::and);
 					break;
 				case FhirConstants.HAS_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handleHasAndListParam(criteria, (HasAndListParam) param.getParam()));
+					entry.getValue().forEach(param -> handleHasAndListParam(criteriaBuilder, (HasAndListParam) param.getParam()));
 					break;
 			}
 		});
@@ -118,9 +115,9 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 								}
 							}
 							// Constrain only on non-voided Drug Orders
-							finalCriteriaBuilder.add(finalCriteriaBuilder.equal(root.get("orders.class"), DrugOrder.class));
-							finalCriteriaBuilder.add(finalCriteriaBuilder.equal(root.get("orders.voided"), false));
-							finalCriteriaBuilder.add(finalCriteriaBuilder.notEqual(root.get("orders.action"), Order.Action.DISCONTINUE));
+							finalCriteriaBuilder.and(finalCriteriaBuilder.equal(root.get("orders.class"), DrugOrder.class));
+							finalCriteriaBuilder.and(finalCriteriaBuilder.equal(root.get("orders.voided"), false));
+							finalCriteriaBuilder.and(finalCriteriaBuilder.notEqual(root.get("orders.action"), Order.Action.DISCONTINUE));
 							
 							String paramName = hasParam.getParameterName();
 							String paramValue = hasParam.getParameterValue();
@@ -134,7 +131,7 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 								if (paramValue != null) {
 									if (MedicationRequest.MedicationRequestStatus.ACTIVE.toString()
 									        .equalsIgnoreCase(paramValue)) {
-										finalCriteriaBuilder.add(generateActiveOrderQuery("orders"));
+										finalCriteriaBuilder.and(generateActiveOrderQuery("orders"));
 									}
 								}
 								handled = true;
@@ -142,24 +139,24 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 								if (paramValue != null) {
 									if (MedicationRequest.MedicationRequestStatus.CANCELLED.toString()
 									        .equalsIgnoreCase(paramValue)) {
-										finalCriteriaBuilder.add(generateNotCancelledOrderQuery("orders"));
+										finalCriteriaBuilder.and(generateNotCancelledOrderQuery("orders"));
 									}
 									if (MedicationRequest.MedicationRequestStatus.COMPLETED.toString()
 									        .equalsIgnoreCase(paramValue)) {
 										Predicate notCompletedCriterion = generateNotCompletedOrderQuery("orders");
 										if (notCompletedCriterion != null) {
-											finalCriteriaBuilder.add(notCompletedCriterion);
+											finalCriteriaBuilder.and(notCompletedCriterion);
 										}
 									}
 								}
 								handled = true;
 							} else if ((FhirConstants.SP_FULFILLER_STATUS).equalsIgnoreCase(paramName)) {
 								if (paramValue != null) {
-									finalCriteriaBuilder.add(generateFulfillerStatusRestriction("orders", paramValue));
+									finalCriteriaBuilder.and(generateFulfillerStatusRestriction("orders", paramValue));
 								}
 							} else if ((FhirConstants.SP_FULFILLER_STATUS + ":not").equalsIgnoreCase(paramName)) {
 								if (paramValue != null) {
-									finalCriteriaBuilder.add(generateNotFulfillerStatusRestriction("orders", paramValue));
+									finalCriteriaBuilder.and(generateNotFulfillerStatusRestriction("orders", paramValue));
 								}
 							}
 						}

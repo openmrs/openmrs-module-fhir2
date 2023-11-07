@@ -12,6 +12,7 @@ package org.openmrs.module.fhir2.api.dao.impl;
 import static org.hibernate.criterion.Restrictions.eq;
 
 import javax.annotation.Nonnull;
+import javax.persistence.criteria.CriteriaBuilder;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,7 +20,6 @@ import java.util.Optional;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
-import org.hibernate.Criteria;
 import org.hibernate.sql.JoinType;
 import org.openmrs.Provider;
 import org.openmrs.ProviderAttribute;
@@ -36,8 +36,8 @@ public class FhirPractitionerDaoImpl extends BasePractitionerDao<Provider> imple
 	}
 	
 	@Override
-	protected void handleIdentifier(Criteria criteria, TokenAndListParam identifier) {
-		handleAndListParam(identifier, param -> Optional.of(eq("identifier", param.getValue()))).ifPresent(criteria::add);
+	protected void handleIdentifier(CriteriaBuilder criteriaBuilder, TokenAndListParam identifier) {
+		handleAndListParam(identifier, param -> Optional.of(criteriaBuilder.equal(root.get("identifier"), param.getValue()))).ifPresent(criteriaBuilder::and);
 	}
 	
 	@Override

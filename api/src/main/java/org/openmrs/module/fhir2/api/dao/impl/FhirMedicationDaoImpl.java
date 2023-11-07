@@ -23,38 +23,40 @@ import org.openmrs.module.fhir2.api.dao.FhirMedicationDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.stereotype.Component;
 
+import javax.persistence.criteria.CriteriaBuilder;
+
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class FhirMedicationDaoImpl extends BaseFhirDao<Drug> implements FhirMedicationDao {
 	
 	@Override
-	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
+	protected void setupSearchParams(CriteriaBuilder criteriaBuilder, SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.CODED_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handleMedicationCode(criteria, (TokenAndListParam) param.getParam()));
+					entry.getValue().forEach(param -> handleMedicationCode(criteriaBuilder, (TokenAndListParam) param.getParam()));
 					break;
 				case FhirConstants.DOSAGE_FORM_SEARCH_HANDLER:
 					entry.getValue()
-					        .forEach(param -> handleMedicationDosageForm(criteria, (TokenAndListParam) param.getParam()));
+					        .forEach(param -> handleMedicationDosageForm(criteriaBuilder, (TokenAndListParam) param.getParam()));
 					break;
 				case FhirConstants.INGREDIENT_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handleIngredientCode(criteria, (TokenAndListParam) param.getParam()));
+					entry.getValue().forEach(param -> handleIngredientCode(criteriaBuilder, (TokenAndListParam) param.getParam()));
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(entry.getValue()).ifPresent(criteria::add);
+					handleCommonSearchParameters(entry.getValue()).ifPresent(criteriaBuilder::and);
 					break;
 			}
 		});
 	}
 	
-	private void handleIngredientCode(Criteria criteria, TokenAndListParam ingredientCode) {
+	private void handleIngredientCode(CriteriaBuilder criteriaBuilder, TokenAndListParam ingredientCode) {
 		if (ingredientCode != null) {
-			criteria.createAlias("ingredients", "i");
+			root.join("ingredients").alias("i");
 			DetachedCriteria detachedCriteria = DetachedCriteria.forClass(Concept.class, "ic");
-			handleCodeableConcept(criteria, ingredientCode, "ic", "icm", "icrt").ifPresent(detachedCriteria::add);
+			handleCodeableConcept(criteriaBuilder, ingredientCode, "ic", "icm", "icrt").ifPresent(detachedCriteria::add);
 			detachedCriteria.setProjection(Projections.property("conceptId"));
-			criteria.add(Subqueries.propertyIn("i.ingredient", detachedCriteria));
+			criteriaBuilder.and(Subqueries.propertyIn("i.ingredient", detachedCriteria));
 		}
 	}
 	

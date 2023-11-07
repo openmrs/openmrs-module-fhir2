@@ -9,9 +9,9 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
-import static org.hibernate.criterion.Restrictions.eq;
 
 import javax.annotation.Nonnull;
+import javax.persistence.criteria.CriteriaBuilder;
 
 import java.util.Optional;
 
@@ -20,7 +20,6 @@ import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
-import org.hibernate.Criteria;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirDiagnosticReportDao;
@@ -33,51 +32,51 @@ import org.springframework.stereotype.Component;
 public class FhirDiagnosticReportDaoImpl extends BaseFhirDao<FhirDiagnosticReport> implements FhirDiagnosticReportDao {
 	
 	@Override
-	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
+	protected void setupSearchParams(CriteriaBuilder criteriaBuilder, SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER:
 					entry.getValue().forEach(
-					    param -> handleEncounterReference(criteria, (ReferenceAndListParam) param.getParam(), "e"));
+					    param -> handleEncounterReference(criteriaBuilder, (ReferenceAndListParam) param.getParam(), "e"));
 					break;
 				case FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER:
 					entry.getValue().forEach(
-					    param -> handlePatientReference(criteria, (ReferenceAndListParam) param.getParam(), "subject"));
+					    param -> handlePatientReference(criteriaBuilder, (ReferenceAndListParam) param.getParam(), "subject"));
 					break;
 				case FhirConstants.CODED_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handleCodedConcept(criteria, (TokenAndListParam) param.getParam()));
+					entry.getValue().forEach(param -> handleCodedConcept(criteriaBuilder, (TokenAndListParam) param.getParam()));
 					break;
 				case FhirConstants.DATE_RANGE_SEARCH_HANDLER:
 					entry.getValue().forEach(
-					    param -> handleDateRange("issued", (DateRangeParam) param.getParam()).ifPresent(criteria::add));
+					    param -> handleDateRange("issued", (DateRangeParam) param.getParam()).ifPresent(criteriaBuilder::and));
 					break;
 				case FhirConstants.RESULT_SEARCH_HANDLER:
 					entry.getValue().forEach(
-					    param -> handleObservationReference(criteria, (ReferenceAndListParam) param.getParam()));
+					    param -> handleObservationReference(criteriaBuilder, (ReferenceAndListParam) param.getParam()));
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(entry.getValue()).ifPresent(criteria::add);
+					handleCommonSearchParameters(entry.getValue()).ifPresent(criteriaBuilder::and);
 					break;
 			}
 		});
 	}
 	
-	private void handleCodedConcept(Criteria criteria, TokenAndListParam code) {
+	private void handleCodedConcept(CriteriaBuilder criteriaBuilder, TokenAndListParam code) {
 		if (code != null) {
-			if (lacksAlias(criteria, "c")) {
-				criteria.createAlias("code", "c");
+			if (lacksAlias(criteriaBuilder, "c")) {
+				root.join("code").alias("c");
 			}
-			handleCodeableConcept(criteria, code, "c", "cm", "crt").ifPresent(criteria::add);
+			handleCodeableConcept(criteriaBuilder, code, "c", "cm", "crt").ifPresent(criteriaBuilder::and);
 		}
 	}
 	
-	private void handleObservationReference(Criteria criteria, ReferenceAndListParam result) {
+	private void handleObservationReference(CriteriaBuilder criteriaBuilder, ReferenceAndListParam result) {
 		if (result != null) {
-			if (lacksAlias(criteria, "obs")) {
-				criteria.createAlias("results", "obs");
+			if (lacksAlias(criteriaBuilder, "obs")) {
+				root.join("results").alias("obs");
 			}
 			
-			handleAndListParam(result, token -> Optional.of(eq("obs.uuid", token.getIdPart()))).ifPresent(criteria::add);
+			handleAndListParam(result, token -> Optional.of(criteriaBuilder.equal(root.get("obs.uuid"), token.getIdPart()))).ifPresent(criteriaBuilder::and);
 		}
 	}
 	

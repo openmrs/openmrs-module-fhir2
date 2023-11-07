@@ -134,9 +134,9 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 		criteriaQuery.select(root).where(criteriaBuilder.in(root.in(uuids)));
 		
 		if (isVoidable) {
-			handleVoidable(criteriaBuilder,criteriaQuery,root);
+			handleVoidable(criteriaBuilder);
 		} else if (isRetireable) {
-			handleRetireable(criteriaBuilder,criteriaQuery,root);
+			handleRetireable(criteriaBuilder);
 		}
 		
 		List<T> results = manager.createQuery(criteriaQuery).getResultList();
@@ -172,9 +172,9 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	
 	private CriteriaBuilder getSearchResultCriteria(SearchParameterMap theParams) {
 		if (isVoidable) {
-			handleVoidable(criteriaBuilder,criteriaQuery,root);
+			handleVoidable(criteriaBuilder);
 		} else if (isRetireable) {
-			handleRetireable(criteriaBuilder,criteriaQuery,root);
+			handleRetireable(criteriaBuilder);
 		}
 		
 		setupSearchParams(criteriaBuilder, theParams);
@@ -319,11 +319,9 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	 * objects are excluded from searches, but not from get
 	 *
 	 * @param criteriaBuilder The JPA CriteriaBuilder to create predicates.
-	 * @param criteriaQuery The JPA CriteriaQuery to which the criterion is added.
-	 * @param root The JPA Root representing the entity being queried.
 	 */
-	protected void handleVoidable(CriteriaBuilder criteriaBuilder, CriteriaQuery<?> criteriaQuery, Root<?> root) {
-		criteriaQuery.where(criteriaBuilder.equal(root.get("voided"), false));
+	protected void handleVoidable(CriteriaBuilder criteriaBuilder) {
+		criteriaBuilder.and(criteriaBuilder.equal(root.get("voided"), false));
 	}
 	
 	/**
@@ -331,11 +329,9 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	 * objects are excluded from searches, but not from get
 	 *
 	 * @param criteriaBuilder The JPA CriteriaBuilder to create predicates.
-	 * @param criteriaQuery The JPA CriteriaQuery to which the criterion is added.
-	 * @param root The JPA Root representing the entity being queried.
 	 */
-	protected void handleRetireable(CriteriaBuilder criteriaBuilder, CriteriaQuery<?> criteriaQuery, Root<?> root) {
-		criteriaQuery.where(criteriaBuilder.equal(root.get("retired"), false));
+	protected void handleRetireable(CriteriaBuilder criteriaBuilder) {
+		criteriaBuilder.and(criteriaBuilder.equal(root.get("retired"), false));
 	}
 	
 	/**

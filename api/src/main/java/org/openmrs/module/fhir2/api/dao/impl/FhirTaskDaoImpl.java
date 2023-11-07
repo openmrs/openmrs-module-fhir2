@@ -13,6 +13,8 @@ import static org.hibernate.criterion.Restrictions.and;
 import static org.hibernate.criterion.Restrictions.eq;
 
 import javax.annotation.Nonnull;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Predicate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,23 +41,23 @@ import org.springframework.stereotype.Component;
 public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDao {
 	
 	@Override
-	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
+	protected void setupSearchParams(CriteriaBuilder criteriaBuilder, SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.BASED_ON_REFERENCE_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handleReference(criteria, (ReferenceAndListParam) param.getParam(),
+					entry.getValue().forEach(param -> handleReference(criteriaBuilder, (ReferenceAndListParam) param.getParam(),
 					    "basedOnReferences", "bo"));
 					break;
 				case FhirConstants.OWNER_REFERENCE_SEARCH_HANDLER:
 					entry.getValue().forEach(
-					    param -> handleReference(criteria, (ReferenceAndListParam) param.getParam(), "ownerReference", "o"));
+					    param -> handleReference(criteriaBuilder, (ReferenceAndListParam) param.getParam(), "ownerReference", "o"));
 					break;
 				case FhirConstants.STATUS_SEARCH_HANDLER:
 					entry.getValue()
-					        .forEach(param -> handleStatus((TokenAndListParam) param.getParam()).ifPresent(criteria::add));
+					        .forEach(param -> handleStatus((TokenAndListParam) param.getParam()).ifPresent(criteriaBuilder::and));
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(entry.getValue()).ifPresent(criteria::add);
+					handleCommonSearchParameters(entry.getValue()).ifPresent(criteriaBuilder::and);
 					break;
 			}
 		});
@@ -77,11 +79,11 @@ public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDa
 		return (ref != null && ref.getIdPart() != null && ref.getResourceType() != null);
 	}
 	
-	private Optional<Criterion> handleStatus(TokenAndListParam tokenAndListParam) {
+	private Optional<Predicate> handleStatus(TokenAndListParam tokenAndListParam) {
 		return handleAndListParam(tokenAndListParam, token -> {
 			if (token.getValue() != null) {
 				try {
-					return Optional.of(eq("status", FhirTask.TaskStatus.valueOf(token.getValue().toUpperCase())));
+					return Optional.of(criteriaBuilder.equal(root.get("status"), FhirTask.TaskStatus.valueOf(token.getValue().toUpperCase())));
 				}
 				catch (IllegalArgumentException e) {
 					return Optional.empty();
@@ -92,20 +94,20 @@ public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDa
 		});
 	}
 	
-	private void handleReference(Criteria criteria, ReferenceAndListParam reference, String property, String alias) {
+	private void handleReference(CriteriaBuilder criteriaBuilder, ReferenceAndListParam reference, String property, String alias) {
 		handleAndListParam(reference, param -> {
 			if (validReferenceParam(param)) {
-				if (lacksAlias(criteria, alias)) {
-					criteria.createAlias(property, alias);
+				if (lacksAlias(criteriaBuilder, alias)) {
+					root.join(property).alias(alias);
 				}
 				
-				List<Optional<? extends Criterion>> criterionList = new ArrayList<>();
-				criterionList.add(Optional.of(eq(String.format("%s.reference", alias), param.getIdPart())));
-				criterionList.add(Optional.of(eq(String.format("%s.type", alias), param.getResourceType())));
-				return Optional.of(and(toCriteriaArray(criterionList)));
+				List<Optional<? extends Predicate>> criterionList = new ArrayList<>();
+				criterionList.add(Optional.of(criteriaBuilder.equal(root.get(String.format("%s.reference", alias)), param.getIdPart())));
+				criterionList.add(Optional.of(criteriaBuilder.equal(root.get(String.format("%s.type", alias)), param.getResourceType())));
+				return Optional.of(criteriaBuilder.and(toCriteriaArray(criterionList)));
 			}
 			
 			return Optional.empty();
-		}).ifPresent(criteria::add);
+		}).ifPresent(criteriaBuilder::and);
 	}
 }
