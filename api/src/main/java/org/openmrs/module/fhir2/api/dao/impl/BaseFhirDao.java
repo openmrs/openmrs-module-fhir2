@@ -37,7 +37,6 @@ import com.google.common.reflect.TypeToken;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.Criteria;
 import org.hibernate.Hibernate;
 import org.hibernate.SessionFactory;;
 import org.hibernate.proxy.HibernateProxy;
@@ -416,7 +415,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 		return deproxyObject(result);
 	}
 	
-	protected Criteria createAlias(Criteria criteria, String referencedEntity, String alias) {
-		return criteria.createAlias(referencedEntity, alias);
+	protected void createAlias(CriteriaBuilder criteriaBuilder, String referencedEntity, String alias) {
+		root.join(referencedEntity).alias(alias);
 	}
 }

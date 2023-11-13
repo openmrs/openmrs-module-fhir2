@@ -12,7 +12,6 @@ package org.openmrs.module.fhir2.api.dao.impl;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
-import org.hibernate.Criteria;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Subqueries;
@@ -24,6 +23,11 @@ import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.stereotype.Component;
 
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+
+import static org.hibernate.criterion.Restrictions.and;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
@@ -56,21 +60,21 @@ public class FhirMedicationDaoImpl extends BaseFhirDao<Drug> implements FhirMedi
 			DetachedCriteria detachedCriteria = DetachedCriteria.forClass(Concept.class, "ic");
 			handleCodeableConcept(criteriaBuilder, ingredientCode, "ic", "icm", "icrt").ifPresent(detachedCriteria::add);
 			detachedCriteria.setProjection(Projections.property("conceptId"));
-			criteriaBuilder.and(Subqueries.propertyIn("i.ingredient", detachedCriteria));
+			and(Subqueries.propertyIn("i.ingredient", detachedCriteria));
 		}
 	}
 	
-	private void handleMedicationCode(Criteria criteria, TokenAndListParam code) {
+	private void handleMedicationCode(CriteriaBuilder criteriaBuilder, TokenAndListParam code) {
 		if (code != null) {
-			criteria.createAlias("concept", "cc");
-			handleCodeableConcept(criteria, code, "cc", "ccm", "ccrt").ifPresent(criteria::add);
+			root.join("concept").alias("cc");
+			handleCodeableConcept(criteriaBuilder, code, "cc", "ccm", "ccrt").ifPresent(criteriaBuilder::and);
 		}
 	}
 	
-	private void handleMedicationDosageForm(Criteria criteria, TokenAndListParam dosageForm) {
+	private void handleMedicationDosageForm(CriteriaBuilder criteriaBuilder, TokenAndListParam dosageForm) {
 		if (dosageForm != null) {
-			criteria.createAlias("dosageForm", "dc");
-			handleCodeableConcept(criteria, dosageForm, "dc", "dcm", "dcrt").ifPresent(criteria::add);
+			root.join("dosageForm").alias("dc");
+			handleCodeableConcept(criteriaBuilder, dosageForm, "dc", "dcm", "dcrt").ifPresent(criteriaBuilder::and);
 		}
 	}
 }

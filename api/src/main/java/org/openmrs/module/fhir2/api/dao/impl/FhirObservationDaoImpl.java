@@ -64,9 +64,9 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 		if (!theParams.getParameters(FhirConstants.LASTN_OBSERVATION_SEARCH_HANDLER).isEmpty()) {
 			Criteria criteria = getSessionFactory().getCurrentSession().createCriteria(typeToken.getRawType());
 			
-			setupSearchParams(criteria, theParams);
+			setupSearchParams(criteriaBuilder, theParams);
 			
-			criteria.addOrder(Order.asc("concept")).addOrder(Order.desc("obsDatetime"));
+			criteriaQuery.orderBy(criteriaBuilder.asc(root.get("concept"))).orderBy(criteriaBuilder.desc(root.get("obsDatetime")));
 			
 			List<Obs> results = new ArrayList<>();
 			int firstResult = 0;
@@ -217,7 +217,7 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 	private void handleHasMemberReference(CriteriaBuilder criteriaBuilder, ReferenceAndListParam hasMemberReference) {
 		if (hasMemberReference != null) {
 			if (lacksAlias(criteriaBuilder, "gm")) {
-				criteriaBuilder.createAlias("groupMembers", "gm");
+				root.join("groupMembers").alias("gm");
 			}
 			
 			handleAndListParam(hasMemberReference, hasMemberRef -> {

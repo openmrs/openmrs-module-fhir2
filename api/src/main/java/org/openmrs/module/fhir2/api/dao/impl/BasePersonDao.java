@@ -25,9 +25,11 @@ import static org.hl7.fhir.r4.model.Person.SP_NAME;
 
 import javax.annotation.Nonnull;
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Predicate;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -87,12 +89,12 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 			return null;
 		}
 		
-		CriteriaBuilder criteria = sortState.getCriteriaBuilder();
-		if (param.startsWith("address") && lacksAlias(criteria, "pad")) {
-			criteria.createAlias(getAssociationPath("addresses"), "pad", JoinType.LEFT_OUTER_JOIN);
+		CriteriaBuilder sortStateCriteriaBuilder = sortState.getCriteriaBuilder();
+		if (param.startsWith("address") && lacksAlias(sortStateCriteriaBuilder, "pad")) {
+			root.join(getAssociationPath("addresses"), javax.persistence.criteria.JoinType.LEFT).alias("pad");
 		} else if (param.equals(SP_NAME) || param.equals(SP_GIVEN) || param.equals(SP_FAMILY)) {
-			if (lacksAlias(criteria, "pn")) {
-				criteria.createAlias(getAssociationPath("names"), "pn", JoinType.LEFT_OUTER_JOIN);
+			if (lacksAlias(sortStateCriteriaBuilder, "pn")) {
+				root.join(getAssociationPath("names"), javax.persistence.criteria.JoinType.LEFT).alias("pad");
 			}
 			
 			String sqlAlias = getSqlAlias();
@@ -130,7 +132,9 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 			
 			switch (sortState.getSortOrder()) {
 				case ASC:
+					return Arrays.stream(properties);
 					return Arrays.stream(properties).map(Order::asc).collect(Collectors.toList());
+//				return Collections.singletonList(criteriaBuilder.asc(root.get("dateCreated")));
 				case DESC:
 					return Arrays.stream(properties).map(Order::desc).collect(Collectors.toList());
 			}
