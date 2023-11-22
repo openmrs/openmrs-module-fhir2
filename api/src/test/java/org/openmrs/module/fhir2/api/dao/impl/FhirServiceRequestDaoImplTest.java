@@ -84,11 +84,6 @@ public class FhirServiceRequestDaoImplTest extends BaseModuleContextSensitiveTes
 		dao.setSessionFactory(sessionFactory);
 	}
 	
-	@After
-	public void teardown() {
-		// TODO: unexecuteDataSet(TEST_ORDER_INITIAL_DATA);
-	}
-	
 	@Test
 	public void shouldRetrieveTestOrderByUuid() {
 		TestOrder result = dao.get(TEST_ORDER_UUID);
@@ -154,7 +149,6 @@ public class FhirServiceRequestDaoImplTest extends BaseModuleContextSensitiveTes
 	@Test
 	public void shouldApplyHasConstraintsForObservationsBasedOnSpecificSubjectCorrectly() {
 		runHasObservationBasedOnTest("subject",
-		    // TODO: what would be a realistic value?
 		    "5946f880-b197-400b-9caa-a3c661d23041", new String[] { ORDER_WITH_OBSERVATION_CATEGORY_LABORATORY_UUID },
 		    new String[] { WRONG_UUID });
 	}
@@ -168,7 +162,6 @@ public class FhirServiceRequestDaoImplTest extends BaseModuleContextSensitiveTes
 	@Test
 	public void shouldApplyHasConstraintsForObservationsBasedOnSpecificPatientCorrectly() {
 		runHasObservationBasedOnTest("patient",
-		    // TODO: what would be a realistic value?
 		    "5946f880-b197-400b-9caa-a3c661d23041", new String[] { ORDER_WITH_OBSERVATION_CATEGORY_LABORATORY_UUID },
 		    new String[] { WRONG_UUID });
 	}
