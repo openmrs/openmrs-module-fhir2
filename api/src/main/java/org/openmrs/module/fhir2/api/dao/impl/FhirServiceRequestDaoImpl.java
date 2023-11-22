@@ -11,17 +11,35 @@ package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hibernate.criterion.Restrictions.and;
 import static org.hibernate.criterion.Restrictions.or;
+import static org.hibernate.criterion.Subqueries.propertyIn;
 
+import javax.validation.constraints.NotNull;
+
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.util.Date;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.HasAndListParam;
+import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.DetachedCriteria;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
+import org.hl7.fhir.r4.model.Observation;
+import org.openmrs.ConceptClass;
+import org.openmrs.Obs;
 import org.openmrs.TestOrder;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirServiceRequestDao;
@@ -30,6 +48,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
+@Slf4j
 public class FhirServiceRequestDaoImpl extends BaseFhirDao<TestOrder> implements FhirServiceRequestDao<TestOrder> {
 	
 	@Override
@@ -46,7 +65,7 @@ public class FhirServiceRequestDaoImpl extends BaseFhirDao<TestOrder> implements
 					    param -> handleEncounterReference(criteria, (ReferenceAndListParam) param.getParam(), "e"));
 					break;
 				case FhirConstants.HAS_SEARCH_HANDLER:
-					// TODO: add implementation of the has search. stub is required for other tests not to fail
+					entry.getValue().forEach(param -> handleHasAndListParam(criteria, (HasAndListParam) param.getParam()));
 					break;
 				case FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER:
 					entry.getValue().forEach(patientReference -> handlePatientReference(criteria,
@@ -92,4 +111,226 @@ public class FhirServiceRequestDaoImpl extends BaseFhirDao<TestOrder> implements
 		        handleDate("autoExpireDate", dateRangeParam.getUpperBound())))))))));
 	}
 	
+	/**
+	 * Handle _has parameters that are passed in to constrain the ServiceRequest resource on properties
+	 * of dependent resources
+	 */
+	private void handleHasAndListParam(Criteria criteria, HasAndListParam hasAndListParam) {
+		if (criteria == null) {
+			log.warn("handleHasAndListParam called without criteria.");
+			return;
+		}
+		
+		if (hasAndListParam == null) {
+			log.warn("handleHasAndListParam called without param or param list.");
+			return;
+		}
+		
+		hasAndListParam.getValuesAsQueryTokens().forEach(hasOrListParam -> {
+			List<HasParam> queryTokens = hasOrListParam.getValuesAsQueryTokens();
+			if (queryTokens.isEmpty()) {
+				return;
+			}
+			
+			// Making the assumption that any "orListParams" match everything except for the value
+			HasParam hasParam = queryTokens.get(0);
+			Set<String> values = queryTokens.stream().map(HasParam::getParameterValue).collect(Collectors.toSet());
+			
+			switch (hasParam.getTargetResourceType()) {
+				case FhirConstants.OBSERVATION:
+					handleHasObservation(criteria, hasParam, values);
+					break;
+				default:
+					log.warn("_has parameter not supported: " + hasParam.getQueryParameterQualifier());
+			}
+		});
+	}
+	
+	private void handleHasObservation(Criteria criteria, HasParam hasParam, Set<String> values) {
+		String projection = null;
+		switch (hasParam.getReferenceFieldName()) {
+			case Observation.SP_BASED_ON:
+				projection = "order";
+				break;
+			default:
+				log.warn("Failed to add has constraint for non-existent reference " + hasParam.getReferenceFieldName());
+				// ensure no entries are found
+				criteria.add(Restrictions.isNull("id"));
+		}
+		
+		if (projection == null) {
+			return;
+		}
+		
+		String parameterName = hasParam.getParameterName();
+		String parameterValue = hasParam.getParameterValue();
+		DetachedCriteria observationCriteria = createObservationCriteria(projection, parameterName, parameterValue);
+		
+		criteria.add(propertyIn("id", observationCriteria));
+	}
+	
+	// the detached criteria in this file should all return a subquery of ids to make usage of them consistent
+	private DetachedCriteria createObservationCriteria(String projection, String parameterName, String parameterValue) {
+		DetachedCriteria observationQuery = DetachedCriteria.forClass(Obs.class);
+		observationQuery.setProjection(Projections.property(projection));
+
+		if (parameterName == null) {
+			// just check for existence of any observation if no further propertyname is given
+			return observationQuery;
+		}
+		 
+		switch (parameterName) {
+			case Observation.SP_DATE:
+				addSimpleDateSearch(observationQuery, "obsDatetime", parameterValue);
+				break;
+				
+			case Observation.SP_PATIENT:
+			case Observation.SP_SUBJECT:
+				addReferenceSearchByUuid(observationQuery, "person", parameterValue);
+				break;
+
+			case Observation.SP_VALUE_CONCEPT:
+				addReferenceSearchByUuid(observationQuery, "valueCoded", parameterValue);
+				break;
+
+			case Observation.SP_VALUE_DATE:
+				addSimpleDateSearch(observationQuery, "valueDatetime", parameterValue);
+				break;
+
+			case Observation.SP_HAS_MEMBER:
+				if (parameterValue == null) {
+					observationQuery.add(Restrictions.isNotNull("groupMembers"));
+					break;
+				}
+
+				// TODO : observationQuery.add(Restrictions.in( parameterValue, "groupMembers"));
+				break;
+
+			case Observation.SP_VALUE_STRING:
+				addSimpleSearch(observationQuery, "valueText", parameterValue);
+				break;
+				
+			case Observation.SP_IDENTIFIER:
+				addSimpleSearch(observationQuery, "uuid", parameterValue);
+				break;
+				
+			case Observation.SP_ENCOUNTER:
+				addReferenceSearchByUuid(observationQuery, "encounter", parameterValue);
+				break;
+				
+			case Observation.SP_CATEGORY:
+				if (parameterValue == null) {
+					observationQuery.add(Restrictions.isNotNull("concept"));
+					break;
+				}
+				
+				// TODO: where are the possible values defined? Are all values in ConceptClass relevant?
+				switch (parameterValue) {
+					case "laboratory":
+						addReferenceSearchByUuid(observationQuery, "concept", ConceptClass.LABSET_UUID);
+						break;
+
+					default:
+						log.warn(
+						    "Failed to add has constraint for observation category with unknown concept  " + parameterValue);
+						// ensure no entries are found
+						addNoResultsCriteria(observationQuery);
+				}
+				break;
+
+			case Observation.SP_STATUS:
+				addSimpleSearch(observationQuery, "status", parameterValue);
+				break;
+
+			// TODO: should be implementable
+			case Observation.SP_CODE:
+			case Observation.SP_VALUE_QUANTITY:
+			case Observation.SP_PERFORMER:
+
+			// TODO: add explanation on why these values are not implemented
+			case Observation.SP_CODE_VALUE_STRING:
+			case Observation.SP_PART_OF:
+			case Observation.SP_CODE_VALUE_DATE:
+			case Observation.SP_CODE_VALUE_QUANTITY:
+			case Observation.SP_CODE_VALUE_CONCEPT:
+
+			// could be implemented via accessionNumber matching
+			case Observation.SP_SPECIMEN:
+			
+			// no meaningful mapping in OpenMRS
+			case Observation.SP_FOCUS:
+			case Observation.SP_DERIVED_FROM:
+			case Observation.SP_METHOD:
+			case Observation.SP_DATA_ABSENT_REASON:
+			case Observation.SP_DEVICE:
+			
+			// OpenMRS does not support Components yet, this includes the SP_COMPONENT_* space and SP_COMBO_* space
+			case Observation.SP_COMPONENT_DATA_ABSENT_REASON:
+			case Observation.SP_COMPONENT_CODE_VALUE_QUANTITY:
+			case Observation.SP_COMPONENT_VALUE_QUANTITY:
+			case Observation.SP_COMPONENT_CODE_VALUE_CONCEPT:
+			case Observation.SP_COMPONENT_VALUE_CONCEPT:
+			case Observation.SP_COMPONENT_CODE:
+			case Observation.SP_COMBO_DATA_ABSENT_REASON:
+			case Observation.SP_COMBO_CODE:
+			case Observation.SP_COMBO_CODE_VALUE_QUANTITY:
+			case Observation.SP_COMBO_CODE_VALUE_CONCEPT:
+			case Observation.SP_COMBO_VALUE_QUANTITY:
+			case Observation.SP_COMBO_VALUE_CONCEPT:
+				log.warn(
+					"Failed to add has constraint for observation search parameter " + parameterValue + ": Not Implemented.");
+				// ensure no entries are found
+				addNoResultsCriteria(observationQuery);
+				break;
+
+			default:
+				log.warn(
+					"Failed to add has constraint for observation search parameter " + parameterValue + ": Invalid search parameter.");
+				// ensure no entries are found
+				addNoResultsCriteria(observationQuery);
+				break;
+		}
+
+		return observationQuery;
+	}
+
+	private void addReferenceSearchByUuid(DetachedCriteria observationQuery, String parameterField, String parameterValue){
+		if (parameterValue == null) {
+			observationQuery.add(Restrictions.isNotNull(parameterField));
+			return;
+		}
+		
+		observationQuery.createAlias(parameterField, parameterField);
+		observationQuery.add(Restrictions.eq(parameterField + ".uuid", parameterValue));
+	}
+
+	private void addSimpleDateSearch(DetachedCriteria observationQuery, String parameterField, String parameterValue){
+		if(parameterValue == null){
+			addSimpleSearch(observationQuery, parameterField, parameterValue);
+			return;
+		}
+
+		try{
+			Date valueDate = DateFormat.getDateTimeInstance().parse(parameterValue);
+			addSimpleSearch(observationQuery, "valueDatetime", valueDate);
+		} catch (ParseException e) {
+			log.warn(
+				"Failed to parse Date " + parameterValue);
+			// ensure no entries are found
+			addNoResultsCriteria(observationQuery);
+		}
+	}
+
+	private void addSimpleSearch(DetachedCriteria observationQuery, String parameterField, Object parameterValue){
+		if (parameterValue == null) {
+			observationQuery.add(Restrictions.isNotNull(parameterField));
+			return;
+		}
+
+		observationQuery.add(Restrictions.eq(parameterField, parameterValue));
+	}
+
+	private void addNoResultsCriteria(DetachedCriteria observationQuery){
+		observationQuery.add(Restrictions.isNull("id"));
+	}
 }
