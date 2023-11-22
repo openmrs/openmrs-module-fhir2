@@ -58,6 +58,7 @@ import org.openmrs.module.fhir2.api.search.param.MedicationRequestSearchParams;
 import org.openmrs.module.fhir2.api.search.param.ObservationSearchParams;
 import org.openmrs.module.fhir2.api.search.param.PropParam;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
+import org.openmrs.module.fhir2.api.search.param.ServiceRequestSearchParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -277,7 +278,9 @@ public class SearchQueryInclude<U extends IBaseResource> {
 				        null, params, null, null, null, null, null, recursiveIncludes, recursiveRevIncludes));
 			case FhirConstants.PROCEDURE_REQUEST:
 			case FhirConstants.SERVICE_REQUEST:
-				return serviceRequestService.searchForServiceRequests(null, null, null, params, null, null, null, null);
+				ServiceRequestSearchParams serviceRequestSearchParams = new ServiceRequestSearchParams();
+				serviceRequestSearchParams.setParticipantReference(params);
+				return serviceRequestService.searchForServiceRequests(serviceRequestSearchParams);
 		}
 		
 		return null;
@@ -297,7 +300,9 @@ public class SearchQueryInclude<U extends IBaseResource> {
 				        .encounterReference(params).includes(recursiveIncludes).revIncludes(recursiveRevIncludes).build());
 			case FhirConstants.PROCEDURE_REQUEST:
 			case FhirConstants.SERVICE_REQUEST:
-				return serviceRequestService.searchForServiceRequests(null, null, params, null, null, null, null, null);
+				ServiceRequestSearchParams serviceRequestSearchParams = new ServiceRequestSearchParams();
+				serviceRequestSearchParams.setEncounterReference(params);
+				return serviceRequestService.searchForServiceRequests(serviceRequestSearchParams);
 		}
 		
 		return null;
@@ -346,7 +351,9 @@ public class SearchQueryInclude<U extends IBaseResource> {
 				        null, null, null, null, null, null, null, recursiveIncludes, recursiveRevIncludes));
 			case FhirConstants.SERVICE_REQUEST:
 			case FhirConstants.PROCEDURE_REQUEST:
-				return serviceRequestService.searchForServiceRequests(params, null, null, null, null, null, null, null);
+				ServiceRequestSearchParams serviceRequestSearchParams = new ServiceRequestSearchParams();
+				serviceRequestSearchParams.setPatientReference(params);
+				return serviceRequestService.searchForServiceRequests(serviceRequestSearchParams);
 		}
 		
 		return null;

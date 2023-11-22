@@ -45,6 +45,9 @@ public class FhirServiceRequestDaoImpl extends BaseFhirDao<TestOrder> implements
 					entry.getValue().forEach(
 					    param -> handleEncounterReference(criteria, (ReferenceAndListParam) param.getParam(), "e"));
 					break;
+				case FhirConstants.HAS_SEARCH_HANDLER:
+					// TODO: add implementation of the has search. stub is required for other tests not to fail
+					break;
 				case FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER:
 					entry.getValue().forEach(patientReference -> handlePatientReference(criteria,
 					    (ReferenceAndListParam) patientReference.getParam(), "patient"));

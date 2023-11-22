@@ -16,9 +16,8 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.when;
-import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -51,6 +50,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirServiceRequestService;
+import org.openmrs.module.fhir2.api.search.param.ServiceRequestSearchParams;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ServiceRequestFhirResourceProviderTest {
@@ -131,9 +131,8 @@ public class ServiceRequestFhirResourceProviderTest {
 	
 	@Test
 	public void searchServiceRequest_shouldReturnMatchingServiceRequestsByCode() {
-		when(serviceRequestService.searchForServiceRequests(any(), any(), any(), any(), any(), any(), any(), any()))
-		        .thenReturn(
-		            new MockIBundleProvider<>(Collections.singletonList(serviceRequest), PREFERRED_PAGE_SIZE, COUNT));
+		when(serviceRequestService.searchForServiceRequests(any())).thenReturn(
+		    new MockIBundleProvider<>(Collections.singletonList(serviceRequest), PREFERRED_PAGE_SIZE, COUNT));
 		
 		TokenAndListParam code = new TokenAndListParam().addAnd(new TokenParam(CODE));
 		
@@ -151,9 +150,8 @@ public class ServiceRequestFhirResourceProviderTest {
 	
 	@Test
 	public void searchServiceRequest_shouldReturnMatchingServiceRequestsWhenPatientParamIsSpecified() {
-		when(serviceRequestService.searchForServiceRequests(any(), any(), any(), any(), any(), any(), any(), any()))
-		        .thenReturn(
-		            new MockIBundleProvider<>(Collections.singletonList(serviceRequest), PREFERRED_PAGE_SIZE, COUNT));
+		when(serviceRequestService.searchForServiceRequests(any())).thenReturn(
+		    new MockIBundleProvider<>(Collections.singletonList(serviceRequest), PREFERRED_PAGE_SIZE, COUNT));
 		
 		ReferenceAndListParam patientParam = new ReferenceAndListParam().addAnd(
 		    new ReferenceOrListParam().add(new ReferenceParam().setValue(PATIENT_GIVEN_NAME).setChain(Patient.SP_NAME)));
@@ -172,9 +170,8 @@ public class ServiceRequestFhirResourceProviderTest {
 	
 	@Test
 	public void searchServiceRequest_shouldReturnMatchingServiceRequestsWhenSubjectParamIsSpecified() {
-		when(serviceRequestService.searchForServiceRequests(any(), any(), any(), any(), any(), any(), any(), any()))
-		        .thenReturn(
-		            new MockIBundleProvider<>(Collections.singletonList(serviceRequest), PREFERRED_PAGE_SIZE, COUNT));
+		when(serviceRequestService.searchForServiceRequests(any())).thenReturn(
+		    new MockIBundleProvider<>(Collections.singletonList(serviceRequest), PREFERRED_PAGE_SIZE, COUNT));
 		
 		ReferenceAndListParam subjectParam = new ReferenceAndListParam().addAnd(
 		    new ReferenceOrListParam().add(new ReferenceParam().setValue(PATIENT_GIVEN_NAME).setChain(Patient.SP_NAME)));
@@ -193,9 +190,8 @@ public class ServiceRequestFhirResourceProviderTest {
 	
 	@Test
 	public void searchServiceRequest_shouldReturnMatchingServiceRequestsByRequesterParam() {
-		when(serviceRequestService.searchForServiceRequests(any(), any(), any(), any(), any(), any(), any(), any()))
-		        .thenReturn(
-		            new MockIBundleProvider<>(Collections.singletonList(serviceRequest), PREFERRED_PAGE_SIZE, COUNT));
+		when(serviceRequestService.searchForServiceRequests(any())).thenReturn(
+		    new MockIBundleProvider<>(Collections.singletonList(serviceRequest), PREFERRED_PAGE_SIZE, COUNT));
 		
 		ReferenceAndListParam practitionerParam = new ReferenceAndListParam().addAnd(new ReferenceOrListParam()
 		        .add(new ReferenceParam().setValue(PARTICIPANT_IDENTIFIER).setChain(Practitioner.SP_IDENTIFIER)));
@@ -214,9 +210,8 @@ public class ServiceRequestFhirResourceProviderTest {
 	
 	@Test
 	public void searchServiceRequest_shouldReturnMatchingServiceRequestsByOccurrence() {
-		when(serviceRequestService.searchForServiceRequests(any(), any(), any(), any(), any(), any(), any(), any()))
-		        .thenReturn(
-		            new MockIBundleProvider<>(Collections.singletonList(serviceRequest), PREFERRED_PAGE_SIZE, COUNT));
+		when(serviceRequestService.searchForServiceRequests(any())).thenReturn(
+		    new MockIBundleProvider<>(Collections.singletonList(serviceRequest), PREFERRED_PAGE_SIZE, COUNT));
 		
 		DateRangeParam occurrence = new DateRangeParam().setLowerBound(OCCURRENCE).setUpperBound(OCCURRENCE);
 		
@@ -234,7 +229,7 @@ public class ServiceRequestFhirResourceProviderTest {
 	
 	@Test
 	public void searchServiceRequests_shouldReturnMatchingServiceRequestsByEncounter() {
-		when(serviceRequestService.searchForServiceRequests(any(), any(), any(), any(), any(), any(), any(), any()))
+		when(serviceRequestService.searchForServiceRequests(any()))
 		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(serviceRequest), 10, 1));
 		
 		ReferenceAndListParam encounterParam = new ReferenceAndListParam()
@@ -256,9 +251,8 @@ public class ServiceRequestFhirResourceProviderTest {
 	public void searchServiceRequest_shouldReturnMatchingServiceRequestWhenUUIDIsSpecified() {
 		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(SERVICE_REQUEST_UUID));
 		
-		when(serviceRequestService.searchForServiceRequests(any(), any(), any(), any(), any(), any(), any(), any()))
-		        .thenReturn(
-		            new MockIBundleProvider<>(Collections.singletonList(serviceRequest), PREFERRED_PAGE_SIZE, COUNT));
+		when(serviceRequestService.searchForServiceRequests(any())).thenReturn(
+		    new MockIBundleProvider<>(Collections.singletonList(serviceRequest), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchForServiceRequests(null, null, null, null, null, null, uuid, null,
 		    null);
@@ -276,9 +270,8 @@ public class ServiceRequestFhirResourceProviderTest {
 	public void searchServiceRequest_shouldReturnMatchingServiceRequestWhenLastUpdatedIsSpecified() {
 		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(LAST_UPDATED_DATE).setLowerBound(LAST_UPDATED_DATE);
 		
-		when(serviceRequestService.searchForServiceRequests(any(), any(), any(), any(), any(), any(), any(), any()))
-		        .thenReturn(
-		            new MockIBundleProvider<>(Collections.singletonList(serviceRequest), PREFERRED_PAGE_SIZE, COUNT));
+		when(serviceRequestService.searchForServiceRequests(any())).thenReturn(
+		    new MockIBundleProvider<>(Collections.singletonList(serviceRequest), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchForServiceRequests(null, null, null, null, null, null, null,
 		    lastUpdated, null);
@@ -357,9 +350,11 @@ public class ServiceRequestFhirResourceProviderTest {
 		HashSet<Include> includes = new HashSet<>();
 		includes.add(new Include("ServiceRequest:patient"));
 		
-		when(serviceRequestService.searchForServiceRequests(any(), any(), any(), any(), any(), any(), any(),
-		    argThat(is(includes)))).thenReturn(
-		        new MockIBundleProvider<>(Arrays.asList(serviceRequest, new Patient()), PREFERRED_PAGE_SIZE, COUNT));
+		// TODO: challenge if the less readable argThat should be used to preserve exact test behaviour or switch to any() as described in the similar pull request here: https://github.com/openmrs/openmrs-module-fhir2/pull/398/files#diff-c9a3b09584a3999711375bbae28e3dccda1188158195cd43dde98f1ea6ca9098L224
+		when(serviceRequestService.searchForServiceRequests(
+		    argThat((ServiceRequestSearchParams serviceRequestSearchParams) -> serviceRequestSearchParams
+		            .getIncludes() == includes))).thenReturn(
+		                new MockIBundleProvider<>(Arrays.asList(serviceRequest, new Patient()), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchForServiceRequests(null, null, null, null, null, null, null, null,
 		    includes);
@@ -378,9 +373,11 @@ public class ServiceRequestFhirResourceProviderTest {
 	public void searchServiceRequest_shouldNotAddRelatedResourcesToResultListForEmptyIncludes() {
 		HashSet<Include> includes = new HashSet<>();
 		
-		when(serviceRequestService.searchForServiceRequests(any(), any(), any(), any(), any(), any(), any(), isNull()))
-		        .thenReturn(
-		            new MockIBundleProvider<>(Collections.singletonList(serviceRequest), PREFERRED_PAGE_SIZE, COUNT));
+		// an empty set of includes is converted to null before being passed on to searchForServiceRequests
+		when(serviceRequestService.searchForServiceRequests(argThat(
+		    (ServiceRequestSearchParams serviceRequestSearchParams) -> serviceRequestSearchParams.getIncludes() == null)))
+		            .thenReturn(
+		                new MockIBundleProvider<>(Collections.singletonList(serviceRequest), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchForServiceRequests(null, null, null, null, null, null, null, null,
 		    includes);

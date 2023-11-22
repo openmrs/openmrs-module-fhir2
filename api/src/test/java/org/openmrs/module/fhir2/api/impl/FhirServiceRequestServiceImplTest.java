@@ -58,6 +58,7 @@ import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.SearchQueryBundleProvider;
 import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
+import org.openmrs.module.fhir2.api.search.param.ServiceRequestSearchParams;
 import org.openmrs.module.fhir2.api.translators.ServiceRequestTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -146,6 +147,8 @@ public class FhirServiceRequestServiceImplTest {
 	public void searchForServiceRequest_shouldReturnCollectionOfServiceRequestByPatientParam() {
 		ReferenceAndListParam patientReference = new ReferenceAndListParam().addAnd(
 		    new ReferenceOrListParam().add(new ReferenceParam().setValue(PATIENT_GIVEN_NAME).setChain(SP_GIVEN)));
+		ServiceRequestSearchParams serviceRequestSearchParams = new ServiceRequestSearchParams();
+		serviceRequestSearchParams.setPatientReference(patientReference);
 		
 		SearchParameterMap theParams = new SearchParameterMap();
 		theParams.addParameter(PATIENT_REFERENCE_SEARCH_HANDLER, patientReference);
@@ -156,8 +159,7 @@ public class FhirServiceRequestServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		
-		IBundleProvider results = serviceRequestService.searchForServiceRequests(patientReference, null, null, null, null,
-		    null, null, null);
+		IBundleProvider results = serviceRequestService.searchForServiceRequests(serviceRequestSearchParams);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -169,6 +171,8 @@ public class FhirServiceRequestServiceImplTest {
 	@Test
 	public void searchForServiceRequest_shouldReturnCollectionOfServiceRequestByCode() {
 		TokenAndListParam code = new TokenAndListParam().addAnd(new TokenParam(CODE));
+		ServiceRequestSearchParams serviceRequestSearchParams = new ServiceRequestSearchParams();
+		serviceRequestSearchParams.setCode(code);
 		
 		SearchParameterMap theParams = new SearchParameterMap();
 		theParams.addParameter(CODED_SEARCH_HANDLER, code);
@@ -179,8 +183,7 @@ public class FhirServiceRequestServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		
-		IBundleProvider results = serviceRequestService.searchForServiceRequests(null, code, null, null, null, null, null,
-		    null);
+		IBundleProvider results = serviceRequestService.searchForServiceRequests(serviceRequestSearchParams);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -193,6 +196,8 @@ public class FhirServiceRequestServiceImplTest {
 	public void searchForServiceRequest_shouldReturnCollectionOfServiceRequestByEncounter() {
 		ReferenceAndListParam encounterReference = new ReferenceAndListParam()
 		        .addAnd(new ReferenceOrListParam().add(new ReferenceParam().setValue(ENCOUNTER_UUID).setChain(null)));
+		ServiceRequestSearchParams serviceRequestSearchParams = new ServiceRequestSearchParams();
+		serviceRequestSearchParams.setEncounterReference(encounterReference);
 		
 		SearchParameterMap theParams = new SearchParameterMap();
 		theParams.addParameter(ENCOUNTER_REFERENCE_SEARCH_HANDLER, encounterReference);
@@ -203,8 +208,7 @@ public class FhirServiceRequestServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		
-		IBundleProvider results = serviceRequestService.searchForServiceRequests(null, null, encounterReference, null, null,
-		    null, null, null);
+		IBundleProvider results = serviceRequestService.searchForServiceRequests(serviceRequestSearchParams);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -217,6 +221,8 @@ public class FhirServiceRequestServiceImplTest {
 	public void searchForServiceRequest_shouldReturnCollectionOfServiceRequestByRequester() {
 		ReferenceAndListParam participantReference = new ReferenceAndListParam().addAnd(
 		    new ReferenceOrListParam().add(new ReferenceParam().setValue(PARTICIPANT_IDENTIFIER).setChain(SP_IDENTIFIER)));
+		ServiceRequestSearchParams serviceRequestSearchParams = new ServiceRequestSearchParams();
+		serviceRequestSearchParams.setParticipantReference(participantReference);
 		
 		SearchParameterMap theParams = new SearchParameterMap();
 		theParams.addParameter(PARTICIPANT_REFERENCE_SEARCH_HANDLER, participantReference);
@@ -227,8 +233,7 @@ public class FhirServiceRequestServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		
-		IBundleProvider results = serviceRequestService.searchForServiceRequests(null, null, null, participantReference,
-		    null, null, null, null);
+		IBundleProvider results = serviceRequestService.searchForServiceRequests(serviceRequestSearchParams);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -240,6 +245,8 @@ public class FhirServiceRequestServiceImplTest {
 	@Test
 	public void searchForServiceRequest_shouldReturnCollectionOfServiceRequestByOccurrence() {
 		DateRangeParam occurrence = new DateRangeParam().setLowerBound(OCCURRENCE).setUpperBound(OCCURRENCE);
+		ServiceRequestSearchParams serviceRequestSearchParams = new ServiceRequestSearchParams();
+		serviceRequestSearchParams.setOccurrence(occurrence);
 		
 		SearchParameterMap theParams = new SearchParameterMap();
 		theParams.addParameter(DATE_RANGE_SEARCH_HANDLER, occurrence);
@@ -250,8 +257,7 @@ public class FhirServiceRequestServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		
-		IBundleProvider results = serviceRequestService.searchForServiceRequests(null, null, null, null, occurrence, null,
-		    null, null);
+		IBundleProvider results = serviceRequestService.searchForServiceRequests(serviceRequestSearchParams);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -263,6 +269,8 @@ public class FhirServiceRequestServiceImplTest {
 	@Test
 	public void searchForServiceRequest_shouldReturnCollectionOfServiceRequestByUUID() {
 		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(SERVICE_REQUEST_UUID));
+		ServiceRequestSearchParams serviceRequestSearchParams = new ServiceRequestSearchParams();
+		serviceRequestSearchParams.setUuid(uuid);
 		
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
 		    FhirConstants.ID_PROPERTY, uuid);
@@ -273,8 +281,7 @@ public class FhirServiceRequestServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		
-		IBundleProvider results = serviceRequestService.searchForServiceRequests(null, null, null, null, null, uuid, null,
-		    null);
+		IBundleProvider results = serviceRequestService.searchForServiceRequests(serviceRequestSearchParams);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -286,6 +293,8 @@ public class FhirServiceRequestServiceImplTest {
 	@Test
 	public void searchForServiceRequest_shouldReturnCollectionOfServiceRequestByLastUpdated() {
 		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(LAST_UPDATED_DATE).setLowerBound(LAST_UPDATED_DATE);
+		ServiceRequestSearchParams serviceRequestSearchParams = new ServiceRequestSearchParams();
+		serviceRequestSearchParams.setLastUpdated(lastUpdated);
 		
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
 		    FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
@@ -296,8 +305,7 @@ public class FhirServiceRequestServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		
-		IBundleProvider results = serviceRequestService.searchForServiceRequests(null, null, null, null, null, null,
-		    lastUpdated, null);
+		IBundleProvider results = serviceRequestService.searchForServiceRequests(serviceRequestSearchParams);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -310,6 +318,8 @@ public class FhirServiceRequestServiceImplTest {
 	public void searchForPeople_shouldAddRelatedResourcesWhenIncluded() {
 		HashSet<Include> includes = new HashSet<>();
 		includes.add(new Include("ServiceRequest:patient"));
+		ServiceRequestSearchParams serviceRequestSearchParams = new ServiceRequestSearchParams();
+		serviceRequestSearchParams.setIncludes(includes);
 		
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
 		
@@ -319,8 +329,7 @@ public class FhirServiceRequestServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.singleton(new Patient()));
 		
-		IBundleProvider results = serviceRequestService.searchForServiceRequests(null, null, null, null, null, null, null,
-		    includes);
+		IBundleProvider results = serviceRequestService.searchForServiceRequests(serviceRequestSearchParams);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -334,6 +343,8 @@ public class FhirServiceRequestServiceImplTest {
 	public void searchForPeople_shouldAddRelatedResourcesWhenIncludedR3() {
 		HashSet<Include> includes = new HashSet<>();
 		includes.add(new Include("ProcedureRequest:patient"));
+		ServiceRequestSearchParams serviceRequestSearchParams = new ServiceRequestSearchParams();
+		serviceRequestSearchParams.setIncludes(includes);
 		
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
 		
@@ -343,8 +354,7 @@ public class FhirServiceRequestServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.singleton(new Patient()));
 		
-		IBundleProvider results = serviceRequestService.searchForServiceRequests(null, null, null, null, null, null, null,
-		    includes);
+		IBundleProvider results = serviceRequestService.searchForServiceRequests(serviceRequestSearchParams);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -357,6 +367,8 @@ public class FhirServiceRequestServiceImplTest {
 	@Test
 	public void searchForPeople_shouldNotAddRelatedResourcesForEmptyInclude() {
 		HashSet<Include> includes = new HashSet<>();
+		ServiceRequestSearchParams serviceRequestSearchParams = new ServiceRequestSearchParams();
+		serviceRequestSearchParams.setIncludes(includes);
 		
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
 		
@@ -366,8 +378,7 @@ public class FhirServiceRequestServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		
-		IBundleProvider results = serviceRequestService.searchForServiceRequests(null, null, null, null, null, null, null,
-		    includes);
+		IBundleProvider results = serviceRequestService.searchForServiceRequests(serviceRequestSearchParams);
 		
 		List<IBaseResource> resultList = get(results);
 		

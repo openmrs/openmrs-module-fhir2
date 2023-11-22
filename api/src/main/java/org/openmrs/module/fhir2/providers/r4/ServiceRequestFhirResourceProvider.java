@@ -41,6 +41,7 @@ import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.openmrs.module.fhir2.api.FhirServiceRequestService;
 import org.openmrs.module.fhir2.api.annotations.R4Provider;
+import org.openmrs.module.fhir2.api.search.param.ServiceRequestSearchParams;
 import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -119,7 +120,7 @@ public class ServiceRequestFhirResourceProvider implements IResourceProvider {
 			includes = null;
 		}
 		
-		return serviceRequestService.searchForServiceRequests(patientReference, code, encounterReference,
-		    participantReference, occurrence, uuid, lastUpdated, includes);
+		return serviceRequestService.searchForServiceRequests(new ServiceRequestSearchParams(patientReference, code,
+		        encounterReference, participantReference, occurrence, uuid, lastUpdated, includes, null));
 	}
 }

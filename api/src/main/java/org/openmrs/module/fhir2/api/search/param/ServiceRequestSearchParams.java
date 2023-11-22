@@ -7,11 +7,17 @@
  * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
  * graphic logo is a trademark of OpenMRS Inc.
  */
+
 package org.openmrs.module.fhir2.api.search.param;
 
 import java.io.Serializable;
+import java.util.HashSet;
 
+import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.HasAndListParam;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,6 +28,22 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class ServiceRequestSearchParams implements Serializable {
+	
+	private ReferenceAndListParam patientReference;
+	
+	private TokenAndListParam code;
+	
+	private ReferenceAndListParam encounterReference;
+	
+	private ReferenceAndListParam participantReference;
+	
+	private DateRangeParam occurrence;
+	
+	private TokenAndListParam uuid;
+	
+	private DateRangeParam lastUpdated;
+	
+	private HashSet<Include> includes;
 	
 	private HasAndListParam hasAndListParam;
 }
