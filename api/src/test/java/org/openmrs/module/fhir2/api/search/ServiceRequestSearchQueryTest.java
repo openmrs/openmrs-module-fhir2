@@ -123,7 +123,7 @@ public class ServiceRequestSearchQueryTest extends BaseModuleContextSensitiveTes
 	
 	private static final int END_INDEX = 10;
 	
-	private static final int SERVICE_REQUEST_COUNT = 9;
+	private static final int SERVICE_REQUEST_COUNT = 4;
 	
 	@Autowired
 	private FhirServiceRequestDao<TestOrder> dao;

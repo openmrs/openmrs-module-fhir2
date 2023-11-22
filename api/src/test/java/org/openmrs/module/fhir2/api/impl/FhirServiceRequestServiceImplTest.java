@@ -402,10 +402,11 @@ public class FhirServiceRequestServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.HAS_SEARCH_HANDLER,
 		    hasAndListParam);
 		
+		SearchQueryBundleProvider<TestOrder, ServiceRequest> searchQueryBundleProvider = new SearchQueryBundleProvider<>(
+		        theParams, dao, translator, globalPropertyService, searchQueryInclude);
 		when(dao.getSearchResults(any())).thenReturn(Collections.singletonList(order));
 		when(translator.toFhirResource(order)).thenReturn(fhirServiceRequest);
-		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
-		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
+		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(searchQueryBundleProvider);
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.singleton(new Observation()));
 		
 		IBundleProvider results = serviceRequestService.searchForServiceRequests(serviceRequestSearchParams);

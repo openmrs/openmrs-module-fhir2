@@ -28,46 +28,5 @@
 	<orders order_id="103" order_type_id="2" order_number="ORD-103" urgency="ROUTINE" order_action="NEW" concept_id="5089" orderer="1" date_activated="2008-11-19 09:24:10.0" date_stopped="2009-12-17 00:00:00.0" patient_id="7" care_setting="1" encounter_id="5" uuid="02b9d1e4-7619-453e-bd6b-c3228dsn61df" date_voided="2010-09-03 00:00:00.0" date_created="2009-11-19 09:24:10.0" creator="1" voided="1" />
 	<test_order order_id="101"  />
 	<test_order order_id="103"  />
-	
-	<!-- Test data for _has -->
-	<!-- Supporting data structures -->
-	<concept changed_by="1" class_id="5" concept_id="10001" creator="1" datatype_id="3" date_changed="2020-07-07 19:08:19.0" date_created="2020-07-07 19:08:19.0" is_set="true" retired="false" uuid="8d492026-c2cc-11de-8d13-0010c6dffd0f"/>
-	<concept changed_by="1" class_id="5" concept_id="10002" creator="1" datatype_id="3" date_changed="2020-07-07 19:08:19.0" date_created="2020-07-07 19:08:19.0" is_set="true" retired="false" uuid="8d490bf4-c2cc-11de-8d13-0010c6dffd0f"/>
-  
-	<!-- TestOrder with lab indicator -->
-	<orders order_id="104" order_type_id="2" order_number="ORD-104" urgency="ROUTINE" order_action="NEW" concept_id="5497" orderer="1" date_activated="2008-11-19 09:24:10.0" patient_id="2" care_setting="1" encounter_id="6" uuid="4364996e-450c-42dc-84a7-1c205f34b10b" date_created="2009-11-19 09:24:10.0" creator="1" voided="0" />
-	<test_order order_id="104"  />
-	<encounter encounter_id="104" encounter_type="1" patient_id="7" location_id="2" form_id="1" encounter_datetime="2008-08-19 00:00:00.1" creator="1" date_created="2008-08-19 12:34:40.0" voided="false" uuid="8a706f20-d133-403a-aa7e-95318a03cf12"/>
-  	<obs obs_id="104" order_id="104" person_id="7" concept_id="10001" encounter_id="6" obs_datetime="1998-07-01 00:00:00.0" location_id="1" value_numeric="115.0" comments="" creator="1" date_created="1998-08-18 14:09:35.0" voided="false" value_coded="[NULL]" value_coded_name_id="[NULL]" value_complex="[NULL]" value_text="[NULL]" value_datetime="[NULL]" value_drug="[NULL]" uuid="d2044b65-12fd-49c1-a8c2-e5aeb6cbc9bc"/>
-	
-	<!-- ServiceOrder (NOT TestOrder) with lab indicator -->
-	<orders order_id="105" order_type_id="2" order_number="ORD-105" urgency="ROUTINE" order_action="NEW" concept_id="5497" orderer="1" date_activated="2008-11-19 09:24:10.0" patient_id="2" care_setting="1" encounter_id="6" uuid="38c53063-450a-47be-802c-e6270d2e6c69" date_created="2009-11-19 09:24:10.0" creator="1" voided="0" />
-	<encounter encounter_id="105" encounter_type="1" patient_id="7" location_id="2" form_id="1" encounter_datetime="2008-08-19 00:00:00.1" creator="1" date_created="2008-08-19 12:34:40.0" voided="false" uuid="62e2d245-1315-4217-a88d-9920187ae888"/>
-  	<obs obs_id="105" order_id="105" person_id="7" concept_id="10001" encounter_id="6" obs_datetime="1998-07-01 00:00:00.0" location_id="1" value_numeric="115.0" comments="" creator="1" date_created="1998-08-18 14:09:35.0" voided="false" value_coded="[NULL]" value_coded_name_id="[NULL]" value_complex="[NULL]" value_text="[NULL]" value_datetime="[NULL]" value_drug="[NULL]" uuid="bfc1d484-22d3-4535-b921-3255343bcf0e"/>
-	
-	<!-- TestOrder with NO lab indicator -->
-	<orders order_id="106" order_type_id="2" order_number="ORD-106" urgency="ROUTINE" order_action="NEW" concept_id="5497" orderer="1" date_activated="2008-11-19 09:24:10.0" patient_id="2" care_setting="1" encounter_id="6" uuid="6233f0f9-17eb-471c-8131-440a20dc25c4" date_created="2009-11-19 09:24:10.0" creator="1" voided="0" />
-	<test_order order_id="106"  />
-	<encounter encounter_id="106" encounter_type="1" patient_id="7" location_id="2" form_id="1" encounter_datetime="2008-08-19 00:00:00.1" creator="1" date_created="2008-08-19 12:34:40.0" voided="false" uuid="b28d1e9f-b6f8-4519-af58-842f1e20b428"/>
-  	<obs obs_id="106" order_id="106" person_id="1" concept_id="10002" encounter_id="6" obs_datetime="1998-07-01 00:00:00.1" location_id="1" value_numeric="115.0" comments="" creator="1" date_created="1998-08-18 14:09:35.0" voided="false" value_coded="[NULL]" value_coded_name_id="[NULL]" value_complex="[NULL]" value_text="[NULL]" value_datetime="[NULL]" value_drug="[NULL]" uuid="0839db87-92ee-4cc2-ba77-8b00eff150bd"/>
-	
-	<!-- TestOrder with concept value -->
-	<orders order_id="107" order_type_id="2" order_number="ORD-107" urgency="ROUTINE" order_action="NEW" concept_id="5497" orderer="1" date_activated="2008-11-19 09:24:10.0" patient_id="2" care_setting="1" encounter_id="6" uuid="b5bb2ba7-b17d-473e-907b-de7ad5374804" date_created="2009-11-19 09:24:10.0" creator="1" voided="0" />
-	<test_order order_id="107"  />
-	<encounter encounter_id="107" encounter_type="1" patient_id="7" location_id="2" form_id="1" encounter_datetime="2008-08-19 00:00:00.1" creator="1" date_created="2008-08-19 12:34:40.0" voided="false" uuid="b23628de-bb9f-4cde-a64a-836ac4e88f3f"/>
-  	<obs obs_id="107" order_id="107" person_id="7" concept_id="10002" encounter_id="6" obs_datetime="1998-07-01 00:00:00.0" location_id="1" value_numeric="[NULL]" comments="" creator="1" date_created="1998-08-18 14:09:35.0" voided="false" value_coded="10001" value_coded_name_id="[NULL]" value_complex="[NULL]" value_text="[NULL]" value_datetime="[NULL]" value_drug="[NULL]" uuid="1cb07316-f092-46bc-bc8c-2ebd248d530c"/>
-	
-	<!-- TestOrder with datetime value -->
-	<orders order_id="108" order_type_id="2" order_number="ORD-108" urgency="ROUTINE" order_action="NEW" concept_id="5497" orderer="1" date_activated="2008-11-19 09:24:10.0" patient_id="2" care_setting="1" encounter_id="6" uuid="a5a0f4a2-8d32-4527-ae8e-2be8cb76a899" date_created="2009-11-19 09:24:10.0" creator="1" voided="0" />
-	<test_order order_id="108"  />
-	<encounter encounter_id="108" encounter_type="1" patient_id="7" location_id="2" form_id="1" encounter_datetime="2008-08-19 00:00:00.1" creator="1" date_created="2008-08-19 12:34:40.0" voided="false" uuid="df239182-75b4-48da-aae7-fe6b55b2a602"/>
-  	<obs obs_id="108" order_id="108" person_id="7" concept_id="10002" encounter_id="6" obs_datetime="1998-07-01 00:00:00.0" location_id="1" value_numeric="[NULL]" comments="" creator="1" date_created="1998-08-18 14:09:35.0" voided="false" value_coded="[NULL]" value_coded_name_id="[NULL]" value_complex="[NULL]" value_text="[NULL]" value_datetime="1998-07-01 00:00:00.0" value_drug="[NULL]" uuid="7bb6166d-86d5-4f16-9276-9e438b0d5e89"/>
-	
-	<!-- TestOrder with datetime value -->
-	<orders order_id="109" order_type_id="2" order_number="ORD-109" urgency="ROUTINE" order_action="NEW" concept_id="5497" orderer="1" date_activated="2008-11-19 09:24:10.0" patient_id="2" care_setting="1" encounter_id="6" uuid="fb5e9e5f-1800-4c96-b18e-0d89cf20219" date_created="2009-11-19 09:24:10.0" creator="1" voided="0" />
-	<test_order order_id="109"  />
-	<encounter encounter_id="109" encounter_type="1" patient_id="7" location_id="2" form_id="1" encounter_datetime="2008-08-19 00:00:00.1" creator="1" date_created="2008-08-19 12:34:40.0" voided="false" uuid="9c5aff01-fbf7-4905-87fb-72db039f811"/>
-  	<obs obs_id="109" order_id="109" person_id="7" concept_id="10002" encounter_id="6" obs_datetime="1998-07-01 00:00:00.0" location_id="1" value_numeric="[NULL]" comments="" creator="1" date_created="1998-08-18 14:09:35.0" voided="false" value_coded="[NULL]" value_coded_name_id="[NULL]" value_complex="[NULL]" value_text="value_text" value_datetime="[NULL]" value_drug="[NULL]" uuid="9354bbf7-df39-4153-a07c-e2a27ee4a11f"/>
-	
 </dataset>
 
