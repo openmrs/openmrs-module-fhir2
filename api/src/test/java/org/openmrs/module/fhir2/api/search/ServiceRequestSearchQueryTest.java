@@ -123,6 +123,8 @@ public class ServiceRequestSearchQueryTest extends BaseModuleContextSensitiveTes
 	
 	private static final int END_INDEX = 10;
 	
+	private static final int SERVICE_REQUEST_COUNT = 9;
+	
 	@Autowired
 	private FhirServiceRequestDao<TestOrder> dao;
 	
@@ -158,13 +160,12 @@ public class ServiceRequestSearchQueryTest extends BaseModuleContextSensitiveTes
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		
-		assertThat(results.size(), equalTo(4));
+		assertThat(results.size(), equalTo(SERVICE_REQUEST_COUNT));
 		
 		List<ServiceRequest> resultList = get(results);
 		
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(4));
+		assertThat(resultList.size(), equalTo(SERVICE_REQUEST_COUNT));
 		assertThat(resultList, everyItem(
 		    hasProperty("code", hasProperty("coding", hasItem(hasProperty("code", equalTo(TEST_ORDER_CONCEPT_UUID)))))));
 	}
@@ -178,12 +179,12 @@ public class ServiceRequestSearchQueryTest extends BaseModuleContextSensitiveTes
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(4));
+		assertThat(results.size(), equalTo(SERVICE_REQUEST_COUNT));
 		
 		List<ServiceRequest> resultList = get(results);
 		
 		assertThat(resultList, not(empty()));
-		assertThat(resultList, hasSize(equalTo(4)));
+		assertThat(resultList, hasSize(equalTo(SERVICE_REQUEST_COUNT)));
 		assertThat(resultList, everyItem(
 		    hasProperty("code", hasProperty("coding", hasItem(hasProperty("code", equalTo(TEST_ORDER_CONCEPT_UUID)))))));
 	}
@@ -198,12 +199,12 @@ public class ServiceRequestSearchQueryTest extends BaseModuleContextSensitiveTes
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(4));
+		assertThat(results.size(), equalTo(SERVICE_REQUEST_COUNT));
 		
 		List<ServiceRequest> resultList = get(results);
 		
 		assertThat(resultList, not(empty()));
-		assertThat(resultList, hasSize(equalTo(4)));
+		assertThat(resultList, hasSize(equalTo(SERVICE_REQUEST_COUNT)));
 		assertThat(resultList,
 		    everyItem(
 		        hasProperty("code", hasProperty("coding", hasItem(allOf(hasProperty("code", equalTo(TEST_ORDER_LOINC_CODE)),
@@ -221,12 +222,12 @@ public class ServiceRequestSearchQueryTest extends BaseModuleContextSensitiveTes
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(4));
+		assertThat(results.size(), equalTo(SERVICE_REQUEST_COUNT));
 		
 		List<ServiceRequest> resultList = get(results);
 		
 		assertThat(resultList, not(empty()));
-		assertThat(resultList, hasSize(equalTo(4)));
+		assertThat(resultList, hasSize(equalTo(SERVICE_REQUEST_COUNT)));
 		assertThat(resultList, everyItem(allOf(
 		    hasProperty("code",
 		        hasProperty("coding",
@@ -246,12 +247,12 @@ public class ServiceRequestSearchQueryTest extends BaseModuleContextSensitiveTes
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(4));
+		assertThat(results.size(), equalTo(SERVICE_REQUEST_COUNT));
 		
 		List<ServiceRequest> resultList = get(results);
 		
 		assertThat(resultList, not(empty()));
-		assertThat(resultList, hasSize(equalTo(4)));
+		assertThat(resultList, hasSize(equalTo(SERVICE_REQUEST_COUNT)));
 		assertThat(resultList,
 		    everyItem(anyOf(
 		        hasProperty("code",
@@ -273,12 +274,12 @@ public class ServiceRequestSearchQueryTest extends BaseModuleContextSensitiveTes
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(4));
+		assertThat(results.size(), equalTo(SERVICE_REQUEST_COUNT));
 		
 		List<ServiceRequest> resultList = get(results);
 		
 		assertThat(resultList, not(empty()));
-		assertThat(resultList, hasSize(equalTo(4)));
+		assertThat(resultList, hasSize(equalTo(SERVICE_REQUEST_COUNT)));
 		assertThat(resultList, everyItem(
 		    hasProperty("subject", hasProperty("referenceElement", hasProperty("idPart", equalTo(PATIENT_UUID))))));
 	}
@@ -294,12 +295,12 @@ public class ServiceRequestSearchQueryTest extends BaseModuleContextSensitiveTes
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(4));
+		assertThat(results.size(), equalTo(SERVICE_REQUEST_COUNT));
 		
 		List<ServiceRequest> resultList = get(results);
 		
 		assertThat(resultList, not(empty()));
-		assertThat(resultList, hasSize(equalTo(4)));
+		assertThat(resultList, hasSize(equalTo(SERVICE_REQUEST_COUNT)));
 		assertThat(resultList, everyItem(
 		    hasProperty("subject", hasProperty("referenceElement", hasProperty("idPart", equalTo(PATIENT_UUID))))));
 	}
@@ -335,7 +336,7 @@ public class ServiceRequestSearchQueryTest extends BaseModuleContextSensitiveTes
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(4));
+		assertThat(results.size(), equalTo(SERVICE_REQUEST_COUNT));
 		
 		List<ServiceRequest> resources = get(results);
 		
@@ -355,7 +356,7 @@ public class ServiceRequestSearchQueryTest extends BaseModuleContextSensitiveTes
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(4));
+		assertThat(results.size(), equalTo(SERVICE_REQUEST_COUNT));
 		
 		List<ServiceRequest> resources = get(results);
 		
@@ -376,7 +377,7 @@ public class ServiceRequestSearchQueryTest extends BaseModuleContextSensitiveTes
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(4));
+		assertThat(results.size(), equalTo(SERVICE_REQUEST_COUNT));
 		
 		List<ServiceRequest> resources = get(results);
 		
@@ -419,7 +420,7 @@ public class ServiceRequestSearchQueryTest extends BaseModuleContextSensitiveTes
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(4));
+		assertThat(results.size(), equalTo(SERVICE_REQUEST_COUNT));
 		
 		List<ServiceRequest> resources = get(results);
 		
@@ -461,7 +462,7 @@ public class ServiceRequestSearchQueryTest extends BaseModuleContextSensitiveTes
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(4));
+		assertThat(results.size(), equalTo(SERVICE_REQUEST_COUNT));
 		
 		List<ServiceRequest> resources = get(results);
 		
@@ -483,7 +484,7 @@ public class ServiceRequestSearchQueryTest extends BaseModuleContextSensitiveTes
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(4));
+		assertThat(results.size(), equalTo(SERVICE_REQUEST_COUNT));
 		
 		List<ServiceRequest> resources = get(results);
 		
@@ -524,12 +525,12 @@ public class ServiceRequestSearchQueryTest extends BaseModuleContextSensitiveTes
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(4));
+		assertThat(results.size(), equalTo(SERVICE_REQUEST_COUNT));
 		
 		List<ServiceRequest> resources = get(results);
 		
 		assertThat(resources, not(empty()));
-		assertThat(resources, hasSize(equalTo(4)));
+		assertThat(resources, hasSize(equalTo(SERVICE_REQUEST_COUNT)));
 		assertThat(resources, everyItem(hasProperty("subject", hasProperty("reference", endsWith(PATIENT_UUID)))));
 	}
 	
@@ -545,12 +546,12 @@ public class ServiceRequestSearchQueryTest extends BaseModuleContextSensitiveTes
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(4));
+		assertThat(results.size(), equalTo(SERVICE_REQUEST_COUNT));
 		
 		List<ServiceRequest> resultList = get(results);
 		
 		assertThat(resultList, not(empty()));
-		assertThat(resultList, hasSize(equalTo(4)));
+		assertThat(resultList, hasSize(equalTo(SERVICE_REQUEST_COUNT)));
 		assertThat(resultList, everyItem(hasProperty("subject", hasProperty("reference", endsWith(PATIENT_UUID)))));
 	}
 	
@@ -587,12 +588,12 @@ public class ServiceRequestSearchQueryTest extends BaseModuleContextSensitiveTes
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(4));
+		assertThat(results.size(), equalTo(SERVICE_REQUEST_COUNT));
 		
 		List<ServiceRequest> resources = get(results);
 		
 		assertThat(resources, not(empty()));
-		assertThat(resources, hasSize(equalTo(4)));
+		assertThat(resources, hasSize(equalTo(SERVICE_REQUEST_COUNT)));
 		assertThat(resources, everyItem(
 		    hasProperty("encounter", hasProperty("referenceElement", hasProperty("idPart", equalTo(ENCOUNTER_UUID))))));
 	}
@@ -610,7 +611,7 @@ public class ServiceRequestSearchQueryTest extends BaseModuleContextSensitiveTes
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(4));
+		assertThat(results.size(), equalTo(SERVICE_REQUEST_COUNT));
 		
 		List<ServiceRequest> resources = get(results);
 		
@@ -630,12 +631,12 @@ public class ServiceRequestSearchQueryTest extends BaseModuleContextSensitiveTes
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(4));
+		assertThat(results.size(), equalTo(SERVICE_REQUEST_COUNT));
 		
 		List<ServiceRequest> resources = get(results);
 		
 		assertThat(resources, not(empty()));
-		assertThat(resources, hasSize(equalTo(4)));
+		assertThat(resources, hasSize(equalTo(SERVICE_REQUEST_COUNT)));
 		assertThat(resources, everyItem(anyOf(
 		    hasProperty("encounter", hasProperty("referenceElement", hasProperty("idPart", equalTo(ENCOUNTER_UUID)))),
 		    hasProperty("encounter", hasProperty("referenceElement", hasProperty("idPart", equalTo(ENCOUNTER_UUID_TWO)))))));
@@ -696,12 +697,12 @@ public class ServiceRequestSearchQueryTest extends BaseModuleContextSensitiveTes
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(4));
+		assertThat(results.size(), equalTo(SERVICE_REQUEST_COUNT));
 		
 		List<ServiceRequest> resources = get(results);
 		
 		assertThat(resources, notNullValue());
-		assertThat(resources, hasSize(equalTo(4)));
+		assertThat(resources, hasSize(equalTo(SERVICE_REQUEST_COUNT)));
 		assertThat(resources, everyItem(
 		    hasProperty("requester", hasProperty("referenceElement", hasProperty("idPart", equalTo(PARTICIPANT_UUID))))));
 	}
@@ -718,12 +719,12 @@ public class ServiceRequestSearchQueryTest extends BaseModuleContextSensitiveTes
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(4));
+		assertThat(results.size(), equalTo(SERVICE_REQUEST_COUNT));
 		
 		List<ServiceRequest> resources = get(results);
 		
 		assertThat(resources, notNullValue());
-		assertThat(resources, hasSize(equalTo(4)));
+		assertThat(resources, hasSize(equalTo(SERVICE_REQUEST_COUNT)));
 		assertThat(resources, everyItem(
 		    hasProperty("requester", hasProperty("referenceElement", hasProperty("idPart", equalTo(PARTICIPANT_UUID))))));
 	}
@@ -759,12 +760,12 @@ public class ServiceRequestSearchQueryTest extends BaseModuleContextSensitiveTes
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(4));
+		assertThat(results.size(), equalTo(SERVICE_REQUEST_COUNT));
 		
 		List<ServiceRequest> resources = get(results);
 		
 		assertThat(resources, notNullValue());
-		assertThat(resources, hasSize(equalTo(4)));
+		assertThat(resources, hasSize(equalTo(SERVICE_REQUEST_COUNT)));
 		assertThat(resources, everyItem(
 		    hasProperty("requester", hasProperty("referenceElement", hasProperty("idPart", equalTo(PARTICIPANT_UUID))))));
 	}
@@ -781,12 +782,12 @@ public class ServiceRequestSearchQueryTest extends BaseModuleContextSensitiveTes
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(4));
+		assertThat(results.size(), equalTo(SERVICE_REQUEST_COUNT));
 		
 		List<ServiceRequest> resources = get(results);
 		
 		assertThat(resources, notNullValue());
-		assertThat(resources, hasSize(equalTo(4)));
+		assertThat(resources, hasSize(equalTo(SERVICE_REQUEST_COUNT)));
 		assertThat(resources, everyItem(
 		    hasProperty("requester", hasProperty("referenceElement", hasProperty("idPart", equalTo(PARTICIPANT_UUID))))));
 	}
@@ -824,12 +825,12 @@ public class ServiceRequestSearchQueryTest extends BaseModuleContextSensitiveTes
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(4));
+		assertThat(results.size(), equalTo(SERVICE_REQUEST_COUNT));
 		
 		List<ServiceRequest> resources = get(results);
 		
 		assertThat(resources, notNullValue());
-		assertThat(resources, hasSize(equalTo(4)));
+		assertThat(resources, hasSize(equalTo(SERVICE_REQUEST_COUNT)));
 		assertThat(resources, everyItem(
 		    hasProperty("requester", hasProperty("referenceElement", hasProperty("idPart", equalTo(PARTICIPANT_UUID))))));
 	}
@@ -846,12 +847,12 @@ public class ServiceRequestSearchQueryTest extends BaseModuleContextSensitiveTes
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(4));
+		assertThat(results.size(), equalTo(SERVICE_REQUEST_COUNT));
 		
 		List<ServiceRequest> resources = get(results);
 		
 		assertThat(resources, notNullValue());
-		assertThat(resources, hasSize(equalTo(4)));
+		assertThat(resources, hasSize(equalTo(SERVICE_REQUEST_COUNT)));
 		assertThat(resources, everyItem(
 		    hasProperty("requester", hasProperty("referenceElement", hasProperty("idPart", equalTo(PARTICIPANT_UUID))))));
 	}
@@ -890,12 +891,12 @@ public class ServiceRequestSearchQueryTest extends BaseModuleContextSensitiveTes
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(4));
+		assertThat(results.size(), equalTo(SERVICE_REQUEST_COUNT));
 		
 		List<ServiceRequest> resources = get(results);
 		
 		assertThat(resources, notNullValue());
-		assertThat(resources, hasSize(equalTo(4)));
+		assertThat(resources, hasSize(equalTo(SERVICE_REQUEST_COUNT)));
 		assertThat(resources, everyItem(
 		    hasProperty("requester", hasProperty("referenceElement", hasProperty("idPart", equalTo(PARTICIPANT_UUID))))));
 	}
@@ -915,12 +916,12 @@ public class ServiceRequestSearchQueryTest extends BaseModuleContextSensitiveTes
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(4));
+		assertThat(results.size(), equalTo(SERVICE_REQUEST_COUNT));
 		
 		List<ServiceRequest> resources = get(results);
 		
 		assertThat(resources, notNullValue());
-		assertThat(resources, hasSize(equalTo(4)));
+		assertThat(resources, hasSize(equalTo(SERVICE_REQUEST_COUNT)));
 		assertThat(resources, everyItem(
 		    hasProperty("requester", hasProperty("referenceElement", hasProperty("idPart", equalTo(PARTICIPANT_UUID))))));
 	}
@@ -959,12 +960,12 @@ public class ServiceRequestSearchQueryTest extends BaseModuleContextSensitiveTes
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(4));
+		assertThat(results.size(), equalTo(SERVICE_REQUEST_COUNT));
 		
 		List<ServiceRequest> resources = get(results);
 		
 		assertThat(resources, notNullValue());
-		assertThat(resources, hasSize(equalTo(4)));
+		assertThat(resources, hasSize(equalTo(SERVICE_REQUEST_COUNT)));
 		assertThat(resources, everyItem(
 		    hasProperty("requester", hasProperty("identifier", hasProperty("value", equalTo(PARTICIPANT_IDENTIFIER))))));
 	}
@@ -981,12 +982,12 @@ public class ServiceRequestSearchQueryTest extends BaseModuleContextSensitiveTes
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(4));
+		assertThat(results.size(), equalTo(SERVICE_REQUEST_COUNT));
 		
 		List<ServiceRequest> resources = get(results);
 		
 		assertThat(resources, notNullValue());
-		assertThat(resources, hasSize(equalTo(4)));
+		assertThat(resources, hasSize(equalTo(SERVICE_REQUEST_COUNT)));
 		assertThat(resources, everyItem(
 		    hasProperty("requester", hasProperty("identifier", hasProperty("value", equalTo(PARTICIPANT_IDENTIFIER))))));
 	}

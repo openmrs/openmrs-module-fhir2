@@ -16,6 +16,9 @@ import static org.hamcrest.Matchers.nullValue;
 
 import java.util.Collection;
 
+import ca.uhn.fhir.rest.param.HasAndListParam;
+import ca.uhn.fhir.rest.param.HasOrListParam;
+import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.junit.Before;
@@ -72,6 +75,21 @@ public class FhirObservationDaoImplTest extends BaseModuleContextSensitiveTest {
 		
 		SearchParameterMap theParams = new SearchParameterMap();
 		theParams.addParameter(FhirConstants.CODED_SEARCH_HANDLER, code);
+		
+		Collection<Obs> obs = dao.getSearchResults(theParams);
+		
+		assertThat(obs, notNullValue());
+	}
+	
+	@Test
+	public void search_shouldFindObservationsBasedOnServiceRequestUuid() {
+		String id = "28b1e265-019d-4475-89a3-9f0cb5185d47";
+		HasOrListParam hasOrListParam = new HasOrListParam();
+		hasOrListParam.add(new HasParam("Observation", "based-on", "ServiceRequest", id));
+		HasAndListParam hasAndListParam = new HasAndListParam();
+		hasAndListParam.addAnd(hasOrListParam);
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.HAS_SEARCH_HANDLER,
+		    hasAndListParam);
 		
 		Collection<Obs> obs = dao.getSearchResults(theParams);
 		

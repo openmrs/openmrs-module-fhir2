@@ -15,12 +15,23 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 
+import java.util.Collection;
+import java.util.List;
+
+import ca.uhn.fhir.rest.param.HasAndListParam;
+import ca.uhn.fhir.rest.param.HasOrListParam;
+import ca.uhn.fhir.rest.param.HasParam;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.Predicate;
 import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
+import org.openmrs.Obs;
 import org.openmrs.OrderType;
 import org.openmrs.TestOrder;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
+import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -33,7 +44,17 @@ public class FhirServiceRequestDaoImplTest extends BaseModuleContextSensitiveTes
 	
 	private static final String OTHER_ORDER_UUID = "02b9d1e4-7619-453e-bd6b-c32286f861df";
 	
-	private static final String WRONG_UUID = "7d96f25c-4949-4f72-9931-d808fbc226dd";
+	private static final String ORDER_WITH_OBSERVATION_CATEGORY_LABORATORY_UUID = "4364996e-450c-42dc-84a7-1c205f34b10b";
+	
+	private static final String ORDER_WITH_OBSERVATION_CATEGORY_PROCEDURE_UUID = "6233f0f9-17eb-471c-8131-440a20dc25c4";
+	
+	private static final String ORDER_WITH_CODED_VALUE_UUID = "b5bb2ba7-b17d-473e-907b-de7ad5374804";
+	
+	private static final String ORDER_WITH_DATETIME_VALUE_UUID = "a5a0f4a2-8d32-4527-ae8e-2be8cb76a899";
+
+	private static final String ORDER_WITH_TEXT_VALUE_UUID = "fb5e9e5f-1800-4c96-b18e-0d89cf20219";
+	
+	private static final String WRONG_UUID = "38c53063-450a-47be-802c-e6270d2e6c69";
 	
 	private static final String TEST_ORDER_INITIAL_DATA = "org/openmrs/module/fhir2/api/dao/impl/FhirServiceRequestTest_initial_data.xml";
 	
@@ -72,4 +93,301 @@ public class FhirServiceRequestDaoImplTest extends BaseModuleContextSensitiveTes
 		TestOrder result = dao.get(OTHER_ORDER_UUID);
 		assertThat(result, nullValue());
 	}
+	
+	@Test
+	public void shouldApplyHasConstraintsForObservationsBasedOnAnyCorrectly() {
+		runHasObservationBasedOnTest(
+			null,
+			null, 
+			 new String[]{ ORDER_WITH_OBSERVATION_CATEGORY_LABORATORY_UUID, ORDER_WITH_OBSERVATION_CATEGORY_PROCEDURE_UUID, ORDER_WITH_TEXT_VALUE_UUID }, 
+			 new String[]{WRONG_UUID}
+		);
+	}
+	
+	@Test
+	public void shouldApplyHasConstraintsForObservationsBasedOnAnyCategoryCorrectly() {
+		runHasObservationBasedOnTest(
+			"category",
+			null, 
+			 new String[]{ ORDER_WITH_OBSERVATION_CATEGORY_LABORATORY_UUID, ORDER_WITH_OBSERVATION_CATEGORY_PROCEDURE_UUID }, 
+			 new String[]{WRONG_UUID}
+		);
+	}
+	
+	@Test
+	public void shouldApplyHasConstraintsForObservationsBasedOnLaboratoryCategoryCorrectly() {
+		runHasObservationBasedOnTest(
+			"category",
+			"laboratory", 
+			 new String[]{ ORDER_WITH_OBSERVATION_CATEGORY_LABORATORY_UUID }, 
+			 new String[]{WRONG_UUID, ORDER_WITH_OBSERVATION_CATEGORY_PROCEDURE_UUID}
+		);
+	}
+	
+	@Test
+	public void shouldApplyHasConstraintsForObservationsBasedOnAnyDateCorrectly() {
+		runHasObservationBasedOnTest(
+			"date",
+			null, 
+			 new String[]{ ORDER_WITH_OBSERVATION_CATEGORY_LABORATORY_UUID }, 
+			 new String[]{WRONG_UUID}
+		);
+	}
+	
+	@Test
+	public void shouldApplyHasConstraintsForObservationsBasedOnSpecificDateCorrectly() {
+		runHasObservationBasedOnTest(
+			"date",
+			"1998-07-01 00:00:00.0", 
+			 new String[]{ ORDER_WITH_OBSERVATION_CATEGORY_LABORATORY_UUID }, 
+			 new String[]{WRONG_UUID}
+		);
+	}
+
+	
+	@Test
+	public void shouldApplyHasConstraintsForObservationsBasedOnAnySubjectCorrectly() {
+		runHasObservationBasedOnTest(
+			"subject",
+			null,
+			 new String[]{ ORDER_WITH_OBSERVATION_CATEGORY_LABORATORY_UUID }, 
+			 new String[]{WRONG_UUID}
+		);
+	}
+	
+	@Test
+	public void shouldApplyHasConstraintsForObservationsBasedOnSpecificSubjectCorrectly() {
+		runHasObservationBasedOnTest(
+			"subject",
+			// TODO: what would be a realistic value?
+			"a65c347e-1384-493a-a55b-d325924acd94", 
+			 new String[]{ ORDER_WITH_OBSERVATION_CATEGORY_LABORATORY_UUID }, 
+			 new String[]{WRONG_UUID}
+		);
+	}
+
+	
+	@Test
+	public void shouldApplyHasConstraintsForObservationsBasedOnAnyValueConceptCorrectly() {
+		runHasObservationBasedOnTest(
+			"value-concept",
+			null,
+			 new String[]{ ORDER_WITH_CODED_VALUE_UUID }, 
+			 new String[]{WRONG_UUID, ORDER_WITH_DATETIME_VALUE_UUID}
+		);
+	}
+	
+	@Test
+	public void shouldApplyHasConstraintsForObservationsBasedOnSpecificValueConceptCorrectly() {
+		runHasObservationBasedOnTest(
+			"value-concept",
+			"8d492026-c2cc-11de-8d13-0010c6dffd0f",
+			 new String[]{ ORDER_WITH_CODED_VALUE_UUID }, 
+			 new String[]{WRONG_UUID, ORDER_WITH_DATETIME_VALUE_UUID}
+		);
+	}
+
+	
+	@Test
+	public void shouldApplyHasConstraintsForObservationsBasedOnAnyValueDateCorrectly() {
+		runHasObservationBasedOnTest(
+			"value-date",
+			null,
+			 new String[]{ ORDER_WITH_DATETIME_VALUE_UUID }, 
+			 new String[]{WRONG_UUID, ORDER_WITH_CODED_VALUE_UUID}
+		);
+	}
+	
+	@Test
+	public void shouldApplyHasConstraintsForObservationsBasedOnSpecificValueDateCorrectly() {
+		runHasObservationBasedOnTest(
+			"value-date",
+			// TODO: what would be a realistic value?
+			"1998-07-01 00:00:00",
+			 new String[]{ ORDER_WITH_DATETIME_VALUE_UUID }, 
+			 new String[]{WRONG_UUID, ORDER_WITH_CODED_VALUE_UUID}
+		);
+	}
+
+	
+	@Test
+	public void shouldApplyHasConstraintsForObservationsBasedOnAnyHasMemberCorrectly() {
+		// TODO:
+		runHasObservationBasedOnTest(
+			"has-member",
+			null,
+			 new String[]{ WRONG_UUID, ORDER_WITH_DATETIME_VALUE_UUID }, 
+			 new String[]{WRONG_UUID, ORDER_WITH_CODED_VALUE_UUID}
+		);
+	}
+	
+	@Test
+	public void shouldApplyHasConstraintsForObservationsBasedOnSpecificHasMemerCorrectly() {
+		// TODO:
+		runHasObservationBasedOnTest(
+			"has-member",
+			"TODO",
+			 new String[]{ WRONG_UUID, ORDER_WITH_DATETIME_VALUE_UUID }, 
+			 new String[]{WRONG_UUID, ORDER_WITH_CODED_VALUE_UUID}
+		);
+	}
+
+	
+	@Test
+	public void shouldApplyHasConstraintsForObservationsBasedOnAnyValueStringCorrectly() {
+		runHasObservationBasedOnTest(
+			"value-string",
+			null,
+			 new String[]{ ORDER_WITH_TEXT_VALUE_UUID }, 
+			 new String[]{WRONG_UUID, ORDER_WITH_CODED_VALUE_UUID}
+		);
+	}
+	
+	@Test
+	public void shouldApplyHasConstraintsForObservationsBasedOnSpecificValueStringCorrectly() {
+		runHasObservationBasedOnTest(
+			"value-string",
+			// TODO: what would be a realistic value here? Are spaces allowed?
+			"value_text",
+			 new String[]{ ORDER_WITH_TEXT_VALUE_UUID }, 
+			 new String[]{WRONG_UUID, ORDER_WITH_CODED_VALUE_UUID}
+		);
+	}
+
+	
+	@Test
+	public void shouldApplyHasConstraintsForObservationsBasedOnAnyIdentifierCorrectly() {
+		// this test should return ALL observations (it basically checks obs.uuid != null)
+		runHasObservationBasedOnTest(
+			"identifier",
+			null,
+			 new String[]{ ORDER_WITH_TEXT_VALUE_UUID }, 
+			 new String[]{}
+		);
+	}
+	
+	@Test
+	public void shouldApplyHasConstraintsForObservationsBasedOnSpecificIdentifierCorrectly() {
+		runHasObservationBasedOnTest(
+			"identifier",
+			 ORDER_WITH_TEXT_VALUE_UUID, 
+			 new String[]{ ORDER_WITH_TEXT_VALUE_UUID }, 
+			 new String[]{WRONG_UUID, ORDER_WITH_OBSERVATION_CATEGORY_LABORATORY_UUID }
+		);
+	}
+
+	
+	@Test
+	public void shouldApplyHasConstraintsForObservationsBasedOnAnyEncounterCorrectly() {
+		// this test should return ALL observations (it basically checks obs.uuid != null)
+		runHasObservationBasedOnTest(
+			"encounter",
+			null,
+			 new String[]{ ORDER_WITH_TEXT_VALUE_UUID, ORDER_WITH_OBSERVATION_CATEGORY_LABORATORY_UUID }, 
+			 new String[]{ WRONG_UUID}
+		);
+	}
+	
+	@Test
+	public void shouldApplyHasConstraintsForObservationsBasedOnSpecificEncounterCorrectly() {
+		runHasObservationBasedOnTest(
+			"encounter",
+			 "8a706f20-d133-403a-aa7e-95318a03cf12", 
+			 new String[]{ ORDER_WITH_OBSERVATION_CATEGORY_LABORATORY_UUID }, 
+			 new String[]{WRONG_UUID, ORDER_WITH_TEXT_VALUE_UUID }
+		);
+	}
+
+	
+	@Test
+	public void shouldApplyHasConstraintsForObservationsBasedOnAnyStatusCorrectly() {
+		// this test should return ALL observations (it basically checks obs.uuid != null)
+		runHasObservationBasedOnTest(
+			"status",
+			null,
+			 new String[]{ ORDER_WITH_TEXT_VALUE_UUID, ORDER_WITH_OBSERVATION_CATEGORY_LABORATORY_UUID }, 
+			 new String[]{ WRONG_UUID}
+		);
+	}
+	
+	@Test
+	public void shouldApplyHasConstraintsForObservationsBasedOnSpecificStatusCorrectly() {
+		runHasObservationBasedOnTest(
+			"status",
+			"TODO", //TODO: Obs.Status.FINAL can not be loaded here and is the only value status can have, 
+			 new String[]{ ORDER_WITH_OBSERVATION_CATEGORY_LABORATORY_UUID }, 
+			 new String[]{WRONG_UUID, ORDER_WITH_TEXT_VALUE_UUID }
+		);
+	}
+
+	
+	@Test
+	public void shouldReturnNoEntriesForUnsupportedSearchParameters() {
+		String[] unsupportedSearchParameters = {
+			"focus",
+			"derived-from",
+			"method",
+			"data-absent-reason",
+			"device",
+			"component-data-absent-reason",
+			"component-code-value-quantity",
+			"component-value-quantity",
+			"component-code-value-concept",
+			"component-value-concept",
+			"component-code",
+			"combo-data-absent-reason",
+			"combo-code",
+			"combo-code-value-quantity",
+			"combo-code-value-concept",
+			"combo-value-quantity",
+			"combo-value-concept",
+		};
+		for (String unsupportedSearchParameter : unsupportedSearchParameters) {
+			runHasObservationBasedOnTest(
+				unsupportedSearchParameter,
+				null,
+				new String[]{ }, 
+				new String[]{WRONG_UUID, ORDER_WITH_TEXT_VALUE_UUID }
+			);
+		}	
+	}
+
+	private void runHasObservationBasedOnTest(String searchParameter, String value, String[] expectedUuids, String[] unexpectedUuids){
+		HasOrListParam hasOrListParam = new HasOrListParam();
+		hasOrListParam.add(new HasParam("Observation", "based-on", searchParameter, value));
+		HasAndListParam hasAndListParam = new HasAndListParam();
+		hasAndListParam.addAnd(hasOrListParam);
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.HAS_SEARCH_HANDLER,
+		    hasAndListParam);
+		
+		List<TestOrder> results = dao.getSearchResults(theParams);
+		
+		assertThat(results, notNullValue());
+
+		if(expectedUuids.length > 0){
+			assertThat("No service requests returned", results.size() > 0);
+		}
+		
+		for (String expectedUuid : expectedUuids) {
+			assertThat("Result did not contain expected entry",
+				containsUuid(results, expectedUuid));
+		}
+
+		for (String unexpectedUuid : unexpectedUuids) {
+			assertThat("Result did contain unexpected entry",
+				!containsUuid(results, unexpectedUuid));
+		}
+	}
+
+	
+	private boolean containsUuid(Collection<TestOrder> collection, String uuid) {
+		Predicate predicate = new Predicate() {
+			
+			public boolean evaluate(Object sample) {
+				return ((TestOrder) sample).getUuid().equals(uuid);
+			}
+		};
+		return CollectionUtils.exists(collection, predicate);
+	}
+	
 }

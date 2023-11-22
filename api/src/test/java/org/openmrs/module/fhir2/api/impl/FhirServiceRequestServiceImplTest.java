@@ -36,6 +36,9 @@ import java.util.List;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.HasAndListParam;
+import ca.uhn.fhir.rest.param.HasOrListParam;
+import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -43,6 +46,7 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.junit.Before;
@@ -315,7 +319,7 @@ public class FhirServiceRequestServiceImplTest {
 	}
 	
 	@Test
-	public void searchForPeople_shouldAddRelatedResourcesWhenIncluded() {
+	public void searchForServiceRequest_shouldAddRelatedResourcesWhenIncluded() {
 		HashSet<Include> includes = new HashSet<>();
 		includes.add(new Include("ServiceRequest:patient"));
 		ServiceRequestSearchParams serviceRequestSearchParams = new ServiceRequestSearchParams();
@@ -340,7 +344,7 @@ public class FhirServiceRequestServiceImplTest {
 	}
 	
 	@Test
-	public void searchForPeople_shouldAddRelatedResourcesWhenIncludedR3() {
+	public void searchForServiceRequest_shouldAddRelatedResourcesWhenIncludedR3() {
 		HashSet<Include> includes = new HashSet<>();
 		includes.add(new Include("ProcedureRequest:patient"));
 		ServiceRequestSearchParams serviceRequestSearchParams = new ServiceRequestSearchParams();
@@ -365,7 +369,7 @@ public class FhirServiceRequestServiceImplTest {
 	}
 	
 	@Test
-	public void searchForPeople_shouldNotAddRelatedResourcesForEmptyInclude() {
+	public void searchForServiceRequest_shouldNotAddRelatedResourcesForEmptyInclude() {
 		HashSet<Include> includes = new HashSet<>();
 		ServiceRequestSearchParams serviceRequestSearchParams = new ServiceRequestSearchParams();
 		serviceRequestSearchParams.setIncludes(includes);
@@ -387,4 +391,40 @@ public class FhirServiceRequestServiceImplTest {
 		assertThat(resultList.size(), equalTo(1));
 	}
 	
+	@Test
+	public void searchForServiceRequest_shouldAddNotNullConstraintForHasParamsWithNoParameterValue() {
+		// Example request: /ServiceRequest?_has:Observation:based-on
+		HasAndListParam hasAndListParam = CreateHasAndListParam(FhirConstants.OBSERVATION, Observation.SP_BASED_ON, null,
+		    null);
+		ServiceRequestSearchParams serviceRequestSearchParams = new ServiceRequestSearchParams();
+		serviceRequestSearchParams.setHasAndListParam(hasAndListParam);
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.HAS_SEARCH_HANDLER,
+		    hasAndListParam);
+		
+		when(dao.getSearchResults(any())).thenReturn(Collections.singletonList(order));
+		when(translator.toFhirResource(order)).thenReturn(fhirServiceRequest);
+		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
+		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
+		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.singleton(new Observation()));
+		
+		IBundleProvider results = serviceRequestService.searchForServiceRequests(serviceRequestSearchParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(2));
+		assertThat(resultList, hasItem(is(instanceOf(Observation.class))));
+	}
+	
+	private HasAndListParam CreateHasAndListParam(String theTargetResourceType, String theReferenceFieldName,
+	        String theParameterName, String theParameterValue) {
+		HasParam hasParam = new HasParam(theTargetResourceType, theReferenceFieldName, theParameterName, theParameterValue);
+		HasOrListParam hasOrListParam = new HasOrListParam();
+		hasOrListParam.add(hasParam);
+		HasAndListParam hasAndListParam = new HasAndListParam();
+		hasAndListParam.addValue(hasOrListParam);
+		return hasAndListParam;
+	}
 }
