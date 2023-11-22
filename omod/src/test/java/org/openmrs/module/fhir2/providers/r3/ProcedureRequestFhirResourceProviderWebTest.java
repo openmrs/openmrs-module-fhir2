@@ -49,6 +49,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirServiceRequestService;
+import org.openmrs.module.fhir2.api.search.param.ServiceRequestSearchParams;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -107,6 +108,9 @@ public class ProcedureRequestFhirResourceProviderWebTest extends BaseFhirR3Resou
 	
 	@Captor
 	private ArgumentCaptor<HashSet<Include>> includeArgumentCaptor;
+
+	@Captor
+	private ArgumentCaptor<ServiceRequestSearchParams> serviceRequestSearchParamsArgumentCaptor;
 	
 	@Before
 	@Override
@@ -565,6 +569,64 @@ public class ProcedureRequestFhirResourceProviderWebTest extends BaseFhirR3Resou
 		assertThat(includeArgumentCaptor.getValue(),
 		    hasItem(allOf(hasProperty("paramName", equalTo(FhirConstants.INCLUDE_PATIENT_PARAM)),
 		        hasProperty("paramType", equalTo(FhirConstants.PROCEDURE_REQUEST)))));
+	}
+
+	@Test
+	public void searchForServiceRequests_shouldHandleHasAndListParameter() throws Exception {
+		verifyUri("/ServiceRequest?_has:Observation:based-on:category:not=laboratory");
+		
+		verify(service).searchForServiceRequests(serviceRequestSearchParamsArgumentCaptor.capture());
+
+		HasAndListParam hasAndListParam = serviceRequestSearchParamsArgumentCaptor.getValue().getHasAndListParam();
+		assertThat(hasAndListParam, notNullValue());
+		assertThat(hasAndListParam.size(), equalTo(1));
+		
+		List<HasOrListParam> hasOrListParams = hasAndListParam.getValuesAsQueryTokens();
+		assertThat(hasOrListParams.size(), equalTo(1));
+		
+		List<String> valuesFound = new ArrayList<>();
+		
+		for (HasOrListParam hasOrListParam : hasOrListParams) {
+			hasOrListParam.getValuesAsQueryTokens().forEach(hasParam -> {
+				assertThat(hasParam.getTargetResourceType(), equalTo(FhirConstants.OBSERVATION));
+				assertThat(hasParam.getReferenceFieldName(), equalTo("based-on"));
+				valuesFound.add(hasParam.getParameterName() + "=" + hasParam.getParameterValue());
+			});
+		}
+		Collections.sort(valuesFound);
+		
+		assertThat(valuesFound.size(), equalTo(1));
+		assertThat(valuesFound.get(0), equalTo("category != laboratory"));
+	}
+	
+	@Test
+	@Ignore
+	public void shouldHandleHasAndListParameterWithColonNotAfterParameterName() throws Exception {
+		verifyUri("/ServiceRequest?_has:Observation:based-on:category:not=laboratory");
+		
+		verify(service).searchForServiceRequests(serviceRequestSearchParamsArgumentCaptor.capture());
+		
+		/*
+		 * TODO:
+		 * The [HL7 documentation](https://www.hl7.org/fhir/search.html#has) discourages this use-case.
+		 * Implementation of verification is pending confirmation to act against this recommendation. 
+		 */
+		
+	}
+	
+	@Test
+	@Ignore
+	public void shouldHandleHasAndListParameterWithColonNotAfterParameterNameAndNoValue() throws Exception {
+		verifyUri("/ServiceRequest?_has:Observation:based-on:not");
+		
+		verify(service).searchForServiceRequests(serviceRequestSearchParamsArgumentCaptor.capture());
+		
+		/*
+		 * TODO:
+		 * The [HL7 documentation](https://www.hl7.org/fhir/search.html#has) discourages this use-case.
+		 * Implementation of verification is pending confirmation to act against this recommendation. 
+		 */
+		
 	}
 	
 	private void verifyUri(String uri) throws Exception {

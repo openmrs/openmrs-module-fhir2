@@ -17,10 +17,13 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import org.hl7.fhir.r4.model.ServiceRequest;
+import org.openmrs.module.fhir2.api.search.param.ServiceRequestSearchParams;
 
 public interface FhirServiceRequestService extends FhirService<ServiceRequest> {
 	
 	IBundleProvider searchForServiceRequests(ReferenceAndListParam patientReference, TokenAndListParam code,
 	        ReferenceAndListParam encounterReference, ReferenceAndListParam participantReference, DateRangeParam occurrence,
 	        TokenAndListParam uuid, DateRangeParam lastUpdated, HashSet<Include> includes);
+	
+	IBundleProvider searchForServiceRequests(ServiceRequestSearchParams serviceRequestSearchParams);
 }

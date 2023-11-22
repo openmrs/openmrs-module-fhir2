@@ -24,12 +24,16 @@ import static org.mockito.Mockito.when;
 
 import javax.servlet.ServletException;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.HasAndListParam;
+import ca.uhn.fhir.rest.param.HasOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
@@ -40,6 +44,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -48,6 +53,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirServiceRequestService;
+import org.openmrs.module.fhir2.api.search.param.ServiceRequestSearchParams;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -98,6 +104,9 @@ public class ServiceRequestFhirResourceProviderWebTest extends BaseFhirR4Resourc
 	
 	@Captor
 	private ArgumentCaptor<HashSet<Include>> includeArgumentCaptor;
+	
+	@Captor
+	private ArgumentCaptor<ServiceRequestSearchParams> paramCaptor;
 	
 	private ServiceRequest serviceRequest;
 	
@@ -566,6 +575,64 @@ public class ServiceRequestFhirResourceProviderWebTest extends BaseFhirR4Resourc
 		assertThat(includeArgumentCaptor.getValue(),
 		    hasItem(allOf(hasProperty("paramName", equalTo(FhirConstants.INCLUDE_PATIENT_PARAM)),
 		        hasProperty("paramType", equalTo(FhirConstants.SERVICE_REQUEST)))));
+	}
+
+	@Test
+	public void searchForServiceRequests_shouldHandleHasAndListParameter() throws Exception {
+		verifyUri("/ServiceRequest?_has:Observation:based-on:category:not=laboratory");
+		
+		verify(service).searchForServiceRequests(serviceRequestSearchParamsArgumentCaptor.capture());
+
+		HasAndListParam hasAndListParam = serviceRequestSearchParamsArgumentCaptor.getValue().getHasAndListParam();
+		assertThat(hasAndListParam, notNullValue());
+		assertThat(hasAndListParam.size(), equalTo(1));
+		
+		List<HasOrListParam> hasOrListParams = hasAndListParam.getValuesAsQueryTokens();
+		assertThat(hasOrListParams.size(), equalTo(1));
+		
+		List<String> valuesFound = new ArrayList<>();
+		
+		for (HasOrListParam hasOrListParam : hasOrListParams) {
+			hasOrListParam.getValuesAsQueryTokens().forEach(hasParam -> {
+				assertThat(hasParam.getTargetResourceType(), equalTo(FhirConstants.OBSERVATION));
+				assertThat(hasParam.getReferenceFieldName(), equalTo("based-on"));
+				valuesFound.add(hasParam.getParameterName() + "=" + hasParam.getParameterValue());
+			});
+		}
+		Collections.sort(valuesFound);
+		
+		assertThat(valuesFound.size(), equalTo(1));
+		assertThat(valuesFound.get(0), equalTo("category != laboratory"));
+	}
+	
+	@Test
+	@Ignore
+	public void searchForServiceRequests_shouldHandleHasAndListParameterWithColonNotAfterParameterName() throws Exception {
+		verifyUri("/ServiceRequest?_has:Observation:based-on:category:not=laboratory");
+		
+		verify(service).searchForServiceRequests(serviceRequestSearchParamsArgumentCaptor.capture());
+		
+		/*
+		 * TODO:
+		 * The [HL7 documentation](https://www.hl7.org/fhir/search.html#has) discourages this use-case.
+		 * Implementation of verification is pending confirmation to act against this recommendation. 
+		 */
+		
+	}
+	
+	@Test
+	@Ignore
+	public void searchForServiceRequests_shouldHandleHasAndListParameterWithColonNotAfterParameterNameAndNoValue() throws Exception {
+		verifyUri("/ServiceRequest?_has:Observation:based-on:not");
+		
+		verify(service).searchForServiceRequests(serviceRequestSearchParamsArgumentCaptor.capture());
+		
+		/*
+		 * TODO:
+		 * The [HL7 documentation](https://www.hl7.org/fhir/search.html#has) discourages this use-case.
+		 * Implementation of verification is pending confirmation to act against this recommendation. 
+		 */
+		
 	}
 	
 	private void verifyUri(String uri) throws Exception {

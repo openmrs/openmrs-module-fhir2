@@ -27,6 +27,7 @@ import org.openmrs.module.fhir2.api.dao.FhirServiceRequestDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
+import org.openmrs.module.fhir2.api.search.param.ServiceRequestSearchParams;
 import org.openmrs.module.fhir2.api.translators.ServiceRequestTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -68,4 +69,8 @@ public class FhirServiceRequestServiceImpl extends BaseFhirService<ServiceReques
 		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}
 	
+	@Override
+	public IBundleProvider searchForServiceRequests(ServiceRequestSearchParams serviceRequestSearchParams) {
+		return null;
+	}
 }
