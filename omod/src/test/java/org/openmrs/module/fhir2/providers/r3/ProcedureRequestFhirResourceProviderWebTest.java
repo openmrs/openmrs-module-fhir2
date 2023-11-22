@@ -539,7 +539,7 @@ public class ProcedureRequestFhirResourceProviderWebTest extends BaseFhirR3Resou
 	
 	@Test
 	public void searchForServiceRequests_shouldHandleHasAndListParameter() throws Exception {
-		verifyUri("/ServiceRequest?_has:Observation:based-on:category:not=laboratory");
+		verifyUri("/ProcedureRequest?_has:Observation:based-on:category=laboratory");
 		
 		verify(service).searchForServiceRequests(serviceRequestSearchParamsArgumentCaptor.capture());
 		
@@ -562,13 +562,13 @@ public class ProcedureRequestFhirResourceProviderWebTest extends BaseFhirR3Resou
 		Collections.sort(valuesFound);
 		
 		assertThat(valuesFound.size(), equalTo(1));
-		assertThat(valuesFound.get(0), equalTo("category != laboratory"));
+		assertThat(valuesFound.get(0), equalTo("category=laboratory"));
 	}
 	
 	@Test
 	@Ignore
 	public void shouldHandleHasAndListParameterWithColonNotAfterParameterName() throws Exception {
-		verifyUri("/ServiceRequest?_has:Observation:based-on:category:not=laboratory");
+		verifyUri("/ProcedureRequest?_has:Observation:based-on:category:not=laboratory");
 		
 		verify(service).searchForServiceRequests(serviceRequestSearchParamsArgumentCaptor.capture());
 		
@@ -583,7 +583,7 @@ public class ProcedureRequestFhirResourceProviderWebTest extends BaseFhirR3Resou
 	@Test
 	@Ignore
 	public void shouldHandleHasAndListParameterWithColonNotAfterParameterNameAndNoValue() throws Exception {
-		verifyUri("/ServiceRequest?_has:Observation:based-on:not");
+		verifyUri("/ProcedureRequest?_has:Observation:based-on:not");
 		
 		verify(service).searchForServiceRequests(serviceRequestSearchParamsArgumentCaptor.capture());
 		

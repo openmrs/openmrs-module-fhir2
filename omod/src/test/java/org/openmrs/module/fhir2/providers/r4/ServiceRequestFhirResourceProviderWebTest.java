@@ -539,9 +539,8 @@ public class ServiceRequestFhirResourceProviderWebTest extends BaseFhirR4Resourc
 	}
 	
 	@Test
-	@Ignore
 	public void searchForServiceRequests_shouldHandleHasAndListParameter() throws Exception {
-		verifyUri("/ServiceRequest?_has:Observation:based-on:category:not=laboratory");
+		verifyUri("/ServiceRequest?_has:Observation:based-on:category=laboratory");
 		
 		verify(service).searchForServiceRequests(serviceRequestSearchParamsArgumentCaptor.capture());
 		
@@ -564,10 +563,11 @@ public class ServiceRequestFhirResourceProviderWebTest extends BaseFhirR4Resourc
 		Collections.sort(valuesFound);
 		
 		assertThat(valuesFound.size(), equalTo(1));
-		assertThat(valuesFound.get(0), equalTo("category != laboratory"));
+		assertThat(valuesFound.get(0), equalTo("category=laboratory"));
 	}
 	
 	@Test
+	@Ignore
 	public void searchForServiceRequests_shouldHandleHasAndListParameterWithColonNotAfterParameterName() throws Exception {
 		verifyUri("/ServiceRequest?_has:Observation:based-on:category:not=laboratory");
 		
