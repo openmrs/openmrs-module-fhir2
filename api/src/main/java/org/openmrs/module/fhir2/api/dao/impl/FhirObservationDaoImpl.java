@@ -137,7 +137,7 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 			
 			cq.multiselect(root.get("concept.id"), root.get("obsDatetime"), criteriaBuilder.count(root));
 			
-			applyExactTotal(theParams, criteriaBuilder);
+			applyExactTotal(criteriaBuilder, theParams);
 			List<Object[]> rows = tq.getResultList();
 			final int maxGroupCount = getMaxParameter(theParams);
 			int groupCount = maxGroupCount;
