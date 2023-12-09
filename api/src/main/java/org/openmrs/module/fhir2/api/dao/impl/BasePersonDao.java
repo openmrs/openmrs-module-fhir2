@@ -177,8 +177,7 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
-	protected void handleAddresses(CriteriaBuilder criteriaBuilder, Map.Entry<String, List<PropParam<?>>> entry) {
+	protected void handleAddresses(OpenmrsFhirCriteriaContext<T> criteriaContext, Map.Entry<String, List<PropParam<?>>> entry) {
 		StringAndListParam city = null;
 		StringAndListParam country = null;
 		StringAndListParam postalCode = null;
@@ -200,19 +199,14 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 			}
 		}
 		
-		EntityManager em = sessionFactory.getCurrentSession();
-		criteriaBuilder = em.getCriteriaBuilder();
-		CriteriaQuery<T> criteriaQuery = (CriteriaQuery<T>) em.getCriteriaBuilder().createQuery(typeToken.getRawType());
-		Root<T> root = (Root<T>) criteriaQuery.from(typeToken.getRawType());
-		
-		CriteriaBuilder finalCriteriaBuilder = criteriaBuilder;
 		handlePersonAddress("pad", city, state, postalCode, country).ifPresent(c -> {
-			root.join(getAssociationPath("addresses")).alias("pad");
-			finalCriteriaBuilder.and(c);
+			criteriaContext.getRoot().join(getAssociationPath("addresses")).alias("pad");
+			criteriaContext.addPredicate(c);
+			criteriaContext.finalizeQuery();
 		});
 	}
 	
-	protected void handleNames(CriteriaBuilder criteriaBuilder, List<PropParam<?>> params) {
+	protected void handleNames(OpenmrsFhirCriteriaContext<T> criteriaContext, List<PropParam<?>> params) {
 		StringAndListParam name = null;
 		StringAndListParam given = null;
 		StringAndListParam family = null;
@@ -231,7 +225,7 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 			}
 		}
 		
-		handleNames(criteriaBuilder, name, given, family, getPersonProperty());
+		handleNames(criteriaContext, name, given, family, getPersonProperty());
 	}
 	
 	private String getAssociationPath(String property) {

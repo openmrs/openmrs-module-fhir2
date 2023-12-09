@@ -10,13 +10,8 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import javax.annotation.Nonnull;
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,8 +33,6 @@ import org.springframework.stereotype.Component;
 @Component
 @Setter(AccessLevel.PROTECTED)
 public class FhirConditionDaoImpl extends BaseFhirDao<Condition> implements FhirConditionDao<Condition> {
-	
-	private List<Predicate> predicates = new ArrayList<>();
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_CONDITIONS)
@@ -78,78 +71,59 @@ public class FhirConditionDaoImpl extends BaseFhirDao<Condition> implements Fhir
 	}
 	
 	@Override
-	protected void setupSearchParams(CriteriaBuilder criteriaBuilder, SearchParameterMap theParams) {
-		EntityManager em = sessionFactory.getCurrentSession();
-		criteriaBuilder = em.getCriteriaBuilder();
-		CriteriaQuery<Condition> criteriaQuery = criteriaBuilder.createQuery(Condition.class);
-		Root<Condition> root = criteriaQuery.from(Condition.class);
-		
-		CriteriaBuilder finalCriteriaBuilder = criteriaBuilder;
+	protected void setupSearchParams(OpenmrsFhirCriteriaContext<Condition> criteriaContext, SearchParameterMap theParams) {
+		createCriteriaContext();
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER:
 					entry.getValue().forEach(
-					    param -> handlePatientReference(finalCriteriaBuilder, (ReferenceAndListParam) param.getParam()));
+					    param -> handlePatientReference(criteriaContext, (ReferenceAndListParam) param.getParam()));
 					break;
 				case FhirConstants.CODED_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handleCode(finalCriteriaBuilder, (TokenAndListParam) param.getParam()));
+					entry.getValue().forEach(param -> handleCode(criteriaContext, (TokenAndListParam) param.getParam()));
 					break;
 				case FhirConstants.CONDITION_CLINICAL_STATUS_HANDLER:
 					entry.getValue()
-					        .forEach(param -> handleClinicalStatus(finalCriteriaBuilder, (TokenAndListParam) param.getParam()));
+					        .forEach(param -> handleClinicalStatus(criteriaContext, (TokenAndListParam) param.getParam()));
 					break;
 				case FhirConstants.DATE_RANGE_SEARCH_HANDLER:
 					entry.getValue()
 					        .forEach(param -> handleDateRange(param.getPropertyName(), (DateRangeParam) param.getParam())
-					                .ifPresent(predicates::add));
+					                .ifPresent(criteriaContext::addPredicate));
+					criteriaContext.finalizeQuery();
 					break;
 				case FhirConstants.QUANTITY_SEARCH_HANDLER:
 					entry.getValue()
-					        .forEach(param -> handleOnsetAge(finalCriteriaBuilder, (QuantityAndListParam) param.getParam()));
+					        .forEach(param -> handleOnsetAge(criteriaContext, (QuantityAndListParam) param.getParam()));
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(entry.getValue()).ifPresent(predicates::add);
-					criteriaQuery.distinct(true).where(predicates.toArray(new Predicate[] {}));
+					handleCommonSearchParameters(entry.getValue()).ifPresent(criteriaContext::addPredicate);
+					criteriaContext.finalizeQuery();
 					break;
 			}
 		});
 	}
 	
-	private void handleCode(CriteriaBuilder criteriaBuilder, TokenAndListParam code) {
-		EntityManager em = sessionFactory.getCurrentSession();
-		criteriaBuilder = em.getCriteriaBuilder();
-		CriteriaQuery<Condition> criteriaQuery = criteriaBuilder.createQuery(Condition.class);
-		Root<Condition> root = criteriaQuery.from(Condition.class);
-		
+	private void handleCode(OpenmrsFhirCriteriaContext<Condition> criteriaContext, TokenAndListParam code) {
 		if (code != null) {
-			root.join("condition.coded").alias("cd");
-			handleCodeableConcept(criteriaBuilder, code, "cd", "map", "term").ifPresent(predicates::add);
-			criteriaQuery.distinct(true).where(predicates.toArray(new Predicate[] {}));
+			criteriaContext.getRoot().join("condition.coded").alias("cd");
+			handleCodeableConcept(criteriaContext, code, "cd", "map", "term").ifPresent(criteriaContext::addPredicate);
+			criteriaContext.finalizeQuery();
 		}
 	}
 	
-	private void handleClinicalStatus(CriteriaBuilder criteriaBuilder, TokenAndListParam status) {
-		EntityManager em = sessionFactory.getCurrentSession();
-		criteriaBuilder = em.getCriteriaBuilder();
-		CriteriaQuery<Condition> criteriaQuery = criteriaBuilder.createQuery(Condition.class);
-		Root<Condition> root = criteriaQuery.from(Condition.class);
-		
-		CriteriaBuilder finalCriteriaBuilder = criteriaBuilder;
+	private void handleClinicalStatus(OpenmrsFhirCriteriaContext<Condition> criteriaContext, TokenAndListParam status) {
 		handleAndListParam(status,
 		    tokenParam -> Optional
-		            .of(finalCriteriaBuilder.equal(root.get("clinicalStatus"), convertStatus(tokenParam.getValue()))))
-		                    .ifPresent(predicates::add);
-		criteriaQuery.distinct(true).where(predicates.toArray(new Predicate[] {}));
+		            .of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("clinicalStatus"), convertStatus(tokenParam.getValue()))))
+		                    .ifPresent(criteriaContext::addPredicate);
+		criteriaContext.finalizeQuery();
 	}
 	
-	private void handleOnsetAge(CriteriaBuilder criteriaBuilder, QuantityAndListParam onsetAge) {
-		EntityManager em = sessionFactory.getCurrentSession();
-		criteriaBuilder = em.getCriteriaBuilder();
-		CriteriaQuery<Condition> criteriaQuery = criteriaBuilder.createQuery(Condition.class);
-		
+	private void handleOnsetAge(OpenmrsFhirCriteriaContext<Condition> criteriaContext, QuantityAndListParam onsetAge) {
 		handleAndListParam(onsetAge, onsetAgeParam -> handleAgeByDateProperty("onsetDate", onsetAgeParam))
-		        .ifPresent(predicates::add);
-		criteriaQuery.distinct(true).where(predicates.toArray(new Predicate[] {}));
+		        .ifPresent(criteriaContext::addPredicate);
+		criteriaContext.finalizeQuery();
 	}
 	
 	@Override

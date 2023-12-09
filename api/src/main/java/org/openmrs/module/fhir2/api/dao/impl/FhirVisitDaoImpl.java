@@ -12,16 +12,8 @@ package org.openmrs.module.fhir2.api.dao.impl;
 import static org.hl7.fhir.r4.model.Encounter.SP_DATE;
 
 import javax.annotation.Nonnull;
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -39,43 +31,26 @@ import org.springframework.stereotype.Component;
 public class FhirVisitDaoImpl extends BaseEncounterDao<Visit> implements FhirVisitDao {
 	
 	@Override
-	protected void handleDate(CriteriaBuilder criteriaBuilder, DateRangeParam dateRangeParam) {
-		EntityManager em = sessionFactory.getCurrentSession();
-		criteriaBuilder = em.getCriteriaBuilder();
-		CriteriaQuery<Visit> criteriaQuery = criteriaBuilder.createQuery(Visit.class);
-		
-		List<Predicate> predicates = new ArrayList<>();
-		handleDateRange("startDatetime", dateRangeParam).ifPresent(predicates::add);
-		criteriaQuery.distinct(true).where(predicates.toArray(new Predicate[] {}));
+	protected void handleDate(OpenmrsFhirCriteriaContext<Visit> criteriaContext, DateRangeParam dateRangeParam) {
+		handleDateRange("startDatetime", dateRangeParam).ifPresent(criteriaContext::addPredicate);
+		criteriaContext.finalizeQuery();
 	}
 	
 	@Override
-	protected void handleEncounterType(CriteriaBuilder criteriaBuilder, TokenAndListParam tokenAndListParam) {
-		EntityManager em = sessionFactory.getCurrentSession();
-		criteriaBuilder = em.getCriteriaBuilder();
-		CriteriaQuery<Visit> criteriaQuery = criteriaBuilder.createQuery(Visit.class);
-		Root<Visit> root = criteriaQuery.from(Visit.class);
-		
-		List<Predicate> predicates = new ArrayList<>();
-		CriteriaBuilder finalCriteriaBuilder = criteriaBuilder;
-		handleAndListParam(tokenAndListParam, t -> Optional.of(finalCriteriaBuilder.equal(root.get("vt.uuid"), t.getValue())))
+	protected void handleEncounterType(OpenmrsFhirCriteriaContext<Visit> criteriaContext, TokenAndListParam tokenAndListParam) {
+		handleAndListParam(tokenAndListParam, t -> Optional.of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("vt.uuid"), t.getValue())))
 		        .ifPresent(t -> {
-			        root.join("visitType");
-			        predicates.add(t);
-			        criteriaQuery.distinct(true).where(predicates.toArray(new Predicate[] {}));
+			        criteriaContext.getRoot().join("visitType");
+			        criteriaContext.addPredicate(t);
+			        criteriaContext.finalizeQuery();
 		        });
 	}
 	
 	@Override
-	protected void handleParticipant(CriteriaBuilder criteriaBuilder, ReferenceAndListParam referenceAndListParam) {
-		EntityManager em = sessionFactory.getCurrentSession();
-		criteriaBuilder = em.getCriteriaBuilder();
-		CriteriaQuery<Visit> criteriaQuery = criteriaBuilder.createQuery(Visit.class);
-		Root<Visit> root = criteriaQuery.from(Visit.class);
-		
-		Join<Visit, Encounter> encounterJoin = root.join("encounters", JoinType.INNER);
+	protected void handleParticipant(OpenmrsFhirCriteriaContext<Visit> criteriaContext, ReferenceAndListParam referenceAndListParam) {
+		Join<Visit, Encounter> encounterJoin = criteriaContext.getRoot().join("encounters", JoinType.INNER);
 		encounterJoin.join("encounterProviders", JoinType.INNER);
-		handleParticipantReference(criteriaBuilder, referenceAndListParam);
+		handleParticipantReference(criteriaContext, referenceAndListParam);
 	}
 	
 	@Override

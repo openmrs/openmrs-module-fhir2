@@ -13,14 +13,8 @@ import static org.hl7.fhir.r4.model.Encounter.SP_DATE;
 import static org.openmrs.module.fhir2.api.util.LastnOperationUtils.getTopNRankedIds;
 
 import javax.annotation.Nonnull;
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -53,35 +47,26 @@ public class FhirEncounterDaoImpl extends BaseEncounterDao<Encounter> implements
 	
 	@Override
 	public List<String> getSearchResultUuids(@Nonnull SearchParameterMap theParams) {
-		EntityManager em = sessionFactory.getCurrentSession();
-		CriteriaBuilder cb = em.getCriteriaBuilder();
-		CriteriaQuery<Encounter> criteriaQuery = cb.createQuery(Encounter.class);
-		Root<Encounter> root = criteriaQuery.from(Encounter.class);
+		OpenmrsFhirCriteriaContext<Encounter> criteriaContext = createCriteriaContext();
 		
 		if (!theParams.getParameters(FhirConstants.LASTN_ENCOUNTERS_SEARCH_HANDLER).isEmpty()) {
-			CriteriaQuery<Object[]> cq = cb.createQuery(Object[].class);
+			setupSearchParams(criteriaContext, theParams);
 			
-			setupSearchParams(cb, theParams);
+			OpenmrsFhirCriteriaContext<Object[]> objCriteriaContext = createObjectCriteriaContext();
+			objCriteriaContext.getCriteriaQuery().multiselect(objCriteriaContext.getRoot().get("uuid"), objCriteriaContext.getRoot().get("encounterDatetime"));
 			
-			cq.multiselect(root.get("uuid"), root.get("encounterDatetime"));
-			
-			List<LastnResult<String>> results = em.createQuery(cq).getResultList().stream()
+			List<LastnResult<String>> results = objCriteriaContext.getEntityManager().createQuery(objCriteriaContext.getCriteriaQuery()).getResultList().stream()
 			        .map(array -> new LastnResult<String>(array)).collect(Collectors.toList());
 			
 			return getTopNRankedIds(results, getMaxParameter(theParams));
 		}
 		
-		CriteriaQuery<String> cbQuery = cb.createQuery(String.class);
+		handleVoidable(criteriaContext);
+		setupSearchParams(criteriaContext, theParams);
+		handleSort(criteriaContext, theParams.getSortSpec());
 		
-		handleVoidable(cb);
-		
-		setupSearchParams(cb, theParams);
-		handleSort(cb, theParams.getSortSpec());
-		cbQuery.select(root.get("uuid"));
-		
-		List<String> results = em.createQuery(cbQuery).getResultList();
-		
-		return results.stream().distinct().collect(Collectors.toList());
+		createStringCriteriaContext().getCriteriaQuery().select(createStringCriteriaContext().getRoot().get("uuid"));
+		return createStringCriteriaContext().getEntityManager().createQuery(createStringCriteriaContext().getCriteriaQuery()).getResultList().stream().distinct().collect(Collectors.toList());
 	}
 	
 	private int getMaxParameter(SearchParameterMap theParams) {
@@ -90,40 +75,24 @@ public class FhirEncounterDaoImpl extends BaseEncounterDao<Encounter> implements
 	}
 	
 	@Override
-	protected void handleDate(CriteriaBuilder criteriaBuilder, DateRangeParam dateRangeParam) {
-		List<Predicate> predicates = new ArrayList<>();
-		EntityManager em = sessionFactory.getCurrentSession();
-		CriteriaBuilder cb = em.getCriteriaBuilder();
-		CriteriaQuery<Encounter> criteriaQuery = cb.createQuery(Encounter.class);
-		
-		handleDateRange("encounterDatetime", dateRangeParam).ifPresent(predicates::add);
-		criteriaQuery.where(predicates.toArray(new Predicate[] {}));
+	protected void handleDate(OpenmrsFhirCriteriaContext<Encounter> criteriaContext, DateRangeParam dateRangeParam) {
+		handleDateRange("encounterDatetime", dateRangeParam).ifPresent(criteriaContext::addPredicate);
+		criteriaContext.finalizeQuery();
 	}
 	
 	@Override
-	protected void handleEncounterType(CriteriaBuilder criteriaBuilder, TokenAndListParam tokenAndListParam) {
-		List<Predicate> predicates = new ArrayList<>();
-		EntityManager em = sessionFactory.getCurrentSession();
-		CriteriaBuilder cb = em.getCriteriaBuilder();
-		CriteriaQuery<Encounter> criteriaQuery = cb.createQuery(Encounter.class);
-		Root<Encounter> root = criteriaQuery.from(Encounter.class);
-		
+	protected void handleEncounterType(OpenmrsFhirCriteriaContext<Encounter> criteriaContext, TokenAndListParam tokenAndListParam) {
 		handleAndListParam(tokenAndListParam, t -> {
-			Join<Encounter, EncounterType> et = root.join("encounterType");
-			return Optional.of(criteriaBuilder.equal(et.get("uuid"), t.getValue()));
-		}).ifPresent(predicates::add);
-		criteriaQuery.where(predicates.toArray(new Predicate[] {}));
+			Join<Encounter, EncounterType> et = criteriaContext.getRoot().join("encounterType");
+			return Optional.of(criteriaContext.getCriteriaBuilder().equal(et.get("uuid"), t.getValue()));
+		}).ifPresent(criteriaContext::addPredicate);
+		criteriaContext.finalizeQuery();
 	}
 	
 	@Override
-	protected void handleParticipant(CriteriaBuilder criteriaBuilder, ReferenceAndListParam referenceAndListParam) {
-		EntityManager em = sessionFactory.getCurrentSession();
-		CriteriaBuilder cb = em.getCriteriaBuilder();
-		CriteriaQuery<Encounter> criteriaQuery = cb.createQuery(Encounter.class);
-		Root<Encounter> root = criteriaQuery.from(Encounter.class);
-		
-		root.join("encounterProviders");
-		handleParticipantReference(criteriaBuilder, referenceAndListParam);
+	protected void handleParticipant(OpenmrsFhirCriteriaContext<Encounter> criteriaContext, ReferenceAndListParam referenceAndListParam) {
+		criteriaContext.getRoot().join("encounterProviders");
+		handleParticipantReference(criteriaContext, referenceAndListParam);
 	}
 	
 	@Override

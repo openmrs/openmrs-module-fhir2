@@ -160,7 +160,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
  * }</pre>
  * </p>
  */
-public abstract class BaseDao {
+public abstract class BaseDao<T> {
 	
 	private static final BigDecimal APPROX_RANGE = new BigDecimal("0.1");
 	
@@ -553,43 +553,38 @@ public abstract class BaseDao {
 		return handleAndListParam(quantityAndListParam, quantityParam -> handleQuantity(propertyName, quantityParam));
 	}
 	
-	protected void handleEncounterReference(CriteriaBuilder criteria, ReferenceAndListParam encounterReference,
+	protected void handleEncounterReference(OpenmrsFhirCriteriaContext<T> criteriaContext, ReferenceAndListParam encounterReference,
 	        @Nonnull String encounterAlias) {
-		handleEncounterReference(criteria, encounterReference, encounterAlias, "encounter");
+		handleEncounterReference(criteriaContext, encounterReference, encounterAlias, "encounter");
 	}
 	
-	protected void handleEncounterReference(CriteriaBuilder criteriaBuilder, ReferenceAndListParam encounterReference,
+	protected void handleEncounterReference(OpenmrsFhirCriteriaContext<T> criteriaContext, ReferenceAndListParam encounterReference,
 	        @Nonnull String encounterAlias, @Nonnull String associationPath) {
-		EntityManager entityManager = sessionFactory.getCurrentSession();
-		criteriaBuilder = entityManager.getCriteriaBuilder();
-		CriteriaQuery<EntityType> criteriaQuery = criteriaBuilder.createQuery(EntityType.class);
-		Root<EntityType> root = criteriaQuery.from(EntityType.class);
 		
 		if (encounterReference == null) {
 			return;
 		}
 		
-		if (lacksAlias(criteriaBuilder, encounterAlias)) {
-			root.join(associationPath).alias(encounterAlias);
+		if (lacksAlias(criteriaContext, encounterAlias)) {
+			criteriaContext.getRoot().join(associationPath).alias(encounterAlias);
 		}
 		
-		CriteriaBuilder finalCriteriaBuilder = criteriaBuilder;
 		handleAndListParam(encounterReference, token -> {
 			if (token.getChain() != null) {
 				switch (token.getChain()) {
 					case Encounter.SP_TYPE:
-						if (lacksAlias(finalCriteriaBuilder, "et")) {
-							root.join(String.format("%s.encounterType", encounterAlias)).alias("et");
+						if (lacksAlias(criteriaContext, "et")) {
+							criteriaContext.getRoot().join(String.format("%s.encounterType", encounterAlias)).alias("et");
 						}
 						return propertyLike("et.uuid", new StringParam(token.getValue(), true));
 				}
 			} else {
 				return Optional.of(
-				    finalCriteriaBuilder.equal(root.get(String.format("%s.uuid", encounterAlias)), token.getIdPart()));
+						criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get(String.format("%s.uuid", encounterAlias)),token.getIdPart()));
 			}
 			
 			return Optional.empty();
-		}).ifPresent(criteriaQuery::where);
+		}).ifPresent(criteriaContext::addPredicate);
 	}
 	
 	protected Optional<Predicate> handleGender(@Nonnull String propertyName, TokenAndListParam gender) {
@@ -660,52 +655,45 @@ public abstract class BaseDao {
 		});
 	}
 	
-	protected void handleParticipantReference(CriteriaBuilder criteriaBuilder, ReferenceAndListParam participantReference) {
+	protected void handleParticipantReference(OpenmrsFhirCriteriaContext<T> criteriaContext, ReferenceAndListParam participantReference) {
 		if (participantReference != null) {
-			
-			EntityManager entityManager = sessionFactory.getCurrentSession();
-			criteriaBuilder = entityManager.getCriteriaBuilder();
-			CriteriaQuery<Object> criteriaQuery = criteriaBuilder.createQuery(Object.class);
-			Root<?> root = criteriaQuery.from(Object.class);
-			
-			if (lacksAlias(criteriaBuilder, "ep")) {
+			if (lacksAlias(criteriaContext, "ep")) {
 				return;
 			}
 			
-			CriteriaBuilder finalCriteriaBuilder = criteriaBuilder;
 			handleAndListParam(participantReference, participantToken -> {
 				if (participantToken.getChain() != null) {
 					switch (participantToken.getChain()) {
 						case Practitioner.SP_IDENTIFIER:
-							if (lacksAlias(finalCriteriaBuilder, "p")) {
-								root.join("ep.provider").alias("p");
+							if (lacksAlias(criteriaContext, "p")) {
+								criteriaContext.getRoot().join("ep.provider").alias("p");
 							}
 							return Optional
-							        .of(finalCriteriaBuilder.like(root.get("p.identifier"), participantToken.getValue()));
+							        .of(criteriaContext.getCriteriaBuilder().like(criteriaContext.getRoot().get("p.identifier"), participantToken.getValue()));
 						case Practitioner.SP_GIVEN:
-							if ((lacksAlias(finalCriteriaBuilder, "pro") && (lacksAlias(finalCriteriaBuilder, "ps")
-							        && (lacksAlias(finalCriteriaBuilder, "pn"))))) {
-								root.join("ep.provider").alias("pro");
-								root.join("pro.person").alias("ps");
-								root.join("ps.names").alias("pn");
+							if ((lacksAlias(criteriaContext, "pro") && (lacksAlias(criteriaContext, "ps")
+							        && (lacksAlias(criteriaContext, "pn"))))) {
+								criteriaContext.getRoot().join("ep.provider").alias("pro");
+								criteriaContext.getRoot().join("pro.person").alias("ps");
+								criteriaContext.getRoot().join("ps.names").alias("pn");
 							}
 							return Optional
-							        .of(finalCriteriaBuilder.like(root.get("pn.givenName"), participantToken.getValue()));
+							        .of(criteriaContext.getCriteriaBuilder().like(criteriaContext.getRoot().get("pn.givenName"), participantToken.getValue()));
 						case Practitioner.SP_FAMILY:
-							if ((lacksAlias(finalCriteriaBuilder, "pro") && (lacksAlias(finalCriteriaBuilder, "ps")
-							        && (lacksAlias(finalCriteriaBuilder, "pn"))))) {
-								root.join("ep.provider").alias("pro");
-								root.join("pro.person").alias("ps");
-								root.join("ps.names").alias("pn");
+							if ((lacksAlias(criteriaContext, "pro") && (lacksAlias(criteriaContext, "ps")
+							        && (lacksAlias(criteriaContext, "pn"))))) {
+								criteriaContext.getRoot().join("ep.provider").alias("pro");
+								criteriaContext.getRoot().join("pro.person").alias("ps");
+								criteriaContext.getRoot().join("ps.names").alias("pn");
 							}
 							return Optional
-							        .of(finalCriteriaBuilder.like(root.get("pn.familyName"), participantToken.getValue()));
+							        .of(criteriaContext.getCriteriaBuilder().like(criteriaContext.getRoot().get("pn.familyName"), participantToken.getValue()));
 						case Practitioner.SP_NAME:
-							if ((lacksAlias(finalCriteriaBuilder, "pro") && (lacksAlias(finalCriteriaBuilder, "ps")
-							        && (lacksAlias(finalCriteriaBuilder, "pn"))))) {
-								root.join("ep.provider").alias("pro");
-								root.join("pro.person").alias("ps");
-								root.join("ps.names").alias("pn");
+							if ((lacksAlias(criteriaContext, "pro") && (lacksAlias(criteriaContext, "ps")
+							        && (lacksAlias(criteriaContext, "pn"))))) {
+								criteriaContext.getRoot().join("ep.provider").alias("pro");
+								criteriaContext.getRoot().join("pro.person").alias("ps");
+								criteriaContext.getRoot().join("ps.names").alias("pn");
 							}
 							
 							List<Optional<? extends Predicate>> predicateList = new ArrayList<>();
@@ -716,56 +704,50 @@ public abstract class BaseDao {
 								predicateList.add(propertyLike("pn.familyName", token));
 							}
 							
-							return Optional.of(finalCriteriaBuilder.or(toCriteriaArray(predicateList)));
+							return Optional.of(criteriaContext.getCriteriaBuilder().or(toCriteriaArray(predicateList)));
 					}
 				} else {
-					if (lacksAlias(finalCriteriaBuilder, "pro")) {
-						root.join("ep.provider").alias("pro");
+					if (lacksAlias(criteriaContext, "pro")) {
+						criteriaContext.getRoot().join("ep.provider").alias("pro");
 					}
-					return Optional.of(finalCriteriaBuilder.equal(root.get("pro.uuid"), participantToken.getValue()));
+					return Optional.of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("pro.uuid"), participantToken.getValue()));
 				}
 				
 				return Optional.empty();
-			}).ifPresent(criteriaQuery::where);
+			}).ifPresent(criteriaContext::addPredicate);
+			criteriaContext.finalizeQuery();
 		}
 	}
 	
 	//Added this method to allow handling classes with provider instead  of encounterProvider
-	protected void handleProviderReference(CriteriaBuilder criteriaBuilder, ReferenceAndListParam providerReference) {
-		
-		EntityManager entityManager = sessionFactory.getCurrentSession();
-		criteriaBuilder = entityManager.getCriteriaBuilder();
-		CriteriaQuery<Object> criteriaQuery = criteriaBuilder.createQuery(Object.class);
-		Root<?> root = criteriaQuery.from(Object.class);
+	protected void handleProviderReference(OpenmrsFhirCriteriaContext<T> criteriaContext, ReferenceAndListParam providerReference) {
 		
 		if (providerReference != null) {
-			criteriaQuery.select(root.get("orderer").alias("or"));
-			
-			CriteriaBuilder finalCriteriaBuilder = criteriaBuilder;
+			criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot().get("orderer"));
 			handleAndListParam(providerReference, participantToken -> {
 				if (participantToken.getChain() != null) {
 					switch (participantToken.getChain()) {
 						case Practitioner.SP_IDENTIFIER:
 							return Optional
-							        .of(finalCriteriaBuilder.like(root.get("or.identifier"), participantToken.getValue()));
+							        .of(criteriaContext.getCriteriaBuilder().like(criteriaContext.getRoot().get("or.identifier"), participantToken.getValue()));
 						case Practitioner.SP_GIVEN:
-							if ((lacksAlias(finalCriteriaBuilder, "ps") && (lacksAlias(finalCriteriaBuilder, "pn")))) {
-								root.join("or.person").alias("ps");
-								root.join("ps.names").alias("pn");
+							if ((lacksAlias(criteriaContext, "ps") && (lacksAlias(criteriaContext, "pn")))) {
+								criteriaContext.getRoot().join("or.person").alias("ps");
+								criteriaContext.getRoot().join("ps.names").alias("pn");
 							}
 							return Optional
-							        .of(finalCriteriaBuilder.like(root.get("pn.givenName"), participantToken.getValue()));
+							        .of(criteriaContext.getCriteriaBuilder().like(criteriaContext.getRoot().get("pn.givenName"), participantToken.getValue()));
 						case Practitioner.SP_FAMILY:
-							if ((lacksAlias(finalCriteriaBuilder, "ps") && (lacksAlias(finalCriteriaBuilder, "pn")))) {
-								root.join("or.person").alias("ps");
-								root.join("ps.names").alias("pn");
+							if ((lacksAlias(criteriaContext, "ps") && (lacksAlias(criteriaContext, "pn")))) {
+								criteriaContext.getRoot().join("or.person").alias("ps");
+								criteriaContext.getRoot().join("ps.names").alias("pn");
 							}
 							return Optional
-							        .of(finalCriteriaBuilder.like(root.get("pn.familyName"), participantToken.getValue()));
+							        .of(criteriaContext.getCriteriaBuilder().like(criteriaContext.getRoot().get("pn.familyName"), participantToken.getValue()));
 						case Practitioner.SP_NAME:
-							if ((lacksAlias(finalCriteriaBuilder, "ps") && (lacksAlias(finalCriteriaBuilder, "pn")))) {
-								root.join("or.person").alias("ps");
-								root.join("ps.names").alias("pn");
+							if ((lacksAlias(criteriaContext, "ps") && (lacksAlias(criteriaContext, "pn")))) {
+								criteriaContext.getRoot().join("or.person").alias("ps");
+								criteriaContext.getRoot().join("ps.names").alias("pn");
 							}
 							
 							List<Optional<? extends Predicate>> predicateList = new ArrayList<>();
@@ -776,44 +758,38 @@ public abstract class BaseDao {
 								predicateList.add(propertyLike("pn.familyName", token));
 							}
 							
-							return Optional.of(finalCriteriaBuilder.or(toCriteriaArray(predicateList)));
+							return Optional.of(criteriaContext.getCriteriaBuilder().or(toCriteriaArray(predicateList)));
 					}
 				} else {
-					return Optional.of(finalCriteriaBuilder.equal(root.get("ro.uuid"), participantToken.getValue()));
+					return Optional.of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("ro.uuid"), participantToken.getValue()));
 				}
 				
 				return Optional.empty();
-			}).ifPresent(criteriaQuery::where);
+			}).ifPresent(criteriaContext::addPredicate);
 		}
 	}
 	
-	protected Optional<Predicate> handleCodeableConcept(CriteriaBuilder criteriaBuilder, TokenAndListParam concepts,
+	protected Optional<Predicate> handleCodeableConcept(OpenmrsFhirCriteriaContext<T> criteriaContext, TokenAndListParam concepts,
 	        @Nonnull String conceptAlias, @Nonnull String conceptMapAlias, @Nonnull String conceptReferenceTermAlias) {
-		EntityManager entityManager = sessionFactory.getCurrentSession();
-		criteriaBuilder = entityManager.getCriteriaBuilder();
-		CriteriaQuery<Object> criteriaQuery = criteriaBuilder.createQuery(Object.class);
-		Root<?> root = criteriaQuery.from(Object.class);
-		
 		if (concepts == null) {
 			return Optional.empty();
 		}
-		
-		CriteriaBuilder finalCriteriaBuilder = criteriaBuilder;
+
 		return handleAndListParamBySystem(concepts, (system, tokens) -> {
 			if (system.isEmpty()) {
-				finalCriteriaBuilder.literal(tokensToParams(tokens).map(NumberUtils::toInt).collect(Collectors.toList()));
+				criteriaContext.getCriteriaBuilder().literal(tokensToParams(tokens).map(NumberUtils::toInt).collect(Collectors.toList()));
 				return Optional
-				        .of(finalCriteriaBuilder.or(
-				            finalCriteriaBuilder.in(root.get(String.format("%s.conceptId", conceptAlias))
-				                    .in(finalCriteriaBuilder.literal(
+				        .of(criteriaContext.getCriteriaBuilder().or(
+						        criteriaContext.getCriteriaBuilder().in(criteriaContext.getRoot().get(String.format("%s.conceptId", conceptAlias))
+				                    .in(criteriaContext.getCriteriaBuilder().literal(
 				                        tokensToParams(tokens).map(NumberUtils::toInt).collect(Collectors.toList())))),
-				            finalCriteriaBuilder.in(root.get(String.format("%s.uuid", conceptAlias))
-				                    .in(finalCriteriaBuilder.literal(tokensToList(tokens))))));
+						        criteriaContext.getCriteriaBuilder().in(criteriaContext.getRoot().get(String.format("%s.uuid", conceptAlias))
+				                    .in(criteriaContext.getCriteriaBuilder().literal(tokensToList(tokens))))));
 				
 			} else {
-				if (lacksAlias(finalCriteriaBuilder, conceptMapAlias)) {
-					root.join(String.format("%s.conceptMappings", conceptAlias)).alias(conceptMapAlias);
-					root.join(String.format("%s.conceptReferenceTerm", conceptMapAlias)).alias(conceptReferenceTermAlias);
+				if (lacksAlias(criteriaContext.getCriteriaBuilder(), conceptMapAlias)) {
+					criteriaContext.getRoot().join(String.format("%s.conceptMappings", conceptAlias)).alias(conceptMapAlias);
+					criteriaContext.getRoot().join(String.format("%s.conceptReferenceTerm", conceptMapAlias)).alias(conceptReferenceTermAlias);
 				}
 				
 				return Optional.of(generateSystemQuery(system, tokensToList(tokens), conceptReferenceTermAlias));
@@ -821,30 +797,25 @@ public abstract class BaseDao {
 		});
 	}
 	
-	protected void handleNames(CriteriaBuilder criteria, StringAndListParam name, StringAndListParam given,
+	protected void handleNames(OpenmrsFhirCriteriaContext<T> criteriaContext, StringAndListParam name, StringAndListParam given,
 	        StringAndListParam family) {
-		handleNames(criteria, name, given, family, null);
+		handleNames(criteriaContext, name, given, family, null);
 	}
 	
-	protected void handleNames(CriteriaBuilder criteriaBuilder, StringAndListParam name, StringAndListParam given,
+	protected void handleNames(OpenmrsFhirCriteriaContext<T> criteriaContext, StringAndListParam name, StringAndListParam given,
 	        StringAndListParam family, String personAlias) {
-		
-		EntityManager entityManager = sessionFactory.getCurrentSession();
-		criteriaBuilder = entityManager.getCriteriaBuilder();
-		CriteriaQuery<Object> criteriaQuery = criteriaBuilder.createQuery(Object.class);
-		Root<?> root = criteriaQuery.from(Object.class);
 		
 		if (name == null && given == null && family == null) {
 			return;
 		}
 		
-		if (lacksAlias(criteriaBuilder, "pn")) {
+		if (lacksAlias(criteriaContext, "pn")) {
 			if (StringUtils.isNotBlank(personAlias)) {
-				root.join(String.format("%s.names", personAlias), javax.persistence.criteria.JoinType.INNER).alias("pn");
-				criteriaBuilder.equal(root.get("pn.voided"), false);
+				criteriaContext.getRoot().join(String.format("%s.names", personAlias), javax.persistence.criteria.JoinType.INNER).alias("pn");
+				criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("pn.voided"), false);
 			} else {
-				root.join("names", javax.persistence.criteria.JoinType.INNER).alias("pn");
-				criteriaBuilder.equal(root.get("pn.voided"), false);
+				criteriaContext.getRoot().join("names", javax.persistence.criteria.JoinType.INNER).alias("pn");
+				criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("pn.voided"), false);
 			}
 		}
 		
@@ -869,47 +840,40 @@ public abstract class BaseDao {
 		}
 	}
 	
-	protected void handlePatientReference(CriteriaBuilder criteriaBuilder, ReferenceAndListParam patientReference) {
-		handlePatientReference(criteriaBuilder, patientReference, "patient");
+	protected void handlePatientReference(OpenmrsFhirCriteriaContext<T> criteriaContext, ReferenceAndListParam patientReference) {
+		handlePatientReference(criteriaContext, patientReference, "patient");
 	}
 	
-	protected void handlePatientReference(CriteriaBuilder criteriaBuilder, ReferenceAndListParam patientReference,
+	protected void handlePatientReference(OpenmrsFhirCriteriaContext<T> criteriaContext, ReferenceAndListParam patientReference,
 	        String associationPath) {
-		
-		EntityManager entityManager = sessionFactory.getCurrentSession();
-		criteriaBuilder = entityManager.getCriteriaBuilder();
-		CriteriaQuery<Object> criteriaQuery = criteriaBuilder.createQuery(Object.class);
-		Root<?> root = criteriaQuery.from(Object.class);
-		
 		if (patientReference != null) {
-			criteriaQuery.select(root.get(associationPath).alias("p"));
-			
-			CriteriaBuilder finalCriteriaBuilder = criteriaBuilder;
+			criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot().get(associationPath));
+
 			handleAndListParam(patientReference, patientToken -> {
 				if (patientToken.getChain() != null) {
 					switch (patientToken.getChain()) {
 						case Patient.SP_IDENTIFIER:
-							if (lacksAlias(finalCriteriaBuilder, "pi")) {
-								criteriaQuery.select(root.get("p.identifiers").alias("pi"));
+							if (lacksAlias(criteriaContext, "pi")) {
+								criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot().get("p.identifiers"));
 							}
 							return Optional
-							        .of(finalCriteriaBuilder.like(root.get("pi.identifier"), patientToken.getValue()));
+							        .of(criteriaContext.getCriteriaBuilder().like(criteriaContext.getRoot().get("pi.identifier"), patientToken.getValue()));
 						case Patient.SP_GIVEN:
-							if (lacksAlias(finalCriteriaBuilder, "pn")) {
-								criteriaQuery.select(root.get("p.names").alias("pn"));
+							if (lacksAlias(criteriaContext, "pn")) {
+								criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot().get("p.names"));
 							}
 							//							return Optional.of(ilike("pn.givenName", patientToken.getValue(), MatchMode.START));
-							return Optional.of(finalCriteriaBuilder.like(root.get("pi.givenName"), patientToken.getValue()));
+							return Optional.of(criteriaContext.getCriteriaBuilder().like(criteriaContext.getRoot().get("pi.givenName"), patientToken.getValue()));
 						case Patient.SP_FAMILY:
-							if (lacksAlias(finalCriteriaBuilder, "pn")) {
-								criteriaQuery.select(root.get("p.names").alias("pn"));
+							if (lacksAlias(criteriaContext.getCriteriaBuilder(), "pn")) {
+								criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot().get("p.names"));
 							}
 							//							return Optional.of(ilike("pn.familyName", patientToken.getValue(), MatchMode.START));
 							return Optional
-							        .of(finalCriteriaBuilder.like(root.get("pi.familyName"), patientToken.getValue()));
+							        .of(criteriaContext.getCriteriaBuilder().like(criteriaContext.getRoot().get("familyName"), patientToken.getValue()));
 						case Patient.SP_NAME:
-							if (lacksAlias(finalCriteriaBuilder, "pn")) {
-								criteriaQuery.select(root.get("p.names").alias("pn"));
+							if (lacksAlias(criteriaContext, "pn")) {
+								criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot().get("p.names"));
 							}
 							List<Optional<? extends Predicate>> criterionList = new ArrayList<>();
 							
@@ -918,14 +882,14 @@ public abstract class BaseDao {
 								criterionList.add(propertyLike("pn.middleName", token));
 								criterionList.add(propertyLike("pn.familyName", token));
 							}
-							return Optional.of(finalCriteriaBuilder.or(toCriteriaArray(criterionList)));
+							return Optional.of(criteriaContext.getCriteriaBuilder().or(toCriteriaArray(criterionList)));
 					}
 				} else {
-					return Optional.of(finalCriteriaBuilder.equal(root.get("p.uuid"), patientToken.getValue()));
+					return Optional.of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("uuid"), patientToken.getValue()));
 				}
 				
 				return Optional.empty();
-			}).ifPresent(criteriaQuery::where);
+			}).ifPresent(criteriaContext::addPredicate);
 		}
 	}
 	
@@ -1030,24 +994,19 @@ public abstract class BaseDao {
 	 * you must override one or more of: {@link #paramToProps(SortState)},
 	 * {@link #paramToProps(String)}, or {@link #paramToProp(String)}.
 	 *
-	 * @param criteriaBuilder the current criteria
+	 * @param criteriaContext The {@link OpenmrsFhirCriteriaContext} for the current query
 	 * @param sort the {@link SortSpec} which defines the sorting to be translated
 	 */
-	protected void handleSort(CriteriaBuilder criteriaBuilder, SortSpec sort) {
-		EntityManager manager = sessionFactory.getCurrentSession();
-		criteriaBuilder = manager.getCriteriaBuilder();
-		CriteriaQuery<Object> criteriaQuery = criteriaBuilder.createQuery(Object.class);
-		
-		handleSort(criteriaBuilder, sort, this::paramToProps).ifPresent(l -> l.forEach(criteriaQuery::orderBy));
+	protected void handleSort(OpenmrsFhirCriteriaContext<T> criteriaContext, SortSpec sort) {
+		handleSort(criteriaContext, sort, this::paramToProps).ifPresent(l -> l.forEach(criteriaContext.getCriteriaQuery()::orderBy));
 	}
 	
-	@SuppressWarnings("unchecked")
-	protected Optional<List<javax.persistence.criteria.Order>> handleSort(CriteriaBuilder criteriaBuilder, SortSpec sort,
+	protected Optional<List<javax.persistence.criteria.Order>> handleSort(OpenmrsFhirCriteriaContext<?> criteriaContex, SortSpec sort,
 	        Function<SortState, Collection<javax.persistence.criteria.Order>> paramToProp) {
 		List<javax.persistence.criteria.Order> orderings = new ArrayList<>();
 		SortSpec sortSpec = sort;
 		while (sortSpec != null) {
-			SortState state = SortState.builder().criteriaBuilder(criteriaBuilder).sortOrder(sortSpec.getOrder())
+			SortState state = SortState.builder().criteriaBuilder(criteriaContex.getCriteriaBuilder()).sortOrder(sortSpec.getOrder())
 			        .parameter(sortSpec.getParamName().toLowerCase()).build();
 			
 			Collection<javax.persistence.criteria.Order> orders = paramToProp.apply(state);
@@ -1384,7 +1343,7 @@ public abstract class BaseDao {
 				CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 				CriteriaQuery<EntityType> criteriaQuery = criteriaBuilder.createQuery(EntityType.class);
 				Root<EntityType> root = criteriaQuery.from(EntityType.class);
-				
+
 				Predicate predicate = criteriaBuilder.and(
 				    criteriaBuilder.greaterThanOrEqualTo(root.get(datePropertyName), lowerBound),
 				    criteriaBuilder.lessThanOrEqualTo(root.get(datePropertyName), upperBound));

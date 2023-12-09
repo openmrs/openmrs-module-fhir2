@@ -9,15 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
-import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import ca.uhn.fhir.rest.param.TokenAndListParam;
@@ -33,32 +24,18 @@ public class FhirUserDaoImpl extends BasePractitionerDao<User> implements FhirUs
 	
 	@Override
 	public User getUserByUserName(String username) {
-		EntityManager em = getSessionFactory().getCurrentSession();
-		CriteriaBuilder cb = em.getCriteriaBuilder();
-		CriteriaQuery<User> cq = cb.createQuery(User.class);
-		Root<User> root = cq.from(User.class);
-		
-		cq.select(root).where(cb.equal(root.get("username"), username));
-		
-		TypedQuery<User> query = em.createQuery(cq);
-		return query.getResultList().stream().findFirst().orElse(null);
-	}
+		OpenmrsFhirCriteriaContext<User> criteriaContext = createCriteriaContext();
+		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot()).where(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("username"), username));
 
+		return criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).getResultList().stream().findFirst().orElse(null);
+	}
 	
 	@Override
-	protected void handleIdentifier(CriteriaBuilder criteriaBuilder, TokenAndListParam identifier) {
-		EntityManager em = sessionFactory.getCurrentSession();
-		criteriaBuilder = em.getCriteriaBuilder();
-		CriteriaQuery<User> criteriaQuery = criteriaBuilder.createQuery(User.class);
-		Root<User> root = criteriaQuery.from(User.class);
-		
-		List<Predicate> predicates = new ArrayList<>();
-		CriteriaBuilder finalCriteriaBuilder = criteriaBuilder;
-		handleAndListParam(identifier, param -> Optional.of(finalCriteriaBuilder.equal(root.get("username"), param.getValue())))
+	protected void handleIdentifier(OpenmrsFhirCriteriaContext<User> criteriaContext, TokenAndListParam identifier) {
+		handleAndListParam(identifier, param -> Optional.of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("username"), param.getValue())))
 		        .ifPresent(t -> {
-			        predicates.add(t);
-			        criteriaQuery.distinct(true).where(predicates.toArray(new Predicate[] {}));
+			        criteriaContext.addPredicate(t);
+			        criteriaContext.finalizeQuery();
 		        });
-		criteriaQuery.distinct(true).where(predicates.toArray(new Predicate[] {}));
 	}
 }

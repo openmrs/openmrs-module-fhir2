@@ -11,16 +11,9 @@ package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.openmrs.module.fhir2.FhirConstants.ENCOUNTER_TYPE_REFERENCE_SEARCH_HANDLER;
 
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -42,49 +35,40 @@ import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> extends BaseFhirDao<T> {
 	
 	@Override
-	@SuppressWarnings("unchecked")
-	protected void setupSearchParams(CriteriaBuilder criteriaBuilder, SearchParameterMap theParams) {
-		EntityManager em = sessionFactory.getCurrentSession();
-		criteriaBuilder = em.getCriteriaBuilder();
-		CriteriaQuery<T> criteriaQuery = (CriteriaQuery<T>) em.getCriteriaBuilder().createQuery(typeToken.getRawType());
-		Root<T> root = (Root<T>) criteriaQuery.from(typeToken.getRawType());
-		
-		CriteriaBuilder finalCriteriaBuilder = criteriaBuilder;
+	protected void setupSearchParams(OpenmrsFhirCriteriaContext<T> criteriaContext, SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.DATE_RANGE_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handleDate(finalCriteriaBuilder, (DateRangeParam) param.getParam()));
+					entry.getValue().forEach(param -> handleDate(criteriaContext, (DateRangeParam) param.getParam()));
 					break;
 				case FhirConstants.LOCATION_REFERENCE_SEARCH_HANDLER:
-					List<Predicate> predicates = new ArrayList<>();
 					entry.getValue().forEach(param -> {
 						handleLocationReference("l", (ReferenceAndListParam) param.getParam()).ifPresent(l -> {
-							root.join("location", JoinType.INNER).alias("l");
-							predicates.add(l);
-							criteriaQuery.where(predicates.toArray(new Predicate[] {}));
+							criteriaContext.getRoot().join("location", JoinType.INNER).alias("l");
+							criteriaContext.addPredicate(l);
+							criteriaContext.finalizeQuery();
 						});
 					});
 					break;
 				case FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER:
 					entry.getValue()
-					        .forEach(param -> handleParticipant(finalCriteriaBuilder, (ReferenceAndListParam) param.getParam()));
+					        .forEach(param -> handleParticipant(criteriaContext, (ReferenceAndListParam) param.getParam()));
 					break;
 				case FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER:
 					entry.getValue().forEach(
-					    param -> handlePatientReference(finalCriteriaBuilder, (ReferenceAndListParam) param.getParam()));
+					    param -> handlePatientReference(criteriaContext, (ReferenceAndListParam) param.getParam()));
 					break;
 				case ENCOUNTER_TYPE_REFERENCE_SEARCH_HANDLER:
 					entry.getValue()
-					        .forEach(param -> handleEncounterType(finalCriteriaBuilder, (TokenAndListParam) param.getParam()));
+					        .forEach(param -> handleEncounterType(criteriaContext, (TokenAndListParam) param.getParam()));
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					predicates = new ArrayList<>();
-					handleCommonSearchParameters(entry.getValue()).ifPresent(predicates::add);
-					criteriaQuery.where(predicates.toArray(new Predicate[] {}));
+					handleCommonSearchParameters(entry.getValue()).ifPresent(criteriaContext::addPredicate);
+					criteriaContext.finalizeQuery();
 					break;
 				case FhirConstants.HAS_SEARCH_HANDLER:
 					entry.getValue()
-					        .forEach(param -> handleHasAndListParam(finalCriteriaBuilder, (HasAndListParam) param.getParam()));
+					        .forEach(param -> handleHasAndListParam(criteriaContext, (HasAndListParam) param.getParam()));
 					break;
 			}
 		});
@@ -95,15 +79,9 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 	 * dependent resources
 	 */
 	@SuppressWarnings("unchecked")
-	protected void handleHasAndListParam(CriteriaBuilder criteriaBuilder, HasAndListParam hasAndListParam) {
-		EntityManager em = sessionFactory.getCurrentSession();
-		criteriaBuilder = em.getCriteriaBuilder();
-		CriteriaQuery<T> criteriaQuery = (CriteriaQuery<T>) em.getCriteriaBuilder().createQuery(typeToken.getRawType());
-		Root<T> root = (Root<T>) criteriaQuery.from(typeToken.getRawType());
-		
+	protected void handleHasAndListParam(OpenmrsFhirCriteriaContext<T> criteriaContext, HasAndListParam hasAndListParam) {
 		if (hasAndListParam != null) {
 			log.debug("Handling hasAndListParam");
-			CriteriaBuilder finalCriteriaBuilder = criteriaBuilder;
 			hasAndListParam.getValuesAsQueryTokens().forEach(hasOrListParam -> {
 				if (!hasOrListParam.getValuesAsQueryTokens().isEmpty()) {
 					
@@ -121,22 +99,20 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 					// Support constraining encounter resources to those that contain only certain Medication Requests
 					if (FhirConstants.MEDICATION_REQUEST.equals(hasParam.getTargetResourceType())) {
 						if (MedicationRequest.SP_ENCOUNTER.equals(hasParam.getReferenceFieldName())) {
-							if (lacksAlias(finalCriteriaBuilder, "orders")) {
+							if (lacksAlias(criteriaContext, "orders")) {
 								if (Encounter.class.isAssignableFrom(typeToken.getRawType())) {
-									root.join("orders").alias("orders");
+									criteriaContext.getRoot().join("orders").alias("orders");
 								} else {
-									if (lacksAlias(finalCriteriaBuilder, "en")) {
-										root.join("encounters").alias("en");
+									if (lacksAlias(criteriaContext, "en")) {
+										criteriaContext.getRoot().join("encounters").alias("en");
 									}
-									root.join("en.orders").alias("orders");
+									criteriaContext.getRoot().join("en.orders").alias("orders");
 								}
 							}
-							
-							List<Predicate> predicates = new ArrayList<>();
 							// Constrain only on non-voided Drug Orders
-							predicates.add(finalCriteriaBuilder.equal(root.get("orders.class"), DrugOrder.class));
-							predicates.add(finalCriteriaBuilder.equal(root.get("orders.voided"), false));
-							predicates.add(finalCriteriaBuilder.notEqual(root.get("orders.action"), Order.Action.DISCONTINUE));
+							criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("orders.class"), DrugOrder.class));
+							criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("orders.voided"), false));
+							criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().notEqual(criteriaContext.getRoot().get("orders.action"), Order.Action.DISCONTINUE));
 							
 							String paramName = hasParam.getParameterName();
 							String paramValue = hasParam.getParameterValue();
@@ -150,7 +126,7 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 								if (paramValue != null) {
 									if (MedicationRequest.MedicationRequestStatus.ACTIVE.toString()
 									        .equalsIgnoreCase(paramValue)) {
-										finalCriteriaBuilder.and(generateActiveOrderQuery("orders"));
+										criteriaContext.getCriteriaBuilder().and(generateActiveOrderQuery("orders"));
 									}
 								}
 								handled = true;
@@ -158,29 +134,29 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 								if (paramValue != null) {
 									if (MedicationRequest.MedicationRequestStatus.CANCELLED.toString()
 									        .equalsIgnoreCase(paramValue)) {
-										finalCriteriaBuilder.and(generateNotCancelledOrderQuery("orders"));
+										criteriaContext.getCriteriaBuilder().and(generateNotCancelledOrderQuery("orders"));
 									}
 									if (MedicationRequest.MedicationRequestStatus.COMPLETED.toString()
 									        .equalsIgnoreCase(paramValue)) {
 										Predicate notCompletedCriterion = generateNotCompletedOrderQuery("orders");
 										if (notCompletedCriterion != null) {
-											finalCriteriaBuilder.and(notCompletedCriterion);
+											criteriaContext.getCriteriaBuilder().and(notCompletedCriterion);
 										}
 									}
 								}
 								handled = true;
 							} else if ((FhirConstants.SP_FULFILLER_STATUS).equalsIgnoreCase(paramName)) {
 								if (paramValue != null) {
-									finalCriteriaBuilder.and(generateFulfillerStatusRestriction("orders", paramValue));
+									criteriaContext.getCriteriaBuilder().and(generateFulfillerStatusRestriction("orders", paramValue));
 								}
 								handled = true;
 							} else if ((FhirConstants.SP_FULFILLER_STATUS + ":not").equalsIgnoreCase(paramName)) {
 								if (paramValue != null) {
-									finalCriteriaBuilder.and(generateNotFulfillerStatusRestriction("orders", paramValue));
+									criteriaContext.getCriteriaBuilder().and(generateNotFulfillerStatusRestriction("orders", paramValue));
 								}
 								handled = true;
 							}
-							criteriaQuery.where(predicates.toArray(new Predicate[] {}));
+							criteriaContext.finalizeQuery();
 						}
 					}
 					if (!handled) {
@@ -192,11 +168,11 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 		}
 	}
 	
-	protected abstract void handleDate(CriteriaBuilder criteriaBuilder, DateRangeParam dateRangeParam);
+	protected abstract void handleDate(OpenmrsFhirCriteriaContext<T> criteriaContext, DateRangeParam dateRangeParam);
 	
-	protected abstract void handleEncounterType(CriteriaBuilder criteriaBuilder, TokenAndListParam tokenAndListParam);
+	protected abstract void handleEncounterType(OpenmrsFhirCriteriaContext<T> criteriaContext, TokenAndListParam tokenAndListParam);
 	
-	protected abstract void handleParticipant(CriteriaBuilder criteriaBuilder, ReferenceAndListParam referenceAndListParam);
+	protected abstract void handleParticipant(OpenmrsFhirCriteriaContext<T> criteriaContext, ReferenceAndListParam referenceAndListParam);
 	
 	protected Predicate generateNotCompletedOrderQuery(String path) {
 		// not implemented in Core until 2.2; see override in FhirEncounterDaoImpl_2_2

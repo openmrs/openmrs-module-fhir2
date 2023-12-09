@@ -10,14 +10,6 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import javax.annotation.Nonnull;
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -26,7 +18,6 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.DiagnosticReport;
-import org.openmrs.Encounter;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirDiagnosticReportDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
@@ -38,74 +29,58 @@ import org.springframework.stereotype.Component;
 public class FhirDiagnosticReportDaoImpl extends BaseFhirDao<FhirDiagnosticReport> implements FhirDiagnosticReportDao {
 	
 	@Override
-	protected void setupSearchParams(CriteriaBuilder criteriaBuilder, SearchParameterMap theParams) {
-		EntityManager em = sessionFactory.getCurrentSession();
-		CriteriaBuilder cb = em.getCriteriaBuilder();
-		CriteriaQuery<FhirDiagnosticReport> criteriaQuery = cb.createQuery(FhirDiagnosticReport.class);
-		
-		List<Predicate> predicates = new ArrayList<>();
+	protected void setupSearchParams(OpenmrsFhirCriteriaContext<FhirDiagnosticReport> criteriaContext, SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER:
 					entry.getValue().forEach(
-					    param -> handleEncounterReference(criteriaBuilder, (ReferenceAndListParam) param.getParam(), "e"));
+					    param -> handleEncounterReference(criteriaContext, (ReferenceAndListParam) param.getParam(), "e"));
 					break;
 				case FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handlePatientReference(criteriaBuilder,
+					entry.getValue().forEach(param -> handlePatientReference(criteriaContext,
 					    (ReferenceAndListParam) param.getParam(), "subject"));
 					break;
 				case FhirConstants.CODED_SEARCH_HANDLER:
 					entry.getValue()
-					        .forEach(param -> handleCodedConcept(criteriaBuilder, (TokenAndListParam) param.getParam()));
+					        .forEach(param -> handleCodedConcept(criteriaContext, (TokenAndListParam) param.getParam()));
 					break;
 				case FhirConstants.DATE_RANGE_SEARCH_HANDLER:
 					entry.getValue().forEach(
-					    param -> handleDateRange("issued", (DateRangeParam) param.getParam()).ifPresent(predicates::add));
-					criteriaQuery.distinct(true).where(predicates.toArray(new Predicate[] {}));
+					    param -> handleDateRange("issued", (DateRangeParam) param.getParam()).ifPresent(criteriaContext::addPredicate));
+					criteriaContext.finalizeQuery();
 					break;
 				case FhirConstants.RESULT_SEARCH_HANDLER:
 					entry.getValue().forEach(
-					    param -> handleObservationReference(criteriaBuilder, (ReferenceAndListParam) param.getParam()));
+					    param -> handleObservationReference(criteriaContext, (ReferenceAndListParam) param.getParam()));
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(entry.getValue()).ifPresent(predicates::add);
-					criteriaQuery.distinct(true).where(predicates.toArray(new Predicate[] {}));
+					handleCommonSearchParameters(entry.getValue()).ifPresent(criteriaContext::addPredicate);
+					criteriaContext.finalizeQuery();
 					break;
 			}
 		});
 	}
 	
-	private void handleCodedConcept(CriteriaBuilder criteriaBuilder, TokenAndListParam code) {
-		EntityManager em = sessionFactory.getCurrentSession();
-		CriteriaBuilder cb = em.getCriteriaBuilder();
-		CriteriaQuery<FhirDiagnosticReport> criteriaQuery = cb.createQuery(FhirDiagnosticReport.class);
-		Root<FhirDiagnosticReport> root = criteriaQuery.from(FhirDiagnosticReport.class);
-		
-		List<Predicate> predicates = new ArrayList<>();
+	private void handleCodedConcept(OpenmrsFhirCriteriaContext<FhirDiagnosticReport> criteriaContext, TokenAndListParam code) {
 		if (code != null) {
-			if (lacksAlias(criteriaBuilder, "c")) {
-				root.join("code");
+			if (lacksAlias(criteriaContext, "c")) {
+				criteriaContext.getRoot().join("code");
 			}
-			handleCodeableConcept(criteriaBuilder, code, "c", "cm", "crt").ifPresent(predicates::add);
-			criteriaQuery.distinct(true).where(predicates.toArray(new Predicate[] {}));
+			handleCodeableConcept(criteriaContext, code, "c", "cm", "crt")
+					.ifPresent(criteriaContext::addPredicate);
+			criteriaContext.finalizeQuery();
 		}
 	}
 	
-	private void handleObservationReference(CriteriaBuilder criteriaBuilder, ReferenceAndListParam result) {
-		EntityManager em = sessionFactory.getCurrentSession();
-		CriteriaBuilder cb = em.getCriteriaBuilder();
-		CriteriaQuery<FhirDiagnosticReport> criteriaQuery = cb.createQuery(FhirDiagnosticReport.class);
-		Root<FhirDiagnosticReport> root = criteriaQuery.from(FhirDiagnosticReport.class);
-		
-		List<Predicate> predicates = new ArrayList<>();
+	private void handleObservationReference(OpenmrsFhirCriteriaContext<FhirDiagnosticReport> criteriaContext, ReferenceAndListParam result) {
 		if (result != null) {
-			if (lacksAlias(criteriaBuilder, "obs")) {
-				root.join("results");
+			if (lacksAlias(criteriaContext, "obs")) {
+				criteriaContext.getRoot().join("results");
 			}
 			
-			handleAndListParam(result, token -> Optional.of(criteriaBuilder.equal(root.get("obs.uuid"), token.getIdPart())))
-			        .ifPresent(predicates::add);
-			criteriaQuery.distinct(true).where(predicates.toArray(new Predicate[] {}));
+			handleAndListParam(result, token -> Optional.of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("obs.uuid"), token.getIdPart())))
+			        .ifPresent(criteriaContext::addPredicate);
+			criteriaContext.finalizeQuery();
 		}
 	}
 	

@@ -10,11 +10,7 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import javax.annotation.Nonnull;
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,31 +37,25 @@ public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDa
 	private List<Predicate> predicateList = new ArrayList<>();
 	
 	@Override
-	protected void setupSearchParams(CriteriaBuilder criteriaBuilder, SearchParameterMap theParams) {
-		EntityManager em = sessionFactory.getCurrentSession();
-		criteriaBuilder = em.getCriteriaBuilder();
-		CriteriaQuery<FhirTask> criteriaQuery = criteriaBuilder.createQuery(FhirTask.class);
-		Root<FhirTask> root = criteriaQuery.from(FhirTask.class);
-		
-		CriteriaBuilder finalCriteriaBuilder = criteriaBuilder;
+	protected void setupSearchParams(OpenmrsFhirCriteriaContext<FhirTask> criteriaContext, SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.BASED_ON_REFERENCE_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handleReference(finalCriteriaBuilder,
+					entry.getValue().forEach(param -> handleReference(criteriaContext,
 					    (ReferenceAndListParam) param.getParam(), "basedOnReferences", "bo"));
 					break;
 				case FhirConstants.OWNER_REFERENCE_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handleReference(finalCriteriaBuilder,
+					entry.getValue().forEach(param -> handleReference(criteriaContext,
 					    (ReferenceAndListParam) param.getParam(), "ownerReference", "o"));
 					break;
 				case FhirConstants.STATUS_SEARCH_HANDLER:
 					entry.getValue().forEach(
-					    param -> handleStatus((TokenAndListParam) param.getParam()).ifPresent(predicateList::add));
-					criteriaQuery.where(predicateList.toArray(new Predicate[] {}));
+					    param -> handleStatus((TokenAndListParam) param.getParam()).ifPresent(criteriaContext::addPredicate));
+					criteriaContext.finalizeQuery();
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(entry.getValue()).ifPresent(predicateList::add);
-					criteriaQuery.where(predicateList.toArray(new Predicate[] {}));
+					handleCommonSearchParameters(entry.getValue()).ifPresent(criteriaContext::addPredicate);
+					criteriaContext.finalizeQuery();
 					break;
 			}
 		});
@@ -88,15 +78,12 @@ public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDa
 	}
 	
 	private Optional<Predicate> handleStatus(TokenAndListParam tokenAndListParam) {
-		EntityManager em = sessionFactory.getCurrentSession();
-		CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
-		CriteriaQuery<FhirTask> criteriaQuery = criteriaBuilder.createQuery(FhirTask.class);
-		Root<FhirTask> root = criteriaQuery.from(FhirTask.class);
+		OpenmrsFhirCriteriaContext<FhirTask> criteriaContext = createCriteriaContext();
 		
 		return handleAndListParam(tokenAndListParam, token -> {
 			if (token.getValue() != null) {
 				try {
-					return Optional.of(criteriaBuilder.equal(root.get("status"),
+					return Optional.of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("status"),
 					    FhirTask.TaskStatus.valueOf(token.getValue().toUpperCase())));
 				}
 				catch (IllegalArgumentException e) {
@@ -108,30 +95,24 @@ public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDa
 		});
 	}
 	
-	private void handleReference(CriteriaBuilder criteriaBuilder, ReferenceAndListParam reference, String property,
+	private void handleReference(OpenmrsFhirCriteriaContext<FhirTask> criteriaContext, ReferenceAndListParam reference, String property,
 	        String alias) {
-		EntityManager em = sessionFactory.getCurrentSession();
-		criteriaBuilder = em.getCriteriaBuilder();
-		CriteriaQuery<FhirTask> criteriaQuery = criteriaBuilder.createQuery(FhirTask.class);
-		Root<FhirTask> root = criteriaQuery.from(FhirTask.class);
-		
-		CriteriaBuilder finalCriteriaBuilder = criteriaBuilder;
 		handleAndListParam(reference, param -> {
 			if (validReferenceParam(param)) {
-				if (lacksAlias(finalCriteriaBuilder, alias)) {
-					root.join(property).alias(alias);
+				if (lacksAlias(criteriaContext, alias)) {
+					criteriaContext.getRoot().join(property).alias(alias);
 				}
 				
 				List<Optional<? extends Predicate>> predicateList = new ArrayList<>();
 				predicateList.add(
-				    Optional.of(finalCriteriaBuilder.equal(root.get(String.format("%s.reference", alias)), param.getIdPart())));
+				    Optional.of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get(String.format("%s.reference", alias)), param.getIdPart())));
 				predicateList.add(
-				    Optional.of(finalCriteriaBuilder.equal(root.get(String.format("%s.type", alias)), param.getResourceType())));
-				return Optional.of(finalCriteriaBuilder.and(toCriteriaArray(predicateList)));
+				    Optional.of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get(String.format("%s.type", alias)), param.getResourceType())));
+				return Optional.of(criteriaContext.getCriteriaBuilder().and(toCriteriaArray(predicateList)));
 			}
 			
 			return Optional.empty();
-		}).ifPresent(predicateList::add);
-		criteriaQuery.where(predicateList.toArray(new Predicate[] {}));
+		}).ifPresent(criteriaContext::addPredicate);
+		criteriaContext.finalizeQuery();
 	}
 }
