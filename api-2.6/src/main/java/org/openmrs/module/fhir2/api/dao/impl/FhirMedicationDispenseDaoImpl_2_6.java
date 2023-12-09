@@ -61,28 +61,31 @@ public class FhirMedicationDispenseDaoImpl_2_6 extends BaseFhirDao<MedicationDis
 	}
 	
 	@Override
-	protected void setupSearchParams(CriteriaBuilder criteriaBuilder, SearchParameterMap theParams) {
+	protected void setupSearchParams(OpenmrsFhirCriteriaContext<MedicationDispense> criteriaContext, SearchParameterMap theParams) {
+		createCriteriaContext();
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER:
 					entry.getValue()
-					        .forEach(param -> handlePatientReference(criteriaBuilder, (ReferenceAndListParam) param.getParam()));
+					        .forEach(param -> handlePatientReference(criteriaContext, (ReferenceAndListParam) param.getParam()));
 					break;
 				case FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER:
 					entry.getValue()
-					        .forEach(e -> handleEncounterReference(criteriaBuilder, (ReferenceAndListParam) e.getParam(), "e"));
+					        .forEach(e -> handleEncounterReference(criteriaContext, (ReferenceAndListParam) e.getParam(), "e"));
 					break;
 				case FhirConstants.MEDICATION_REQUEST_REFERENCE_SEARCH_HANDLER:
 					entry.getValue()
 					        .forEach(e -> handleMedicationRequestReference("drugOrder", (ReferenceAndListParam) e.getParam())
 					                .ifPresent(c -> {
-										createAlias(criteriaBuilder, "drugOrder", "drugOrder");
-										criteriaBuilder.and(c);
+										createAlias(criteriaContext, "drugOrder", "drugOrder");
+								                criteriaContext.addPredicate(c);
+								                criteriaContext.finalizeQuery();
 									}
 					                ));
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(entry.getValue()).ifPresent(criteriaBuilder::and);
+					handleCommonSearchParameters(entry.getValue()).ifPresent(criteriaContext::addPredicate);
+					criteriaContext.finalizeQuery();
 					break;
 			}
 		});

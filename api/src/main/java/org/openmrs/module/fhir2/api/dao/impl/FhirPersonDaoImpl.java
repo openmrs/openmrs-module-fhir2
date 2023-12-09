@@ -12,13 +12,8 @@ package org.openmrs.module.fhir2.api.dao.impl;
 import static org.hibernate.criterion.Restrictions.eq;
 
 import javax.annotation.Nonnull;
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -30,7 +25,6 @@ import lombok.Setter;
 import org.hibernate.sql.JoinType;
 import org.openmrs.Person;
 import org.openmrs.PersonAttribute;
-import org.openmrs.Provider;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirPersonDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
@@ -39,8 +33,6 @@ import org.springframework.stereotype.Component;
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class FhirPersonDaoImpl extends BasePersonDao<Person> implements FhirPersonDao {
-	
-	private List<Predicate> predicateList = new ArrayList<>();
 	
 	@Override
 	@SuppressWarnings("unchecked")
@@ -53,33 +45,29 @@ public class FhirPersonDaoImpl extends BasePersonDao<Person> implements FhirPers
 	}
 	
 	@Override
-	protected void setupSearchParams(CriteriaBuilder criteriaBuilder, SearchParameterMap theParams) {
-		EntityManager em = sessionFactory.getCurrentSession();
-		criteriaBuilder = em.getCriteriaBuilder();
-		CriteriaQuery<Person> criteriaQuery = criteriaBuilder.createQuery(Person.class);
-		
-		CriteriaBuilder finalCriteriaBuilder = criteriaBuilder;
+	protected void setupSearchParams(OpenmrsFhirCriteriaContext<Person> criteriaContext, SearchParameterMap theParams) {
+		createCriteriaContext();
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.NAME_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handleNames(finalCriteriaBuilder, entry.getValue()));
+					entry.getValue().forEach(param -> handleNames(criteriaContext, entry.getValue()));
 					break;
 				case FhirConstants.GENDER_SEARCH_HANDLER:
 					entry.getValue().forEach(
-					    param -> handleGender("gender", (TokenAndListParam) param.getParam()).ifPresent(predicateList::add));
-					criteriaQuery.distinct(true).where(predicateList.toArray(new Predicate[] {}));
+					    param -> handleGender("gender", (TokenAndListParam) param.getParam()).ifPresent(criteriaContext::addPredicate));
+					criteriaContext.finalizeQuery();
 					break;
 				case FhirConstants.DATE_RANGE_SEARCH_HANDLER:
 					entry.getValue().forEach(param -> handleDateRange("birthdate", (DateRangeParam) param.getParam())
-					        .ifPresent(predicateList::add));
-					criteriaQuery.distinct(true).where(predicateList.toArray(new Predicate[] {}));
+					        .ifPresent(criteriaContext::addPredicate));
+					criteriaContext.finalizeQuery();
 					break;
 				case FhirConstants.ADDRESS_SEARCH_HANDLER:
-					handleAddresses(finalCriteriaBuilder, entry);
+					handleAddresses(criteriaContext, entry);
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(entry.getValue()).ifPresent(predicateList::add);
-					criteriaQuery.distinct(true).where(predicateList.toArray(new Predicate[] {}));
+					handleCommonSearchParameters(entry.getValue()).ifPresent(criteriaContext::addPredicate);
+					criteriaContext.finalizeQuery();
 					break;
 			}
 		});
@@ -87,14 +75,10 @@ public class FhirPersonDaoImpl extends BasePersonDao<Person> implements FhirPers
 	
 	@Override
 	protected Optional<Predicate> handleLastUpdated(DateRangeParam param) {
-		EntityManager em = sessionFactory.getCurrentSession();
-		CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
-		CriteriaQuery<Person> criteriaQuery = criteriaBuilder.createQuery(Person.class);
-		Root<Person> root = criteriaQuery.from(Person.class);
 		
-		return Optional.of(criteriaBuilder.or(toCriteriaArray(handleDateRange("personDateChanged", param),
-		    Optional.of(criteriaBuilder
-		            .and(toCriteriaArray(Stream.of(Optional.of(criteriaBuilder.isNull(root.get("personDateChanged"))),
+		return Optional.of(createCriteriaContext().getCriteriaBuilder().or(toCriteriaArray(handleDateRange("personDateChanged", param),
+		    Optional.of(createCriteriaContext().getCriteriaBuilder()
+		            .and(toCriteriaArray(Stream.of(Optional.of(createCriteriaContext().getCriteriaBuilder().isNull(createCriteriaContext().getRoot().get("personDateChanged"))),
 		                handleDateRange("personDateCreated", param))))))));
 	}
 	
@@ -104,13 +88,9 @@ public class FhirPersonDaoImpl extends BasePersonDao<Person> implements FhirPers
 	}
 	
 	@Override
-	protected void handleVoidable(CriteriaBuilder criteriaBuilder) {
-		EntityManager em = sessionFactory.getCurrentSession();
-		criteriaBuilder = em.getCriteriaBuilder();
-		CriteriaQuery<Person> criteriaQuery = criteriaBuilder.createQuery(Person.class);
-		Root<Person> root = criteriaQuery.from(Person.class);
-		
-		criteriaBuilder.and(criteriaBuilder.equal(root.get("personVoided"), false));
+	protected void handleVoidable(OpenmrsFhirCriteriaContext<Person> criteriaContext) {
+		criteriaContext.getCriteriaBuilder().and(criteriaContext.getCriteriaBuilder()
+				.equal(criteriaContext.getRoot().get("personVoided"), false));
 	}
 	
 }

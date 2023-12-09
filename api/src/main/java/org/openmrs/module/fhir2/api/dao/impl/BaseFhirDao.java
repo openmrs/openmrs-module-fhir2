@@ -17,7 +17,6 @@ import javax.annotation.Nonnull;
 import javax.persistence.CacheStoreMode;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
-import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
@@ -67,7 +66,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @param <T> the {@link OpenmrsObject} managed by this Dao
  */
 @Transactional
-public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends BaseDao implements FhirDao<T> {
+public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends BaseDao<T> implements FhirDao<T> {
 
     @SuppressWarnings("UnstableApiUsage")
     protected final TypeToken<T> typeToken;
@@ -98,7 +97,6 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 
     @Override
     @Transactional(readOnly = true)
-    @SuppressWarnings("unchecked")
     public T get(@Nonnull String uuid) {
         OpenmrsFhirCriteriaContext<T> criteriaContext = createCriteriaContext();
 
@@ -127,7 +125,8 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
             handleRetireable(criteriaContext);
         }
 
-        return criteriaContext.getEntityManager().createQuery(criteriaContext.finalizeQuery()).getResultList().stream().filter(Objects::nonNull).map(this::deproxyResult).collect(Collectors.toList());
+        return criteriaContext.getEntityManager().createQuery(criteriaContext.finalizeQuery())
+                .getResultList().stream().filter(Objects::nonNull).map(this::deproxyResult).collect(Collectors.toList());
     }
 
     @Override
@@ -170,36 +169,30 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
         return criteriaContext;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public List<T> getSearchResults(@Nonnull SearchParameterMap theParams) {
         OpenmrsFhirCriteriaContext<T> criteriaContext = getSearchResultCriteria(theParams);
 
         handleSort(criteriaContext, theParams.getSortSpec());
         criteriaContext.addOrder(criteriaContext.getCriteriaBuilder().asc(criteriaContext.getRoot().get("id")));
-
-        em.createQuery(cq).setFirstResult(theParams.getFromIndex());
+        
+        criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).setFirstResult(
+                theParams.getFromIndex());
         if (theParams.getToIndex() != Integer.MAX_VALUE) {
             int maxResults = theParams.getToIndex() - theParams.getFromIndex();
-            em.createQuery(cq).setMaxResults(maxResults);
+            criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).setMaxResults(maxResults);
         }
 
         List<T> results;
         if (hasDistinctResults()) {
-            results = em.createQuery(cq).getResultList();
+            results = criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).getResultList();
         } else {
-            EntityManager projectionManager = sessionFactory.getCurrentSession();
-            CriteriaBuilder projectionCriteriaBuilder = projectionManager.getCriteriaBuilder();
-            CriteriaQuery<Integer> projectionCriteriaQuery = projectionCriteriaBuilder.createQuery(Integer.class);
-
-            Root<Integer> projectionRoot = projectionCriteriaQuery.from(Integer.class);
-            Subquery<Long> subquery = projectionCriteriaQuery.subquery(Long.class);
-
-            subquery.select(projectionCriteriaBuilder.countDistinct(projectionRoot.get("id")));
-
-            projectionCriteriaQuery.select(projectionRoot)
-                    .where(projectionCriteriaBuilder.in(projectionRoot.get("id")).value(subquery));
-            TypedQuery<Integer> projectionTypedQuery = projectionManager.createQuery(projectionCriteriaQuery);
+            
+            OpenmrsFhirCriteriaContext<Long> longOpenmrsFhirCriteriaContext = createLongCriteriaContext();
+            longOpenmrsFhirCriteriaContext.getCriteriaQuery().subquery(Long.class).select(longOpenmrsFhirCriteriaContext.getCriteriaBuilder().countDistinct(longOpenmrsFhirCriteriaContext.getRoot().get("id")));
+            
+            longOpenmrsFhirCriteriaContext.getCriteriaQuery().select(longOpenmrsFhirCriteriaContext.getRoot())
+                    .where(longOpenmrsFhirCriteriaContext.getCriteriaBuilder().in(longOpenmrsFhirCriteriaContext.getRoot().get("id")).value(longOpenmrsFhirCriteriaContext.getCriteriaQuery().subquery(Long.class)));
 
             //TODO: gonna come back to it later
             //			handleSort(projectionCriteriaBuilder, theParams.getSortSpec(), this::paramToProps).ifPresent(
@@ -213,20 +206,14 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
             //			} else {
             //				ids = criteria.list();
             //			}
-
-            // Use distinct ids from the original query to return entire objects
-            EntityManager idsManager = sessionFactory.getCurrentSession();
-            CriteriaBuilder idsCriteriaBuilder = idsManager.getCriteriaBuilder();
-            CriteriaQuery<T> idsCriteriaQuery = (CriteriaQuery<T>) idsCriteriaBuilder.createQuery(typeToken.getRawType());
-            Root<T> idsRoot = (Root<T>) idsCriteriaQuery.from(typeToken.getRawType());
-            TypedQuery<T> idsTypedQuery = idsManager.createQuery(idsCriteriaQuery);
-
-            idsCriteriaQuery.select(idsRoot).where(idsCriteriaBuilder.in(idsRoot.get("id")));
+            
+            longOpenmrsFhirCriteriaContext.getCriteriaQuery().select(longOpenmrsFhirCriteriaContext.getRoot())
+                    .where(longOpenmrsFhirCriteriaContext.getCriteriaBuilder().in(longOpenmrsFhirCriteriaContext.getRoot().get("id")));
             // Need to reapply ordering
-            handleSort(idsCriteriaBuilder, theParams.getSortSpec());
-            idsCriteriaQuery.orderBy(idsCriteriaBuilder.asc(idsRoot.get("id")));
+            handleSort(criteriaContext, theParams.getSortSpec());
+            criteriaContext.addOrder(criteriaContext.getCriteriaBuilder().asc(criteriaContext.getRoot().get("id")));
 
-            results = idsTypedQuery.getResultList();
+            results = criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).getResultList();
         }
         return results.stream().map(this::deproxyResult).collect(Collectors.toList());
     }
@@ -239,13 +226,13 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
         applyExactTotal(criteriaContext, theParams);
 
         if (hasDistinctResults()) {
-            criteriaQuery.select(criteriaBuilder.count(root));
-            TypedQuery<Long> query = manager.createQuery(criteriaQuery);
-            return query.getSingleResult().intValue();
+            OpenmrsFhirCriteriaContext<Long> criteria = createLongCriteriaContext();
+            criteria.getCriteriaQuery().select(criteria.getCriteriaBuilder().count(criteria.getRoot()));
+            return criteria.getEntityManager().createQuery(criteria.getCriteriaQuery()).getSingleResult().intValue();
         } else {
-            criteriaQuery.select(criteriaBuilder.countDistinct(root.get("id")));
-            TypedQuery<Long> query = manager.createQuery(criteriaQuery);
-            return query.getSingleResult().intValue();
+            OpenmrsFhirCriteriaContext<Long> criteria = createLongCriteriaContext();
+            criteria.getCriteriaQuery().select(criteria.getCriteriaBuilder().countDistinct(criteria.getRoot().get("id")));
+            return criteria.getEntityManager().createQuery(criteria.getCriteriaQuery()).getSingleResult().intValue();
         }
     }
 
@@ -260,14 +247,8 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
         return true;
     }
 
-    @SuppressWarnings("unchecked")
     protected void createAlias(OpenmrsFhirCriteriaContext<T> criteriaContext, String referencedEntity, String alias) {
-        EntityManager em = sessionFactory.getCurrentSession();
-        criteriaBuilder = em.getCriteriaBuilder();
-        CriteriaQuery<T> cq = (CriteriaQuery<T>) criteriaBuilder.createQuery(typeToken.getRawType());
-        Root<T> rt = (Root<T>) cq.from(typeToken.getRawType());
-
-        rt.join(referencedEntity).alias(alias);
+        criteriaContext.getRoot().join(referencedEntity).alias(alias);
     }
 
     @Override
@@ -279,16 +260,10 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
         return handleLastUpdatedMutable(param);
     }
 
-    @SuppressWarnings("unchecked")
     protected Optional<Predicate> handleLastUpdatedMutable(DateRangeParam param) {
-        EntityManager em = sessionFactory.getCurrentSession();
-        CriteriaBuilder cb = em.getCriteriaBuilder();
-        CriteriaQuery<T> cq = (CriteriaQuery<T>) cb.createQuery(typeToken.getRawType());
-        Root<T> rt = (Root<T>) cq.from(typeToken.getRawType());
-
         // @formatter:off
-		return Optional.of(cb.or(toCriteriaArray(handleDateRange("dateChanged", param), Optional.of(
-		    cb.and(toCriteriaArray(Stream.of(Optional.of(cb.isNull(rt.get("dateChanged"))), handleDateRange("dateCreated", param))))))));
+		return Optional.of(createCriteriaContext().getCriteriaBuilder().or(toCriteriaArray(handleDateRange("dateChanged", param), Optional.of(
+                createCriteriaContext().getCriteriaBuilder().and(toCriteriaArray(Stream.of(Optional.of(createCriteriaContext().getCriteriaBuilder().isNull(createCriteriaContext().getRoot().get("dateChanged"))), handleDateRange("dateCreated", param))))))));
 		// @formatter:on
     }
 
@@ -303,7 +278,6 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
      *
      * @param criteriaContext The {@link OpenmrsFhirCriteriaContext} for the current query
      */
-    @SuppressWarnings("unchecked")
     protected void handleVoidable(OpenmrsFhirCriteriaContext<T> criteriaContext) {
         criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("voided"), true));
     }
@@ -314,7 +288,6 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
      *
      * @param criteriaContext The {@link OpenmrsFhirCriteriaContext} for the current query
      */
-    @SuppressWarnings("unchecked")
     protected void handleRetireable(OpenmrsFhirCriteriaContext<T> criteriaContext) {
         criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("retired"), true));
     }
@@ -345,10 +318,10 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
      * This is intended to be overridden by subclasses to implement any special handling they might
      * require
      *
-     * @param criteriaBuilder the criteria object representing this search
+     * @param criteriaContext The {@link OpenmrsFhirCriteriaContext} for the current query
      * @param theParams       the parameters for this search
      */
-    protected void setupSearchParams(CriteriaBuilder criteriaBuilder, SearchParameterMap theParams) {
+    protected void setupSearchParams(OpenmrsFhirCriteriaContext<T> criteriaContext, SearchParameterMap theParams) {
 
     }
 
@@ -399,24 +372,54 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
         CriteriaQuery<T> cq = (CriteriaQuery<T>) cb.createQuery(typeToken.getRawType());
         @SuppressWarnings({"unchecked", "UnstableApiUsage"})
         Root<T> root = (Root<T>) cq.from(typeToken.getRawType());
-
+        return new OpenmrsFhirCriteriaContext<>(em, cb, cq, root);
+    }
+    
+    protected OpenmrsFhirCriteriaContext<Long> createLongCriteriaContext() {
+        EntityManager em = sessionFactory.getCurrentSession();
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaQuery<Long> cq = cb.createQuery(Long.class);
+        Root<Long> root = cq.from(Long.class);
+	    
+	    return new OpenmrsFhirCriteriaContext<>(em, cb, cq, root);
+    }
+    
+    protected OpenmrsFhirCriteriaContext<String> createStringCriteriaContext() {
+        EntityManager em = sessionFactory.getCurrentSession();
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaQuery<String> cq = cb.createQuery(String.class);
+        Root<String> root = cq.from(String.class);
+        
+        return new OpenmrsFhirCriteriaContext<>(em, cb, cq, root);
+    }
+    
+    protected OpenmrsFhirCriteriaContext<Object[]> createObjectCriteriaContext() {
+        EntityManager em = sessionFactory.getCurrentSession();
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaQuery<Object[]> cq = cb.createQuery(Object[].class);
+        Root<Object[]> root = cq.from(Object[].class);
+        
         return new OpenmrsFhirCriteriaContext<>(em, cb, cq, root);
     }
 
     @SuppressWarnings("unchecked")
     protected void applyExactTotal(OpenmrsFhirCriteriaContext<T> criteriaContext, SearchParameterMap theParams) {
-        EntityManager em = sessionFactory.getCurrentSession();
-        CriteriaQuery<T> criteriaQuery = (CriteriaQuery<T>) criteriaBuilder.createQuery(typeToken.getRawType());
-
+        createCriteriaContext();
         List<PropParam<?>> exactTotal = theParams.getParameters(EXACT_TOTAL_SEARCH_PARAMETER);
         if (!exactTotal.isEmpty()) {
             PropParam<Boolean> propParam = (PropParam<Boolean>) exactTotal.get(0);
             if (propParam.getParam()) {
-                em.createQuery(criteriaQuery).setHint("javax.persistence.cache.storeMode", CacheStoreMode.REFRESH);
+                criteriaContext.getEntityManager()
+                        .createQuery(criteriaContext.getCriteriaQuery())
+                        .setHint("javax.persistence.cache.storeMode", CacheStoreMode.REFRESH);
             }
         } else {
-            em.createQuery(criteriaQuery).setHint(HINT_CACHEABLE, "true");
-            em.createQuery(criteriaQuery).setHint("org.hibernate.cacheRegion", COUNT_QUERY_CACHE);
+            criteriaContext.getEntityManager()
+                    .createQuery(criteriaContext.getCriteriaQuery())
+                    .setHint(HINT_CACHEABLE, "true");
+            criteriaContext.getEntityManager()
+                    .createQuery(criteriaContext.getCriteriaQuery())
+                    .setHint("org.hibernate.cacheRegion", COUNT_QUERY_CACHE);
         }
     }
 

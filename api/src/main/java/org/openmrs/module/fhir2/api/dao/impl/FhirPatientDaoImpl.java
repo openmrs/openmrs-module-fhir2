@@ -98,124 +98,104 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 	}
 	
 	@Override
-	protected void setupSearchParams(CriteriaBuilder criteriaBuilder, SearchParameterMap theParams) {
-		EntityManager em = sessionFactory.getCurrentSession();
-		criteriaBuilder = em.getCriteriaBuilder();
-		CriteriaQuery<Patient> criteriaQuery = criteriaBuilder.createQuery(Patient.class);
-		Root<Patient> root = criteriaQuery.from(Patient.class);
-		
-		List<Predicate> predicates = new ArrayList<>();
-		CriteriaBuilder finalCriteriaBuilder = criteriaBuilder;
+	protected void setupSearchParams(OpenmrsFhirCriteriaContext<Patient> criteriaContext, SearchParameterMap theParams) {
+		createCriteriaContext();
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.QUERY_SEARCH_HANDLER:
 					entry.getValue()
-					        .forEach(query -> handlePatientQuery(finalCriteriaBuilder, (StringAndListParam) query.getParam()));
+					        .forEach(query -> handlePatientQuery(criteriaContext, (StringAndListParam) query.getParam()));
 					break;
 				case FhirConstants.NAME_SEARCH_HANDLER:
-					handleNames(finalCriteriaBuilder, entry.getValue());
+					handleNames(criteriaContext, entry.getValue());
 					break;
 				case FhirConstants.GENDER_SEARCH_HANDLER:
 					entry.getValue().forEach(
-					    p -> handleGender(p.getPropertyName(), (TokenAndListParam) p.getParam()).ifPresent(predicates::add));
-					criteriaQuery.distinct(true).where(predicates.toArray(new Predicate[] {}));
+					    p -> handleGender(p.getPropertyName(), (TokenAndListParam) p.getParam()).ifPresent(criteriaContext::addPredicate));
+					criteriaContext.finalizeQuery();
 					break;
 				case FhirConstants.IDENTIFIER_SEARCH_HANDLER:
 					entry.getValue().forEach(
-					    identifier -> handleIdentifier(finalCriteriaBuilder, (TokenAndListParam) identifier.getParam()));
+					    identifier -> handleIdentifier(criteriaContext, (TokenAndListParam) identifier.getParam()));
 					break;
 				case FhirConstants.DATE_RANGE_SEARCH_HANDLER:
 					entry.getValue().forEach(dateRangeParam -> handleDateRange(dateRangeParam.getPropertyName(),
-					    (DateRangeParam) dateRangeParam.getParam()).ifPresent(predicates::add));
-					criteriaQuery.distinct(true).where(predicates.toArray(new Predicate[] {}));
+					    (DateRangeParam) dateRangeParam.getParam()).ifPresent(criteriaContext::addPredicate));
+					criteriaContext.finalizeQuery();
 					break;
 				case FhirConstants.BOOLEAN_SEARCH_HANDLER:
 					entry.getValue().forEach(b -> handleBoolean(b.getPropertyName(), (TokenAndListParam) b.getParam())
-					        .ifPresent(predicates::add));
-					criteriaQuery.distinct(true).where(predicates.toArray(new Predicate[] {}));
+					        .ifPresent(criteriaContext::addPredicate));
+					criteriaContext.finalizeQuery();
 					break;
 				case FhirConstants.ADDRESS_SEARCH_HANDLER:
-					handleAddresses(finalCriteriaBuilder, entry);
+					handleAddresses(criteriaContext, entry);
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(entry.getValue()).ifPresent(predicates::add);
-					criteriaQuery.distinct(true).where(predicates.toArray(new Predicate[] {}));
+					handleCommonSearchParameters(entry.getValue()).ifPresent(criteriaContext::addPredicate);
+					criteriaContext.finalizeQuery();
 					break;
 			}
 		});
 	}
 	
-	private void handlePatientQuery(CriteriaBuilder criteriaBuilder, @Nonnull StringAndListParam query) {
-		EntityManager em = sessionFactory.getCurrentSession();
-		criteriaBuilder = em.getCriteriaBuilder();
-		CriteriaQuery<Patient> criteriaQuery = criteriaBuilder.createQuery(Patient.class);
-		Root<Patient> root = criteriaQuery.from(Patient.class);
-		
-		List<Predicate> predicates = new ArrayList<>();
+	private void handlePatientQuery(OpenmrsFhirCriteriaContext<Patient> criteriaContext, @Nonnull StringAndListParam query) {
 		if (query == null) {
 			return;
 		}
 		
-		if (lacksAlias(criteriaBuilder, "pn")) {
-			root.join("names");
+		if (lacksAlias(criteriaContext, "pn")) {
+			criteriaContext.getRoot().join("names");
 		}
 		
-		if (lacksAlias(criteriaBuilder, "pi")) {
-			root.join("identifiers");
+		if (lacksAlias(criteriaContext, "pi")) {
+			criteriaContext.getRoot().join("identifiers");
 		}
 		
-		CriteriaBuilder finalCriteriaBuilder = criteriaBuilder;
 		handleAndListParam(query, q -> {
 			List<Optional<? extends Predicate>> arrayList = new ArrayList<>();
 			
 			for (String token : StringUtils.split(q.getValueNotNull(), " \t,")) {
 				StringParam param = new StringParam(token).setContains(q.isContains()).setExact(q.isExact());
 				arrayList.add(propertyLike("pn.givenName", param)
-				        .map(c -> finalCriteriaBuilder.and(c, finalCriteriaBuilder.equal(root.get("pn.voided"), false))));
+				        .map(c -> criteriaContext.getCriteriaBuilder().and(c, criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("voided"), false))));
 				arrayList.add(propertyLike("pn.middleName", param)
-				        .map(c -> finalCriteriaBuilder.and(c, finalCriteriaBuilder.equal(root.get("pn.voided"), false))));
+				        .map(c -> criteriaContext.getCriteriaBuilder().and(c, criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("voided"), false))));
 				arrayList.add(propertyLike("pn.familyName", param)
-				        .map(c -> finalCriteriaBuilder.and(c, finalCriteriaBuilder.equal(root.get("pn.voided"), false))));
+				        .map(c -> criteriaContext.getCriteriaBuilder().and(c, criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("voided"), false))));
 			}
 			
 			arrayList.add(propertyLike("pi.identifier",
 			    new StringParam(q.getValueNotNull()).setContains(q.isContains()).setExact(q.isExact()))
-			            .map(c -> finalCriteriaBuilder.and(c, finalCriteriaBuilder.equal(root.get("pi.voided"), false))));
+			            .map(c -> criteriaContext.getCriteriaBuilder().and(c, criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("voided"), false))));
 			
-			return Optional.of(finalCriteriaBuilder.or(toCriteriaArray(arrayList)));
-		}).ifPresent(predicates::add);
-		criteriaQuery.distinct(true).where(predicates.toArray(new Predicate[] {}));
+			return Optional.of(criteriaContext.getCriteriaBuilder().or(toCriteriaArray(arrayList)));
+		}).ifPresent(criteriaContext::addPredicate);
+		criteriaContext.finalizeQuery();
 	}
 	
-	protected void handleIdentifier(CriteriaBuilder criteriaBuilder, TokenAndListParam identifier) {
-		EntityManager em = sessionFactory.getCurrentSession();
-		criteriaBuilder = em.getCriteriaBuilder();
-		CriteriaQuery<Patient> criteriaQuery = criteriaBuilder.createQuery(Patient.class);
-		Root<Patient> root = criteriaQuery.from(Patient.class);
-		
-		List<Predicate> predicates = new ArrayList<>();
+	protected void handleIdentifier(OpenmrsFhirCriteriaContext<Patient> criteriaContext, TokenAndListParam identifier) {
 		if (identifier == null) {
 			return;
 		}
 		
-		root.join("identifiers", javax.persistence.criteria.JoinType.INNER).alias("pi");
-		criteriaBuilder.equal(root.get("pi.voided"), false);
-		
-		CriteriaBuilder finalCriteriaBuilder = criteriaBuilder;
+		criteriaContext.getRoot().join("identifiers", javax.persistence.criteria.JoinType.INNER).alias("pi");
+		criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("pi.voided"), false);
+	
 		handleAndListParamBySystem(identifier, (system, tokens) -> {
 			if (system.isEmpty()) {
-				return Optional.of(finalCriteriaBuilder.in(root.get("pi.identifier")).value(tokensToList(tokens)));
+				return Optional.of(criteriaContext.getCriteriaBuilder().in(criteriaContext.getRoot().get("pi.identifier")).value(tokensToList(tokens)));
 			} else {
-				if (lacksAlias(finalCriteriaBuilder, "pit")) {
-					root.join("pi.identifierType", javax.persistence.criteria.JoinType.INNER).alias("pit");
-					finalCriteriaBuilder.equal(root.get("pit.retired"), false);
+				if (lacksAlias(criteriaContext, "pit")) {
+					criteriaContext.getRoot().join("pi.identifierType", javax.persistence.criteria.JoinType.INNER).alias("pit");
+					criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("pit.retired"), false);
 				}
 				
-				return Optional.of(finalCriteriaBuilder.and(finalCriteriaBuilder.equal(root.get("pit.name"), system),
-				    finalCriteriaBuilder.in(root.get("pi.identifier")).value(tokensToList(tokens))));
+				return Optional.of(criteriaContext.getCriteriaBuilder().and(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("pit.name"), system),
+						criteriaContext.getCriteriaBuilder().in(criteriaContext.getRoot().get("pi.identifier")).value(tokensToList(tokens))));
 			}
-		}).ifPresent(predicates::add);
-		criteriaQuery.distinct(true).where(predicates.toArray(new Predicate[] {}));
+		}).ifPresent(criteriaContext::addPredicate);
+		criteriaContext.finalizeQuery();
 	}
 	
 	@Override

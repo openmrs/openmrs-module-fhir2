@@ -9,14 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -35,64 +29,52 @@ import org.springframework.stereotype.Component;
 @Setter(AccessLevel.PACKAGE)
 public class FhirServiceRequestDaoImpl extends BaseFhirDao<TestOrder> implements FhirServiceRequestDao<TestOrder> {
 	
-	private List<Predicate> predicateList = new ArrayList<>();
-	
 	@Override
 	public boolean hasDistinctResults() {
 		return false;
 	}
 	
 	@Override
-	protected void setupSearchParams(CriteriaBuilder criteriaBuilder, SearchParameterMap theParams) {
-		EntityManager em = sessionFactory.getCurrentSession();
-		criteriaBuilder = em.getCriteriaBuilder();
-		CriteriaQuery<TestOrder> criteriaQuery = criteriaBuilder.createQuery(TestOrder.class);
-		
-		CriteriaBuilder finalCriteriaBuilder = criteriaBuilder;
+	protected void setupSearchParams(OpenmrsFhirCriteriaContext<TestOrder> criteriaContext, SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER:
 					entry.getValue().forEach(
-					    param -> handleEncounterReference(finalCriteriaBuilder, (ReferenceAndListParam) param.getParam(), "e"));
+					    param -> handleEncounterReference(criteriaContext, (ReferenceAndListParam) param.getParam(), "e"));
 					break;
 				case FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER:
-					entry.getValue().forEach(patientReference -> handlePatientReference(finalCriteriaBuilder,
+					entry.getValue().forEach(patientReference -> handlePatientReference(criteriaContext,
 					    (ReferenceAndListParam) patientReference.getParam(), "patient"));
 					break;
 				case FhirConstants.CODED_SEARCH_HANDLER:
 					entry.getValue()
-					        .forEach(code -> handleCodedConcept(finalCriteriaBuilder, (TokenAndListParam) code.getParam()));
+					        .forEach(code -> handleCodedConcept(criteriaContext, (TokenAndListParam) code.getParam()));
 					break;
 				case FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER:
-					entry.getValue().forEach(participantReference -> handleProviderReference(finalCriteriaBuilder,
+					entry.getValue().forEach(participantReference -> handleProviderReference(criteriaContext,
 					    (ReferenceAndListParam) participantReference.getParam()));
 					break;
 				case FhirConstants.DATE_RANGE_SEARCH_HANDLER:
 					entry.getValue().forEach(dateRangeParam -> handleDateRange((DateRangeParam) dateRangeParam.getParam())
-					        .ifPresent(predicateList::add));
-					criteriaQuery.distinct(true).where(predicateList.toArray(new Predicate[] {}));
+					        .ifPresent(criteriaContext::addPredicate));
+					criteriaContext.finalizeQuery();
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(entry.getValue()).ifPresent(predicateList::add);
-					criteriaQuery.distinct(true).where(predicateList.toArray(new Predicate[] {}));
+					handleCommonSearchParameters(entry.getValue()).ifPresent(criteriaContext::addPredicate);
+					criteriaContext.finalizeQuery();
 					break;
 			}
 		});
 	}
 	
-	private void handleCodedConcept(CriteriaBuilder criteriaBuilder, TokenAndListParam code) {
-		EntityManager em = sessionFactory.getCurrentSession();
-		criteriaBuilder = em.getCriteriaBuilder();
-		CriteriaQuery<TestOrder> criteriaQuery = criteriaBuilder.createQuery(TestOrder.class);
-		Root<TestOrder> root = criteriaQuery.from(TestOrder.class);
-		
+	private void handleCodedConcept(OpenmrsFhirCriteriaContext<TestOrder> criteriaContext, TokenAndListParam code) {
 		if (code != null) {
-			if (lacksAlias(criteriaBuilder, "c")) {
-				root.join("concept").alias("c");
+			if (lacksAlias(criteriaContext, "c")) {
+				criteriaContext.getRoot().join("concept").alias("c");
 			}
 			
-			handleCodeableConcept(criteriaBuilder, code, "c", "cm", "crt").ifPresent(predicateList::add);
-			criteriaQuery.distinct(true).where(predicateList.toArray(new Predicate[] {}));
+			handleCodeableConcept(criteriaContext, code, "c", "cm", "crt").ifPresent(criteriaContext::addPredicate);
+			criteriaContext.finalizeQuery();
 		}
 	}
 	
@@ -100,16 +82,15 @@ public class FhirServiceRequestDaoImpl extends BaseFhirDao<TestOrder> implements
 		if (dateRangeParam == null) {
 			return Optional.empty();
 		}
-		EntityManager em = sessionFactory.getCurrentSession();
-		CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
-		CriteriaQuery<TestOrder> criteriaQuery = criteriaBuilder.createQuery(TestOrder.class);
 		
-		return Optional.of(criteriaBuilder.and(toCriteriaArray(Stream.of(
+		OpenmrsFhirCriteriaContext<TestOrder> criteriaContext = createCriteriaContext();
+		
+		return Optional.of(criteriaContext.getCriteriaBuilder().and(toCriteriaArray(Stream.of(
 		    Optional.of(
-		        criteriaBuilder.or(toCriteriaArray(Stream.of(handleDate("scheduledDate", dateRangeParam.getLowerBound()),
+		        criteriaContext.getCriteriaBuilder().or(toCriteriaArray(Stream.of(handleDate("scheduledDate", dateRangeParam.getLowerBound()),
 		            handleDate("dateActivated", dateRangeParam.getLowerBound()))))),
 		    Optional.of(
-		        criteriaBuilder.or(toCriteriaArray(Stream.of(handleDate("dateStopped", dateRangeParam.getUpperBound()),
+		        criteriaContext.getCriteriaBuilder().or(toCriteriaArray(Stream.of(handleDate("dateStopped", dateRangeParam.getUpperBound()),
 		            handleDate("autoExpireDate", dateRangeParam.getUpperBound())))))))));
 	}
 	

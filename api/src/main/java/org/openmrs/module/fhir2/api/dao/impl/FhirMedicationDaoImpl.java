@@ -11,15 +11,6 @@ package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hibernate.criterion.Restrictions.and;
 
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
@@ -38,78 +29,55 @@ import org.springframework.stereotype.Component;
 public class FhirMedicationDaoImpl extends BaseFhirDao<Drug> implements FhirMedicationDao {
 	
 	@Override
-	protected void setupSearchParams(CriteriaBuilder criteriaBuilder, SearchParameterMap theParams) {
-		EntityManager em = sessionFactory.getCurrentSession();
-		criteriaBuilder = em.getCriteriaBuilder();
-		CriteriaQuery<Drug> criteriaQuery = criteriaBuilder.createQuery(Drug.class);
-		Root<Drug> root = criteriaQuery.from(Drug.class);
-		
-		List<Predicate> predicates = new ArrayList<>();
-		CriteriaBuilder finalCriteriaBuilder = criteriaBuilder;
+	protected void setupSearchParams(OpenmrsFhirCriteriaContext<Drug> criteriaContext, SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.CODED_SEARCH_HANDLER:
 					entry.getValue()
-					        .forEach(param -> handleMedicationCode(finalCriteriaBuilder, (TokenAndListParam) param.getParam()));
+					        .forEach(param -> handleMedicationCode(criteriaContext, (TokenAndListParam) param.getParam()));
 					break;
 				case FhirConstants.DOSAGE_FORM_SEARCH_HANDLER:
 					entry.getValue().forEach(
-					    param -> handleMedicationDosageForm(finalCriteriaBuilder, (TokenAndListParam) param.getParam()));
+					    param -> handleMedicationDosageForm(criteriaContext, (TokenAndListParam) param.getParam()));
 					break;
 				case FhirConstants.INGREDIENT_SEARCH_HANDLER:
 					entry.getValue()
-					        .forEach(param -> handleIngredientCode(finalCriteriaBuilder, (TokenAndListParam) param.getParam()));
+					        .forEach(param -> handleIngredientCode(criteriaContext, (TokenAndListParam) param.getParam()));
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(entry.getValue()).ifPresent(predicates::add);
-					criteriaQuery.where(predicates.toArray(new Predicate[] {}));
+					handleCommonSearchParameters(entry.getValue()).ifPresent(criteriaContext::addPredicate);
+					criteriaContext.finalizeQuery();
 					break;
 			}
 		});
 	}
 	
 	// TODO: look into DetachedCriteria and how to translate it to jpa criteria api
-	private void handleIngredientCode(CriteriaBuilder criteriaBuilder, TokenAndListParam ingredientCode) {
-		EntityManager em = sessionFactory.getCurrentSession();
-		criteriaBuilder = em.getCriteriaBuilder();
-		CriteriaQuery<Drug> criteriaQuery = criteriaBuilder.createQuery(Drug.class);
-		Root<Drug> root = criteriaQuery.from(Drug.class);
-		
-		List<Predicate> predicates = new ArrayList<>();
+	private void handleIngredientCode(OpenmrsFhirCriteriaContext<Drug> criteriaContext, TokenAndListParam ingredientCode) {
 		if (ingredientCode != null) {
-			root.join("ingredients").alias("i");
+			criteriaContext.getRoot().join("ingredients").alias("i");
 			DetachedCriteria detachedCriteria = DetachedCriteria.forClass(Concept.class, "ic");
-			handleCodeableConcept(criteriaBuilder, ingredientCode, "ic", "icm", "icrt").ifPresent(predicates::add);
+			handleCodeableConcept(criteriaContext, ingredientCode, "ic", "icm", "icrt").ifPresent(criteriaContext::addPredicate);
+			criteriaContext.finalizeQuery();
 			detachedCriteria.setProjection(Projections.property("conceptId"));
 			and(Subqueries.propertyIn("i.ingredient", detachedCriteria));
 		}
 	}
 	
-	private void handleMedicationCode(CriteriaBuilder criteriaBuilder, TokenAndListParam code) {
-		EntityManager em = sessionFactory.getCurrentSession();
-		criteriaBuilder = em.getCriteriaBuilder();
-		CriteriaQuery<Drug> criteriaQuery = criteriaBuilder.createQuery(Drug.class);
-		Root<Drug> root = criteriaQuery.from(Drug.class);
-		
-		List<Predicate> predicates = new ArrayList<>();
+	private void handleMedicationCode(OpenmrsFhirCriteriaContext<Drug> criteriaContext, TokenAndListParam code) {
 		if (code != null) {
-			root.join("concept").alias("cc");
-			handleCodeableConcept(criteriaBuilder, code, "cc", "ccm", "ccrt").ifPresent(predicates::add);
-			criteriaQuery.distinct(true).where(predicates.toArray(new Predicate[] {}));
+			criteriaContext.getRoot().join("concept").alias("cc");
+			handleCodeableConcept(criteriaContext, code, "cc", "ccm", "ccrt").ifPresent(criteriaContext::addPredicate);
+			criteriaContext.finalizeQuery();
 		}
 	}
 	
-	private void handleMedicationDosageForm(CriteriaBuilder criteriaBuilder, TokenAndListParam dosageForm) {
-		EntityManager em = sessionFactory.getCurrentSession();
-		criteriaBuilder = em.getCriteriaBuilder();
-		CriteriaQuery<Drug> criteriaQuery = criteriaBuilder.createQuery(Drug.class);
-		Root<Drug> root = criteriaQuery.from(Drug.class);
-		
-		List<Predicate> predicates = new ArrayList<>();
+	private void handleMedicationDosageForm(OpenmrsFhirCriteriaContext<Drug> criteriaContext, TokenAndListParam dosageForm) {
 		if (dosageForm != null) {
-			root.join("dosageForm").alias("dc");
-			handleCodeableConcept(criteriaBuilder, dosageForm, "dc", "dcm", "dcrt").ifPresent(predicates::add);
-			criteriaQuery.distinct(true).where(predicates.toArray(new Predicate[] {}));
+			criteriaContext.getRoot().join("dosageForm").alias("dc");
+			handleCodeableConcept(criteriaContext, dosageForm, "dc", "dcm", "dcrt")
+					.ifPresent(criteriaContext::addPredicate);
+			criteriaContext.finalizeQuery();
 		}
 	}
 }
