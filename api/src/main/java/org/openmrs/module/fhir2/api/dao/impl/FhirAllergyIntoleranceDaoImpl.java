@@ -10,14 +10,8 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import javax.annotation.Nonnull;
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -44,8 +38,6 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implemen
 	@Autowired
 	private FhirGlobalPropertyService globalPropertyService;
 	
-	private List<Predicate> predicates = new ArrayList<>();
-	
 	@Override
 	public Allergy createOrUpdate(@Nonnull Allergy allergy) {
 		Allergy savedAllergy = super.createOrUpdate(allergy);
@@ -58,114 +50,95 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implemen
 	}
 	
 	@Override
-	protected void setupSearchParams(CriteriaBuilder criteriaBuilder, SearchParameterMap theParams) {
+	protected void setupSearchParams(OpenmrsFhirCriteriaContext<Allergy> criteriaContext, SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
-			EntityManager em = sessionFactory.getCurrentSession();
-			CriteriaQuery<Allergy> criteriaQuery = em.getCriteriaBuilder().createQuery(Allergy.class);
-			Root<Allergy> root = criteriaQuery.from(Allergy.class);
-			
 			switch (entry.getKey()) {
 				case FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handlePatientReference(criteriaBuilder,
+					entry.getValue().forEach(param -> handlePatientReference(criteriaContext,
 					    (ReferenceAndListParam) param.getParam(), "patient"));
 					break;
 				case FhirConstants.CATEGORY_SEARCH_HANDLER:
 					entry.getValue().forEach(
 					    param -> handleAllergenCategory("allergen.allergenType", (TokenAndListParam) param.getParam())
-					            .ifPresent(predicates::add));
-					criteriaQuery.distinct(true).where(predicates.toArray(new Predicate[] {}));
+					            .ifPresent(criteriaContext::addPredicate));
+					criteriaContext.finalizeQuery();
 					break;
 				case FhirConstants.ALLERGEN_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handleAllergen(criteriaBuilder, (TokenAndListParam) param.getParam()));
+					entry.getValue().forEach(param -> handleAllergen(criteriaContext, (TokenAndListParam) param.getParam()));
 					break;
 				case FhirConstants.SEVERITY_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handleSeverity(criteriaBuilder, (TokenAndListParam) param.getParam()));
+					entry.getValue().forEach(param -> handleSeverity(criteriaContext, (TokenAndListParam) param.getParam()));
 					break;
 				case FhirConstants.CODED_SEARCH_HANDLER:
 					entry.getValue()
-					        .forEach(param -> handleManifestation(criteriaBuilder, (TokenAndListParam) param.getParam()));
+					        .forEach(param -> handleManifestation(criteriaContext, (TokenAndListParam) param.getParam()));
 					break;
 				case FhirConstants.BOOLEAN_SEARCH_HANDLER:
 					entry.getValue().forEach(
 					    param -> handleBoolean("voided", convertStringStatusToBoolean((TokenAndListParam) param.getParam()))
-					            .ifPresent(predicates::add));
-					criteriaQuery.distinct(true).where(predicates.toArray(new Predicate[] {}));
+					            .ifPresent(criteriaContext::addPredicate));
+					criteriaContext.finalizeQuery();
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(entry.getValue()).ifPresent(predicates::add);
-					criteriaQuery.distinct(true).where(predicates.toArray(new Predicate[] {}));
+					handleCommonSearchParameters(entry.getValue()).ifPresent(criteriaContext::addPredicate);
+					criteriaContext.finalizeQuery();
 					break;
 			}
 		});
 	}
 	
-	private void handleManifestation(CriteriaBuilder criteriaBuilder, TokenAndListParam code) {
-		EntityManager em = sessionFactory.getCurrentSession();
-		criteriaBuilder = em.getCriteriaBuilder();
-		CriteriaQuery<Allergy> criteriaQuery = criteriaBuilder.createQuery(Allergy.class);
-		Root<Allergy> root = criteriaQuery.from(Allergy.class);
-		
+	private void handleManifestation(OpenmrsFhirCriteriaContext<Allergy> criteriaContext, TokenAndListParam code) {
 		if (code != null) {
-			root.join("reactions").alias("r");
-			root.join("r.reaction").alias("rc");
+			criteriaContext.getRoot().join("reactions").alias("r");
+			criteriaContext.getRoot().join("r.reaction").alias("rc");
 			
-			handleCodeableConcept(criteriaBuilder, code, "rc", "rcm", "rcrt").ifPresent(predicates::add);
-			criteriaQuery.distinct(true).where(predicates.toArray(new Predicate[] {}));
+			handleCodeableConcept(criteriaContext, code, "rc", "rcm", "rcrt").ifPresent(criteriaContext::addPredicate);
+			criteriaContext.finalizeQuery();
 		}
 	}
 	
-	private void handleAllergen(CriteriaBuilder criteriaBuilder, TokenAndListParam code) {
-		EntityManager em = sessionFactory.getCurrentSession();
-		CriteriaQuery<Allergy> criteriaQuery = em.getCriteriaBuilder().createQuery(Allergy.class);
-		Root<Allergy> root = criteriaQuery.from(Allergy.class);
-		
+	private void handleAllergen(OpenmrsFhirCriteriaContext<Allergy> criteriaContext, TokenAndListParam code) {
 		if (code != null) {
-			root.join("allergen.codedAllergen").alias("ac");
+			criteriaContext.getRoot().join("allergen.codedAllergen").alias("ac");
 			
-			handleCodeableConcept(criteriaBuilder, code, "ac", "acm", "acrt").ifPresent(predicates::add);
-			criteriaQuery.distinct(true).where(predicates.toArray(new Predicate[] {}));
+			handleCodeableConcept(criteriaContext, code, "ac", "acm", "acrt").ifPresent(criteriaContext::addPredicate);
+			criteriaContext.finalizeQuery();
 		}
 	}
 	
-	private void handleSeverity(CriteriaBuilder criteriaBuilder, TokenAndListParam severityParam) {
+	private void handleSeverity(OpenmrsFhirCriteriaContext<Allergy> criteriaContext, TokenAndListParam severityParam) {
 		if (severityParam == null) {
 			return;
 		}
 		Map<String, String> severityConceptUuids = globalPropertyService.getGlobalProperties(
 		    FhirConstants.GLOBAL_PROPERTY_MILD, FhirConstants.GLOBAL_PROPERTY_MODERATE, FhirConstants.GLOBAL_PROPERTY_SEVERE,
 		    FhirConstants.GLOBAL_PROPERTY_OTHER);
+				
+		criteriaContext.getRoot().join("severity").alias("sc");
 		
-		EntityManager em = sessionFactory.getCurrentSession();
-		criteriaBuilder = em.getCriteriaBuilder();
-		CriteriaQuery<Allergy> criteriaQuery = criteriaBuilder.createQuery(Allergy.class);
-		Root<Allergy> root = criteriaQuery.from(Allergy.class);
-		
-		root.join("severity").alias("sc");
-		
-		CriteriaBuilder finalCriteriaBuilder = criteriaBuilder;
 		handleAndListParam(severityParam, token -> {
 			try {
 				AllergyIntolerance.AllergyIntoleranceSeverity severity = AllergyIntolerance.AllergyIntoleranceSeverity
 				        .fromCode(token.getValue());
 				switch (severity) {
 					case MILD:
-						return Optional.of(finalCriteriaBuilder.equal(root.get("sc.uuid"),
+						return Optional.of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("sc.uuid"),
 						    severityConceptUuids.get(FhirConstants.GLOBAL_PROPERTY_MILD)));
 					case MODERATE:
-						return Optional.of(finalCriteriaBuilder.equal(root.get("sc.uuid"),
+						return Optional.of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("sc.uuid"),
 						    severityConceptUuids.get(FhirConstants.GLOBAL_PROPERTY_MODERATE)));
 					case SEVERE:
-						return Optional.of(finalCriteriaBuilder.equal(root.get("sc.uuid"),
+						return Optional.of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("sc.uuid"),
 						    severityConceptUuids.get(FhirConstants.GLOBAL_PROPERTY_SEVERE)));
 					case NULL:
-						return Optional.of(finalCriteriaBuilder.equal(root.get("sc.uuid"),
+						return Optional.of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("sc.uuid"),
 						    severityConceptUuids.get(FhirConstants.GLOBAL_PROPERTY_OTHER)));
 				}
 			}
 			catch (FHIRException ignored) {}
 			return Optional.empty();
-		}).ifPresent(predicates::add);
-		criteriaQuery.distinct(true).where(predicates.toArray(new Predicate[] {}));
+		}).ifPresent(criteriaContext::addPredicate);
+		criteriaContext.finalizeQuery();
 	}
 	
 	private Optional<Predicate> handleAllergenCategory(String propertyName, TokenAndListParam categoryParam) {
@@ -173,24 +146,20 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implemen
 			return Optional.empty();
 		}
 		
-		EntityManager em = sessionFactory.getCurrentSession();
-		CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
-		CriteriaQuery<Allergy> criteriaQuery = criteriaBuilder.createQuery(Allergy.class);
-		Root<Allergy> root = criteriaQuery.from(Allergy.class);
-		
+		OpenmrsFhirCriteriaContext<Allergy> criteriaContext = createCriteriaContext();
 		return handleAndListParam(categoryParam, token -> {
 			try {
 				AllergyIntolerance.AllergyIntoleranceCategory category = AllergyIntolerance.AllergyIntoleranceCategory
 				        .fromCode(token.getValue());
 				switch (category) {
 					case FOOD:
-						return Optional.of(criteriaBuilder.equal(root.get(propertyName), AllergenType.FOOD));
+						return Optional.of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get(propertyName), AllergenType.FOOD));
 					case MEDICATION:
-						return Optional.of(criteriaBuilder.equal(root.get(propertyName), AllergenType.DRUG));
+						return Optional.of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get(propertyName), AllergenType.DRUG));
 					case ENVIRONMENT:
-						return Optional.of(criteriaBuilder.equal(root.get(propertyName), AllergenType.ENVIRONMENT));
+						return Optional.of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get(propertyName), AllergenType.ENVIRONMENT));
 					case NULL:
-						return Optional.of(criteriaBuilder.equal(root.get(propertyName), AllergenType.OTHER));
+						return Optional.of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get(propertyName), AllergenType.OTHER));
 				}
 			}
 			catch (FHIRException ignored) {}

@@ -75,7 +75,6 @@ public class FhirPersonDaoImpl extends BasePersonDao<Person> implements FhirPers
 	
 	@Override
 	protected Optional<Predicate> handleLastUpdated(DateRangeParam param) {
-		
 		return Optional.of(createCriteriaContext().getCriteriaBuilder().or(toCriteriaArray(handleDateRange("personDateChanged", param),
 		    Optional.of(createCriteriaContext().getCriteriaBuilder()
 		            .and(toCriteriaArray(Stream.of(Optional.of(createCriteriaContext().getCriteriaBuilder().isNull(createCriteriaContext().getRoot().get("personDateChanged"))),
@@ -89,7 +88,7 @@ public class FhirPersonDaoImpl extends BasePersonDao<Person> implements FhirPers
 	
 	@Override
 	protected void handleVoidable(OpenmrsFhirCriteriaContext<Person> criteriaContext) {
-		criteriaContext.getCriteriaBuilder().and(criteriaContext.getCriteriaBuilder()
+		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder()
 				.equal(criteriaContext.getRoot().get("personVoided"), false));
 	}
 	

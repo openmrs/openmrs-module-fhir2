@@ -91,14 +91,14 @@ public class FhirRelatedPersonDaoImpl extends BaseFhirDao<Relationship> implemen
 				criteriaContext.getRoot().join("m.names", javax.persistence.criteria.JoinType.LEFT).alias("pn");
 			}
 			
-			Root<PersonName> subRoot = criteriaContext.getSubquery().subquery(Integer.class).from(PersonName.class);
+			Root<PersonName> subRoot = criteriaContext.getCriteriaQuery().subquery(Integer.class).from(PersonName.class);
 			
 			Predicate predicate = criteriaContext.getCriteriaBuilder()
 			        .and(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("pn").get("voided"), false),
 					        criteriaContext.getCriteriaBuilder().or(
 							        criteriaContext.getCriteriaBuilder().and(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("pn").get("preferred"), true),
 									        criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("pn").get("personNameId"),
-			                        criteriaContext.getSubquery().subquery(Integer.class)
+			                        criteriaContext.getCriteriaQuery().subquery(Integer.class)
 			                                .select(criteriaContext.getCriteriaBuilder().min(criteriaContext.getRoot().get("pn1").get("personNameId")))
 			                                .where(criteriaContext.getCriteriaBuilder().and(
 					                                criteriaContext.getCriteriaBuilder().equal(subRoot.get("preferred"), true),
@@ -110,7 +110,7 @@ public class FhirRelatedPersonDaoImpl extends BaseFhirDao<Relationship> implemen
 							                        criteriaContext.getCriteriaBuilder().equal(subRoot.get("pn2").get("person").get("personId"),
 			                                    criteriaContext.getRoot().get("personId")))))),
 									        criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("pn").get("personNameId"),
-			                        criteriaContext.getSubquery().subquery(Integer.class)
+			                        criteriaContext.getCriteriaQuery().subquery(Integer.class)
 			                                .select(criteriaContext.getCriteriaBuilder().min(criteriaContext.getRoot().get("pn3").get("personNameId")))
 			                                .where(criteriaContext.getCriteriaBuilder().and(
 					                                criteriaContext.getCriteriaBuilder().equal(subRoot.get("pn3").get("preferred"), false),

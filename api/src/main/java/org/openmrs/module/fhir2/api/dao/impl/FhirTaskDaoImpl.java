@@ -33,9 +33,6 @@ import org.springframework.stereotype.Component;
 @Getter(AccessLevel.PACKAGE)
 @Setter(AccessLevel.PACKAGE)
 public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDao {
-	
-	private List<Predicate> predicateList = new ArrayList<>();
-	
 	@Override
 	protected void setupSearchParams(OpenmrsFhirCriteriaContext<FhirTask> criteriaContext, SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {

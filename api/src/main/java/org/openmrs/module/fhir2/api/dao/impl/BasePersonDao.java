@@ -74,12 +74,8 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 	}
 	
 	@Override
-	@SuppressWarnings("unchecked")
 	protected Collection<Order> paramToProps(@Nonnull SortState sortState) {
-		EntityManager em = sessionFactory.getCurrentSession();
-		CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
-		CriteriaQuery<T> criteriaQuery = (CriteriaQuery<T>) criteriaBuilder.createQuery(typeToken.getRawType());
-		Root<T> root = (Root<T>) criteriaQuery.from(typeToken.getRawType());
+		OpenmrsFhirCriteriaContext<T> criteriaContext = createCriteriaContext();
 		
 		String param = sortState.getParameter();
 		
@@ -89,39 +85,39 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 		
 		CriteriaBuilder cb = sortState.getCriteriaBuilder();
 		if (param.startsWith("address") && lacksAlias(cb, "pad")) {
-			root.join(getAssociationPath("addresses"), JoinType.LEFT).alias("pad");
+			criteriaContext.getRoot().join(getAssociationPath("addresses"), JoinType.LEFT).alias("pad");
 		} else if (param.equals(SP_NAME) || param.equals(SP_GIVEN) || param.equals(SP_FAMILY)) {
 			if (lacksAlias(cb, "pn")) {
-				root.join(getAssociationPath("names"), JoinType.LEFT).alias("pn");
+				criteriaContext.getRoot().join(getAssociationPath("names"), JoinType.LEFT).alias("pn");
 			}
 			
-			Root<PersonName> subRoot = criteriaQuery.subquery(Integer.class).from(PersonName.class);
+			Root<PersonName> subRoot = criteriaContext.getCriteriaQuery().subquery(Integer.class).from(PersonName.class);
 			
-			Predicate predicate = criteriaBuilder
-			        .and(criteriaBuilder.equal(root.get("pn").get("voided"), false),
-			            criteriaBuilder.or(
-			                criteriaBuilder.and(criteriaBuilder.equal(root.get("pn").get("preferred"), true),
-			                    criteriaBuilder.equal(root.get("pn").get("personNameId"),
-			                        criteriaQuery.subquery(Integer.class)
-			                                .select(criteriaBuilder.min(root.get("pn1").get("personNameId")))
-			                                .where(criteriaBuilder.and(
-			                                    criteriaBuilder.equal(subRoot.get("preferred"), true),
-			                                    criteriaBuilder.equal(subRoot.get("person_id"), root.get("person_id")))))),
-			                criteriaBuilder.and(
-			                    criteriaBuilder.not(criteriaBuilder.exists(
-			                        criteriaQuery.subquery(Integer.class).select(root.get("pn2").get("personNameId")).where(
-			                            criteriaBuilder.and(criteriaBuilder.equal(subRoot.get("pn2").get("preferred"), true),
-			                                criteriaBuilder.equal(subRoot.get("pn2").get("person").get("personId"),
-			                                    root.get("personId")))))),
-			                    criteriaBuilder.equal(root.get("pn").get("personNameId"),
-			                        criteriaQuery.subquery(Integer.class)
-			                                .select(criteriaBuilder.min(root.get("pn3").get("personNameId")))
-			                                .where(criteriaBuilder.and(
-			                                    criteriaBuilder.equal(subRoot.get("pn3").get("preferred"), false),
-			                                    criteriaBuilder.equal(subRoot.get("pn3").get("person").get("personId"),
-			                                        root.get("personId")))))),
-			                criteriaBuilder.isNull(root.get("pn").get("personNameId"))));
-			criteriaQuery.where(predicate);
+			criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder()
+					.and(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("pn").get("voided"), false),
+							criteriaContext.getCriteriaBuilder().or(
+									criteriaContext.getCriteriaBuilder().and(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("pn").get("preferred"), true),
+											criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("pn").get("personNameId"),
+													criteriaContext.getCriteriaQuery().subquery(Integer.class)
+															.select(criteriaContext.getCriteriaBuilder().min(criteriaContext.getRoot().get("pn1").get("personNameId")))
+															.where(criteriaContext.getCriteriaBuilder().and(
+																	criteriaContext.getCriteriaBuilder().equal(subRoot.get("preferred"), true),
+																	criteriaContext.getCriteriaBuilder().equal(subRoot.get("person_id"), criteriaContext.getRoot().get("person_id")))))),
+									criteriaContext.getCriteriaBuilder().and(
+											criteriaContext.getCriteriaBuilder().not(criteriaContext.getCriteriaBuilder().exists(
+													criteriaContext.getCriteriaQuery().subquery(Integer.class).select(criteriaContext.getRoot().get("pn2").get("personNameId")).where(
+															criteriaContext.getCriteriaBuilder().and(criteriaContext.getCriteriaBuilder().equal(subRoot.get("pn2").get("preferred"), true),
+																	criteriaContext.getCriteriaBuilder().equal(subRoot.get("pn2").get("person").get("personId"),
+																			criteriaContext.getRoot().get("personId")))))),
+											criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("pn").get("personNameId"),
+													criteriaContext.getCriteriaQuery().subquery(Integer.class)
+															.select(criteriaContext.getCriteriaBuilder().min(criteriaContext.getRoot().get("pn3").get("personNameId")))
+															.where(criteriaContext.getCriteriaBuilder().and(
+																	criteriaContext.getCriteriaBuilder().equal(subRoot.get("pn3").get("preferred"), false),
+																	criteriaContext.getCriteriaBuilder().equal(subRoot.get("pn3").get("person").get("personId"),
+																			criteriaContext.getRoot().get("personId")))))),
+									criteriaContext.getCriteriaBuilder().isNull(criteriaContext.getRoot().get("pn").get("personNameId")))));
+			criteriaContext.finalizeQuery();
 			
 			String[] properties = null;
 			switch (param) {
@@ -141,21 +137,20 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 			switch (sortState.getSortOrder()) {
 				case ASC:
 					for (String property : properties) {
-						sortStateOrders.add(cb.asc(root.get(property)));
+						sortStateOrders.add(cb.asc(criteriaContext.getRoot().get(property)));
 					}
 					break;
 				case DESC:
 					for (String property : properties) {
-						sortStateOrders.add(cb.desc(root.get(property)));
+						sortStateOrders.add(cb.desc(criteriaContext.getRoot().get(property)));
 					}
 					break;
 			}
 			
-			criteriaQuery.orderBy(sortStateOrders);
+			criteriaContext.getCriteriaQuery().orderBy(sortStateOrders);
 			return sortStateOrders;
 			
 		}
-		
 		return super.paramToProps(sortState);
 	}
 	
