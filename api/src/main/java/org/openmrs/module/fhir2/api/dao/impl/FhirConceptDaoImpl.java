@@ -17,7 +17,6 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Subquery;
 
 import java.util.Collections;
 import java.util.List;
@@ -122,9 +121,8 @@ public class FhirConceptDaoImpl extends BaseFhirDao<Concept> implements FhirConc
 		CriteriaBuilder cb = em.getCriteriaBuilder();
 		CriteriaQuery<Concept> cq = cb.createQuery(Concept.class);
 		Root<Concept> root = cq.from(Concept.class);
-		Subquery<Concept> subquery = cq.subquery(Concept.class);
 		
-		return new OpenmrsFhirCriteriaContext<>(em, cb, cq, root, subquery);
+		return new OpenmrsFhirCriteriaContext<>(em, cb, cq, root);
 	}
 	
 }

@@ -9,9 +9,11 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
-import static org.hibernate.criterion.Restrictions.eq;
-
 import javax.annotation.Nonnull;
+import javax.persistence.EntityManager;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,7 +22,6 @@ import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
-import org.hibernate.sql.JoinType;
 import org.openmrs.Location;
 import org.openmrs.LocationAttribute;
 import org.openmrs.LocationAttributeType;
@@ -74,15 +75,20 @@ public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLo
 		});
 	}
 	
-	// TODO: to be looked into
 	@Override
-	@SuppressWarnings("unchecked")
 	public List<LocationAttribute> getActiveAttributesByLocationAndAttributeTypeUuid(@Nonnull Location location,
 	        @Nonnull String locationAttributeTypeUuid) {
-		return (List<LocationAttribute>) getSessionFactory().getCurrentSession().createCriteria(LocationAttribute.class)
-		        .createAlias("location", "l", JoinType.INNER_JOIN, eq("l.id", location.getId()))
-		        .createAlias("attributeType", "lat").add(eq("lat.uuid", locationAttributeTypeUuid)).add(eq("voided", false))
-		        .list();
+		OpenmrsFhirCriteriaContext<LocationAttribute> criteriaContext = openmrsFhirCriteriaContext();
+		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot());
+		
+		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder()
+				.equal(criteriaContext.getRoot().join("location").get("id"), location.getId()));
+		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder()
+				.equal(criteriaContext.getRoot().join("attributeType").get("uuid"), locationAttributeTypeUuid));
+		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder()
+				.equal(criteriaContext.getRoot().get("voided"), false));
+		
+		return criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).getResultList();
 	}
 	
 	private void handleName(OpenmrsFhirCriteriaContext<Location> criteriaContext, StringAndListParam namePattern) {
@@ -159,5 +165,14 @@ public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLo
 	@Override
 	public LocationAttributeType getLocationAttributeTypeByUuid(String uuid) {
 		return locationService.getLocationAttributeTypeByUuid(uuid);
+	}
+	
+	protected OpenmrsFhirCriteriaContext<LocationAttribute> openmrsFhirCriteriaContext() {
+		EntityManager em = sessionFactory.getCurrentSession();
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<LocationAttribute> cq = cb.createQuery(LocationAttribute.class);
+		Root<LocationAttribute> root = cq.from(LocationAttribute.class);
+		
+		return new OpenmrsFhirCriteriaContext<>(em, cb, cq, root);
 	}
 }

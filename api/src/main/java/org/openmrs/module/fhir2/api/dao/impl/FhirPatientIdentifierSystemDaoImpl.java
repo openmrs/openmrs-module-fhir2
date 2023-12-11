@@ -43,7 +43,8 @@ public class FhirPatientIdentifierSystemDaoImpl implements FhirPatientIdentifier
 		OpenmrsFhirCriteriaContext<FhirPatientIdentifierSystem> criteriaContext = openmrsFhirCriteriaContext();
 		CriteriaQuery<String> criteriaQuery = criteriaContext.getCriteriaBuilder().createQuery(String.class);
 		
-		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("patientIdentifierType.patientIdentifierTypeId"), patientIdentifierType.getId()));
+		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder()
+				.equal(criteriaContext.getRoot().get("patientIdentifierType.patientIdentifierTypeId"), patientIdentifierType.getId()));
 		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot().get("url"));
 		return criteriaContext.getEntityManager().createQuery(criteriaQuery).getSingleResult();
 	}
@@ -53,6 +54,7 @@ public class FhirPatientIdentifierSystemDaoImpl implements FhirPatientIdentifier
 		OpenmrsFhirCriteriaContext<FhirPatientIdentifierSystem> criteriaContext = openmrsFhirCriteriaContext();
 		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("url"), url));
 		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot().get("patientIdentifierType"));
+		
 		return criteriaContext.getEntityManager().createQuery(criteriaContext.finalizeQuery()).getSingleResult()
 				.getPatientIdentifierType();
 	}
@@ -62,7 +64,8 @@ public class FhirPatientIdentifierSystemDaoImpl implements FhirPatientIdentifier
 	        @Nonnull PatientIdentifierType patientIdentifierType) {
 		OpenmrsFhirCriteriaContext<FhirPatientIdentifierSystem> criteriaContext = openmrsFhirCriteriaContext();
 		
-		criteriaContext.getCriteriaQuery().where(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("patientIdentifierType"), patientIdentifierType));
+		criteriaContext.getCriteriaQuery().where(criteriaContext.getCriteriaBuilder()
+				.equal(criteriaContext.getRoot().get("patientIdentifierType"), patientIdentifierType));
 		return criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).getResultList().stream().findFirst();
 	}
 	
@@ -78,6 +81,7 @@ public class FhirPatientIdentifierSystemDaoImpl implements FhirPatientIdentifier
 		CriteriaBuilder cb = em.getCriteriaBuilder();
 		CriteriaQuery<FhirPatientIdentifierSystem> cq = cb.createQuery(FhirPatientIdentifierSystem.class);
 		Root<FhirPatientIdentifierSystem> root = cq.from(FhirPatientIdentifierSystem.class);
+		
 		return new OpenmrsFhirCriteriaContext<>(em, cb, cq, root);
 	}
 }

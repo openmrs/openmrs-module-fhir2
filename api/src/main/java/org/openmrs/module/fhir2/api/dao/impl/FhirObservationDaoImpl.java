@@ -276,7 +276,7 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 
 			createStringCriteriaContext().getCriteriaQuery().subquery(String.class).select(createStringCriteriaContext().getRoot().get("uuid")).where(createStringCriteriaContext().getCriteriaBuilder().equal(createStringCriteriaContext().getRoot().get("category"), param.getValue()));
 			
-			return Optional.of(createStringCriteriaContext().getCriteriaBuilder().in(criteriaContext.getRoot().get("concept").get("conceptClass").get("uuid")).value(createStringCriteriaContext().getSubquery()));
+			return Optional.of(createStringCriteriaContext().getCriteriaBuilder().in(criteriaContext.getRoot().get("concept").get("conceptClass").get("uuid")).value(createStringCriteriaContext().getCriteriaQuery().subquery(String.class)));
 		}).ifPresent(criteriaContext::addPredicate);
 		criteriaContext.finalizeQuery();
 	}

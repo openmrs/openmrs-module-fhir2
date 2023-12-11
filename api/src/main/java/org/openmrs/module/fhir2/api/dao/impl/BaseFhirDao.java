@@ -68,9 +68,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends BaseDao<T> implements FhirDao<T> {
 
-    @SuppressWarnings("UnstableApiUsage")
-    protected final TypeToken<T> typeToken;
-
     private final boolean isRetireable;
 
     private final boolean isVoidable;
@@ -85,10 +82,6 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 
     @SuppressWarnings({"UnstableApiUsage"})
     protected BaseFhirDao() {
-        // @formatter:off
-		typeToken = new TypeToken<T>(getClass()) {};
-		// @formatter:on
-
         this.isRetireable = Retireable.class.isAssignableFrom(typeToken.getRawType());
         this.isVoidable = Voidable.class.isAssignableFrom(typeToken.getRawType());
         this.isImmutable = Order.class.isAssignableFrom(typeToken.getRawType())
@@ -363,43 +356,6 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
         }
 
         return super.paramToProp(param);
-    }
-
-    protected OpenmrsFhirCriteriaContext<T> createCriteriaContext() {
-        EntityManager em = sessionFactory.getCurrentSession();
-        CriteriaBuilder cb = em.getCriteriaBuilder();
-        @SuppressWarnings({"unchecked", "UnstableApiUsage"})
-        CriteriaQuery<T> cq = (CriteriaQuery<T>) cb.createQuery(typeToken.getRawType());
-        @SuppressWarnings({"unchecked", "UnstableApiUsage"})
-        Root<T> root = (Root<T>) cq.from(typeToken.getRawType());
-        return new OpenmrsFhirCriteriaContext<>(em, cb, cq, root);
-    }
-    
-    protected OpenmrsFhirCriteriaContext<Long> createLongCriteriaContext() {
-        EntityManager em = sessionFactory.getCurrentSession();
-        CriteriaBuilder cb = em.getCriteriaBuilder();
-        CriteriaQuery<Long> cq = cb.createQuery(Long.class);
-        Root<Long> root = cq.from(Long.class);
-	    
-	    return new OpenmrsFhirCriteriaContext<>(em, cb, cq, root);
-    }
-    
-    protected OpenmrsFhirCriteriaContext<String> createStringCriteriaContext() {
-        EntityManager em = sessionFactory.getCurrentSession();
-        CriteriaBuilder cb = em.getCriteriaBuilder();
-        CriteriaQuery<String> cq = cb.createQuery(String.class);
-        Root<String> root = cq.from(String.class);
-        
-        return new OpenmrsFhirCriteriaContext<>(em, cb, cq, root);
-    }
-    
-    protected OpenmrsFhirCriteriaContext<Object[]> createObjectCriteriaContext() {
-        EntityManager em = sessionFactory.getCurrentSession();
-        CriteriaBuilder cb = em.getCriteriaBuilder();
-        CriteriaQuery<Object[]> cq = cb.createQuery(Object[].class);
-        Root<Object[]> root = cq.from(Object[].class);
-        
-        return new OpenmrsFhirCriteriaContext<>(em, cb, cq, root);
     }
 
     @SuppressWarnings("unchecked")
