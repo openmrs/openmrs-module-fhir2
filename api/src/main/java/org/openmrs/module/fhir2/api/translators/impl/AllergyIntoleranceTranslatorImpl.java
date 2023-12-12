@@ -68,6 +68,7 @@ public class AllergyIntoleranceTranslatorImpl extends BaseReferenceHandlingTrans
 		
 		AllergyIntolerance allergy = new AllergyIntolerance();
 		allergy.setId(omrsAllergy.getUuid());
+		allergy.setCode(setCode(omrsAllergy.getAllergen()));
 		if (omrsAllergy.getAllergen() != null) {
 			allergy.addCategory(categoryTranslator.toFhirResource(omrsAllergy.getAllergen().getAllergenType()));
 		}
@@ -82,12 +83,22 @@ public class AllergyIntoleranceTranslatorImpl extends BaseReferenceHandlingTrans
 		allergy.setCriticality(
 		    criticalityTranslator.toFhirResource(severityTranslator.toFhirResource(omrsAllergy.getSeverity())));
 		allergy.addReaction(reactionComponentTranslator.toFhirResource(omrsAllergy));
-		allergy.setCode(allergy.getReactionFirstRep().getSubstance());
 		
 		allergy.getMeta().setLastUpdated(getLastUpdated(omrsAllergy));
 		allergy.getMeta().setVersionId(getVersionId(omrsAllergy));
 		
 		return allergy;
+	}
+	
+	private CodeableConcept setCode(Allergen allergen) {
+		CodeableConcept code = new CodeableConcept();
+		if (allergen != null) {
+			code = conceptTranslator.toFhirResource(allergen.getCodedAllergen());
+			if (allergen.getNonCodedAllergen() != null) {
+				code.setText(allergen.getNonCodedAllergen());
+			}
+		}
+		return code;
 	}
 	
 	@Override

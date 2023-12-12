@@ -124,6 +124,58 @@ public class AllergyIntoleranceTranslatorImplTest {
 	}
 	
 	@Test
+	public void toFhirResource_shouldTranslateCodedAllergen() {
+		String conceptName = "Coded allergen";
+		Concept concept = new Concept();
+		concept.setUuid(CONCEPT_UUID);
+		concept.addName(new ConceptName(conceptName, null));
+		
+		Allergen allergen = new Allergen(AllergenType.FOOD, concept, null);
+		Allergy omrsAllergy = new Allergy();
+		omrsAllergy.setAllergen(allergen);
+		
+		CodeableConcept codeableConcept = new CodeableConcept();
+		codeableConcept.addCoding(new Coding().setCode(CONCEPT_UUID).setDisplay(conceptName));
+		codeableConcept.setText(conceptName);
+		when(conceptTranslator.toFhirResource(concept)).thenReturn(codeableConcept);
+		
+		AllergyIntolerance allergyIntolerance = allergyIntoleranceTranslator.toFhirResource(omrsAllergy);
+		
+		assertThat(allergyIntolerance, notNullValue());
+		assertThat(allergyIntolerance.getCode(), notNullValue());
+		assertThat(allergyIntolerance.getCode().getText(), equalTo(conceptName));
+		
+		Coding coding = allergyIntolerance.getCode().getCoding().get(0);
+		assertThat(coding.getCode(), equalTo(CONCEPT_UUID));
+		assertThat(coding.getDisplay(), equalTo(conceptName));
+	}
+	
+	@Test
+	public void toFhirResource_shouldTranslateNonCodedAllergen() {
+		String nonCodedAllergen = "Custom allergen";
+		String otherConceptName = "Other";
+		
+		Concept otherConcept = new Concept();
+		otherConcept.setUuid(CONCEPT_UUID);
+		otherConcept.addName(new ConceptName(otherConceptName, null));
+		
+		Allergen allergen = new Allergen(AllergenType.OTHER, otherConcept, nonCodedAllergen);
+		Allergy omrsAllergy = new Allergy();
+		omrsAllergy.setAllergen(allergen);
+		
+		CodeableConcept codeableConcept = new CodeableConcept();
+		codeableConcept.addCoding(new Coding().setCode(CONCEPT_UUID).setDisplay(otherConceptName));
+		codeableConcept.setText(otherConceptName);
+		when(conceptTranslator.toFhirResource(otherConcept)).thenReturn(codeableConcept);
+		
+		AllergyIntolerance allergyIntolerance = allergyIntoleranceTranslator.toFhirResource(omrsAllergy);
+		
+		assertThat(allergyIntolerance, notNullValue());
+		assertThat(allergyIntolerance.getCode(), notNullValue());
+		assertThat(allergyIntolerance.getCode().getText(), equalTo(nonCodedAllergen));
+	}
+	
+	@Test
 	public void toFhirResource_shouldTranslateNullUuidToNullId() {
 		omrsAllergy.setUuid(null);
 		AllergyIntolerance allergyIntolerance = allergyIntoleranceTranslator.toFhirResource(omrsAllergy);

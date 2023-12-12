@@ -27,11 +27,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.openmrs.Allergen;
-import org.openmrs.AllergenType;
-import org.openmrs.Allergy;
-import org.openmrs.AllergyReaction;
-import org.openmrs.Concept;
+import org.openmrs.*;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.AllergyIntoleranceSeverityTranslator;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
@@ -46,8 +42,6 @@ public class AllergyIntoleranceReactionComponentTranslatorImplTest {
 	private AllergyIntoleranceSeverityTranslator severityTranslator;
 	
 	private AllergyIntoleranceReactionComponentTranslatorImpl reactionComponentTranslator;
-	
-	private static final String NON_CODED_REACTION = "Test Reaction";
 	
 	private static final String GLOBAL_PROPERTY_MILD_VALUE = "102553AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	
@@ -79,26 +73,58 @@ public class AllergyIntoleranceReactionComponentTranslatorImplTest {
 	public void toFhirResource_shouldTranslateReactionToManifestation() {
 		Concept concept = new Concept();
 		concept.setUuid(CONCEPT_UUID);
+		String conceptName = "Test Reaction";
+		concept.addName(new ConceptName(conceptName, null));
 		
 		AllergyReaction reaction = new AllergyReaction();
 		reaction.setUuid(ALLERGY_REACTION_UUID);
 		reaction.setReaction(concept);
 		reaction.setAllergy(omrsAllergy);
-		reaction.setReactionNonCoded(NON_CODED_REACTION);
 		omrsAllergy.setReactions(Collections.singletonList(reaction));
 		
 		CodeableConcept codeableConcept = new CodeableConcept();
 		codeableConcept.addCoding(new Coding().setCode(CONCEPT_UUID));
-		codeableConcept.setText(NON_CODED_REACTION);
+		codeableConcept.setText(conceptName);
 		when(conceptTranslator.toFhirResource(concept)).thenReturn(codeableConcept);
+		
 		AllergyIntolerance.AllergyIntoleranceReactionComponent reactionComponent = reactionComponentTranslator
 		        .toFhirResource(omrsAllergy);
+
 		assertThat(reactionComponent, notNullValue());
-		assertThat(reactionComponent.getManifestation(), hasSize(greaterThanOrEqualTo(1)));
-		assertThat(reactionComponent.getManifestation().get(0).getCoding(), hasSize(greaterThanOrEqualTo(1)));
-		assertThat(reactionComponent.getManifestation().size(), greaterThanOrEqualTo(1));
+		assertThat(reactionComponent.getManifestation().size(), equalTo(1));
+		assertThat(reactionComponent.getManifestation().get(0).getCoding().size(), equalTo(1));
 		assertThat(reactionComponent.getManifestation().get(0).getCoding().get(0).getCode(), equalTo(CONCEPT_UUID));
-		assertThat(reactionComponent.getManifestation().get(0).getText(), equalTo(NON_CODED_REACTION));
+		assertThat(reactionComponent.getManifestation().get(0).getText(), equalTo(conceptName));
+	}
+	
+	@Test
+	public void toFhirResource_shouldTranslateNonCodedReactionToManifestation() {
+		String nonCodedReaction = "Custom Reaction";
+		String otherConceptName = "Other";
+		
+		Concept otherConcept = new Concept();
+		otherConcept.setUuid(GLOBAL_PROPERTY_OTHER_VALUE);
+		otherConcept.addName(new ConceptName(otherConceptName, null));
+		
+		AllergyReaction reaction = new AllergyReaction();
+		reaction.setUuid(ALLERGY_REACTION_UUID);
+		reaction.setReaction(otherConcept);
+		reaction.setAllergy(omrsAllergy);
+		reaction.setReactionNonCoded(nonCodedReaction);
+		omrsAllergy.setReactions(Collections.singletonList(reaction));
+		
+		CodeableConcept codeableConcept = new CodeableConcept();
+		codeableConcept.addCoding(new Coding().setCode(CONCEPT_UUID));
+		when(conceptTranslator.toFhirResource(otherConcept)).thenReturn(codeableConcept);
+		
+		AllergyIntolerance.AllergyIntoleranceReactionComponent reactionComponent = reactionComponentTranslator
+				.toFhirResource(omrsAllergy);
+		
+		assertThat(reactionComponent, notNullValue());
+		assertThat(reactionComponent.getManifestation().size(), equalTo(1));
+		assertThat(reactionComponent.getManifestation().get(0).getCoding().size(), equalTo(1));
+		assertThat(reactionComponent.getManifestation().get(0).getCoding().get(0).getCode(), equalTo(CONCEPT_UUID));
+		assertThat(reactionComponent.getManifestation().get(0).getText(), equalTo(nonCodedReaction));
 	}
 	
 	@Test
