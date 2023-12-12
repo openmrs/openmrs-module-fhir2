@@ -12,7 +12,6 @@ package org.openmrs.module.fhir2.api.translators.impl;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.when;
@@ -89,7 +88,7 @@ public class AllergyIntoleranceReactionComponentTranslatorImplTest {
 		
 		AllergyIntolerance.AllergyIntoleranceReactionComponent reactionComponent = reactionComponentTranslator
 		        .toFhirResource(omrsAllergy);
-
+		
 		assertThat(reactionComponent, notNullValue());
 		assertThat(reactionComponent.getManifestation().size(), equalTo(1));
 		assertThat(reactionComponent.getManifestation().get(0).getCoding().size(), equalTo(1));
@@ -118,7 +117,7 @@ public class AllergyIntoleranceReactionComponentTranslatorImplTest {
 		when(conceptTranslator.toFhirResource(otherConcept)).thenReturn(codeableConcept);
 		
 		AllergyIntolerance.AllergyIntoleranceReactionComponent reactionComponent = reactionComponentTranslator
-				.toFhirResource(omrsAllergy);
+		        .toFhirResource(omrsAllergy);
 		
 		assertThat(reactionComponent, notNullValue());
 		assertThat(reactionComponent.getManifestation().size(), equalTo(1));

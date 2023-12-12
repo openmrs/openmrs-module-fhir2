@@ -36,6 +36,7 @@ import org.openmrs.Allergen;
 import org.openmrs.AllergenType;
 import org.openmrs.Allergy;
 import org.openmrs.Concept;
+import org.openmrs.ConceptName;
 import org.openmrs.Patient;
 import org.openmrs.User;
 import org.openmrs.module.fhir2.FhirTestConstants;
