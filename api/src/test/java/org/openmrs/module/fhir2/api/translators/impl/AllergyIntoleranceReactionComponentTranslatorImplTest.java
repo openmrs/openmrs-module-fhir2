@@ -191,20 +191,52 @@ public class AllergyIntoleranceReactionComponentTranslatorImplTest {
 	
 	@Test
 	public void toFhirResource_shouldTranslateAllergenToAllergySubstance() {
+		String allergenName = "Test Allergen";
 		Concept concept = new Concept();
 		concept.setUuid(CONCEPT_UUID);
+		concept.addName(new ConceptName(allergenName, null));
 		
-		Allergen allergen = new Allergen();
-		allergen.setCodedAllergen(concept);
-		allergen.setAllergenType(AllergenType.FOOD);
+		Allergen allergen = new Allergen(AllergenType.FOOD, concept, null);
 		omrsAllergy.setAllergen(allergen);
 		
-		when(conceptTranslator.toFhirResource(concept))
-		        .thenReturn(new CodeableConcept().addCoding(new Coding("", CONCEPT_UUID, "")));
+		CodeableConcept codeableConcept = new CodeableConcept();
+		codeableConcept.addCoding(new Coding().setCode(CONCEPT_UUID).setDisplay(allergenName));
+		codeableConcept.setText(allergenName);
+		when(conceptTranslator.toFhirResource(concept)).thenReturn(codeableConcept);
+		
 		AllergyIntolerance.AllergyIntoleranceReactionComponent reactionComponent = reactionComponentTranslator
 		        .toFhirResource(omrsAllergy);
 		assertThat(reactionComponent, notNullValue());
 		assertThat(reactionComponent.getSubstance().getCodingFirstRep().getCode(), equalTo(CONCEPT_UUID));
+		assertThat(reactionComponent.getSubstance().getCodingFirstRep().getDisplay(), equalTo(allergenName));
+		assertThat(reactionComponent.getSubstance().getText(), equalTo(allergenName));
+	}
+	
+	@Test
+	public void toFhirResource_shouldTranslateNonCodedAllergenToAllergySubstance() {
+		String nonCodedAllergen = "Custom allergen";
+		String otherConceptName = "Other";
+		
+		Concept otherConcept = new Concept();
+		otherConcept.setUuid(GLOBAL_PROPERTY_OTHER_VALUE);
+		otherConcept.addName(new ConceptName(otherConceptName, null));
+		
+		Allergen allergen = new Allergen(AllergenType.OTHER, otherConcept, nonCodedAllergen);
+		omrsAllergy.setAllergen(allergen);
+		
+		CodeableConcept codeableConcept = new CodeableConcept();
+		codeableConcept.addCoding(new Coding().setCode(GLOBAL_PROPERTY_OTHER_VALUE).setDisplay(otherConceptName));
+		codeableConcept.setText(otherConceptName);
+		when(conceptTranslator.toFhirResource(otherConcept)).thenReturn(codeableConcept);
+		
+		AllergyIntolerance.AllergyIntoleranceReactionComponent reactionComponent = reactionComponentTranslator
+		        .toFhirResource(omrsAllergy);
+		
+		assertThat(reactionComponent, notNullValue());
+		assertThat(reactionComponent.getSubstance().getCodingFirstRep().getCode(), equalTo(GLOBAL_PROPERTY_OTHER_VALUE));
+		assertThat(reactionComponent.getSubstance().getCodingFirstRep().getDisplay(), equalTo(otherConceptName));
+		assertThat(reactionComponent.getSubstance().getText(), equalTo(nonCodedAllergen));
+		
 	}
 	
 	@Test

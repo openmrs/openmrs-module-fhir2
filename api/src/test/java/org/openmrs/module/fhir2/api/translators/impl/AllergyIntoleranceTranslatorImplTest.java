@@ -135,7 +135,6 @@ public class AllergyIntoleranceTranslatorImplTest {
 		concept.addName(new ConceptName(conceptName, null));
 		
 		Allergen allergen = new Allergen(AllergenType.FOOD, concept, null);
-		Allergy omrsAllergy = new Allergy();
 		omrsAllergy.setAllergen(allergen);
 		
 		CodeableConcept codeableConcept = new CodeableConcept();
@@ -164,7 +163,6 @@ public class AllergyIntoleranceTranslatorImplTest {
 		otherConcept.addName(new ConceptName(otherConceptName, null));
 		
 		Allergen allergen = new Allergen(AllergenType.OTHER, otherConcept, nonCodedAllergen);
-		Allergy omrsAllergy = new Allergy();
 		omrsAllergy.setAllergen(allergen);
 		
 		CodeableConcept codeableConcept = new CodeableConcept();
