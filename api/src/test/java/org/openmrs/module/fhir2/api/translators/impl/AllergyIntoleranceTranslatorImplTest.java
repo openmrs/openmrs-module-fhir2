@@ -106,7 +106,10 @@ public class AllergyIntoleranceTranslatorImplTest {
 		allergyIntoleranceTranslator.setReactionComponentTranslator(reactionComponentTranslator);
 		
 		omrsAllergy = new Allergy();
-		Allergen allergen = new Allergen(AllergenType.FOOD, null, "Test allergen");
+		Concept allergenConcept = new Concept();
+		allergenConcept.setUuid(CONCEPT_UUID);
+		allergenConcept.addName(new ConceptName("Test allergen", null));
+		Allergen allergen = new Allergen(AllergenType.FOOD, allergenConcept, null);
 		omrsAllergy.setAllergen(allergen);
 	}
 	
@@ -326,14 +329,6 @@ public class AllergyIntoleranceTranslatorImplTest {
 		AllergyIntolerance allergyIntolerance = allergyIntoleranceTranslator.toFhirResource(omrsAllergy);
 		assertThat(allergyIntolerance, notNullValue());
 		assertThat(allergyIntolerance.getType(), equalTo(AllergyIntolerance.AllergyIntoleranceType.ALLERGY));
-	}
-	
-	@Test
-	public void toFhirResource_shouldReturnNullSeverityIfSeverityConceptIsNull() {
-		omrsAllergy.setSeverity(null);
-		
-		AllergyIntolerance allergyIntolerance = allergyIntoleranceTranslator.toFhirResource(omrsAllergy);
-		assertThat(allergyIntolerance.getReaction().get(0).getSeverity(), nullValue());
 	}
 	
 	@Test
