@@ -66,19 +66,16 @@ import org.springframework.transaction.annotation.Transactional;
  * @param <T> the {@link OpenmrsObject} managed by this Dao
  */
 @Transactional
-public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends BaseDao<T> implements FhirDao<T> {
+public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends BaseDao implements FhirDao<T> {
+
+    @SuppressWarnings("UnstableApiUsage")
+    protected final TypeToken<T> typeToken = new TypeToken<T>(getClass()) {};
 
     private final boolean isRetireable;
 
     private final boolean isVoidable;
 
     private final boolean isImmutable;
-
-    @Autowired
-    @Getter(AccessLevel.PUBLIC)
-    @Setter(AccessLevel.PUBLIC)
-    @Qualifier("sessionFactory")
-    protected SessionFactory sessionFactory;
 
     @SuppressWarnings({"UnstableApiUsage"})
     protected BaseFhirDao() {

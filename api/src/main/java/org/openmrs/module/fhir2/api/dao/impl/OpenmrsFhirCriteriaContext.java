@@ -10,7 +10,6 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Subquery;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,7 +48,7 @@ public class OpenmrsFhirCriteriaContext<T> {
    }
    
    public void addResults(T result) {
-      results.add((T) result);
+      results.add(result);
    }
 
    public CriteriaQuery<T> finalizeQuery() {
