@@ -51,7 +51,7 @@ public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDa
 					criteriaContext.finalizeQuery();
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(entry.getValue()).ifPresent(criteriaContext::addPredicate);
+					handleCommonSearchParameters(criteriaContext,entry.getValue()).ifPresent(criteriaContext::addPredicate);
 					criteriaContext.finalizeQuery();
 					break;
 			}
@@ -75,7 +75,7 @@ public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDa
 	}
 	
 	private Optional<Predicate> handleStatus(TokenAndListParam tokenAndListParam) {
-		OpenmrsFhirCriteriaContext<FhirTask> criteriaContext = createCriteriaContext();
+		OpenmrsFhirCriteriaContext<FhirTask> criteriaContext = createCriteriaContext(FhirTask.class);
 		
 		return handleAndListParam(tokenAndListParam, token -> {
 			if (token.getValue() != null) {

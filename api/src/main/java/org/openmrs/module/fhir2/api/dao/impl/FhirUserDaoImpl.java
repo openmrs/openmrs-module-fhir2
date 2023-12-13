@@ -24,7 +24,7 @@ public class FhirUserDaoImpl extends BasePractitionerDao<User> implements FhirUs
 	
 	@Override
 	public User getUserByUserName(String username) {
-		OpenmrsFhirCriteriaContext<User> criteriaContext = createCriteriaContext();
+		OpenmrsFhirCriteriaContext<User> criteriaContext = createCriteriaContext(User.class);
 		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot()).where(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("username"), username));
 
 		return criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).getResultList().stream().findFirst().orElse(null);

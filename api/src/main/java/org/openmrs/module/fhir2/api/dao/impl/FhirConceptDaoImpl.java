@@ -12,11 +12,7 @@ package org.openmrs.module.fhir2.api.dao.impl;
 import static org.openmrs.module.fhir2.FhirConstants.TITLE_SEARCH_HANDLER;
 
 import javax.annotation.Nonnull;
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
-import javax.persistence.criteria.Root;
 
 import java.util.Collections;
 import java.util.List;
@@ -52,8 +48,8 @@ public class FhirConceptDaoImpl extends BaseFhirDao<Concept> implements FhirConc
 	@Override
 	public Optional<Concept> getConceptWithSameAsMappingInSource(@Nonnull ConceptSource conceptSource,
 	        @Nonnull String mappingCode) {
-		OpenmrsFhirCriteriaContext<Concept> criteriaContext = openmrsFhirCriteriaContext();
-		createConceptMapCriteriaBuilder(conceptSource, mappingCode);
+		OpenmrsFhirCriteriaContext<Concept> criteriaContext = createCriteriaContext(Concept.class);
+		createConceptMapCriteriaBuilder(criteriaContext,conceptSource, mappingCode);
 		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().or(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("uuid"), ConceptMapType.SAME_AS_MAP_TYPE_UUID),
 				criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("name"), "SAME-AS")));
 		
@@ -70,15 +66,11 @@ public class FhirConceptDaoImpl extends BaseFhirDao<Concept> implements FhirConc
 			return Collections.emptyList();
 		}
 		
-		EntityManager em = sessionFactory.getCurrentSession();
-		CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
-		CriteriaQuery<Concept> criteriaQuery = criteriaBuilder.createQuery(Concept.class);
-		Root<Concept> root = criteriaQuery.from(Concept.class);
+		OpenmrsFhirCriteriaContext<Concept> criteriaContext = createCriteriaContext(Concept.class);
+		createConceptMapCriteriaBuilder(criteriaContext,conceptSource, mappingCode);
+		criteriaContext.getCriteriaQuery().orderBy(criteriaContext.getCriteriaBuilder().asc(criteriaContext.getRoot().get("retired"))).distinct(true);
 		
-		createConceptMapCriteriaBuilder(conceptSource, mappingCode);
-		criteriaQuery.orderBy(criteriaBuilder.asc(root.get("retired"))).distinct(true);
-		
-		return em.createQuery(criteriaQuery).getResultList();
+		return criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).getResultList();
 	}
 	
 	@Override
@@ -95,34 +87,25 @@ public class FhirConceptDaoImpl extends BaseFhirDao<Concept> implements FhirConc
 	
 	protected void handleTitle(OpenmrsFhirCriteriaContext<Concept> criteriaContext, StringAndListParam titlePattern) {
 		criteriaContext.getRoot().join("names").alias("cn");
-		handleAndListParam(titlePattern, (title) -> propertyLike("cn.name", title)).ifPresent(criteriaContext::addPredicate);
+		handleAndListParam(titlePattern, (title) -> propertyLike(criteriaContext,"cn.name", title)).ifPresent(criteriaContext::addPredicate);
 		criteriaContext.finalizeQuery();
 	}
 	
-	protected void createConceptMapCriteriaBuilder(@Nonnull ConceptSource conceptSource, String mappingCode) {
-		openmrsFhirCriteriaContext().getCriteriaQuery().select(openmrsFhirCriteriaContext().getRoot().get("concept"));
+	protected void createConceptMapCriteriaBuilder(OpenmrsFhirCriteriaContext<Concept> criteriaContext, @Nonnull ConceptSource conceptSource, String mappingCode) {
+		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot().get("concept"));
 		
-		Join<ConceptMap, ConceptReferenceTerm> term = openmrsFhirCriteriaContext().getRoot().join("conceptReferenceTerm");
-		@SuppressWarnings("unused") Join<ConceptMap, ConceptMapType> mapType = openmrsFhirCriteriaContext().getRoot().join("conceptMapType");
-		@SuppressWarnings("unused") Join<ConceptMap, Concept> concept = openmrsFhirCriteriaContext().getRoot().join("concept");
+		Join<ConceptMap, ConceptReferenceTerm> term = criteriaContext.getRoot().join("conceptReferenceTerm");
+		@SuppressWarnings("unused") Join<ConceptMap, ConceptMapType> mapType = criteriaContext.getRoot().join("conceptMapType");
+		@SuppressWarnings("unused") Join<ConceptMap, Concept> concept = criteriaContext.getRoot().join("concept");
 	
 		if (Context.getAdministrationService().isDatabaseStringComparisonCaseSensitive()) {
-			openmrsFhirCriteriaContext().addPredicate(openmrsFhirCriteriaContext().getCriteriaBuilder().equal(openmrsFhirCriteriaContext().getCriteriaBuilder().lower(term.get("code")), mappingCode.toLowerCase()));
+			criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getCriteriaBuilder().lower(term.get("code")), mappingCode.toLowerCase()));
 		} else {
-			openmrsFhirCriteriaContext().addPredicate(openmrsFhirCriteriaContext().getCriteriaBuilder().equal(term.get("code"), mappingCode));
+			criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().equal(term.get("code"), mappingCode));
 		}
 		
-		openmrsFhirCriteriaContext().addPredicate(openmrsFhirCriteriaContext().getCriteriaBuilder().equal(term.get("conceptSource"), conceptSource));
-		openmrsFhirCriteriaContext().finalizeQuery();
-	}
-	
-	private OpenmrsFhirCriteriaContext<Concept> openmrsFhirCriteriaContext () {
-		EntityManager em = sessionFactory.getCurrentSession();
-		CriteriaBuilder cb = em.getCriteriaBuilder();
-		CriteriaQuery<Concept> cq = cb.createQuery(Concept.class);
-		Root<Concept> root = cq.from(Concept.class);
-		
-		return new OpenmrsFhirCriteriaContext<>(em, cb, cq, root);
+		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().equal(term.get("conceptSource"), conceptSource));
+		criteriaContext.finalizeQuery();
 	}
 	
 }

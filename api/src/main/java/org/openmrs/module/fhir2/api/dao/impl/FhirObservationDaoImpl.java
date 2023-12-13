@@ -26,6 +26,7 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import lombok.NonNull;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.Observation;
 import org.openmrs.Concept;
@@ -50,7 +51,7 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 	@Override
 	public List<Obs> getSearchResults(@Nonnull SearchParameterMap theParams) {
 		if (!theParams.getParameters(FhirConstants.LASTN_OBSERVATION_SEARCH_HANDLER).isEmpty()) {
-			OpenmrsFhirCriteriaContext<Obs> criteriaContext = createCriteriaContext();
+			OpenmrsFhirCriteriaContext<Obs> criteriaContext = createCriteriaContext(Obs.class);
 			
 			setupSearchParams(criteriaContext, theParams);
 			
@@ -112,19 +113,20 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 	@Override
 	public int getSearchResultsCount(@Nonnull SearchParameterMap theParams) {
 		if (!theParams.getParameters(FhirConstants.LASTN_OBSERVATION_SEARCH_HANDLER).isEmpty()) {
-			setupSearchParams(createCriteriaContext(), theParams);
-			createObjectCriteriaContext().getCriteriaQuery().orderBy(
-							createObjectCriteriaContext().getCriteriaBuilder().asc(createObjectCriteriaContext().getRoot().get("concept")))
-			        .orderBy(createObjectCriteriaContext().getCriteriaBuilder().desc(createObjectCriteriaContext().getRoot().get("obsDatetime")));
+			OpenmrsFhirCriteriaContext<Obs> criteriaContext = createCriteriaContext(Obs.class);
+			setupSearchParams(criteriaContext, theParams);
+			criteriaContext.getCriteriaQuery().orderBy(criteriaContext.getCriteriaBuilder().asc(criteriaContext.getRoot().get("concept")))
+			        .orderBy(criteriaContext.getCriteriaBuilder().desc(criteriaContext.getRoot().get("obsDatetime")));
 			
-			createObjectCriteriaContext().getCriteriaQuery().multiselect(createObjectCriteriaContext().getRoot().get("concept.id"),
-					createObjectCriteriaContext().getRoot().get("obsDatetime"),
-					createObjectCriteriaContext().getCriteriaBuilder().count(createObjectCriteriaContext().getRoot()));
+			criteriaContext.getCriteriaQuery().multiselect(criteriaContext.getRoot().get("concept.id"),
+					criteriaContext.getRoot().get("obsDatetime"),
+					criteriaContext.getCriteriaBuilder().count(criteriaContext.getRoot()));
 			
-			applyExactTotal(createCriteriaContext(), theParams);
-			List<Object[]> rows = createObjectCriteriaContext()
+			applyExactTotal(criteriaContext, theParams);
+			OpenmrsFhirCriteriaContext<Object[]> context = createCriteriaContext(Object[].class);
+			List<Object[]> rows = context
 					.getEntityManager()
-					.createQuery(createObjectCriteriaContext().getCriteriaQuery())
+					.createQuery(context.getCriteriaQuery())
 					.getResultList();
 			final int maxGroupCount = getMaxParameter(theParams);
 			int groupCount = maxGroupCount;
@@ -185,7 +187,7 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 					    valueCoded -> handleValueCodedConcept(criteriaContext, (TokenAndListParam) valueCoded.getParam()));
 					break;
 				case FhirConstants.DATE_RANGE_SEARCH_HANDLER:
-					entry.getValue().forEach(dateRangeParam -> handleDateRange(dateRangeParam.getPropertyName(),
+					entry.getValue().forEach(dateRangeParam -> handleDateRange(criteriaContext,dateRangeParam.getPropertyName(),
 					    (DateRangeParam) dateRangeParam.getParam()).ifPresent(criteriaContext::addPredicate));
 					criteriaContext.finalizeQuery();
 					break;
@@ -195,18 +197,18 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 					break;
 				case FhirConstants.QUANTITY_SEARCH_HANDLER:
 					entry.getValue().forEach(
-					    quantity -> handleQuantity(quantity.getPropertyName(), (QuantityAndListParam) quantity.getParam())
+					    quantity -> handleQuantity(criteriaContext,quantity.getPropertyName(), (QuantityAndListParam) quantity.getParam())
 					            .ifPresent(criteriaContext::addPredicate));
 					criteriaContext.finalizeQuery();
 					break;
 				case FhirConstants.VALUE_STRING_SEARCH_HANDLER:
 					entry.getValue().forEach(
-					    string -> handleValueStringParam(string.getPropertyName(), (StringAndListParam) string.getParam())
+					    string -> handleValueStringParam(criteriaContext,string.getPropertyName(), (StringAndListParam) string.getParam())
 					            .ifPresent(criteriaContext::addPredicate));
 					criteriaContext.finalizeQuery();
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(entry.getValue()).ifPresent(criteriaContext::addPredicate);
+					handleCommonSearchParameters(criteriaContext,entry.getValue()).ifPresent(criteriaContext::addPredicate);
 					criteriaContext.finalizeQuery();
 					break;
 			}
@@ -243,8 +245,8 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 		}
 	}
 	
-	private Optional<Predicate> handleValueStringParam(@Nonnull String propertyName, StringAndListParam valueStringParam) {
-		return handleAndListParam(valueStringParam, v -> propertyLike(propertyName, v.getValue()));
+	private <T> Optional<Predicate> handleValueStringParam(OpenmrsFhirCriteriaContext<T> criteriaContext,@Nonnull String propertyName, StringAndListParam valueStringParam) {
+		return handleAndListParam(valueStringParam, v -> propertyLike(criteriaContext,propertyName, v.getValue()));
 	}
 	
 	private void handleCodedConcept(OpenmrsFhirCriteriaContext<Obs> criteriaContext, TokenAndListParam code) {
@@ -273,10 +275,10 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 			if (param.getValue() == null) {
 				return Optional.empty();
 			}
-
-			createStringCriteriaContext().getCriteriaQuery().subquery(String.class).select(createStringCriteriaContext().getRoot().get("uuid")).where(createStringCriteriaContext().getCriteriaBuilder().equal(createStringCriteriaContext().getRoot().get("category"), param.getValue()));
+			OpenmrsFhirCriteriaContext<String> context = createCriteriaContext(String.class);
+			context.getCriteriaQuery().subquery(String.class).select(context.getRoot().get("uuid")).where(context.getCriteriaBuilder().equal(context.getRoot().get("category"), param.getValue()));
 			
-			return Optional.of(createStringCriteriaContext().getCriteriaBuilder().in(criteriaContext.getRoot().get("concept").get("conceptClass").get("uuid")).value(createStringCriteriaContext().getCriteriaQuery().subquery(String.class)));
+			return Optional.of(context.getCriteriaBuilder().in(criteriaContext.getRoot().get("concept").get("conceptClass").get("uuid")).value(context.getCriteriaQuery().subquery(String.class)));
 		}).ifPresent(criteriaContext::addPredicate);
 		criteriaContext.finalizeQuery();
 	}
@@ -292,7 +294,7 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 	}
 	
 	@Override
-	protected String paramToProp(@Nonnull String paramName) {
+	protected <V> String paramToProp(OpenmrsFhirCriteriaContext<V> criteriaContext, @NonNull String paramName) {
 		if (Observation.SP_DATE.equals(paramName)) {
 			return "obsDatetime";
 		}

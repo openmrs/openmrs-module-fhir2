@@ -21,6 +21,7 @@ import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
+import lombok.NonNull;
 import lombok.Setter;
 import org.openmrs.Location;
 import org.openmrs.LocationAttribute;
@@ -68,7 +69,7 @@ public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLo
 					entry.getValue().forEach(param -> handleTag(criteriaContext, (TokenAndListParam) param.getParam()));
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(entry.getValue()).ifPresent(criteriaContext::addPredicate);
+					handleCommonSearchParameters(criteriaContext,entry.getValue()).ifPresent(criteriaContext::addPredicate);
 					criteriaContext.finalizeQuery();
 					break;
 			}
@@ -92,28 +93,28 @@ public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLo
 	}
 	
 	private void handleName(OpenmrsFhirCriteriaContext<Location> criteriaContext, StringAndListParam namePattern) {
-		handleAndListParam(namePattern, (name) -> propertyLike("name", name)).ifPresent(criteriaContext::addPredicate);
+		handleAndListParam(namePattern, (name) -> propertyLike(criteriaContext,"name", name)).ifPresent(criteriaContext::addPredicate);
 		criteriaContext.finalizeQuery();
 	}
 	
 	private void handleCity(OpenmrsFhirCriteriaContext<Location> criteriaContext, StringAndListParam cityPattern) {
-		handleAndListParam(cityPattern, (city) -> propertyLike("cityVillage", city)).ifPresent(criteriaContext::addPredicate);
+		handleAndListParam(cityPattern, (city) -> propertyLike(criteriaContext,"cityVillage", city)).ifPresent(criteriaContext::addPredicate);
 		criteriaContext.finalizeQuery();
 	}
 	
 	private void handleCountry(OpenmrsFhirCriteriaContext<Location> criteriaContext, StringAndListParam countryPattern) {
-		handleAndListParam(countryPattern, (country) -> propertyLike("country", country)).ifPresent(criteriaContext::addPredicate);
+		handleAndListParam(countryPattern, (country) -> propertyLike(criteriaContext,"country", country)).ifPresent(criteriaContext::addPredicate);
 		criteriaContext.finalizeQuery();
 	}
 	
 	private void handlePostalCode(OpenmrsFhirCriteriaContext<Location> criteriaContext, StringAndListParam postalCodePattern) {
-		handleAndListParam(postalCodePattern, (postalCode) -> propertyLike("postalCode", postalCode))
+		handleAndListParam(postalCodePattern, (postalCode) -> propertyLike(criteriaContext,"postalCode", postalCode))
 		        .ifPresent(criteriaContext::addPredicate);
 		criteriaContext.finalizeQuery();
 	}
 	
 	private void handleState(OpenmrsFhirCriteriaContext<Location> criteriaContext, StringAndListParam statePattern) {
-		handleAndListParam(statePattern, (state) -> propertyLike("stateProvince", state)).ifPresent(criteriaContext::addPredicate);
+		handleAndListParam(statePattern, (state) -> propertyLike(criteriaContext,"stateProvince", state)).ifPresent(criteriaContext::addPredicate);
 		criteriaContext.finalizeQuery();
 	}
 	
@@ -127,7 +128,7 @@ public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLo
 	}
 	
 	private void handleParentLocation(OpenmrsFhirCriteriaContext<Location> criteriaContext, ReferenceAndListParam parent) {
-		handleLocationReference("loc", parent).ifPresent(loc -> {
+		handleLocationReference(criteriaContext,"loc", parent).ifPresent(loc -> {
 			criteriaContext.getRoot().join("parentLocation").alias("loc");
 			criteriaContext.addPredicate(loc);
 			criteriaContext.finalizeQuery();
@@ -135,7 +136,7 @@ public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLo
 	}
 	
 	@Override
-	protected String paramToProp(@Nonnull String param) {
+	protected <V> String paramToProp(OpenmrsFhirCriteriaContext<V> criteriaContext, @NonNull String param) {
 		switch (param) {
 			case org.hl7.fhir.r4.model.Location.SP_NAME:
 				return "name";
@@ -148,7 +149,8 @@ public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLo
 			case org.hl7.fhir.r4.model.Location.SP_ADDRESS_POSTALCODE:
 				return "postalCode";
 			default:
-				return super.paramToProp(param);
+				return super.paramToProp(criteriaContext, param);
+			
 		}
 	}
 	

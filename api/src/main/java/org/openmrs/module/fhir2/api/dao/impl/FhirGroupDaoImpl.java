@@ -81,9 +81,9 @@ public class FhirGroupDaoImpl extends BaseFhirDao<Cohort> implements FhirGroupDa
 							List<Optional<? extends Predicate>> criterionList = new ArrayList<>();
 							
 							for (String token : StringUtils.split(participantToken.getValue(), " \t,")) {
-								criterionList.add(propertyLike("pn.givenName", token));
-								criterionList.add(propertyLike("pn.middleName", token));
-								criterionList.add(propertyLike("pn.familyName", token));
+								criterionList.add(propertyLike(criteriaContext,"pn.givenName", token));
+								criterionList.add(propertyLike(criteriaContext,"pn.middleName", token));
+								criterionList.add(propertyLike(criteriaContext,"pn.familyName", token));
 							}
 							
 							return Optional.of(criteriaContext.getCriteriaBuilder().or(toCriteriaArray(criterionList)));

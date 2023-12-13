@@ -20,6 +20,7 @@ import ca.uhn.fhir.rest.param.QuantityAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
+import lombok.NonNull;
 import lombok.Setter;
 import org.openmrs.Condition;
 import org.openmrs.ConditionClinicalStatus;
@@ -72,7 +73,6 @@ public class FhirConditionDaoImpl extends BaseFhirDao<Condition> implements Fhir
 	
 	@Override
 	protected void setupSearchParams(OpenmrsFhirCriteriaContext<Condition> criteriaContext, SearchParameterMap theParams) {
-		createCriteriaContext();
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER:
@@ -88,7 +88,7 @@ public class FhirConditionDaoImpl extends BaseFhirDao<Condition> implements Fhir
 					break;
 				case FhirConstants.DATE_RANGE_SEARCH_HANDLER:
 					entry.getValue()
-					        .forEach(param -> handleDateRange(param.getPropertyName(), (DateRangeParam) param.getParam())
+					        .forEach(param -> handleDateRange(criteriaContext,param.getPropertyName(), (DateRangeParam) param.getParam())
 					                .ifPresent(criteriaContext::addPredicate));
 					criteriaContext.finalizeQuery();
 					break;
@@ -97,7 +97,7 @@ public class FhirConditionDaoImpl extends BaseFhirDao<Condition> implements Fhir
 					        .forEach(param -> handleOnsetAge(criteriaContext, (QuantityAndListParam) param.getParam()));
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(entry.getValue()).ifPresent(criteriaContext::addPredicate);
+					handleCommonSearchParameters(criteriaContext,entry.getValue()).ifPresent(criteriaContext::addPredicate);
 					criteriaContext.finalizeQuery();
 					break;
 			}
@@ -121,25 +121,25 @@ public class FhirConditionDaoImpl extends BaseFhirDao<Condition> implements Fhir
 	}
 	
 	private void handleOnsetAge(OpenmrsFhirCriteriaContext<Condition> criteriaContext, QuantityAndListParam onsetAge) {
-		handleAndListParam(onsetAge, onsetAgeParam -> handleAgeByDateProperty("onsetDate", onsetAgeParam))
+		handleAndListParam(onsetAge, onsetAgeParam -> handleAgeByDateProperty(criteriaContext,"onsetDate", onsetAgeParam))
 		        .ifPresent(criteriaContext::addPredicate);
 		criteriaContext.finalizeQuery();
 	}
 	
 	@Override
-	protected Optional<Predicate> handleLastUpdated(DateRangeParam param) {
-		return super.handleLastUpdatedImmutable(param);
+	protected <T> Optional<Predicate> handleLastUpdated(OpenmrsFhirCriteriaContext<T> criteriaContext,
+			DateRangeParam param) {
+		return super.handleLastUpdated(criteriaContext, param);
 	}
 	
 	@Override
-	protected String paramToProp(@Nonnull String param) {
+	protected <V> String paramToProp(OpenmrsFhirCriteriaContext<V> criteriaContext, @NonNull String param) {
 		switch (param) {
 			case org.hl7.fhir.r4.model.Condition.SP_ONSET_DATE:
 				return "onsetDate";
 			case org.hl7.fhir.r4.model.Condition.SP_RECORDED_DATE:
 				return "dateCreated";
 		}
-		
-		return super.paramToProp(param);
+		return super.paramToProp(criteriaContext, param);
 	}
 }

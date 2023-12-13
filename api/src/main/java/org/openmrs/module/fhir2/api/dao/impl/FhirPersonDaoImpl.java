@@ -46,7 +46,6 @@ public class FhirPersonDaoImpl extends BasePersonDao<Person> implements FhirPers
 	
 	@Override
 	protected void setupSearchParams(OpenmrsFhirCriteriaContext<Person> criteriaContext, SearchParameterMap theParams) {
-		createCriteriaContext();
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.NAME_SEARCH_HANDLER:
@@ -54,11 +53,11 @@ public class FhirPersonDaoImpl extends BasePersonDao<Person> implements FhirPers
 					break;
 				case FhirConstants.GENDER_SEARCH_HANDLER:
 					entry.getValue().forEach(
-					    param -> handleGender("gender", (TokenAndListParam) param.getParam()).ifPresent(criteriaContext::addPredicate));
+					    param -> handleGender(criteriaContext,"gender", (TokenAndListParam) param.getParam()).ifPresent(criteriaContext::addPredicate));
 					criteriaContext.finalizeQuery();
 					break;
 				case FhirConstants.DATE_RANGE_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handleDateRange("birthdate", (DateRangeParam) param.getParam())
+					entry.getValue().forEach(param -> handleDateRange(criteriaContext,"birthdate", (DateRangeParam) param.getParam())
 					        .ifPresent(criteriaContext::addPredicate));
 					criteriaContext.finalizeQuery();
 					break;
@@ -66,7 +65,7 @@ public class FhirPersonDaoImpl extends BasePersonDao<Person> implements FhirPers
 					handleAddresses(criteriaContext, entry);
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(entry.getValue()).ifPresent(criteriaContext::addPredicate);
+					handleCommonSearchParameters(criteriaContext,entry.getValue()).ifPresent(criteriaContext::addPredicate);
 					criteriaContext.finalizeQuery();
 					break;
 			}
@@ -74,11 +73,11 @@ public class FhirPersonDaoImpl extends BasePersonDao<Person> implements FhirPers
 	}
 	
 	@Override
-	protected Optional<Predicate> handleLastUpdated(DateRangeParam param) {
-		return Optional.of(createCriteriaContext().getCriteriaBuilder().or(toCriteriaArray(handleDateRange("personDateChanged", param),
-		    Optional.of(createCriteriaContext().getCriteriaBuilder()
-		            .and(toCriteriaArray(Stream.of(Optional.of(createCriteriaContext().getCriteriaBuilder().isNull(createCriteriaContext().getRoot().get("personDateChanged"))),
-		                handleDateRange("personDateCreated", param))))))));
+	protected <T> Optional<Predicate> handleLastUpdated(OpenmrsFhirCriteriaContext<T>criteriaContext, DateRangeParam param) {
+		return Optional.of(criteriaContext.getCriteriaBuilder().or(toCriteriaArray(handleDateRange(criteriaContext,"personDateChanged", param),
+		    Optional.of(criteriaContext.getCriteriaBuilder()
+		            .and(toCriteriaArray(Stream.of(Optional.of(criteriaContext.getCriteriaBuilder().isNull(criteriaContext.getRoot().get("personDateChanged"))),
+		                handleDateRange(criteriaContext,"personDateCreated", param))))))));
 	}
 	
 	@Override

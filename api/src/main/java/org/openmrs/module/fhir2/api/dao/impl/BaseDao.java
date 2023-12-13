@@ -16,7 +16,6 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import javax.persistence.metamodel.EntityType;
 
 import java.math.BigDecimal;
 import java.time.Duration;
@@ -59,7 +58,6 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import com.google.common.reflect.TypeToken;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
@@ -69,7 +67,6 @@ import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.time.DateUtils;
-import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.internal.CriteriaImpl;
@@ -79,8 +76,6 @@ import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.codesystems.AdministrativeGender;
-import org.openmrs.Auditable;
-import org.openmrs.OpenmrsObject;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.search.param.PropParam;
 import org.openmrs.module.fhir2.api.util.LocalDateTimeFactory;
@@ -225,11 +220,10 @@ public abstract class BaseDao {
 	 * Determines whether or not the given criteria object already has a given alias. This is useful to
 	 * determine whether a mapping has already been made or whether a given alias is already in use.
 	 *
-	 * @param criteriaBuilder the {@link CriteriaBuilder} object to examine
 	 * @param alias the alias to look for
 	 * @return true if the alias exists in this criteria object, false otherwise
 	 */
-	protected boolean lacksAlias(@Nonnull Criteria criteria, @Nonnull String alias) {
+	protected <T> boolean lacksAlias(@Nonnull OpenmrsFhirCriteriaContext<T> criteriaContext, @Nonnull String alias) {
 		Optional<Iterator<CriteriaImpl.Subcriteria>> subcriteria = asImpl((CriteriaBuilder) criteria).map(CriteriaImpl::iterateSubcriteria);
 
 		return subcriteria.filter(subcriteriaIterator -> containsAlias(subcriteriaIterator, alias)).isPresent();
@@ -350,10 +344,8 @@ public abstract class BaseDao {
 
 		EntityManager entityManager = sessionFactory.getCurrentSession();
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-		Predicate predicate = criteriaBuilder.and(toCriteriaArray(
-		    handleAndListParam(andListParam).map(param -> handleOrListParamBySystem(param, systemTokenHandler))));
-
-		return Optional.of(predicate);
+		return Optional.of(criteriaBuilder.and(toCriteriaArray(
+				handleAndListParam(andListParam).map(param -> handleOrListParamBySystem(param, systemTokenHandler)))));
 	}
 
 	/**
@@ -375,11 +367,10 @@ public abstract class BaseDao {
 
 		EntityManager entityManager = sessionFactory.getCurrentSession();
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-		Predicate predicate = criteriaBuilder
-		        .or(toCriteriaArray(handleOrListParam(orListParam).collect(Collectors.groupingBy(this::groupBySystem))
-		                .entrySet().stream().map(e -> systemTokenHandler.apply(e.getKey(), e.getValue()))));
 
-		return Optional.of(predicate);
+		return Optional.of(criteriaBuilder
+				.or(toCriteriaArray(handleOrListParam(orListParam).collect(Collectors.groupingBy(this::groupBySystem))
+						.entrySet().stream().map(e -> systemTokenHandler.apply(e.getKey(), e.getValue())))));
 	}
 
 	/**
@@ -390,7 +381,7 @@ public abstract class BaseDao {
 	 * @return a {@link Criterion} to be added to the query indicating that the property matches the
 	 *         given value
 	 */
-	protected Optional<Predicate> handleBoolean(String propertyName, TokenAndListParam booleanToken) {
+	protected <T> Optional<Predicate> handleBoolean(OpenmrsFhirCriteriaContext<T> criteriaContext,String propertyName, TokenAndListParam booleanToken) {
 		if (booleanToken == null) {
 			return Optional.empty();
 		}
@@ -399,21 +390,17 @@ public abstract class BaseDao {
 		// the string matches "true". We could potentially be passed a non-valid Boolean value here.
 		return handleAndListParam(booleanToken, token -> {
 			if (token.getValue().equalsIgnoreCase("true")) {
-				return handleBooleanProperty(propertyName, true);
+				return handleBooleanProperty(criteriaContext,propertyName, true);
 			} else if (token.getValue().equalsIgnoreCase("false")) {
-				return handleBooleanProperty(propertyName, false);
+				return handleBooleanProperty(criteriaContext,propertyName, false);
 			}
 
 			return Optional.empty();
 		});
 	}
 
-	protected Optional<Predicate> handleBooleanProperty(String propertyName, boolean booleanVal) {
-		EntityManager entityManager = sessionFactory.getCurrentSession();
-		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-		CriteriaQuery<Object> criteriaQuery = criteriaBuilder.createQuery();
-		Root<?> root = criteriaQuery.from(Object.class);
-		return Optional.of(criteriaBuilder.equal(root.get(propertyName), booleanVal));
+	protected <T> Optional<Predicate> handleBooleanProperty(OpenmrsFhirCriteriaContext<T> criteriaContext,String propertyName, boolean booleanVal) {
+		return Optional.of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get(propertyName), booleanVal));
 	}
 
 	/**
@@ -423,21 +410,14 @@ public abstract class BaseDao {
 	 * @param dateRangeParam the {@link DateRangeParam} to handle
 	 * @return a {@link Criterion} to be added to the query for the indicated date range
 	 */
-	protected Optional<Predicate> handleDateRange(String propertyName, DateRangeParam dateRangeParam) {
+	protected <T> Optional<Predicate> handleDateRange(OpenmrsFhirCriteriaContext<T> criteriaContext, String propertyName, DateRangeParam dateRangeParam) {
 		if (dateRangeParam == null) {
 			return Optional.empty();
 		}
 
-		EntityManager entityManager = sessionFactory.getCurrentSession();
-		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-		CriteriaQuery<EntityType> criteriaQuery = criteriaBuilder.createQuery(EntityType.class);
-		Root<EntityType> root = criteriaQuery.from(EntityType.class);
-
-		Predicate predicate = criteriaBuilder
-		        .and(toCriteriaArray(Stream.of(handleDate(propertyName, dateRangeParam.getLowerBound()),
-		            handleDate(propertyName, dateRangeParam.getUpperBound()))));
-
-		return Optional.ofNullable(predicate);
+		return Optional.ofNullable(criteriaContext.getCriteriaBuilder()
+				.and(toCriteriaArray(Stream.of(handleDate(criteriaContext,propertyName, dateRangeParam.getLowerBound()),
+						handleDate(criteriaContext,propertyName, dateRangeParam.getUpperBound())))));
 	}
 
 	/**
@@ -447,7 +427,7 @@ public abstract class BaseDao {
 	 * @param dateParam the {@link DateParam} to handle
 	 * @return a {@link Predicate} to be added to the query for the indicate date param
 	 */
-	protected Optional<Predicate> handleDate(String propertyName, DateParam dateParam) {
+	protected <T> Optional<Predicate> handleDate(OpenmrsFhirCriteriaContext<T> criteriaContext, String propertyName, DateParam dateParam) {
 		if (dateParam == null) {
 			return Optional.empty();
 		}
@@ -459,47 +439,38 @@ public abstract class BaseDao {
 		// TODO We may want to not use the default Calendar
 		Date dateStart = DateUtils.truncate(dateParam.getValue(), calendarPrecision);
 		Date dateEnd = DateUtils.ceiling(dateParam.getValue(), calendarPrecision);
-
-		EntityManager entityManager = sessionFactory.getCurrentSession();
-		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-		CriteriaQuery<EntityType> criteriaQuery = criteriaBuilder.createQuery(EntityType.class);
-		Root<EntityType> root = criteriaQuery.from(EntityType.class);
+		
 
 		// TODO This does not properly handle FHIR Periods and Timings, though its unclear if we are using those
 		// see https://www.hl7.org/fhir/search.html#date
 		switch (dateParam.getPrefix()) {
 			case EQUAL:
 				return Optional
-				        .of(criteriaBuilder.and(criteriaBuilder.greaterThanOrEqualTo(root.get(propertyName), dateStart),
-				            criteriaBuilder.lessThan(root.get(propertyName), dateEnd)));
+				        .of(criteriaContext.getCriteriaBuilder().and(criteriaContext.getCriteriaBuilder().greaterThanOrEqualTo(criteriaContext.getRoot().get(propertyName), dateStart),
+						        criteriaContext.getCriteriaBuilder().lessThan(criteriaContext.getRoot().get(propertyName), dateEnd)));
 			case NOT_EQUAL:
-				return Optional.of(criteriaBuilder
-				        .not(criteriaBuilder.and(criteriaBuilder.greaterThanOrEqualTo(root.get(propertyName), dateStart),
-				            criteriaBuilder.lessThan(root.get(propertyName), dateEnd))));
+				return Optional.of(criteriaContext.getCriteriaBuilder()
+				        .not(criteriaContext.getCriteriaBuilder().and(criteriaContext.getCriteriaBuilder().greaterThanOrEqualTo(criteriaContext.getRoot().get(propertyName), dateStart),
+						        criteriaContext.getCriteriaBuilder().lessThan(criteriaContext.getRoot().get(propertyName), dateEnd))));
 			case LESSTHAN_OR_EQUALS:
 			case LESSTHAN:
-				return Optional.of(criteriaBuilder.lessThanOrEqualTo(root.get(propertyName), dateEnd));
+				return Optional.of(criteriaContext.getCriteriaBuilder().lessThanOrEqualTo(criteriaContext.getRoot().get(propertyName), dateEnd));
 			case GREATERTHAN_OR_EQUALS:
 			case GREATERTHAN:
-				return Optional.of(criteriaBuilder.greaterThanOrEqualTo(root.get(propertyName), dateStart));
+				return Optional.of(criteriaContext.getCriteriaBuilder().greaterThanOrEqualTo(criteriaContext.getRoot().get(propertyName), dateStart));
 			case STARTS_AFTER:
-				return Optional.of(criteriaBuilder.greaterThan(root.get(propertyName), dateEnd));
+				return Optional.of(criteriaContext.getCriteriaBuilder().greaterThan(criteriaContext.getRoot().get(propertyName), dateEnd));
 			case ENDS_BEFORE:
-				return Optional.of(criteriaBuilder.lessThan(root.get(propertyName), dateEnd));
+				return Optional.of(criteriaContext.getCriteriaBuilder().lessThan(criteriaContext.getRoot().get(propertyName), dateEnd));
 		}
 
 		return Optional.empty();
 	}
 
-	protected Optional<Predicate> handleQuantity(String propertyName, QuantityParam quantityParam) {
+	protected <T> Optional<Predicate> handleQuantity(OpenmrsFhirCriteriaContext<T> criteriaContext, String propertyName, QuantityParam quantityParam) {
 		if (quantityParam == null) {
 			return Optional.empty();
 		}
-
-		EntityManager entityManager = sessionFactory.getCurrentSession();
-		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-		CriteriaQuery<EntityType> criteriaQuery = criteriaBuilder.createQuery(EntityType.class);
-		Root<EntityType> root = criteriaQuery.from(EntityType.class);
 
 		BigDecimal value = quantityParam.getValue();
 		if (quantityParam.getPrefix() == null || quantityParam.getPrefix() == ParamPrefixEnum.APPROXIMATE) {
@@ -510,51 +481,49 @@ public abstract class BaseDao {
 			if (dotIdx == -1) {
 				double lowerBound = value.subtract(approxRange).doubleValue();
 				double upperBound = value.add(approxRange).doubleValue();
-				return Optional.of(criteriaBuilder.between(root.get(propertyName), lowerBound, upperBound));
+				return Optional.of(criteriaContext.getCriteriaBuilder().between(criteriaContext.getRoot().get(propertyName), lowerBound, upperBound));
 			} else {
 				int precision = plainString.length() - (dotIdx);
 				double mul = Math.pow(10, -precision);
 				double val = mul * 5.0d;
 				double lowerBound = value.subtract(new BigDecimal(val)).doubleValue();
 				double upperBound = value.add(new BigDecimal(val)).doubleValue();
-				return Optional.of(criteriaBuilder.between(root.get(propertyName), lowerBound, upperBound));
+				return Optional.of(criteriaContext.getCriteriaBuilder().between(criteriaContext.getRoot().get(propertyName), lowerBound, upperBound));
 			}
 		} else {
 			double val = value.doubleValue();
 			switch (quantityParam.getPrefix()) {
 				case EQUAL:
-					return Optional.of(criteriaBuilder.equal(root.get(propertyName), val));
+					return Optional.of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get(propertyName), val));
 				case NOT_EQUAL:
-					return Optional.of(criteriaBuilder.notEqual(root.get(propertyName), val));
+					return Optional.of(criteriaContext.getCriteriaBuilder().notEqual(criteriaContext.getRoot().get(propertyName), val));
 				case LESSTHAN_OR_EQUALS:
-					return Optional.of(criteriaBuilder.lessThanOrEqualTo(root.get(propertyName), val));
+					return Optional.of(criteriaContext.getCriteriaBuilder().lessThanOrEqualTo(criteriaContext.getRoot().get(propertyName), val));
 				case LESSTHAN:
-					return Optional.of(criteriaBuilder.lessThan(root.get(propertyName), val));
+					return Optional.of(criteriaContext.getCriteriaBuilder().lessThan(criteriaContext.getRoot().get(propertyName), val));
 				case GREATERTHAN_OR_EQUALS:
-					return Optional.of(criteriaBuilder.greaterThanOrEqualTo(root.get(propertyName), val));
+					return Optional.of(criteriaContext.getCriteriaBuilder().greaterThanOrEqualTo(criteriaContext.getRoot().get(propertyName), val));
 				case GREATERTHAN:
-					return Optional.of(criteriaBuilder.greaterThan(root.get(propertyName), val));
+					return Optional.of(criteriaContext.getCriteriaBuilder().greaterThan(criteriaContext.getRoot().get(propertyName), val));
 			}
 		}
 
 		return Optional.empty();
 	}
 
-	protected Optional<Predicate> handleQuantity(@Nonnull String propertyName, QuantityAndListParam quantityAndListParam) {
+	protected <T> Optional<Predicate> handleQuantity(OpenmrsFhirCriteriaContext<T> criteriaContext,@Nonnull String propertyName, QuantityAndListParam quantityAndListParam) {
 		if (quantityAndListParam == null) {
 			return Optional.empty();
 		}
 
-		return handleAndListParam(quantityAndListParam, quantityParam -> handleQuantity(propertyName, quantityParam));
+		return handleAndListParam(quantityAndListParam, quantityParam -> handleQuantity(criteriaContext,propertyName, quantityParam));
 	}
 
-	protected <T extends OpenmrsObject & Auditable> void handleEncounterReference(OpenmrsFhirCriteriaContext<T> criteriaContext, ReferenceAndListParam encounterReference,
-                                                                                 @Nonnull String encounterAlias) {
+	protected <T> void handleEncounterReference(OpenmrsFhirCriteriaContext<T> criteriaContext, ReferenceAndListParam encounterReference, @Nonnull String encounterAlias) {
 		handleEncounterReference(criteriaContext, encounterReference, encounterAlias, "encounter");
 	}
 
-	protected <T extends OpenmrsObject & Auditable>  void handleEncounterReference(OpenmrsFhirCriteriaContext<T> criteriaContext, ReferenceAndListParam encounterReference,
-	        @Nonnull String encounterAlias, @Nonnull String associationPath) {
+	protected <T>  void handleEncounterReference(OpenmrsFhirCriteriaContext<T> criteriaContext, ReferenceAndListParam encounterReference, @Nonnull String encounterAlias, @Nonnull String associationPath) {
 
 		if (encounterReference == null) {
 			return;
@@ -571,7 +540,7 @@ public abstract class BaseDao {
 						if (lacksAlias(criteriaContext, "et")) {
 							criteriaContext.getRoot().join(String.format("%s.encounterType", encounterAlias)).alias("et");
 						}
-						return propertyLike("et.uuid", new StringParam(token.getValue(), true));
+						return propertyLike(criteriaContext,"et.uuid", new StringParam(token.getValue(), true));
 				}
 			} else {
 				return Optional.of(
@@ -582,7 +551,7 @@ public abstract class BaseDao {
 		}).ifPresent(criteriaContext::addPredicate);
 	}
 
-	protected Optional<Predicate> handleGender(@Nonnull String propertyName, TokenAndListParam gender) {
+	protected <T> Optional<Predicate> handleGender(OpenmrsFhirCriteriaContext<T> criteriaContext, @Nonnull String propertyName, TokenAndListParam gender) {
 		if (gender == null) {
 			return Optional.empty();
 		}
@@ -592,26 +561,26 @@ public abstract class BaseDao {
 				AdministrativeGender administrativeGender = AdministrativeGender.fromCode(token.getValue());
 
 				if (administrativeGender == null) {
-					return Optional.of(criteriaBuilder.isNull(root.get(propertyName)));
+					return Optional.of(criteriaContext.getCriteriaBuilder().isNull(criteriaContext.getRoot().get(propertyName)));
 				}
 
 				switch (administrativeGender) {
 					case MALE:
-						return Optional.of(criteriaBuilder.like(root.get(propertyName), "M"));
+						return Optional.of(criteriaContext.getCriteriaBuilder().like(criteriaContext.getRoot().get(propertyName), "M"));
 					case FEMALE:
-						return Optional.of(criteriaBuilder.like(root.get(propertyName), "F"));
+						return Optional.of(criteriaContext.getCriteriaBuilder().like(criteriaContext.getRoot().get(propertyName), "F"));
 					case OTHER:
 					case UNKNOWN:
 					case NULL:
-						return Optional.of(criteriaBuilder.isNull(root.get(propertyName)));
+						return Optional.of(criteriaContext.getCriteriaBuilder().isNull(criteriaContext.getRoot().get(propertyName)));
 				}
 			}
 			catch (FHIRException ignored) {}
-			return Optional.of(criteriaBuilder.like(root.get(propertyName), token.getValue()));
+			return Optional.of(criteriaContext.getCriteriaBuilder().like(criteriaContext.getRoot().get(propertyName), token.getValue()));
 		});
 	}
 
-	protected <T extends OpenmrsObject & Auditable>  Optional<Predicate> handleLocationReference(OpenmrsFhirCriteriaContext<T> criteriaContext, @Nonnull String locationAlias,
+	protected <T>  Optional<Predicate> handleLocationReference(OpenmrsFhirCriteriaContext<T> criteriaContext, @Nonnull String locationAlias,
 	        ReferenceAndListParam locationReference) {
 
 		if (locationReference == null) {
@@ -622,15 +591,15 @@ public abstract class BaseDao {
 			if (token.getChain() != null) {
 				switch (token.getChain()) {
 					case Location.SP_NAME:
-						return propertyLike(String.format("%s.name", locationAlias), token.getValue());
+						return propertyLike(criteriaContext,String.format("%s.name", locationAlias), token.getValue());
 					case Location.SP_ADDRESS_CITY:
-						return propertyLike(String.format("%s.cityVillage", locationAlias), token.getValue());
+						return propertyLike(criteriaContext,String.format("%s.cityVillage", locationAlias), token.getValue());
 					case Location.SP_ADDRESS_STATE:
-						return propertyLike(String.format("%s.stateProvince", locationAlias), token.getValue());
+						return propertyLike(criteriaContext,String.format("%s.stateProvince", locationAlias), token.getValue());
 					case Location.SP_ADDRESS_POSTALCODE:
-						return propertyLike(String.format("%s.postalCode", locationAlias), token.getValue());
+						return propertyLike(criteriaContext,String.format("%s.postalCode", locationAlias), token.getValue());
 					case Location.SP_ADDRESS_COUNTRY:
-						return propertyLike(String.format("%s.country", locationAlias), token.getValue());
+						return propertyLike(criteriaContext,String.format("%s.country", locationAlias), token.getValue());
 				}
 			} else {
 				return Optional
@@ -641,7 +610,7 @@ public abstract class BaseDao {
 		});
 	}
 
-	protected <T extends OpenmrsObject & Auditable>  void handleParticipantReference(OpenmrsFhirCriteriaContext<T> criteriaContext, ReferenceAndListParam participantReference) {
+	protected <T>  void handleParticipantReference(OpenmrsFhirCriteriaContext<T> criteriaContext, ReferenceAndListParam participantReference) {
 		if (participantReference != null) {
 			if (lacksAlias(criteriaContext, "ep")) {
 				return;
@@ -685,9 +654,9 @@ public abstract class BaseDao {
 							List<Optional<? extends Predicate>> predicateList = new ArrayList<>();
 
 							for (String token : StringUtils.split(participantToken.getValue(), " \t,")) {
-								predicateList.add(propertyLike("pn.givenName", token));
-								predicateList.add(propertyLike("pn.middleName", token));
-								predicateList.add(propertyLike("pn.familyName", token));
+								predicateList.add(propertyLike(criteriaContext,"pn.givenName", token));
+								predicateList.add(propertyLike(criteriaContext,"pn.middleName", token));
+								predicateList.add(propertyLike(criteriaContext,"pn.familyName", token));
 							}
 
 							return Optional.of(criteriaContext.getCriteriaBuilder().or(toCriteriaArray(predicateList)));
@@ -706,8 +675,7 @@ public abstract class BaseDao {
 	}
 
 	//Added this method to allow handling classes with provider instead  of encounterProvider
-	protected <T extends OpenmrsObject & Auditable>  void handleProviderReference(OpenmrsFhirCriteriaContext<T> criteriaContext, ReferenceAndListParam providerReference) {
-
+	protected <T> void handleProviderReference(OpenmrsFhirCriteriaContext<T> criteriaContext, ReferenceAndListParam providerReference) {
 		if (providerReference != null) {
 			criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot().get("orderer"));
 			handleAndListParam(providerReference, participantToken -> {
@@ -739,9 +707,9 @@ public abstract class BaseDao {
 							List<Optional<? extends Predicate>> predicateList = new ArrayList<>();
 
 							for (String token : StringUtils.split(participantToken.getValue(), " \t,")) {
-								predicateList.add(propertyLike("pn.givenName", token));
-								predicateList.add(propertyLike("pn.middleName", token));
-								predicateList.add(propertyLike("pn.familyName", token));
+								predicateList.add(propertyLike(criteriaContext,"pn.givenName", token));
+								predicateList.add(propertyLike(criteriaContext,"pn.middleName", token));
+								predicateList.add(propertyLike(criteriaContext,"pn.familyName", token));
 							}
 
 							return Optional.of(criteriaContext.getCriteriaBuilder().or(toCriteriaArray(predicateList)));
@@ -755,7 +723,7 @@ public abstract class BaseDao {
 		}
 	}
 
-	protected <T extends OpenmrsObject & Auditable> Optional<Predicate> handleCodeableConcept(OpenmrsFhirCriteriaContext<T> criteriaContext, TokenAndListParam concepts,
+	protected <T> Optional<Predicate> handleCodeableConcept(OpenmrsFhirCriteriaContext<T> criteriaContext, TokenAndListParam concepts,
 	        @Nonnull String conceptAlias, @Nonnull String conceptMapAlias, @Nonnull String conceptReferenceTermAlias) {
 		if (concepts == null) {
 			return Optional.empty();
@@ -778,17 +746,17 @@ public abstract class BaseDao {
 					criteriaContext.getRoot().join(String.format("%s.conceptReferenceTerm", conceptMapAlias)).alias(conceptReferenceTermAlias);
 				}
 
-				return Optional.of(generateSystemQuery(system, tokensToList(tokens), conceptReferenceTermAlias));
+				return Optional.of(generateSystemQuery(criteriaContext,system, tokensToList(tokens), conceptReferenceTermAlias));
 			}
 		});
 	}
 
-	protected <T extends OpenmrsObject & Auditable>  void handleNames(OpenmrsFhirCriteriaContext<T> criteriaContext, StringAndListParam name, StringAndListParam given,
+	protected <T>  void handleNames(OpenmrsFhirCriteriaContext<T> criteriaContext, StringAndListParam name, StringAndListParam given,
 	        StringAndListParam family) {
 		handleNames(criteriaContext, name, given, family, null);
 	}
 
-	protected <T extends OpenmrsObject & Auditable>  void handleNames(OpenmrsFhirCriteriaContext<T> criteriaContext, StringAndListParam name, StringAndListParam given,
+	protected <T>  void handleNames(OpenmrsFhirCriteriaContext<T> criteriaContext, StringAndListParam name, StringAndListParam given,
 	        StringAndListParam family, String personAlias) {
 
 		if (name == null && given == null && family == null) {
@@ -810,30 +778,30 @@ public abstract class BaseDao {
 			    (nameParam) -> Arrays.stream(StringUtils.split(nameParam.getValue(), " \t,"))
 			            .map(token -> new StringParam().setValue(token).setExact(nameParam.isExact())
 			                    .setContains(nameParam.isContains()))
-			            .map(tokenParam -> Arrays.asList(propertyLike("pn.givenName", tokenParam),
-			                propertyLike("pn.middleName", tokenParam), propertyLike("pn.familyName", tokenParam)))
+			            .map(tokenParam -> Arrays.asList(propertyLike(criteriaContext,"pn.givenName", tokenParam),
+			                propertyLike(criteriaContext,"pn.middleName", tokenParam), propertyLike(criteriaContext,"pn.familyName", tokenParam)))
 			            .flatMap(Collection::stream)).ifPresent(criteriaContext::addPredicate);
 			criteriaContext.finalizeQuery();
 		}
 
 		if (given != null) {
-			handleAndListParam(given, (givenName) -> propertyLike("pn.givenName", givenName))
+			handleAndListParam(given, (givenName) -> propertyLike(criteriaContext,"pn.givenName", givenName))
 			        .ifPresent(criteriaContext::addPredicate);
 			criteriaContext.finalizeQuery();
 		}
 
 		if (family != null) {
-			handleAndListParam(family, (familyName) -> propertyLike("pn.familyName", familyName))
+			handleAndListParam(family, (familyName) -> propertyLike(criteriaContext,"pn.familyName", familyName))
 			        .ifPresent(criteriaContext::addPredicate);
 			criteriaContext.finalizeQuery();
 		}
 	}
 
-	protected <T extends OpenmrsObject & Auditable>  void handlePatientReference(OpenmrsFhirCriteriaContext<T> criteriaContext, ReferenceAndListParam patientReference) {
+	protected <T>  void handlePatientReference(OpenmrsFhirCriteriaContext<T> criteriaContext, ReferenceAndListParam patientReference) {
 		handlePatientReference(criteriaContext, patientReference, "patient");
 	}
 
-	protected <T extends OpenmrsObject & Auditable>  void handlePatientReference(OpenmrsFhirCriteriaContext<T> criteriaContext, ReferenceAndListParam patientReference,
+	protected <T>  void handlePatientReference(OpenmrsFhirCriteriaContext<T> criteriaContext, ReferenceAndListParam patientReference,
 	        String associationPath) {
 		if (patientReference != null) {
 			criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot().get(associationPath));
@@ -851,13 +819,11 @@ public abstract class BaseDao {
 							if (lacksAlias(criteriaContext, "pn")) {
 								criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot().get("p.names"));
 							}
-							//							return Optional.of(ilike("pn.givenName", patientToken.getValue(), MatchMode.START));
 							return Optional.of(criteriaContext.getCriteriaBuilder().like(criteriaContext.getRoot().get("pi.givenName"), patientToken.getValue()));
 						case Patient.SP_FAMILY:
 							if (lacksAlias(criteriaContext, "pn")) {
 								criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot().get("p.names"));
 							}
-							//							return Optional.of(ilike("pn.familyName", patientToken.getValue(), MatchMode.START));
 							return Optional
 							        .of(criteriaContext.getCriteriaBuilder().like(criteriaContext.getRoot().get("familyName"), patientToken.getValue()));
 						case Patient.SP_NAME:
@@ -867,9 +833,9 @@ public abstract class BaseDao {
 							List<Optional<? extends Predicate>> criterionList = new ArrayList<>();
 
 							for (String token : StringUtils.split(patientToken.getValue(), " \t,")) {
-								criterionList.add(propertyLike("pn.givenName", token));
-								criterionList.add(propertyLike("pn.middleName", token));
-								criterionList.add(propertyLike("pn.familyName", token));
+								criterionList.add(propertyLike(criteriaContext,"pn.givenName", token));
+								criterionList.add(propertyLike(criteriaContext,"pn.middleName", token));
+								criterionList.add(propertyLike(criteriaContext,"pn.familyName", token));
 							}
 							return Optional.of(criteriaContext.getCriteriaBuilder().or(toCriteriaArray(criterionList)));
 					}
@@ -882,7 +848,7 @@ public abstract class BaseDao {
 		}
 	}
 
-	protected <T extends OpenmrsObject & Auditable>  Optional<Predicate> handleCommonSearchParameters(OpenmrsFhirCriteriaContext<T> criteriaContext, List<PropParam<?>> theCommonParams) {
+	protected <T>  Optional<Predicate> handleCommonSearchParameters(OpenmrsFhirCriteriaContext<T> criteriaContext, List<PropParam<?>> theCommonParams) {
 		List<Optional<? extends Predicate>> criterionList = new ArrayList<>();
 
 		for (PropParam<?> commonSearchParam : theCommonParams) {
@@ -892,7 +858,7 @@ public abstract class BaseDao {
 					    param -> Optional.of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("uuid"), param.getValue()))));
 					break;
 				case FhirConstants.LAST_UPDATED_PROPERTY:
-					criterionList.add(handleLastUpdated((DateRangeParam) commonSearchParam.getParam()));
+					criterionList.add(handleLastUpdated(criteriaContext,(DateRangeParam) commonSearchParam.getParam()));
 					break;
 			}
 		}
@@ -906,9 +872,9 @@ public abstract class BaseDao {
 	 * @param param the DateRangeParam used to query for _lastUpdated
 	 * @return an optional criterion for the query
 	 */
-	protected abstract Optional<Predicate> handleLastUpdated(DateRangeParam param);
+	protected abstract <T> Optional<Predicate> handleLastUpdated(OpenmrsFhirCriteriaContext<T> criteriaContext, DateRangeParam param);
 
-	protected <T extends OpenmrsObject & Auditable> Optional<Predicate> handlePersonAddress(OpenmrsFhirCriteriaContext<T> criteriaContext, String aliasPrefix, StringAndListParam city, StringAndListParam state,
+	protected <T> Optional<Predicate> handlePersonAddress(OpenmrsFhirCriteriaContext<T> criteriaContext, String aliasPrefix, StringAndListParam city, StringAndListParam state,
 	        StringAndListParam postalCode, StringAndListParam country) {
 		if (city == null && state == null && postalCode == null && country == null) {
 			return Optional.empty();
@@ -917,26 +883,26 @@ public abstract class BaseDao {
 		List<Optional<? extends Predicate>> predicateList = new ArrayList<>();
 
 		if (city != null) {
-			predicateList.add(handleAndListParam(city, c -> propertyLike(String.format("%s.cityVillage", aliasPrefix), c)));
+			predicateList.add(handleAndListParam(city, c -> propertyLike(criteriaContext,String.format("%s.cityVillage", aliasPrefix), c)));
 		}
 
 		if (state != null) {
-			predicateList.add(handleAndListParam(state, c -> propertyLike(String.format("%s.stateProvince", aliasPrefix), c)));
+			predicateList.add(handleAndListParam(state, c -> propertyLike(criteriaContext,String.format("%s.stateProvince", aliasPrefix), c)));
 		}
 
 		if (postalCode != null) {
 			predicateList
-			        .add(handleAndListParam(postalCode, c -> propertyLike(String.format("%s.postalCode", aliasPrefix), c)));
+			        .add(handleAndListParam(postalCode, c -> propertyLike(criteriaContext, String.format("%s.postalCode", aliasPrefix), c)));
 		}
 
 		if (country != null) {
-			predicateList.add(handleAndListParam(country, c -> propertyLike(String.format("%s.country", aliasPrefix), c)));
+			predicateList.add(handleAndListParam(country, c -> propertyLike(criteriaContext, String.format("%s.country", aliasPrefix), c)));
 		}
 
 		return Optional.of(criteriaContext.getCriteriaBuilder().and(toCriteriaArray(predicateList.stream())));
 	}
 
-	protected <T extends OpenmrsObject & Auditable>  Optional<Predicate> handleMedicationReference(OpenmrsFhirCriteriaContext<T> criteriaContext, @Nonnull String medicationAlias,
+	protected <T>  Optional<Predicate> handleMedicationReference(OpenmrsFhirCriteriaContext<T> criteriaContext, @Nonnull String medicationAlias,
 	        ReferenceAndListParam medicationReference) {
 		if (medicationReference == null) {
 			return Optional.empty();
@@ -946,7 +912,7 @@ public abstract class BaseDao {
 		        .of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get(String.format("%s.uuid", medicationAlias)), token.getIdPart())));
 	}
 
-	protected <T extends OpenmrsObject & Auditable>  Optional<Predicate> handleMedicationRequestReference(OpenmrsFhirCriteriaContext<T> criteriaContext, @Nonnull String drugOrderAlias,
+	protected <T> Optional<Predicate> handleMedicationRequestReference(OpenmrsFhirCriteriaContext<T> criteriaContext, @Nonnull String drugOrderAlias,
 	        ReferenceAndListParam drugOrderReference) {
 		if (drugOrderReference == null) {
 			return Optional.empty();
@@ -964,11 +930,11 @@ public abstract class BaseDao {
 	 * @param criteriaContext The {@link OpenmrsFhirCriteriaContext} for the current query
 	 * @param sort the {@link SortSpec} which defines the sorting to be translated
 	 */
-	protected <T extends OpenmrsObject & Auditable>  void handleSort(OpenmrsFhirCriteriaContext<T> criteriaContext, SortSpec sort) {
-		handleSort(criteriaContext, sort, this::paramToProps).ifPresent(l -> l.forEach(criteriaContext.getCriteriaQuery()::orderBy));
+	protected <T> void handleSort(OpenmrsFhirCriteriaContext<T> criteriaContext, SortSpec sort) {
+		handleSort(criteriaContext, sort,this::paramToProp).ifPresent(l -> l.forEach(criteriaContext.getCriteriaQuery()::orderBy));
 	}
-
-	protected <T extends OpenmrsObject & Auditable>  Optional<List<javax.persistence.criteria.Order>> handleSort(OpenmrsFhirCriteriaContext<T> criteriaContext, SortSpec sort,
+	
+	protected <T>  Optional<List<javax.persistence.criteria.Order>> handleSort(OpenmrsFhirCriteriaContext<T> criteriaContext, SortSpec sort,
 	        Function<SortState, Collection<javax.persistence.criteria.Order>> paramToProp) {
 		List<javax.persistence.criteria.Order> orderings = new ArrayList<>();
 		SortSpec sortSpec = sort;
@@ -992,7 +958,7 @@ public abstract class BaseDao {
 	}
 
 	@SuppressWarnings("unchecked")
-	protected <T extends OpenmrsObject & Auditable>  Predicate generateSystemQuery(OpenmrsFhirCriteriaContext<T> criteriaContext, String system, List<String> codes, String conceptReferenceTermAlias) {
+	protected <T>  Predicate generateSystemQuery(OpenmrsFhirCriteriaContext<T> criteriaContext, String system, List<String> codes, String conceptReferenceTermAlias) {
 		//detached criteria
 		Specification<FhirConceptSource> spec = (root, query, cb) -> (Predicate) query.select(root.get("conceptSource"))
 				.where(cb.equal(root.get("url"), system));
@@ -1011,7 +977,7 @@ public abstract class BaseDao {
 		}
 	}
 
-	protected <T extends OpenmrsObject & Auditable> Predicate generateActiveOrderQuery(OpenmrsFhirCriteriaContext<T> criteriaContext, String path, Date onDate) {
+	protected <T> Predicate generateActiveOrderQuery(OpenmrsFhirCriteriaContext<T> criteriaContext, String path, Date onDate) {
 		if (StringUtils.isNotBlank(path)) {
 			path = path + ".";
 		}
@@ -1025,23 +991,23 @@ public abstract class BaseDao {
 						criteriaContext.getCriteriaBuilder().greaterThan(criteriaContext.getRoot().get(path + "autoExpireDate"), onDate)));
 	}
 
-	protected <T extends OpenmrsObject & Auditable> Predicate generateActiveOrderQuery(OpenmrsFhirCriteriaContext<T> criteriaContext, String path) {
+	protected <T> Predicate generateActiveOrderQuery(OpenmrsFhirCriteriaContext<T> criteriaContext, String path) {
 		return generateActiveOrderQuery(criteriaContext, path, new Date());
 	}
 
-	protected <T extends OpenmrsObject & Auditable> Predicate generateActiveOrderQuery(OpenmrsFhirCriteriaContext<T> criteriaContext, Date onDate) {
+	protected <T> Predicate generateActiveOrderQuery(OpenmrsFhirCriteriaContext<T> criteriaContext, Date onDate) {
 		return generateActiveOrderQuery(criteriaContext, "", onDate);
 	}
 
-	protected <T extends OpenmrsObject & Auditable> Predicate generateActiveOrderQuery(OpenmrsFhirCriteriaContext<T> criteriaContext) {
+	protected <T> Predicate generateActiveOrderQuery(OpenmrsFhirCriteriaContext<T> criteriaContext) {
 		return generateActiveOrderQuery(criteriaContext, new Date());
 	}
 
-	protected Predicate generateNotCancelledOrderQuery() {
-		return generateNotCancelledOrderQuery("");
+	protected <T> Predicate generateNotCancelledOrderQuery(OpenmrsFhirCriteriaContext<T> criteriaContext) {
+		return generateNotCancelledOrderQuery(criteriaContext,"");
 	}
 
-	protected <T extends OpenmrsObject & Auditable> Predicate generateNotCancelledOrderQuery(OpenmrsFhirCriteriaContext<T> criteriaContext, String path) {
+	protected <T> Predicate generateNotCancelledOrderQuery(OpenmrsFhirCriteriaContext<T> criteriaContext, String path) {
 		if (StringUtils.isNotBlank(path)) {
 			path = path + ".";
 		}
@@ -1086,17 +1052,17 @@ public abstract class BaseDao {
 	 * @param sortState a {@link SortState} object describing the current sort state
 	 * @return the corresponding ordering(s) needed for this property
 	 */
-	protected Collection<Order> paramToProps(@Nonnull SortState sortState) {
-		Collection<String> prop = paramToProps(sortState.getParameter());
+	protected <T> Collection<Order> paramToProps(OpenmrsFhirCriteriaContext<T> criteriaContext, @Nonnull SortState sortState) {
+		Collection<String> prop = paramToProps(criteriaContext,sortState.getParameter());
 		if (prop != null) {
 			switch (sortState.getSortOrder()) {
 				case ASC:
 					return prop.stream()
-							.map(s -> createCriteriaContext().getCriteriaBuilder().asc(createCriteriaContext().getRoot().get(s)))
+							.map(s -> criteriaContext.getCriteriaBuilder().asc(criteriaContext.getRoot().get(s)))
 							.collect(Collectors.toList());
 				case DESC:
 					return prop.stream()
-							.map(s -> createCriteriaContext().getCriteriaBuilder().desc(createCriteriaContext().getRoot().get(s)))
+							.map(s -> criteriaContext.getCriteriaBuilder().desc(criteriaContext.getRoot().get(s)))
 							.collect(Collectors.toList());
 			}
 		}
@@ -1111,8 +1077,8 @@ public abstract class BaseDao {
 	 * @param param the FHIR parameter to map
 	 * @return the name of the corresponding property from the current query
 	 */
-	protected Collection<String> paramToProps(@Nonnull String param) {
-		String prop = paramToProp(param);
+	protected <T> Collection<String> paramToProps(OpenmrsFhirCriteriaContext<T> criteriaContext, @Nonnull String param) {
+		String prop = paramToProp(criteriaContext,param);
 
 		if (prop != null) {
 			return Collections.singleton(prop);
@@ -1128,16 +1094,16 @@ public abstract class BaseDao {
 	 * @param param the FHIR parameter to map
 	 * @return the name of the corresponding property from the current query
 	 */
-	protected String paramToProp(@Nonnull String param) {
+	protected <T> String paramToProp(OpenmrsFhirCriteriaContext<T> criteriaContext, @Nonnull String param) {
 		return null;
 	}
 
-	protected Optional<Predicate> propertyLike(@Nonnull String propertyName, String value) {
+	protected <T> Optional<Predicate> propertyLike(OpenmrsFhirCriteriaContext<T> criteriaContext, @Nonnull String propertyName, String value) {
 		if (value == null) {
 			return Optional.empty();
 		}
 
-		return propertyLike(propertyName, new StringParam(value));
+		return propertyLike(criteriaContext,propertyName, new StringParam(value));
 	}
 
 	protected <T> Optional<Predicate> propertyLike(OpenmrsFhirCriteriaContext<T> criteriaContext, @Nonnull String propertyName, StringParam param) {
