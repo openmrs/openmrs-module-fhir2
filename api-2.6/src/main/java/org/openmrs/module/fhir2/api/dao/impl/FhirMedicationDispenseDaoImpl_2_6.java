@@ -19,6 +19,7 @@ import java.util.Optional;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import lombok.AccessLevel;
+import lombok.NonNull;
 import lombok.Setter;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Criterion;
@@ -62,7 +63,6 @@ public class FhirMedicationDispenseDaoImpl_2_6 extends BaseFhirDao<MedicationDis
 	
 	@Override
 	protected void setupSearchParams(OpenmrsFhirCriteriaContext<MedicationDispense> criteriaContext, SearchParameterMap theParams) {
-		createCriteriaContext();
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER:
@@ -75,7 +75,7 @@ public class FhirMedicationDispenseDaoImpl_2_6 extends BaseFhirDao<MedicationDis
 					break;
 				case FhirConstants.MEDICATION_REQUEST_REFERENCE_SEARCH_HANDLER:
 					entry.getValue()
-					        .forEach(e -> handleMedicationRequestReference("drugOrder", (ReferenceAndListParam) e.getParam())
+					        .forEach(e -> handleMedicationRequestReference(criteriaContext,"drugOrder", (ReferenceAndListParam) e.getParam())
 					                .ifPresent(c -> {
 										createAlias(criteriaContext, "drugOrder", "drugOrder");
 								                criteriaContext.addPredicate(c);
@@ -84,7 +84,7 @@ public class FhirMedicationDispenseDaoImpl_2_6 extends BaseFhirDao<MedicationDis
 					                ));
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(entry.getValue()).ifPresent(criteriaContext::addPredicate);
+					handleCommonSearchParameters(criteriaContext,entry.getValue()).ifPresent(criteriaContext::addPredicate);
 					criteriaContext.finalizeQuery();
 					break;
 			}
@@ -92,12 +92,12 @@ public class FhirMedicationDispenseDaoImpl_2_6 extends BaseFhirDao<MedicationDis
 	}
 	
 	@Override
-	protected Optional<Predicate> handleLastUpdated(DateRangeParam param) {
-		return super.handleLastUpdatedImmutable(param);
+	protected <T> Optional<Predicate> handleLastUpdated(OpenmrsFhirCriteriaContext<T> criteriaContext, DateRangeParam param) {
+		return super.handleLastUpdatedImmutable(criteriaContext,param);
 	}
 	
 	@Override
-	protected String paramToProp(@Nonnull String param) {
-		return super.paramToProp(param);
+	protected <V> String paramToProp(OpenmrsFhirCriteriaContext<V> criteriaContext, @NonNull String param) {
+		return super.paramToProp(criteriaContext, param);
 	}
 }

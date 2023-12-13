@@ -24,6 +24,7 @@ import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
+import lombok.NonNull;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.criterion.Restrictions;
@@ -47,12 +48,12 @@ public class FhirEncounterDaoImpl extends BaseEncounterDao<Encounter> implements
 	
 	@Override
 	public List<String> getSearchResultUuids(@Nonnull SearchParameterMap theParams) {
-		OpenmrsFhirCriteriaContext<Encounter> criteriaContext = createCriteriaContext();
+		OpenmrsFhirCriteriaContext<Encounter> criteriaContext = createCriteriaContext(Encounter.class);
 		
 		if (!theParams.getParameters(FhirConstants.LASTN_ENCOUNTERS_SEARCH_HANDLER).isEmpty()) {
 			setupSearchParams(criteriaContext, theParams);
 			
-			OpenmrsFhirCriteriaContext<Object[]> objCriteriaContext = createObjectCriteriaContext();
+			OpenmrsFhirCriteriaContext<Object[]> objCriteriaContext = createCriteriaContext(Object[].class);
 			objCriteriaContext.getCriteriaQuery().multiselect(objCriteriaContext.getRoot().get("uuid"), objCriteriaContext.getRoot().get("encounterDatetime"));
 			
 			List<LastnResult<String>> results = objCriteriaContext.getEntityManager().createQuery(objCriteriaContext.getCriteriaQuery()).getResultList().stream()
@@ -65,8 +66,9 @@ public class FhirEncounterDaoImpl extends BaseEncounterDao<Encounter> implements
 		setupSearchParams(criteriaContext, theParams);
 		handleSort(criteriaContext, theParams.getSortSpec());
 		
-		createStringCriteriaContext().getCriteriaQuery().select(createStringCriteriaContext().getRoot().get("uuid"));
-		return createStringCriteriaContext().getEntityManager().createQuery(createStringCriteriaContext().getCriteriaQuery()).getResultList().stream().distinct().collect(Collectors.toList());
+		OpenmrsFhirCriteriaContext<String> context = createCriteriaContext(String.class);
+		context.getCriteriaQuery().select(context.getRoot().get("uuid"));
+		return context.getEntityManager().createQuery(context.getCriteriaQuery()).getResultList().stream().distinct().collect(Collectors.toList());
 	}
 	
 	private int getMaxParameter(SearchParameterMap theParams) {
@@ -76,7 +78,7 @@ public class FhirEncounterDaoImpl extends BaseEncounterDao<Encounter> implements
 	
 	@Override
 	protected void handleDate(OpenmrsFhirCriteriaContext<Encounter> criteriaContext, DateRangeParam dateRangeParam) {
-		handleDateRange("encounterDatetime", dateRangeParam).ifPresent(criteriaContext::addPredicate);
+		handleDateRange(criteriaContext,"encounterDatetime", dateRangeParam).ifPresent(criteriaContext::addPredicate);
 		criteriaContext.finalizeQuery();
 	}
 	
@@ -96,7 +98,7 @@ public class FhirEncounterDaoImpl extends BaseEncounterDao<Encounter> implements
 	}
 	
 	@Override
-	protected String paramToProp(@Nonnull String param) {
+	protected <V> String paramToProp(OpenmrsFhirCriteriaContext<V> criteriaContext, @NonNull String param) {
 		switch (param) {
 			case SP_DATE:
 				return "encounterDatetime";

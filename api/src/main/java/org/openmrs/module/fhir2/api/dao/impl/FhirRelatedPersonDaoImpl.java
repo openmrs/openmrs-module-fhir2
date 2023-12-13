@@ -55,12 +55,12 @@ public class FhirRelatedPersonDaoImpl extends BaseFhirDao<Relationship> implemen
 					    param -> handleNames(criteriaContext, (StringAndListParam) param.getParam(), null, null, "m"));
 					break;
 				case FhirConstants.GENDER_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handleGender("m.gender", (TokenAndListParam) param.getParam())
+					entry.getValue().forEach(param -> handleGender(criteriaContext,"m.gender", (TokenAndListParam) param.getParam())
 					        .ifPresent(criteriaContext::addPredicate));
 					criteriaContext.finalizeQuery();
 					break;
 				case FhirConstants.DATE_RANGE_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handleDateRange("m.birthdate", (DateRangeParam) param.getParam())
+					entry.getValue().forEach(param -> handleDateRange(criteriaContext,"m.birthdate", (DateRangeParam) param.getParam())
 					        .ifPresent(criteriaContext::addPredicate));
 					criteriaContext.finalizeQuery();
 					break;
@@ -68,26 +68,24 @@ public class FhirRelatedPersonDaoImpl extends BaseFhirDao<Relationship> implemen
 					handleAddresses(criteriaContext, entry);
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(entry.getValue()).ifPresent(criteriaContext::addPredicate);
+					handleCommonSearchParameters(criteriaContext,entry.getValue()).ifPresent(criteriaContext::addPredicate);
 					break;
 			}
 		});
 	}
 	
 	@Override
-	protected Collection<Order> paramToProps(@Nonnull SortState sortState) {
-		OpenmrsFhirCriteriaContext<Relationship> criteriaContext = createCriteriaContext();
+	protected <T> Collection<Order> paramToProps(OpenmrsFhirCriteriaContext<T> criteriaContext, @Nonnull SortState sortState) {
 		String param = sortState.getParameter();
 		
 		if (param == null) {
 			return null;
 		}
 		
-		CriteriaBuilder cb = sortState.getCriteriaBuilder();
-		if (param.startsWith("address") && lacksAlias(cb, "pad")) {
+		if (param.startsWith("address") && lacksAlias(criteriaContext, "pad")) {
 			criteriaContext.getRoot().join("m.addresses", javax.persistence.criteria.JoinType.LEFT).alias("pad");
 		} else if (param.equals(SP_NAME) || param.equals(SP_GIVEN) || param.equals(SP_FAMILY)) {
-			if (lacksAlias(cb, "pn")) {
+			if (lacksAlias(criteriaContext, "pn")) {
 				criteriaContext.getRoot().join("m.names", javax.persistence.criteria.JoinType.LEFT).alias("pn");
 			}
 			
@@ -148,11 +146,11 @@ public class FhirRelatedPersonDaoImpl extends BaseFhirDao<Relationship> implemen
 			
 		}
 		
-		return super.paramToProps(sortState);
+		return super.paramToProps(criteriaContext,sortState);
 	}
 	
 	@Override
-	protected String paramToProp(@Nonnull String param) {
+	protected <V> String paramToProp(OpenmrsFhirCriteriaContext<V> criteriaContext, @Nonnull String param) {
 		switch (param) {
 			case SP_BIRTHDATE:
 				return "m.birthdate";
@@ -165,7 +163,7 @@ public class FhirRelatedPersonDaoImpl extends BaseFhirDao<Relationship> implemen
 			case SP_ADDRESS_COUNTRY:
 				return "pad.country";
 			default:
-				return super.paramToProp(param);
+				return super.paramToProp(criteriaContext,param);
 		}
 	}
 	
@@ -191,7 +189,7 @@ public class FhirRelatedPersonDaoImpl extends BaseFhirDao<Relationship> implemen
 			}
 		}
 
-		handlePersonAddress("pad", city, state, postalCode, country).ifPresent(c -> {
+		handlePersonAddress(criteriaContext,"pad", city, state, postalCode, country).ifPresent(c -> {
 			criteriaContext.getRoot().join("m.addresses").alias("pad");
 			criteriaContext.addPredicate(c);
 			criteriaContext.finalizeQuery();

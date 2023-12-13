@@ -43,7 +43,7 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 					break;
 				case FhirConstants.LOCATION_REFERENCE_SEARCH_HANDLER:
 					entry.getValue().forEach(param -> {
-						handleLocationReference("l", (ReferenceAndListParam) param.getParam()).ifPresent(l -> {
+						handleLocationReference(criteriaContext,"l", (ReferenceAndListParam) param.getParam()).ifPresent(l -> {
 							criteriaContext.getRoot().join("location", JoinType.INNER).alias("l");
 							criteriaContext.addPredicate(l);
 							criteriaContext.finalizeQuery();
@@ -63,7 +63,7 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 					        .forEach(param -> handleEncounterType(criteriaContext, (TokenAndListParam) param.getParam()));
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(entry.getValue()).ifPresent(criteriaContext::addPredicate);
+					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(criteriaContext::addPredicate);
 					criteriaContext.finalizeQuery();
 					break;
 				case FhirConstants.HAS_SEARCH_HANDLER:
@@ -78,7 +78,7 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 	 * Handle _has parameters that are passed in to constrain the Encounter resource on properties of
 	 * dependent resources
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("UnstableApiUsage")
 	protected void handleHasAndListParam(OpenmrsFhirCriteriaContext<T> criteriaContext, HasAndListParam hasAndListParam) {
 		if (hasAndListParam != null) {
 			log.debug("Handling hasAndListParam");
@@ -126,7 +126,7 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 								if (paramValue != null) {
 									if (MedicationRequest.MedicationRequestStatus.ACTIVE.toString()
 									        .equalsIgnoreCase(paramValue)) {
-										criteriaContext.getCriteriaBuilder().and(generateActiveOrderQuery("orders"));
+										criteriaContext.getCriteriaBuilder().and(generateActiveOrderQuery(criteriaContext,"orders"));
 									}
 								}
 								handled = true;
@@ -134,7 +134,7 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 								if (paramValue != null) {
 									if (MedicationRequest.MedicationRequestStatus.CANCELLED.toString()
 									        .equalsIgnoreCase(paramValue)) {
-										criteriaContext.getCriteriaBuilder().and(generateNotCancelledOrderQuery("orders"));
+										criteriaContext.getCriteriaBuilder().and(generateNotCancelledOrderQuery(criteriaContext, "orders"));
 									}
 									if (MedicationRequest.MedicationRequestStatus.COMPLETED.toString()
 									        .equalsIgnoreCase(paramValue)) {

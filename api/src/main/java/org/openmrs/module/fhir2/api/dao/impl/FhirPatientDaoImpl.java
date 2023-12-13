@@ -31,6 +31,7 @@ import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
+import lombok.NonNull;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.Patient;
@@ -99,7 +100,6 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 	
 	@Override
 	protected void setupSearchParams(OpenmrsFhirCriteriaContext<Patient> criteriaContext, SearchParameterMap theParams) {
-		createCriteriaContext();
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.QUERY_SEARCH_HANDLER:
@@ -111,7 +111,7 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 					break;
 				case FhirConstants.GENDER_SEARCH_HANDLER:
 					entry.getValue().forEach(
-					    p -> handleGender(p.getPropertyName(), (TokenAndListParam) p.getParam()).ifPresent(criteriaContext::addPredicate));
+					    p -> handleGender(criteriaContext,p.getPropertyName(), (TokenAndListParam) p.getParam()).ifPresent(criteriaContext::addPredicate));
 					criteriaContext.finalizeQuery();
 					break;
 				case FhirConstants.IDENTIFIER_SEARCH_HANDLER:
@@ -119,12 +119,12 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 					    identifier -> handleIdentifier(criteriaContext, (TokenAndListParam) identifier.getParam()));
 					break;
 				case FhirConstants.DATE_RANGE_SEARCH_HANDLER:
-					entry.getValue().forEach(dateRangeParam -> handleDateRange(dateRangeParam.getPropertyName(),
+					entry.getValue().forEach(dateRangeParam -> handleDateRange(criteriaContext,dateRangeParam.getPropertyName(),
 					    (DateRangeParam) dateRangeParam.getParam()).ifPresent(criteriaContext::addPredicate));
 					criteriaContext.finalizeQuery();
 					break;
 				case FhirConstants.BOOLEAN_SEARCH_HANDLER:
-					entry.getValue().forEach(b -> handleBoolean(b.getPropertyName(), (TokenAndListParam) b.getParam())
+					entry.getValue().forEach(b -> handleBoolean(criteriaContext,b.getPropertyName(), (TokenAndListParam) b.getParam())
 					        .ifPresent(criteriaContext::addPredicate));
 					criteriaContext.finalizeQuery();
 					break;
@@ -132,7 +132,7 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 					handleAddresses(criteriaContext, entry);
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(entry.getValue()).ifPresent(criteriaContext::addPredicate);
+					handleCommonSearchParameters(criteriaContext,entry.getValue()).ifPresent(criteriaContext::addPredicate);
 					criteriaContext.finalizeQuery();
 					break;
 			}
@@ -157,15 +157,15 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 			
 			for (String token : StringUtils.split(q.getValueNotNull(), " \t,")) {
 				StringParam param = new StringParam(token).setContains(q.isContains()).setExact(q.isExact());
-				arrayList.add(propertyLike("pn.givenName", param)
+				arrayList.add(propertyLike(criteriaContext,"pn.givenName", param)
 				        .map(c -> criteriaContext.getCriteriaBuilder().and(c, criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("voided"), false))));
-				arrayList.add(propertyLike("pn.middleName", param)
+				arrayList.add(propertyLike(criteriaContext,"pn.middleName", param)
 				        .map(c -> criteriaContext.getCriteriaBuilder().and(c, criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("voided"), false))));
-				arrayList.add(propertyLike("pn.familyName", param)
+				arrayList.add(propertyLike(criteriaContext,"pn.familyName", param)
 				        .map(c -> criteriaContext.getCriteriaBuilder().and(c, criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("voided"), false))));
 			}
 			
-			arrayList.add(propertyLike("pi.identifier",
+			arrayList.add(propertyLike(criteriaContext,"pi.identifier",
 			    new StringParam(q.getValueNotNull()).setContains(q.isContains()).setExact(q.isExact()))
 			            .map(c -> criteriaContext.getCriteriaBuilder().and(c, criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("voided"), false))));
 			
@@ -204,12 +204,11 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 	}
 	
 	@Override
-	protected String paramToProp(@Nonnull String param) {
+	protected <V> String paramToProp(OpenmrsFhirCriteriaContext<V> criteriaContext, @NonNull String param) {
 		if (SP_DEATH_DATE.equalsIgnoreCase(param)) {
 			return "deathDate";
 		}
-		
-		return super.paramToProp(param);
+		return super.paramToProp(criteriaContext, param);
 	}
 	
 	@Override

@@ -18,6 +18,7 @@ import java.util.Optional;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
+import lombok.NonNull;
 import lombok.Setter;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
@@ -59,7 +60,7 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implemen
 					break;
 				case FhirConstants.CATEGORY_SEARCH_HANDLER:
 					entry.getValue().forEach(
-					    param -> handleAllergenCategory("allergen.allergenType", (TokenAndListParam) param.getParam())
+					    param -> handleAllergenCategory(criteriaContext,"allergen.allergenType", (TokenAndListParam) param.getParam())
 					            .ifPresent(criteriaContext::addPredicate));
 					criteriaContext.finalizeQuery();
 					break;
@@ -75,12 +76,12 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implemen
 					break;
 				case FhirConstants.BOOLEAN_SEARCH_HANDLER:
 					entry.getValue().forEach(
-					    param -> handleBoolean("voided", convertStringStatusToBoolean((TokenAndListParam) param.getParam()))
+					    param -> handleBoolean(criteriaContext,"voided", convertStringStatusToBoolean((TokenAndListParam) param.getParam()))
 					            .ifPresent(criteriaContext::addPredicate));
 					criteriaContext.finalizeQuery();
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(entry.getValue()).ifPresent(criteriaContext::addPredicate);
+					handleCommonSearchParameters(criteriaContext,entry.getValue()).ifPresent(criteriaContext::addPredicate);
 					criteriaContext.finalizeQuery();
 					break;
 			}
@@ -141,12 +142,11 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implemen
 		criteriaContext.finalizeQuery();
 	}
 	
-	private Optional<Predicate> handleAllergenCategory(String propertyName, TokenAndListParam categoryParam) {
+	private <T> Optional<Predicate> handleAllergenCategory(OpenmrsFhirCriteriaContext<T> criteriaContext, String propertyName, TokenAndListParam categoryParam) {
 		if (categoryParam == null) {
 			return Optional.empty();
 		}
 		
-		OpenmrsFhirCriteriaContext<Allergy> criteriaContext = createCriteriaContext();
 		return handleAndListParam(categoryParam, token -> {
 			try {
 				AllergyIntolerance.AllergyIntoleranceCategory category = AllergyIntolerance.AllergyIntoleranceCategory
@@ -169,11 +169,11 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implemen
 	}
 	
 	@Override
-	protected String paramToProp(@Nonnull String param) {
+	protected <V> String paramToProp(OpenmrsFhirCriteriaContext<V> criteriaContext, @NonNull String param) {
 		if (AllergyIntolerance.SP_SEVERITY.equals(param)) {
 			return "severity";
 		}
 		
-		return super.paramToProp(param);
+		return super.paramToProp(criteriaContext, param);
 	}
 }

@@ -74,20 +74,17 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 	}
 	
 	@Override
-	protected Collection<Order> paramToProps(@Nonnull SortState sortState) {
-		OpenmrsFhirCriteriaContext<T> criteriaContext = createCriteriaContext();
-		
+	protected <V> Collection<Order> paramToProps(OpenmrsFhirCriteriaContext<V> criteriaContext, @Nonnull SortState sortState) {
 		String param = sortState.getParameter();
 		
 		if (param == null) {
 			return null;
 		}
 		
-		CriteriaBuilder cb = sortState.getCriteriaBuilder();
-		if (param.startsWith("address") && lacksAlias(cb, "pad")) {
+		if (param.startsWith("address") && lacksAlias(criteriaContext, "pad")) {
 			criteriaContext.getRoot().join(getAssociationPath("addresses"), JoinType.LEFT).alias("pad");
 		} else if (param.equals(SP_NAME) || param.equals(SP_GIVEN) || param.equals(SP_FAMILY)) {
-			if (lacksAlias(cb, "pn")) {
+			if (lacksAlias(criteriaContext, "pn")) {
 				criteriaContext.getRoot().join(getAssociationPath("names"), JoinType.LEFT).alias("pn");
 			}
 			
@@ -137,12 +134,12 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 			switch (sortState.getSortOrder()) {
 				case ASC:
 					for (String property : properties) {
-						sortStateOrders.add(cb.asc(criteriaContext.getRoot().get(property)));
+						sortStateOrders.add(criteriaContext.getCriteriaBuilder().asc(criteriaContext.getRoot().get(property)));
 					}
 					break;
 				case DESC:
 					for (String property : properties) {
-						sortStateOrders.add(cb.desc(criteriaContext.getRoot().get(property)));
+						sortStateOrders.add(criteriaContext.getCriteriaBuilder().desc(criteriaContext.getRoot().get(property)));
 					}
 					break;
 			}
@@ -151,11 +148,11 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 			return sortStateOrders;
 			
 		}
-		return super.paramToProps(sortState);
+		return super.paramToProps(criteriaContext,sortState);
 	}
 	
 	@Override
-	protected String paramToProp(@Nonnull String param) {
+	protected <V> String paramToProp(OpenmrsFhirCriteriaContext<V> criteriaContext, @Nonnull String param) {
 		switch (param) {
 			case SP_BIRTHDATE:
 				return "birthdate";
@@ -194,7 +191,7 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 			}
 		}
 		
-		handlePersonAddress("pad", city, state, postalCode, country).ifPresent(c -> {
+		handlePersonAddress(criteriaContext,"pad", city, state, postalCode, country).ifPresent(c -> {
 			criteriaContext.getRoot().join(getAssociationPath("addresses")).alias("pad");
 			criteriaContext.addPredicate(c);
 			criteriaContext.finalizeQuery();
