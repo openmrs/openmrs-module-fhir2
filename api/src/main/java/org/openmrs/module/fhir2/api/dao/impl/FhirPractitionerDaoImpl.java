@@ -14,6 +14,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -36,8 +37,10 @@ public class FhirPractitionerDaoImpl extends BasePractitionerDao<Provider> imple
 	
 	@Override
 	protected void handleIdentifier(OpenmrsFhirCriteriaContext<Provider> criteriaContext, TokenAndListParam identifier) {
-		handleAndListParam(identifier, param -> Optional.of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("identifier"), param.getValue())))
-		        .ifPresent(criteriaContext::addPredicate);
+		handleAndListParam(identifier,
+		    param -> Optional.of(
+		        criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("identifier"), param.getValue())))
+		                .ifPresent(criteriaContext::addPredicate);
 		criteriaContext.finalizeQuery();
 	}
 	
@@ -48,11 +51,11 @@ public class FhirPractitionerDaoImpl extends BasePractitionerDao<Provider> imple
 		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot());
 		
 		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder()
-				.equal(criteriaContext.getRoot().join("provider").get("id"), provider.getId()));
+		        .equal(criteriaContext.getRoot().join("provider").get("id"), provider.getId()));
 		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder()
-				.equal(criteriaContext.getRoot().join("AttributeType").get("uuid"), providerAttributeTypeUuid));
-		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder()
-				.equal(criteriaContext.getRoot().get("voided"), false));
+		        .equal(criteriaContext.getRoot().join("AttributeType").get("uuid"), providerAttributeTypeUuid));
+		criteriaContext
+		        .addPredicate(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("voided"), false));
 		
 		return criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).getResultList();
 	}

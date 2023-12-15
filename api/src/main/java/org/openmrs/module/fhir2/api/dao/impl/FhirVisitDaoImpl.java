@@ -11,9 +11,9 @@ package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hl7.fhir.r4.model.Encounter.SP_DATE;
 
-import javax.annotation.Nonnull;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
+
 import java.util.Optional;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -33,22 +33,26 @@ public class FhirVisitDaoImpl extends BaseEncounterDao<Visit> implements FhirVis
 	
 	@Override
 	protected void handleDate(OpenmrsFhirCriteriaContext<Visit> criteriaContext, DateRangeParam dateRangeParam) {
-		handleDateRange("startDatetime", dateRangeParam).ifPresent(criteriaContext::addPredicate);
+		handleDateRange(criteriaContext, "startDatetime", dateRangeParam);
 		criteriaContext.finalizeQuery();
 	}
 	
 	@Override
-	protected void handleEncounterType(OpenmrsFhirCriteriaContext<Visit> criteriaContext, TokenAndListParam tokenAndListParam) {
-		handleAndListParam(tokenAndListParam, t -> Optional.of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("vt.uuid"), t.getValue())))
-		        .ifPresent(t -> {
-			        criteriaContext.getRoot().join("visitType");
-			        criteriaContext.addPredicate(t);
-			        criteriaContext.finalizeQuery();
-		        });
+	protected void handleEncounterType(OpenmrsFhirCriteriaContext<Visit> criteriaContext,
+	        TokenAndListParam tokenAndListParam) {
+		handleAndListParam(tokenAndListParam,
+		    t -> Optional
+		            .of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("vt.uuid"), t.getValue())))
+		                    .ifPresent(t -> {
+			                    criteriaContext.getRoot().join("visitType");
+			                    criteriaContext.addPredicate(t);
+			                    criteriaContext.finalizeQuery();
+		                    });
 	}
 	
 	@Override
-	protected void handleParticipant(OpenmrsFhirCriteriaContext<Visit> criteriaContext, ReferenceAndListParam referenceAndListParam) {
+	protected void handleParticipant(OpenmrsFhirCriteriaContext<Visit> criteriaContext,
+	        ReferenceAndListParam referenceAndListParam) {
 		Join<Visit, Encounter> encounterJoin = criteriaContext.getRoot().join("encounters", JoinType.INNER);
 		encounterJoin.join("encounterProviders", JoinType.INNER);
 		handleParticipantReference(criteriaContext, referenceAndListParam);

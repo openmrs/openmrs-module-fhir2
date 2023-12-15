@@ -19,7 +19,6 @@ import static org.hl7.fhir.r4.model.Person.SP_BIRTHDATE;
 import static org.hl7.fhir.r4.model.Person.SP_NAME;
 
 import javax.annotation.Nonnull;
-import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -46,7 +45,8 @@ import org.springframework.stereotype.Component;
 public class FhirRelatedPersonDaoImpl extends BaseFhirDao<Relationship> implements FhirRelatedPersonDao {
 	
 	@Override
-	protected void setupSearchParams(OpenmrsFhirCriteriaContext<Relationship> criteriaContext, SearchParameterMap theParams) {
+	protected void setupSearchParams(OpenmrsFhirCriteriaContext<Relationship> criteriaContext,
+	        SearchParameterMap theParams) {
 		criteriaContext.getRoot().join("personA", javax.persistence.criteria.JoinType.INNER).alias("m");
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
@@ -55,27 +55,30 @@ public class FhirRelatedPersonDaoImpl extends BaseFhirDao<Relationship> implemen
 					    param -> handleNames(criteriaContext, (StringAndListParam) param.getParam(), null, null, "m"));
 					break;
 				case FhirConstants.GENDER_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handleGender(criteriaContext,"m.gender", (TokenAndListParam) param.getParam())
-					        .ifPresent(criteriaContext::addPredicate));
+					entry.getValue()
+					        .forEach(param -> handleGender(criteriaContext, "m.gender", (TokenAndListParam) param.getParam())
+					                .ifPresent(criteriaContext::addPredicate));
 					criteriaContext.finalizeQuery();
 					break;
 				case FhirConstants.DATE_RANGE_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handleDateRange(criteriaContext,"m.birthdate", (DateRangeParam) param.getParam())
-					        .ifPresent(criteriaContext::addPredicate));
+					entry.getValue().forEach(
+					    param -> handleDateRange(criteriaContext, "m.birthdate", (DateRangeParam) param.getParam())
+					            .ifPresent(criteriaContext::addPredicate));
 					criteriaContext.finalizeQuery();
 					break;
 				case FhirConstants.ADDRESS_SEARCH_HANDLER:
 					handleAddresses(criteriaContext, entry);
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(criteriaContext,entry.getValue()).ifPresent(criteriaContext::addPredicate);
+					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(criteriaContext::addPredicate);
 					break;
 			}
 		});
 	}
 	
 	@Override
-	protected <T> Collection<Order> paramToProps(OpenmrsFhirCriteriaContext<T> criteriaContext, @Nonnull SortState sortState) {
+	protected <T> Collection<Order> paramToProps(OpenmrsFhirCriteriaContext<T> criteriaContext,
+	        @Nonnull SortState sortState) {
 		String param = sortState.getParameter();
 		
 		if (param == null) {
@@ -92,29 +95,46 @@ public class FhirRelatedPersonDaoImpl extends BaseFhirDao<Relationship> implemen
 			Root<PersonName> subRoot = criteriaContext.getCriteriaQuery().subquery(Integer.class).from(PersonName.class);
 			
 			Predicate predicate = criteriaContext.getCriteriaBuilder()
-			        .and(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("pn").get("voided"), false),
-					        criteriaContext.getCriteriaBuilder().or(
-							        criteriaContext.getCriteriaBuilder().and(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("pn").get("preferred"), true),
-									        criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("pn").get("personNameId"),
-			                        criteriaContext.getCriteriaQuery().subquery(Integer.class)
-			                                .select(criteriaContext.getCriteriaBuilder().min(criteriaContext.getRoot().get("pn1").get("personNameId")))
+			        .and(
+			            criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("pn").get("voided"), false),
+			            criteriaContext.getCriteriaBuilder().or(
+			                criteriaContext.getCriteriaBuilder().and(
+			                    criteriaContext.getCriteriaBuilder()
+			                            .equal(criteriaContext.getRoot().get("pn").get("preferred"), true),
+			                    criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("pn").get(
+			                        "personNameId"),
+			                        criteriaContext.getCriteriaQuery().subquery(Integer.class).select(
+			                            criteriaContext.getCriteriaBuilder().min(criteriaContext.getRoot().get("pn1")
+			                                    .get("personNameId")))
 			                                .where(criteriaContext.getCriteriaBuilder().and(
-					                                criteriaContext.getCriteriaBuilder().equal(subRoot.get("preferred"), true),
-					                                criteriaContext.getCriteriaBuilder().equal(subRoot.get("person_id"), criteriaContext.getRoot().get("person_id")))))),
-							        criteriaContext.getCriteriaBuilder().and(
-									        criteriaContext.getCriteriaBuilder().not(criteriaContext.getCriteriaBuilder().exists(
-			                        criteriaContext.getCriteriaQuery().subquery(Integer.class).select(criteriaContext.getRoot().get("pn2").get("personNameId")).where(
-					                        criteriaContext.getCriteriaBuilder().and(criteriaContext.getCriteriaBuilder().equal(subRoot.get("pn2").get("preferred"), true),
-							                        criteriaContext.getCriteriaBuilder().equal(subRoot.get("pn2").get("person").get("personId"),
-			                                    criteriaContext.getRoot().get("personId")))))),
-									        criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("pn").get("personNameId"),
+			                                    criteriaContext.getCriteriaBuilder().equal(subRoot.get("preferred"), true),
+			                                    criteriaContext.getCriteriaBuilder().equal(
+			                                        subRoot.get("person_id"),
+			                                        criteriaContext.getRoot().get("person_id")))))),
+			                criteriaContext.getCriteriaBuilder().and(
+			                    criteriaContext.getCriteriaBuilder()
+			                            .not(criteriaContext.getCriteriaBuilder()
+			                                    .exists(criteriaContext.getCriteriaQuery().subquery(Integer.class)
+			                                            .select(criteriaContext.getRoot().get("pn2").get("personNameId"))
+			                                            .where(criteriaContext.getCriteriaBuilder().and(
+			                                                criteriaContext.getCriteriaBuilder()
+			                                                        .equal(subRoot.get("pn2").get("preferred"), true),
+			                                                criteriaContext.getCriteriaBuilder().equal(
+			                                                    subRoot.get("pn2").get("person").get("personId"),
+			                                                    criteriaContext.getRoot().get("personId")))))),
+			                    criteriaContext.getCriteriaBuilder().equal(
+			                        criteriaContext.getRoot().get("pn").get("personNameId"),
 			                        criteriaContext.getCriteriaQuery().subquery(Integer.class)
-			                                .select(criteriaContext.getCriteriaBuilder().min(criteriaContext.getRoot().get("pn3").get("personNameId")))
+			                                .select(criteriaContext.getCriteriaBuilder()
+			                                        .min(criteriaContext.getRoot().get("pn3").get("personNameId")))
 			                                .where(criteriaContext.getCriteriaBuilder().and(
-					                                criteriaContext.getCriteriaBuilder().equal(subRoot.get("pn3").get("preferred"), false),
-					                                criteriaContext.getCriteriaBuilder().equal(subRoot.get("pn3").get("person").get("personId"),
+			                                    criteriaContext.getCriteriaBuilder()
+			                                            .equal(subRoot.get("pn3").get("preferred"), false),
+			                                    criteriaContext.getCriteriaBuilder().equal(
+			                                        subRoot.get("pn3").get("person").get("personId"),
 			                                        criteriaContext.getRoot().get("personId")))))),
-							        criteriaContext.getCriteriaBuilder().isNull(criteriaContext.getRoot().get("pn").get("personNameId"))));
+			                criteriaContext.getCriteriaBuilder()
+			                        .isNull(criteriaContext.getRoot().get("pn").get("personNameId"))));
 			criteriaContext.getCriteriaQuery().where(predicate);
 			
 			String[] properties = null;
@@ -134,19 +154,21 @@ public class FhirRelatedPersonDaoImpl extends BaseFhirDao<Relationship> implemen
 			switch (sortState.getSortOrder()) {
 				case ASC:
 					for (String property : properties) {
-						criteriaContext.addOrder(criteriaContext.getCriteriaBuilder().asc(criteriaContext.getRoot().get(property)));
+						criteriaContext
+						        .addOrder(criteriaContext.getCriteriaBuilder().asc(criteriaContext.getRoot().get(property)));
 					}
 					break;
 				case DESC:
 					for (String property : properties) {
-						criteriaContext.addOrder(criteriaContext.getCriteriaBuilder().desc(criteriaContext.getRoot().get(property)));
+						criteriaContext.addOrder(
+						    criteriaContext.getCriteriaBuilder().desc(criteriaContext.getRoot().get(property)));
 					}
 					break;
 			}
 			
 		}
 		
-		return super.paramToProps(criteriaContext,sortState);
+		return super.paramToProps(criteriaContext, sortState);
 	}
 	
 	@Override
@@ -163,11 +185,12 @@ public class FhirRelatedPersonDaoImpl extends BaseFhirDao<Relationship> implemen
 			case SP_ADDRESS_COUNTRY:
 				return "pad.country";
 			default:
-				return super.paramToProp(criteriaContext,param);
+				return super.paramToProp(criteriaContext, param);
 		}
 	}
 	
-	private void handleAddresses(OpenmrsFhirCriteriaContext<Relationship> criteriaContext, Map.Entry<String, List<PropParam<?>>> entry) {
+	private void handleAddresses(OpenmrsFhirCriteriaContext<Relationship> criteriaContext,
+	        Map.Entry<String, List<PropParam<?>>> entry) {
 		StringAndListParam city = null;
 		StringAndListParam country = null;
 		StringAndListParam postalCode = null;
@@ -188,8 +211,8 @@ public class FhirRelatedPersonDaoImpl extends BaseFhirDao<Relationship> implemen
 					break;
 			}
 		}
-
-		handlePersonAddress(criteriaContext,"pad", city, state, postalCode, country).ifPresent(c -> {
+		
+		handlePersonAddress(criteriaContext, "pad", city, state, postalCode, country).ifPresent(c -> {
 			criteriaContext.getRoot().join("m.addresses").alias("pad");
 			criteriaContext.addPredicate(c);
 			criteriaContext.finalizeQuery();

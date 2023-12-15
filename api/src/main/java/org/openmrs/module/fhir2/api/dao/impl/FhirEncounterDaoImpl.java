@@ -15,6 +15,7 @@ import static org.openmrs.module.fhir2.api.util.LastnOperationUtils.getTopNRanke
 import javax.annotation.Nonnull;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -54,9 +55,11 @@ public class FhirEncounterDaoImpl extends BaseEncounterDao<Encounter> implements
 			setupSearchParams(criteriaContext, theParams);
 			
 			OpenmrsFhirCriteriaContext<Object[]> objCriteriaContext = createCriteriaContext(Object[].class);
-			objCriteriaContext.getCriteriaQuery().multiselect(objCriteriaContext.getRoot().get("uuid"), objCriteriaContext.getRoot().get("encounterDatetime"));
+			objCriteriaContext.getCriteriaQuery().multiselect(objCriteriaContext.getRoot().get("uuid"),
+			    objCriteriaContext.getRoot().get("encounterDatetime"));
 			
-			List<LastnResult<String>> results = objCriteriaContext.getEntityManager().createQuery(objCriteriaContext.getCriteriaQuery()).getResultList().stream()
+			List<LastnResult<String>> results = objCriteriaContext.getEntityManager()
+			        .createQuery(objCriteriaContext.getCriteriaQuery()).getResultList().stream()
 			        .map(array -> new LastnResult<String>(array)).collect(Collectors.toList());
 			
 			return getTopNRankedIds(results, getMaxParameter(theParams));
@@ -68,7 +71,8 @@ public class FhirEncounterDaoImpl extends BaseEncounterDao<Encounter> implements
 		
 		OpenmrsFhirCriteriaContext<String> context = createCriteriaContext(String.class);
 		context.getCriteriaQuery().select(context.getRoot().get("uuid"));
-		return context.getEntityManager().createQuery(context.getCriteriaQuery()).getResultList().stream().distinct().collect(Collectors.toList());
+		return context.getEntityManager().createQuery(context.getCriteriaQuery()).getResultList().stream().distinct()
+		        .collect(Collectors.toList());
 	}
 	
 	private int getMaxParameter(SearchParameterMap theParams) {
@@ -78,12 +82,13 @@ public class FhirEncounterDaoImpl extends BaseEncounterDao<Encounter> implements
 	
 	@Override
 	protected void handleDate(OpenmrsFhirCriteriaContext<Encounter> criteriaContext, DateRangeParam dateRangeParam) {
-		handleDateRange(criteriaContext,"encounterDatetime", dateRangeParam).ifPresent(criteriaContext::addPredicate);
+		handleDateRange(criteriaContext, "encounterDatetime", dateRangeParam).ifPresent(criteriaContext::addPredicate);
 		criteriaContext.finalizeQuery();
 	}
 	
 	@Override
-	protected void handleEncounterType(OpenmrsFhirCriteriaContext<Encounter> criteriaContext, TokenAndListParam tokenAndListParam) {
+	protected void handleEncounterType(OpenmrsFhirCriteriaContext<Encounter> criteriaContext,
+	        TokenAndListParam tokenAndListParam) {
 		handleAndListParam(tokenAndListParam, t -> {
 			Join<Encounter, EncounterType> et = criteriaContext.getRoot().join("encounterType");
 			return Optional.of(criteriaContext.getCriteriaBuilder().equal(et.get("uuid"), t.getValue()));
@@ -92,7 +97,8 @@ public class FhirEncounterDaoImpl extends BaseEncounterDao<Encounter> implements
 	}
 	
 	@Override
-	protected void handleParticipant(OpenmrsFhirCriteriaContext<Encounter> criteriaContext, ReferenceAndListParam referenceAndListParam) {
+	protected void handleParticipant(OpenmrsFhirCriteriaContext<Encounter> criteriaContext,
+	        ReferenceAndListParam referenceAndListParam) {
 		criteriaContext.getRoot().join("encounterProviders");
 		handleParticipantReference(criteriaContext, referenceAndListParam);
 	}

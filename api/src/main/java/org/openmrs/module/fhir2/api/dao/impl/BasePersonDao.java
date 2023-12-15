@@ -19,12 +19,8 @@ import static org.hl7.fhir.r4.model.Person.SP_BIRTHDATE;
 import static org.hl7.fhir.r4.model.Person.SP_NAME;
 
 import javax.annotation.Nonnull;
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Order;
-import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import java.util.ArrayList;
@@ -74,7 +70,8 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 	}
 	
 	@Override
-	protected <V> Collection<Order> paramToProps(OpenmrsFhirCriteriaContext<V> criteriaContext, @Nonnull SortState sortState) {
+	protected <V> Collection<Order> paramToProps(OpenmrsFhirCriteriaContext<V> criteriaContext,
+	        @Nonnull SortState sortState) {
 		String param = sortState.getParameter();
 		
 		if (param == null) {
@@ -90,30 +87,46 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 			
 			Root<PersonName> subRoot = criteriaContext.getCriteriaQuery().subquery(Integer.class).from(PersonName.class);
 			
-			criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder()
-					.and(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("pn").get("voided"), false),
-							criteriaContext.getCriteriaBuilder().or(
-									criteriaContext.getCriteriaBuilder().and(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("pn").get("preferred"), true),
-											criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("pn").get("personNameId"),
-													criteriaContext.getCriteriaQuery().subquery(Integer.class)
-															.select(criteriaContext.getCriteriaBuilder().min(criteriaContext.getRoot().get("pn1").get("personNameId")))
-															.where(criteriaContext.getCriteriaBuilder().and(
-																	criteriaContext.getCriteriaBuilder().equal(subRoot.get("preferred"), true),
-																	criteriaContext.getCriteriaBuilder().equal(subRoot.get("person_id"), criteriaContext.getRoot().get("person_id")))))),
-									criteriaContext.getCriteriaBuilder().and(
-											criteriaContext.getCriteriaBuilder().not(criteriaContext.getCriteriaBuilder().exists(
-													criteriaContext.getCriteriaQuery().subquery(Integer.class).select(criteriaContext.getRoot().get("pn2").get("personNameId")).where(
-															criteriaContext.getCriteriaBuilder().and(criteriaContext.getCriteriaBuilder().equal(subRoot.get("pn2").get("preferred"), true),
-																	criteriaContext.getCriteriaBuilder().equal(subRoot.get("pn2").get("person").get("personId"),
-																			criteriaContext.getRoot().get("personId")))))),
-											criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("pn").get("personNameId"),
-													criteriaContext.getCriteriaQuery().subquery(Integer.class)
-															.select(criteriaContext.getCriteriaBuilder().min(criteriaContext.getRoot().get("pn3").get("personNameId")))
-															.where(criteriaContext.getCriteriaBuilder().and(
-																	criteriaContext.getCriteriaBuilder().equal(subRoot.get("pn3").get("preferred"), false),
-																	criteriaContext.getCriteriaBuilder().equal(subRoot.get("pn3").get("person").get("personId"),
-																			criteriaContext.getRoot().get("personId")))))),
-									criteriaContext.getCriteriaBuilder().isNull(criteriaContext.getRoot().get("pn").get("personNameId")))));
+			criteriaContext.addPredicate(
+			    criteriaContext.getCriteriaBuilder().and(
+			        criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("pn").get("voided"), false),
+			        criteriaContext.getCriteriaBuilder().or(
+			            criteriaContext.getCriteriaBuilder().and(criteriaContext.getCriteriaBuilder()
+			                    .equal(criteriaContext.getRoot().get("pn").get("preferred"), true),
+			                criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("pn").get(
+			                    "personNameId"),
+			                    criteriaContext.getCriteriaQuery().subquery(Integer.class)
+			                            .select(criteriaContext.getCriteriaBuilder().min(criteriaContext.getRoot().get("pn1")
+			                                    .get("personNameId")))
+			                            .where(criteriaContext.getCriteriaBuilder().and(
+			                                criteriaContext.getCriteriaBuilder().equal(subRoot.get("preferred"), true),
+			                                criteriaContext
+			                                        .getCriteriaBuilder().equal(subRoot.get("person_id"),
+			                                            criteriaContext.getRoot().get("person_id")))))),
+			            criteriaContext.getCriteriaBuilder().and(
+			                criteriaContext.getCriteriaBuilder()
+			                        .not(criteriaContext.getCriteriaBuilder()
+			                                .exists(criteriaContext.getCriteriaQuery().subquery(Integer.class)
+			                                        .select(criteriaContext.getRoot().get("pn2").get("personNameId"))
+			                                        .where(criteriaContext.getCriteriaBuilder().and(
+			                                            criteriaContext.getCriteriaBuilder()
+			                                                    .equal(subRoot.get("pn2").get("preferred"), true),
+			                                            criteriaContext.getCriteriaBuilder().equal(
+			                                                subRoot.get("pn2").get("person").get("personId"),
+			                                                criteriaContext.getRoot().get("personId")))))),
+			                criteriaContext.getCriteriaBuilder().equal(
+			                    criteriaContext.getRoot().get("pn").get("personNameId"),
+			                    criteriaContext.getCriteriaQuery().subquery(Integer.class)
+			                            .select(criteriaContext.getCriteriaBuilder()
+			                                    .min(criteriaContext.getRoot().get("pn3").get("personNameId")))
+			                            .where(criteriaContext.getCriteriaBuilder().and(
+			                                criteriaContext.getCriteriaBuilder().equal(subRoot.get("pn3").get("preferred"),
+			                                    false),
+			                                criteriaContext.getCriteriaBuilder().equal(
+			                                    subRoot.get("pn3").get("person").get("personId"),
+			                                    criteriaContext.getRoot().get("personId")))))),
+			            criteriaContext.getCriteriaBuilder()
+			                    .isNull(criteriaContext.getRoot().get("pn").get("personNameId")))));
 			criteriaContext.finalizeQuery();
 			
 			String[] properties = null;
@@ -134,12 +147,14 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 			switch (sortState.getSortOrder()) {
 				case ASC:
 					for (String property : properties) {
-						sortStateOrders.add(criteriaContext.getCriteriaBuilder().asc(criteriaContext.getRoot().get(property)));
+						sortStateOrders
+						        .add(criteriaContext.getCriteriaBuilder().asc(criteriaContext.getRoot().get(property)));
 					}
 					break;
 				case DESC:
 					for (String property : properties) {
-						sortStateOrders.add(criteriaContext.getCriteriaBuilder().desc(criteriaContext.getRoot().get(property)));
+						sortStateOrders
+						        .add(criteriaContext.getCriteriaBuilder().desc(criteriaContext.getRoot().get(property)));
 					}
 					break;
 			}
@@ -148,7 +163,7 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 			return sortStateOrders;
 			
 		}
-		return super.paramToProps(criteriaContext,sortState);
+		return super.paramToProps(criteriaContext, sortState);
 	}
 	
 	@Override
@@ -169,7 +184,8 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 		}
 	}
 	
-	protected void handleAddresses(OpenmrsFhirCriteriaContext<T> criteriaContext, Map.Entry<String, List<PropParam<?>>> entry) {
+	protected void handleAddresses(OpenmrsFhirCriteriaContext<T> criteriaContext,
+	        Map.Entry<String, List<PropParam<?>>> entry) {
 		StringAndListParam city = null;
 		StringAndListParam country = null;
 		StringAndListParam postalCode = null;
@@ -191,7 +207,7 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 			}
 		}
 		
-		handlePersonAddress(criteriaContext,"pad", city, state, postalCode, country).ifPresent(c -> {
+		handlePersonAddress(criteriaContext, "pad", city, state, postalCode, country).ifPresent(c -> {
 			criteriaContext.getRoot().join(getAssociationPath("addresses")).alias("pad");
 			criteriaContext.addPredicate(c);
 			criteriaContext.finalizeQuery();

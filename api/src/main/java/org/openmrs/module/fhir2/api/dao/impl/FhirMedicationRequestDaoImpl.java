@@ -61,8 +61,9 @@ public class FhirMedicationRequestDaoImpl extends BaseFhirDao<DrugOrder> impleme
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.FULFILLER_STATUS_SEARCH_HANDLER:
-					entry.getValue().forEach(
-					    param -> handleFulfillerStatus(criteriaContext,(TokenAndListParam) param.getParam()).ifPresent(criteriaContext::addPredicate));
+					entry.getValue()
+					        .forEach(param -> handleFulfillerStatus(criteriaContext, (TokenAndListParam) param.getParam())
+					                .ifPresent(criteriaContext::addPredicate));
 					criteriaContext.finalizeQuery();
 					break;
 				case FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER:
@@ -83,18 +84,19 @@ public class FhirMedicationRequestDaoImpl extends BaseFhirDao<DrugOrder> impleme
 					break;
 				case FhirConstants.MEDICATION_REFERENCE_SEARCH_HANDLER:
 					entry.getValue().forEach(
-					    d -> handleMedicationReference(criteriaContext,"d", (ReferenceAndListParam) d.getParam()).ifPresent(c -> {
-						    criteriaContext.getRoot().join("drug").alias("d");
-						    criteriaContext.addPredicate(c);
-						    criteriaContext.finalizeQuery();
-					    }));
+					    d -> handleMedicationReference(criteriaContext, "d", (ReferenceAndListParam) d.getParam())
+					            .ifPresent(c -> {
+						            criteriaContext.getRoot().join("drug").alias("d");
+						            criteriaContext.addPredicate(c);
+						            criteriaContext.finalizeQuery();
+					            }));
 					break;
 				case FhirConstants.STATUS_SEARCH_HANDLER:
-					entry.getValue()
-					        .forEach(param -> handleStatus(criteriaContext,(TokenAndListParam) param.getParam()).ifPresent(criteriaContext::addPredicate));
+					entry.getValue().forEach(param -> handleStatus(criteriaContext, (TokenAndListParam) param.getParam())
+					        .ifPresent(criteriaContext::addPredicate));
 					criteriaContext.finalizeQuery();
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(criteriaContext,entry.getValue()).ifPresent(criteriaContext::addPredicate);
+					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(criteriaContext::addPredicate);
 					criteriaContext.finalizeQuery();
 					break;
 			}
@@ -103,7 +105,8 @@ public class FhirMedicationRequestDaoImpl extends BaseFhirDao<DrugOrder> impleme
 		excludeDiscontinueOrders(criteriaContext);
 	}
 	
-	private <T> Optional<Predicate> handleStatus(OpenmrsFhirCriteriaContext<T> criteriaContext,TokenAndListParam tokenAndListParam) {
+	private <T> Optional<Predicate> handleStatus(OpenmrsFhirCriteriaContext<T> criteriaContext,
+	        TokenAndListParam tokenAndListParam) {
 		return handleAndListParam(tokenAndListParam, token -> {
 			if (token.getValue() != null) {
 				try {
@@ -121,26 +124,30 @@ public class FhirMedicationRequestDaoImpl extends BaseFhirDao<DrugOrder> impleme
 		});
 	}
 	
-	private <T> Optional<Predicate> handleFulfillerStatus(OpenmrsFhirCriteriaContext<T> criteriaContext, TokenAndListParam tokenAndListParam) {
+	private <T> Optional<Predicate> handleFulfillerStatus(OpenmrsFhirCriteriaContext<T> criteriaContext,
+	        TokenAndListParam tokenAndListParam) {
 		return handleAndListParam(tokenAndListParam, token -> {
 			if (token.getValue() != null) {
-				return Optional.of(
-				    generateFulfillerStatusRestriction(criteriaContext,Order.FulfillerStatus.valueOf(token.getValue().toUpperCase())));
+				return Optional.of(generateFulfillerStatusRestriction(criteriaContext,
+				    Order.FulfillerStatus.valueOf(token.getValue().toUpperCase())));
 			}
 			return Optional.empty();
 		});
 	}
 	
-	protected <T> Predicate generateFulfillerStatusRestriction(OpenmrsFhirCriteriaContext<T> criteriaContext, Order.FulfillerStatus fulfillerStatus) {
-		return generateFulfillerStatusRestriction(criteriaContext,"", fulfillerStatus);
+	protected <T> Predicate generateFulfillerStatusRestriction(OpenmrsFhirCriteriaContext<T> criteriaContext,
+	        Order.FulfillerStatus fulfillerStatus) {
+		return generateFulfillerStatusRestriction(criteriaContext, "", fulfillerStatus);
 	}
 	
-	protected <T> Predicate generateFulfillerStatusRestriction(OpenmrsFhirCriteriaContext<T> criteriaContext, String path, Order.FulfillerStatus fulfillerStatus) {
+	protected <T> Predicate generateFulfillerStatusRestriction(OpenmrsFhirCriteriaContext<T> criteriaContext, String path,
+	        Order.FulfillerStatus fulfillerStatus) {
 		if (StringUtils.isNotBlank(path)) {
 			path = path + ".";
 		}
 		
-		return criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get(path + "fulfillerStatus"), fulfillerStatus);
+		return criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get(path + "fulfillerStatus"),
+		    fulfillerStatus);
 	}
 	
 	private void handleCodedConcept(OpenmrsFhirCriteriaContext<DrugOrder> criteriaContext, TokenAndListParam code) {
@@ -156,6 +163,7 @@ public class FhirMedicationRequestDaoImpl extends BaseFhirDao<DrugOrder> impleme
 	
 	private void excludeDiscontinueOrders(OpenmrsFhirCriteriaContext<DrugOrder> criteriaContext) {
 		// exclude "discontinue" orders, see: https://issues.openmrs.org/browse/FM2-532
-		criteriaContext.getCriteriaBuilder().and(criteriaContext.getCriteriaBuilder().notEqual(criteriaContext.getRoot().get("action"), Order.Action.DISCONTINUE));
+		criteriaContext.getCriteriaBuilder().and(criteriaContext.getCriteriaBuilder()
+		        .notEqual(criteriaContext.getRoot().get("action"), Order.Action.DISCONTINUE));
 	}
 }

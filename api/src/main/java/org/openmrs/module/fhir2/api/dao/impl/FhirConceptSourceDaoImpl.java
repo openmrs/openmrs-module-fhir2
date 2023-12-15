@@ -57,11 +57,12 @@ public class FhirConceptSourceDaoImpl implements FhirConceptSourceDao {
 		OpenmrsFhirCriteriaContext<FhirConceptSource> criteriaContext = openmrsFhirCriteriaContext();
 		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot());
 		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("url"), url));
-		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("retired"), false));
-	
-		return criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).setMaxResults(1).getResultList().stream().findFirst();
+		criteriaContext
+		        .addPredicate(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("retired"), false));
+		
+		return criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).setMaxResults(1)
+		        .getResultList().stream().findFirst();
 	}
-
 	
 	@Override
 	public Optional<FhirConceptSource> getFhirConceptSourceByConceptSourceName(@Nonnull String sourceName) {
@@ -73,9 +74,11 @@ public class FhirConceptSourceDaoImpl implements FhirConceptSourceDao {
 		
 		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().equal(conceptSource.get("name"), sourceName));
 		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().equal(conceptSource.get("voided"), false));
-		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("voided"), false));
+		criteriaContext
+		        .addPredicate(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("voided"), false));
 		
-		return Optional.ofNullable(criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).getSingleResult());
+		return Optional.ofNullable(
+		    criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).getSingleResult());
 	}
 	
 	@Override
@@ -88,7 +91,7 @@ public class FhirConceptSourceDaoImpl implements FhirConceptSourceDao {
 		List<Predicate> predicates = new ArrayList<>();
 		predicates.add(cb.equal(root.get("conceptSource"), conceptSource));
 		
-		cq.distinct(true).where(predicates.toArray(new Predicate[]{}));
+		cq.distinct(true).where(predicates.toArray(new Predicate[] {}));
 		TypedQuery<FhirConceptSource> query = em.createQuery(cq);
 		query.setMaxResults(1);
 		
@@ -111,7 +114,7 @@ public class FhirConceptSourceDaoImpl implements FhirConceptSourceDao {
 			predicates.add(criteriaBuilder.equal(sourceRoot.get("hl7Code"), hl7Code));
 		}
 		
-		criteriaQuery.orderBy(criteriaBuilder.asc(sourceRoot.get("retired"))).where(predicates.toArray(new Predicate[]{}));
+		criteriaQuery.orderBy(criteriaBuilder.asc(sourceRoot.get("retired"))).where(predicates.toArray(new Predicate[] {}));
 		
 		TypedQuery<ConceptSource> fhirConceptSourceTypedQuery = entityManager.createQuery(criteriaQuery);
 		List<ConceptSource> matchingSources = fhirConceptSourceTypedQuery.getResultList();
@@ -134,7 +137,7 @@ public class FhirConceptSourceDaoImpl implements FhirConceptSourceDao {
 		CriteriaQuery<FhirConceptSource> cq = cb.createQuery(FhirConceptSource.class);
 		Root<FhirConceptSource> root = cq.from(FhirConceptSource.class);
 		
-		return new OpenmrsFhirCriteriaContext<>(em,cb,cq,root);
+		return new OpenmrsFhirCriteriaContext<>(em, cb, cq, root);
 		
 	}
 }

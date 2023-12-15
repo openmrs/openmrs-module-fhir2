@@ -13,7 +13,6 @@ import static org.hl7.fhir.r4.model.Patient.SP_DEATH_DATE;
 
 import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -36,7 +35,6 @@ import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifierType;
-import org.openmrs.Person;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirPatientDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
@@ -111,7 +109,8 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 					break;
 				case FhirConstants.GENDER_SEARCH_HANDLER:
 					entry.getValue().forEach(
-					    p -> handleGender(criteriaContext,p.getPropertyName(), (TokenAndListParam) p.getParam()).ifPresent(criteriaContext::addPredicate));
+					    p -> handleGender(criteriaContext, p.getPropertyName(), (TokenAndListParam) p.getParam())
+					            .ifPresent(criteriaContext::addPredicate));
 					criteriaContext.finalizeQuery();
 					break;
 				case FhirConstants.IDENTIFIER_SEARCH_HANDLER:
@@ -119,20 +118,22 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 					    identifier -> handleIdentifier(criteriaContext, (TokenAndListParam) identifier.getParam()));
 					break;
 				case FhirConstants.DATE_RANGE_SEARCH_HANDLER:
-					entry.getValue().forEach(dateRangeParam -> handleDateRange(criteriaContext,dateRangeParam.getPropertyName(),
-					    (DateRangeParam) dateRangeParam.getParam()).ifPresent(criteriaContext::addPredicate));
+					entry.getValue()
+					        .forEach(dateRangeParam -> handleDateRange(criteriaContext, dateRangeParam.getPropertyName(),
+					            (DateRangeParam) dateRangeParam.getParam()).ifPresent(criteriaContext::addPredicate));
 					criteriaContext.finalizeQuery();
 					break;
 				case FhirConstants.BOOLEAN_SEARCH_HANDLER:
-					entry.getValue().forEach(b -> handleBoolean(criteriaContext,b.getPropertyName(), (TokenAndListParam) b.getParam())
-					        .ifPresent(criteriaContext::addPredicate));
+					entry.getValue().forEach(
+					    b -> handleBoolean(criteriaContext, b.getPropertyName(), (TokenAndListParam) b.getParam())
+					            .ifPresent(criteriaContext::addPredicate));
 					criteriaContext.finalizeQuery();
 					break;
 				case FhirConstants.ADDRESS_SEARCH_HANDLER:
 					handleAddresses(criteriaContext, entry);
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(criteriaContext,entry.getValue()).ifPresent(criteriaContext::addPredicate);
+					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(criteriaContext::addPredicate);
 					criteriaContext.finalizeQuery();
 					break;
 			}
@@ -157,17 +158,21 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 			
 			for (String token : StringUtils.split(q.getValueNotNull(), " \t,")) {
 				StringParam param = new StringParam(token).setContains(q.isContains()).setExact(q.isExact());
-				arrayList.add(propertyLike(criteriaContext,"pn.givenName", param)
-				        .map(c -> criteriaContext.getCriteriaBuilder().and(c, criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("voided"), false))));
-				arrayList.add(propertyLike(criteriaContext,"pn.middleName", param)
-				        .map(c -> criteriaContext.getCriteriaBuilder().and(c, criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("voided"), false))));
-				arrayList.add(propertyLike(criteriaContext,"pn.familyName", param)
-				        .map(c -> criteriaContext.getCriteriaBuilder().and(c, criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("voided"), false))));
+				arrayList.add(
+				    propertyLike(criteriaContext, "pn.givenName", param).map(c -> criteriaContext.getCriteriaBuilder().and(c,
+				        criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("voided"), false))));
+				arrayList.add(propertyLike(criteriaContext, "pn.middleName", param)
+				        .map(c -> criteriaContext.getCriteriaBuilder().and(c,
+				            criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("voided"), false))));
+				arrayList.add(propertyLike(criteriaContext, "pn.familyName", param)
+				        .map(c -> criteriaContext.getCriteriaBuilder().and(c,
+				            criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("voided"), false))));
 			}
 			
-			arrayList.add(propertyLike(criteriaContext,"pi.identifier",
+			arrayList.add(propertyLike(criteriaContext, "pi.identifier",
 			    new StringParam(q.getValueNotNull()).setContains(q.isContains()).setExact(q.isExact()))
-			            .map(c -> criteriaContext.getCriteriaBuilder().and(c, criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("voided"), false))));
+			            .map(c -> criteriaContext.getCriteriaBuilder().and(c,
+			                criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("voided"), false))));
 			
 			return Optional.of(criteriaContext.getCriteriaBuilder().or(toCriteriaArray(arrayList)));
 		}).ifPresent(criteriaContext::addPredicate);
@@ -181,18 +186,22 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 		
 		criteriaContext.getRoot().join("identifiers", javax.persistence.criteria.JoinType.INNER).alias("pi");
 		criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("pi.voided"), false);
-	
+		
 		handleAndListParamBySystem(identifier, (system, tokens) -> {
 			if (system.isEmpty()) {
-				return Optional.of(criteriaContext.getCriteriaBuilder().in(criteriaContext.getRoot().get("pi.identifier")).value(tokensToList(tokens)));
+				return Optional.of(criteriaContext.getCriteriaBuilder().in(criteriaContext.getRoot().get("pi.identifier"))
+				        .value(tokensToList(tokens)));
 			} else {
 				if (lacksAlias(criteriaContext, "pit")) {
-					criteriaContext.getRoot().join("pi.identifierType", javax.persistence.criteria.JoinType.INNER).alias("pit");
+					criteriaContext.getRoot().join("pi.identifierType", javax.persistence.criteria.JoinType.INNER)
+					        .alias("pit");
 					criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("pit.retired"), false);
 				}
 				
-				return Optional.of(criteriaContext.getCriteriaBuilder().and(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("pit.name"), system),
-						criteriaContext.getCriteriaBuilder().in(criteriaContext.getRoot().get("pi.identifier")).value(tokensToList(tokens))));
+				return Optional.of(criteriaContext.getCriteriaBuilder().and(
+				    criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("pit.name"), system),
+				    criteriaContext.getCriteriaBuilder().in(criteriaContext.getRoot().get("pi.identifier"))
+				            .value(tokensToList(tokens))));
 			}
 		}).ifPresent(criteriaContext::addPredicate);
 		criteriaContext.finalizeQuery();

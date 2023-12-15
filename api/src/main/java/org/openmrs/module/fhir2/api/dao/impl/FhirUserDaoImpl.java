@@ -25,17 +25,21 @@ public class FhirUserDaoImpl extends BasePractitionerDao<User> implements FhirUs
 	@Override
 	public User getUserByUserName(String username) {
 		OpenmrsFhirCriteriaContext<User> criteriaContext = createCriteriaContext(User.class);
-		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot()).where(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("username"), username));
-
-		return criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).getResultList().stream().findFirst().orElse(null);
+		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot())
+		        .where(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("username"), username));
+		
+		return criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).getResultList().stream()
+		        .findFirst().orElse(null);
 	}
 	
 	@Override
 	protected void handleIdentifier(OpenmrsFhirCriteriaContext<User> criteriaContext, TokenAndListParam identifier) {
-		handleAndListParam(identifier, param -> Optional.of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("username"), param.getValue())))
-		        .ifPresent(t -> {
-			        criteriaContext.addPredicate(t);
-			        criteriaContext.finalizeQuery();
-		        });
+		handleAndListParam(identifier,
+		    param -> Optional.of(
+		        criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("username"), param.getValue())))
+		                .ifPresent(t -> {
+			                criteriaContext.addPredicate(t);
+			                criteriaContext.finalizeQuery();
+		                });
 	}
 }
