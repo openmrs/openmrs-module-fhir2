@@ -33,6 +33,7 @@ import org.springframework.stereotype.Component;
 @Getter(AccessLevel.PACKAGE)
 @Setter(AccessLevel.PACKAGE)
 public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDao {
+	
 	@Override
 	protected void setupSearchParams(OpenmrsFhirCriteriaContext<FhirTask> criteriaContext, SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
@@ -46,12 +47,12 @@ public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDa
 					    (ReferenceAndListParam) param.getParam(), "ownerReference", "o"));
 					break;
 				case FhirConstants.STATUS_SEARCH_HANDLER:
-					entry.getValue().forEach(
-					    param -> handleStatus((TokenAndListParam) param.getParam()).ifPresent(criteriaContext::addPredicate));
+					entry.getValue().forEach(param -> handleStatus((TokenAndListParam) param.getParam())
+					        .ifPresent(criteriaContext::addPredicate));
 					criteriaContext.finalizeQuery();
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(criteriaContext,entry.getValue()).ifPresent(criteriaContext::addPredicate);
+					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(criteriaContext::addPredicate);
 					criteriaContext.finalizeQuery();
 					break;
 			}
@@ -92,8 +93,8 @@ public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDa
 		});
 	}
 	
-	private void handleReference(OpenmrsFhirCriteriaContext<FhirTask> criteriaContext, ReferenceAndListParam reference, String property,
-	        String alias) {
+	private void handleReference(OpenmrsFhirCriteriaContext<FhirTask> criteriaContext, ReferenceAndListParam reference,
+	        String property, String alias) {
 		handleAndListParam(reference, param -> {
 			if (validReferenceParam(param)) {
 				if (lacksAlias(criteriaContext, alias)) {
@@ -101,10 +102,10 @@ public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDa
 				}
 				
 				List<Optional<? extends Predicate>> predicateList = new ArrayList<>();
-				predicateList.add(
-				    Optional.of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get(String.format("%s.reference", alias)), param.getIdPart())));
-				predicateList.add(
-				    Optional.of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get(String.format("%s.type", alias)), param.getResourceType())));
+				predicateList.add(Optional.of(criteriaContext.getCriteriaBuilder()
+				        .equal(criteriaContext.getRoot().get(String.format("%s.reference", alias)), param.getIdPart())));
+				predicateList.add(Optional.of(criteriaContext.getCriteriaBuilder()
+				        .equal(criteriaContext.getRoot().get(String.format("%s.type", alias)), param.getResourceType())));
 				return Optional.of(criteriaContext.getCriteriaBuilder().and(toCriteriaArray(predicateList)));
 			}
 			

@@ -49,14 +49,17 @@ public class FhirConceptDaoImpl extends BaseFhirDao<Concept> implements FhirConc
 	public Optional<Concept> getConceptWithSameAsMappingInSource(@Nonnull ConceptSource conceptSource,
 	        @Nonnull String mappingCode) {
 		OpenmrsFhirCriteriaContext<Concept> criteriaContext = createCriteriaContext(Concept.class);
-		createConceptMapCriteriaBuilder(criteriaContext,conceptSource, mappingCode);
-		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().or(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("uuid"), ConceptMapType.SAME_AS_MAP_TYPE_UUID),
-				criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("name"), "SAME-AS")));
+		createConceptMapCriteriaBuilder(criteriaContext, conceptSource, mappingCode);
+		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder()
+		        .or(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("uuid"),
+		            ConceptMapType.SAME_AS_MAP_TYPE_UUID),
+		            criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("name"), "SAME-AS")));
 		
 		criteriaContext.addOrder(criteriaContext.getCriteriaBuilder().asc(criteriaContext.getRoot().get("retired")));
 		criteriaContext.finalizeQuery();
 		
-		return Optional.ofNullable(criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).getSingleResult());
+		return Optional.ofNullable(
+		    criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).getSingleResult());
 	}
 	
 	@Override
@@ -67,15 +70,17 @@ public class FhirConceptDaoImpl extends BaseFhirDao<Concept> implements FhirConc
 		}
 		
 		OpenmrsFhirCriteriaContext<Concept> criteriaContext = createCriteriaContext(Concept.class);
-		createConceptMapCriteriaBuilder(criteriaContext,conceptSource, mappingCode);
-		criteriaContext.getCriteriaQuery().orderBy(criteriaContext.getCriteriaBuilder().asc(criteriaContext.getRoot().get("retired"))).distinct(true);
+		createConceptMapCriteriaBuilder(criteriaContext, conceptSource, mappingCode);
+		criteriaContext.getCriteriaQuery()
+		        .orderBy(criteriaContext.getCriteriaBuilder().asc(criteriaContext.getRoot().get("retired"))).distinct(true);
 		
 		return criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).getResultList();
 	}
 	
 	@Override
 	protected void setupSearchParams(OpenmrsFhirCriteriaContext<Concept> criteriaContext, SearchParameterMap theParams) {
-		criteriaContext.getCriteriaBuilder().and(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("set"), true));
+		criteriaContext.getCriteriaBuilder()
+		        .and(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("set"), true));
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case TITLE_SEARCH_HANDLER:
@@ -87,19 +92,24 @@ public class FhirConceptDaoImpl extends BaseFhirDao<Concept> implements FhirConc
 	
 	protected void handleTitle(OpenmrsFhirCriteriaContext<Concept> criteriaContext, StringAndListParam titlePattern) {
 		criteriaContext.getRoot().join("names").alias("cn");
-		handleAndListParam(titlePattern, (title) -> propertyLike(criteriaContext,"cn.name", title)).ifPresent(criteriaContext::addPredicate);
+		handleAndListParam(titlePattern, (title) -> propertyLike(criteriaContext, "cn.name", title))
+		        .ifPresent(criteriaContext::addPredicate);
 		criteriaContext.finalizeQuery();
 	}
 	
-	protected void createConceptMapCriteriaBuilder(OpenmrsFhirCriteriaContext<Concept> criteriaContext, @Nonnull ConceptSource conceptSource, String mappingCode) {
+	protected void createConceptMapCriteriaBuilder(OpenmrsFhirCriteriaContext<Concept> criteriaContext,
+	        @Nonnull ConceptSource conceptSource, String mappingCode) {
 		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot().get("concept"));
 		
 		Join<ConceptMap, ConceptReferenceTerm> term = criteriaContext.getRoot().join("conceptReferenceTerm");
-		@SuppressWarnings("unused") Join<ConceptMap, ConceptMapType> mapType = criteriaContext.getRoot().join("conceptMapType");
-		@SuppressWarnings("unused") Join<ConceptMap, Concept> concept = criteriaContext.getRoot().join("concept");
-	
+		@SuppressWarnings("unused")
+		Join<ConceptMap, ConceptMapType> mapType = criteriaContext.getRoot().join("conceptMapType");
+		@SuppressWarnings("unused")
+		Join<ConceptMap, Concept> concept = criteriaContext.getRoot().join("concept");
+		
 		if (Context.getAdministrationService().isDatabaseStringComparisonCaseSensitive()) {
-			criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getCriteriaBuilder().lower(term.get("code")), mappingCode.toLowerCase()));
+			criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder()
+			        .equal(criteriaContext.getCriteriaBuilder().lower(term.get("code")), mappingCode.toLowerCase()));
 		} else {
 			criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().equal(term.get("code"), mappingCode));
 		}

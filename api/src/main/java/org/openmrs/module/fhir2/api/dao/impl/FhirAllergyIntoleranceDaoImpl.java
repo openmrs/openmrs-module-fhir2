@@ -59,9 +59,8 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implemen
 					    (ReferenceAndListParam) param.getParam(), "patient"));
 					break;
 				case FhirConstants.CATEGORY_SEARCH_HANDLER:
-					entry.getValue().forEach(
-					    param -> handleAllergenCategory(criteriaContext,"allergen.allergenType", (TokenAndListParam) param.getParam())
-					            .ifPresent(criteriaContext::addPredicate));
+					entry.getValue().forEach(param -> handleAllergenCategory(criteriaContext, "allergen.allergenType",
+					    (TokenAndListParam) param.getParam()).ifPresent(criteriaContext::addPredicate));
 					criteriaContext.finalizeQuery();
 					break;
 				case FhirConstants.ALLERGEN_SEARCH_HANDLER:
@@ -75,13 +74,14 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implemen
 					        .forEach(param -> handleManifestation(criteriaContext, (TokenAndListParam) param.getParam()));
 					break;
 				case FhirConstants.BOOLEAN_SEARCH_HANDLER:
-					entry.getValue().forEach(
-					    param -> handleBoolean(criteriaContext,"voided", convertStringStatusToBoolean((TokenAndListParam) param.getParam()))
-					            .ifPresent(criteriaContext::addPredicate));
+					entry.getValue()
+					        .forEach(param -> handleBoolean(criteriaContext, "voided",
+					            convertStringStatusToBoolean((TokenAndListParam) param.getParam()))
+					                    .ifPresent(criteriaContext::addPredicate));
 					criteriaContext.finalizeQuery();
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(criteriaContext,entry.getValue()).ifPresent(criteriaContext::addPredicate);
+					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(criteriaContext::addPredicate);
 					criteriaContext.finalizeQuery();
 					break;
 			}
@@ -114,7 +114,7 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implemen
 		Map<String, String> severityConceptUuids = globalPropertyService.getGlobalProperties(
 		    FhirConstants.GLOBAL_PROPERTY_MILD, FhirConstants.GLOBAL_PROPERTY_MODERATE, FhirConstants.GLOBAL_PROPERTY_SEVERE,
 		    FhirConstants.GLOBAL_PROPERTY_OTHER);
-				
+		
 		criteriaContext.getRoot().join("severity").alias("sc");
 		
 		handleAndListParam(severityParam, token -> {
@@ -123,17 +123,21 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implemen
 				        .fromCode(token.getValue());
 				switch (severity) {
 					case MILD:
-						return Optional.of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("sc.uuid"),
-						    severityConceptUuids.get(FhirConstants.GLOBAL_PROPERTY_MILD)));
+						return Optional
+						        .of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("sc.uuid"),
+						            severityConceptUuids.get(FhirConstants.GLOBAL_PROPERTY_MILD)));
 					case MODERATE:
-						return Optional.of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("sc.uuid"),
-						    severityConceptUuids.get(FhirConstants.GLOBAL_PROPERTY_MODERATE)));
+						return Optional
+						        .of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("sc.uuid"),
+						            severityConceptUuids.get(FhirConstants.GLOBAL_PROPERTY_MODERATE)));
 					case SEVERE:
-						return Optional.of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("sc.uuid"),
-						    severityConceptUuids.get(FhirConstants.GLOBAL_PROPERTY_SEVERE)));
+						return Optional
+						        .of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("sc.uuid"),
+						            severityConceptUuids.get(FhirConstants.GLOBAL_PROPERTY_SEVERE)));
 					case NULL:
-						return Optional.of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("sc.uuid"),
-						    severityConceptUuids.get(FhirConstants.GLOBAL_PROPERTY_OTHER)));
+						return Optional
+						        .of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("sc.uuid"),
+						            severityConceptUuids.get(FhirConstants.GLOBAL_PROPERTY_OTHER)));
 				}
 			}
 			catch (FHIRException ignored) {}
@@ -142,7 +146,8 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implemen
 		criteriaContext.finalizeQuery();
 	}
 	
-	private <T> Optional<Predicate> handleAllergenCategory(OpenmrsFhirCriteriaContext<T> criteriaContext, String propertyName, TokenAndListParam categoryParam) {
+	private <T> Optional<Predicate> handleAllergenCategory(OpenmrsFhirCriteriaContext<T> criteriaContext,
+	        String propertyName, TokenAndListParam categoryParam) {
 		if (categoryParam == null) {
 			return Optional.empty();
 		}
@@ -153,13 +158,17 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implemen
 				        .fromCode(token.getValue());
 				switch (category) {
 					case FOOD:
-						return Optional.of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get(propertyName), AllergenType.FOOD));
+						return Optional.of(criteriaContext.getCriteriaBuilder()
+						        .equal(criteriaContext.getRoot().get(propertyName), AllergenType.FOOD));
 					case MEDICATION:
-						return Optional.of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get(propertyName), AllergenType.DRUG));
+						return Optional.of(criteriaContext.getCriteriaBuilder()
+						        .equal(criteriaContext.getRoot().get(propertyName), AllergenType.DRUG));
 					case ENVIRONMENT:
-						return Optional.of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get(propertyName), AllergenType.ENVIRONMENT));
+						return Optional.of(criteriaContext.getCriteriaBuilder()
+						        .equal(criteriaContext.getRoot().get(propertyName), AllergenType.ENVIRONMENT));
 					case NULL:
-						return Optional.of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get(propertyName), AllergenType.OTHER));
+						return Optional.of(criteriaContext.getCriteriaBuilder()
+						        .equal(criteriaContext.getRoot().get(propertyName), AllergenType.OTHER));
 				}
 			}
 			catch (FHIRException ignored) {}

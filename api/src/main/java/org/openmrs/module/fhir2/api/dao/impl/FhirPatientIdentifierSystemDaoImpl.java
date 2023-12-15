@@ -9,7 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
-
 import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -37,14 +36,14 @@ public class FhirPatientIdentifierSystemDaoImpl implements FhirPatientIdentifier
 	@Autowired
 	@Qualifier("sessionFactory")
 	private SessionFactory sessionFactory;
-
+	
 	@Override
 	public String getUrlByPatientIdentifierType(PatientIdentifierType patientIdentifierType) {
 		OpenmrsFhirCriteriaContext<FhirPatientIdentifierSystem> criteriaContext = openmrsFhirCriteriaContext();
 		CriteriaQuery<String> criteriaQuery = criteriaContext.getCriteriaBuilder().createQuery(String.class);
 		
-		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder()
-				.equal(criteriaContext.getRoot().get("patientIdentifierType.patientIdentifierTypeId"), patientIdentifierType.getId()));
+		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().equal(
+		    criteriaContext.getRoot().get("patientIdentifierType.patientIdentifierTypeId"), patientIdentifierType.getId()));
 		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot().get("url"));
 		return criteriaContext.getEntityManager().createQuery(criteriaQuery).getSingleResult();
 	}
@@ -56,7 +55,7 @@ public class FhirPatientIdentifierSystemDaoImpl implements FhirPatientIdentifier
 		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot().get("patientIdentifierType"));
 		
 		return criteriaContext.getEntityManager().createQuery(criteriaContext.finalizeQuery()).getSingleResult()
-				.getPatientIdentifierType();
+		        .getPatientIdentifierType();
 	}
 	
 	@Override
@@ -65,8 +64,9 @@ public class FhirPatientIdentifierSystemDaoImpl implements FhirPatientIdentifier
 		OpenmrsFhirCriteriaContext<FhirPatientIdentifierSystem> criteriaContext = openmrsFhirCriteriaContext();
 		
 		criteriaContext.getCriteriaQuery().where(criteriaContext.getCriteriaBuilder()
-				.equal(criteriaContext.getRoot().get("patientIdentifierType"), patientIdentifierType));
-		return criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).getResultList().stream().findFirst();
+		        .equal(criteriaContext.getRoot().get("patientIdentifierType"), patientIdentifierType));
+		return criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).getResultList().stream()
+		        .findFirst();
 	}
 	
 	@Override

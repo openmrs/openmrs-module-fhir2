@@ -8,6 +8,7 @@
  * graphic logo is a trademark of OpenMRS Inc.
  */
 package org.openmrs.module.fhir2.api.dao.impl;
+
 import javax.persistence.criteria.Predicate;
 
 import java.util.ArrayList;
@@ -48,7 +49,8 @@ public class FhirGroupDaoImpl extends BaseFhirDao<Cohort> implements FhirGroupDa
 	 * Find a way to merge this logic into handleParticipantReference logic in the BaseDao class
 	 * make it reusable
 	 */
-	protected void handleManagingEntity(OpenmrsFhirCriteriaContext<Cohort> criteriaContext, ReferenceAndListParam participantReference) {
+	protected void handleManagingEntity(OpenmrsFhirCriteriaContext<Cohort> criteriaContext,
+	        ReferenceAndListParam participantReference) {
 		if (participantReference != null) {
 			criteriaContext.getRoot().join("creator");
 			handleAndListParam(participantReference, participantToken -> {
@@ -59,19 +61,22 @@ public class FhirGroupDaoImpl extends BaseFhirDao<Cohort> implements FhirGroupDa
 							if ((lacksAlias(criteriaContext, "ps"))) {
 								criteriaContext.getRoot().join(PERSON_ALIAS);
 							}
-							return Optional.of(criteriaContext.getCriteriaBuilder().like(criteriaContext.getRoot().get("ps.uuid"), participantToken.getValue()));
+							return Optional.of(criteriaContext.getCriteriaBuilder()
+							        .like(criteriaContext.getRoot().get("ps.uuid"), participantToken.getValue()));
 						case Practitioner.SP_GIVEN:
 							if ((lacksAlias(criteriaContext, "ps") && (lacksAlias(criteriaContext, "pn")))) {
 								criteriaContext.getRoot().join(PERSON_ALIAS);
 								criteriaContext.getRoot().join(NAMES_ALIAS);
 							}
-							return Optional.of(criteriaContext.getCriteriaBuilder().like(criteriaContext.getRoot().get("pn.givenName"), participantToken.getValue()));
+							return Optional.of(criteriaContext.getCriteriaBuilder()
+							        .like(criteriaContext.getRoot().get("pn.givenName"), participantToken.getValue()));
 						case Practitioner.SP_FAMILY:
 							if ((lacksAlias(criteriaContext, "ps") && (lacksAlias(criteriaContext, "pn")))) {
 								criteriaContext.getRoot().join(PERSON_ALIAS);
 								criteriaContext.getRoot().join(NAMES_ALIAS);
 							}
-							return Optional.of(criteriaContext.getCriteriaBuilder().like(criteriaContext.getRoot().get("pn.familyName"), participantToken.getValue()));
+							return Optional.of(criteriaContext.getCriteriaBuilder()
+							        .like(criteriaContext.getRoot().get("pn.familyName"), participantToken.getValue()));
 						case Practitioner.SP_NAME:
 							if ((lacksAlias(criteriaContext, "ps") && (lacksAlias(criteriaContext, "pn")))) {
 								criteriaContext.getRoot().join(PERSON_ALIAS);
@@ -81,16 +86,17 @@ public class FhirGroupDaoImpl extends BaseFhirDao<Cohort> implements FhirGroupDa
 							List<Optional<? extends Predicate>> criterionList = new ArrayList<>();
 							
 							for (String token : StringUtils.split(participantToken.getValue(), " \t,")) {
-								criterionList.add(propertyLike(criteriaContext,"pn.givenName", token));
-								criterionList.add(propertyLike(criteriaContext,"pn.middleName", token));
-								criterionList.add(propertyLike(criteriaContext,"pn.familyName", token));
+								criterionList.add(propertyLike(criteriaContext, "pn.givenName", token));
+								criterionList.add(propertyLike(criteriaContext, "pn.middleName", token));
+								criterionList.add(propertyLike(criteriaContext, "pn.familyName", token));
 							}
 							
 							return Optional.of(criteriaContext.getCriteriaBuilder().or(toCriteriaArray(criterionList)));
 					}
 				} else {
 					// Search by creator uuid
-					return Optional.of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("cr.uuid"), participantToken.getValue()));
+					return Optional.of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("cr.uuid"),
+					    participantToken.getValue()));
 				}
 				
 				return Optional.empty();

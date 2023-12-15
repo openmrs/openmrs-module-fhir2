@@ -55,12 +55,13 @@ public class FhirServiceRequestDaoImpl extends BaseFhirDao<TestOrder> implements
 					    (ReferenceAndListParam) participantReference.getParam()));
 					break;
 				case FhirConstants.DATE_RANGE_SEARCH_HANDLER:
-					entry.getValue().forEach(dateRangeParam -> handleDateRange(criteriaContext,(DateRangeParam) dateRangeParam.getParam())
-					        .ifPresent(criteriaContext::addPredicate));
+					entry.getValue().forEach(
+					    dateRangeParam -> handleDateRange(criteriaContext, (DateRangeParam) dateRangeParam.getParam())
+					            .ifPresent(criteriaContext::addPredicate));
 					criteriaContext.finalizeQuery();
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(criteriaContext,entry.getValue()).ifPresent(criteriaContext::addPredicate);
+					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(criteriaContext::addPredicate);
 					criteriaContext.finalizeQuery();
 					break;
 			}
@@ -78,18 +79,27 @@ public class FhirServiceRequestDaoImpl extends BaseFhirDao<TestOrder> implements
 		}
 	}
 	
-	private <T> Optional<Predicate> handleDateRange(OpenmrsFhirCriteriaContext<T> criteriaContext,DateRangeParam dateRangeParam) {
+	private <T> Optional<Predicate> handleDateRange(OpenmrsFhirCriteriaContext<T> criteriaContext,
+	        DateRangeParam dateRangeParam) {
 		if (dateRangeParam == null) {
 			return Optional.empty();
 		}
 		
-		return Optional.of(criteriaContext.getCriteriaBuilder().and(toCriteriaArray(Stream.of(
-		    Optional.of(
-		        criteriaContext.getCriteriaBuilder().or(toCriteriaArray(Stream.of(handleDate(criteriaContext,"scheduledDate", dateRangeParam.getLowerBound()),
-		            handleDate(criteriaContext,"dateActivated", dateRangeParam.getLowerBound()))))),
-		    Optional.of(
-		        criteriaContext.getCriteriaBuilder().or(toCriteriaArray(Stream.of(handleDate(criteriaContext,"dateStopped", dateRangeParam.getUpperBound()),
-		            handleDate(criteriaContext,"autoExpireDate", dateRangeParam.getUpperBound())))))))));
+		return Optional
+		        .of(criteriaContext.getCriteriaBuilder()
+		                .and(
+		                    toCriteriaArray(
+		                        Stream.of(
+		                            Optional.of(criteriaContext.getCriteriaBuilder()
+		                                    .or(toCriteriaArray(Stream.of(
+		                                        handleDate(criteriaContext, "scheduledDate", dateRangeParam.getLowerBound()),
+		                                        handleDate(criteriaContext, "dateActivated",
+		                                            dateRangeParam.getLowerBound()))))),
+		                            Optional.of(criteriaContext.getCriteriaBuilder()
+		                                    .or(toCriteriaArray(Stream.of(
+		                                        handleDate(criteriaContext, "dateStopped", dateRangeParam.getUpperBound()),
+		                                        handleDate(criteriaContext, "autoExpireDate",
+		                                            dateRangeParam.getUpperBound())))))))));
 	}
 	
 }

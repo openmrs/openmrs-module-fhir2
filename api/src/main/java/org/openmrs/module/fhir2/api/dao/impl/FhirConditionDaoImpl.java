@@ -87,9 +87,9 @@ public class FhirConditionDaoImpl extends BaseFhirDao<Condition> implements Fhir
 					        .forEach(param -> handleClinicalStatus(criteriaContext, (TokenAndListParam) param.getParam()));
 					break;
 				case FhirConstants.DATE_RANGE_SEARCH_HANDLER:
-					entry.getValue()
-					        .forEach(param -> handleDateRange(criteriaContext,param.getPropertyName(), (DateRangeParam) param.getParam())
-					                .ifPresent(criteriaContext::addPredicate));
+					entry.getValue().forEach(
+					    param -> handleDateRange(criteriaContext, param.getPropertyName(), (DateRangeParam) param.getParam())
+					            .ifPresent(criteriaContext::addPredicate));
 					criteriaContext.finalizeQuery();
 					break;
 				case FhirConstants.QUANTITY_SEARCH_HANDLER:
@@ -97,7 +97,7 @@ public class FhirConditionDaoImpl extends BaseFhirDao<Condition> implements Fhir
 					        .forEach(param -> handleOnsetAge(criteriaContext, (QuantityAndListParam) param.getParam()));
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(criteriaContext,entry.getValue()).ifPresent(criteriaContext::addPredicate);
+					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(criteriaContext::addPredicate);
 					criteriaContext.finalizeQuery();
 					break;
 			}
@@ -114,21 +114,21 @@ public class FhirConditionDaoImpl extends BaseFhirDao<Condition> implements Fhir
 	
 	private void handleClinicalStatus(OpenmrsFhirCriteriaContext<Condition> criteriaContext, TokenAndListParam status) {
 		handleAndListParam(status,
-		    tokenParam -> Optional
-		            .of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("clinicalStatus"), convertStatus(tokenParam.getValue()))))
+		    tokenParam -> Optional.of(criteriaContext.getCriteriaBuilder()
+		            .equal(criteriaContext.getRoot().get("clinicalStatus"), convertStatus(tokenParam.getValue()))))
 		                    .ifPresent(criteriaContext::addPredicate);
 		criteriaContext.finalizeQuery();
 	}
 	
 	private void handleOnsetAge(OpenmrsFhirCriteriaContext<Condition> criteriaContext, QuantityAndListParam onsetAge) {
-		handleAndListParam(onsetAge, onsetAgeParam -> handleAgeByDateProperty(criteriaContext,"onsetDate", onsetAgeParam))
+		handleAndListParam(onsetAge, onsetAgeParam -> handleAgeByDateProperty(criteriaContext, "onsetDate", onsetAgeParam))
 		        .ifPresent(criteriaContext::addPredicate);
 		criteriaContext.finalizeQuery();
 	}
 	
 	@Override
 	protected <T> Optional<Predicate> handleLastUpdated(OpenmrsFhirCriteriaContext<T> criteriaContext,
-			DateRangeParam param) {
+	        DateRangeParam param) {
 		return super.handleLastUpdated(criteriaContext, param);
 	}
 	

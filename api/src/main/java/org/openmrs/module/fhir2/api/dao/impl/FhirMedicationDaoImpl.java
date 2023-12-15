@@ -45,7 +45,7 @@ public class FhirMedicationDaoImpl extends BaseFhirDao<Drug> implements FhirMedi
 					        .forEach(param -> handleIngredientCode(criteriaContext, (TokenAndListParam) param.getParam()));
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(criteriaContext,entry.getValue()).ifPresent(criteriaContext::addPredicate);
+					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(criteriaContext::addPredicate);
 					criteriaContext.finalizeQuery();
 					break;
 			}
@@ -57,7 +57,8 @@ public class FhirMedicationDaoImpl extends BaseFhirDao<Drug> implements FhirMedi
 		if (ingredientCode != null) {
 			criteriaContext.getRoot().join("ingredients").alias("i");
 			DetachedCriteria detachedCriteria = DetachedCriteria.forClass(Concept.class, "ic");
-			handleCodeableConcept(criteriaContext, ingredientCode, "ic", "icm", "icrt").ifPresent(criteriaContext::addPredicate);
+			handleCodeableConcept(criteriaContext, ingredientCode, "ic", "icm", "icrt")
+			        .ifPresent(criteriaContext::addPredicate);
 			criteriaContext.finalizeQuery();
 			detachedCriteria.setProjection(Projections.property("conceptId"));
 			and(Subqueries.propertyIn("i.ingredient", detachedCriteria));
@@ -75,8 +76,7 @@ public class FhirMedicationDaoImpl extends BaseFhirDao<Drug> implements FhirMedi
 	private void handleMedicationDosageForm(OpenmrsFhirCriteriaContext<Drug> criteriaContext, TokenAndListParam dosageForm) {
 		if (dosageForm != null) {
 			criteriaContext.getRoot().join("dosageForm").alias("dc");
-			handleCodeableConcept(criteriaContext, dosageForm, "dc", "dcm", "dcrt")
-					.ifPresent(criteriaContext::addPredicate);
+			handleCodeableConcept(criteriaContext, dosageForm, "dc", "dcm", "dcrt").ifPresent(criteriaContext::addPredicate);
 			criteriaContext.finalizeQuery();
 		}
 	}
