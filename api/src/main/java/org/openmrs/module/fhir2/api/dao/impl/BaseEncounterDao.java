@@ -140,10 +140,12 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 								if (paramValue != null) {
 									criteria.add(generateFulfillerStatusRestriction("orders", paramValue));
 								}
+								handled = true;
 							} else if ((FhirConstants.SP_FULFILLER_STATUS + ":not").equalsIgnoreCase(paramName)) {
 								if (paramValue != null) {
 									criteria.add(generateNotFulfillerStatusRestriction("orders", paramValue));
 								}
+								handled = true;
 							}
 						}
 					}
