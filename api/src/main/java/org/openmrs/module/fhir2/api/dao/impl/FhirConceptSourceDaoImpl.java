@@ -56,12 +56,11 @@ public class FhirConceptSourceDaoImpl implements FhirConceptSourceDao {
 	public Optional<FhirConceptSource> getFhirConceptSourceByUrl(@Nonnull String url) {
 		OpenmrsFhirCriteriaContext<FhirConceptSource> criteriaContext = openmrsFhirCriteriaContext();
 		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot());
-		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("url"), url));
-		criteriaContext
-		        .addPredicate(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("retired"), false));
 		
-		return criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).setMaxResults(1)
-		        .getResultList().stream().findFirst();
+		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("url"), url));
+		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("retired"), false));
+		
+		return Optional.ofNullable(criteriaContext.getEntityManager().createQuery(criteriaContext.finalizeQuery()).getSingleResult());
 	}
 	
 	@Override
@@ -70,15 +69,14 @@ public class FhirConceptSourceDaoImpl implements FhirConceptSourceDao {
 		OpenmrsFhirCriteriaContext<FhirConceptSource> criteriaContext = openmrsFhirCriteriaContext();
 		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot());
 		
-		Join<FhirConceptSource, ConceptSource> conceptSource = criteriaContext.getRoot().join("conceptSource");
+		Join<FhirConceptSource, ConceptSource> conceptSourceJoin = criteriaContext.getRoot().join("conceptSource");
 		
-		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().equal(conceptSource.get("name"), sourceName));
-		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().equal(conceptSource.get("voided"), false));
-		criteriaContext
-		        .addPredicate(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("voided"), false));
+		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().equal(conceptSourceJoin.get("name"), sourceName));
+		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().equal(conceptSourceJoin.get("voided"), false));
 		
-		return Optional.ofNullable(
-		    criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).getSingleResult());
+		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("voided"), false));
+		
+		return Optional.ofNullable(criteriaContext.getEntityManager().createQuery(criteriaContext.finalizeQuery()).getSingleResult());
 	}
 	
 	@Override
