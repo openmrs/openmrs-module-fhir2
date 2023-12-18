@@ -9,35 +9,40 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.exparity.hamcrest.date.DateMatchers.sameDay;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.Date;
 
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import org.exparity.hamcrest.date.DateMatchers;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.openmrs.CodedOrFreeText;
 import org.openmrs.Concept;
-import org.openmrs.Obs;
+import org.openmrs.ConditionClinicalStatus;
+import org.openmrs.ConditionVerificationStatus;
 import org.openmrs.Patient;
 import org.openmrs.User;
-import org.openmrs.api.ConceptService;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
+import org.openmrs.module.fhir2.api.translators.ConditionClinicalStatusTranslator;
+import org.openmrs.module.fhir2.api.translators.ConditionVerificationStatusTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
 
@@ -46,15 +51,21 @@ public class ConditionTranslatorImplTest {
 	
 	private static final String CONDITION_UUID = "36aa91ad-66f3-455b-b28a-71beb6ca3195";
 	
-	private static final Integer CONDITION_ID = 1284;
-	
 	private static final String PATIENT_UUID = "fc8b217b-2ed4-4dde-b9f7-a5334347e7ca";
 	
 	private static final String PATIENT_REF = "Patient/" + PATIENT_UUID;
 	
+	private static final String ACTIVE = "active";
+	
 	private static final String SYSTEM = "https://openconceptlab.org/orgs/CIEL/sources/CIEL";
 	
 	private static final Integer CODE = 102309;
+	
+	private static final Integer CONDITION_NON_CODED = 5622;
+	
+	private static final String CONDITION_NON_CODED_TEXT = "condition non coded";
+	
+	private static final String CONDITION_NON_CODED_VALUE = "Other";
 	
 	private static final String CONCEPT_UUID = "31d754f5-3e9e-4ca3-805c-87f97a1f5e4b";
 	
@@ -65,8 +76,15 @@ public class ConditionTranslatorImplTest {
 	@Mock
 	private PatientReferenceTranslator patientReferenceTranslator;
 	
+	private static final String CONFIRMED = "confirmed";
+	
+	private static final String PROVISIONAL = "provisional";
+	
 	@Mock
-	ConceptService conceptService;
+	private ConditionClinicalStatusTranslator<ConditionClinicalStatus> clinicalStatusTranslator;
+	
+	@Mock
+	private ConditionVerificationStatusTranslator<ConditionVerificationStatus> verificationStatusTranslator;
 	
 	@Mock
 	private ConceptTranslator conceptTranslator;
@@ -78,21 +96,20 @@ public class ConditionTranslatorImplTest {
 	
 	private Condition fhirCondition;
 	
-	private Obs openmrsCondition;
+	private org.openmrs.Condition openmrsCondition;
 	
 	private Patient patient;
 	
 	private Reference patientRef;
 	
-	private Concept concept;
-	
 	@Before
 	public void setup() {
 		conditionTranslator = new ConditionTranslatorImpl();
 		conditionTranslator.setPatientReferenceTranslator(patientReferenceTranslator);
+		conditionTranslator.setClinicalStatusTranslator(clinicalStatusTranslator);
+		conditionTranslator.setVerificationStatusTranslator(verificationStatusTranslator);
 		conditionTranslator.setConceptTranslator(conceptTranslator);
 		conditionTranslator.setPractitionerReferenceTranslator(creatorReferenceTranslator);
-		conditionTranslator.setConceptService(conceptService);
 		
 		patient = new Patient();
 		patient.setUuid(PATIENT_UUID);
@@ -100,19 +117,17 @@ public class ConditionTranslatorImplTest {
 		patientRef = new Reference();
 		patientRef.setReference(PATIENT_REF);
 		
-		concept = new Concept();
-		concept.setUuid(CONDITION_UUID);
-		concept.setConceptId(CONDITION_ID);
-		
-		Concept valueCoded = new Concept();
+		Concept concept = new Concept();
 		concept.setUuid(CONDITION_UUID);
 		concept.setConceptId(CODE);
 		
-		openmrsCondition = new Obs();
+		CodedOrFreeText conditionCoded = new CodedOrFreeText();
+		conditionCoded.setCoded(concept);
+		
+		openmrsCondition = new org.openmrs.Condition();
 		openmrsCondition.setUuid(CONDITION_UUID);
-		openmrsCondition.setPerson(patient);
-		openmrsCondition.setConcept(concept);
-		openmrsCondition.setValueCoded(valueCoded);
+		openmrsCondition.setPatient(patient);
+		openmrsCondition.setCondition(conditionCoded);
 		
 		fhirCondition = new Condition();
 		fhirCondition.setId(CONDITION_UUID);
@@ -128,10 +143,9 @@ public class ConditionTranslatorImplTest {
 	
 	@Test
 	public void shouldTranslateConditionUuidToOpenMrsType() {
-		when(conceptService.getConceptByUuid(FhirConstants.CONDITION_OBSERVATION_CONCEPT_UUID)).thenReturn(concept);
-		Obs obsCondition = conditionTranslator.toOpenmrsType(fhirCondition);
-		assertThat(obsCondition, notNullValue());
-		assertThat(obsCondition.getUuid(), equalTo(CONDITION_UUID));
+		org.openmrs.Condition condition = conditionTranslator.toOpenmrsType(fhirCondition);
+		assertThat(condition, notNullValue());
+		assertThat(condition.getUuid(), equalTo(CONDITION_UUID));
 	}
 	
 	@Test(expected = NullPointerException.class)
@@ -139,23 +153,13 @@ public class ConditionTranslatorImplTest {
 		conditionTranslator.toFhirResource(null);
 	}
 	
-	@Test(expected = InternalErrorException.class)
-	public void toFhirOpenmrsType_shouldThrowExceptionIfConceptProblemListIsNotFound() {
-		when(patientReferenceTranslator.toOpenmrsType(patientRef)).thenReturn(patient);
-		Obs obsCondition = conditionTranslator.toOpenmrsType(fhirCondition);
-		assertThat(obsCondition, notNullValue());
-		assertThat(obsCondition.getPerson(), notNullValue());
-		assertThat(obsCondition.getPerson().getUuid(), equalTo(PATIENT_UUID));
-	}
-	
 	@Test
 	public void shouldTranslateConditionSubjectToOpenMrsType() {
-		when(conceptService.getConceptByUuid(FhirConstants.CONDITION_OBSERVATION_CONCEPT_UUID)).thenReturn(concept);
 		when(patientReferenceTranslator.toOpenmrsType(patientRef)).thenReturn(patient);
-		Obs obsCondition = conditionTranslator.toOpenmrsType(fhirCondition);
-		assertThat(obsCondition, notNullValue());
-		assertThat(obsCondition.getPerson(), notNullValue());
-		assertThat(obsCondition.getPerson().getUuid(), equalTo(PATIENT_UUID));
+		org.openmrs.Condition condition = conditionTranslator.toOpenmrsType(fhirCondition);
+		assertThat(condition, notNullValue());
+		assertThat(condition.getPatient(), notNullValue());
+		assertThat(condition.getPatient().getUuid(), equalTo(PATIENT_UUID));
 	}
 	
 	@Test
@@ -169,24 +173,103 @@ public class ConditionTranslatorImplTest {
 	}
 	
 	@Test
-	public void shouldTranslateOpenMrsConditionOnsetDateToFhirType() {
-		openmrsCondition.setObsDatetime(new Date());
-		org.hl7.fhir.r4.model.Condition condition = conditionTranslator.toFhirResource(openmrsCondition);
+	public void shouldTranslateConditionClinicalStatusToOpenMrsType() {
+		CodeableConcept codeableConcept = new CodeableConcept();
+		codeableConcept.addCoding(new Coding().setCode(ACTIVE).setSystem(FhirConstants.OPENMRS_FHIR_PREFIX));
+		fhirCondition.setClinicalStatus(codeableConcept);
+		when(clinicalStatusTranslator.toOpenmrsType(codeableConcept)).thenReturn(ConditionClinicalStatus.ACTIVE);
+		org.openmrs.Condition condition = conditionTranslator.toOpenmrsType(fhirCondition);
+		
 		assertThat(condition, notNullValue());
-		assertThat(condition.getOnsetDateTimeType().getValue(), notNullValue());
-		assertThat(condition.getOnsetDateTimeType().getValue(), DateMatchers.sameDay(new Date()));
+		assertThat(condition.getClinicalStatus(), notNullValue());
+		assertThat(condition.getClinicalStatus(), equalTo(ConditionClinicalStatus.ACTIVE));
+		
+	}
+	
+	@Test
+	public void shouldTranslateConditionClinicalStatusToFhirType() {
+		CodeableConcept codeableConcept = new CodeableConcept();
+		codeableConcept.addCoding(new Coding().setCode(ACTIVE).setSystem(FhirConstants.OPENMRS_FHIR_PREFIX));
+		openmrsCondition.setClinicalStatus(ConditionClinicalStatus.ACTIVE);
+		when(clinicalStatusTranslator.toFhirResource(ConditionClinicalStatus.ACTIVE)).thenReturn(codeableConcept);
+		
+		Condition condition = conditionTranslator.toFhirResource(openmrsCondition);
+		assertThat(condition, notNullValue());
+		assertThat(condition.getClinicalStatus(), notNullValue());
+		assertThat(condition.getClinicalStatus(), equalTo(codeableConcept));
+	}
+	
+	@Test
+	public void shouldTranslateConditionVerificationStatusToFhirType() {
+		CodeableConcept codeableConcept = new CodeableConcept();
+		codeableConcept.addCoding(new Coding().setCode(CONFIRMED).setSystem(FhirConstants.OPENMRS_FHIR_PREFIX));
+		openmrsCondition.setVerificationStatus(ConditionVerificationStatus.CONFIRMED);
+		when(verificationStatusTranslator.toFhirResource(ConditionVerificationStatus.CONFIRMED)).thenReturn(codeableConcept);
+		Condition condition = conditionTranslator.toFhirResource(openmrsCondition);
+		assertThat(condition, notNullValue());
+		assertThat(condition.getVerificationStatus(), equalTo(codeableConcept));
+		assertThat(condition.getVerificationStatus().getCodingFirstRep().getCode().toLowerCase(), equalTo(CONFIRMED));
+	}
+	
+	@Test
+	public void shouldTranslateConditionVerificationStatusToOpenMrsType() {
+		CodeableConcept codeableConcept = new CodeableConcept();
+		codeableConcept.addCoding(new Coding().setCode(PROVISIONAL).setSystem(FhirConstants.OPENMRS_FHIR_PREFIX));
+		fhirCondition.setVerificationStatus(codeableConcept);
+		when(verificationStatusTranslator.toOpenmrsType(codeableConcept))
+		        .thenReturn(ConditionVerificationStatus.PROVISIONAL);
+		org.openmrs.Condition condition = conditionTranslator.toOpenmrsType(fhirCondition);
+		assertThat(condition, notNullValue());
+		assertThat(condition.getVerificationStatus(), equalTo(ConditionVerificationStatus.PROVISIONAL));
+	}
+	
+	@Test
+	public void shouldTranslateOpenMrsConditionOnsetDateToFhirType() {
+		openmrsCondition.setOnsetDate(new Date());
+		
+		org.hl7.fhir.r4.model.Condition condition = conditionTranslator.toFhirResource(openmrsCondition);
+		
+		assertThat(condition, notNullValue());
+		assertThat(condition.hasOnsetDateTimeType(), is(true));
+		assertThat(condition.getOnsetDateTimeType().getValue(), sameDay(new Date()));
 	}
 	
 	@Test
 	public void shouldTranslateFhirConditionOnsetToOpenMrsOnsetDate() {
-		when(conceptService.getConceptByUuid(FhirConstants.CONDITION_OBSERVATION_CONCEPT_UUID)).thenReturn(concept);
 		DateTimeType theDateTime = new DateTimeType();
 		theDateTime.setValue(new Date());
 		fhirCondition.setOnset(theDateTime);
-		Obs condition = conditionTranslator.toOpenmrsType(fhirCondition);
+		
+		org.openmrs.Condition condition = conditionTranslator.toOpenmrsType(fhirCondition);
+		
 		assertThat(condition, notNullValue());
-		assertThat(condition.getObsDatetime(), notNullValue());
-		assertThat(condition.getObsDatetime(), DateMatchers.sameDay(new Date()));
+		assertThat(condition.getOnsetDate(), notNullValue());
+		assertThat(condition.getOnsetDate(), sameDay(new Date()));
+	}
+	
+	@Test
+	public void shouldTranslateOpenMrsConditionEndDateToFhirType() {
+		openmrsCondition.setEndDate(new Date());
+		
+		org.hl7.fhir.r4.model.Condition condition = conditionTranslator.toFhirResource(openmrsCondition);
+		
+		assertThat(condition, notNullValue());
+		assertThat(condition.hasAbatementDateTimeType(), is(true));
+		assertThat(condition.getAbatementDateTimeType().getValue(), notNullValue());
+		assertThat(condition.getAbatementDateTimeType().getValue(), sameDay(new Date()));
+	}
+	
+	@Test
+	public void shouldTranslateFhirConditionAbatementDateToOpenMrsEndDate() {
+		DateTimeType theDateTime = new DateTimeType();
+		theDateTime.setValue(new Date());
+		fhirCondition.setAbatement(theDateTime);
+		
+		org.openmrs.Condition condition = conditionTranslator.toOpenmrsType(fhirCondition);
+		
+		assertThat(condition, notNullValue());
+		assertThat(condition.getEndDate(), notNullValue());
+		assertThat(condition.getEndDate(), sameDay(new Date()));
 	}
 	
 	@Test
@@ -200,12 +283,11 @@ public class ConditionTranslatorImplTest {
 		Concept concept = new Concept();
 		concept.setUuid(CONCEPT_UUID);
 		concept.setConceptId(CODE);
-		when(conceptService.getConceptByUuid(FhirConstants.CONDITION_OBSERVATION_CONCEPT_UUID)).thenReturn(concept);
 		when(conceptTranslator.toOpenmrsType(codeableConcept)).thenReturn(concept);
-		Obs condition = conditionTranslator.toOpenmrsType(fhirCondition);
+		org.openmrs.Condition condition = conditionTranslator.toOpenmrsType(fhirCondition);
 		assertThat(condition, notNullValue());
-		assertThat(condition.getValueCoded(), notNullValue());
-		assertThat(condition.getValueCoded().getConceptId(), equalTo(CODE));
+		assertThat(condition.getCondition(), notNullValue());
+		assertThat(condition.getCondition().getCoded().getConceptId(), equalTo(CODE));
 	}
 	
 	@Test
@@ -218,7 +300,9 @@ public class ConditionTranslatorImplTest {
 		coding.setCode(CODE.toString());
 		coding.setSystem(SYSTEM);
 		codeableConcept.addCoding(coding);
-		openmrsCondition.setValueCoded(concept);
+		CodedOrFreeText conceptCodeOrFreeText = new CodedOrFreeText();
+		conceptCodeOrFreeText.setCoded(concept);
+		openmrsCondition.setCondition(conceptCodeOrFreeText);
 		when(conceptTranslator.toFhirResource(concept)).thenReturn(codeableConcept);
 		org.hl7.fhir.r4.model.Condition condition = conditionTranslator.toFhirResource(openmrsCondition);
 		assertThat(condition, notNullValue());
@@ -229,12 +313,60 @@ public class ConditionTranslatorImplTest {
 	}
 	
 	@Test
+	public void shouldTranslateConditionNonCodedToOpenMrsType() {
+		CodeableConcept codeableConcept = new CodeableConcept();
+		Coding coding = new Coding();
+		coding.setCode(String.valueOf(CONDITION_NON_CODED));
+		coding.setDisplay(CONDITION_NON_CODED_VALUE);
+		codeableConcept.addCoding(coding);
+		Concept concept = new Concept();
+		concept.setConceptId(CONDITION_NON_CODED);
+		fhirCondition.setCode(codeableConcept);
+		fhirCondition.addExtension(FhirConstants.OPENMRS_FHIR_EXT_NON_CODED_CONDITION,
+		    new StringType(CONDITION_NON_CODED_TEXT));
+		when(conceptTranslator.toOpenmrsType(codeableConcept)).thenReturn(concept);
+		org.openmrs.Condition condition = conditionTranslator.toOpenmrsType(fhirCondition);
+		assertThat(condition, notNullValue());
+		assertThat(condition.getCondition().getCoded(), equalTo(concept));
+		assertThat(condition.getCondition().getNonCoded(), notNullValue());
+		assertThat(condition.getCondition().getNonCoded(), equalTo(CONDITION_NON_CODED_TEXT));
+	}
+	
+	@Test
+	public void shouldTranslateConditionNonCodedToFhirType() {
+		CodeableConcept codeableConcept = new CodeableConcept();
+		Coding coding = new Coding();
+		coding.setCode(String.valueOf(CONDITION_NON_CODED));
+		coding.setDisplay(CONDITION_NON_CODED_VALUE);
+		codeableConcept.addCoding(coding);
+		
+		Concept concept = new Concept();
+		concept.setConceptId(CONDITION_NON_CODED);
+		CodedOrFreeText conditionNonCoded = new CodedOrFreeText();
+		conditionNonCoded.setCoded(concept);
+		conditionNonCoded.setNonCoded(CONDITION_NON_CODED_TEXT);
+		openmrsCondition.setCondition(conditionNonCoded);
+		
+		when(conceptTranslator.toFhirResource(concept)).thenReturn(codeableConcept);
+		org.hl7.fhir.r4.model.Condition condition = conditionTranslator.toFhirResource(openmrsCondition);
+		assertThat(condition, notNullValue());
+		assertThat(condition.getCode(), notNullValue());
+		assertThat(condition.getCode().getCoding(), not(Collections.emptyList()));
+		assertThat(condition.getCode().getCoding().get(0).getCode(), equalTo(CONDITION_NON_CODED.toString()));
+		assertThat(condition.getCode().getCoding().get(0).getDisplay(), equalTo(CONDITION_NON_CODED_VALUE));
+		
+		Extension extension = condition.getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_NON_CODED_CONDITION);
+		assertThat(extension, notNullValue());
+		assertThat(extension.getValue().toString(), equalTo(CONDITION_NON_CODED_TEXT));
+	}
+	
+	@Test
 	public void shouldTranslateConditionDateCreatedToRecordedDateFhirType() {
 		openmrsCondition.setDateCreated(new Date());
 		org.hl7.fhir.r4.model.Condition condition = conditionTranslator.toFhirResource(openmrsCondition);
 		assertThat(condition, notNullValue());
 		assertThat(condition.getRecordedDate(), notNullValue());
-		assertThat(condition.getRecordedDate(), DateMatchers.sameDay(new Date()));
+		assertThat(condition.getRecordedDate(), sameDay(new Date()));
 	}
 	
 	@Test
@@ -244,9 +376,8 @@ public class ConditionTranslatorImplTest {
 		fhirCondition.setRecorder(userRef);
 		User user = new User();
 		user.setUuid(PRACTITIONER_UUID);
-		when(conceptService.getConceptByUuid(FhirConstants.CONDITION_OBSERVATION_CONCEPT_UUID)).thenReturn(concept);
 		when(creatorReferenceTranslator.toOpenmrsType(userRef)).thenReturn(user);
-		Obs condition = conditionTranslator.toOpenmrsType(fhirCondition);
+		org.openmrs.Condition condition = conditionTranslator.toOpenmrsType(fhirCondition);
 		assertThat(condition, notNullValue());
 		assertThat(condition.getCreator(), notNullValue());
 		assertThat(condition.getCreator().getUuid(), equalTo(PRACTITIONER_UUID));
@@ -268,10 +399,10 @@ public class ConditionTranslatorImplTest {
 	
 	@Test
 	public void shouldTranslateOpenMrsDateChangedToLastUpdatedDate() {
-		org.openmrs.Obs obsCondition = new org.openmrs.Obs();
-		obsCondition.setDateChanged(new Date());
+		org.openmrs.Condition condition = new org.openmrs.Condition();
+		condition.setDateChanged(new Date());
 		
-		org.hl7.fhir.r4.model.Condition result = conditionTranslator.toFhirResource(obsCondition);
+		org.hl7.fhir.r4.model.Condition result = conditionTranslator.toFhirResource(condition);
 		
 		assertThat(result, Matchers.notNullValue());
 		assertThat(result.getMeta().getLastUpdated(), Matchers.notNullValue());
@@ -279,10 +410,10 @@ public class ConditionTranslatorImplTest {
 	
 	@Test
 	public void shouldTranslateOpenMrsDateChangedToVersionId() {
-		org.openmrs.Obs obsCondition = new org.openmrs.Obs();
-		obsCondition.setDateChanged(new Date());
+		org.openmrs.Condition condition = new org.openmrs.Condition();
+		condition.setDateChanged(new Date());
 		
-		org.hl7.fhir.r4.model.Condition result = conditionTranslator.toFhirResource(obsCondition);
+		org.hl7.fhir.r4.model.Condition result = conditionTranslator.toFhirResource(condition);
 		
 		assertThat(result, Matchers.notNullValue());
 		assertThat(result.getMeta().getVersionId(), Matchers.notNullValue());

@@ -15,6 +15,7 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40.convertResource;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
@@ -39,7 +40,6 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hamcrest.Matchers;
-import org.hl7.fhir.convertors.VersionConvertor_30_40;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Patient;
@@ -260,8 +260,7 @@ public class ProcedureRequestFhirResourceProviderTest {
 	public void createProcedureRequest_shouldCreateNewProcedureRequest() {
 		when(serviceRequestService.create(any(ServiceRequest.class))).thenReturn(serviceRequest);
 		
-		MethodOutcome result = resourceProvider
-		        .createProcedureRequest((ProcedureRequest) VersionConvertor_30_40.convertResource(serviceRequest, false));
+		MethodOutcome result = resourceProvider.createProcedureRequest((ProcedureRequest) convertResource(serviceRequest));
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getCreated(), is(true));
@@ -274,7 +273,7 @@ public class ProcedureRequestFhirResourceProviderTest {
 		when(serviceRequestService.update(eq(SERVICE_REQUEST_UUID), any(ServiceRequest.class))).thenReturn(serviceRequest);
 		
 		MethodOutcome result = resourceProvider.updateProcedureRequest(new IdType().setValue(SERVICE_REQUEST_UUID),
-		    (ProcedureRequest) VersionConvertor_30_40.convertResource(serviceRequest, false));
+		    (ProcedureRequest) convertResource(serviceRequest));
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getResource(), notNullValue());
@@ -287,7 +286,7 @@ public class ProcedureRequestFhirResourceProviderTest {
 		        .thenThrow(InvalidRequestException.class);
 		
 		resourceProvider.updateProcedureRequest(new IdType().setValue(WRONG_SERVICE_REQUEST_UUID),
-		    (ProcedureRequest) VersionConvertor_30_40.convertResource(serviceRequest, false));
+		    (ProcedureRequest) convertResource(serviceRequest));
 	}
 	
 	@Test(expected = InvalidRequestException.class)
@@ -298,7 +297,7 @@ public class ProcedureRequestFhirResourceProviderTest {
 		        .thenThrow(InvalidRequestException.class);
 		
 		resourceProvider.updateProcedureRequest(new IdType().setValue(SERVICE_REQUEST_UUID),
-		    (ProcedureRequest) VersionConvertor_30_40.convertResource(noIdServiceRequest, false));
+		    (ProcedureRequest) convertResource(noIdServiceRequest));
 	}
 	
 	@Test(expected = MethodNotAllowedException.class)
@@ -310,7 +309,7 @@ public class ProcedureRequestFhirResourceProviderTest {
 		        .thenThrow(MethodNotAllowedException.class);
 		
 		resourceProvider.updateProcedureRequest(new IdType().setValue(WRONG_SERVICE_REQUEST_UUID),
-		    (ProcedureRequest) VersionConvertor_30_40.convertResource(wrongServiceRequest, false));
+		    (ProcedureRequest) convertResource(wrongServiceRequest));
 	}
 	
 	@Test

@@ -40,7 +40,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.Setter;
 import org.apache.commons.collections.CollectionUtils;
-import org.hl7.fhir.convertors.conv30_40.Patient30_40;
+import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40;
 import org.hl7.fhir.dstu3.model.AllergyIntolerance;
 import org.hl7.fhir.dstu3.model.DiagnosticReport;
 import org.hl7.fhir.dstu3.model.Encounter;
@@ -83,13 +83,13 @@ public class PatientFhirResourceProvider implements IResourceProvider {
 			throw new ResourceNotFoundException("Could not find patient with Id " + id.getIdPart());
 		}
 		
-		return Patient30_40.convertPatient(patient);
+		return (Patient) VersionConvertorFactory_30_40.convertResource(patient);
 	}
 	
 	@Create
 	public MethodOutcome createPatient(@ResourceParam Patient patient) {
-		return FhirProviderUtils
-		        .buildCreate(Patient30_40.convertPatient(patientService.create(Patient30_40.convertPatient(patient))));
+		return FhirProviderUtils.buildCreate(VersionConvertorFactory_30_40.convertResource(
+		    patientService.create((org.hl7.fhir.r4.model.Patient) VersionConvertorFactory_30_40.convertResource(patient))));
 	}
 	
 	@Update
@@ -101,8 +101,9 @@ public class PatientFhirResourceProvider implements IResourceProvider {
 		
 		patient.setId(id.getIdPart());
 		
-		return FhirProviderUtils.buildUpdate(
-		    Patient30_40.convertPatient(patientService.update(id.getIdPart(), Patient30_40.convertPatient(patient))));
+		return FhirProviderUtils
+		        .buildUpdate(VersionConvertorFactory_30_40.convertResource(patientService.update(id.getIdPart(),
+		            (org.hl7.fhir.r4.model.Patient) VersionConvertorFactory_30_40.convertResource(patient))));
 	}
 	
 	@Delete

@@ -9,14 +9,14 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -40,13 +40,13 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Condition;
+import org.hl7.fhir.r4.model.Patient;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.openmrs.Obs;
+import org.openmrs.Condition;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirConditionDao;
@@ -60,11 +60,11 @@ import org.openmrs.module.fhir2.api.translators.ConditionTranslator;
 @RunWith(MockitoJUnitRunner.class)
 public class FhirConditionServiceImplTest {
 	
-	private static final Integer OBS_ID = 12345;
+	private static final Integer CONDITION_ID = 123;
 	
-	private static final String OBS_UUID = "12345-abcde-12345";
+	private static final String CONDITION_UUID = "43578769-f1a4-46af-b08b-d9fe8a07066f";
 	
-	private static final String WRONG_OBS_CONDITION_UUID = "90378769-f1a4-46af-034j";
+	private static final String WRONG_CONDITION_UUID = "90378769-f1a4-46af-b08b-d9fe8a09034j";
 	
 	private static final String LAST_UPDATED_DATE = "2020-09-03";
 	
@@ -73,45 +73,44 @@ public class FhirConditionServiceImplTest {
 	private static final int END_INDEX = 10;
 	
 	@Mock
-	private FhirConditionDao<Obs> dao;
+	private FhirConditionDao<Condition> dao;
+	
+	@Mock
+	private ConditionTranslator<Condition> conditionTranslator;
 	
 	@Mock
 	private FhirGlobalPropertyService globalPropertyService;
 	
 	@Mock
-	private SearchQueryInclude<Condition> searchQueryInclude;
+	private SearchQueryInclude searchQueryInclude;
 	
 	@Mock
-	private SearchQuery<org.openmrs.Obs, Condition, FhirConditionDao<org.openmrs.Obs>, ConditionTranslator<org.openmrs.Obs>, SearchQueryInclude<Condition>> searchQuery;
+	private SearchQuery<Condition, org.hl7.fhir.r4.model.Condition, FhirConditionDao<Condition>, ConditionTranslator<Condition>, SearchQueryInclude<org.hl7.fhir.r4.model.Condition>> searchQuery;
 	
-	@Mock
-	private ConditionTranslator<Obs> translator;
+	private FhirConditionServiceImpl conditionService;
 	
-	private FhirConditionServiceImpl fhirConditionService;
+	private Condition openmrsCondition;
 	
-	private Obs obsCondition;
-	
-	private org.hl7.fhir.r4.model.Condition condition;
+	private org.hl7.fhir.r4.model.Condition fhirCondition;
 	
 	@Before
 	public void setup() {
-		fhirConditionService = new FhirConditionServiceImpl() {
+		conditionService = new FhirConditionServiceImpl() {
 			
 			@Override
-			protected void validateObject(Obs object) {
+			protected void validateObject(Condition object) {
 			}
 		};
+		conditionService.setDao(dao);
+		conditionService.setTranslator(conditionTranslator);
+		conditionService.setSearchQuery(searchQuery);
+		conditionService.setSearchQueryInclude(searchQueryInclude);
 		
-		fhirConditionService.setDao(dao);
-		fhirConditionService.setTranslator(translator);
-		fhirConditionService.setSearchQueryInclude(searchQueryInclude);
-		fhirConditionService.setSearchQuery(searchQuery);
+		openmrsCondition = new Condition();
+		openmrsCondition.setUuid(CONDITION_UUID);
 		
-		obsCondition = new Obs();
-		obsCondition.setUuid(OBS_UUID);
-		
-		condition = new org.hl7.fhir.r4.model.Condition();
-		condition.setId(OBS_UUID);
+		fhirCondition = new org.hl7.fhir.r4.model.Condition();
+		fhirCondition.setId(CONDITION_UUID);
 	}
 	
 	private List<IBaseResource> get(IBundleProvider results) {
@@ -119,87 +118,117 @@ public class FhirConditionServiceImplTest {
 	}
 	
 	@Test
-	public void getObsConditionByUuid_shouldReturnConditionByUuid() {
-		when(dao.get(OBS_UUID)).thenReturn(obsCondition);
-		when(translator.toFhirResource(obsCondition)).thenReturn(condition);
+	public void shouldGetConditionByUuid() {
+		when(dao.get(CONDITION_UUID)).thenReturn(openmrsCondition);
+		when(conditionTranslator.toFhirResource(openmrsCondition)).thenReturn(fhirCondition);
 		
-		Condition result = fhirConditionService.get(OBS_UUID);
-		assertThat(result, notNullValue());
-		assertThat(result.getId(), equalTo(OBS_UUID));
+		org.hl7.fhir.r4.model.Condition condition = conditionService.get(CONDITION_UUID);
+		
+		assertThat(condition, notNullValue());
+		assertThat(condition.getId(), notNullValue());
+		assertThat(condition.getId(), equalTo(CONDITION_UUID));
 	}
 	
 	@Test
 	public void shouldThrowExceptionWhenGetMissingUuid() {
-		assertThrows(ResourceNotFoundException.class, () -> fhirConditionService.get(WRONG_OBS_CONDITION_UUID));
+		assertThrows(ResourceNotFoundException.class, () -> conditionService.get(WRONG_CONDITION_UUID));
 	}
 	
 	@Test
 	public void create_shouldCreateNewCondition() {
-		when(translator.toFhirResource(obsCondition)).thenReturn(condition);
-		when(dao.createOrUpdate(obsCondition)).thenReturn(obsCondition);
-		when(translator.toOpenmrsType(condition)).thenReturn(obsCondition);
+		Condition openMrsCondition = new Condition();
+		openMrsCondition.setUuid(CONDITION_UUID);
 		
-		org.hl7.fhir.r4.model.Condition result = fhirConditionService.create(condition);
+		org.hl7.fhir.r4.model.Condition condition = new org.hl7.fhir.r4.model.Condition();
+		condition.setId(CONDITION_UUID);
+		
+		when(conditionTranslator.toFhirResource(openMrsCondition)).thenReturn(condition);
+		when(dao.createOrUpdate(openMrsCondition)).thenReturn(openMrsCondition);
+		when(conditionTranslator.toOpenmrsType(condition)).thenReturn(openMrsCondition);
+		
+		org.hl7.fhir.r4.model.Condition result = conditionService.create(condition);
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getId(), notNullValue());
-		assertThat(result.getId(), equalTo(OBS_UUID));
+		assertThat(result.getId(), equalTo(CONDITION_UUID));
 	}
 	
 	@Test
-	public void update_shouldUpdateExistingObsCondition() {
-		when(dao.get(OBS_UUID)).thenReturn(obsCondition);
-		when(translator.toFhirResource(obsCondition)).thenReturn(condition);
-		when(dao.createOrUpdate(obsCondition)).thenReturn(obsCondition);
-		when(translator.toOpenmrsType(any(Obs.class), any(org.hl7.fhir.r4.model.Condition.class))).thenReturn(obsCondition);
+	public void update_shouldUpdateExistingCondition() {
+		Condition openmrsCondition = new Condition();
+		openmrsCondition.setUuid(CONDITION_UUID);
 		
-		org.hl7.fhir.r4.model.Condition result = fhirConditionService.update(OBS_UUID, condition);
+		org.hl7.fhir.r4.model.Condition condition = new org.hl7.fhir.r4.model.Condition();
+		condition.setId(CONDITION_UUID);
+		
+		when(dao.get(CONDITION_UUID)).thenReturn(openmrsCondition);
+		when(conditionTranslator.toFhirResource(openmrsCondition)).thenReturn(condition);
+		when(dao.createOrUpdate(openmrsCondition)).thenReturn(openmrsCondition);
+		when(conditionTranslator.toOpenmrsType(any(Condition.class), any(org.hl7.fhir.r4.model.Condition.class)))
+		        .thenReturn(openmrsCondition);
+		
+		org.hl7.fhir.r4.model.Condition result = conditionService.update(CONDITION_UUID, condition);
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getId(), notNullValue());
-		assertThat(result.getId(), equalTo(OBS_UUID));
+		assertThat(result.getId(), equalTo(CONDITION_UUID));
 	}
 	
 	@Test
 	public void update_shouldThrowExceptionWhenIdIsNull() {
 		org.hl7.fhir.r4.model.Condition condition = new org.hl7.fhir.r4.model.Condition();
 		
-		assertThrows(InvalidRequestException.class, () -> fhirConditionService.update(null, condition));
+		assertThrows(InvalidRequestException.class, () -> conditionService.update(null, condition));
 	}
 	
 	@Test
 	public void update_shouldThrowExceptionWhenConditionIsNull() {
-		assertThrows(InvalidRequestException.class, () -> fhirConditionService.update(OBS_UUID, null));
+		assertThrows(InvalidRequestException.class, () -> conditionService.update(CONDITION_UUID, null));
+	}
+	
+	@Test
+	public void update_shouldThrowExceptionWhenConditionIdIsNull() {
+		org.hl7.fhir.r4.model.Condition condition = new org.hl7.fhir.r4.model.Condition();
+		
+		assertThrows(InvalidRequestException.class, () -> conditionService.update(CONDITION_UUID, condition));
 	}
 	
 	@Test
 	public void update_shouldThrowExceptionWhenConditionIdDoesNotMatchCurrentId() {
 		org.hl7.fhir.r4.model.Condition condition = new org.hl7.fhir.r4.model.Condition();
-		condition.setId(OBS_UUID);
+		condition.setId(WRONG_CONDITION_UUID);
 		
-		assertThrows(InvalidRequestException.class, () -> fhirConditionService.update(WRONG_OBS_CONDITION_UUID, condition));
+		assertThrows(InvalidRequestException.class, () -> conditionService.update(CONDITION_UUID, condition));
 	}
 	
 	@Test
 	public void delete_shouldDeleteExistingCondition() {
-		when(dao.delete(OBS_UUID)).thenReturn(obsCondition);
+		Condition openmrsCondition = new Condition();
+		openmrsCondition.setUuid(CONDITION_UUID);
 		
-		fhirConditionService.delete(OBS_UUID);
+		org.hl7.fhir.r4.model.Condition condition = new org.hl7.fhir.r4.model.Condition();
+		condition.setId(CONDITION_UUID);
+		
+		when(dao.delete(CONDITION_UUID)).thenReturn(openmrsCondition);
+		
+		conditionService.delete(CONDITION_UUID);
 	}
 	
 	@Test
 	public void delete_shouldThrowExceptionWhenIdIsNull() {
-		assertThrows(InvalidRequestException.class, () -> fhirConditionService.delete(null));
+		assertThrows(InvalidRequestException.class, () -> conditionService.delete(null));
 	}
 	
 	@Test
 	public void searchConditions_shouldReturnTranslatedConditionReturnedByDao() {
 		ReferenceAndListParam patientReference = new ReferenceAndListParam();
-		patientReference.addValue(
-		    new ReferenceOrListParam().add(new ReferenceParam(org.hl7.fhir.r4.model.Patient.SP_GIVEN, "patient name")));
+		patientReference.addValue(new ReferenceOrListParam().add(new ReferenceParam(Patient.SP_GIVEN, "patient name")));
 		
 		TokenAndListParam codeList = new TokenAndListParam();
 		codeList.addValue(new TokenOrListParam().add(new TokenParam("test code")));
+		
+		TokenAndListParam clinicalList = new TokenAndListParam();
+		clinicalList.addValue(new TokenOrListParam().add(new TokenParam("test clinical")));
 		
 		DateRangeParam onsetDate = new DateRangeParam().setLowerBound("gt2020-05-01").setUpperBound("lt2021-05-01");
 		
@@ -208,7 +237,7 @@ public class FhirConditionServiceImplTest {
 		
 		DateRangeParam recordDate = new DateRangeParam().setLowerBound("gt2020-05-01").setUpperBound("lt2021-05-01");
 		
-		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(OBS_UUID));
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(CONDITION_UUID));
 		
 		DateRangeParam lastUpdated = new DateRangeParam().setLowerBound(LAST_UPDATED_DATE).setUpperBound(LAST_UPDATED_DATE);
 		
@@ -219,6 +248,7 @@ public class FhirConditionServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap()
 		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientReference)
 		        .addParameter(FhirConstants.CODED_SEARCH_HANDLER, codeList)
+		        .addParameter(FhirConstants.CONDITION_CLINICAL_STATUS_HANDLER, clinicalList)
 		        .addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER, onsetAge)
 		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, "onsetDate", onsetDate)
 		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, "dateCreated", recordDate)
@@ -226,14 +256,14 @@ public class FhirConditionServiceImplTest {
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated)
 		        .setSortSpec(sort);
 		
-		when(dao.getSearchResults(any())).thenReturn(Collections.singletonList(obsCondition));
+		when(dao.getSearchResults(any())).thenReturn(Collections.singletonList(openmrsCondition));
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
-		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
+		    new SearchQueryBundleProvider<>(theParams, dao, conditionTranslator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
-		when(translator.toFhirResource(obsCondition)).thenReturn(condition);
+		when(conditionTranslator.toFhirResource(openmrsCondition)).thenReturn(fhirCondition);
 		
-		IBundleProvider result = fhirConditionService.searchConditions(new ConditionSearchParams(patientReference, codeList,
-		        null, onsetDate, onsetAge, recordDate, uuid, lastUpdated, sort, includes));
+		IBundleProvider result = conditionService.searchConditions(new ConditionSearchParams(patientReference, codeList,
+		        clinicalList, onsetDate, onsetAge, recordDate, uuid, lastUpdated, sort, includes));
 		
 		List<IBaseResource> resultList = get(result);
 		
@@ -241,5 +271,4 @@ public class FhirConditionServiceImplTest {
 		assertThat(resultList, not(empty()));
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 	}
-	
 }

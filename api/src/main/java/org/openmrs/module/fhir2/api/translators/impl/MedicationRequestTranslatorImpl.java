@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.apache.commons.lang3.Validate.notNull;
+import static org.openmrs.module.fhir2.FhirConstants.OPENMRS_FHIR_EXT_MEDICATION_REQUEST_FULFILLER_STATUS;
 import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getLastUpdated;
 import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getVersionId;
 
@@ -21,7 +22,9 @@ import lombok.AccessLevel;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.Annotation;
+import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.openmrs.Concept;
 import org.openmrs.Drug;
@@ -29,7 +32,6 @@ import org.openmrs.DrugOrder;
 import org.openmrs.Encounter;
 import org.openmrs.Order;
 import org.openmrs.Provider;
-import org.openmrs.annotation.OpenmrsProfile;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.DosageTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
@@ -46,7 +48,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-@OpenmrsProfile(openmrsPlatformVersion = "2.0.5 - 2.1.*")
 public class MedicationRequestTranslatorImpl extends BaseReferenceHandlingTranslator implements MedicationRequestTranslator {
 	
 	@Autowired
@@ -121,6 +122,13 @@ public class MedicationRequestTranslatorImpl extends BaseReferenceHandlingTransl
 			        .setIdentifier(orderIdentifierTranslator.toFhirResource(drugOrder.getPreviousOrder()))));
 		}
 		
+		if (drugOrder.getFulfillerStatus() != null) {
+			Extension extension = new Extension();
+			extension.setUrl(OPENMRS_FHIR_EXT_MEDICATION_REQUEST_FULFILLER_STATUS);
+			extension.setValue(new CodeType(drugOrder.getFulfillerStatus().toString()));
+			medicationRequest.addExtension(extension);
+		}
+		
 		medicationRequest.getMeta().setLastUpdated(getLastUpdated(drugOrder));
 		medicationRequest.getMeta().setVersionId(getVersionId(drugOrder));
 		
@@ -170,6 +178,17 @@ public class MedicationRequestTranslatorImpl extends BaseReferenceHandlingTransl
 		
 		medicationRequestDispenseRequestComponentTranslator.toOpenmrsType(existingDrugOrder,
 		    medicationRequest.getDispenseRequest());
+		
+		if (medicationRequest.getExtensionByUrl(OPENMRS_FHIR_EXT_MEDICATION_REQUEST_FULFILLER_STATUS) != null) {
+			if (!medicationRequest.getExtensionByUrl(OPENMRS_FHIR_EXT_MEDICATION_REQUEST_FULFILLER_STATUS).getValue()
+			        .isEmpty()) {
+				existingDrugOrder.setFulfillerStatus(Order.FulfillerStatus
+				        .valueOf(medicationRequest.getExtensionByUrl(OPENMRS_FHIR_EXT_MEDICATION_REQUEST_FULFILLER_STATUS)
+				                .getValue().toString().toUpperCase()));
+			} else {
+				existingDrugOrder.setFulfillerStatus(null);
+			}
+		}
 		
 		return existingDrugOrder;
 		

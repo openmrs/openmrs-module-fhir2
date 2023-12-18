@@ -36,7 +36,7 @@ import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Getter;
-import org.hl7.fhir.convertors.conv30_40.DiagnosticReport30_40;
+import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40;
 import org.hl7.fhir.dstu3.model.DiagnosticReport;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
@@ -125,7 +125,7 @@ public class DiagnosticReportFhirResourceProviderTest extends BaseFhirR3Provenan
 		when(service.create(any(org.hl7.fhir.r4.model.DiagnosticReport.class))).thenReturn(diagnosticReport);
 		
 		MethodOutcome result = resourceProvider
-		        .createDiagnosticReport(DiagnosticReport30_40.convertDiagnosticReport(diagnosticReport));
+		        .createDiagnosticReport((DiagnosticReport) VersionConvertorFactory_30_40.convertResource(diagnosticReport));
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getResource(), notNullValue());
@@ -137,7 +137,7 @@ public class DiagnosticReportFhirResourceProviderTest extends BaseFhirR3Provenan
 		when(service.update(eq(UUID), any(org.hl7.fhir.r4.model.DiagnosticReport.class))).thenReturn(diagnosticReport);
 		
 		MethodOutcome result = resourceProvider.updateDiagnosticReport(new IdType().setValue(UUID),
-		    DiagnosticReport30_40.convertDiagnosticReport(diagnosticReport));
+		    (DiagnosticReport) VersionConvertorFactory_30_40.convertResource(diagnosticReport));
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getResource(), notNullValue());
@@ -150,7 +150,7 @@ public class DiagnosticReportFhirResourceProviderTest extends BaseFhirR3Provenan
 		        .thenThrow(InvalidRequestException.class);
 		
 		resourceProvider.updateDiagnosticReport(new IdType().setValue(WRONG_UUID),
-		    DiagnosticReport30_40.convertDiagnosticReport(diagnosticReport));
+		    (DiagnosticReport) VersionConvertorFactory_30_40.convertResource(diagnosticReport));
 	}
 	
 	@Test(expected = InvalidRequestException.class)

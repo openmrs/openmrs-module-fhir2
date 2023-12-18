@@ -236,13 +236,13 @@ public class FhirTaskDaoImplTest extends BaseModuleContextSensitiveTest {
 		
 		toUpdate.setInput(Collections.singleton(input));
 		
-		FhirTask result = dao.get(TASK_UUID);
+		FhirTask updatedInput = dao.createOrUpdate(toUpdate);
 		
-		assertThat(result.getInput(), notNullValue());
-		assertThat(result.getInput(), not(empty()));
+		assertThat(updatedInput.getInput(), notNullValue());
+		assertThat(updatedInput.getInput(), not(empty()));
 		
-		assertThat(result.getInput(), hasItem(hasProperty("type", hasProperty("uuid", equalTo(CONCEPT_UUID)))));
-		assertThat(result.getInput(), hasItem(hasProperty("valueNumeric", equalTo(someNumericVal))));
+		assertThat(updatedInput.getInput(), hasItem(hasProperty("type", hasProperty("uuid", equalTo(CONCEPT_UUID)))));
+		assertThat(updatedInput.getInput(), hasItem(hasProperty("valueNumeric", equalTo(someNumericVal))));
 	}
 	
 	@Test
@@ -254,6 +254,8 @@ public class FhirTaskDaoImplTest extends BaseModuleContextSensitiveTest {
 		cd.setSessionFactory(sessionFactory);
 		
 		FhirTask toUpdate = dao.get(TASK_UUID);
+		
+		assertThat(toUpdate, notNullValue());
 		
 		FhirReference outputReference = new FhirReference();
 		outputReference.setType(FhirConstants.DIAGNOSTIC_REPORT);
@@ -274,13 +276,13 @@ public class FhirTaskDaoImplTest extends BaseModuleContextSensitiveTest {
 		
 		toUpdate.setOutput(Collections.singleton(output));
 		
-		FhirTask result = dao.get(TASK_UUID);
+		FhirTask updatedOutput = dao.createOrUpdate(toUpdate);
 		
-		assertThat(result.getOutput(), notNullValue());
-		assertThat(result.getOutput(), not(empty()));
+		assertThat(updatedOutput.getOutput(), notNullValue());
+		assertThat(updatedOutput.getOutput(), not(empty()));
 		
-		assertThat(result.getOutput(), hasItem(hasProperty("type", hasProperty("uuid", equalTo(CONCEPT_UUID)))));
-		assertThat(result.getOutput(),
+		assertThat(updatedOutput.getOutput(), hasItem(hasProperty("type", hasProperty("uuid", equalTo(CONCEPT_UUID)))));
+		assertThat(updatedOutput.getOutput(),
 		    hasItem(hasProperty("valueReference", hasProperty("reference", equalTo(DIAGNOSTIC_REPORT_UUID)))));
 	}
 	

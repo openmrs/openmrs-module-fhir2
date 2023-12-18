@@ -82,6 +82,7 @@ public class DosageTranslatorImplTest {
 		
 		quantityCodingTranslator = new MedicationQuantityCodingTranslatorImpl();
 		quantityCodingTranslator.setConceptTranslator(conceptTranslator);
+		quantityCodingTranslator.setConceptSourceService(conceptSourceService);
 		
 		timingTranslator = new MedicationRequestTimingTranslatorImpl();
 		timingTranslator.setConceptTranslator(conceptTranslator);

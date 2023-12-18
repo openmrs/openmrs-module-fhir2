@@ -45,7 +45,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.Setter;
 import org.apache.commons.collections.CollectionUtils;
-import org.hl7.fhir.convertors.conv30_40.Encounter30_40;
+import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40;
 import org.hl7.fhir.dstu3.model.DiagnosticReport;
 import org.hl7.fhir.dstu3.model.Encounter;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -88,14 +88,14 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 			throw new ResourceNotFoundException("Could not find encounter with Id " + id.getIdPart());
 		}
 		
-		return Encounter30_40.convertEncounter(encounter);
+		return (Encounter) VersionConvertorFactory_30_40.convertResource(encounter);
 	}
 	
 	@Create
 	@SuppressWarnings("unused")
 	public MethodOutcome createEncounter(@ResourceParam Encounter encounter) {
-		return FhirProviderUtils.buildCreate(
-		    Encounter30_40.convertEncounter(encounterService.create(Encounter30_40.convertEncounter(encounter))));
+		return FhirProviderUtils.buildCreate(VersionConvertorFactory_30_40.convertResource(encounterService
+		        .create((org.hl7.fhir.r4.model.Encounter) VersionConvertorFactory_30_40.convertResource(encounter))));
 	}
 	
 	@Update
@@ -107,8 +107,9 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 		
 		encounter.setId(id.getIdPart());
 		
-		return FhirProviderUtils.buildUpdate(Encounter30_40
-		        .convertEncounter(encounterService.update(id.getIdPart(), Encounter30_40.convertEncounter(encounter))));
+		return FhirProviderUtils
+		        .buildUpdate(VersionConvertorFactory_30_40.convertResource(encounterService.update(id.getIdPart(),
+		            (org.hl7.fhir.r4.model.Encounter) VersionConvertorFactory_30_40.convertResource(encounter))));
 	}
 	
 	@Delete

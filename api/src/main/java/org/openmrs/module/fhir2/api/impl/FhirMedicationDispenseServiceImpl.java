@@ -33,7 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @Setter(AccessLevel.PACKAGE)
 @Getter(AccessLevel.PROTECTED)
-@OpenmrsProfile(openmrsPlatformVersion = "2.0.5 - 2.5.*")
+@OpenmrsProfile(openmrsPlatformVersion = "2.* - 2.5.*")
 public class FhirMedicationDispenseServiceImpl implements FhirMedicationDispenseService {
 	
 	@Override

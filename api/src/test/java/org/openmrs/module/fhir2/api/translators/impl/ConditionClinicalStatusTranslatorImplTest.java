@@ -21,17 +21,17 @@ import org.junit.Test;
 import org.openmrs.ConditionClinicalStatus;
 import org.openmrs.module.fhir2.FhirConstants;
 
-public class ConditionClinicalStatusTranslatorImpl_2_2Test {
+public class ConditionClinicalStatusTranslatorImplTest {
 	
 	private static final String ACTIVE = "active";
 	
 	private static final String INACTIVE = "inactive";
 	
-	private ConditionClinicalStatusTranslatorImpl_2_2 clinicalStatusTranslator;
+	private ConditionClinicalStatusTranslatorImpl clinicalStatusTranslator;
 	
 	@Before
 	public void setUp() {
-		this.clinicalStatusTranslator = new ConditionClinicalStatusTranslatorImpl_2_2();
+		this.clinicalStatusTranslator = new ConditionClinicalStatusTranslatorImpl();
 	}
 	
 	@Test

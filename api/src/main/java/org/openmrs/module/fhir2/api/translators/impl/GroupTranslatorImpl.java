@@ -22,7 +22,6 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.r4.model.Group;
 import org.openmrs.Cohort;
-import org.openmrs.annotation.OpenmrsProfile;
 import org.openmrs.module.fhir2.api.translators.GroupMemberTranslator;
 import org.openmrs.module.fhir2.api.translators.GroupTranslator;
 import org.openmrs.module.fhir2.model.GroupMember;
@@ -32,7 +31,6 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @Setter(AccessLevel.MODULE)
-@OpenmrsProfile(openmrsPlatformVersion = "2.0.* - 2.0.*")
 public class GroupTranslatorImpl extends BaseGroupTranslator implements GroupTranslator {
 	
 	@Autowired

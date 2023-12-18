@@ -31,7 +31,7 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.Setter;
 import org.apache.commons.collections.CollectionUtils;
-import org.hl7.fhir.convertors.conv30_40.RelatedPerson30_40;
+import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.RelatedPerson;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -62,7 +62,7 @@ public class RelatedPersonFhirResourceProvider implements IResourceProvider {
 		if (relatedPerson == null) {
 			throw new ResourceNotFoundException("Could not find relatedPerson with Id " + id.getIdPart());
 		}
-		return RelatedPerson30_40.convertRelatedPerson(relatedPerson);
+		return (RelatedPerson) VersionConvertorFactory_30_40.convertResource(relatedPerson);
 	}
 	
 	@Search
