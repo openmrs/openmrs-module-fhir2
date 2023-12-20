@@ -83,14 +83,12 @@ public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLo
 		OpenmrsFhirCriteriaContext<LocationAttribute> criteriaContext = openmrsFhirCriteriaContext();
 		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot());
 		
-		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder()
-		        .equal(criteriaContext.getRoot().join("location").get("id"), location.getId()));
-		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder()
-		        .equal(criteriaContext.getRoot().join("attributeType").get("uuid"), locationAttributeTypeUuid));
-		criteriaContext
-		        .addPredicate(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("voided"), false));
+		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().and(criteriaContext.getCriteriaBuilder()
+				.equal(criteriaContext.getRoot().join("location").get("locationId"), location.getId()),criteriaContext.getCriteriaBuilder()
+				.equal(criteriaContext.getRoot().join("attributeType").get("uuid"), locationAttributeTypeUuid),criteriaContext.getCriteriaBuilder()
+				.equal(criteriaContext.getRoot().get("voided"), false)));
 		
-		return criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).getResultList();
+		return criteriaContext.getEntityManager().createQuery(criteriaContext.finalizeQuery()).getResultList();
 	}
 	
 	private void handleName(OpenmrsFhirCriteriaContext<Location> criteriaContext, StringAndListParam namePattern) {

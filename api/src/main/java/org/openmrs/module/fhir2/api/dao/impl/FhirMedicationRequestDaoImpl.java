@@ -153,10 +153,11 @@ public class FhirMedicationRequestDaoImpl extends BaseFhirDao<DrugOrder> impleme
 	private void handleCodedConcept(OpenmrsFhirCriteriaContext<DrugOrder> criteriaContext, TokenAndListParam code) {
 		if (code != null) {
 			if (lacksAlias(criteriaContext, "c")) {
-				criteriaContext.getRoot().join("concept").alias("c");
+				criteriaContext.getRoot().join("concept");
 			}
 			
-			handleCodeableConcept(criteriaContext, code, "c", "cm", "crt").ifPresent(criteriaContext::addPredicate);
+			handleCodeableConcept(criteriaContext, code, "c", "cm", "crt")
+					.ifPresent(criteriaContext::addPredicate);
 			criteriaContext.finalizeQuery();
 		}
 	}

@@ -11,6 +11,7 @@ package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.openmrs.module.fhir2.FhirConstants.ENCOUNTER_TYPE_REFERENCE_SEARCH_HANDLER;
 
+import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 
@@ -111,14 +112,13 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 									criteriaContext.addJoin("en.orders", "orders");
 								}
 							}
+							Join<DrugOrder,Order> join = criteriaContext.getRoot().join("orders");
 							// Constrain only on non-voided Drug Orders
-							criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder()
-							        .equal(criteriaContext.getRoot().get("orders.class"), DrugOrder.class));
 							// TODO Do these criteria still work?
 							criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder()
-							        .equal(criteriaContext.getRoot().get("orders.voided"), false));
+							        .equal(join.get("voided"), false));
 							criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder()
-							        .notEqual(criteriaContext.getRoot().get("orders.action"), Order.Action.DISCONTINUE));
+							        .notEqual(join.get("action"), Order.Action.DISCONTINUE));
 							
 							String paramName = hasParam.getParameterName();
 							String paramValue = hasParam.getParameterValue();
@@ -146,7 +146,7 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 									}
 									if (MedicationRequest.MedicationRequestStatus.COMPLETED.toString()
 									        .equalsIgnoreCase(paramValue)) {
-										Predicate notCompletedCriterion = generateNotCompletedOrderQuery("orders");
+										Predicate notCompletedCriterion = generateNotCompletedOrderQuery(criteriaContext,"orders");
 										if (notCompletedCriterion != null) {
 											criteriaContext.getCriteriaBuilder().and(notCompletedCriterion);
 										}
@@ -156,13 +156,13 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 							} else if ((FhirConstants.SP_FULFILLER_STATUS).equalsIgnoreCase(paramName)) {
 								if (paramValue != null) {
 									criteriaContext.getCriteriaBuilder()
-									        .and(generateFulfillerStatusRestriction("orders", paramValue));
+									        .and(generateFulfillerStatusRestriction(criteriaContext,"orders", paramValue));
 								}
 								handled = true;
 							} else if ((FhirConstants.SP_FULFILLER_STATUS + ":not").equalsIgnoreCase(paramName)) {
 								if (paramValue != null) {
 									criteriaContext.getCriteriaBuilder()
-									        .and(generateNotFulfillerStatusRestriction("orders", paramValue));
+									        .and(generateNotFulfillerStatusRestriction(criteriaContext,"orders", paramValue));
 								}
 								handled = true;
 							}
@@ -186,17 +186,17 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 	protected abstract void handleParticipant(OpenmrsFhirCriteriaContext<T> criteriaContext,
 	        ReferenceAndListParam referenceAndListParam);
 	
-	protected Predicate generateNotCompletedOrderQuery(String path) {
+	protected <T> Predicate generateNotCompletedOrderQuery(OpenmrsFhirCriteriaContext<T> criteriaContext, String path) {
 		// not implemented in Core until 2.2; see override in FhirEncounterDaoImpl_2_2
 		return null;
 	}
 	
-	protected Predicate generateFulfillerStatusRestriction(String path, String fulfillerStatus) {
+	protected <T> Predicate generateFulfillerStatusRestriction(OpenmrsFhirCriteriaContext<T> criteriaContext, String path, String fulfillerStatus) {
 		// not implemented in Core until 2.2; see override in FhirEncounterDaoImpl_2_2
 		return null;
 	}
 	
-	protected Predicate generateNotFulfillerStatusRestriction(String path, String fulfillerStatus) {
+	protected <V> Predicate generateNotFulfillerStatusRestriction(OpenmrsFhirCriteriaContext<V> criteriaContext, String path, String fulfillerStatus) {
 		// not implemented in Core until 2.2; see override in FhirEncounterDaoImpl_2_2
 		return null;
 	}

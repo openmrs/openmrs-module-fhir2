@@ -11,6 +11,7 @@ package org.openmrs.module.fhir2.api.dao.impl;
 
 import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -56,11 +57,17 @@ public class FhirConceptSourceDaoImpl implements FhirConceptSourceDao {
 	public Optional<FhirConceptSource> getFhirConceptSourceByUrl(@Nonnull String url) {
 		OpenmrsFhirCriteriaContext<FhirConceptSource> criteriaContext = openmrsFhirCriteriaContext();
 		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot());
+
+		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().and(criteriaContext.getCriteriaBuilder()
+				.equal(criteriaContext.getRoot().get("url"), url),criteriaContext.getCriteriaBuilder()
+				.equal(criteriaContext.getRoot().get("retired"), false)));
 		
-		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("url"), url));
-		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("retired"), false));
-		
-		return Optional.ofNullable(criteriaContext.getEntityManager().createQuery(criteriaContext.finalizeQuery()).getSingleResult());
+		try {
+			return Optional.ofNullable(criteriaContext.getEntityManager().createQuery(criteriaContext.finalizeQuery()).getSingleResult());
+		}
+		catch (NoResultException e) {
+			return Optional.empty();
+		}
 	}
 	
 	@Override
@@ -70,13 +77,18 @@ public class FhirConceptSourceDaoImpl implements FhirConceptSourceDao {
 		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot());
 		
 		Join<FhirConceptSource, ConceptSource> conceptSourceJoin = criteriaContext.getRoot().join("conceptSource");
+
+		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().and(criteriaContext.getCriteriaBuilder()
+				.equal(conceptSourceJoin.get("name"), sourceName),criteriaContext.getCriteriaBuilder()
+				.equal(conceptSourceJoin.get("retired"), false),criteriaContext.getCriteriaBuilder()
+				.equal(criteriaContext.getRoot().get("retired"), false)));
 		
-		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().equal(conceptSourceJoin.get("name"), sourceName));
-		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().equal(conceptSourceJoin.get("voided"), false));
-		
-		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("voided"), false));
-		
-		return Optional.ofNullable(criteriaContext.getEntityManager().createQuery(criteriaContext.finalizeQuery()).getSingleResult());
+		try {
+			return Optional.ofNullable(criteriaContext.getEntityManager().createQuery(criteriaContext.finalizeQuery()).getSingleResult());
+		}
+		catch (NoResultException e) {
+			return Optional.empty();
+		}
 	}
 	
 	@Override
