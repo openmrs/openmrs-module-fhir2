@@ -1041,23 +1041,19 @@ public abstract class BaseDao {
 	
 	protected <T> Predicate generateActiveOrderQuery(OpenmrsFhirCriteriaContext<T> criteriaContext, String path,
 	        Date onDate) {
-		if (StringUtils.isNotBlank(path)) {
-			path = path + ".";
-		}
-		
 		// ACTIVE = date activated null or less than or equal to current datetime, date stopped null or in the future, auto expire date null or in the future
 		return criteriaContext.getCriteriaBuilder().and(
 		    criteriaContext.getCriteriaBuilder().or(
-		        criteriaContext.getCriteriaBuilder().isNull(criteriaContext.getRoot().get(path + "dateActivated")),
-		        criteriaContext.getCriteriaBuilder().lessThan(criteriaContext.getRoot().get(path + "dateActivated"),
+		        criteriaContext.getCriteriaBuilder().isNull(criteriaContext.getRoot().join(path).get("dateActivated")),
+		        criteriaContext.getCriteriaBuilder().lessThan(criteriaContext.getRoot().join(path).get("dateActivated"),
 		            onDate)),
 		    criteriaContext.getCriteriaBuilder().or(
-		        criteriaContext.getCriteriaBuilder().isNull(criteriaContext.getRoot().get(path + "dateStopped")),
-		        criteriaContext.getCriteriaBuilder().greaterThan(criteriaContext.getRoot().get(path + "dateStopped"),
+		        criteriaContext.getCriteriaBuilder().isNull(criteriaContext.getRoot().join(path).get("dateStopped")),
+		        criteriaContext.getCriteriaBuilder().greaterThan(criteriaContext.getRoot().join(path).get("dateStopped"),
 		            onDate)),
 		    criteriaContext.getCriteriaBuilder().or(
-		        criteriaContext.getCriteriaBuilder().isNull(criteriaContext.getRoot().get(path + "autoExpireDate")),
-		        criteriaContext.getCriteriaBuilder().greaterThan(criteriaContext.getRoot().get(path + "autoExpireDate"),
+		        criteriaContext.getCriteriaBuilder().isNull(criteriaContext.getRoot().join(path).get("autoExpireDate")),
+		        criteriaContext.getCriteriaBuilder().greaterThan(criteriaContext.getRoot().join(path).get("autoExpireDate"),
 		            onDate)));
 	}
 	
@@ -1078,15 +1074,11 @@ public abstract class BaseDao {
 	}
 	
 	protected <T> Predicate generateNotCancelledOrderQuery(OpenmrsFhirCriteriaContext<T> criteriaContext, String path) {
-		if (StringUtils.isNotBlank(path)) {
-			path = path + ".";
-		}
-		
 		Date now = new Date();
 		
 		return criteriaContext.getCriteriaBuilder().or(
-		    criteriaContext.getCriteriaBuilder().isNull(criteriaContext.getRoot().get(path + "dateStopped")),
-		    criteriaContext.getCriteriaBuilder().greaterThan(criteriaContext.getRoot().get(path + "dateStopped"), now));
+		    criteriaContext.getCriteriaBuilder().isNull(criteriaContext.getRoot().join(path).get("dateStopped")),
+		    criteriaContext.getCriteriaBuilder().greaterThan(criteriaContext.getRoot().join(path).get("dateStopped"), now));
 	}
 	
 	protected TokenOrListParam convertStringStatusToBoolean(TokenOrListParam statusParam) {

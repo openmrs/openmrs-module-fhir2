@@ -32,6 +32,7 @@ import org.hibernate.Hibernate;
 import org.hibernate.proxy.HibernateProxy;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.openmrs.Auditable;
+import org.openmrs.Encounter;
 import org.openmrs.Obs;
 import org.openmrs.OpenmrsObject;
 import org.openmrs.Order;
@@ -157,30 +158,30 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	@Override
 	public List<T> getSearchResults(@Nonnull SearchParameterMap theParams) {
 		OpenmrsFhirCriteriaContext<T> criteriaContext = getSearchResultCriteria(theParams);
-		
-		handleSort(criteriaContext, theParams.getSortSpec());
-		criteriaContext.addOrder(criteriaContext.getCriteriaBuilder().asc(criteriaContext.getRoot().get("id")));
-		
-		criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery())
-		        .setFirstResult(theParams.getFromIndex());
-		if (theParams.getToIndex() != Integer.MAX_VALUE) {
-			int maxResults = theParams.getToIndex() - theParams.getFromIndex();
-			criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).setMaxResults(maxResults);
-		}
-		
-		List<T> results;
-		if (hasDistinctResults()) {
-			results = criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).getResultList();
-		} else {
 			
-			OpenmrsFhirCriteriaContext<Long> longOpenmrsFhirCriteriaContext = createCriteriaContext(Long.class);
-			longOpenmrsFhirCriteriaContext.getCriteriaQuery().subquery(Long.class).select(longOpenmrsFhirCriteriaContext
-			        .getCriteriaBuilder().countDistinct(longOpenmrsFhirCriteriaContext.getRoot().get("id")));
+			handleSort(criteriaContext, theParams.getSortSpec());
+			criteriaContext.addOrder(criteriaContext.getCriteriaBuilder().asc(criteriaContext.getRoot().get("id")));
 			
-			longOpenmrsFhirCriteriaContext.getCriteriaQuery().select(longOpenmrsFhirCriteriaContext.getRoot())
-			        .where(longOpenmrsFhirCriteriaContext.getCriteriaBuilder()
-			                .in(longOpenmrsFhirCriteriaContext.getRoot().get("id"))
-			                .value(longOpenmrsFhirCriteriaContext.getCriteriaQuery().subquery(Long.class)));
+			criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery())
+					.setFirstResult(theParams.getFromIndex());
+			if (theParams.getToIndex() != Integer.MAX_VALUE) {
+				int maxResults = theParams.getToIndex() - theParams.getFromIndex();
+				criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).setMaxResults(maxResults);
+			}
+			
+			List<T> results;
+			if (hasDistinctResults()) {
+				results = criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).getResultList();
+			} else {
+				
+				OpenmrsFhirCriteriaContext<Long> longOpenmrsFhirCriteriaContext = createCriteriaContext(Long.class);
+				longOpenmrsFhirCriteriaContext.getCriteriaQuery().subquery(Long.class).select(longOpenmrsFhirCriteriaContext
+						.getCriteriaBuilder().countDistinct(longOpenmrsFhirCriteriaContext.getRoot().get("id")));
+				
+				longOpenmrsFhirCriteriaContext.getCriteriaQuery().select(longOpenmrsFhirCriteriaContext.getRoot())
+						.where(longOpenmrsFhirCriteriaContext.getCriteriaBuilder()
+								.in(longOpenmrsFhirCriteriaContext.getRoot().get("id"))
+								.value(longOpenmrsFhirCriteriaContext.getCriteriaQuery().subquery(Long.class)));
 			
 			//TODO: gonna come back to it later
 			//			handleSort(projectionCriteriaBuilder, theParams.getSortSpec(), this::paramToProps).ifPresent(

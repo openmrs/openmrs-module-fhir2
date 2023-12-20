@@ -50,14 +50,12 @@ public class FhirPractitionerDaoImpl extends BasePractitionerDao<Provider> imple
 		OpenmrsFhirCriteriaContext<ProviderAttribute> criteriaContext = openmrsFhirCriteriaContext();
 		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot());
 		
-		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder()
-		        .equal(criteriaContext.getRoot().join("provider").get("id"), provider.getId()));
-		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder()
-		        .equal(criteriaContext.getRoot().join("AttributeType").get("uuid"), providerAttributeTypeUuid));
-		criteriaContext
-		        .addPredicate(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("voided"), false));
+		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().and(criteriaContext.getCriteriaBuilder()
+				.equal(criteriaContext.getRoot().join("provider").get("providerId"), provider.getId()),criteriaContext.getCriteriaBuilder()
+				.equal(criteriaContext.getRoot().join("attributeType").get("uuid"), providerAttributeTypeUuid),criteriaContext.getCriteriaBuilder()
+				.equal(criteriaContext.getRoot().get("voided"), false)));
 		
-		return criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).getResultList();
+		return criteriaContext.getEntityManager().createQuery(criteriaContext.finalizeQuery()).getResultList();
 	}
 	
 	protected OpenmrsFhirCriteriaContext<ProviderAttribute> openmrsFhirCriteriaContext() {

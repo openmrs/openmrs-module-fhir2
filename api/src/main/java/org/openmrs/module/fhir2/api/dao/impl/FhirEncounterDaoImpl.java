@@ -27,10 +27,9 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.NonNull;
 import lombok.Setter;
-import org.apache.commons.lang3.StringUtils;
-import org.hibernate.criterion.Restrictions;
 import org.openmrs.Encounter;
 import org.openmrs.EncounterType;
+import org.openmrs.Obs;
 import org.openmrs.Order;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirEncounterDao;
@@ -45,6 +44,55 @@ public class FhirEncounterDaoImpl extends BaseEncounterDao<Encounter> implements
 	@Override
 	public boolean hasDistinctResults() {
 		return false;
+	}
+	
+	@Override
+	public List<Encounter> getSearchResults(@NonNull SearchParameterMap theParams) {
+		OpenmrsFhirCriteriaContext<Encounter> criteriaContext = getSearchResultCriteria(theParams);
+		handleSort(criteriaContext, theParams.getSortSpec());
+		criteriaContext.addOrder(criteriaContext.getCriteriaBuilder().asc(criteriaContext.getRoot().get("encounterId")));
+			
+		criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).setFirstResult(theParams.getFromIndex());
+		if (theParams.getToIndex() != Integer.MAX_VALUE) {
+			int maxResults = theParams.getToIndex() - theParams.getFromIndex();
+			criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).setMaxResults(maxResults);
+		}
+			
+		List<Encounter> results;
+		if (hasDistinctResults()) {
+			results = criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).getResultList();
+		} else {
+			OpenmrsFhirCriteriaContext<Long> longOpenmrsFhirCriteriaContext = createCriteriaContext(Long.class);
+			longOpenmrsFhirCriteriaContext.getCriteriaQuery().subquery(Long.class).select(longOpenmrsFhirCriteriaContext
+					.getCriteriaBuilder().countDistinct(longOpenmrsFhirCriteriaContext.getRoot().get("id")));
+				
+			longOpenmrsFhirCriteriaContext.getCriteriaQuery().select(longOpenmrsFhirCriteriaContext.getRoot())
+					.where(longOpenmrsFhirCriteriaContext.getCriteriaBuilder()
+							.in(longOpenmrsFhirCriteriaContext.getRoot().get("id"))
+							.value(longOpenmrsFhirCriteriaContext.getCriteriaQuery().subquery(Long.class)));
+				
+				//TODO: gonna come back to it later
+				//			handleSort(projectionCriteriaBuilder, theParams.getSortSpec(), this::paramToProps).ifPresent(
+				//					orders -> orders.forEach(order -> projectionList.add(Projections.property(order.getPropertyName()))));
+				//			criteria.setProjection(projectionList);
+				//			List<Integer> ids = new ArrayList<>();
+				//			if (projectionList.getLength() > 1) {
+				//				for (Object[] o : ((List<Object[]>) criteria.list())) {
+				//					ids.add((Integer) o[0]);
+				//				}
+				//			} else {
+				//				ids = criteria.list();
+				//			}
+				
+			longOpenmrsFhirCriteriaContext.getCriteriaQuery().select(longOpenmrsFhirCriteriaContext.getRoot()).where(
+						longOpenmrsFhirCriteriaContext.getCriteriaBuilder().in(longOpenmrsFhirCriteriaContext.getRoot().get("id")));
+				// Need to reapply ordering
+			handleSort(criteriaContext, theParams.getSortSpec());
+			criteriaContext.addOrder(criteriaContext.getCriteriaBuilder().asc(criteriaContext.getRoot().get("id")));
+				
+			results = criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).getResultList();
+			}
+			return results.stream().map(this::deproxyResult).collect(Collectors.toList());
 	}
 	
 	@Override
@@ -114,35 +162,25 @@ public class FhirEncounterDaoImpl extends BaseEncounterDao<Encounter> implements
 	}
 	
 	@Override
-	protected Predicate generateNotCompletedOrderQuery(String path) {
-		if (StringUtils.isNotBlank(path)) {
-			path = path + ".";
-		}
-		
-		return (Predicate) Restrictions.or(Restrictions.isNull(path + "fulfillerStatus"),
-		    Restrictions.ne(path + "fulfillerStatus", Order.FulfillerStatus.COMPLETED));
-		
+	protected <T> Predicate generateNotCompletedOrderQuery(OpenmrsFhirCriteriaContext<T> criteriaContext,String path) {
+		return criteriaContext.getCriteriaBuilder().or(criteriaContext.getCriteriaBuilder().isNull(criteriaContext.getRoot().join(path).get("fulfillerStatus")),
+				criteriaContext.getCriteriaBuilder().notEqual(criteriaContext.getRoot().join(path).get("fulfillerStatus"),Order.FulfillerStatus.COMPLETED));
 	}
 	
 	@Override
-	protected Predicate generateFulfillerStatusRestriction(String path, String fulfillerStatus) {
-		
-		if (StringUtils.isNotBlank(path)) {
-			path = path + ".";
-		}
-		
-		return (Predicate) Restrictions.eq(path + "fulfillerStatus",
-		    Order.FulfillerStatus.valueOf(fulfillerStatus.toUpperCase()));
+	protected <T> Predicate generateFulfillerStatusRestriction(OpenmrsFhirCriteriaContext<T> criteriaContext, String path,
+			String fulfillerStatus) {
+		return criteriaContext.getCriteriaBuilder()
+				.equal(criteriaContext.getRoot().join(path)
+						.get("fulfillerStatus"),Order.FulfillerStatus.valueOf(fulfillerStatus.toUpperCase()));
 	}
 	
 	@Override
-	protected Predicate generateNotFulfillerStatusRestriction(String path, String fulfillerStatus) {
-		
-		if (StringUtils.isNotBlank(path)) {
-			path = path + ".";
-		}
-		
-		return (Predicate) Restrictions.or(Restrictions.isNull(path + "fulfillerStatus"),
-		    Restrictions.ne(path + "fulfillerStatus", Order.FulfillerStatus.valueOf(fulfillerStatus.toUpperCase())));
+	protected <T> Predicate generateNotFulfillerStatusRestriction(OpenmrsFhirCriteriaContext<T> criteriaContext, String path,
+			String fulfillerStatus) {
+		return criteriaContext.getCriteriaBuilder().or(criteriaContext.getCriteriaBuilder().isNull(criteriaContext.getRoot().join(path).get("fulfillerStatus")),
+				criteriaContext.getCriteriaBuilder()
+						.notEqual(criteriaContext.getRoot()
+								.join(path).get("fulfillerStatus"),Order.FulfillerStatus.valueOf(fulfillerStatus.toUpperCase())));
 	}
 }
