@@ -29,16 +29,32 @@
 	
 	<require_version>2.5.0 - 9.*</require_version>
 
-    <conditionalResources>
+	<conditionalResources>
 		<conditionalResource>
-			<path>/lib/fhir2-api-2.5-${project.parent.version}.jar</path>
+			<path>/lib/fhir2-api-2\.5-${project.parent.version}\.jar</path>
 			<openmrsVersion>2.5.* - 9.*</openmrsVersion>
 		</conditionalResource>
 		<conditionalResource>
-			<path>/lib/fhir2-api-2.6-${project.parent.version}.jar</path>
+			<path>/lib/fhir2-api-2\.6-${project.parent.version}\.jar</path>
 			<openmrsVersion>2.6.* - 9.*</openmrsVersion>
 		</conditionalResource>
-    </conditionalResources>
+		<conditionalResource>
+			<path>/lib/jackson-annotations-.*\.jar</path>
+			<openmrsVersion>2.0.5 - 2.1.2</openmrsVersion>
+		</conditionalResource>
+		<conditionalResource>
+			<path>/lib/jackson-core-.*\.jar</path>
+			<openmrsVersion>2.0.5 - 2.1.2</openmrsVersion>
+		</conditionalResource>
+		<conditionalResource>
+			<path>/lib/jackson-databind-.*\.jar</path>
+			<openmrsVersion>2.0.5 - 2.1.2</openmrsVersion>
+		</conditionalResource>
+		<conditionalResource>
+			<path>/lib/commons-io.*\.jar</path>
+			<openmrsVersion>2.0.5 - 2.1.*</openmrsVersion>
+		</conditionalResource>
+	</conditionalResources>
 
 	<servlet>
 		<servlet-name>fhir2Servlet</servlet-name>
