@@ -15,8 +15,12 @@ import static org.openmrs.module.fhir2.FhirConstants.EXACT_TOTAL_SEARCH_PARAMETE
 
 import javax.annotation.Nonnull;
 import javax.persistence.CacheStoreMode;
+import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -36,6 +40,7 @@ import org.openmrs.Encounter;
 import org.openmrs.Obs;
 import org.openmrs.OpenmrsObject;
 import org.openmrs.Order;
+import org.openmrs.Person;
 import org.openmrs.Retireable;
 import org.openmrs.Voidable;
 import org.openmrs.aop.RequiredDataAdvice;
@@ -156,11 +161,20 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	}
 	
 	@Override
+	@SuppressWarnings({ "unchecked","UnstableApiUsage"})
 	public List<T> getSearchResults(@Nonnull SearchParameterMap theParams) {
 		OpenmrsFhirCriteriaContext<T> criteriaContext = getSearchResultCriteria(theParams);
 			
 			handleSort(criteriaContext, theParams.getSortSpec());
-			criteriaContext.addOrder(criteriaContext.getCriteriaBuilder().asc(criteriaContext.getRoot().get("id")));
+			
+			//the id property differs across various openmrs entities
+			if (Person.class.isAssignableFrom(typeToken.getRawType())) {
+				criteriaContext.getCriteriaBuilder().asc(criteriaContext.getRoot().get("personId"));
+			} else if (Encounter.class.isAssignableFrom(typeToken.getRawType())) {
+				criteriaContext.getCriteriaBuilder().asc(criteriaContext.getRoot().get("encounterId"));
+			} else if (Obs.class.isAssignableFrom(typeToken.getRawType())) {
+				criteriaContext.getCriteriaBuilder().asc(criteriaContext.getRoot().get("obsId"));
+			}
 			
 			criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery())
 					.setFirstResult(theParams.getFromIndex());
@@ -173,6 +187,11 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 			if (hasDistinctResults()) {
 				results = criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).getResultList();
 			} else {
+				
+				EntityManager em = sessionFactory.getCurrentSession();
+				CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
+				CriteriaQuery<Long> criteriaQuery = criteriaBuilder.createQuery(Long.class);
+				Root<T> root = (Root<T>) criteriaQuery.from(typeToken.getRawType());
 				
 				OpenmrsFhirCriteriaContext<Long> longOpenmrsFhirCriteriaContext = createCriteriaContext(Long.class);
 				longOpenmrsFhirCriteriaContext.getCriteriaQuery().subquery(Long.class).select(longOpenmrsFhirCriteriaContext
@@ -208,18 +227,29 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	}
 	
 	@Override
+	@SuppressWarnings({"unchecked","UnstableApiUsage"})
 	public int getSearchResultsCount(@Nonnull SearchParameterMap theParams) {
 		OpenmrsFhirCriteriaContext<T> criteriaContext = getSearchResultCriteria(theParams);
-		OpenmrsFhirCriteriaContext<Long> criteria = createCriteriaContext(Long.class);
-		
 		applyExactTotal(criteriaContext, theParams);
 		
+		EntityManager em = sessionFactory.getCurrentSession();
+		CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
+		CriteriaQuery<Long> criteriaQuery = criteriaBuilder.createQuery(Long.class);
+		Root<T> root = (Root<T>) criteriaQuery.from(typeToken.getRawType());
+		
 		if (hasDistinctResults()) {
-			criteria.getCriteriaQuery().select(criteria.getCriteriaBuilder().count(criteria.getRoot()));
+			criteriaQuery.select(criteriaBuilder.count(root));
 		} else {
-			criteria.getCriteriaQuery().select(criteria.getCriteriaBuilder().countDistinct(criteria.getRoot().get("id")));
+			//the id property differs across various openmrs entities
+			if (Person.class.isAssignableFrom(typeToken.getRawType())) {
+				criteriaQuery.select(criteriaBuilder.countDistinct(root.get("personId")));
+			} else if (Encounter.class.isAssignableFrom(typeToken.getRawType())) {
+				criteriaQuery.select(criteriaBuilder.countDistinct(root.get("encounterId")));
+			} else if (Obs.class.isAssignableFrom(typeToken.getRawType())) {
+				criteriaQuery.select(criteriaBuilder.countDistinct(root.get("obsId")));
+			}
 		}
-		return criteria.getEntityManager().createQuery(criteria.getCriteriaQuery()).getSingleResult().intValue();
+		return em.createQuery(criteriaQuery).getSingleResult().intValue();
 	}
 	
 	/**

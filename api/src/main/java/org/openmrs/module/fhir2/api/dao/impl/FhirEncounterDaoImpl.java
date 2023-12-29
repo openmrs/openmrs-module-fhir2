@@ -13,8 +13,12 @@ import static org.hl7.fhir.r4.model.Encounter.SP_DATE;
 import static org.openmrs.module.fhir2.api.util.LastnOperationUtils.getTopNRankedIds;
 
 import javax.annotation.Nonnull;
+import javax.persistence.EntityManager;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 import java.util.List;
 import java.util.Optional;
@@ -102,12 +106,14 @@ public class FhirEncounterDaoImpl extends BaseEncounterDao<Encounter> implements
 		if (!theParams.getParameters(FhirConstants.LASTN_ENCOUNTERS_SEARCH_HANDLER).isEmpty()) {
 			setupSearchParams(criteriaContext, theParams);
 			
-			OpenmrsFhirCriteriaContext<Object[]> objCriteriaContext = createCriteriaContext(Object[].class);
-			objCriteriaContext.getCriteriaQuery().multiselect(objCriteriaContext.getRoot().get("uuid"),
-			    objCriteriaContext.getRoot().get("encounterDatetime"));
+			EntityManager em = sessionFactory.getCurrentSession();
+			CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
+			CriteriaQuery<Object[]> criteriaQuery = criteriaBuilder.createQuery(Object[].class);
+			Root<Encounter> root = criteriaQuery.from(Encounter.class);
 			
-			List<LastnResult<String>> results = objCriteriaContext.getEntityManager()
-			        .createQuery(objCriteriaContext.getCriteriaQuery()).getResultList().stream()
+			criteriaQuery.multiselect(root.get("uuid"),  root.get("encounterDatetime"));
+			
+			List<LastnResult<String>> results = em.createQuery(criteriaQuery).getResultList().stream()
 			        .map(array -> new LastnResult<String>(array)).collect(Collectors.toList());
 			
 			return getTopNRankedIds(results, getMaxParameter(theParams));
@@ -117,10 +123,13 @@ public class FhirEncounterDaoImpl extends BaseEncounterDao<Encounter> implements
 		setupSearchParams(criteriaContext, theParams);
 		handleSort(criteriaContext, theParams.getSortSpec());
 		
-		OpenmrsFhirCriteriaContext<String> context = createCriteriaContext(String.class);
-		context.getCriteriaQuery().select(context.getRoot().get("uuid"));
-		return context.getEntityManager().createQuery(context.getCriteriaQuery()).getResultList().stream().distinct()
-		        .collect(Collectors.toList());
+		EntityManager em = sessionFactory.getCurrentSession();
+		CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
+		CriteriaQuery<String> query = criteriaBuilder.createQuery(String.class);
+		Root<Encounter> root = query.from(Encounter.class);
+		
+		query.select(root.get("uuid"));
+		return em.createQuery(query).getResultList().stream().distinct().collect(Collectors.toList());
 	}
 	
 	private int getMaxParameter(SearchParameterMap theParams) {

@@ -13,6 +13,8 @@ import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -76,6 +78,7 @@ import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.codesystems.AdministrativeGender;
+import org.openmrs.PatientIdentifier;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.search.param.PropParam;
 import org.openmrs.module.fhir2.api.util.LocalDateTimeFactory;
@@ -848,33 +851,34 @@ public abstract class BaseDao {
 	protected <T> void handlePatientReference(OpenmrsFhirCriteriaContext<T> criteriaContext,
 	        ReferenceAndListParam patientReference, String associationPath) {
 		if (patientReference != null) {
-			criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot().get(associationPath));
+			criteriaContext.addJoin(associationPath,"p").finalizeQuery();
 			
 			handleAndListParam(patientReference, patientToken -> {
 				if (patientToken.getChain() != null) {
 					switch (patientToken.getChain()) {
 						case Patient.SP_IDENTIFIER:
 							if (lacksAlias(criteriaContext, "pi")) {
-								criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot().get("p.identifiers"));
+								criteriaContext.addJoin("p.identifiers","pi").finalizeQuery();
 							}
 							return Optional.of(criteriaContext.getCriteriaBuilder()
 							        .like(criteriaContext.getRoot().get("pi.identifier"), patientToken.getValue()));
 						case Patient.SP_GIVEN:
 							if (lacksAlias(criteriaContext, "pn")) {
-								criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot().get("p.names"));
+								criteriaContext.addJoin("p.names","pn").finalizeQuery();
 							}
 							return Optional.of(criteriaContext.getCriteriaBuilder()
-							        .like(criteriaContext.getRoot().get("pi.givenName"), patientToken.getValue()));
+							        .like(criteriaContext.getRoot().get("pn.givenName"), patientToken.getValue()));
 						case Patient.SP_FAMILY:
 							if (lacksAlias(criteriaContext, "pn")) {
-								criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot().get("p.names"));
+								criteriaContext.addJoin("p.names","pn").finalizeQuery();
 							}
 							return Optional.of(criteriaContext.getCriteriaBuilder()
-							        .like(criteriaContext.getRoot().get("familyName"), patientToken.getValue()));
+							        .like(criteriaContext.getRoot().get("pn.familyName"), patientToken.getValue()));
 						case Patient.SP_NAME:
 							if (lacksAlias(criteriaContext, "pn")) {
-								criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot().get("p.names"));
+								criteriaContext.addJoin("p.names","pn").finalizeQuery();
 							}
+							
 							List<Optional<? extends Predicate>> criterionList = new ArrayList<>();
 							
 							for (String token : StringUtils.split(patientToken.getValue(), " \t,")) {
@@ -885,7 +889,7 @@ public abstract class BaseDao {
 							return Optional.of(criteriaContext.getCriteriaBuilder().or(toCriteriaArray(criterionList)));
 					}
 				} else {
-					return Optional.of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("uuid"),
+					return Optional.of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("p.uuid"),
 					    patientToken.getValue()));
 				}
 				
@@ -1177,7 +1181,6 @@ public abstract class BaseDao {
 		}
 		
 		Predicate likePredicate;
-		
 		if (param.isExact()) {
 			likePredicate = criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get(propertyName),
 			    param.getValue());
