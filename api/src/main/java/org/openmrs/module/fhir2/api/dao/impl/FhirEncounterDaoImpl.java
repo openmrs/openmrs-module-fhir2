@@ -51,55 +51,6 @@ public class FhirEncounterDaoImpl extends BaseEncounterDao<Encounter> implements
 	}
 	
 	@Override
-	public List<Encounter> getSearchResults(@NonNull SearchParameterMap theParams) {
-		OpenmrsFhirCriteriaContext<Encounter> criteriaContext = getSearchResultCriteria(theParams);
-		handleSort(criteriaContext, theParams.getSortSpec());
-		criteriaContext.addOrder(criteriaContext.getCriteriaBuilder().asc(criteriaContext.getRoot().get("encounterId")));
-			
-		criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).setFirstResult(theParams.getFromIndex());
-		if (theParams.getToIndex() != Integer.MAX_VALUE) {
-			int maxResults = theParams.getToIndex() - theParams.getFromIndex();
-			criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).setMaxResults(maxResults);
-		}
-			
-		List<Encounter> results;
-		if (hasDistinctResults()) {
-			results = criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).getResultList();
-		} else {
-			OpenmrsFhirCriteriaContext<Long> longOpenmrsFhirCriteriaContext = createCriteriaContext(Long.class);
-			longOpenmrsFhirCriteriaContext.getCriteriaQuery().subquery(Long.class).select(longOpenmrsFhirCriteriaContext
-					.getCriteriaBuilder().countDistinct(longOpenmrsFhirCriteriaContext.getRoot().get("id")));
-				
-			longOpenmrsFhirCriteriaContext.getCriteriaQuery().select(longOpenmrsFhirCriteriaContext.getRoot())
-					.where(longOpenmrsFhirCriteriaContext.getCriteriaBuilder()
-							.in(longOpenmrsFhirCriteriaContext.getRoot().get("id"))
-							.value(longOpenmrsFhirCriteriaContext.getCriteriaQuery().subquery(Long.class)));
-				
-				//TODO: gonna come back to it later
-				//			handleSort(projectionCriteriaBuilder, theParams.getSortSpec(), this::paramToProps).ifPresent(
-				//					orders -> orders.forEach(order -> projectionList.add(Projections.property(order.getPropertyName()))));
-				//			criteria.setProjection(projectionList);
-				//			List<Integer> ids = new ArrayList<>();
-				//			if (projectionList.getLength() > 1) {
-				//				for (Object[] o : ((List<Object[]>) criteria.list())) {
-				//					ids.add((Integer) o[0]);
-				//				}
-				//			} else {
-				//				ids = criteria.list();
-				//			}
-				
-			longOpenmrsFhirCriteriaContext.getCriteriaQuery().select(longOpenmrsFhirCriteriaContext.getRoot()).where(
-						longOpenmrsFhirCriteriaContext.getCriteriaBuilder().in(longOpenmrsFhirCriteriaContext.getRoot().get("id")));
-				// Need to reapply ordering
-			handleSort(criteriaContext, theParams.getSortSpec());
-			criteriaContext.addOrder(criteriaContext.getCriteriaBuilder().asc(criteriaContext.getRoot().get("id")));
-				
-			results = criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).getResultList();
-			}
-			return results.stream().map(this::deproxyResult).collect(Collectors.toList());
-	}
-	
-	@Override
 	public List<String> getSearchResultUuids(@Nonnull SearchParameterMap theParams) {
 		OpenmrsFhirCriteriaContext<Encounter> criteriaContext = createCriteriaContext(Encounter.class);
 		
