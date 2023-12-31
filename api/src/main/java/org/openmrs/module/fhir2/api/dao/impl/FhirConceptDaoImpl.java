@@ -74,7 +74,7 @@ public class FhirConceptDaoImpl extends BaseFhirDao<Concept> implements FhirConc
 		OpenmrsFhirCriteriaContext<Concept> criteriaContext = createCriteriaContext(Concept.class);
 		createConceptMapCriteriaBuilder(conceptSource,mappingCode);
 
-		criteriaContext.addOrder(criteriaContext.getCriteriaBuilder().asc(criteriaContext.getRoot().join("concept").get("retired")));
+		criteriaContext.addOrder(criteriaContext.getCriteriaBuilder().asc(criteriaContext.getRoot().get("concept.retired")));
 		
 		return criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).getResultList();
 	}
@@ -102,16 +102,22 @@ public class FhirConceptDaoImpl extends BaseFhirDao<Concept> implements FhirConc
 	protected void createConceptMapCriteriaBuilder(@Nonnull ConceptSource conceptSource, String mappingCode) {
 		OpenmrsFhirCriteriaContext<ConceptMap> criteriaContext = createCriteriaContext(ConceptMap.class);
 		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot().get("concept"));
-		Join<ConceptMap, ConceptReferenceTerm> termJoin = criteriaContext.getRoot().join("conceptReferenceTerm");
-
+		criteriaContext.addJoin("conceptReferenceTerm", "term").finalizeQuery();
+		criteriaContext.addJoin("conceptMapType", "mapType").finalizeQuery();
+		criteriaContext.addJoin("concept", "concept").finalizeQuery();
+		
+		
 		if (Context.getAdministrationService().isDatabaseStringComparisonCaseSensitive()) {
 			criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder()
-			        .equal(criteriaContext.getCriteriaBuilder().lower(termJoin.get("code")), mappingCode.toLowerCase()));
+			        .equal(criteriaContext.getCriteriaBuilder()
+					        .lower(criteriaContext.getRoot().get("term.code")), mappingCode.toLowerCase()));
 		} else {
-			criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().equal(termJoin.get("code"), mappingCode));
+			criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder()
+					.equal(criteriaContext.getRoot().get("term.code"), mappingCode));
 		}
 
-		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().equal(termJoin.get("conceptSource"), conceptSource));
-		criteriaContext.finalizeQuery();
+		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder()
+				.equal(criteriaContext.getRoot().get("term.conceptSource"), conceptSource))
+				.finalizeQuery();
 	}
 }
