@@ -239,6 +239,10 @@
                         <artifactId>spring-messaging</artifactId>
                     </exclusion>
                     <exclusion>
+                        <groupId>org.springframework.batch</groupId>
+                        <artifactId>spring-batch-core</artifactId>
+                    </exclusion>
+                    <exclusion>
                         <groupId>org.jetbrains.kotlin</groupId>
                         <artifactId>kotlin-stdlib-jdk8</artifactId>
                     </exclusion>
