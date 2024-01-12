@@ -156,8 +156,7 @@ public class FhirMedicationRequestDaoImpl extends BaseFhirDao<DrugOrder> impleme
 				criteriaContext.getRoot().join("concept");
 			}
 			
-			handleCodeableConcept(criteriaContext, code, "c", "cm", "crt")
-					.ifPresent(criteriaContext::addPredicate);
+			handleCodeableConcept(criteriaContext, code, "c", "cm", "crt").ifPresent(criteriaContext::addPredicate);
 			criteriaContext.finalizeQuery();
 		}
 	}

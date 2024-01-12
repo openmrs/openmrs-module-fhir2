@@ -42,9 +42,11 @@ public class FhirContactPointMapDaoImpl implements FhirContactPointMapDao {
 	@Override
 	public Optional<FhirContactPointMap> getFhirContactPointMapByUuid(String uuid) {
 		OpenmrsFhirCriteriaContext<FhirContactPointMap> criteriaContext = openmrsFhirCriteriaContext();
-		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("uuid"), uuid));
+		criteriaContext
+		        .addPredicate(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("uuid"), uuid));
 		
-		return Optional.ofNullable(criteriaContext.getEntityManager().createQuery(criteriaContext.finalizeQuery()).getSingleResult());
+		return Optional.ofNullable(
+		    criteriaContext.getEntityManager().createQuery(criteriaContext.finalizeQuery()).getSingleResult());
 	}
 	
 	@Override

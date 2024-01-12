@@ -13,6 +13,8 @@ import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.From;
+import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
@@ -22,6 +24,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import lombok.Getter;
 import lombok.NonNull;
@@ -29,15 +32,6 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class OpenmrsFhirCriteriaContext<T> {
-	
-	@Getter
-	@RequiredArgsConstructor
-	public static final class CriteriaJoin {
-		
-		private final String attributeName;
-		
-		private final JoinType joinType;
-	}
 	
 	@Getter
 	@NonNull
@@ -55,7 +49,7 @@ public class OpenmrsFhirCriteriaContext<T> {
 	@NonNull
 	private final Root<T> root;
 	
-	private final Map<String, CriteriaJoin> aliases = new LinkedHashMap<>();
+	private final Map<String, Join<?, ?>> aliases = new LinkedHashMap<>();
 	
 	private final List<Predicate> predicates = new ArrayList<>();
 	
@@ -64,17 +58,28 @@ public class OpenmrsFhirCriteriaContext<T> {
 	@Getter
 	private final List<T> results = new ArrayList<>();
 	
-	public OpenmrsFhirCriteriaContext<T> addJoin(@Nonnull String attributeName, @Nonnull String alias) {
+	public Join<?, ?> addJoin(@Nonnull String attributeName, @Nonnull String alias) {
 		return addJoin(attributeName, alias, JoinType.INNER);
 	}
 	
-	public OpenmrsFhirCriteriaContext<T> addJoin(@Nonnull String attributeName, @Nonnull String alias,
+	public Join<?, ?> addJoin(@Nonnull String attributeName, @Nonnull String alias,
 	        @Nonnull JoinType joinType) {
+		return addJoin(getRoot(), attributeName, alias, joinType);
+	}
+
+	public Join<?, ?> addJoin(From<?, ?> from, @Nonnull String attributeName, @Nonnull String alias) {
+		return addJoin(from, attributeName, alias, JoinType.INNER);
+	}
+
+	public Join<?, ?> addJoin(From<?, ?> from, @Nonnull String attributeName, @Nonnull String alias,
+												 @Nonnull JoinType joinType) {
 		if (!aliases.containsKey(alias)) {
-			aliases.put(alias, new CriteriaJoin(attributeName, joinType));
+			Join<?, ?> join = from.join(attributeName, joinType);
+			join.alias(alias);
+			aliases.put(alias, join);
 		}
-		
-		return this;
+
+		return aliases.get(alias);
 	}
 	
 	public OpenmrsFhirCriteriaContext<T> addPredicate(Predicate predicate) {
@@ -91,16 +96,16 @@ public class OpenmrsFhirCriteriaContext<T> {
 		results.add(result);
 		return this;
 	}
+
+	public Optional<Join<?, ?>> getJoin(String alias) {
+		return Optional.ofNullable(aliases.get(alias));
+	}
 	
 	public boolean hasAlias(String alias) {
 		return aliases.containsKey(alias);
 	}
 	
 	public CriteriaQuery<T> finalizeQuery() {
-		for (Map.Entry<String, CriteriaJoin> alias : aliases.entrySet()) {
-			root.join(alias.getValue().getAttributeName(), alias.getValue().getJoinType()).alias(alias.getKey());
-		}
-		
 		return criteriaQuery.where(predicates.toArray(new Predicate[0])).orderBy(orders);
 	}
 }
