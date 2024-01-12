@@ -112,13 +112,13 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 									criteriaContext.addJoin("en.orders", "orders");
 								}
 							}
-							Join<DrugOrder,Order> join = criteriaContext.getRoot().join("orders");
+							Join<DrugOrder, Order> join = criteriaContext.getRoot().join("orders");
 							// Constrain only on non-voided Drug Orders
 							// TODO Do these criteria still work?
-							criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder()
-							        .equal(join.get("voided"), false));
-							criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder()
-							        .notEqual(join.get("action"), Order.Action.DISCONTINUE));
+							criteriaContext
+							        .addPredicate(criteriaContext.getCriteriaBuilder().equal(join.get("voided"), false));
+							criteriaContext.addPredicate(
+							    criteriaContext.getCriteriaBuilder().notEqual(join.get("action"), Order.Action.DISCONTINUE));
 							
 							String paramName = hasParam.getParameterName();
 							String paramValue = hasParam.getParameterValue();
@@ -146,7 +146,8 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 									}
 									if (MedicationRequest.MedicationRequestStatus.COMPLETED.toString()
 									        .equalsIgnoreCase(paramValue)) {
-										Predicate notCompletedCriterion = generateNotCompletedOrderQuery(criteriaContext,"orders");
+										Predicate notCompletedCriterion = generateNotCompletedOrderQuery(criteriaContext,
+										    "orders");
 										if (notCompletedCriterion != null) {
 											criteriaContext.getCriteriaBuilder().and(notCompletedCriterion);
 										}
@@ -156,13 +157,13 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 							} else if ((FhirConstants.SP_FULFILLER_STATUS).equalsIgnoreCase(paramName)) {
 								if (paramValue != null) {
 									criteriaContext.getCriteriaBuilder()
-									        .and(generateFulfillerStatusRestriction(criteriaContext,"orders", paramValue));
+									        .and(generateFulfillerStatusRestriction(criteriaContext, "orders", paramValue));
 								}
 								handled = true;
 							} else if ((FhirConstants.SP_FULFILLER_STATUS + ":not").equalsIgnoreCase(paramName)) {
 								if (paramValue != null) {
-									criteriaContext.getCriteriaBuilder()
-									        .and(generateNotFulfillerStatusRestriction(criteriaContext,"orders", paramValue));
+									criteriaContext.getCriteriaBuilder().and(
+									    generateNotFulfillerStatusRestriction(criteriaContext, "orders", paramValue));
 								}
 								handled = true;
 							}
@@ -191,12 +192,14 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 		return null;
 	}
 	
-	protected <T> Predicate generateFulfillerStatusRestriction(OpenmrsFhirCriteriaContext<T> criteriaContext, String path, String fulfillerStatus) {
+	protected <T> Predicate generateFulfillerStatusRestriction(OpenmrsFhirCriteriaContext<T> criteriaContext, String path,
+	        String fulfillerStatus) {
 		// not implemented in Core until 2.2; see override in FhirEncounterDaoImpl_2_2
 		return null;
 	}
 	
-	protected <V> Predicate generateNotFulfillerStatusRestriction(OpenmrsFhirCriteriaContext<V> criteriaContext, String path, String fulfillerStatus) {
+	protected <V> Predicate generateNotFulfillerStatusRestriction(OpenmrsFhirCriteriaContext<V> criteriaContext, String path,
+	        String fulfillerStatus) {
 		// not implemented in Core until 2.2; see override in FhirEncounterDaoImpl_2_2
 		return null;
 	}

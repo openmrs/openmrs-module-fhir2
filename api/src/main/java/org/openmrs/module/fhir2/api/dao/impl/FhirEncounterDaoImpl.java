@@ -33,7 +33,6 @@ import lombok.NonNull;
 import lombok.Setter;
 import org.openmrs.Encounter;
 import org.openmrs.EncounterType;
-import org.openmrs.Obs;
 import org.openmrs.Order;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirEncounterDao;
@@ -62,7 +61,7 @@ public class FhirEncounterDaoImpl extends BaseEncounterDao<Encounter> implements
 			CriteriaQuery<Object[]> criteriaQuery = criteriaBuilder.createQuery(Object[].class);
 			Root<Encounter> root = criteriaQuery.from(Encounter.class);
 			
-			criteriaQuery.multiselect(root.get("uuid"),  root.get("encounterDatetime"));
+			criteriaQuery.multiselect(root.get("uuid"), root.get("encounterDatetime"));
 			
 			List<LastnResult<String>> results = em.createQuery(criteriaQuery).getResultList().stream()
 			        .map(array -> new LastnResult<String>(array)).collect(Collectors.toList());
@@ -122,25 +121,26 @@ public class FhirEncounterDaoImpl extends BaseEncounterDao<Encounter> implements
 	}
 	
 	@Override
-	protected <T> Predicate generateNotCompletedOrderQuery(OpenmrsFhirCriteriaContext<T> criteriaContext,String path) {
-		return criteriaContext.getCriteriaBuilder().or(criteriaContext.getCriteriaBuilder().isNull(criteriaContext.getRoot().join(path).get("fulfillerStatus")),
-				criteriaContext.getCriteriaBuilder().notEqual(criteriaContext.getRoot().join(path).get("fulfillerStatus"),Order.FulfillerStatus.COMPLETED));
+	protected <T> Predicate generateNotCompletedOrderQuery(OpenmrsFhirCriteriaContext<T> criteriaContext, String path) {
+		return criteriaContext.getCriteriaBuilder().or(
+		    criteriaContext.getCriteriaBuilder().isNull(criteriaContext.getRoot().join(path).get("fulfillerStatus")),
+		    criteriaContext.getCriteriaBuilder().notEqual(criteriaContext.getRoot().join(path).get("fulfillerStatus"),
+		        Order.FulfillerStatus.COMPLETED));
 	}
 	
 	@Override
 	protected <T> Predicate generateFulfillerStatusRestriction(OpenmrsFhirCriteriaContext<T> criteriaContext, String path,
-			String fulfillerStatus) {
-		return criteriaContext.getCriteriaBuilder()
-				.equal(criteriaContext.getRoot().join(path)
-						.get("fulfillerStatus"),Order.FulfillerStatus.valueOf(fulfillerStatus.toUpperCase()));
+	        String fulfillerStatus) {
+		return criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().join(path).get("fulfillerStatus"),
+		    Order.FulfillerStatus.valueOf(fulfillerStatus.toUpperCase()));
 	}
 	
 	@Override
 	protected <T> Predicate generateNotFulfillerStatusRestriction(OpenmrsFhirCriteriaContext<T> criteriaContext, String path,
-			String fulfillerStatus) {
-		return criteriaContext.getCriteriaBuilder().or(criteriaContext.getCriteriaBuilder().isNull(criteriaContext.getRoot().join(path).get("fulfillerStatus")),
-				criteriaContext.getCriteriaBuilder()
-						.notEqual(criteriaContext.getRoot()
-								.join(path).get("fulfillerStatus"),Order.FulfillerStatus.valueOf(fulfillerStatus.toUpperCase())));
+	        String fulfillerStatus) {
+		return criteriaContext.getCriteriaBuilder().or(
+		    criteriaContext.getCriteriaBuilder().isNull(criteriaContext.getRoot().join(path).get("fulfillerStatus")),
+		    criteriaContext.getCriteriaBuilder().notEqual(criteriaContext.getRoot().join(path).get("fulfillerStatus"),
+		        Order.FulfillerStatus.valueOf(fulfillerStatus.toUpperCase())));
 	}
 }

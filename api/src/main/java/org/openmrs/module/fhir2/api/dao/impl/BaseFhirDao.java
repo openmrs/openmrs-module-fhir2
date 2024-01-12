@@ -161,46 +161,46 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	}
 	
 	@Override
-	@SuppressWarnings({ "unchecked","UnstableApiUsage"})
+	@SuppressWarnings({ "unchecked", "UnstableApiUsage" })
 	public List<T> getSearchResults(@Nonnull SearchParameterMap theParams) {
 		OpenmrsFhirCriteriaContext<T> criteriaContext = getSearchResultCriteria(theParams);
+		
+		handleSort(criteriaContext, theParams.getSortSpec());
+		
+		//the id property differs across various openmrs entities
+		if (Person.class.isAssignableFrom(typeToken.getRawType())) {
+			criteriaContext.getCriteriaBuilder().asc(criteriaContext.getRoot().get("personId"));
+		} else if (Encounter.class.isAssignableFrom(typeToken.getRawType())) {
+			criteriaContext.getCriteriaBuilder().asc(criteriaContext.getRoot().get("encounterId"));
+		} else if (Obs.class.isAssignableFrom(typeToken.getRawType())) {
+			criteriaContext.getCriteriaBuilder().asc(criteriaContext.getRoot().get("obsId"));
+		}
+		
+		criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery())
+		        .setFirstResult(theParams.getFromIndex());
+		if (theParams.getToIndex() != Integer.MAX_VALUE) {
+			int maxResults = theParams.getToIndex() - theParams.getFromIndex();
+			criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).setMaxResults(maxResults);
+		}
+		
+		List<T> results;
+		if (hasDistinctResults()) {
+			results = criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).getResultList();
+		} else {
 			
-			handleSort(criteriaContext, theParams.getSortSpec());
+			EntityManager em = sessionFactory.getCurrentSession();
+			CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
+			CriteriaQuery<Long> criteriaQuery = criteriaBuilder.createQuery(Long.class);
+			Root<T> root = (Root<T>) criteriaQuery.from(typeToken.getRawType());
 			
-			//the id property differs across various openmrs entities
-			if (Person.class.isAssignableFrom(typeToken.getRawType())) {
-				criteriaContext.getCriteriaBuilder().asc(criteriaContext.getRoot().get("personId"));
-			} else if (Encounter.class.isAssignableFrom(typeToken.getRawType())) {
-				criteriaContext.getCriteriaBuilder().asc(criteriaContext.getRoot().get("encounterId"));
-			} else if (Obs.class.isAssignableFrom(typeToken.getRawType())) {
-				criteriaContext.getCriteriaBuilder().asc(criteriaContext.getRoot().get("obsId"));
-			}
+			OpenmrsFhirCriteriaContext<Long> longOpenmrsFhirCriteriaContext = createCriteriaContext(Long.class);
+			longOpenmrsFhirCriteriaContext.getCriteriaQuery().subquery(Long.class).select(longOpenmrsFhirCriteriaContext
+			        .getCriteriaBuilder().countDistinct(longOpenmrsFhirCriteriaContext.getRoot().get("id")));
 			
-			criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery())
-					.setFirstResult(theParams.getFromIndex());
-			if (theParams.getToIndex() != Integer.MAX_VALUE) {
-				int maxResults = theParams.getToIndex() - theParams.getFromIndex();
-				criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).setMaxResults(maxResults);
-			}
-			
-			List<T> results;
-			if (hasDistinctResults()) {
-				results = criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).getResultList();
-			} else {
-				
-				EntityManager em = sessionFactory.getCurrentSession();
-				CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
-				CriteriaQuery<Long> criteriaQuery = criteriaBuilder.createQuery(Long.class);
-				Root<T> root = (Root<T>) criteriaQuery.from(typeToken.getRawType());
-				
-				OpenmrsFhirCriteriaContext<Long> longOpenmrsFhirCriteriaContext = createCriteriaContext(Long.class);
-				longOpenmrsFhirCriteriaContext.getCriteriaQuery().subquery(Long.class).select(longOpenmrsFhirCriteriaContext
-						.getCriteriaBuilder().countDistinct(longOpenmrsFhirCriteriaContext.getRoot().get("id")));
-				
-				longOpenmrsFhirCriteriaContext.getCriteriaQuery().select(longOpenmrsFhirCriteriaContext.getRoot())
-						.where(longOpenmrsFhirCriteriaContext.getCriteriaBuilder()
-								.in(longOpenmrsFhirCriteriaContext.getRoot().get("id"))
-								.value(longOpenmrsFhirCriteriaContext.getCriteriaQuery().subquery(Long.class)));
+			longOpenmrsFhirCriteriaContext.getCriteriaQuery().select(longOpenmrsFhirCriteriaContext.getRoot())
+			        .where(longOpenmrsFhirCriteriaContext.getCriteriaBuilder()
+			                .in(longOpenmrsFhirCriteriaContext.getRoot().get("id"))
+			                .value(longOpenmrsFhirCriteriaContext.getCriteriaQuery().subquery(Long.class)));
 			
 			//TODO: gonna come back to it later
 			//			handleSort(projectionCriteriaBuilder, theParams.getSortSpec(), this::paramToProps).ifPresent(
@@ -227,7 +227,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	}
 	
 	@Override
-	@SuppressWarnings({"unchecked","UnstableApiUsage"})
+	@SuppressWarnings({ "unchecked", "UnstableApiUsage" })
 	public int getSearchResultsCount(@Nonnull SearchParameterMap theParams) {
 		OpenmrsFhirCriteriaContext<T> criteriaContext = getSearchResultCriteria(theParams);
 		applyExactTotal(criteriaContext, theParams);
