@@ -69,6 +69,16 @@ public class AllergyIntoleranceTranslatorImplTest {
 	
 	private static final String GLOBAL_PROPERTY_OTHER_VALUE = "402553AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	
+	private static final String CODED_ALLERGEN = "Coded Allergen";
+	
+	private static final String NON_CODED_ALLERGEN = "Non coded Allergen";
+	
+	private static final String CODED_REACTION = "Coded Reaction";
+	
+	private static final String NON_CODED_REACTION = "Non coded Reaction";
+	
+	private static final String OTHER_CONCEPT_NAME = "Other";
+	
 	@Mock
 	private PractitionerReferenceTranslator<User> practitionerReferenceTranslator;
 	
@@ -108,7 +118,7 @@ public class AllergyIntoleranceTranslatorImplTest {
 		omrsAllergy = new Allergy();
 		Concept allergenConcept = new Concept();
 		allergenConcept.setUuid(CONCEPT_UUID);
-		allergenConcept.addName(new ConceptName("Test allergen", null));
+		allergenConcept.addName(new ConceptName(CODED_ALLERGEN, null));
 		Allergen allergen = new Allergen(AllergenType.FOOD, allergenConcept, null);
 		omrsAllergy.setAllergen(allergen);
 	}
@@ -129,52 +139,48 @@ public class AllergyIntoleranceTranslatorImplTest {
 	
 	@Test
 	public void toFhirResource_shouldTranslateCodedAllergen() {
-		String conceptName = "Coded allergen";
 		Concept concept = new Concept();
 		concept.setUuid(CONCEPT_UUID);
-		concept.addName(new ConceptName(conceptName, null));
+		concept.addName(new ConceptName(CODED_ALLERGEN, null));
 		
 		Allergen allergen = new Allergen(AllergenType.FOOD, concept, null);
 		omrsAllergy.setAllergen(allergen);
 		
 		CodeableConcept codeableConcept = new CodeableConcept();
-		codeableConcept.addCoding(new Coding().setCode(CONCEPT_UUID).setDisplay(conceptName));
-		codeableConcept.setText(conceptName);
+		codeableConcept.addCoding(new Coding().setCode(CONCEPT_UUID).setDisplay(CODED_ALLERGEN));
+		codeableConcept.setText(CODED_ALLERGEN);
 		when(conceptTranslator.toFhirResource(concept)).thenReturn(codeableConcept);
 		
 		AllergyIntolerance allergyIntolerance = allergyIntoleranceTranslator.toFhirResource(omrsAllergy);
 		
 		assertThat(allergyIntolerance, notNullValue());
 		assertThat(allergyIntolerance.getCode(), notNullValue());
-		assertThat(allergyIntolerance.getCode().getText(), equalTo(conceptName));
+		assertThat(allergyIntolerance.getCode().getText(), equalTo(CODED_ALLERGEN));
 		
 		Coding coding = allergyIntolerance.getCode().getCoding().get(0);
 		assertThat(coding.getCode(), equalTo(CONCEPT_UUID));
-		assertThat(coding.getDisplay(), equalTo(conceptName));
+		assertThat(coding.getDisplay(), equalTo(CODED_ALLERGEN));
 	}
 	
 	@Test
 	public void toFhirResource_shouldTranslateNonCodedAllergen() {
-		String nonCodedAllergen = "Custom allergen";
-		String otherConceptName = "Other";
-		
 		Concept otherConcept = new Concept();
 		otherConcept.setUuid(CONCEPT_UUID);
-		otherConcept.addName(new ConceptName(otherConceptName, null));
+		otherConcept.addName(new ConceptName(OTHER_CONCEPT_NAME, null));
 		
-		Allergen allergen = new Allergen(AllergenType.OTHER, otherConcept, nonCodedAllergen);
+		Allergen allergen = new Allergen(AllergenType.OTHER, otherConcept, NON_CODED_ALLERGEN);
 		omrsAllergy.setAllergen(allergen);
 		
 		CodeableConcept codeableConcept = new CodeableConcept();
-		codeableConcept.addCoding(new Coding().setCode(CONCEPT_UUID).setDisplay(otherConceptName));
-		codeableConcept.setText(otherConceptName);
+		codeableConcept.addCoding(new Coding().setCode(CONCEPT_UUID).setDisplay(OTHER_CONCEPT_NAME));
+		codeableConcept.setText(OTHER_CONCEPT_NAME);
 		when(conceptTranslator.toFhirResource(otherConcept)).thenReturn(codeableConcept);
 		
 		AllergyIntolerance allergyIntolerance = allergyIntoleranceTranslator.toFhirResource(omrsAllergy);
 		
 		assertThat(allergyIntolerance, notNullValue());
 		assertThat(allergyIntolerance.getCode(), notNullValue());
-		assertThat(allergyIntolerance.getCode().getText(), equalTo(nonCodedAllergen));
+		assertThat(allergyIntolerance.getCode().getText(), equalTo(NON_CODED_ALLERGEN));
 	}
 	
 	@Test
