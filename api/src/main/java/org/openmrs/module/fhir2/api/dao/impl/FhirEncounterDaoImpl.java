@@ -96,7 +96,7 @@ public class FhirEncounterDaoImpl extends BaseEncounterDao<Encounter> implements
 	@Override
 	protected void handleEncounterType(OpenmrsFhirCriteriaContext<Encounter> criteriaContext,
 	        TokenAndListParam tokenAndListParam) {
-		handleAndListParam(tokenAndListParam, t -> {
+		handleAndListParam(criteriaContext.getCriteriaBuilder(),tokenAndListParam, t -> {
 			Join<Encounter, EncounterType> et = criteriaContext.getRoot().join("encounterType");
 			return Optional.of(criteriaContext.getCriteriaBuilder().equal(et.get("uuid"), t.getValue()));
 		}).ifPresent(criteriaContext::addPredicate);

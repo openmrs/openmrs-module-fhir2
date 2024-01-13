@@ -107,7 +107,7 @@ public class FhirMedicationRequestDaoImpl extends BaseFhirDao<DrugOrder> impleme
 	
 	private <T> Optional<Predicate> handleStatus(OpenmrsFhirCriteriaContext<T> criteriaContext,
 	        TokenAndListParam tokenAndListParam) {
-		return handleAndListParam(tokenAndListParam, token -> {
+		return handleAndListParam(criteriaContext.getCriteriaBuilder(),tokenAndListParam, token -> {
 			if (token.getValue() != null) {
 				try {
 					// currently only handles "ACTIVE"
@@ -126,7 +126,7 @@ public class FhirMedicationRequestDaoImpl extends BaseFhirDao<DrugOrder> impleme
 	
 	private <T> Optional<Predicate> handleFulfillerStatus(OpenmrsFhirCriteriaContext<T> criteriaContext,
 	        TokenAndListParam tokenAndListParam) {
-		return handleAndListParam(tokenAndListParam, token -> {
+		return handleAndListParam(criteriaContext.getCriteriaBuilder(),tokenAndListParam, token -> {
 			if (token.getValue() != null) {
 				return Optional.of(generateFulfillerStatusRestriction(criteriaContext,
 				    Order.FulfillerStatus.valueOf(token.getValue().toUpperCase())));
@@ -152,8 +152,8 @@ public class FhirMedicationRequestDaoImpl extends BaseFhirDao<DrugOrder> impleme
 	
 	private void handleCodedConcept(OpenmrsFhirCriteriaContext<DrugOrder> criteriaContext, TokenAndListParam code) {
 		if (code != null) {
-			if (lacksAlias(criteriaContext, "c")) {
-				criteriaContext.getRoot().join("concept");
+			if (!criteriaContext.getJoin("c").isPresent()) {
+				criteriaContext.addJoin("concept","c");
 			}
 			
 			handleCodeableConcept(criteriaContext, code, "c", "cm", "crt").ifPresent(criteriaContext::addPredicate);

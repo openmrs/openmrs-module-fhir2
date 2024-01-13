@@ -135,7 +135,7 @@ public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLo
 
     private void handleParentLocation(OpenmrsFhirCriteriaContext<Location> criteriaContext, ReferenceAndListParam parent) {
         handleLocationReference(criteriaContext, "loc", parent).ifPresent(loc -> {
-            criteriaContext.getRoot().join("parentLocation").alias("loc");
+            criteriaContext.addJoin("parentLocation","loc");
             criteriaContext.addPredicate(loc);
             criteriaContext.finalizeQuery();
         });

@@ -19,6 +19,7 @@ import static org.hl7.fhir.r4.model.Person.SP_BIRTHDATE;
 import static org.hl7.fhir.r4.model.Person.SP_NAME;
 
 import javax.annotation.Nonnull;
+import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Root;
@@ -78,13 +79,11 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 			return null;
 		}
 		
-		if (param.startsWith("address") && lacksAlias(criteriaContext, "pad")) {
-			criteriaContext.getRoot().join(getAssociationPath("addresses"), JoinType.LEFT).alias("pad");
+		if (param.startsWith("address") && !criteriaContext.getJoin("pad").isPresent()) {
+			criteriaContext.addJoin(getAssociationPath("addresses"), "pad");
 		} else if (param.equals(SP_NAME) || param.equals(SP_GIVEN) || param.equals(SP_FAMILY)) {
-			if (lacksAlias(criteriaContext, "pn")) {
-				criteriaContext.getRoot().join(getAssociationPath("names"), JoinType.LEFT).alias("pn");
-			}
-			
+					Join<?,?> personNamesJoin = criteriaContext.addJoin(getAssociationPath("names"), "pn");
+				
 			Root<PersonName> subRoot = criteriaContext.getCriteriaQuery().subquery(Integer.class).from(PersonName.class);
 			
 			criteriaContext.addPredicate(
@@ -92,9 +91,8 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 			        criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("pn").get("voided"), false),
 			        criteriaContext.getCriteriaBuilder().or(
 			            criteriaContext.getCriteriaBuilder().and(criteriaContext.getCriteriaBuilder()
-			                    .equal(criteriaContext.getRoot().get("pn").get("preferred"), true),
-			                criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("pn").get(
-			                    "personNameId"),
+			                    .equal(personNamesJoin.get("preferred"), true),
+			                criteriaContext.getCriteriaBuilder().equal(personNamesJoin.get("personNameId"),
 			                    criteriaContext.getCriteriaQuery().subquery(Integer.class)
 			                            .select(criteriaContext.getCriteriaBuilder().min(criteriaContext.getRoot().get("pn1")
 			                                    .get("personNameId")))
@@ -237,7 +235,7 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 	}
 	
 	private String getAssociationPath(String property) {
-		String personProperty = getPersonProperty();
+		String personProperty = getPersonProperty(); //"person"
 		return personProperty == null ? property : personProperty + "." + property;
 	}
 }

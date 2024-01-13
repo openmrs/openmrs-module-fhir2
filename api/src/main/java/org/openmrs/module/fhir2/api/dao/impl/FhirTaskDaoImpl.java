@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import javax.annotation.Nonnull;
+import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 
 import java.util.ArrayList;
@@ -78,7 +79,7 @@ public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDa
 	private Optional<Predicate> handleStatus(TokenAndListParam tokenAndListParam) {
 		OpenmrsFhirCriteriaContext<FhirTask> criteriaContext = createCriteriaContext(FhirTask.class);
 		
-		return handleAndListParam(tokenAndListParam, token -> {
+		return handleAndListParam(criteriaContext.getCriteriaBuilder(),tokenAndListParam, token -> {
 			if (token.getValue() != null) {
 				try {
 					return Optional.of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("status"),
@@ -95,17 +96,15 @@ public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDa
 	
 	private void handleReference(OpenmrsFhirCriteriaContext<FhirTask> criteriaContext, ReferenceAndListParam reference,
 	        String property, String alias) {
-		handleAndListParam(reference, param -> {
+		handleAndListParam(criteriaContext.getCriteriaBuilder(),reference, param -> {
 			if (validReferenceParam(param)) {
-				if (lacksAlias(criteriaContext, alias)) {
-					criteriaContext.getRoot().join(property).alias(alias);
-				}
+				Join<?,?> taskAliasJoin =criteriaContext.addJoin(property,alias);
 				
 				List<Optional<? extends Predicate>> predicateList = new ArrayList<>();
 				predicateList.add(Optional.of(criteriaContext.getCriteriaBuilder()
-				        .equal(criteriaContext.getRoot().get(String.format("%s.reference", alias)), param.getIdPart())));
+				        .equal(taskAliasJoin.get("reference"), param.getIdPart())));
 				predicateList.add(Optional.of(criteriaContext.getCriteriaBuilder()
-				        .equal(criteriaContext.getRoot().get(String.format("%s.type", alias)), param.getResourceType())));
+				        .equal(taskAliasJoin.get("type"), param.getResourceType())));
 				return Optional.of(criteriaContext.getCriteriaBuilder().and(toCriteriaArray(predicateList)));
 			}
 			

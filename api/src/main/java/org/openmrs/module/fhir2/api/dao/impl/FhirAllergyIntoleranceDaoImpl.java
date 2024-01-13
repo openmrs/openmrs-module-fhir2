@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import javax.annotation.Nonnull;
+import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 
 import java.util.Map;
@@ -22,6 +23,7 @@ import lombok.NonNull;
 import lombok.Setter;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
+import org.openmrs.Allergen;
 import org.openmrs.AllergenType;
 import org.openmrs.Allergy;
 import org.openmrs.AllergyReaction;
@@ -90,8 +92,8 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implemen
 	
 	private void handleManifestation(OpenmrsFhirCriteriaContext<Allergy> criteriaContext, TokenAndListParam code) {
 		if (code != null) {
-			criteriaContext.getRoot().join("reactions").alias("r");
-			criteriaContext.getRoot().join("r.reaction").alias("rc");
+			Join<?, ?> reactionJoin = criteriaContext.addJoin("reactions","r");
+			criteriaContext.addJoin(reactionJoin,"reaction","rc");
 			
 			handleCodeableConcept(criteriaContext, code, "rc", "rcm", "rcrt").ifPresent(criteriaContext::addPredicate);
 			criteriaContext.finalizeQuery();
@@ -100,7 +102,8 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implemen
 	
 	private void handleAllergen(OpenmrsFhirCriteriaContext<Allergy> criteriaContext, TokenAndListParam code) {
 		if (code != null) {
-			criteriaContext.getRoot().join("allergen.codedAllergen").alias("ac");
+			Join<?, ?> allergenJoin = criteriaContext.getRoot().join("allergen");
+			criteriaContext.addJoin(allergenJoin,"codedAllergen","ac");
 			
 			handleCodeableConcept(criteriaContext, code, "ac", "acm", "acrt").ifPresent(criteriaContext::addPredicate);
 			criteriaContext.finalizeQuery();
@@ -115,28 +118,28 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implemen
 		    FhirConstants.GLOBAL_PROPERTY_MILD, FhirConstants.GLOBAL_PROPERTY_MODERATE, FhirConstants.GLOBAL_PROPERTY_SEVERE,
 		    FhirConstants.GLOBAL_PROPERTY_OTHER);
 		
-		criteriaContext.getRoot().join("severity").alias("sc");
+		Join<?,?> severeJoin = criteriaContext.addJoin("severity","sc");
 		
-		handleAndListParam(severityParam, token -> {
+		handleAndListParam(criteriaContext.getCriteriaBuilder(),severityParam, token -> {
 			try {
 				AllergyIntolerance.AllergyIntoleranceSeverity severity = AllergyIntolerance.AllergyIntoleranceSeverity
 				        .fromCode(token.getValue());
 				switch (severity) {
 					case MILD:
 						return Optional
-						        .of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("sc.uuid"),
+						        .of(criteriaContext.getCriteriaBuilder().equal(severeJoin.get("uuid"),
 						            severityConceptUuids.get(FhirConstants.GLOBAL_PROPERTY_MILD)));
 					case MODERATE:
 						return Optional
-						        .of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("sc.uuid"),
+						        .of(criteriaContext.getCriteriaBuilder().equal(severeJoin.get("uuid"),
 						            severityConceptUuids.get(FhirConstants.GLOBAL_PROPERTY_MODERATE)));
 					case SEVERE:
 						return Optional
-						        .of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("sc.uuid"),
+						        .of(criteriaContext.getCriteriaBuilder().equal(severeJoin.get("uuid"),
 						            severityConceptUuids.get(FhirConstants.GLOBAL_PROPERTY_SEVERE)));
 					case NULL:
 						return Optional
-						        .of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("sc.uuid"),
+						        .of(criteriaContext.getCriteriaBuilder().equal(severeJoin.get("uuid"),
 						            severityConceptUuids.get(FhirConstants.GLOBAL_PROPERTY_OTHER)));
 				}
 			}
@@ -152,7 +155,7 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implemen
 			return Optional.empty();
 		}
 		
-		return handleAndListParam(categoryParam, token -> {
+		return handleAndListParam(criteriaContext.getCriteriaBuilder(),categoryParam, token -> {
 			try {
 				AllergyIntolerance.AllergyIntoleranceCategory category = AllergyIntolerance.AllergyIntoleranceCategory
 				        .fromCode(token.getValue());

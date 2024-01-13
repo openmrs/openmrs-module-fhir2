@@ -16,6 +16,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
@@ -144,32 +145,26 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 		if (query == null) {
 			return;
 		}
+			Join<?, ?> personNameJoin = criteriaContext.addJoin("names","pn");
+			Join<?, ?> identifiersJoin = criteriaContext.addJoin("identifiers","pi");
 		
-		if (lacksAlias(criteriaContext, "pn")) {
-			criteriaContext.getRoot().join("names");
-		}
-		
-		if (lacksAlias(criteriaContext, "pi")) {
-			criteriaContext.getRoot().join("identifiers");
-		}
-		
-		handleAndListParam(query, q -> {
+		handleAndListParam(criteriaContext.getCriteriaBuilder(),query, q -> {
 			List<Optional<? extends Predicate>> arrayList = new ArrayList<>();
 			
 			for (String token : StringUtils.split(q.getValueNotNull(), " \t,")) {
 				StringParam param = new StringParam(token).setContains(q.isContains()).setExact(q.isExact());
 				arrayList.add(
-				    propertyLike(criteriaContext, "pn.givenName", param).map(c -> criteriaContext.getCriteriaBuilder().and(c,
+				    propertyLike(criteriaContext, personNameJoin,"givenName", param).map(c -> criteriaContext.getCriteriaBuilder().and(c,
 				        criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("voided"), false))));
-				arrayList.add(propertyLike(criteriaContext, "pn.middleName", param)
+				arrayList.add(propertyLike(criteriaContext, personNameJoin,"middleName", param)
 				        .map(c -> criteriaContext.getCriteriaBuilder().and(c,
 				            criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("voided"), false))));
-				arrayList.add(propertyLike(criteriaContext, "pn.familyName", param)
+				arrayList.add(propertyLike(criteriaContext, personNameJoin,"familyName", param)
 				        .map(c -> criteriaContext.getCriteriaBuilder().and(c,
 				            criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("voided"), false))));
 			}
 			
-			arrayList.add(propertyLike(criteriaContext, "pi.identifier",
+			arrayList.add(propertyLike(criteriaContext, identifiersJoin,"identifier",
 			    new StringParam(q.getValueNotNull()).setContains(q.isContains()).setExact(q.isExact()))
 			            .map(c -> criteriaContext.getCriteriaBuilder().and(c,
 			                criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("voided"), false))));
@@ -184,23 +179,19 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 			return;
 		}
 		
-		criteriaContext.getRoot().join("identifiers", javax.persistence.criteria.JoinType.INNER).alias("pi");
-		criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("pi.voided"), false);
+		Join<?, ?> identifiersJoin = criteriaContext.addJoin("identifiers","pi");
+		criteriaContext.getCriteriaBuilder().equal(identifiersJoin.get("voided"), false);
 		
-		handleAndListParamBySystem(identifier, (system, tokens) -> {
+		handleAndListParamBySystem(criteriaContext.getCriteriaBuilder(),identifier, (system, tokens) -> {
 			if (system.isEmpty()) {
-				return Optional.of(criteriaContext.getCriteriaBuilder().in(criteriaContext.getRoot().get("pi.identifier"))
-				        .value(tokensToList(tokens)));
+				return Optional.of(criteriaContext.getCriteriaBuilder().in(identifiersJoin.get("identifier")).value(tokensToList(tokens)));
 			} else {
-				if (lacksAlias(criteriaContext, "pit")) {
-					criteriaContext.getRoot().join("pi.identifierType", javax.persistence.criteria.JoinType.INNER)
-					        .alias("pit");
-					criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("pit.retired"), false);
-				}
+				Join<?, ?> identifiersIdentifierTypeJoin = criteriaContext.addJoin(identifiersJoin,"identifierType","pit");
+				criteriaContext.getCriteriaBuilder().equal(identifiersIdentifierTypeJoin.get("retired"), false);
 				
 				return Optional.of(criteriaContext.getCriteriaBuilder().and(
-				    criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("pit.name"), system),
-				    criteriaContext.getCriteriaBuilder().in(criteriaContext.getRoot().get("pi.identifier"))
+				    criteriaContext.getCriteriaBuilder().equal(identifiersIdentifierTypeJoin.get("name"), system),
+				    criteriaContext.getCriteriaBuilder().in(identifiersJoin.get("identifier"))
 				            .value(tokensToList(tokens))));
 			}
 		}).ifPresent(criteriaContext::addPredicate);

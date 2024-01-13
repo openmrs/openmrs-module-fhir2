@@ -15,6 +15,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -222,9 +223,9 @@ public abstract class BaseDao {
      * represents the intersection of all the parameters contained
      *
      * @param andListParam the {@link IQueryParameterAnd} to handle
-     * @param handler      a {@link Function} which maps a parameter to a {@link Criterion}
-     * @param <T>          the subtype of {@link IQueryParameterOr} that this {@link IQueryParameterAnd} contains
-     * @param <U>          the subtype of {@link IQueryParameterType} for this parameter
+     * @param handler a {@link Function} which maps a parameter to a {@link Criterion}
+     * @param <T> the subtype of {@link IQueryParameterOr} that this {@link IQueryParameterAnd} contains
+     * @param <U> the subtype of {@link IQueryParameterType} for this parameter
      * @return the resulting criterion, which is the intersection of all the unions of contained
      * parameters
      */
@@ -233,7 +234,7 @@ public abstract class BaseDao {
             return Optional.empty();
         }
 
-        return Optional.ofNullable(criteriaBuilder.and(toCriteriaArray(handleAndListParam(andListParam).map(orListParam -> handleOrListParam(orListParam, handler)))));
+        return Optional.ofNullable(criteriaBuilder.and(toCriteriaArray(handleAndListParam(andListParam).map(orListParam -> handleOrListParam(criteriaBuilder,orListParam, handler)))));
     }
 
     @SuppressWarnings("unused")
@@ -258,8 +259,8 @@ public abstract class BaseDao {
      * represents the union of all the parameters
      *
      * @param orListParam the {@link IQueryParameterOr} to handle
-     * @param handler     a {@link Function} which maps a parameter to a {@link Criterion}
-     * @param <T>         the subtype of {@link IQueryParameterType} for this parameter
+     * @param handler a {@link Function} which maps a parameter to a {@link Criterion}
+     * @param <T>  the subtype of {@link IQueryParameterType} for this parameter
      * @return the resulting criterion, which is the union of all contained parameters
      */
     protected <T extends IQueryParameterType> Optional<Predicate> handleOrListParam(CriteriaBuilder criteriaBuilder, IQueryParameterOr<T> orListParam, Function<T, Optional<Predicate>> handler) {
@@ -267,7 +268,7 @@ public abstract class BaseDao {
             return Optional.empty();
         }
 
-        return Optional.of(criteriaBuilder.or(toCriteriaArray(handleOrListParam(criteriaBuilder, orListParam).map(handler))));
+        return Optional.of(criteriaBuilder.or(toCriteriaArray(handleOrListParam(orListParam).map(handler))));
     }
 
     protected <T extends IQueryParameterType> Optional<Predicate> handleOrListParamAsStream(CriteriaBuilder criteriaBuilder, IQueryParameterOr<T> orListParam, Function<T, Stream<Optional<Predicate>>> handler) {
@@ -275,7 +276,7 @@ public abstract class BaseDao {
             return Optional.empty();
         }
 
-        return Optional.of(criteriaBuilder.or(toCriteriaArray(handleOrListParam(criteriaBuilder, orListParam).flatMap(handler))));
+        return Optional.of(criteriaBuilder.or(toCriteriaArray(handleOrListParam(orListParam).flatMap(handler))));
     }
 
     /**
@@ -463,20 +464,17 @@ public abstract class BaseDao {
         if (encounterReference == null) {
             return;
         }
-
-        if (lacksAlias(criteriaContext, encounterAlias)) {
-            criteriaContext.getRoot().join(associationPath).alias(encounterAlias);
-        }
+            Join<?, ?> associationPathEncounterJoin = criteriaContext.addJoin(associationPath,encounterAlias);
 
         handleAndListParam(criteriaContext.getCriteriaBuilder(), encounterReference, token -> {
             if (token.getChain() != null) {
                 switch (token.getChain()) {
                     case Encounter.SP_TYPE:
-                        criteriaContext.addJoin(String.format("%s.encounterType", encounterAlias), "et");
-                        return propertyLike(criteriaContext, getRootOrJoin(criteriaContext, "et"), "uuid", new StringParam(token.getValue(), true));
+                        Join<?, ?> associationPathEncounterEncounterTypeJoin = criteriaContext.addJoin(associationPathEncounterJoin,"encounterType", "et");
+                        return propertyLike(criteriaContext, associationPathEncounterEncounterTypeJoin, "uuid", new StringParam(token.getValue(), true));
                 }
             } else {
-                return Optional.of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get(String.format("%s.uuid", encounterAlias)), token.getIdPart()));
+                return Optional.of(criteriaContext.getCriteriaBuilder().equal(associationPathEncounterJoin.get("uuid"), token.getIdPart()));
             }
 
             return Optional.empty();
@@ -533,7 +531,7 @@ public abstract class BaseDao {
                         return propertyLike(criteriaContext, getRootOrJoin(criteriaContext, locationAlias), "country", token.getValue());
                 }
             } else {
-                return Optional.of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get(String.format("%s.uuid", locationAlias)), token.getValue()));
+                return Optional.of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get(String.format("%s..uuid", locationAlias)), token.getValue()));
             }
 
             return Optional.empty();
@@ -584,10 +582,8 @@ public abstract class BaseDao {
                         }
                     }
                 } else {
-                    if (lacksAlias(criteriaContext, "pro")) {
-                        criteriaContext.getRoot().join("ep.provider").alias("pro");
-                    }
-                    return Optional.of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("pro.uuid"), participantToken.getValue()));
+                        Join<?, ?> encounterProviderProvider = criteriaContext.addJoin(encounterProvider.get(), "provider", "pro");
+                    return Optional.of(criteriaContext.getCriteriaBuilder().equal(encounterProviderProvider.get("pro.uuid"), participantToken.getValue()));
                 }
 
                 return Optional.empty();
@@ -646,21 +642,27 @@ public abstract class BaseDao {
         if (concepts == null) {
             return Optional.empty();
         }
-
-        return handleAndListParamBySystem(criteriaContext.getCriteriaBuilder(), concepts, (system, tokens) -> {
-            if (system.isEmpty()) {
-                criteriaContext.getCriteriaBuilder().literal(tokensToParams(tokens).map(NumberUtils::toInt).collect(Collectors.toList()));
-                return Optional.of(criteriaContext.getCriteriaBuilder().or(criteriaContext.getCriteriaBuilder().in(criteriaContext.getRoot().get(String.format("%s.conceptId", conceptAlias)).in(criteriaContext.getCriteriaBuilder().literal(tokensToParams(tokens).map(NumberUtils::toInt).collect(Collectors.toList())))), criteriaContext.getCriteriaBuilder().in(criteriaContext.getRoot().get(String.format("%s.uuid", conceptAlias)).in(criteriaContext.getCriteriaBuilder().literal(tokensToList(tokens))))));
-
-            } else {
-                if (lacksAlias(criteriaContext, conceptMapAlias)) {
-                    criteriaContext.getRoot().join(String.format("%s.conceptMappings", conceptAlias)).alias(conceptMapAlias);
-                    criteriaContext.getRoot().join(String.format("%s.conceptReferenceTerm", conceptMapAlias)).alias(conceptReferenceTermAlias);
-                }
-
-                return Optional.of(generateSystemQuery(criteriaContext, system, tokensToList(tokens), conceptReferenceTermAlias));
-            }
-        });
+        Optional<Join<?, ?>> conceptAliasJoin = criteriaContext.getJoin(conceptAlias);
+	    return conceptAliasJoin.map(
+			    join -> handleAndListParamBySystem(criteriaContext.getCriteriaBuilder(), concepts, (system, tokens) -> {
+				    if (system.isEmpty()) {
+					    criteriaContext.getCriteriaBuilder()
+							    .literal(tokensToParams(tokens).map(NumberUtils::toInt).collect(Collectors.toList()));
+					    return Optional.of(criteriaContext.getCriteriaBuilder().or(criteriaContext.getCriteriaBuilder()
+									    .in(join.get("conceptId").in(criteriaContext.getCriteriaBuilder().literal(
+											    tokensToParams(tokens).map(NumberUtils::toInt).collect(Collectors.toList())))),
+							    criteriaContext.getCriteriaBuilder().in(join.get("uuid")
+									    .in(criteriaContext.getCriteriaBuilder().literal(tokensToList(tokens))))));
+					    
+				    } else {
+					    Join<?, ?> conceptMapAliasJoin = criteriaContext.addJoin(join, "conceptMappings", conceptMapAlias);
+					    criteriaContext.addJoin(conceptMapAliasJoin, "conceptReferenceTerm", conceptReferenceTermAlias);
+					    
+					    return Optional.of(generateSystemQuery(criteriaContext, system, tokensToList(tokens),
+							    conceptReferenceTermAlias));
+				    }
+			    })).orElse(null);
+	    
     }
 
     protected <T> void handleNames(OpenmrsFhirCriteriaContext<T> criteriaContext, StringAndListParam name, StringAndListParam given, StringAndListParam family) {
@@ -672,29 +674,33 @@ public abstract class BaseDao {
         if (name == null && given == null && family == null) {
             return;
         }
+        
+        Join<?, ?> personAliasJoin = criteriaContext.getRoot().join(personAlias);
+        Join<?, ?> personNameAliasJoin = criteriaContext.addJoin(personAliasJoin,"names","pn");
 
-        if (lacksAlias(criteriaContext, "pn")) {
+        if (!criteriaContext.getJoin("pn").isPresent()) {
             if (StringUtils.isNotBlank(personAlias)) {
-                criteriaContext.getRoot().join(String.format("%s.names", personAlias), javax.persistence.criteria.JoinType.INNER).alias("pn");
-                criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("pn.voided"), false);
+                criteriaContext.getCriteriaBuilder().equal(personNameAliasJoin.get("voided"), false);
             } else {
-                criteriaContext.getRoot().join("names", javax.persistence.criteria.JoinType.INNER).alias("pn");
-                criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("pn.voided"), false);
+                criteriaContext.getCriteriaBuilder().equal(personNameAliasJoin.get("voided"), false);
             }
         }
 
         if (name != null) {
-            handleAndListParamAsStream(name, (nameParam) -> Arrays.stream(StringUtils.split(nameParam.getValue(), " \t,")).map(token -> new StringParam().setValue(token).setExact(nameParam.isExact()).setContains(nameParam.isContains())).map(tokenParam -> Arrays.asList(propertyLike(criteriaContext, "pn.givenName", tokenParam), propertyLike(criteriaContext, "pn.middleName", tokenParam), propertyLike(criteriaContext, "pn.familyName", tokenParam))).flatMap(Collection::stream)).ifPresent(criteriaContext::addPredicate);
+            handleAndListParamAsStream(criteriaContext.getCriteriaBuilder(), name, (nameParam) -> Arrays.stream(StringUtils.split(nameParam.getValue(), " \t,")).map(token -> new StringParam().setValue(token).setExact(nameParam.isExact()).setContains(nameParam.isContains())).map(tokenParam -> Arrays.asList(
+                    propertyLike(criteriaContext, personNameAliasJoin,"givenName", tokenParam),
+                    propertyLike(criteriaContext, personNameAliasJoin,"middleName", tokenParam),
+                    propertyLike(criteriaContext, personNameAliasJoin,"familyName", tokenParam))).flatMap(Collection::stream)).ifPresent(criteriaContext::addPredicate);
             criteriaContext.finalizeQuery();
         }
 
         if (given != null) {
-            handleAndListParam(given, (givenName) -> propertyLike(criteriaContext, "pn.givenName", givenName)).ifPresent(criteriaContext::addPredicate);
+            handleAndListParam(criteriaContext.getCriteriaBuilder(),given, (givenName) -> propertyLike(criteriaContext, personNameAliasJoin,"givenName", givenName)).ifPresent(criteriaContext::addPredicate);
             criteriaContext.finalizeQuery();
         }
 
         if (family != null) {
-            handleAndListParam(family, (familyName) -> propertyLike(criteriaContext, "pn.familyName", familyName)).ifPresent(criteriaContext::addPredicate);
+            handleAndListParam(criteriaContext.getCriteriaBuilder(),family, (familyName) -> propertyLike(criteriaContext, personNameAliasJoin,"familyName", familyName)).ifPresent(criteriaContext::addPredicate);
             criteriaContext.finalizeQuery();
         }
     }
@@ -705,42 +711,39 @@ public abstract class BaseDao {
 
     protected <T> void handlePatientReference(OpenmrsFhirCriteriaContext<T> criteriaContext, ReferenceAndListParam patientReference, String associationPath) {
         if (patientReference != null) {
-            criteriaContext.addJoin(associationPath, "p").finalizeQuery();
-
-            handleAndListParam(patientReference, patientToken -> {
+            Join<?, ?> associationPathJoin = criteriaContext.addJoin(associationPath,"p");
+            handleAndListParam(criteriaContext.getCriteriaBuilder(),patientReference, patientToken -> {
                 if (patientToken.getChain() != null) {
                     switch (patientToken.getChain()) {
                         case Patient.SP_IDENTIFIER:
-                            if (lacksAlias(criteriaContext, "pi")) {
-                                criteriaContext.addJoin("p.identifiers", "pi").finalizeQuery();
-                            }
-                            return Optional.of(criteriaContext.getCriteriaBuilder().like(criteriaContext.getRoot().get("pi.identifier"), patientToken.getValue()));
-                        case Patient.SP_GIVEN:
-                            if (lacksAlias(criteriaContext, "pn")) {
-                                criteriaContext.addJoin("p.names", "pn").finalizeQuery();
-                            }
-                            return Optional.of(criteriaContext.getCriteriaBuilder().like(criteriaContext.getRoot().get("pn.givenName"), patientToken.getValue()));
-                        case Patient.SP_FAMILY:
-                            if (lacksAlias(criteriaContext, "pn")) {
-                                criteriaContext.addJoin("p.names", "pn").finalizeQuery();
-                            }
-                            return Optional.of(criteriaContext.getCriteriaBuilder().like(criteriaContext.getRoot().get("pn.familyName"), patientToken.getValue()));
+                            Join<?, ?> associationPathIdentifiersJoin =  criteriaContext.addJoin(associationPathJoin,"identifiers", "pi");
+                            return Optional.of(criteriaContext.getCriteriaBuilder().like(associationPathIdentifiersJoin.get("identifier"), patientToken.getValue()));
+                        case Patient.SP_GIVEN: {
+                            Join<?, ?> associationPathNamesJoin = criteriaContext.addJoin(associationPathJoin, "names",
+                                    "pn");
+                            return Optional.of(criteriaContext.getCriteriaBuilder()
+                                    .like(associationPathNamesJoin.get("givenName"), patientToken.getValue()));
+                        }
+                        case Patient.SP_FAMILY: {
+                            Join<?, ?> associationPathNamesJoin = criteriaContext.addJoin(associationPathJoin, "names",
+                                    "pn");
+                            return Optional.of(criteriaContext.getCriteriaBuilder()
+                                    .like(associationPathNamesJoin.get("familyName"), patientToken.getValue()));
+                        }
                         case Patient.SP_NAME:
-                            if (lacksAlias(criteriaContext, "pn")) {
-                                criteriaContext.addJoin("p.names", "pn").finalizeQuery();
-                            }
+                            Join<?, ?> associationPathNamesJoin =  criteriaContext.addJoin(associationPathJoin,"names", "pn");
 
                             List<Optional<? extends Predicate>> criterionList = new ArrayList<>();
 
                             for (String token : StringUtils.split(patientToken.getValue(), " \t,")) {
-                                criterionList.add(propertyLike(criteriaContext, "pn.givenName", token));
-                                criterionList.add(propertyLike(criteriaContext, "pn.middleName", token));
-                                criterionList.add(propertyLike(criteriaContext, "pn.familyName", token));
+                                criterionList.add(propertyLike(criteriaContext, associationPathNamesJoin,"givenName", token));
+                                criterionList.add(propertyLike(criteriaContext, associationPathNamesJoin,"middleName", token));
+                                criterionList.add(propertyLike(criteriaContext, associationPathNamesJoin,"familyName", token));
                             }
                             return Optional.of(criteriaContext.getCriteriaBuilder().or(toCriteriaArray(criterionList)));
                     }
                 } else {
-                    return Optional.of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("p.uuid"), patientToken.getValue()));
+                    return Optional.of(criteriaContext.getCriteriaBuilder().equal(associationPathJoin.get("uuid"), patientToken.getValue()));
                 }
 
                 return Optional.empty();
@@ -781,19 +784,19 @@ public abstract class BaseDao {
         List<Optional<? extends Predicate>> predicateList = new ArrayList<>();
 
         if (city != null) {
-            predicateList.add(handleAndListParam(criteriaContext.getCriteriaBuilder(), city, c -> propertyLike(criteriaContext, String.format("%s.cityVillage", aliasPrefix), c)));
+            predicateList.add(handleAndListParam(criteriaContext.getCriteriaBuilder(), city, c -> propertyLike(criteriaContext, getRootOrJoin(criteriaContext,aliasPrefix),"cityVillage", c)));
         }
 
         if (state != null) {
-            predicateList.add(handleAndListParam(state, c -> propertyLike(criteriaContext, String.format("%s.stateProvince", aliasPrefix), c)));
+            predicateList.add(handleAndListParam(criteriaContext.getCriteriaBuilder(), state, c -> propertyLike(criteriaContext, getRootOrJoin(criteriaContext,aliasPrefix),"stateProvince", c)));
         }
 
         if (postalCode != null) {
-            predicateList.add(handleAndListParam(postalCode, c -> propertyLike(criteriaContext, String.format("%s.postalCode", aliasPrefix), c)));
+            predicateList.add(handleAndListParam(criteriaContext.getCriteriaBuilder(), postalCode, c -> propertyLike(criteriaContext, getRootOrJoin(criteriaContext,aliasPrefix),"postalCode", c)));
         }
 
         if (country != null) {
-            predicateList.add(handleAndListParam(country, c -> propertyLike(criteriaContext, String.format("%s.country", aliasPrefix), c)));
+            predicateList.add(handleAndListParam(criteriaContext.getCriteriaBuilder(), country, c -> propertyLike(criteriaContext, getRootOrJoin(criteriaContext,aliasPrefix),"country", c)));
         }
 
         return Optional.of(criteriaContext.getCriteriaBuilder().and(toCriteriaArray(predicateList.stream())));
@@ -803,8 +806,8 @@ public abstract class BaseDao {
         if (medicationReference == null) {
             return Optional.empty();
         }
-
-        return handleAndListParam(medicationReference, token -> Optional.of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get(String.format("%s.uuid", medicationAlias)), token.getIdPart())));
+        
+        return handleAndListParam(criteriaContext.getCriteriaBuilder(), medicationReference, token -> Optional.of(criteriaContext.getCriteriaBuilder().equal(getRootOrJoin(criteriaContext,medicationAlias).get("uuid"), token.getIdPart())));
     }
 
     protected <T> Optional<Predicate> handleMedicationRequestReference(OpenmrsFhirCriteriaContext<T> criteriaContext, @Nonnull String drugOrderAlias, ReferenceAndListParam drugOrderReference) {
@@ -812,7 +815,7 @@ public abstract class BaseDao {
             return Optional.empty();
         }
 
-        return handleAndListParam(drugOrderReference, token -> Optional.of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get(String.format("%s.uuid", drugOrderAlias)), token.getIdPart())));
+        return handleAndListParam(criteriaContext.getCriteriaBuilder(), drugOrderReference, token -> Optional.of(criteriaContext.getCriteriaBuilder().equal(getRootOrJoin(criteriaContext,drugOrderAlias).get("uuid"), token.getIdPart())));
     }
 
     /**
@@ -822,7 +825,7 @@ public abstract class BaseDao {
      * {@link #paramToProp(OpenmrsFhirCriteriaContext, String)}.
      *
      * @param criteriaContext The {@link OpenmrsFhirCriteriaContext} for the current query
-     * @param sort            the {@link SortSpec} which defines the sorting to be translated
+     * @param sort the {@link SortSpec} which defines the sorting to be translated
      */
     protected <T> void handleSort(OpenmrsFhirCriteriaContext<T> criteriaContext, SortSpec sort) {
         handleSort(criteriaContext, sort, this::paramToProps).ifPresent(l -> l.forEach(criteriaContext.getCriteriaQuery()::orderBy));
@@ -857,15 +860,21 @@ public abstract class BaseDao {
         criteriaContext.getCriteriaQuery().where(spec.toPredicate((Root<FhirConceptSource>) criteriaContext.getRoot(), (CriteriaQuery<FhirConceptSource>) criteriaContext.getCriteriaQuery(), criteriaContext.getCriteriaBuilder()));
 
         if (codes.size() > 1) {
-            return criteriaContext.getCriteriaBuilder().and(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get(String.format("%s.conceptSource", conceptReferenceTermAlias)), criteriaContext.getCriteriaQuery()), criteriaContext.getCriteriaBuilder().in(criteriaContext.getRoot().get(String.format("%s.code", conceptReferenceTermAlias)).get(codes.toString())));
+            return criteriaContext.getCriteriaBuilder().and(criteriaContext.getCriteriaBuilder().equal(getRootOrJoin(criteriaContext,conceptReferenceTermAlias).get("conceptSource"), criteriaContext.getCriteriaQuery()), criteriaContext.getCriteriaBuilder().in(criteriaContext.getRoot().get(String.format("%s.code", conceptReferenceTermAlias)).get(codes.toString())));
         } else {
-            return criteriaContext.getCriteriaBuilder().and(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get(String.format("%s.conceptSource", conceptReferenceTermAlias)), criteriaContext.getCriteriaQuery()), criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get(String.format("%s.code", conceptReferenceTermAlias)), codes.get(0)));
+            return criteriaContext.getCriteriaBuilder().and(criteriaContext.getCriteriaBuilder().equal(getRootOrJoin(criteriaContext,conceptReferenceTermAlias).get("conceptSource"), criteriaContext.getCriteriaQuery()), criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get(String.format("%s.code", conceptReferenceTermAlias)), codes.get(0)));
         }
     }
 
     protected <T> Predicate generateActiveOrderQuery(OpenmrsFhirCriteriaContext<T> criteriaContext, String path, Date onDate) {
         // ACTIVE = date activated null or less than or equal to current datetime, date stopped null or in the future, auto expire date null or in the future
-        return criteriaContext.getCriteriaBuilder().and(criteriaContext.getCriteriaBuilder().or(criteriaContext.getCriteriaBuilder().isNull(criteriaContext.getRoot().join(path).get("dateActivated")), criteriaContext.getCriteriaBuilder().lessThan(criteriaContext.getRoot().join(path).get("dateActivated"), onDate)), criteriaContext.getCriteriaBuilder().or(criteriaContext.getCriteriaBuilder().isNull(criteriaContext.getRoot().join(path).get("dateStopped")), criteriaContext.getCriteriaBuilder().greaterThan(criteriaContext.getRoot().join(path).get("dateStopped"), onDate)), criteriaContext.getCriteriaBuilder().or(criteriaContext.getCriteriaBuilder().isNull(criteriaContext.getRoot().join(path).get("autoExpireDate")), criteriaContext.getCriteriaBuilder().greaterThan(criteriaContext.getRoot().join(path).get("autoExpireDate"), onDate)));
+        return criteriaContext.getCriteriaBuilder().and(criteriaContext.getCriteriaBuilder().or(criteriaContext.getCriteriaBuilder()
+                .isNull(getRootOrJoin(criteriaContext,path).get("dateActivated")), criteriaContext.getCriteriaBuilder()
+                .lessThan(getRootOrJoin(criteriaContext,path).get("dateActivated"), onDate)), criteriaContext.getCriteriaBuilder()
+                .or(criteriaContext.getCriteriaBuilder().isNull(getRootOrJoin(criteriaContext,path).get("dateStopped")), criteriaContext.getCriteriaBuilder()
+                        .greaterThan(getRootOrJoin(criteriaContext,path).get("dateStopped"), onDate)), criteriaContext.getCriteriaBuilder()
+                .or(criteriaContext.getCriteriaBuilder().isNull(getRootOrJoin(criteriaContext,path).get("autoExpireDate")), criteriaContext.getCriteriaBuilder()
+                        .greaterThan(getRootOrJoin(criteriaContext,path).get("autoExpireDate"), onDate)));
     }
 
     protected <T> Predicate generateActiveOrderQuery(OpenmrsFhirCriteriaContext<T> criteriaContext, String path) {
@@ -887,7 +896,7 @@ public abstract class BaseDao {
     protected <T> Predicate generateNotCancelledOrderQuery(OpenmrsFhirCriteriaContext<T> criteriaContext, String path) {
         Date now = new Date();
 
-        return criteriaContext.getCriteriaBuilder().or(criteriaContext.getCriteriaBuilder().isNull(criteriaContext.getRoot().join(path).get("dateStopped")), criteriaContext.getCriteriaBuilder().greaterThan(criteriaContext.getRoot().join(path).get("dateStopped"), now));
+        return criteriaContext.getCriteriaBuilder().or(criteriaContext.getCriteriaBuilder().isNull(getRootOrJoin(criteriaContext,path).get("dateStopped")), criteriaContext.getCriteriaBuilder().greaterThan(getRootOrJoin(criteriaContext,path).get("dateStopped"), now));
     }
 
     protected TokenOrListParam convertStringStatusToBoolean(TokenOrListParam statusParam) {

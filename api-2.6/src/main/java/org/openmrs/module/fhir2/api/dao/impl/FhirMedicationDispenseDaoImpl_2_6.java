@@ -77,7 +77,7 @@ public class FhirMedicationDispenseDaoImpl_2_6 extends BaseFhirDao<MedicationDis
 					entry.getValue()
 					        .forEach(e -> handleMedicationRequestReference(criteriaContext,"drugOrder", (ReferenceAndListParam) e.getParam())
 					                .ifPresent(c -> {
-										createAlias(criteriaContext, "drugOrder", "drugOrder");
+								                criteriaContext.addJoin("drugOrder", "drugOrder");
 								                criteriaContext.addPredicate(c);
 								                criteriaContext.finalizeQuery();
 									}

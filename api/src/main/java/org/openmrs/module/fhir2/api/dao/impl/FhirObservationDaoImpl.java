@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import javax.annotation.Nonnull;
+import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 
 import java.util.Date;
@@ -217,19 +218,16 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 	
 	private void handleHasMemberReference(OpenmrsFhirCriteriaContext<Obs> criteriaContext,
 	        ReferenceAndListParam hasMemberReference) {
+		Join<?,?> groupMembersJoin = criteriaContext.addJoin("groupMembers","groupMembersJoin");
 		if (hasMemberReference != null) {
-			if (lacksAlias(criteriaContext, "gm")) {
-				criteriaContext.getRoot().join("groupMembers").alias("gm");
-			}
-			
-			handleAndListParam(hasMemberReference, hasMemberRef -> {
+			handleAndListParam(criteriaContext.getCriteriaBuilder(),hasMemberReference, hasMemberRef -> {
 				if (hasMemberRef.getChain() != null) {
 					if (Observation.SP_CODE.equals(hasMemberRef.getChain())) {
 						TokenAndListParam code = new TokenAndListParam()
 						        .addAnd(new TokenParam().setValue(hasMemberRef.getValue()));
 						
-						if (lacksAlias(criteriaContext, "c")) {
-							criteriaContext.getRoot().join("gm.concept").alias("c");
+						if (!criteriaContext.getJoin("c").isPresent()) {
+							criteriaContext.addJoin(groupMembersJoin,"concept","c");
 						}
 						
 						return handleCodeableConcept(criteriaContext, code, "c", "cm", "crt");
@@ -237,7 +235,7 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 				} else {
 					if (StringUtils.isNotBlank(hasMemberRef.getIdPart())) {
 						return Optional.of(criteriaContext.getCriteriaBuilder()
-						        .equal(criteriaContext.getRoot().get("gm.uuid"), hasMemberRef.getIdPart()));
+						        .equal(groupMembersJoin.get("uuid"), hasMemberRef.getIdPart()));
 					}
 				}
 				
@@ -249,14 +247,14 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 	
 	private <T> Optional<Predicate> handleValueStringParam(OpenmrsFhirCriteriaContext<T> criteriaContext,
 	        @Nonnull String propertyName, StringAndListParam valueStringParam) {
-		return handleAndListParam(valueStringParam, v -> propertyLike(criteriaContext, propertyName, v.getValue()));
+		//TODO: needs further investigation
+		Join<?, ?> propertyNameJoin = criteriaContext.addJoin(propertyName, propertyName);
+		return handleAndListParam(criteriaContext.getCriteriaBuilder(),valueStringParam, v -> propertyLike(criteriaContext,propertyNameJoin, propertyName, v.getValue()));
 	}
 	
 	private void handleCodedConcept(OpenmrsFhirCriteriaContext<Obs> criteriaContext, TokenAndListParam code) {
 		if (code != null) {
-			if (lacksAlias(criteriaContext, "c")) {
-				criteriaContext.getRoot().join("concept").alias("c");
-			}
+			criteriaContext.addJoin("concept","c");
 			
 			handleCodeableConcept(criteriaContext, code, "c", "cm", "crt").ifPresent(criteriaContext::addPredicate);
 			criteriaContext.finalizeQuery();
@@ -264,35 +262,30 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 	}
 	
 	private void handleConceptClass(OpenmrsFhirCriteriaContext<Obs> criteriaContext, TokenAndListParam category) {
-		if (category != null) {
-			if (lacksAlias(criteriaContext, "c")) {
-				criteriaContext.getRoot().join("concept").alias("c");
-			}
-			
-			if (lacksAlias(criteriaContext, "cc")) {
-				criteriaContext.getRoot().join("c.conceptClass").alias("cc");
-			}
+		if (category == null) {
+			Join<?, ?> conceptJoin = criteriaContext.addJoin("concept", "c");
+			Join<?, ?> conceptClassJoin = criteriaContext.addJoin(conceptJoin, "conceptClass", "cc");
+			handleAndListParam(criteriaContext.getCriteriaBuilder(), category, (param) -> {
+				if (param.getValue() == null) {
+					return Optional.empty();
+				}
+				OpenmrsFhirCriteriaContext<String> context = createCriteriaContext(String.class);
+				context.getCriteriaQuery().subquery(String.class).select(conceptClassJoin.get("uuid"))
+						.where(context.getCriteriaBuilder().equal(context.getRoot().get("category"), param.getValue()));
+				
+				return Optional.of(
+						context.getCriteriaBuilder()
+								.in(criteriaContext.getRoot().get("concept").get("conceptClass").get("uuid"))
+								.value(context.getCriteriaQuery().subquery(String.class)));
+			}).ifPresent(criteriaContext::addPredicate);
+			criteriaContext.finalizeQuery();
 		}
-		
-		handleAndListParam(category, (param) -> {
-			if (param.getValue() == null) {
-				return Optional.empty();
-			}
-			OpenmrsFhirCriteriaContext<String> context = createCriteriaContext(String.class);
-			context.getCriteriaQuery().subquery(String.class).select(context.getRoot().get("uuid"))
-			        .where(context.getCriteriaBuilder().equal(context.getRoot().get("category"), param.getValue()));
-			
-			return Optional.of(
-			    context.getCriteriaBuilder().in(criteriaContext.getRoot().get("concept").get("conceptClass").get("uuid"))
-			            .value(context.getCriteriaQuery().subquery(String.class)));
-		}).ifPresent(criteriaContext::addPredicate);
-		criteriaContext.finalizeQuery();
 	}
 	
 	private void handleValueCodedConcept(OpenmrsFhirCriteriaContext<Obs> criteriaContext, TokenAndListParam valueConcept) {
 		if (valueConcept != null) {
-			if (lacksAlias(criteriaContext, "vc")) {
-				criteriaContext.getRoot().join("valueCoded").alias("vc");
+			if (!criteriaContext.getJoin("vc").isPresent()) {
+				criteriaContext.addJoin("valueCoded","vc");
 			}
 			handleCodeableConcept(criteriaContext, valueConcept, "vc", "vcm", "vcrt")
 			        .ifPresent(criteriaContext::addPredicate);
