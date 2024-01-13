@@ -102,11 +102,11 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 					// Support constraining encounter resources to those that contain only certain Medication Requests
 					if (FhirConstants.MEDICATION_REQUEST.equals(hasParam.getTargetResourceType())) {
 						if (MedicationRequest.SP_ENCOUNTER.equals(hasParam.getReferenceFieldName())) {
-							if (lacksAlias(criteriaContext, "orders")) {
+							if (!criteriaContext.getJoin("orders").isPresent()) {
 								if (Encounter.class.isAssignableFrom(typeToken.getRawType())) {
 									criteriaContext.addJoin("orders", "orders");
 								} else {
-									if (lacksAlias(criteriaContext, "en")) {
+									if (!criteriaContext.getJoin("en").isPresent()) {
 										criteriaContext.addJoin("encounters", "en");
 									}
 									criteriaContext.addJoin("en.orders", "orders");

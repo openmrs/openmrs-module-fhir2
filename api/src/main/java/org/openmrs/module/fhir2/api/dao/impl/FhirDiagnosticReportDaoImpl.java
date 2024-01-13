@@ -24,6 +24,8 @@ import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.model.FhirDiagnosticReport;
 import org.springframework.stereotype.Component;
 
+import javax.persistence.criteria.Join;
+
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class FhirDiagnosticReportDaoImpl extends BaseFhirDao<FhirDiagnosticReport> implements FhirDiagnosticReportDao {
@@ -66,8 +68,8 @@ public class FhirDiagnosticReportDaoImpl extends BaseFhirDao<FhirDiagnosticRepor
 	private void handleCodedConcept(OpenmrsFhirCriteriaContext<FhirDiagnosticReport> criteriaContext,
 	        TokenAndListParam code) {
 		if (code != null) {
-			if (lacksAlias(criteriaContext, "c")) {
-				criteriaContext.getRoot().join("code");
+			if (!criteriaContext.getJoin("c").isPresent()) {
+				criteriaContext.addJoin("code","c");
 			}
 			handleCodeableConcept(criteriaContext, code, "c", "cm", "crt").ifPresent(criteriaContext::addPredicate);
 			criteriaContext.finalizeQuery();
@@ -77,12 +79,10 @@ public class FhirDiagnosticReportDaoImpl extends BaseFhirDao<FhirDiagnosticRepor
 	private void handleObservationReference(OpenmrsFhirCriteriaContext<FhirDiagnosticReport> criteriaContext,
 	        ReferenceAndListParam result) {
 		if (result != null) {
-			if (lacksAlias(criteriaContext, "obs")) {
-				criteriaContext.getRoot().join("results");
-			}
+			Join<?,?> resultsJoin = criteriaContext.addJoin("results","obs");
 			
-			handleAndListParam(result, token -> Optional.of(
-			    criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("obs.uuid"), token.getIdPart())))
+			handleAndListParam(criteriaContext.getCriteriaBuilder(),result, token -> Optional.of(
+			    criteriaContext.getCriteriaBuilder().equal(resultsJoin.get("uuid"), token.getIdPart())))
 			            .ifPresent(criteriaContext::addPredicate);
 			criteriaContext.finalizeQuery();
 		}

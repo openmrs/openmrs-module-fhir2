@@ -47,7 +47,7 @@ public class FhirRelatedPersonDaoImpl extends BaseFhirDao<Relationship> implemen
 	@Override
 	protected void setupSearchParams(OpenmrsFhirCriteriaContext<Relationship> criteriaContext,
 	        SearchParameterMap theParams) {
-		criteriaContext.addJoin("personA", "m").finalizeQuery();
+		criteriaContext.addJoin("personA", "m");
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.NAME_SEARCH_HANDLER:
@@ -85,11 +85,11 @@ public class FhirRelatedPersonDaoImpl extends BaseFhirDao<Relationship> implemen
 			return null;
 		}
 		
-		if (param.startsWith("address") && lacksAlias(criteriaContext, "pad")) {
-			criteriaContext.addJoin("m.addresses", "pad", javax.persistence.criteria.JoinType.LEFT).finalizeQuery();
+		if (param.startsWith("address") && !criteriaContext.getJoin("pad").isPresent()) {
+			criteriaContext.addJoin("m.addresses", "pad", javax.persistence.criteria.JoinType.LEFT);
 		} else if (param.equals(SP_NAME) || param.equals(SP_GIVEN) || param.equals(SP_FAMILY)) {
-			if (lacksAlias(criteriaContext, "pn")) {
-				criteriaContext.addJoin("m.names", "pn", javax.persistence.criteria.JoinType.LEFT).finalizeQuery();
+			if (!criteriaContext.getJoin("pn").isPresent()) {
+				criteriaContext.addJoin("m.names", "pn", javax.persistence.criteria.JoinType.LEFT);
 			}
 			
 			Root<PersonName> subRoot = criteriaContext.getCriteriaQuery().subquery(Integer.class).from(PersonName.class);

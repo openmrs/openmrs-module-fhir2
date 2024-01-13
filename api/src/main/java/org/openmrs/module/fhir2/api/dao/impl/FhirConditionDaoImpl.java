@@ -113,7 +113,7 @@ public class FhirConditionDaoImpl extends BaseFhirDao<Condition> implements Fhir
 	}
 	
 	private void handleClinicalStatus(OpenmrsFhirCriteriaContext<Condition> criteriaContext, TokenAndListParam status) {
-		handleAndListParam(status,
+		handleAndListParam(criteriaContext.getCriteriaBuilder(),status,
 		    tokenParam -> Optional.of(criteriaContext.getCriteriaBuilder()
 		            .equal(criteriaContext.getRoot().get("clinicalStatus"), convertStatus(tokenParam.getValue()))))
 		                    .ifPresent(criteriaContext::addPredicate);
@@ -121,7 +121,7 @@ public class FhirConditionDaoImpl extends BaseFhirDao<Condition> implements Fhir
 	}
 	
 	private void handleOnsetAge(OpenmrsFhirCriteriaContext<Condition> criteriaContext, QuantityAndListParam onsetAge) {
-		handleAndListParam(onsetAge, onsetAgeParam -> handleAgeByDateProperty(criteriaContext, "onsetDate", onsetAgeParam))
+		handleAndListParam(criteriaContext.getCriteriaBuilder(),onsetAge, onsetAgeParam -> handleAgeByDateProperty(criteriaContext, "onsetDate", onsetAgeParam))
 		        .ifPresent(criteriaContext::addPredicate);
 		criteriaContext.finalizeQuery();
 	}

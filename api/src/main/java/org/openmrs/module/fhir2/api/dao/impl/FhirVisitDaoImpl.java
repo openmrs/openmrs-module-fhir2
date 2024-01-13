@@ -40,9 +40,10 @@ public class FhirVisitDaoImpl extends BaseEncounterDao<Visit> implements FhirVis
 	@Override
 	protected void handleEncounterType(OpenmrsFhirCriteriaContext<Visit> criteriaContext,
 	        TokenAndListParam tokenAndListParam) {
-		handleAndListParam(tokenAndListParam,
+		Join<?,?> visitTypeJoin = criteriaContext.addJoin("visitType","vt");
+		handleAndListParam(criteriaContext.getCriteriaBuilder(),tokenAndListParam,
 		    t -> Optional
-		            .of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("vt.uuid"), t.getValue())))
+		            .of(criteriaContext.getCriteriaBuilder().equal(visitTypeJoin.get("uuid"), t.getValue())))
 		                    .ifPresent(t -> {
 			                    criteriaContext.getRoot().join("visitType");
 			                    criteriaContext.addPredicate(t);
