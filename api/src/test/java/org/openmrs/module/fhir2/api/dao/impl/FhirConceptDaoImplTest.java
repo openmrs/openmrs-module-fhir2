@@ -155,6 +155,7 @@ public class FhirConceptDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void getConceptsWithAnyMappingInSource_shouldReturnEmptyListIfMappingDoesNotExist() {
+		org.apache.log4j.LogManager.getLogger("org.hibernate.SQL").setLevel(org.apache.log4j.Level.DEBUG);
 		ConceptSource loinc = conceptService.getConceptSourceByName("LOINC");
 		
 		List<Concept> results = dao.getConceptsWithAnyMappingInSource(loinc, "non-existing");
