@@ -21,6 +21,7 @@ import java.util.Optional;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
+import org.hibernate.transform.DistinctRootEntityResultTransformer;
 import org.openmrs.Concept;
 import org.openmrs.ConceptMap;
 import org.openmrs.ConceptMapType;
@@ -47,6 +48,10 @@ public class FhirConceptDaoImpl extends BaseFhirDao<Concept> implements FhirConc
 	@Override
 	public Optional<Concept> getConceptWithSameAsMappingInSource(@Nonnull ConceptSource conceptSource,
 	        @Nonnull String mappingCode) {
+		if (conceptSource == null || mappingCode == null) {
+			return Optional.empty();
+		}
+		
 		OpenmrsFhirCriteriaContext<Concept> criteriaContext = createCriteriaContext(Concept.class);
 		
 		createConceptMapCriteriaBuilder(conceptSource, mappingCode);
@@ -69,24 +74,22 @@ public class FhirConceptDaoImpl extends BaseFhirDao<Concept> implements FhirConc
 	}
 	
 	@Override
+	@SuppressWarnings("unchecked")
 	public List<Concept> getConceptsWithAnyMappingInSource(@Nonnull ConceptSource conceptSource,
 	        @Nonnull String mappingCode) {
 		if (conceptSource == null || mappingCode == null) {
 			return Collections.emptyList();
 		}
 		
-		OpenmrsFhirCriteriaContext<Concept> criteriaContext = createCriteriaContext(Concept.class);
+		OpenmrsFhirCriteriaContext<ConceptMap> criteriaContext = createCriteriaContext(ConceptMap.class);
 		createConceptMapCriteriaBuilder(conceptSource, mappingCode);
-		Optional<Join<?, ?>> conceptAliasJoin = criteriaContext.getJoin("concept");
-		if (!conceptAliasJoin.isPresent()) {
-			return Collections.emptyList();
-		}
-		
-		Join<?,?> conceptJoin = criteriaContext.addJoin(conceptAliasJoin.get(),"concept", "concept");
-		
+		Join<?,?> conceptJoin = criteriaContext.addJoin("concept", "concept");
 		criteriaContext.addOrder(criteriaContext.getCriteriaBuilder().asc(conceptJoin.get("retired")));
 		
-		return criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).getResultList();
+		OpenmrsFhirCriteriaContext<Concept> fhirCriteriaContext = createCriteriaContext(Concept.class);
+		
+		return fhirCriteriaContext.getEntityManager().createQuery(fhirCriteriaContext.getCriteriaQuery())
+				.unwrap(org.hibernate.query.Query.class).setResultTransformer(DistinctRootEntityResultTransformer.INSTANCE).getResultList();
 	}
 	
 	@Override
