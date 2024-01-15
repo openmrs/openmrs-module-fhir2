@@ -124,6 +124,6 @@ public class ServiceRequestFhirResourceProvider implements IResourceProvider {
 		}
 		
 		return serviceRequestService.searchForServiceRequests(new ServiceRequestSearchParams(patientReference, code,
-		        encounterReference, participantReference, occurrence, uuid, lastUpdated, includes, hasAndListParam));
+		        encounterReference, participantReference, occurrence, hasAndListParam, uuid, lastUpdated, null, includes));
 	}
 }

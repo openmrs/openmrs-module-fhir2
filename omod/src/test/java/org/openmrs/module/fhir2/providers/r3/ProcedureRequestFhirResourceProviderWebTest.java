@@ -457,7 +457,7 @@ public class ProcedureRequestFhirResourceProviderWebTest extends BaseFhirR3Resou
 		
 		verify(service).searchForServiceRequests(serviceRequestSearchParamsArgumentCaptor.capture());
 		
-		TokenAndListParam tokenAndListParam = serviceRequestSearchParamsArgumentCaptor.getValue().getUuid();
+		TokenAndListParam tokenAndListParam = serviceRequestSearchParamsArgumentCaptor.getValue().getId();
 		assertThat(tokenAndListParam, notNullValue());
 		assertThat(tokenAndListParam.getValuesAsQueryTokens(), not(empty()));
 		assertThat(tokenAndListParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),

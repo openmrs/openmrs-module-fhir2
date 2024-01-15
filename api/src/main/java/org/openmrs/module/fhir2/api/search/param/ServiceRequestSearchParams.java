@@ -10,26 +10,24 @@
 
 package org.openmrs.module.fhir2.api.search.param;
 
-import java.io.Serializable;
 import java.util.HashSet;
 
 import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.HasAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.openmrs.module.fhir2.FhirConstants;
 
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
-@Builder
-@EqualsAndHashCode
-public class ServiceRequestSearchParams implements Serializable {
+@EqualsAndHashCode(callSuper = true)
+public class ServiceRequestSearchParams extends BaseResourceSearchParams {
 	
 	private ReferenceAndListParam patientReference;
 	
@@ -41,11 +39,31 @@ public class ServiceRequestSearchParams implements Serializable {
 	
 	private DateRangeParam occurrence;
 	
-	private TokenAndListParam uuid;
-	
-	private DateRangeParam lastUpdated;
-	
-	private HashSet<Include> includes;
-	
 	private HasAndListParam hasAndListParam;
+	
+	@Builder
+	public ServiceRequestSearchParams(ReferenceAndListParam patientReference, TokenAndListParam code,
+	    ReferenceAndListParam encounterReference, ReferenceAndListParam participantReference, DateRangeParam occurrence,
+	    HasAndListParam hasAndListParam, TokenAndListParam id, DateRangeParam lastUpdated, SortSpec sort,
+	    HashSet<Include> includes) {
+		
+		super(id, lastUpdated, sort, includes, null);
+		
+		this.patientReference = patientReference;
+		this.code = code;
+		this.encounterReference = encounterReference;
+		this.participantReference = participantReference;
+		this.occurrence = occurrence;
+		this.hasAndListParam = hasAndListParam;
+	}
+	
+	@Override
+	public SearchParameterMap toSearchParameterMap() {
+		return baseSearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, getPatientReference())
+		        .addParameter(FhirConstants.CODED_SEARCH_HANDLER, getCode())
+		        .addParameter(FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER, getEncounterReference())
+		        .addParameter(FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER, getParticipantReference())
+		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, FhirConstants.STATE_PROPERTY, getOccurrence())
+		        .addParameter(FhirConstants.HAS_SEARCH_HANDLER, FhirConstants.POSTAL_CODE_PROPERTY, getHasAndListParam());
+	}
 }

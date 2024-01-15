@@ -166,6 +166,33 @@ public class FhirServiceRequestDaoImpl extends BaseFhirDao<TestOrder> implements
 		criteria.add(propertyIn("id", observationCriteria));
 	}
 	
+	/**
+	 * Creates a detached criteria representing the search for the parameterName with a value
+	 * representing the given parameterValue using the given projection.
+	 * <p>
+	 * The available FHIR parameters will be converted where applicable, however some parameters can not
+	 * be represented:
+	 * <ul>
+	 * <li><code>Observation.SP_SPECIMEN</code>: a close match would be accessionIdentifier but wouldn't
+	 * represent the entire specimen</li>
+	 * <li><code>Observation.SP_FOCUS</code>, <code>Observation.SP_DERIVED_FROM</code>,
+	 * <code>Observation.SP_METHOD</code>, <code>Observation.SP_DATA_ABSENT_REASON</code>,
+	 * <code>Observation.SP_DEVICE</code>: no meaningful mapping in OpenMRS</li>
+	 * <li>SP_COMPONENT_* (like <code>Observation.SP_COMPONENT_CODE</code>) and SP_COMBO_* (like
+	 * <code>Observation.SP_COMBO_VALUE_QUANTITY</code>): OpenMRS does not support Components yet</li>
+	 * <li><code>Observation.SP_CODE_VALUE_STRING</code>, <code>Observation.SP_PART_OF</code>,
+	 * <code>Observation.SP_CODE_VALUE_DATE</code>, <code>Observation.SP_CODE_VALUE_QUANTITY</code>,
+	 * <code>Observation.SP_CODE_VALUE_CONCEPT</code>: no meaningful mappings could be found during
+	 * development. This may or may not change in the future.</li>
+	 * </ul>
+	 * Unrepresentable parameters will return a detached criteria containing no matches.
+	 * </p>
+	 * 
+	 * @param projection the string determining the projection of the detached criteria
+	 * @param parameterName the string representing the parameter to be searched for
+	 * @param parameterValue the string containing a representation of the value to be compared with
+	 * @return the detached criteria representing the observation criteria
+	 */
 	// the detached criteria in this file should all return a subquery of ids to make usage of them consistent
 	private DetachedCriteria createObservationCriteria(String projection, String parameterName, String parameterValue) {
 		DetachedCriteria observationQuery = DetachedCriteria.forClass(Obs.class);
@@ -261,24 +288,17 @@ public class FhirServiceRequestDaoImpl extends BaseFhirDao<TestOrder> implements
 				observationQuery.add(propertyIn("encounter", encounterProviderQuery));
 				break;
 			
-			// TODO: add explanation on why these values are not implemented
 			case Observation.SP_CODE_VALUE_STRING:
 			case Observation.SP_PART_OF:
 			case Observation.SP_CODE_VALUE_DATE:
 			case Observation.SP_CODE_VALUE_QUANTITY:
 			case Observation.SP_CODE_VALUE_CONCEPT:
-				
-				// only meaningful mapping would be the accessionIdentifier, not a whole specimen
 			case Observation.SP_SPECIMEN:
-				
-				// no meaningful mapping in OpenMRS
 			case Observation.SP_FOCUS:
 			case Observation.SP_DERIVED_FROM:
 			case Observation.SP_METHOD:
 			case Observation.SP_DATA_ABSENT_REASON:
 			case Observation.SP_DEVICE:
-				
-				// OpenMRS does not support Components yet, this includes the SP_COMPONENT_* space and SP_COMBO_* space
 			case Observation.SP_COMPONENT_DATA_ABSENT_REASON:
 			case Observation.SP_COMPONENT_CODE_VALUE_QUANTITY:
 			case Observation.SP_COMPONENT_VALUE_QUANTITY:

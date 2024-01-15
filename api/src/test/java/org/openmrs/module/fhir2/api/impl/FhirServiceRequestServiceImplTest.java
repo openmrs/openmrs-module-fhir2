@@ -274,7 +274,7 @@ public class FhirServiceRequestServiceImplTest {
 	public void searchForServiceRequest_shouldReturnCollectionOfServiceRequestByUUID() {
 		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(SERVICE_REQUEST_UUID));
 		ServiceRequestSearchParams serviceRequestSearchParams = new ServiceRequestSearchParams();
-		serviceRequestSearchParams.setUuid(uuid);
+		serviceRequestSearchParams.setId(uuid);
 		
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
 		    FhirConstants.ID_PROPERTY, uuid);

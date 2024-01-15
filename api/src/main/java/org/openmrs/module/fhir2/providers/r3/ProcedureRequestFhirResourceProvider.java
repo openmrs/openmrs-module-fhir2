@@ -126,6 +126,6 @@ public class ProcedureRequestFhirResourceProvider implements IResourceProvider {
 		
 		return new SearchQueryBundleProviderR3Wrapper(serviceRequestService
 		        .searchForServiceRequests(new ServiceRequestSearchParams(patientReference, code, encounterReference,
-		                participantReference, occurrence, uuid, lastUpdated, includes, hasAndListParam)));
+		                participantReference, occurrence, hasAndListParam, uuid, lastUpdated, null, includes)));
 	}
 }

@@ -57,7 +57,7 @@ public class FhirServiceRequestServiceImpl extends BaseFhirService<ServiceReques
 		            serviceRequestSearchParams.getParticipantReference())
 		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, serviceRequestSearchParams.getOccurrence())
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY,
-		            serviceRequestSearchParams.getUuid())
+		            serviceRequestSearchParams.getId())
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY,
 		            serviceRequestSearchParams.getLastUpdated())
 		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, serviceRequestSearchParams.getIncludes())

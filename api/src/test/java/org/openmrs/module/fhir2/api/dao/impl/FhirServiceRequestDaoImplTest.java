@@ -28,7 +28,6 @@ import ca.uhn.fhir.rest.param.HasParam;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.hibernate.SessionFactory;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.OrderType;
@@ -148,9 +147,8 @@ public class FhirServiceRequestDaoImplTest extends BaseModuleContextSensitiveTes
 	
 	@Test
 	public void shouldApplyHasConstraintsForObservationsBasedOnSpecificSubjectCorrectly() {
-		runHasObservationBasedOnTest("subject",
-		    "5946f880-b197-400b-9caa-a3c661d23041", new String[] { ORDER_WITH_OBSERVATION_CATEGORY_LABORATORY_UUID },
-		    new String[] { WRONG_UUID });
+		runHasObservationBasedOnTest("subject", "5946f880-b197-400b-9caa-a3c661d23041",
+		    new String[] { ORDER_WITH_OBSERVATION_CATEGORY_LABORATORY_UUID }, new String[] { WRONG_UUID });
 	}
 	
 	@Test
@@ -161,9 +159,8 @@ public class FhirServiceRequestDaoImplTest extends BaseModuleContextSensitiveTes
 	
 	@Test
 	public void shouldApplyHasConstraintsForObservationsBasedOnSpecificPatientCorrectly() {
-		runHasObservationBasedOnTest("patient",
-		    "5946f880-b197-400b-9caa-a3c661d23041", new String[] { ORDER_WITH_OBSERVATION_CATEGORY_LABORATORY_UUID },
-		    new String[] { WRONG_UUID });
+		runHasObservationBasedOnTest("patient", "5946f880-b197-400b-9caa-a3c661d23041",
+		    new String[] { ORDER_WITH_OBSERVATION_CATEGORY_LABORATORY_UUID }, new String[] { WRONG_UUID });
 	}
 	
 	@Test
