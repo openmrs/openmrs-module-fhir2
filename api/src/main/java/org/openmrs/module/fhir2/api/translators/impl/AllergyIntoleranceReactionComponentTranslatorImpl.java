@@ -89,7 +89,9 @@ public class AllergyIntoleranceReactionComponentTranslatorImpl implements Allerg
 		
 		if (allergen.getCodedAllergen() != null) {
 			allergySubstance = conceptTranslator.toFhirResource(allergen.getCodedAllergen());
-			allergySubstance.setText(allergen.getNonCodedAllergen());
+			if (allergen.getNonCodedAllergen() != null) {
+				allergySubstance.setText(allergen.getNonCodedAllergen());
+			}
 		}
 		
 		return allergySubstance;
@@ -101,8 +103,11 @@ public class AllergyIntoleranceReactionComponentTranslatorImpl implements Allerg
 		if (reactions != null) {
 			for (AllergyReaction reaction : reactions) {
 				if (reaction.getReaction() != null) {
-					manifestations.add(
-					    conceptTranslator.toFhirResource(reaction.getReaction()).setText(reaction.getReactionNonCoded()));
+					CodeableConcept manifestation = conceptTranslator.toFhirResource(reaction.getReaction());
+					if (reaction.getReactionNonCoded() != null) {
+						manifestation.setText(reaction.getReactionNonCoded());
+					}
+					manifestations.add(manifestation);
 				}
 			}
 		}
