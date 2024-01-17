@@ -19,9 +19,13 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Selection;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -187,36 +191,38 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 		if (hasDistinctResults()) {
 			results = criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).getResultList();
 		} else {
-			
 			EntityManager em = sessionFactory.getCurrentSession();
+			//for the projections (Object[])
 			CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
-			CriteriaQuery<Long> criteriaQuery = criteriaBuilder.createQuery(Long.class);
+			CriteriaQuery<Object[]> criteriaQuery = criteriaBuilder.createQuery(Object[].class);
 			Root<T> root = (Root<T>) criteriaQuery.from(typeToken.getRawType());
 			
-			OpenmrsFhirCriteriaContext<Long> longOpenmrsFhirCriteriaContext = createCriteriaContext(Long.class);
-			longOpenmrsFhirCriteriaContext.getCriteriaQuery().subquery(Long.class).select(longOpenmrsFhirCriteriaContext
-			        .getCriteriaBuilder().countDistinct(longOpenmrsFhirCriteriaContext.getRoot().get("id")));
+			List<Selection<?>> selectionList = new ArrayList<>();
+			selectionList.add(root.get("id"));
+			selectionList.add(criteriaBuilder.countDistinct(root.get("id")));
+			criteriaQuery.multiselect(selectionList);
 			
-			longOpenmrsFhirCriteriaContext.getCriteriaQuery().select(longOpenmrsFhirCriteriaContext.getRoot())
-			        .where(longOpenmrsFhirCriteriaContext.getCriteriaBuilder()
-			                .in(longOpenmrsFhirCriteriaContext.getRoot().get("id"))
-			                .value(longOpenmrsFhirCriteriaContext.getCriteriaQuery().subquery(Long.class)));
+			handleSort(criteriaContext, theParams.getSortSpec(), this::paramToProps).ifPresent(
+					orders -> orders.forEach(order -> selectionList.add(root.get(getPropertyName(order.getExpression())))));
+			List<Integer> ids = new ArrayList<>();
+			if (selectionList.size() > 1) {
+				for (Object[] o : em.createQuery(criteriaQuery).getResultList()) {
+					ids.add((Integer) o[0]);
+				}
+			} else {
+				//for the integer array of ids
+				CriteriaBuilder cb = em.getCriteriaBuilder();
+				CriteriaQuery<Integer> cq = criteriaBuilder.createQuery(Integer.class);
+				ids = em.createQuery(cq).getResultList();
+			}
 			
-			//TODO: gonna come back to it later
-			//			handleSort(projectionCriteriaBuilder, theParams.getSortSpec(), this::paramToProps).ifPresent(
-			//					orders -> orders.forEach(order -> projectionList.add(Projections.property(order.getPropertyName()))));
-			//			criteria.setProjection(projectionList);
-			//			List<Integer> ids = new ArrayList<>();
-			//			if (projectionList.getLength() > 1) {
-			//				for (Object[] o : ((List<Object[]>) criteria.list())) {
-			//					ids.add((Integer) o[0]);
-			//				}
-			//			} else {
-			//				ids = criteria.list();
-			//			}
+			CriteriaBuilder cb = em.getCriteriaBuilder();
+			CriteriaQuery<T> idsCriteriaQuery = (CriteriaQuery<T>) criteriaBuilder.createQuery(typeToken.getRawType());
+			Root<T> idsRoot = (Root<T>) idsCriteriaQuery.from(typeToken.getRawType());
+
+			idsCriteriaQuery.where(idsRoot.get("id").in(ids));
+			results = em.createQuery(idsCriteriaQuery).getResultList();
 			
-			longOpenmrsFhirCriteriaContext.getCriteriaQuery().select(longOpenmrsFhirCriteriaContext.getRoot()).where(
-			    longOpenmrsFhirCriteriaContext.getCriteriaBuilder().in(longOpenmrsFhirCriteriaContext.getRoot().get("id")));
 			// Need to reapply ordering
 			handleSort(criteriaContext, theParams.getSortSpec());
 			criteriaContext.addOrder(criteriaContext.getCriteriaBuilder().asc(criteriaContext.getRoot().get("id")));
@@ -397,6 +403,22 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 			    "true");
 			criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery())
 			        .setHint("org.hibernate.cacheRegion", COUNT_QUERY_CACHE);
+		}
+	}
+	
+	/**
+	 * Extracts the property name from the given JPA Criteria API expression.
+	 *
+	 * @param expression The JPA Criteria API expression, typically representing a property or attribute.
+	 * @return The property name extracted from the expression.
+	 * @throws IllegalArgumentException If the expression is not of type {@code Path<?>}.
+	 */
+	public static String getPropertyName(Expression<?> expression) {
+		if (expression instanceof Path<?>) {
+			Path<?> path = (Path<?>) expression;
+			return path.getJavaType().getSimpleName();
+		} else {
+			throw new IllegalArgumentException("Unsupported expression type: " + expression.getClass());
 		}
 	}
 	
