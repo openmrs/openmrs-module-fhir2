@@ -40,6 +40,8 @@ import org.hibernate.Hibernate;
 import org.hibernate.proxy.HibernateProxy;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.openmrs.Auditable;
+import org.openmrs.BaseOpenmrsData;
+import org.openmrs.BaseOpenmrsObject;
 import org.openmrs.Encounter;
 import org.openmrs.Obs;
 import org.openmrs.OpenmrsObject;
@@ -171,13 +173,17 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 		
 		handleSort(criteriaContext, theParams.getSortSpec());
 		
+		String person = getIdPropertyName(Person.class);
+		String encounter = getIdPropertyName(Encounter.class);
+		String obs = getIdPropertyName(Obs.class);
+		
 		//the id property differs across various openmrs entities
-		if (Person.class.isAssignableFrom(typeToken.getRawType())) {
-			criteriaContext.getCriteriaBuilder().asc(criteriaContext.getRoot().get("personId"));
-		} else if (Encounter.class.isAssignableFrom(typeToken.getRawType())) {
-			criteriaContext.getCriteriaBuilder().asc(criteriaContext.getRoot().get("encounterId"));
-		} else if (Obs.class.isAssignableFrom(typeToken.getRawType())) {
-			criteriaContext.getCriteriaBuilder().asc(criteriaContext.getRoot().get("obsId"));
+		if (Person.class.isAssignableFrom(BaseOpenmrsObject.class)) {
+			handleIdPropertyOrdering(criteriaContext, person);
+		} else if (Encounter.class.isAssignableFrom(BaseOpenmrsObject.class)) {
+			handleIdPropertyOrdering(criteriaContext, encounter);
+		} else if (Obs.class.isAssignableFrom(BaseOpenmrsObject.class)) {
+			handleIdPropertyOrdering(criteriaContext, obs);
 		}
 		
 		criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery())
@@ -198,8 +204,16 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 			Root<T> root = (Root<T>) criteriaQuery.from(typeToken.getRawType());
 			
 			List<Selection<?>> selectionList = new ArrayList<>();
-			selectionList.add(root.get("id"));
-			selectionList.add(criteriaBuilder.countDistinct(root.get("id")));
+			
+			//the id property differs across various openmrs entities
+			if (Person.class.isAssignableFrom(BaseOpenmrsObject.class)) {
+				handleIdPropertySelection(selectionList, root, criteriaBuilder, "personId");
+			} else if (Encounter.class.isAssignableFrom(BaseOpenmrsObject.class)) {
+				handleIdPropertySelection(selectionList, root, criteriaBuilder, "encounterId");
+			} else if (Obs.class.isAssignableFrom(BaseOpenmrsObject.class)) {
+				handleIdPropertySelection(selectionList, root, criteriaBuilder, "obsId");
+			}
+			
 			criteriaQuery.multiselect(selectionList);
 			
 			handleSort(criteriaContext, theParams.getSortSpec(), this::paramToProps).ifPresent(
@@ -210,17 +224,25 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 					ids.add((Integer) o[0]);
 				}
 			} else {
+				EntityManager manager = sessionFactory.getCurrentSession();
 				//for the integer array of ids
-				CriteriaBuilder cb = em.getCriteriaBuilder();
 				CriteriaQuery<Integer> cq = criteriaBuilder.createQuery(Integer.class);
-				ids = em.createQuery(cq).getResultList();
+				ids = manager.createQuery(cq).getResultList();
 			}
 			
 			CriteriaBuilder cb = em.getCriteriaBuilder();
 			CriteriaQuery<T> idsCriteriaQuery = (CriteriaQuery<T>) criteriaBuilder.createQuery(typeToken.getRawType());
 			Root<T> idsRoot = (Root<T>) idsCriteriaQuery.from(typeToken.getRawType());
+			
+			//the id property differs across various openmrs entities
+			if (Person.class.isAssignableFrom(BaseOpenmrsObject.class)) {
+				handleIdPropertyInCondition(idsCriteriaQuery, idsRoot, ids, "personId");
+			} else if (Encounter.class.isAssignableFrom(BaseOpenmrsObject.class)) {
+				handleIdPropertyInCondition(idsCriteriaQuery, idsRoot, ids, "encounterId");
+			} else if (Obs.class.isAssignableFrom(BaseOpenmrsObject.class)) {
+				handleIdPropertyInCondition(idsCriteriaQuery, idsRoot, ids, "obsId");
+			}
 
-			idsCriteriaQuery.where(idsRoot.get("id").in(ids));
 			results = em.createQuery(idsCriteriaQuery).getResultList();
 			
 			// Need to reapply ordering
@@ -419,6 +441,53 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 			return path.getJavaType().getSimpleName();
 		} else {
 			throw new IllegalArgumentException("Unsupported expression type: " + expression.getClass());
+		}
+	}
+	
+	/**
+	 * Handles the ordering of the criteria based on the specified id property name.
+	 *
+	 * @param criteriaContext The criteria context containing the criteria builder and root.
+	 * @param idPropertyName  The name of the id property to be used for ordering.
+	 */
+	private void handleIdPropertyOrdering(OpenmrsFhirCriteriaContext<T> criteriaContext, String idPropertyName) {
+		criteriaContext.getCriteriaBuilder().asc(criteriaContext.getRoot().get(idPropertyName));
+	}
+	
+	/**
+	 * Handles the selection list based on the specified id property name, adding both the property and its distinct count.
+	 *
+	 * @param selectionList   The list of selections to be populated.
+	 * @param root            The root of the criteria query.
+	 * @param criteriaBuilder The criteria builder to build selection expressions.
+	 * @param idPropertyName  The name of the id property to be used for selection.
+	 */
+	private void handleIdPropertySelection(List<Selection<?>> selectionList, Root<T> root, CriteriaBuilder criteriaBuilder, String idPropertyName) {
+		selectionList.add(root.get(idPropertyName));
+		selectionList.add(criteriaBuilder.countDistinct(root.get(idPropertyName)));
+	}
+	
+	/**
+	 * Handles the "IN" condition in the criteria query based on the specified id property name and a list of ids.
+	 *
+	 * @param idsCriteriaQuery The criteria query for ids.
+	 * @param idsRoot          The root of the criteria query for ids.
+	 * @param ids              The list of ids to be used in the "IN" condition.
+	 * @param idPropertyName   The name of the id property to be used in the "IN" condition.
+	 */
+	private void handleIdPropertyInCondition(CriteriaQuery<T> idsCriteriaQuery, Root<T> idsRoot, List<Integer> ids, String idPropertyName) {
+		idsCriteriaQuery.where(idsRoot.get(idPropertyName).in(ids));
+	}
+	
+	private String getIdPropertyName(Class<?> entityClass) {
+		if (Person.class.isAssignableFrom(entityClass)) {
+			return "personId";
+		} else if (Encounter.class.isAssignableFrom(entityClass)) {
+			return "encounterId";
+		} else if (Obs.class.isAssignableFrom(entityClass)) {
+			return "obsId";
+		} else {
+			throw new IllegalArgumentException("Unsupported entity type: " + entityClass.getName());
 		}
 	}
 	
