@@ -250,6 +250,10 @@
                         <groupId>org.slf4j</groupId>
                         <artifactId>slf4j-api</artifactId>
                     </exclusion>
+                    <exclusion>
+                        <groupId>org.simplejavamail</groupId>
+                        <artifactId>simple-java-mail</artifactId>
+                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
