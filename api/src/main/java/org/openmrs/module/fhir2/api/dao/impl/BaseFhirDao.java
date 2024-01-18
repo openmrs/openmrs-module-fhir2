@@ -176,8 +176,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 		String person = getIdPropertyName(Person.class);
 		String encounter = getIdPropertyName(Encounter.class);
 		String obs = getIdPropertyName(Obs.class);
-		
-		//the id property differs across various openmrs entities
+
 		if (Person.class.isAssignableFrom(BaseOpenmrsObject.class)) {
 			handleIdPropertyOrdering(criteriaContext, person);
 		} else if (Encounter.class.isAssignableFrom(BaseOpenmrsObject.class)) {
@@ -203,8 +202,6 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 			Root<T> root = (Root<T>) criteriaQuery.from(typeToken.getRawType());
 			
 			List<Selection<?>> selectionList = new ArrayList<>();
-			
-			//the id property differs across various openmrs entities
 			if (Person.class.isAssignableFrom(BaseOpenmrsObject.class)) {
 				handleIdPropertySelection(selectionList, root, criteriaBuilder, person);
 			} else if (Encounter.class.isAssignableFrom(BaseOpenmrsObject.class)) {
@@ -214,7 +211,6 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 			}
 			
 			criteriaQuery.multiselect(selectionList);
-			
 			handleSort(criteriaContext, theParams.getSortSpec(), this::paramToProps).ifPresent(
 					orders -> orders.forEach(order -> selectionList.add(root.get(getPropertyName(order.getExpression())))));
 			List<T> ids = new ArrayList<>();
@@ -234,7 +230,6 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 			CriteriaQuery<T> idsCriteriaQuery = (CriteriaQuery<T>) criteriaBuilder.createQuery(typeToken.getRawType());
 			Root<T> idsRoot = (Root<T>) idsCriteriaQuery.from(typeToken.getRawType());
 			
-			//the id property differs across various openmrs entities
 			if (Person.class.isAssignableFrom(BaseOpenmrsObject.class)) {
 				handleIdPropertyInCondition(idsCriteriaQuery, idsRoot, ids, person);
 			} else if (Encounter.class.isAssignableFrom(BaseOpenmrsObject.class)) {
@@ -247,15 +242,13 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 			
 			// Need to reapply ordering
 			handleSort(criteriaContext, theParams.getSortSpec());
-//			criteriaContext.addOrder(criteriaContext.getCriteriaBuilder().asc(criteriaContext.getRoot().get("id")));
 			
-			//the id property differs across various openmrs entities
 			if (Person.class.isAssignableFrom(BaseOpenmrsObject.class)) {
-				handleIdPropertyInCondition2(idsCriteriaQuery, idsRoot, ids, person);
+				handleIdPropertyOrdering(criteriaBuilder,idsCriteriaQuery, idsRoot, person);
 			} else if (Encounter.class.isAssignableFrom(BaseOpenmrsObject.class)) {
-				handleIdPropertyInCondition2(idsCriteriaQuery, idsRoot, ids, encounter);
+				handleIdPropertyOrdering(criteriaBuilder,idsCriteriaQuery, idsRoot, encounter);
 			} else if (Obs.class.isAssignableFrom(BaseOpenmrsObject.class)) {
-				handleIdPropertyInCondition2(idsCriteriaQuery, idsRoot, ids, obs);
+				handleIdPropertyOrdering(criteriaBuilder, idsCriteriaQuery, idsRoot,obs);
 			}
 			
 			results = criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).getResultList();
@@ -460,7 +453,19 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	 * @param idPropertyName  The name of the id property to be used for ordering.
 	 */
 	private void handleIdPropertyOrdering(OpenmrsFhirCriteriaContext<T> criteriaContext, String idPropertyName) {
-		criteriaContext.getCriteriaBuilder().asc(criteriaContext.getRoot().get(idPropertyName));
+		criteriaContext.getCriteriaQuery().orderBy(criteriaContext.getCriteriaBuilder().asc(criteriaContext.getRoot().get(idPropertyName)));
+	}
+	
+	/**
+	 * Handles the ordering of the criteria based on the specified id property name.
+	 *
+	 * @param criteriaBuilder The criteria builder to build expressions
+	 * @param criteriaQuery The criteria query for the idPropertyName.
+	 * @param idsRoot The root of the criteria query for the idPropertyName
+	 * @param idPropertyName  The name of the id property to be used for ordering.
+	 */
+	private void handleIdPropertyOrdering(CriteriaBuilder criteriaBuilder, CriteriaQuery<T> criteriaQuery, Root<T> idsRoot, String idPropertyName) {
+		criteriaQuery.orderBy(criteriaBuilder.asc(idsRoot.get(idPropertyName)));
 	}
 	
 	/**
@@ -485,10 +490,6 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	 * @param idPropertyName   The name of the id property to be used in the "IN" condition.
 	 */
 	private void handleIdPropertyInCondition(CriteriaQuery<T> idsCriteriaQuery, Root<T> idsRoot, List<T> ids, String idPropertyName) {
-		idsCriteriaQuery.where(idsRoot.get(idPropertyName).in(ids));
-	}
-	
-	private void handleIdPropertyInCondition2(CriteriaQuery<T> idsCriteriaQuery, Root<T> idsRoot, List<T> ids, String idPropertyName) {
 		idsCriteriaQuery.where(idsRoot.get(idPropertyName).in(ids));
 	}
 	
