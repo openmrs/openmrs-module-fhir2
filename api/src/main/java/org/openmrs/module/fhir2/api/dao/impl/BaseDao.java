@@ -338,7 +338,7 @@ public abstract class BaseDao {
 	 * @return a {@link Criterion} to be added to the query indicating that the property matches the
 	 *         given value
 	 */
-	protected <T> Optional<Predicate> handleBoolean(OpenmrsFhirCriteriaContext<T> criteriaContext, String propertyName,
+	protected <T, U> Optional<Predicate> handleBoolean(OpenmrsFhirCriteriaContext<T, U> criteriaContext, String propertyName,
 	        TokenAndListParam booleanToken) {
 		if (booleanToken == null) {
 			return Optional.empty();
@@ -357,7 +357,7 @@ public abstract class BaseDao {
 		});
 	}
 	
-	protected <T> Optional<Predicate> handleBooleanProperty(OpenmrsFhirCriteriaContext<T> criteriaContext,
+	protected <T, U> Optional<Predicate> handleBooleanProperty(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
 	        String propertyName, boolean booleanVal) {
 		return Optional
 		        .of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get(propertyName), booleanVal));
@@ -370,7 +370,7 @@ public abstract class BaseDao {
 	 * @param dateRangeParam the {@link DateRangeParam} to handle
 	 * @return a {@link Criterion} to be added to the query for the indicated date range
 	 */
-	protected <T> Optional<Predicate> handleDateRange(OpenmrsFhirCriteriaContext<T> criteriaContext, String propertyName,
+	protected <T, U> Optional<Predicate> handleDateRange(OpenmrsFhirCriteriaContext<T, U> criteriaContext, String propertyName,
 	        DateRangeParam dateRangeParam) {
 		if (dateRangeParam == null) {
 			return Optional.empty();
@@ -388,7 +388,7 @@ public abstract class BaseDao {
 	 * @param dateParam the {@link DateParam} to handle
 	 * @return a {@link Predicate} to be added to the query for the indicate date param
 	 */
-	protected <T> Optional<Predicate> handleDate(OpenmrsFhirCriteriaContext<T> criteriaContext, String propertyName,
+	protected <T, U> Optional<Predicate> handleDate(OpenmrsFhirCriteriaContext<T, U> criteriaContext, String propertyName,
 	        DateParam dateParam) {
 		if (dateParam == null) {
 			return Optional.empty();
@@ -434,7 +434,7 @@ public abstract class BaseDao {
 		return Optional.empty();
 	}
 	
-	protected <T> Optional<Predicate> handleQuantity(OpenmrsFhirCriteriaContext<T> criteriaContext, String propertyName,
+	protected <T, U> Optional<Predicate> handleQuantity(OpenmrsFhirCriteriaContext<T, U> criteriaContext, String propertyName,
 	        QuantityParam quantityParam) {
 		if (quantityParam == null) {
 			return Optional.empty();
@@ -487,7 +487,7 @@ public abstract class BaseDao {
 		return Optional.empty();
 	}
 	
-	protected <T> Optional<Predicate> handleQuantity(OpenmrsFhirCriteriaContext<T> criteriaContext,
+	protected <T, U> Optional<Predicate> handleQuantity(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
 	        @Nonnull String propertyName, QuantityAndListParam quantityAndListParam) {
 		if (quantityAndListParam == null) {
 			return Optional.empty();
@@ -497,12 +497,12 @@ public abstract class BaseDao {
 		    quantityParam -> handleQuantity(criteriaContext, propertyName, quantityParam));
 	}
 	
-	protected <T> void handleEncounterReference(OpenmrsFhirCriteriaContext<T> criteriaContext,
+	protected <T, U> void handleEncounterReference(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
 	        ReferenceAndListParam encounterReference, @Nonnull String encounterAlias) {
 		handleEncounterReference(criteriaContext, encounterReference, encounterAlias, "encounter");
 	}
 	
-	protected <T> void handleEncounterReference(OpenmrsFhirCriteriaContext<T> criteriaContext,
+	protected <T, U> void handleEncounterReference(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
 	        ReferenceAndListParam encounterReference, @Nonnull String encounterAlias, @Nonnull String associationPath) {
 		
 		if (encounterReference == null) {
@@ -528,7 +528,7 @@ public abstract class BaseDao {
 		}).ifPresent(criteriaContext::addPredicate);
 	}
 	
-	protected <T> Optional<Predicate> handleGender(OpenmrsFhirCriteriaContext<T> criteriaContext,
+	protected <T, U> Optional<Predicate> handleGender(OpenmrsFhirCriteriaContext<T, U> criteriaContext, From<?, ?> from,
 	        @Nonnull String propertyName, TokenAndListParam gender) {
 		if (gender == null) {
 			return Optional.empty();
@@ -539,27 +539,22 @@ public abstract class BaseDao {
 				AdministrativeGender administrativeGender = AdministrativeGender.fromCode(token.getValue());
 				
 				if (administrativeGender == null) {
-					return Optional
-					        .of(criteriaContext.getCriteriaBuilder().isNull(criteriaContext.getRoot().get(propertyName)));
+					return Optional.of(criteriaContext.getCriteriaBuilder().isNull(from.get(propertyName)));
 				}
 				
 				switch (administrativeGender) {
 					case MALE:
-						return Optional.of(
-						    criteriaContext.getCriteriaBuilder().like(criteriaContext.getRoot().get(propertyName), "M"));
+						return Optional.of(criteriaContext.getCriteriaBuilder().like(from.get(propertyName), "M"));
 					case FEMALE:
-						return Optional.of(
-						    criteriaContext.getCriteriaBuilder().like(criteriaContext.getRoot().get(propertyName), "F"));
+						return Optional.of(criteriaContext.getCriteriaBuilder().like(from.get(propertyName), "F"));
 					case OTHER:
 					case UNKNOWN:
 					case NULL:
-						return Optional.of(
-						    criteriaContext.getCriteriaBuilder().isNull(criteriaContext.getRoot().get(propertyName)));
+						return Optional.of(criteriaContext.getCriteriaBuilder().isNull(from.get(propertyName)));
 				}
 			}
 			catch (FHIRException ignored) {}
-			return Optional.of(
-			    criteriaContext.getCriteriaBuilder().like(criteriaContext.getRoot().get(propertyName), token.getValue()));
+			return Optional.of(criteriaContext.getCriteriaBuilder().like(from.get(propertyName), token.getValue()));
 		});
 	}
 	
@@ -674,7 +669,7 @@ public abstract class BaseDao {
 	protected <T> void handleProviderReference(OpenmrsFhirCriteriaContext<T> criteriaContext,
 	        ReferenceAndListParam providerReference) {
 		if (providerReference != null) {
-			Join<?, ?> orderer = criteriaContext.addJoin("orderer", "or");
+			Join<?, ?> orderer = criteriaContext.addJoin("orderer", "ord");
 			
 			handleAndListParam(criteriaContext.getCriteriaBuilder(), providerReference, participantToken -> {
 				if (participantToken.getChain() != null) {
@@ -693,7 +688,7 @@ public abstract class BaseDao {
 							Join<?, ?> ordererPerson = criteriaContext.addJoin(orderer, "person", "ps");
 							Join<?, ?> ordererName = criteriaContext.addJoin(ordererPerson, "names", "pn");
 							
-							return Optional.of(criteriaContext.getCriteriaBuilder().like(ordererName.get("pn.familyName"),
+							return Optional.of(criteriaContext.getCriteriaBuilder().like(ordererName.get("familyName"),
 							    participantToken.getValue()));
 						}
 						case Practitioner.SP_NAME: {
@@ -727,6 +722,7 @@ public abstract class BaseDao {
 		if (concepts == null) {
 			return Optional.empty();
 		}
+		
 		Optional<Join<?, ?>> conceptAliasJoin = criteriaContext.getJoin(conceptAlias);
 		return conceptAliasJoin
 		        .map(join -> handleAndListParamBySystem(criteriaContext.getCriteriaBuilder(), concepts, (system, tokens) -> {
@@ -756,26 +752,18 @@ public abstract class BaseDao {
 	
 	protected <T> void handleNames(OpenmrsFhirCriteriaContext<T> criteriaContext, StringAndListParam name,
 	        StringAndListParam given, StringAndListParam family) {
-		handleNames(criteriaContext, name, given, family, null);
+		handleNames(criteriaContext, name, given, family, criteriaContext.getRoot());
 	}
 	
 	protected <T> void handleNames(OpenmrsFhirCriteriaContext<T> criteriaContext, StringAndListParam name,
-	        StringAndListParam given, StringAndListParam family, String personAlias) {
+	        StringAndListParam given, StringAndListParam family, From<?, ?> person) {
 		
 		if (name == null && given == null && family == null) {
 			return;
 		}
 		
-		Join<?, ?> personAliasJoin = criteriaContext.getRoot().join(personAlias);
-		Join<?, ?> personNameAliasJoin = criteriaContext.addJoin(personAliasJoin, "names", "pn");
-		
-		if (!criteriaContext.getJoin("pn").isPresent()) {
-			if (StringUtils.isNotBlank(personAlias)) {
-				criteriaContext.getCriteriaBuilder().equal(personNameAliasJoin.get("voided"), false);
-			} else {
-				criteriaContext.getCriteriaBuilder().equal(personNameAliasJoin.get("voided"), false);
-			}
-		}
+		Join<?, ?> personNameAliasJoin = criteriaContext.addJoin(person, "names", "pn",
+		    (personNameAlias) -> criteriaContext.getCriteriaBuilder().equal(personNameAlias.get("voided"), false));
 		
 		if (name != null) {
 			handleAndListParamAsStream(criteriaContext.getCriteriaBuilder(), name,
@@ -818,23 +806,27 @@ public abstract class BaseDao {
 				if (patientToken.getChain() != null) {
 					switch (patientToken.getChain()) {
 						case Patient.SP_IDENTIFIER:
+							@SuppressWarnings("unchecked")
 							Join<?, ?> associationPathIdentifiersJoin = criteriaContext.addJoin(associationPathJoin,
 							    "identifiers", "pi");
 							return Optional.of(criteriaContext.getCriteriaBuilder()
 							        .like(associationPathIdentifiersJoin.get("identifier"), patientToken.getValue()));
 						case Patient.SP_GIVEN: {
+							@SuppressWarnings("unchecked")
 							Join<?, ?> associationPathNamesJoin = criteriaContext.addJoin(associationPathJoin, "names",
 							    "pn");
 							return Optional.of(criteriaContext.getCriteriaBuilder()
 							        .like(associationPathNamesJoin.get("givenName"), patientToken.getValue()));
 						}
 						case Patient.SP_FAMILY: {
+							@SuppressWarnings("unchecked")
 							Join<?, ?> associationPathNamesJoin = criteriaContext.addJoin(associationPathJoin, "names",
 							    "pn");
 							return Optional.of(criteriaContext.getCriteriaBuilder()
 							        .like(associationPathNamesJoin.get("familyName"), patientToken.getValue()));
 						}
 						case Patient.SP_NAME:
+							@SuppressWarnings("unchecked")
 							Join<?, ?> associationPathNamesJoin = criteriaContext.addJoin(associationPathJoin, "names",
 							    "pn");
 							
@@ -860,7 +852,7 @@ public abstract class BaseDao {
 		}
 	}
 	
-	protected <T> Optional<Predicate> handleCommonSearchParameters(OpenmrsFhirCriteriaContext<T> criteriaContext,
+	protected <T, U> Optional<Predicate> handleCommonSearchParameters(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
 	        List<PropParam<?>> theCommonParams) {
 		List<Optional<? extends Predicate>> criterionList = new ArrayList<>();
 		
@@ -886,10 +878,10 @@ public abstract class BaseDao {
 	 * @param param the DateRangeParam used to query for _lastUpdated
 	 * @return an optional criterion for the query
 	 */
-	protected abstract <T> Optional<Predicate> handleLastUpdated(OpenmrsFhirCriteriaContext<T> criteriaContext,
+	protected abstract <T, U> Optional<Predicate> handleLastUpdated(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
 	        DateRangeParam param);
 	
-	protected <T> Optional<Predicate> handlePersonAddress(OpenmrsFhirCriteriaContext<T> criteriaContext, String aliasPrefix,
+	protected <T, U> Optional<Predicate> handlePersonAddress(OpenmrsFhirCriteriaContext<T, U> criteriaContext, String aliasPrefix,
 	        StringAndListParam city, StringAndListParam state, StringAndListParam postalCode, StringAndListParam country) {
 		if (city == null && state == null && postalCode == null && country == null) {
 			return Optional.empty();
@@ -1318,18 +1310,18 @@ public abstract class BaseDao {
 		return Optional.empty();
 	}
 	
-	protected <T> OpenmrsFhirCriteriaContext<T> createCriteriaContext(Class<? super T> rootType) {
+	protected <T, U> OpenmrsFhirCriteriaContext<T, U> createCriteriaContext(Class<? super T> rootType) {
 		EntityManager em = sessionFactory.getCurrentSession();
 		CriteriaBuilder cb = em.getCriteriaBuilder();
 		@SuppressWarnings("unchecked")
-		CriteriaQuery<T> cq = (CriteriaQuery<T>) cb.createQuery(rootType);
+		CriteriaQuery<U> cq = (CriteriaQuery<U>) cb.createQuery(rootType);
 		@SuppressWarnings("unchecked")
 		Root<T> root = (Root<T>) cq.from(rootType);
 		
 		return new OpenmrsFhirCriteriaContext<>(em, cb, cq, root);
 	}
 	
-	protected <T> From<?, ?> getRootOrJoin(OpenmrsFhirCriteriaContext<T> criteriaContext, String alias) {
+	protected <T, U> From<?, ?> getRootOrJoin(OpenmrsFhirCriteriaContext<T, U> criteriaContext, String alias) {
 		if (alias.isEmpty()) {
 			return criteriaContext.getRoot();
 		} else {

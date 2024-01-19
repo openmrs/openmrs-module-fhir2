@@ -25,13 +25,30 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * {@code OpenmrsFhirCriteriaContext} is a holder object for building criteria queries in the FHIR2 DAO API. It is
+ * provided as a convenience since the old Hibernate Criteria API allowed us to simply pass a Criteria object around,
+ * but the JPA2 Criteria API requires us to pass several different classes around.
+ * <br/><br/>
+ * Criteria queries are built up mostly by calling methods on this class to add various joins, predicates, and sort orders
+ * which are built into a {@link CriteriaQuery<U>} by calling {@link #finalizeQuery()}. {@link #finalizeQuery()} should
+ * only be called once the full query has been built and only just before running the query if possible.
+ * <br/><br/>
+ * The type {@code T} indicates the type of object that is the "root" of the query. For most queries, the type {@code U},
+ * which is the expected type of the result, will be the same as {@code T}; however, for some queries, like those that
+ * count results, {@code U} will have a different type.
+ *
+ * @param <T> The root type for the query
+ * @param <U> The type for the result of the query
+ */
 @RequiredArgsConstructor
-public class OpenmrsFhirCriteriaContext<T> {
+public class OpenmrsFhirCriteriaContext<T, U> {
 	
 	@Getter
 	@NonNull
@@ -43,7 +60,7 @@ public class OpenmrsFhirCriteriaContext<T> {
 	
 	@Getter
 	@NonNull
-	private final CriteriaQuery<T> criteriaQuery;
+	private final CriteriaQuery<U> criteriaQuery;
 	
 	@Getter
 	@NonNull
@@ -72,26 +89,43 @@ public class OpenmrsFhirCriteriaContext<T> {
 	
 	public Join<?, ?> addJoin(From<?, ?> from, @Nonnull String attributeName, @Nonnull String alias,
 	        @Nonnull JoinType joinType) {
-		if (!aliases.containsKey(alias)) {
-			Join<?, ?> join = from.join(attributeName, joinType);
-			join.alias(alias);
-			aliases.put(alias, join);
-		}
-		
-		return aliases.get(alias);
+		return addJoin(from, attributeName, alias, joinType, null);
 	}
 	
-	public OpenmrsFhirCriteriaContext<T> addPredicate(Predicate predicate) {
+	public Join<?, ?> addJoin(From<?, ?> from, @Nonnull String attributeName, @Nonnull String alias,
+	        Function<From<?, ?>, Predicate> onGenerator) {
+		return addJoin(from, attributeName, alias, JoinType.INNER, null);
+	}
+	
+	public Join<?, ?> addJoin(From<?, ?> from, @Nonnull String attributeName, @Nonnull String alias,
+	        @Nonnull JoinType joinType, Function<From<?, ?>, Predicate> onGenerator) {
+		return Optional.ofNullable(aliases.get(alias)).orElseGet(() -> {
+			Join newJoin = from.join(attributeName, joinType);
+			newJoin.alias(alias);
+			aliases.put(alias, newJoin);
+			
+			if (onGenerator != null) {
+				Predicate onPredicate = onGenerator.apply(newJoin);
+				if (onPredicate != null) {
+					newJoin.on(onPredicate);
+				}
+			}
+			
+			return newJoin;
+		});
+	}
+	
+	public OpenmrsFhirCriteriaContext<T, U> addPredicate(Predicate predicate) {
 		predicates.add(predicate);
 		return this;
 	}
 	
-	public OpenmrsFhirCriteriaContext<T> addOrder(Order order) {
+	public OpenmrsFhirCriteriaContext<T, U> addOrder(Order order) {
 		orders.add(order);
 		return this;
 	}
 	
-	public OpenmrsFhirCriteriaContext<T> addResults(T result) {
+	public OpenmrsFhirCriteriaContext<T, U> addResults(T result) {
 		results.add(result);
 		return this;
 	}
@@ -104,7 +138,7 @@ public class OpenmrsFhirCriteriaContext<T> {
 		return aliases.containsKey(alias);
 	}
 	
-	public CriteriaQuery<T> finalizeQuery() {
+	public CriteriaQuery<U> finalizeQuery() {
 		return criteriaQuery.where(predicates.toArray(new Predicate[0])).orderBy(orders);
 	}
 }

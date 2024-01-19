@@ -52,7 +52,7 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 	@Override
 	public List<Obs> getSearchResults(@Nonnull SearchParameterMap theParams) {
 		if (!theParams.getParameters(FhirConstants.LASTN_OBSERVATION_SEARCH_HANDLER).isEmpty()) {
-			OpenmrsFhirCriteriaContext<Obs> criteriaContext = createCriteriaContext(Obs.class);
+			OpenmrsFhirCriteriaContext<Obs, Obs> criteriaContext = createCriteriaContext(Obs.class);
 			
 			setupSearchParams(criteriaContext, theParams);
 			
@@ -117,7 +117,7 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 	@Override
 	public int getSearchResultsCount(@Nonnull SearchParameterMap theParams) {
 		if (!theParams.getParameters(FhirConstants.LASTN_OBSERVATION_SEARCH_HANDLER).isEmpty()) {
-			OpenmrsFhirCriteriaContext<Obs> criteriaContext = createCriteriaContext(Obs.class);
+			OpenmrsFhirCriteriaContext<Obs, Obs> criteriaContext = createCriteriaContext(Obs.class);
 			setupSearchParams(criteriaContext, theParams);
 			criteriaContext.getCriteriaQuery()
 			        .orderBy(criteriaContext.getCriteriaBuilder().asc(criteriaContext.getRoot().get("concept")))
@@ -128,7 +128,8 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 			    criteriaContext.getCriteriaBuilder().count(criteriaContext.getRoot()));
 			
 			applyExactTotal(criteriaContext, theParams);
-			OpenmrsFhirCriteriaContext<Object[]> context = createCriteriaContext(Object[].class);
+
+			OpenmrsFhirCriteriaContext<Object[], Object[]> context = createCriteriaContext(Object[].class);
 			List<Object[]> rows = context.getEntityManager().createQuery(context.getCriteriaQuery()).getResultList();
 			final int maxGroupCount = getMaxParameter(theParams);
 			int groupCount = maxGroupCount;
@@ -153,7 +154,7 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 	}
 	
 	@Override
-	protected void setupSearchParams(OpenmrsFhirCriteriaContext<Obs> criteriaContext, SearchParameterMap theParams) {
+	protected <U> void setupSearchParams(OpenmrsFhirCriteriaContext<Obs, U> criteriaContext, SearchParameterMap theParams) {
 		if (!theParams.getParameters(FhirConstants.LASTN_ENCOUNTERS_SEARCH_HANDLER).isEmpty()) {
 			ReferenceAndListParam encountersReferences = new ReferenceAndListParam();
 			ReferenceOrListParam referenceOrListParam = new ReferenceOrListParam();

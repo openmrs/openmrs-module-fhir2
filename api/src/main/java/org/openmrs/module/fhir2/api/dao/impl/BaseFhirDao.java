@@ -90,7 +90,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	@Transactional(readOnly = true)
 	public T get(@Nonnull String uuid) {
 		@SuppressWarnings({ "UnstableApiUsage" })
-		OpenmrsFhirCriteriaContext<T> criteriaContext = createCriteriaContext(typeToken.getRawType());
+		OpenmrsFhirCriteriaContext<T, T> criteriaContext = createCriteriaContext(typeToken.getRawType());
 		
 		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot());
 		criteriaContext
@@ -110,7 +110,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	@Transactional(readOnly = true)
 	public List<T> get(@Nonnull Collection<String> uuids) {
 		@SuppressWarnings({ "UnstableApiUsage" })
-		OpenmrsFhirCriteriaContext<T> criteriaContext = createCriteriaContext(typeToken.getRawType());
+		OpenmrsFhirCriteriaContext<T, T> criteriaContext = createCriteriaContext(typeToken.getRawType());
 		
 		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot());
 		criteriaContext.addPredicate(criteriaContext.getRoot().get("uuid").in(uuids));
@@ -152,8 +152,8 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	}
 	
 	@SuppressWarnings("UnstableApiUsage")
-	protected OpenmrsFhirCriteriaContext<T> getSearchResultCriteria(SearchParameterMap theParams) {
-		OpenmrsFhirCriteriaContext<T> criteriaContext = createCriteriaContext(typeToken.getRawType());
+	protected <U> OpenmrsFhirCriteriaContext<T, U> getSearchResultCriteria(SearchParameterMap theParams) {
+		OpenmrsFhirCriteriaContext<T, U> criteriaContext = createCriteriaContext(typeToken.getRawType());
 		
 		if (isVoidable) {
 			handleVoidable(criteriaContext);
@@ -169,7 +169,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	@Override
 	@SuppressWarnings({ "unchecked", "UnstableApiUsage" })
 	public List<T> getSearchResults(@Nonnull SearchParameterMap theParams) {
-		OpenmrsFhirCriteriaContext<T> criteriaContext = getSearchResultCriteria(theParams);
+		OpenmrsFhirCriteriaContext<T, T> criteriaContext = getSearchResultCriteria(theParams);
 		
 		handleSort(criteriaContext, theParams.getSortSpec());
 		
@@ -257,29 +257,25 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	}
 	
 	@Override
-	@SuppressWarnings({ "unchecked", "UnstableApiUsage" })
+	@SuppressWarnings({ "UnstableApiUsage" })
 	public int getSearchResultsCount(@Nonnull SearchParameterMap theParams) {
-		OpenmrsFhirCriteriaContext<T> criteriaContext = getSearchResultCriteria(theParams);
+		OpenmrsFhirCriteriaContext<T, Long> criteriaContext = getSearchResultCriteria(theParams);
 		applyExactTotal(criteriaContext, theParams);
-		
-		EntityManager em = sessionFactory.getCurrentSession();
-		CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
-		CriteriaQuery<Long> criteriaQuery = criteriaBuilder.createQuery(Long.class);
-		Root<T> root = (Root<T>) criteriaQuery.from(typeToken.getRawType());
-		
+
 		if (hasDistinctResults()) {
-			criteriaQuery.select(criteriaBuilder.count(root));
+			criteriaContext.getCriteriaQuery().select(criteriaContext.getCriteriaBuilder().count(criteriaContext.getRoot()));
 		} else {
 			//the id property differs across various openmrs entities
 			if (Person.class.isAssignableFrom(typeToken.getRawType())) {
-				criteriaQuery.select(criteriaBuilder.countDistinct(root.get("personId")));
+				criteriaContext.getCriteriaQuery().select(criteriaContext.getCriteriaBuilder().countDistinct(criteriaContext.getRoot().get("personId")));
 			} else if (Encounter.class.isAssignableFrom(typeToken.getRawType())) {
-				criteriaQuery.select(criteriaBuilder.countDistinct(root.get("encounterId")));
+				criteriaContext.getCriteriaQuery().select(criteriaContext.getCriteriaBuilder().countDistinct(criteriaContext.getRoot().get("encounterId")));
 			} else if (Obs.class.isAssignableFrom(typeToken.getRawType())) {
-				criteriaQuery.select(criteriaBuilder.countDistinct(root.get("obsId")));
+				criteriaContext.getCriteriaQuery().select(criteriaContext.getCriteriaBuilder().countDistinct(criteriaContext.getRoot().get("obsId")));
 			}
 		}
-		return em.createQuery(criteriaQuery).getSingleResult().intValue();
+
+		return criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).getSingleResult().intValue();
 	}
 	
 	/**
@@ -298,7 +294,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	}
 	
 	@Override
-	protected <T> Optional<Predicate> handleLastUpdated(OpenmrsFhirCriteriaContext<T> criteriaContext,
+	protected <T, U> Optional<Predicate> handleLastUpdated(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
 	        DateRangeParam param) {
 		if (isImmutable) {
 			return handleLastUpdatedImmutable(criteriaContext, param);
@@ -329,7 +325,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	 */
 	protected void handleVoidable(OpenmrsFhirCriteriaContext<T> criteriaContext) {
 		criteriaContext
-		        .addPredicate(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("voided"), true));
+		        .addPredicate(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("voided"), false));
 	}
 	
 	/**
@@ -340,7 +336,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	 */
 	protected void handleRetireable(OpenmrsFhirCriteriaContext<T> criteriaContext) {
 		criteriaContext
-		        .addPredicate(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("retired"), true));
+		        .addPredicate(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("retired"), false));
 	}
 	
 	/**
@@ -372,12 +368,12 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	 * @param criteriaContext The {@link OpenmrsFhirCriteriaContext} for the current query
 	 * @param theParams the parameters for this search
 	 */
-	protected void setupSearchParams(OpenmrsFhirCriteriaContext<T> criteriaContext, SearchParameterMap theParams) {
+	protected <U> void setupSearchParams(OpenmrsFhirCriteriaContext<T, U> criteriaContext, SearchParameterMap theParams) {
 		
 	}
 	
 	@Override
-	protected <V> Collection<javax.persistence.criteria.Order> paramToProps(OpenmrsFhirCriteriaContext<V> criteriaContext,
+	protected <V, U> Collection<javax.persistence.criteria.Order> paramToProps(OpenmrsFhirCriteriaContext<V, U> criteriaContext,
 	        @Nonnull SortState sortState) {
 		String param = sortState.getParameter();
 		

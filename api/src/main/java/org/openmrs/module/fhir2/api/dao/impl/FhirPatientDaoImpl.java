@@ -109,9 +109,8 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 					handleNames(criteriaContext, entry.getValue());
 					break;
 				case FhirConstants.GENDER_SEARCH_HANDLER:
-					entry.getValue().forEach(
-					    p -> handleGender(criteriaContext, p.getPropertyName(), (TokenAndListParam) p.getParam())
-					            .ifPresent(criteriaContext::addPredicate));
+					entry.getValue().forEach(p -> handleGender(criteriaContext, getPersonProperty(criteriaContext),
+					    p.getPropertyName(), (TokenAndListParam) p.getParam()).ifPresent(criteriaContext::addPredicate));
 					criteriaContext.finalizeQuery();
 					break;
 				case FhirConstants.IDENTIFIER_SEARCH_HANDLER:
@@ -196,11 +195,6 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 			}
 		}).ifPresent(criteriaContext::addPredicate);
 		criteriaContext.finalizeQuery();
-	}
-	
-	@Override
-	protected String getSqlAlias() {
-		return "this_1_";
 	}
 	
 	@Override

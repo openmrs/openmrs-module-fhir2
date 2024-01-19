@@ -19,6 +19,7 @@ import static org.hl7.fhir.r4.model.Person.SP_BIRTHDATE;
 import static org.hl7.fhir.r4.model.Person.SP_NAME;
 
 import javax.annotation.Nonnull;
+import javax.persistence.criteria.From;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Root;
@@ -47,26 +48,19 @@ import org.openmrs.module.fhir2.api.search.param.PropParam;
 public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends BaseFhirDao<T> {
 	
 	/**
-	 * Returns the sqlAlias of the Person class for queries from this class
-	 *
-	 * @return the sqlAlias for the Person class for queries from this class
-	 */
-	protected abstract String getSqlAlias();
-	
-	/**
 	 * This is intended to be overridden by subclasses to provide the property that defines the Person
 	 * for this object
 	 *
 	 * @return the property that points to the person for this object
 	 */
 	@SuppressWarnings("UnstableApiUsage")
-	protected String getPersonProperty() {
+	protected <V> From<?, ?> getPersonProperty(OpenmrsFhirCriteriaContext<V> criteriaContext) {
 		Class<? super T> rawType = typeToken.getRawType();
 		if (rawType.equals(Person.class) || rawType.equals(Patient.class)) {
-			return null;
+			return criteriaContext.getRoot();
 		}
 		
-		return "person";
+		return criteriaContext.addJoin("person", "person");
 	}
 	
 	@Override
@@ -78,10 +72,11 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 			return null;
 		}
 		
-		if (param.startsWith("address") && !criteriaContext.getJoin("pad").isPresent()) {
-			criteriaContext.addJoin(getAssociationPath("addresses"), "pad");
+		From<?, ?> person = getPersonProperty(criteriaContext);
+		if (param.startsWith("address")) {
+			criteriaContext.addJoin(person, "addresses", "pad");
 		} else if (param.equals(SP_NAME) || param.equals(SP_GIVEN) || param.equals(SP_FAMILY)) {
-			Join<?, ?> personNamesJoin = criteriaContext.addJoin(getAssociationPath("names"), "pn");
+			Join<?, ?> personNamesJoin = criteriaContext.addJoin(person, "names", "pn");
 			
 			Root<PersonName> subRoot = criteriaContext.getCriteriaQuery().subquery(Integer.class).from(PersonName.class);
 			
@@ -199,8 +194,9 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 			}
 		}
 		
+		From<?, ?> person = getPersonProperty(criteriaContext);
+		criteriaContext.addJoin(person, "addresses", "pad");
 		handlePersonAddress(criteriaContext, "pad", city, state, postalCode, country).ifPresent(c -> {
-			criteriaContext.getRoot().join(getAssociationPath("addresses")).alias("pad");
 			criteriaContext.addPredicate(c);
 			criteriaContext.finalizeQuery();
 		});
@@ -225,11 +221,6 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 			}
 		}
 		
-		handleNames(criteriaContext, name, given, family, getPersonProperty());
-	}
-	
-	private String getAssociationPath(String property) {
-		String personProperty = getPersonProperty(); //"person"
-		return personProperty == null ? property : personProperty + "." + property;
+		handleNames(criteriaContext, name, given, family, getPersonProperty(criteriaContext));
 	}
 }
