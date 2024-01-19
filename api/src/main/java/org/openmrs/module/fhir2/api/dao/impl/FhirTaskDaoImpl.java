@@ -79,7 +79,7 @@ public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDa
 	private Optional<Predicate> handleStatus(TokenAndListParam tokenAndListParam) {
 		OpenmrsFhirCriteriaContext<FhirTask> criteriaContext = createCriteriaContext(FhirTask.class);
 		
-		return handleAndListParam(criteriaContext.getCriteriaBuilder(),tokenAndListParam, token -> {
+		return handleAndListParam(criteriaContext.getCriteriaBuilder(), tokenAndListParam, token -> {
 			if (token.getValue() != null) {
 				try {
 					return Optional.of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("status"),
@@ -96,15 +96,15 @@ public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDa
 	
 	private void handleReference(OpenmrsFhirCriteriaContext<FhirTask> criteriaContext, ReferenceAndListParam reference,
 	        String property, String alias) {
-		handleAndListParam(criteriaContext.getCriteriaBuilder(),reference, param -> {
+		handleAndListParam(criteriaContext.getCriteriaBuilder(), reference, param -> {
 			if (validReferenceParam(param)) {
-				Join<?,?> taskAliasJoin =criteriaContext.addJoin(property,alias);
+				Join<?, ?> taskAliasJoin = criteriaContext.addJoin(property, alias);
 				
 				List<Optional<? extends Predicate>> predicateList = new ArrayList<>();
-				predicateList.add(Optional.of(criteriaContext.getCriteriaBuilder()
-				        .equal(taskAliasJoin.get("reference"), param.getIdPart())));
-				predicateList.add(Optional.of(criteriaContext.getCriteriaBuilder()
-				        .equal(taskAliasJoin.get("type"), param.getResourceType())));
+				predicateList.add(Optional
+				        .of(criteriaContext.getCriteriaBuilder().equal(taskAliasJoin.get("reference"), param.getIdPart())));
+				predicateList.add(Optional
+				        .of(criteriaContext.getCriteriaBuilder().equal(taskAliasJoin.get("type"), param.getResourceType())));
 				return Optional.of(criteriaContext.getCriteriaBuilder().and(toCriteriaArray(predicateList)));
 			}
 			

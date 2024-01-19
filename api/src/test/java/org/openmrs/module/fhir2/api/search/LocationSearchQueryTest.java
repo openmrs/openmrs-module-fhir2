@@ -297,7 +297,6 @@ public class LocationSearchQueryTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void searchForLocations_shouldReturnLocationsContainingGivenTag() {
-		org.apache.log4j.LogManager.getLogger("org.hibernate.SQL").setLevel(org.apache.log4j.Level.DEBUG);
 		TokenAndListParam locationTag = new TokenAndListParam()
 		        .addAnd(new TokenOrListParam(FhirConstants.OPENMRS_FHIR_EXT_LOCATION_TAG, LOGIN_LOCATION_TAG_NAME));
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.TAG_SEARCH_HANDLER, locationTag);

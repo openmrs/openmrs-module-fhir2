@@ -59,11 +59,11 @@ public class FhirConceptDaoImpl extends BaseFhirDao<Concept> implements FhirConc
 		if (!conceptAliasJoin.isPresent()) {
 			return Optional.empty();
 		}
-		Join<?,?> conceptMapTypeJoin = criteriaContext.addJoin(conceptAliasJoin.get(),"conceptMapType", "mapType");
+		Join<?, ?> conceptMapTypeJoin = criteriaContext.addJoin(conceptAliasJoin.get(), "conceptMapType", "mapType");
 		
 		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().or(
 		    criteriaContext.getCriteriaBuilder().equal(conceptMapTypeJoin.get("uuid"), ConceptMapType.SAME_AS_MAP_TYPE_UUID),
-		    criteriaContext.getCriteriaBuilder().equal(conceptMapTypeJoin.get("name"),"SAME-AS")));
+		    criteriaContext.getCriteriaBuilder().equal(conceptMapTypeJoin.get("name"), "SAME-AS")));
 		
 		criteriaContext.addOrder(
 		    criteriaContext.getCriteriaBuilder().asc(criteriaContext.getRoot().join("concept").get("retired")));
@@ -83,13 +83,14 @@ public class FhirConceptDaoImpl extends BaseFhirDao<Concept> implements FhirConc
 		
 		OpenmrsFhirCriteriaContext<ConceptMap> criteriaContext = createCriteriaContext(ConceptMap.class);
 		createConceptMapCriteriaBuilder(conceptSource, mappingCode);
-		Join<?,?> conceptJoin = criteriaContext.addJoin("concept", "concept");
+		Join<?, ?> conceptJoin = criteriaContext.addJoin("concept", "concept");
 		criteriaContext.addOrder(criteriaContext.getCriteriaBuilder().asc(conceptJoin.get("retired")));
 		
 		OpenmrsFhirCriteriaContext<Concept> fhirCriteriaContext = createCriteriaContext(Concept.class);
 		
 		return fhirCriteriaContext.getEntityManager().createQuery(fhirCriteriaContext.getCriteriaQuery())
-				.unwrap(org.hibernate.query.Query.class).setResultTransformer(DistinctRootEntityResultTransformer.INSTANCE).getResultList();
+		        .unwrap(org.hibernate.query.Query.class).setResultTransformer(DistinctRootEntityResultTransformer.INSTANCE)
+		        .getResultList();
 	}
 	
 	@Override
@@ -106,9 +107,10 @@ public class FhirConceptDaoImpl extends BaseFhirDao<Concept> implements FhirConc
 	}
 	
 	protected void handleTitle(OpenmrsFhirCriteriaContext<Concept> criteriaContext, StringAndListParam titlePattern) {
-		Join<?,?> conceptNamesJoin = criteriaContext.addJoin("names","cn");
-		handleAndListParam(criteriaContext.getCriteriaBuilder(), titlePattern, (title) -> propertyLike(criteriaContext, conceptNamesJoin,"name", title))
-		        .ifPresent(criteriaContext::addPredicate);
+		Join<?, ?> conceptNamesJoin = criteriaContext.addJoin("names", "cn");
+		handleAndListParam(criteriaContext.getCriteriaBuilder(), titlePattern,
+		    (title) -> propertyLike(criteriaContext, conceptNamesJoin, "name", title))
+		            .ifPresent(criteriaContext::addPredicate);
 		criteriaContext.finalizeQuery();
 	}
 	
@@ -118,16 +120,18 @@ public class FhirConceptDaoImpl extends BaseFhirDao<Concept> implements FhirConc
 		criteriaContext.addJoin("conceptMapType", "mapType");
 		criteriaContext.addJoin("concept", "concept");
 		
-		Join<?,?> conceptReferenceTermJoin = criteriaContext.addJoin("conceptReferenceTerm","term");
+		Join<?, ?> conceptReferenceTermJoin = criteriaContext.addJoin("conceptReferenceTerm", "term");
 		if (Context.getAdministrationService().isDatabaseStringComparisonCaseSensitive()) {
 			criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().equal(
-			    criteriaContext.getCriteriaBuilder().lower(conceptReferenceTermJoin.get("code")), mappingCode.toLowerCase()));
+			    criteriaContext.getCriteriaBuilder().lower(conceptReferenceTermJoin.get("code")),
+			    mappingCode.toLowerCase()));
 		} else {
 			criteriaContext.addPredicate(
 			    criteriaContext.getCriteriaBuilder().equal(conceptReferenceTermJoin.get("code"), mappingCode));
 		}
-		criteriaContext.addPredicate(
-		    criteriaContext.getCriteriaBuilder().equal(conceptReferenceTermJoin.get("conceptSource"), conceptSource))
+		criteriaContext
+		        .addPredicate(
+		            criteriaContext.getCriteriaBuilder().equal(conceptReferenceTermJoin.get("conceptSource"), conceptSource))
 		        .finalizeQuery();
 	}
 }

@@ -176,7 +176,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 		String person = getIdPropertyName(Person.class);
 		String encounter = getIdPropertyName(Encounter.class);
 		String obs = getIdPropertyName(Obs.class);
-
+		
 		if (Person.class.isAssignableFrom(BaseOpenmrsObject.class)) {
 			handleIdPropertyOrdering(criteriaContext, person);
 		} else if (Encounter.class.isAssignableFrom(BaseOpenmrsObject.class)) {
@@ -212,7 +212,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 			
 			criteriaQuery.multiselect(selectionList);
 			handleSort(criteriaContext, theParams.getSortSpec(), this::paramToProps).ifPresent(
-					orders -> orders.forEach(order -> selectionList.add(root.get(getPropertyName(order.getExpression())))));
+			    orders -> orders.forEach(order -> selectionList.add(root.get(getPropertyName(order.getExpression())))));
 			List<T> ids = new ArrayList<>();
 			if (selectionList.size() > 1) {
 				for (Object[] o : em.createQuery(criteriaQuery).getResultList()) {
@@ -237,18 +237,18 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 			} else if (Obs.class.isAssignableFrom(BaseOpenmrsObject.class)) {
 				handleIdPropertyInCondition(idsCriteriaQuery, idsRoot, ids, obs);
 			}
-
+			
 			results = em.createQuery(idsCriteriaQuery).getResultList();
 			
 			// Need to reapply ordering
 			handleSort(criteriaContext, theParams.getSortSpec());
 			
 			if (Person.class.isAssignableFrom(BaseOpenmrsObject.class)) {
-				handleIdPropertyOrdering(criteriaBuilder,idsCriteriaQuery, idsRoot, person);
+				handleIdPropertyOrdering(criteriaBuilder, idsCriteriaQuery, idsRoot, person);
 			} else if (Encounter.class.isAssignableFrom(BaseOpenmrsObject.class)) {
-				handleIdPropertyOrdering(criteriaBuilder,idsCriteriaQuery, idsRoot, encounter);
+				handleIdPropertyOrdering(criteriaBuilder, idsCriteriaQuery, idsRoot, encounter);
 			} else if (Obs.class.isAssignableFrom(BaseOpenmrsObject.class)) {
-				handleIdPropertyOrdering(criteriaBuilder, idsCriteriaQuery, idsRoot,obs);
+				handleIdPropertyOrdering(criteriaBuilder, idsCriteriaQuery, idsRoot, obs);
 			}
 			
 			results = criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).getResultList();
@@ -433,7 +433,8 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	/**
 	 * Extracts the property name from the given JPA Criteria API expression.
 	 *
-	 * @param expression The JPA Criteria API expression, typically representing a property or attribute.
+	 * @param expression The JPA Criteria API expression, typically representing a property or
+	 *            attribute.
 	 * @return The property name extracted from the expression.
 	 * @throws IllegalArgumentException If the expression is not of type {@code Path<?>}.
 	 */
@@ -450,10 +451,11 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	 * Handles the ordering of the criteria based on the specified id property name.
 	 *
 	 * @param criteriaContext The criteria context containing the criteria builder and root.
-	 * @param idPropertyName  The name of the id property to be used for ordering.
+	 * @param idPropertyName The name of the id property to be used for ordering.
 	 */
 	private void handleIdPropertyOrdering(OpenmrsFhirCriteriaContext<T> criteriaContext, String idPropertyName) {
-		criteriaContext.getCriteriaQuery().orderBy(criteriaContext.getCriteriaBuilder().asc(criteriaContext.getRoot().get(idPropertyName)));
+		criteriaContext.getCriteriaQuery()
+		        .orderBy(criteriaContext.getCriteriaBuilder().asc(criteriaContext.getRoot().get(idPropertyName)));
 	}
 	
 	/**
@@ -462,55 +464,56 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	 * @param criteriaBuilder The criteria builder to build expressions
 	 * @param criteriaQuery The criteria query for the idPropertyName.
 	 * @param idsRoot The root of the criteria query for the idPropertyName
-	 * @param idPropertyName  The name of the id property to be used for ordering.
+	 * @param idPropertyName The name of the id property to be used for ordering.
 	 */
-	private void handleIdPropertyOrdering(CriteriaBuilder criteriaBuilder, CriteriaQuery<T> criteriaQuery, Root<T> idsRoot, String idPropertyName) {
+	private void handleIdPropertyOrdering(CriteriaBuilder criteriaBuilder, CriteriaQuery<T> criteriaQuery, Root<T> idsRoot,
+	        String idPropertyName) {
 		criteriaQuery.orderBy(criteriaBuilder.asc(idsRoot.get(idPropertyName)));
 	}
 	
 	/**
-	 * Handles the selection list based on the specified id property name, adding both the property and its distinct count.
+	 * Handles the selection list based on the specified id property name, adding both the property and
+	 * its distinct count.
 	 *
-	 * @param selectionList   The list of selections to be populated.
-	 * @param root            The root of the criteria query.
+	 * @param selectionList The list of selections to be populated.
+	 * @param root The root of the criteria query.
 	 * @param criteriaBuilder The criteria builder to build selection expressions.
-	 * @param idPropertyName  The name of the id property to be used for selection.
+	 * @param idPropertyName The name of the id property to be used for selection.
 	 */
-	private void handleIdPropertySelection(List<Selection<?>> selectionList, Root<T> root, CriteriaBuilder criteriaBuilder, String idPropertyName) {
+	private void handleIdPropertySelection(List<Selection<?>> selectionList, Root<T> root, CriteriaBuilder criteriaBuilder,
+	        String idPropertyName) {
 		selectionList.add(root.get(idPropertyName));
 		selectionList.add(criteriaBuilder.countDistinct(root.get(idPropertyName)));
 	}
 	
 	/**
-	 * Handles the "IN" condition in the criteria query based on the specified id property name and a list of ids.
+	 * Handles the "IN" condition in the criteria query based on the specified id property name and a
+	 * list of ids.
 	 *
 	 * @param idsCriteriaQuery The criteria query for ids.
-	 * @param idsRoot          The root of the criteria query for ids.
-	 * @param ids              The list of ids to be used in the "IN" condition.
-	 * @param idPropertyName   The name of the id property to be used in the "IN" condition.
+	 * @param idsRoot The root of the criteria query for ids.
+	 * @param ids The list of ids to be used in the "IN" condition.
+	 * @param idPropertyName The name of the id property to be used in the "IN" condition.
 	 */
-	private void handleIdPropertyInCondition(CriteriaQuery<T> idsCriteriaQuery, Root<T> idsRoot, List<T> ids, String idPropertyName) {
+	private void handleIdPropertyInCondition(CriteriaQuery<T> idsCriteriaQuery, Root<T> idsRoot, List<T> ids,
+	        String idPropertyName) {
 		idsCriteriaQuery.where(idsRoot.get(idPropertyName).in(ids));
 	}
 	
 	/**
-	 * Determines the name of the id property for the given entity class. This method assumes a specific naming convention
-	 * based on the entity type.
+	 * Determines the name of the id property for the given entity class. This method assumes a specific
+	 * naming convention based on the entity type.
 	 *
 	 * @param openmrsEntityClass The openmrs class for which the id property name is requested.
 	 * @return The name of the id property for the specified entity class.
 	 * @throws IllegalArgumentException If the entity class is not supported or recognized.
 	 */
 	private String getIdPropertyName(Class<? extends BaseOpenmrsObject> openmrsEntityClass) {
-		return Stream.of(Pair.of(Person.class, "personId"),
-						Pair.of(Encounter.class, "encounterId"),
-						Pair.of(Obs.class, "obsId"))
-				.filter(pair -> pair.getLeft().isAssignableFrom(openmrsEntityClass))
-				.findFirst()
-				.map(Pair::getRight)
-				.orElseThrow(() -> new IllegalArgumentException("Unsupported entity type: " + openmrsEntityClass.getName()));
+		return Stream
+		        .of(Pair.of(Person.class, "personId"), Pair.of(Encounter.class, "encounterId"), Pair.of(Obs.class, "obsId"))
+		        .filter(pair -> pair.getLeft().isAssignableFrom(openmrsEntityClass)).findFirst().map(Pair::getRight)
+		        .orElseThrow(() -> new IllegalArgumentException("Unsupported entity type: " + openmrsEntityClass.getName()));
 	}
-	
 	
 	protected static <V> V deproxyObject(V object) {
 		if (object instanceof HibernateProxy) {
