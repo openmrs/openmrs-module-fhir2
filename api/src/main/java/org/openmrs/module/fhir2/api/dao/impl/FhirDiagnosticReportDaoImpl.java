@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
+import javax.persistence.criteria.Join;
+
 import java.util.Optional;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -23,8 +25,6 @@ import org.openmrs.module.fhir2.api.dao.FhirDiagnosticReportDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.model.FhirDiagnosticReport;
 import org.springframework.stereotype.Component;
-
-import javax.persistence.criteria.Join;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
@@ -69,7 +69,7 @@ public class FhirDiagnosticReportDaoImpl extends BaseFhirDao<FhirDiagnosticRepor
 	        TokenAndListParam code) {
 		if (code != null) {
 			if (!criteriaContext.getJoin("c").isPresent()) {
-				criteriaContext.addJoin("code","c");
+				criteriaContext.addJoin("code", "c");
 			}
 			handleCodeableConcept(criteriaContext, code, "c", "cm", "crt").ifPresent(criteriaContext::addPredicate);
 			criteriaContext.finalizeQuery();
@@ -79,10 +79,10 @@ public class FhirDiagnosticReportDaoImpl extends BaseFhirDao<FhirDiagnosticRepor
 	private void handleObservationReference(OpenmrsFhirCriteriaContext<FhirDiagnosticReport> criteriaContext,
 	        ReferenceAndListParam result) {
 		if (result != null) {
-			Join<?,?> resultsJoin = criteriaContext.addJoin("results","obs");
+			Join<?, ?> resultsJoin = criteriaContext.addJoin("results", "obs");
 			
-			handleAndListParam(criteriaContext.getCriteriaBuilder(),result, token -> Optional.of(
-			    criteriaContext.getCriteriaBuilder().equal(resultsJoin.get("uuid"), token.getIdPart())))
+			handleAndListParam(criteriaContext.getCriteriaBuilder(), result,
+			    token -> Optional.of(criteriaContext.getCriteriaBuilder().equal(resultsJoin.get("uuid"), token.getIdPart())))
 			            .ifPresent(criteriaContext::addPredicate);
 			criteriaContext.finalizeQuery();
 		}

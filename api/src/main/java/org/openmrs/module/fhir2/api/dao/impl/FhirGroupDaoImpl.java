@@ -53,27 +53,27 @@ public class FhirGroupDaoImpl extends BaseFhirDao<Cohort> implements FhirGroupDa
 	protected void handleManagingEntity(OpenmrsFhirCriteriaContext<Cohort> criteriaContext,
 	        ReferenceAndListParam participantReference) {
 		if (participantReference != null) {
-			Join<?,?> creatorJoin = criteriaContext.addJoin("creator","cr");
-			handleAndListParam(criteriaContext.getCriteriaBuilder(),participantReference, participantToken -> {
+			Join<?, ?> creatorJoin = criteriaContext.addJoin("creator", "cr");
+			handleAndListParam(criteriaContext.getCriteriaBuilder(), participantReference, participantToken -> {
 				if (participantToken.getChain() != null) {
 					switch (participantToken.getChain()) {
 						// Search by person (the person who created the cohort - creator) uuid
 						case Practitioner.SP_RES_ID: {
 							Join<?, ?> creatorPersonJoin = criteriaContext.addJoin(creatorJoin, PERSON_ALIAS, "ps");
-							return Optional.of(criteriaContext.getCriteriaBuilder()
-									.like(creatorPersonJoin.get("uuid"), participantToken.getValue()));
+							return Optional.of(criteriaContext.getCriteriaBuilder().like(creatorPersonJoin.get("uuid"),
+							    participantToken.getValue()));
 						}
 						case Practitioner.SP_GIVEN: {
 							Join<?, ?> creatorPersonJoin = criteriaContext.addJoin(creatorJoin, PERSON_ALIAS, "ps");
 							Join<?, ?> creatorPersonNameJoin = criteriaContext.addJoin(creatorPersonJoin, NAMES_ALIAS, "pn");
 							return Optional.of(criteriaContext.getCriteriaBuilder()
-									.like(creatorPersonNameJoin.get("givenName"), participantToken.getValue()));
+							        .like(creatorPersonNameJoin.get("givenName"), participantToken.getValue()));
 						}
 						case Practitioner.SP_FAMILY: {
 							Join<?, ?> creatorPersonJoin = criteriaContext.addJoin(creatorJoin, PERSON_ALIAS, "ps");
 							Join<?, ?> creatorPersonNameJoin = criteriaContext.addJoin(creatorPersonJoin, NAMES_ALIAS, "pn");
 							return Optional.of(criteriaContext.getCriteriaBuilder()
-									.like(creatorPersonNameJoin.get("familyName"), participantToken.getValue()));
+							        .like(creatorPersonNameJoin.get("familyName"), participantToken.getValue()));
 						}
 						case Practitioner.SP_NAME: {
 							List<Optional<? extends Predicate>> criterionList = new ArrayList<>();
@@ -81,9 +81,9 @@ public class FhirGroupDaoImpl extends BaseFhirDao<Cohort> implements FhirGroupDa
 							Join<?, ?> creatorPersonNameJoin = criteriaContext.addJoin(creatorPersonJoin, NAMES_ALIAS, "pn");
 							
 							for (String token : StringUtils.split(participantToken.getValue(), " \t,")) {
-								criterionList.add(propertyLike(criteriaContext, creatorPersonNameJoin,"givenName", token));
-								criterionList.add(propertyLike(criteriaContext, creatorPersonNameJoin,"middleName", token));
-								criterionList.add(propertyLike(criteriaContext, creatorPersonNameJoin,"familyName", token));
+								criterionList.add(propertyLike(criteriaContext, creatorPersonNameJoin, "givenName", token));
+								criterionList.add(propertyLike(criteriaContext, creatorPersonNameJoin, "middleName", token));
+								criterionList.add(propertyLike(criteriaContext, creatorPersonNameJoin, "familyName", token));
 							}
 							
 							return Optional.of(criteriaContext.getCriteriaBuilder().or(toCriteriaArray(criterionList)));
@@ -91,8 +91,8 @@ public class FhirGroupDaoImpl extends BaseFhirDao<Cohort> implements FhirGroupDa
 					}
 				} else {
 					// Search by creator uuid
-					return Optional.of(criteriaContext.getCriteriaBuilder().equal(creatorJoin.get("uuid"),
-					    participantToken.getValue()));
+					return Optional.of(
+					    criteriaContext.getCriteriaBuilder().equal(creatorJoin.get("uuid"), participantToken.getValue()));
 				}
 				
 				return Optional.empty();

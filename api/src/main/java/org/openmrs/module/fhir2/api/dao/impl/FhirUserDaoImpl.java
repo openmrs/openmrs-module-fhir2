@@ -34,7 +34,7 @@ public class FhirUserDaoImpl extends BasePractitionerDao<User> implements FhirUs
 	
 	@Override
 	protected void handleIdentifier(OpenmrsFhirCriteriaContext<User> criteriaContext, TokenAndListParam identifier) {
-		handleAndListParam(criteriaContext.getCriteriaBuilder(),identifier,
+		handleAndListParam(criteriaContext.getCriteriaBuilder(), identifier,
 		    param -> Optional.of(
 		        criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("username"), param.getValue())))
 		                .ifPresent(t -> {

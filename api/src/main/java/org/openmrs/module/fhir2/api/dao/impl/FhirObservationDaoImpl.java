@@ -218,24 +218,24 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 	
 	private void handleHasMemberReference(OpenmrsFhirCriteriaContext<Obs> criteriaContext,
 	        ReferenceAndListParam hasMemberReference) {
-		Join<?,?> groupMembersJoin = criteriaContext.addJoin("groupMembers","groupMembersJoin");
+		Join<?, ?> groupMembersJoin = criteriaContext.addJoin("groupMembers", "groupMembersJoin");
 		if (hasMemberReference != null) {
-			handleAndListParam(criteriaContext.getCriteriaBuilder(),hasMemberReference, hasMemberRef -> {
+			handleAndListParam(criteriaContext.getCriteriaBuilder(), hasMemberReference, hasMemberRef -> {
 				if (hasMemberRef.getChain() != null) {
 					if (Observation.SP_CODE.equals(hasMemberRef.getChain())) {
 						TokenAndListParam code = new TokenAndListParam()
 						        .addAnd(new TokenParam().setValue(hasMemberRef.getValue()));
 						
 						if (!criteriaContext.getJoin("c").isPresent()) {
-							criteriaContext.addJoin(groupMembersJoin,"concept","c");
+							criteriaContext.addJoin(groupMembersJoin, "concept", "c");
 						}
 						
 						return handleCodeableConcept(criteriaContext, code, "c", "cm", "crt");
 					}
 				} else {
 					if (StringUtils.isNotBlank(hasMemberRef.getIdPart())) {
-						return Optional.of(criteriaContext.getCriteriaBuilder()
-						        .equal(groupMembersJoin.get("uuid"), hasMemberRef.getIdPart()));
+						return Optional.of(criteriaContext.getCriteriaBuilder().equal(groupMembersJoin.get("uuid"),
+						    hasMemberRef.getIdPart()));
 					}
 				}
 				
@@ -249,12 +249,13 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 	        @Nonnull String propertyName, StringAndListParam valueStringParam) {
 		//TODO: needs further investigation
 		Join<?, ?> propertyNameJoin = criteriaContext.addJoin(propertyName, propertyName);
-		return handleAndListParam(criteriaContext.getCriteriaBuilder(),valueStringParam, v -> propertyLike(criteriaContext,propertyNameJoin, propertyName, v.getValue()));
+		return handleAndListParam(criteriaContext.getCriteriaBuilder(), valueStringParam,
+		    v -> propertyLike(criteriaContext, propertyNameJoin, propertyName, v.getValue()));
 	}
 	
 	private void handleCodedConcept(OpenmrsFhirCriteriaContext<Obs> criteriaContext, TokenAndListParam code) {
 		if (code != null) {
-			criteriaContext.addJoin("concept","c");
+			criteriaContext.addJoin("concept", "c");
 			
 			handleCodeableConcept(criteriaContext, code, "c", "cm", "crt").ifPresent(criteriaContext::addPredicate);
 			criteriaContext.finalizeQuery();
@@ -271,12 +272,11 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 				}
 				OpenmrsFhirCriteriaContext<String> context = createCriteriaContext(String.class);
 				context.getCriteriaQuery().subquery(String.class).select(conceptClassJoin.get("uuid"))
-						.where(context.getCriteriaBuilder().equal(context.getRoot().get("category"), param.getValue()));
+				        .where(context.getCriteriaBuilder().equal(context.getRoot().get("category"), param.getValue()));
 				
 				return Optional.of(
-						context.getCriteriaBuilder()
-								.in(criteriaContext.getRoot().get("concept").get("conceptClass").get("uuid"))
-								.value(context.getCriteriaQuery().subquery(String.class)));
+				    context.getCriteriaBuilder().in(criteriaContext.getRoot().get("concept").get("conceptClass").get("uuid"))
+				            .value(context.getCriteriaQuery().subquery(String.class)));
 			}).ifPresent(criteriaContext::addPredicate);
 			criteriaContext.finalizeQuery();
 		}
@@ -285,7 +285,7 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 	private void handleValueCodedConcept(OpenmrsFhirCriteriaContext<Obs> criteriaContext, TokenAndListParam valueConcept) {
 		if (valueConcept != null) {
 			if (!criteriaContext.getJoin("vc").isPresent()) {
-				criteriaContext.addJoin("valueCoded","vc");
+				criteriaContext.addJoin("valueCoded", "vc");
 			}
 			handleCodeableConcept(criteriaContext, valueConcept, "vc", "vcm", "vcrt")
 			        .ifPresent(criteriaContext::addPredicate);

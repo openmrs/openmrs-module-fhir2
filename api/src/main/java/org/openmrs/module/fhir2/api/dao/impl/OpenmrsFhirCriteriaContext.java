@@ -62,23 +62,22 @@ public class OpenmrsFhirCriteriaContext<T> {
 		return addJoin(attributeName, alias, JoinType.INNER);
 	}
 	
-	public Join<?, ?> addJoin(@Nonnull String attributeName, @Nonnull String alias,
-	        @Nonnull JoinType joinType) {
+	public Join<?, ?> addJoin(@Nonnull String attributeName, @Nonnull String alias, @Nonnull JoinType joinType) {
 		return addJoin(getRoot(), attributeName, alias, joinType);
 	}
-
+	
 	public Join<?, ?> addJoin(From<?, ?> from, @Nonnull String attributeName, @Nonnull String alias) {
 		return addJoin(from, attributeName, alias, JoinType.INNER);
 	}
-
+	
 	public Join<?, ?> addJoin(From<?, ?> from, @Nonnull String attributeName, @Nonnull String alias,
-												 @Nonnull JoinType joinType) {
+	        @Nonnull JoinType joinType) {
 		if (!aliases.containsKey(alias)) {
 			Join<?, ?> join = from.join(attributeName, joinType);
 			join.alias(alias);
 			aliases.put(alias, join);
 		}
-
+		
 		return aliases.get(alias);
 	}
 	
@@ -96,7 +95,7 @@ public class OpenmrsFhirCriteriaContext<T> {
 		results.add(result);
 		return this;
 	}
-
+	
 	public Optional<Join<?, ?>> getJoin(String alias) {
 		return Optional.ofNullable(aliases.get(alias));
 	}
