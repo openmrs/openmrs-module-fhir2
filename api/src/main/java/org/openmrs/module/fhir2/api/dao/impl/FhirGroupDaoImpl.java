@@ -36,7 +36,7 @@ public class FhirGroupDaoImpl extends BaseFhirDao<Cohort> implements FhirGroupDa
 	private static final String PERSON_ALIAS = "person";
 	
 	@Override
-	protected void setupSearchParams(OpenmrsFhirCriteriaContext<Cohort> criteriaContext, SearchParameterMap theParams) {
+	protected <U> void setupSearchParams(OpenmrsFhirCriteriaContext<Cohort,U> criteriaContext, SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			if (FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER.equals(entry.getKey())) {
 				entry.getValue()
@@ -50,7 +50,7 @@ public class FhirGroupDaoImpl extends BaseFhirDao<Cohort> implements FhirGroupDa
 	 * Find a way to merge this logic into handleParticipantReference logic in the BaseDao class
 	 * make it reusable
 	 */
-	protected void handleManagingEntity(OpenmrsFhirCriteriaContext<Cohort> criteriaContext,
+	protected <U> void handleManagingEntity(OpenmrsFhirCriteriaContext<Cohort,U> criteriaContext,
 	        ReferenceAndListParam participantReference) {
 		if (participantReference != null) {
 			Join<?, ?> creatorJoin = criteriaContext.addJoin("creator", "cr");

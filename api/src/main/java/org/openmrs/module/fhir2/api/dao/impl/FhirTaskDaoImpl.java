@@ -36,7 +36,7 @@ import org.springframework.stereotype.Component;
 public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDao {
 	
 	@Override
-	protected void setupSearchParams(OpenmrsFhirCriteriaContext<FhirTask> criteriaContext, SearchParameterMap theParams) {
+	protected <U> void setupSearchParams(OpenmrsFhirCriteriaContext<FhirTask,U> criteriaContext, SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.BASED_ON_REFERENCE_SEARCH_HANDLER:
@@ -77,7 +77,7 @@ public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDa
 	}
 	
 	private Optional<Predicate> handleStatus(TokenAndListParam tokenAndListParam) {
-		OpenmrsFhirCriteriaContext<FhirTask> criteriaContext = createCriteriaContext(FhirTask.class);
+		OpenmrsFhirCriteriaContext<FhirTask,FhirTask> criteriaContext = createCriteriaContext(FhirTask.class);
 		
 		return handleAndListParam(criteriaContext.getCriteriaBuilder(), tokenAndListParam, token -> {
 			if (token.getValue() != null) {
@@ -94,7 +94,7 @@ public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDa
 		});
 	}
 	
-	private void handleReference(OpenmrsFhirCriteriaContext<FhirTask> criteriaContext, ReferenceAndListParam reference,
+	private <U> void handleReference(OpenmrsFhirCriteriaContext<FhirTask,U> criteriaContext, ReferenceAndListParam reference,
 	        String property, String alias) {
 		handleAndListParam(criteriaContext.getCriteriaBuilder(), reference, param -> {
 			if (validReferenceParam(param)) {

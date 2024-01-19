@@ -32,13 +32,13 @@ import org.springframework.stereotype.Component;
 public class FhirVisitDaoImpl extends BaseEncounterDao<Visit> implements FhirVisitDao {
 	
 	@Override
-	protected void handleDate(OpenmrsFhirCriteriaContext<Visit> criteriaContext, DateRangeParam dateRangeParam) {
+	protected <U> void handleDate(OpenmrsFhirCriteriaContext<Visit,U> criteriaContext, DateRangeParam dateRangeParam) {
 		handleDateRange(criteriaContext, "startDatetime", dateRangeParam);
 		criteriaContext.finalizeQuery();
 	}
 	
 	@Override
-	protected void handleEncounterType(OpenmrsFhirCriteriaContext<Visit> criteriaContext,
+	protected <U> void handleEncounterType(OpenmrsFhirCriteriaContext<Visit,U> criteriaContext,
 	        TokenAndListParam tokenAndListParam) {
 		Join<?, ?> visitTypeJoin = criteriaContext.addJoin("visitType", "vt");
 		handleAndListParam(criteriaContext.getCriteriaBuilder(), tokenAndListParam,
@@ -51,7 +51,7 @@ public class FhirVisitDaoImpl extends BaseEncounterDao<Visit> implements FhirVis
 	}
 	
 	@Override
-	protected void handleParticipant(OpenmrsFhirCriteriaContext<Visit> criteriaContext,
+	protected <U> void handleParticipant(OpenmrsFhirCriteriaContext<Visit,U> criteriaContext,
 	        ReferenceAndListParam referenceAndListParam) {
 		Join<Visit, Encounter> encounterJoin = criteriaContext.getRoot().join("encounters", JoinType.INNER);
 		encounterJoin.join("encounterProviders", JoinType.INNER);
@@ -59,7 +59,7 @@ public class FhirVisitDaoImpl extends BaseEncounterDao<Visit> implements FhirVis
 	}
 	
 	@Override
-	protected <V> String paramToProp(OpenmrsFhirCriteriaContext<V> criteriaContext, @NonNull String param) {
+	protected <V,U> String paramToProp(OpenmrsFhirCriteriaContext<V,U> criteriaContext, @NonNull String param) {
 		switch (param) {
 			case SP_DATE:
 				return "startDatetime";

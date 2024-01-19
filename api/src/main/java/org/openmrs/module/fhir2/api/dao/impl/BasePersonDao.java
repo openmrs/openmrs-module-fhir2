@@ -54,7 +54,7 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 	 * @return the property that points to the person for this object
 	 */
 	@SuppressWarnings("UnstableApiUsage")
-	protected <V> From<?, ?> getPersonProperty(OpenmrsFhirCriteriaContext<V> criteriaContext) {
+	protected <V,U> From<?, ?> getPersonProperty(OpenmrsFhirCriteriaContext<V,U> criteriaContext) {
 		Class<? super T> rawType = typeToken.getRawType();
 		if (rawType.equals(Person.class) || rawType.equals(Patient.class)) {
 			return criteriaContext.getRoot();
@@ -64,7 +64,7 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 	}
 	
 	@Override
-	protected <V> Collection<Order> paramToProps(OpenmrsFhirCriteriaContext<V> criteriaContext,
+	protected <V,U> Collection<Order> paramToProps(OpenmrsFhirCriteriaContext<V,U> criteriaContext,
 	        @Nonnull SortState sortState) {
 		String param = sortState.getParameter();
 		
@@ -154,7 +154,7 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 	}
 	
 	@Override
-	protected <V> String paramToProp(OpenmrsFhirCriteriaContext<V> criteriaContext, @Nonnull String param) {
+	protected <V,U> String paramToProp(OpenmrsFhirCriteriaContext<V,U> criteriaContext, @Nonnull String param) {
 		switch (param) {
 			case SP_BIRTHDATE:
 				return "birthdate";
@@ -171,7 +171,7 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 		}
 	}
 	
-	protected void handleAddresses(OpenmrsFhirCriteriaContext<T> criteriaContext,
+	protected <U> void handleAddresses(OpenmrsFhirCriteriaContext<T,U> criteriaContext,
 	        Map.Entry<String, List<PropParam<?>>> entry) {
 		StringAndListParam city = null;
 		StringAndListParam country = null;
@@ -202,7 +202,7 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 		});
 	}
 	
-	protected void handleNames(OpenmrsFhirCriteriaContext<T> criteriaContext, List<PropParam<?>> params) {
+	protected <U> void handleNames(OpenmrsFhirCriteriaContext<T,U> criteriaContext, List<PropParam<?>> params) {
 		StringAndListParam name = null;
 		StringAndListParam given = null;
 		StringAndListParam family = null;

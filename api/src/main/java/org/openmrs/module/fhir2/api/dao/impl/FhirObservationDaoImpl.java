@@ -217,7 +217,7 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 		});
 	}
 	
-	private void handleHasMemberReference(OpenmrsFhirCriteriaContext<Obs> criteriaContext,
+	private <U> void handleHasMemberReference(OpenmrsFhirCriteriaContext<Obs,U> criteriaContext,
 	        ReferenceAndListParam hasMemberReference) {
 		Join<?, ?> groupMembersJoin = criteriaContext.addJoin("groupMembers", "groupMembersJoin");
 		if (hasMemberReference != null) {
@@ -246,7 +246,7 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 		}
 	}
 	
-	private <T> Optional<Predicate> handleValueStringParam(OpenmrsFhirCriteriaContext<T> criteriaContext,
+	private <T,U> Optional<Predicate> handleValueStringParam(OpenmrsFhirCriteriaContext<T,U> criteriaContext,
 	        @Nonnull String propertyName, StringAndListParam valueStringParam) {
 		//TODO: needs further investigation
 		Join<?, ?> propertyNameJoin = criteriaContext.addJoin(propertyName, propertyName);
@@ -254,7 +254,7 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 		    v -> propertyLike(criteriaContext, propertyNameJoin, propertyName, v.getValue()));
 	}
 	
-	private void handleCodedConcept(OpenmrsFhirCriteriaContext<Obs> criteriaContext, TokenAndListParam code) {
+	private <U> void handleCodedConcept(OpenmrsFhirCriteriaContext<Obs,U> criteriaContext, TokenAndListParam code) {
 		if (code != null) {
 			criteriaContext.addJoin("concept", "c");
 			
@@ -263,7 +263,7 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 		}
 	}
 	
-	private void handleConceptClass(OpenmrsFhirCriteriaContext<Obs> criteriaContext, TokenAndListParam category) {
+	private <U> void handleConceptClass(OpenmrsFhirCriteriaContext<Obs,U> criteriaContext, TokenAndListParam category) {
 		if (category == null) {
 			Join<?, ?> conceptJoin = criteriaContext.addJoin("concept", "c");
 			Join<?, ?> conceptClassJoin = criteriaContext.addJoin(conceptJoin, "conceptClass", "cc");
@@ -271,7 +271,7 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 				if (param.getValue() == null) {
 					return Optional.empty();
 				}
-				OpenmrsFhirCriteriaContext<String> context = createCriteriaContext(String.class);
+				OpenmrsFhirCriteriaContext<String,U> context = createCriteriaContext(String.class);
 				context.getCriteriaQuery().subquery(String.class).select(conceptClassJoin.get("uuid"))
 				        .where(context.getCriteriaBuilder().equal(context.getRoot().get("category"), param.getValue()));
 				
@@ -283,7 +283,7 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 		}
 	}
 	
-	private void handleValueCodedConcept(OpenmrsFhirCriteriaContext<Obs> criteriaContext, TokenAndListParam valueConcept) {
+	private <U> void handleValueCodedConcept(OpenmrsFhirCriteriaContext<Obs,U> criteriaContext, TokenAndListParam valueConcept) {
 		if (valueConcept != null) {
 			if (!criteriaContext.getJoin("vc").isPresent()) {
 				criteriaContext.addJoin("valueCoded", "vc");
@@ -295,7 +295,7 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 	}
 	
 	@Override
-	protected <V> String paramToProp(OpenmrsFhirCriteriaContext<V> criteriaContext, @NonNull String paramName) {
+	protected <V, U> String paramToProp(OpenmrsFhirCriteriaContext<V, U> criteriaContext, @NonNull String paramName) {
 		if (Observation.SP_DATE.equals(paramName)) {
 			return "obsDatetime";
 		}

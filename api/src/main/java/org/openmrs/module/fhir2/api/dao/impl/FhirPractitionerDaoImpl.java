@@ -36,7 +36,7 @@ public class FhirPractitionerDaoImpl extends BasePractitionerDao<Provider> imple
 	}
 	
 	@Override
-	protected void handleIdentifier(OpenmrsFhirCriteriaContext<Provider> criteriaContext, TokenAndListParam identifier) {
+	protected <U> void handleIdentifier(OpenmrsFhirCriteriaContext<Provider,U> criteriaContext, TokenAndListParam identifier) {
 		handleAndListParam(criteriaContext.getCriteriaBuilder(), identifier,
 		    param -> Optional.of(
 		        criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("identifier"), param.getValue())))
@@ -47,7 +47,7 @@ public class FhirPractitionerDaoImpl extends BasePractitionerDao<Provider> imple
 	@Override
 	public List<ProviderAttribute> getActiveAttributesByPractitionerAndAttributeTypeUuid(@Nonnull Provider provider,
 	        @Nonnull String providerAttributeTypeUuid) {
-		OpenmrsFhirCriteriaContext<ProviderAttribute> criteriaContext = openmrsFhirCriteriaContext();
+		OpenmrsFhirCriteriaContext<ProviderAttribute,ProviderAttribute> criteriaContext = openmrsFhirCriteriaContext();
 		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot());
 		
 		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().and(
@@ -60,7 +60,7 @@ public class FhirPractitionerDaoImpl extends BasePractitionerDao<Provider> imple
 		return criteriaContext.getEntityManager().createQuery(criteriaContext.finalizeQuery()).getResultList();
 	}
 	
-	protected OpenmrsFhirCriteriaContext<ProviderAttribute> openmrsFhirCriteriaContext() {
+	protected OpenmrsFhirCriteriaContext<ProviderAttribute,ProviderAttribute> openmrsFhirCriteriaContext() {
 		EntityManager em = sessionFactory.getCurrentSession();
 		CriteriaBuilder cb = em.getCriteriaBuilder();
 		CriteriaQuery<ProviderAttribute> cq = cb.createQuery(ProviderAttribute.class);

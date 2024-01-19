@@ -45,7 +45,7 @@ public class FhirPersonDaoImpl extends BasePersonDao<Person> implements FhirPers
 	}
 	
 	@Override
-	protected void setupSearchParams(OpenmrsFhirCriteriaContext<Person> criteriaContext, SearchParameterMap theParams) {
+	protected <U> void setupSearchParams(OpenmrsFhirCriteriaContext<Person,U> criteriaContext, SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.NAME_SEARCH_HANDLER:
@@ -74,7 +74,7 @@ public class FhirPersonDaoImpl extends BasePersonDao<Person> implements FhirPers
 	}
 	
 	@Override
-	protected <T> Optional<Predicate> handleLastUpdated(OpenmrsFhirCriteriaContext<T> criteriaContext,
+	protected <T,U> Optional<Predicate> handleLastUpdated(OpenmrsFhirCriteriaContext<T,U> criteriaContext,
 	        DateRangeParam param) {
 		return Optional.of(criteriaContext.getCriteriaBuilder().or(toCriteriaArray(
 		    handleDateRange(criteriaContext, "personDateChanged", param),
@@ -86,7 +86,7 @@ public class FhirPersonDaoImpl extends BasePersonDao<Person> implements FhirPers
 	}
 	
 	@Override
-	protected void handleVoidable(OpenmrsFhirCriteriaContext<Person> criteriaContext) {
+	protected <U> void handleVoidable(OpenmrsFhirCriteriaContext<Person,U> criteriaContext) {
 		criteriaContext.addPredicate(
 		    criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("personVoided"), false));
 	}
