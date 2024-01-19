@@ -98,7 +98,7 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 	}
 	
 	@Override
-	protected void setupSearchParams(OpenmrsFhirCriteriaContext<Patient> criteriaContext, SearchParameterMap theParams) {
+	protected <U> void setupSearchParams(OpenmrsFhirCriteriaContext<Patient,U> criteriaContext, SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.QUERY_SEARCH_HANDLER:
@@ -140,7 +140,7 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 		});
 	}
 	
-	private void handlePatientQuery(OpenmrsFhirCriteriaContext<Patient> criteriaContext, @Nonnull StringAndListParam query) {
+	private <U> void handlePatientQuery(OpenmrsFhirCriteriaContext<Patient,U> criteriaContext, @Nonnull StringAndListParam query) {
 		if (query == null) {
 			return;
 		}
@@ -173,7 +173,7 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 		criteriaContext.finalizeQuery();
 	}
 	
-	protected void handleIdentifier(OpenmrsFhirCriteriaContext<Patient> criteriaContext, TokenAndListParam identifier) {
+	protected <U> void handleIdentifier(OpenmrsFhirCriteriaContext<Patient,U> criteriaContext, TokenAndListParam identifier) {
 		if (identifier == null) {
 			return;
 		}
@@ -198,7 +198,7 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 	}
 	
 	@Override
-	protected <V> String paramToProp(OpenmrsFhirCriteriaContext<V> criteriaContext, @NonNull String param) {
+	protected <V,U> String paramToProp(OpenmrsFhirCriteriaContext<V,U> criteriaContext, @NonNull String param) {
 		if (SP_DEATH_DATE.equalsIgnoreCase(param)) {
 			return "deathDate";
 		}

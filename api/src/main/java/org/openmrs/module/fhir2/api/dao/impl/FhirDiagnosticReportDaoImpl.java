@@ -31,7 +31,7 @@ import org.springframework.stereotype.Component;
 public class FhirDiagnosticReportDaoImpl extends BaseFhirDao<FhirDiagnosticReport> implements FhirDiagnosticReportDao {
 	
 	@Override
-	protected void setupSearchParams(OpenmrsFhirCriteriaContext<FhirDiagnosticReport> criteriaContext,
+	protected <U> void setupSearchParams(OpenmrsFhirCriteriaContext<FhirDiagnosticReport,U> criteriaContext,
 	        SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
@@ -65,7 +65,7 @@ public class FhirDiagnosticReportDaoImpl extends BaseFhirDao<FhirDiagnosticRepor
 		});
 	}
 	
-	private void handleCodedConcept(OpenmrsFhirCriteriaContext<FhirDiagnosticReport> criteriaContext,
+	private <U> void handleCodedConcept(OpenmrsFhirCriteriaContext<FhirDiagnosticReport,U> criteriaContext,
 	        TokenAndListParam code) {
 		if (code != null) {
 			if (!criteriaContext.getJoin("c").isPresent()) {
@@ -76,7 +76,7 @@ public class FhirDiagnosticReportDaoImpl extends BaseFhirDao<FhirDiagnosticRepor
 		}
 	}
 	
-	private void handleObservationReference(OpenmrsFhirCriteriaContext<FhirDiagnosticReport> criteriaContext,
+	private <U> void handleObservationReference(OpenmrsFhirCriteriaContext<FhirDiagnosticReport,U> criteriaContext,
 	        ReferenceAndListParam result) {
 		if (result != null) {
 			Join<?, ?> resultsJoin = criteriaContext.addJoin("results", "obs");
@@ -89,7 +89,7 @@ public class FhirDiagnosticReportDaoImpl extends BaseFhirDao<FhirDiagnosticRepor
 	}
 	
 	@Override
-	protected <V> String paramToProp(OpenmrsFhirCriteriaContext<V> criteriaContext, @NonNull String param) {
+	protected <V,U> String paramToProp(OpenmrsFhirCriteriaContext<V,U> criteriaContext, @NonNull String param) {
 		if (DiagnosticReport.SP_ISSUED.equals(param)) {
 			return "issued";
 		}

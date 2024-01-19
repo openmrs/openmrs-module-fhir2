@@ -29,7 +29,7 @@ import org.springframework.stereotype.Component;
 public class FhirMedicationDaoImpl extends BaseFhirDao<Drug> implements FhirMedicationDao {
 	
 	@Override
-	protected void setupSearchParams(OpenmrsFhirCriteriaContext<Drug> criteriaContext, SearchParameterMap theParams) {
+	protected <U> void setupSearchParams(OpenmrsFhirCriteriaContext<Drug,U> criteriaContext, SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.CODED_SEARCH_HANDLER:
@@ -53,7 +53,7 @@ public class FhirMedicationDaoImpl extends BaseFhirDao<Drug> implements FhirMedi
 	}
 	
 	// TODO: look into DetachedCriteria and how to translate it to jpa criteria api
-	private void handleIngredientCode(OpenmrsFhirCriteriaContext<Drug> criteriaContext, TokenAndListParam ingredientCode) {
+	private <U> void handleIngredientCode(OpenmrsFhirCriteriaContext<Drug,U> criteriaContext, TokenAndListParam ingredientCode) {
 		if (ingredientCode != null) {
 			criteriaContext.getRoot().join("ingredients").alias("i");
 			DetachedCriteria detachedCriteria = DetachedCriteria.forClass(Concept.class, "ic");
@@ -65,7 +65,7 @@ public class FhirMedicationDaoImpl extends BaseFhirDao<Drug> implements FhirMedi
 		}
 	}
 	
-	private void handleMedicationCode(OpenmrsFhirCriteriaContext<Drug> criteriaContext, TokenAndListParam code) {
+	private <U> void handleMedicationCode(OpenmrsFhirCriteriaContext<Drug,U> criteriaContext, TokenAndListParam code) {
 		if (code != null) {
 			criteriaContext.getRoot().join("concept").alias("cc");
 			handleCodeableConcept(criteriaContext, code, "cc", "ccm", "ccrt").ifPresent(criteriaContext::addPredicate);
@@ -73,7 +73,7 @@ public class FhirMedicationDaoImpl extends BaseFhirDao<Drug> implements FhirMedi
 		}
 	}
 	
-	private void handleMedicationDosageForm(OpenmrsFhirCriteriaContext<Drug> criteriaContext, TokenAndListParam dosageForm) {
+	private <U> void handleMedicationDosageForm(OpenmrsFhirCriteriaContext<Drug,U> criteriaContext, TokenAndListParam dosageForm) {
 		if (dosageForm != null) {
 			criteriaContext.getRoot().join("dosageForm").alias("dc");
 			handleCodeableConcept(criteriaContext, dosageForm, "dc", "dcm", "dcrt").ifPresent(criteriaContext::addPredicate);

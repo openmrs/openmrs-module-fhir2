@@ -46,7 +46,7 @@ import org.springframework.stereotype.Component;
 public class FhirRelatedPersonDaoImpl extends BaseFhirDao<Relationship> implements FhirRelatedPersonDao {
 	
 	@Override
-	protected void setupSearchParams(OpenmrsFhirCriteriaContext<Relationship> criteriaContext,
+	protected <U> void setupSearchParams(OpenmrsFhirCriteriaContext<Relationship,U> criteriaContext,
 	        SearchParameterMap theParams) {
 		From<?, ?> personJoin = criteriaContext.addJoin("personA", "m");
 		theParams.getParameters().forEach(entry -> {
@@ -78,7 +78,7 @@ public class FhirRelatedPersonDaoImpl extends BaseFhirDao<Relationship> implemen
 	}
 	
 	@Override
-	protected <T> Collection<Order> paramToProps(OpenmrsFhirCriteriaContext<T> criteriaContext,
+	protected <T,U> Collection<Order> paramToProps(OpenmrsFhirCriteriaContext<T,U> criteriaContext,
 	        @Nonnull SortState sortState) {
 		String param = sortState.getParameter();
 		
@@ -167,7 +167,7 @@ public class FhirRelatedPersonDaoImpl extends BaseFhirDao<Relationship> implemen
 	}
 	
 	@Override
-	protected <V> String paramToProp(OpenmrsFhirCriteriaContext<V> criteriaContext, @Nonnull String param) {
+	protected <V,U> String paramToProp(OpenmrsFhirCriteriaContext<V,U> criteriaContext, @Nonnull String param) {
 		switch (param) {
 			case SP_BIRTHDATE:
 				return "m.birthdate";
@@ -184,7 +184,7 @@ public class FhirRelatedPersonDaoImpl extends BaseFhirDao<Relationship> implemen
 		}
 	}
 	
-	private void handleAddresses(OpenmrsFhirCriteriaContext<Relationship> criteriaContext,
+	private <U> void handleAddresses(OpenmrsFhirCriteriaContext<Relationship,U> criteriaContext,
 	        Map.Entry<String, List<PropParam<?>>> entry) {
 		StringAndListParam city = null;
 		StringAndListParam country = null;

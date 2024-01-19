@@ -72,7 +72,7 @@ public class FhirConditionDaoImpl extends BaseFhirDao<Condition> implements Fhir
 	}
 	
 	@Override
-	protected void setupSearchParams(OpenmrsFhirCriteriaContext<Condition> criteriaContext, SearchParameterMap theParams) {
+	protected <U> void setupSearchParams(OpenmrsFhirCriteriaContext<Condition,U> criteriaContext, SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER:
@@ -104,7 +104,7 @@ public class FhirConditionDaoImpl extends BaseFhirDao<Condition> implements Fhir
 		});
 	}
 	
-	private void handleCode(OpenmrsFhirCriteriaContext<Condition> criteriaContext, TokenAndListParam code) {
+	private <U> void handleCode(OpenmrsFhirCriteriaContext<Condition,U> criteriaContext, TokenAndListParam code) {
 		if (code != null) {
 			criteriaContext.getRoot().join("condition.coded").alias("cd");
 			handleCodeableConcept(criteriaContext, code, "cd", "map", "term").ifPresent(criteriaContext::addPredicate);
@@ -112,7 +112,7 @@ public class FhirConditionDaoImpl extends BaseFhirDao<Condition> implements Fhir
 		}
 	}
 	
-	private void handleClinicalStatus(OpenmrsFhirCriteriaContext<Condition> criteriaContext, TokenAndListParam status) {
+	private <U> void handleClinicalStatus(OpenmrsFhirCriteriaContext<Condition,U> criteriaContext, TokenAndListParam status) {
 		handleAndListParam(criteriaContext.getCriteriaBuilder(), status,
 		    tokenParam -> Optional.of(criteriaContext.getCriteriaBuilder()
 		            .equal(criteriaContext.getRoot().get("clinicalStatus"), convertStatus(tokenParam.getValue()))))
@@ -120,7 +120,7 @@ public class FhirConditionDaoImpl extends BaseFhirDao<Condition> implements Fhir
 		criteriaContext.finalizeQuery();
 	}
 	
-	private void handleOnsetAge(OpenmrsFhirCriteriaContext<Condition> criteriaContext, QuantityAndListParam onsetAge) {
+	private <U> void handleOnsetAge(OpenmrsFhirCriteriaContext<Condition,U> criteriaContext, QuantityAndListParam onsetAge) {
 		handleAndListParam(criteriaContext.getCriteriaBuilder(), onsetAge,
 		    onsetAgeParam -> handleAgeByDateProperty(criteriaContext, "onsetDate", onsetAgeParam))
 		            .ifPresent(criteriaContext::addPredicate);
@@ -128,13 +128,13 @@ public class FhirConditionDaoImpl extends BaseFhirDao<Condition> implements Fhir
 	}
 	
 	@Override
-	protected <T> Optional<Predicate> handleLastUpdated(OpenmrsFhirCriteriaContext<T> criteriaContext,
+	protected <T,U> Optional<Predicate> handleLastUpdated(OpenmrsFhirCriteriaContext<T,U> criteriaContext,
 	        DateRangeParam param) {
 		return super.handleLastUpdated(criteriaContext, param);
 	}
 	
 	@Override
-	protected <V> String paramToProp(OpenmrsFhirCriteriaContext<V> criteriaContext, @NonNull String param) {
+	protected <V,U> String paramToProp(OpenmrsFhirCriteriaContext<V,U> criteriaContext, @NonNull String param) {
 		switch (param) {
 			case org.hl7.fhir.r4.model.Condition.SP_ONSET_DATE:
 				return "onsetDate";

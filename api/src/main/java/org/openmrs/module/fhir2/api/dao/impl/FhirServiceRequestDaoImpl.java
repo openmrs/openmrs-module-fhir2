@@ -35,7 +35,7 @@ public class FhirServiceRequestDaoImpl extends BaseFhirDao<TestOrder> implements
 	}
 	
 	@Override
-	protected void setupSearchParams(OpenmrsFhirCriteriaContext<TestOrder> criteriaContext, SearchParameterMap theParams) {
+	protected <U> void setupSearchParams(OpenmrsFhirCriteriaContext<TestOrder,U> criteriaContext, SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER:
@@ -68,7 +68,7 @@ public class FhirServiceRequestDaoImpl extends BaseFhirDao<TestOrder> implements
 		});
 	}
 	
-	private void handleCodedConcept(OpenmrsFhirCriteriaContext<TestOrder> criteriaContext, TokenAndListParam code) {
+	private <U> void handleCodedConcept(OpenmrsFhirCriteriaContext<TestOrder,U> criteriaContext, TokenAndListParam code) {
 		if (code != null) {
 			if (!criteriaContext.getJoin("c").isPresent()) {
 				criteriaContext.addJoin("concept", "c");
@@ -79,7 +79,7 @@ public class FhirServiceRequestDaoImpl extends BaseFhirDao<TestOrder> implements
 		}
 	}
 	
-	private <T> Optional<Predicate> handleDateRange(OpenmrsFhirCriteriaContext<T> criteriaContext,
+	private <T,U> Optional<Predicate> handleDateRange(OpenmrsFhirCriteriaContext<T,U> criteriaContext,
 	        DateRangeParam dateRangeParam) {
 		if (dateRangeParam == null) {
 			return Optional.empty();

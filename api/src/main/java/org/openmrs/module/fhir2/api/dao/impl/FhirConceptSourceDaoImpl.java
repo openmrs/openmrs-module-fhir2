@@ -47,7 +47,7 @@ public class FhirConceptSourceDaoImpl implements FhirConceptSourceDao {
 	@Override
 	@Transactional(readOnly = true)
 	public Collection<FhirConceptSource> getFhirConceptSources() {
-		OpenmrsFhirCriteriaContext<FhirConceptSource> criteriaContext = openmrsFhirCriteriaContext();
+		OpenmrsFhirCriteriaContext<FhirConceptSource,FhirConceptSource> criteriaContext = openmrsFhirCriteriaContext();
 		
 		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot());
 		return criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).getResultList();
@@ -55,7 +55,7 @@ public class FhirConceptSourceDaoImpl implements FhirConceptSourceDao {
 	
 	@Override
 	public Optional<FhirConceptSource> getFhirConceptSourceByUrl(@Nonnull String url) {
-		OpenmrsFhirCriteriaContext<FhirConceptSource> criteriaContext = openmrsFhirCriteriaContext();
+		OpenmrsFhirCriteriaContext<FhirConceptSource,FhirConceptSource> criteriaContext = openmrsFhirCriteriaContext();
 		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot());
 		
 		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().and(
@@ -74,7 +74,7 @@ public class FhirConceptSourceDaoImpl implements FhirConceptSourceDao {
 	@Override
 	public Optional<FhirConceptSource> getFhirConceptSourceByConceptSourceName(@Nonnull String sourceName) {
 		
-		OpenmrsFhirCriteriaContext<FhirConceptSource> criteriaContext = openmrsFhirCriteriaContext();
+		OpenmrsFhirCriteriaContext<FhirConceptSource,FhirConceptSource> criteriaContext = openmrsFhirCriteriaContext();
 		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot());
 		
 		Join<FhirConceptSource, ConceptSource> conceptSourceJoin = criteriaContext.getRoot().join("conceptSource");
@@ -143,7 +143,7 @@ public class FhirConceptSourceDaoImpl implements FhirConceptSourceDao {
 		return fhirConceptSource;
 	}
 	
-	private OpenmrsFhirCriteriaContext<FhirConceptSource> openmrsFhirCriteriaContext() {
+	private OpenmrsFhirCriteriaContext<FhirConceptSource,FhirConceptSource> openmrsFhirCriteriaContext() {
 		EntityManager em = sessionFactory.getCurrentSession();
 		CriteriaBuilder cb = em.getCriteriaBuilder();
 		CriteriaQuery<FhirConceptSource> cq = cb.createQuery(FhirConceptSource.class);

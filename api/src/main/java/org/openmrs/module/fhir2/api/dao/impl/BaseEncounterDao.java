@@ -37,7 +37,7 @@ import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> extends BaseFhirDao<T> {
 	
 	@Override
-	protected void setupSearchParams(OpenmrsFhirCriteriaContext<T> criteriaContext, SearchParameterMap theParams) {
+	protected <U> void setupSearchParams(OpenmrsFhirCriteriaContext<T,U> criteriaContext, SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.DATE_RANGE_SEARCH_HANDLER:
@@ -82,7 +82,7 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 	 * dependent resources
 	 */
 	@SuppressWarnings("UnstableApiUsage")
-	protected void handleHasAndListParam(OpenmrsFhirCriteriaContext<T> criteriaContext, HasAndListParam hasAndListParam) {
+	protected <U> void handleHasAndListParam(OpenmrsFhirCriteriaContext<T,U> criteriaContext, HasAndListParam hasAndListParam) {
 		if (hasAndListParam != null) {
 			log.debug("Handling hasAndListParam");
 			hasAndListParam.getValuesAsQueryTokens().forEach(hasOrListParam -> {
@@ -179,26 +179,26 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 		}
 	}
 	
-	protected abstract void handleDate(OpenmrsFhirCriteriaContext<T> criteriaContext, DateRangeParam dateRangeParam);
+	protected abstract <U> void handleDate(OpenmrsFhirCriteriaContext<T,U> criteriaContext, DateRangeParam dateRangeParam);
 	
-	protected abstract void handleEncounterType(OpenmrsFhirCriteriaContext<T> criteriaContext,
+	protected abstract <U> void handleEncounterType(OpenmrsFhirCriteriaContext<T,U> criteriaContext,
 	        TokenAndListParam tokenAndListParam);
 	
-	protected abstract void handleParticipant(OpenmrsFhirCriteriaContext<T> criteriaContext,
+	protected abstract <U> void handleParticipant(OpenmrsFhirCriteriaContext<T,U> criteriaContext,
 	        ReferenceAndListParam referenceAndListParam);
 	
-	protected <T> Predicate generateNotCompletedOrderQuery(OpenmrsFhirCriteriaContext<T> criteriaContext, String path) {
+	protected <V,U> Predicate generateNotCompletedOrderQuery(OpenmrsFhirCriteriaContext<V,U> criteriaContext, String path) {
 		// not implemented in Core until 2.2; see override in FhirEncounterDaoImpl_2_2
 		return null;
 	}
 	
-	protected <T> Predicate generateFulfillerStatusRestriction(OpenmrsFhirCriteriaContext<T> criteriaContext, String path,
+	protected <V,U> Predicate generateFulfillerStatusRestriction(OpenmrsFhirCriteriaContext<V,U> criteriaContext, String path,
 	        String fulfillerStatus) {
 		// not implemented in Core until 2.2; see override in FhirEncounterDaoImpl_2_2
 		return null;
 	}
 	
-	protected <V> Predicate generateNotFulfillerStatusRestriction(OpenmrsFhirCriteriaContext<V> criteriaContext, String path,
+	protected <V,U> Predicate generateNotFulfillerStatusRestriction(OpenmrsFhirCriteriaContext<V,U> criteriaContext, String path,
 	        String fulfillerStatus) {
 		// not implemented in Core until 2.2; see override in FhirEncounterDaoImpl_2_2
 		return null;

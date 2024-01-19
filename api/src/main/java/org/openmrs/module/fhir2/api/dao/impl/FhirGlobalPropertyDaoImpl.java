@@ -44,7 +44,7 @@ public class FhirGlobalPropertyDaoImpl implements FhirGlobalPropertyDao {
 	
 	@Override
 	public GlobalProperty getGlobalPropertyObject(String property) {
-		OpenmrsFhirCriteriaContext<GlobalProperty> criteriaContext = openmrsFhirCriteriaContext();
+		OpenmrsFhirCriteriaContext<GlobalProperty,GlobalProperty> criteriaContext = createCriteriaContext();
 		
 		criteriaContext.getCriteriaQuery()
 		        .where(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("property"), property));
@@ -56,10 +56,10 @@ public class FhirGlobalPropertyDaoImpl implements FhirGlobalPropertyDao {
 	public Map<String, String> getGlobalProperties(String... properties) {
 		Map<String, String> globalPropertiesMap = new HashMap<>();
 		
-		openmrsFhirCriteriaContext().getCriteriaQuery().where(openmrsFhirCriteriaContext().getCriteriaQuery()
+		createCriteriaContext().getCriteriaQuery().where(createCriteriaContext().getCriteriaQuery()
 		        .from(GlobalProperty.class).get("property").in((Object[]) properties));
-		Collection<GlobalProperty> globalProperties = openmrsFhirCriteriaContext().getEntityManager()
-		        .createQuery(openmrsFhirCriteriaContext().getCriteriaQuery()).getResultList();
+		Collection<GlobalProperty> globalProperties = createCriteriaContext().getEntityManager()
+		        .createQuery(createCriteriaContext().getCriteriaQuery()).getResultList();
 		
 		for (GlobalProperty property : globalProperties) {
 			globalPropertiesMap.put(property.getProperty(), property.getPropertyValue());
@@ -68,7 +68,7 @@ public class FhirGlobalPropertyDaoImpl implements FhirGlobalPropertyDao {
 		return globalPropertiesMap;
 	}
 	
-	protected OpenmrsFhirCriteriaContext<GlobalProperty> openmrsFhirCriteriaContext() {
+	private OpenmrsFhirCriteriaContext<GlobalProperty, GlobalProperty> createCriteriaContext() {
 		EntityManager em = sessionFactory.getCurrentSession();
 		CriteriaBuilder cb = em.getCriteriaBuilder();
 		CriteriaQuery<GlobalProperty> cq = cb.createQuery(GlobalProperty.class);

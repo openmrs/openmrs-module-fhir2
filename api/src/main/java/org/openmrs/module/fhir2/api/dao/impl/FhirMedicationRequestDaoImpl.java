@@ -57,7 +57,7 @@ public class FhirMedicationRequestDaoImpl extends BaseFhirDao<DrugOrder> impleme
 	}
 	
 	@Override
-	protected void setupSearchParams(OpenmrsFhirCriteriaContext<DrugOrder> criteriaContext, SearchParameterMap theParams) {
+	protected <U> void setupSearchParams(OpenmrsFhirCriteriaContext<DrugOrder,U> criteriaContext, SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.FULFILLER_STATUS_SEARCH_HANDLER:
@@ -105,7 +105,7 @@ public class FhirMedicationRequestDaoImpl extends BaseFhirDao<DrugOrder> impleme
 		excludeDiscontinueOrders(criteriaContext);
 	}
 	
-	private <T> Optional<Predicate> handleStatus(OpenmrsFhirCriteriaContext<T> criteriaContext,
+	private <T,U> Optional<Predicate> handleStatus(OpenmrsFhirCriteriaContext<T,U> criteriaContext,
 	        TokenAndListParam tokenAndListParam) {
 		return handleAndListParam(criteriaContext.getCriteriaBuilder(), tokenAndListParam, token -> {
 			if (token.getValue() != null) {
@@ -124,7 +124,7 @@ public class FhirMedicationRequestDaoImpl extends BaseFhirDao<DrugOrder> impleme
 		});
 	}
 	
-	private <T> Optional<Predicate> handleFulfillerStatus(OpenmrsFhirCriteriaContext<T> criteriaContext,
+	private <T,U> Optional<Predicate> handleFulfillerStatus(OpenmrsFhirCriteriaContext<T,U> criteriaContext,
 	        TokenAndListParam tokenAndListParam) {
 		return handleAndListParam(criteriaContext.getCriteriaBuilder(), tokenAndListParam, token -> {
 			if (token.getValue() != null) {
@@ -135,12 +135,12 @@ public class FhirMedicationRequestDaoImpl extends BaseFhirDao<DrugOrder> impleme
 		});
 	}
 	
-	protected <T> Predicate generateFulfillerStatusRestriction(OpenmrsFhirCriteriaContext<T> criteriaContext,
+	protected <T,U> Predicate generateFulfillerStatusRestriction(OpenmrsFhirCriteriaContext<T,U> criteriaContext,
 	        Order.FulfillerStatus fulfillerStatus) {
 		return generateFulfillerStatusRestriction(criteriaContext, "", fulfillerStatus);
 	}
 	
-	protected <T> Predicate generateFulfillerStatusRestriction(OpenmrsFhirCriteriaContext<T> criteriaContext, String path,
+	protected <T,U> Predicate generateFulfillerStatusRestriction(OpenmrsFhirCriteriaContext<T,U> criteriaContext, String path,
 	        Order.FulfillerStatus fulfillerStatus) {
 		if (StringUtils.isNotBlank(path)) {
 			path = path + ".";
@@ -150,7 +150,7 @@ public class FhirMedicationRequestDaoImpl extends BaseFhirDao<DrugOrder> impleme
 		    fulfillerStatus);
 	}
 	
-	private void handleCodedConcept(OpenmrsFhirCriteriaContext<DrugOrder> criteriaContext, TokenAndListParam code) {
+	private <U> void handleCodedConcept(OpenmrsFhirCriteriaContext<DrugOrder,U> criteriaContext, TokenAndListParam code) {
 		if (code != null) {
 			if (!criteriaContext.getJoin("c").isPresent()) {
 				criteriaContext.addJoin("concept", "c");
@@ -161,7 +161,7 @@ public class FhirMedicationRequestDaoImpl extends BaseFhirDao<DrugOrder> impleme
 		}
 	}
 	
-	private void excludeDiscontinueOrders(OpenmrsFhirCriteriaContext<DrugOrder> criteriaContext) {
+	private <U> void excludeDiscontinueOrders(OpenmrsFhirCriteriaContext<DrugOrder,U> criteriaContext) {
 		// exclude "discontinue" orders, see: https://issues.openmrs.org/browse/FM2-532
 		criteriaContext.getCriteriaBuilder().and(criteriaContext.getCriteriaBuilder()
 		        .notEqual(criteriaContext.getRoot().get("action"), Order.Action.DISCONTINUE));

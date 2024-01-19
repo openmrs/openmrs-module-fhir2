@@ -289,7 +289,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 		return true;
 	}
 	
-	protected void createAlias(OpenmrsFhirCriteriaContext<T> criteriaContext, String referencedEntity, String alias) {
+	protected <U> void createAlias(OpenmrsFhirCriteriaContext<T,U> criteriaContext, String referencedEntity, String alias) {
 		criteriaContext.getRoot().join(referencedEntity).alias(alias);
 	}
 	
@@ -303,7 +303,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 		return handleLastUpdatedMutable(criteriaContext, param);
 	}
 	
-	protected <T> Optional<Predicate> handleLastUpdatedMutable(OpenmrsFhirCriteriaContext<T> criteriaContext,
+	protected <V,U> Optional<Predicate> handleLastUpdatedMutable(OpenmrsFhirCriteriaContext<V,U> criteriaContext,
 	        DateRangeParam param) {
 		// @formatter:off
 		return Optional.of(criteriaContext.getCriteriaBuilder().or(toCriteriaArray(handleDateRange(criteriaContext,"dateChanged", param), Optional.of(
@@ -312,7 +312,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	}
 	
 	// Implementation of handleLastUpdated for "immutable" types, that is, those that cannot be changed
-	protected <T> Optional<Predicate> handleLastUpdatedImmutable(OpenmrsFhirCriteriaContext<T> criteriaContext,
+	protected <V,U> Optional<Predicate> handleLastUpdatedImmutable(OpenmrsFhirCriteriaContext<V,U> criteriaContext,
 	        DateRangeParam param) {
 		return handleDateRange(criteriaContext, "dateCreated", param);
 	}
@@ -323,7 +323,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	 *
 	 * @param criteriaContext The {@link OpenmrsFhirCriteriaContext} for the current query
 	 */
-	protected void handleVoidable(OpenmrsFhirCriteriaContext<T> criteriaContext) {
+	protected <U> void handleVoidable(OpenmrsFhirCriteriaContext<T,U> criteriaContext) {
 		criteriaContext
 		        .addPredicate(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("voided"), false));
 	}
@@ -334,7 +334,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	 *
 	 * @param criteriaContext The {@link OpenmrsFhirCriteriaContext} for the current query
 	 */
-	protected void handleRetireable(OpenmrsFhirCriteriaContext<T> criteriaContext) {
+	protected <U> void handleRetireable(OpenmrsFhirCriteriaContext<T,U> criteriaContext) {
 		criteriaContext
 		        .addPredicate(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("retired"), false));
 	}
@@ -401,7 +401,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	}
 	
 	@Override
-	protected <V> String paramToProp(OpenmrsFhirCriteriaContext<V> criteriaContext, @Nonnull String param) {
+	protected <V,U> String paramToProp(OpenmrsFhirCriteriaContext<V,U> criteriaContext, @Nonnull String param) {
 		if (DomainResource.SP_RES_ID.equals(param)) {
 			return "uuid";
 		}
@@ -410,7 +410,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	}
 	
 	@SuppressWarnings("unchecked")
-	protected void applyExactTotal(OpenmrsFhirCriteriaContext<T> criteriaContext, SearchParameterMap theParams) {
+	protected <V,U> void applyExactTotal(OpenmrsFhirCriteriaContext<V,U> criteriaContext, SearchParameterMap theParams) {
 		List<PropParam<?>> exactTotal = theParams.getParameters(EXACT_TOTAL_SEARCH_PARAMETER);
 		if (!exactTotal.isEmpty()) {
 			PropParam<Boolean> propParam = (PropParam<Boolean>) exactTotal.get(0);
@@ -449,13 +449,14 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	 * @param criteriaContext The criteria context containing the criteria builder and root.
 	 * @param idPropertyName The name of the id property to be used for ordering.
 	 */
-	private void handleIdPropertyOrdering(OpenmrsFhirCriteriaContext<T> criteriaContext, String idPropertyName) {
+	private <V,U> void handleIdPropertyOrdering(OpenmrsFhirCriteriaContext<V,U> criteriaContext, String idPropertyName) {
 		criteriaContext.getCriteriaQuery()
 		        .orderBy(criteriaContext.getCriteriaBuilder().asc(criteriaContext.getRoot().get(idPropertyName)));
 	}
 	
 	/**
-	 * Handles the ordering of the criteria based on the specified id property name.
+	 * Handles the ordering
+	 * of the criteria based on the specified id property name.
 	 *
 	 * @param criteriaBuilder The criteria builder to build expressions
 	 * @param criteriaQuery The criteria query for the idPropertyName.
