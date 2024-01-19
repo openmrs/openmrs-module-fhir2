@@ -52,9 +52,8 @@ public class FhirPersonDaoImpl extends BasePersonDao<Person> implements FhirPers
 					entry.getValue().forEach(param -> handleNames(criteriaContext, entry.getValue()));
 					break;
 				case FhirConstants.GENDER_SEARCH_HANDLER:
-					entry.getValue()
-					        .forEach(param -> handleGender(criteriaContext, "gender", (TokenAndListParam) param.getParam())
-					                .ifPresent(criteriaContext::addPredicate));
+					entry.getValue().forEach(param -> handleGender(criteriaContext, getPersonProperty(criteriaContext),
+					    "gender", (TokenAndListParam) param.getParam()).ifPresent(criteriaContext::addPredicate));
 					criteriaContext.finalizeQuery();
 					break;
 				case FhirConstants.DATE_RANGE_SEARCH_HANDLER:
@@ -84,11 +83,6 @@ public class FhirPersonDaoImpl extends BasePersonDao<Person> implements FhirPers
 		                Optional.of(
 		                    criteriaContext.getCriteriaBuilder().isNull(criteriaContext.getRoot().get("personDateChanged"))),
 		                handleDateRange(criteriaContext, "personDateCreated", param))))))));
-	}
-	
-	@Override
-	protected String getSqlAlias() {
-		return "this_";
 	}
 	
 	@Override

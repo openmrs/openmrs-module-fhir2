@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import javax.annotation.Nonnull;
+import javax.persistence.criteria.From;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 
@@ -59,11 +60,13 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implemen
 					entry.getValue().forEach(param -> handlePatientReference(criteriaContext,
 					    (ReferenceAndListParam) param.getParam(), "patient"));
 					break;
-				case FhirConstants.CATEGORY_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handleAllergenCategory(criteriaContext, "allergen.allergenType",
+				case FhirConstants.CATEGORY_SEARCH_HANDLER: {
+					From<?, ?> allergyJoin = criteriaContext.addJoin("allergen", "allergen");
+					entry.getValue().forEach(param -> handleAllergenCategory(criteriaContext, allergyJoin, "allergenType",
 					    (TokenAndListParam) param.getParam()).ifPresent(criteriaContext::addPredicate));
 					criteriaContext.finalizeQuery();
 					break;
+				}
 				case FhirConstants.ALLERGEN_SEARCH_HANDLER:
 					entry.getValue().forEach(param -> handleAllergen(criteriaContext, (TokenAndListParam) param.getParam()));
 					break;
@@ -101,7 +104,7 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implemen
 	
 	private void handleAllergen(OpenmrsFhirCriteriaContext<Allergy> criteriaContext, TokenAndListParam code) {
 		if (code != null) {
-			Join<?, ?> allergenJoin = criteriaContext.getRoot().join("allergen");
+			Join<?, ?> allergenJoin = criteriaContext.addJoin("allergen", "allergen");
 			criteriaContext.addJoin(allergenJoin, "codedAllergen", "ac");
 			
 			handleCodeableConcept(criteriaContext, code, "ac", "acm", "acrt").ifPresent(criteriaContext::addPredicate);
@@ -145,7 +148,7 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implemen
 	}
 	
 	private <T> Optional<Predicate> handleAllergenCategory(OpenmrsFhirCriteriaContext<T> criteriaContext,
-	        String propertyName, TokenAndListParam categoryParam) {
+	        From<?, ?> allergyJoin, String propertyName, TokenAndListParam categoryParam) {
 		if (categoryParam == null) {
 			return Optional.empty();
 		}
@@ -156,17 +159,17 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implemen
 				        .fromCode(token.getValue());
 				switch (category) {
 					case FOOD:
-						return Optional.of(criteriaContext.getCriteriaBuilder()
-						        .equal(criteriaContext.getRoot().get(propertyName), AllergenType.FOOD));
+						return Optional.of(
+						    criteriaContext.getCriteriaBuilder().equal(allergyJoin.get(propertyName), AllergenType.FOOD));
 					case MEDICATION:
-						return Optional.of(criteriaContext.getCriteriaBuilder()
-						        .equal(criteriaContext.getRoot().get(propertyName), AllergenType.DRUG));
+						return Optional.of(
+						    criteriaContext.getCriteriaBuilder().equal(allergyJoin.get(propertyName), AllergenType.DRUG));
 					case ENVIRONMENT:
-						return Optional.of(criteriaContext.getCriteriaBuilder()
-						        .equal(criteriaContext.getRoot().get(propertyName), AllergenType.ENVIRONMENT));
+						return Optional.of(criteriaContext.getCriteriaBuilder().equal(allergyJoin.get(propertyName),
+						    AllergenType.ENVIRONMENT));
 					case NULL:
-						return Optional.of(criteriaContext.getCriteriaBuilder()
-						        .equal(criteriaContext.getRoot().get(propertyName), AllergenType.OTHER));
+						return Optional.of(
+						    criteriaContext.getCriteriaBuilder().equal(allergyJoin.get(propertyName), AllergenType.OTHER));
 				}
 			}
 			catch (FHIRException ignored) {}

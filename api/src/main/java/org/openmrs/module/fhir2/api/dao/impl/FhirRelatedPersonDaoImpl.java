@@ -19,6 +19,7 @@ import static org.hl7.fhir.r4.model.Person.SP_BIRTHDATE;
 import static org.hl7.fhir.r4.model.Person.SP_NAME;
 
 import javax.annotation.Nonnull;
+import javax.persistence.criteria.From;
 import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -47,17 +48,17 @@ public class FhirRelatedPersonDaoImpl extends BaseFhirDao<Relationship> implemen
 	@Override
 	protected void setupSearchParams(OpenmrsFhirCriteriaContext<Relationship> criteriaContext,
 	        SearchParameterMap theParams) {
-		criteriaContext.addJoin("personA", "m");
+		From<?, ?> personJoin = criteriaContext.addJoin("personA", "m");
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.NAME_SEARCH_HANDLER:
-					entry.getValue().forEach(
-					    param -> handleNames(criteriaContext, (StringAndListParam) param.getParam(), null, null, "m"));
+					entry.getValue().forEach(param -> handleNames(criteriaContext, (StringAndListParam) param.getParam(),
+					    null, null, personJoin));
 					break;
 				case FhirConstants.GENDER_SEARCH_HANDLER:
-					entry.getValue()
-					        .forEach(param -> handleGender(criteriaContext, "m.gender", (TokenAndListParam) param.getParam())
-					                .ifPresent(criteriaContext::addPredicate));
+					entry.getValue().forEach(
+					    param -> handleGender(criteriaContext, personJoin, "gender", (TokenAndListParam) param.getParam())
+					            .ifPresent(criteriaContext::addPredicate));
 					criteriaContext.finalizeQuery();
 					break;
 				case FhirConstants.DATE_RANGE_SEARCH_HANDLER:

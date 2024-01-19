@@ -46,14 +46,4 @@ public abstract class BasePractitionerDao<T extends OpenmrsObject & Auditable> e
 	}
 	
 	protected abstract void handleIdentifier(OpenmrsFhirCriteriaContext<T> criteriaContext, TokenAndListParam identifier);
-	
-	@Override
-	protected String getSqlAlias() {
-		return "p_";
-	}
-	
-	@Override
-	protected String getPersonProperty() {
-		return "p";
-	}
 }
