@@ -64,8 +64,7 @@ public class FhirMedicationRequestDaoImpl extends BaseFhirDao<DrugOrder> impleme
 				case FhirConstants.FULFILLER_STATUS_SEARCH_HANDLER:
 					entry.getValue()
 					        .forEach(param -> handleFulfillerStatus(criteriaContext, (TokenAndListParam) param.getParam())
-					                .ifPresent(criteriaContext::addPredicate));
-					criteriaContext.finalizeQuery();
+					                .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery()));
 					break;
 				case FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER:
 					entry.getValue().forEach(
@@ -84,21 +83,16 @@ public class FhirMedicationRequestDaoImpl extends BaseFhirDao<DrugOrder> impleme
 					    (ReferenceAndListParam) participantReference.getParam()));
 					break;
 				case FhirConstants.MEDICATION_REFERENCE_SEARCH_HANDLER:
+					From<?,?> medicationAlias = criteriaContext.addJoin("drug","d");
 					entry.getValue().forEach(
-					    d -> handleMedicationReference(criteriaContext, "d", (ReferenceAndListParam) d.getParam())
-					            .ifPresent(c -> {
-						            criteriaContext.getRoot().join("drug").alias("d");
-						            criteriaContext.addPredicate(c);
-						            criteriaContext.finalizeQuery();
-					            }));
+					    d -> handleMedicationReference(criteriaContext, medicationAlias, (ReferenceAndListParam) d.getParam())
+					            .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery()));
 					break;
 				case FhirConstants.STATUS_SEARCH_HANDLER:
 					entry.getValue().forEach(param -> handleStatus(criteriaContext, (TokenAndListParam) param.getParam())
-					        .ifPresent(criteriaContext::addPredicate));
-					criteriaContext.finalizeQuery();
+					        .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery()));
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(criteriaContext::addPredicate);
-					criteriaContext.finalizeQuery();
+					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
 					break;
 			}
 		});

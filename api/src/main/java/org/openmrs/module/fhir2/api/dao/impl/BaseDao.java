@@ -569,24 +569,18 @@ public abstract class BaseDao {
 			if (token.getChain() != null) {
 				switch (token.getChain()) {
 					case Location.SP_NAME:
-						return propertyLike(criteriaContext, getRootOrJoin(criteriaContext, locationAlias.getAlias()), "name",
-						    token.getValue());
+						return propertyLike(criteriaContext, locationAlias, "name", token.getValue());
 					case Location.SP_ADDRESS_CITY:
-						return propertyLike(criteriaContext, getRootOrJoin(criteriaContext, locationAlias.getAlias()), "cityVillage",
-						    token.getValue());
+						return propertyLike(criteriaContext, locationAlias, "cityVillage", token.getValue());
 					case Location.SP_ADDRESS_STATE:
-						return propertyLike(criteriaContext, getRootOrJoin(criteriaContext, locationAlias.getAlias()), "stateProvince",
-						    token.getValue());
+						return propertyLike(criteriaContext, locationAlias, "stateProvince", token.getValue());
 					case Location.SP_ADDRESS_POSTALCODE:
-						return propertyLike(criteriaContext, getRootOrJoin(criteriaContext, locationAlias.getAlias()), "postalCode",
-						    token.getValue());
+						return propertyLike(criteriaContext, locationAlias, "postalCode", token.getValue());
 					case Location.SP_ADDRESS_COUNTRY:
-						return propertyLike(criteriaContext, getRootOrJoin(criteriaContext, locationAlias.getAlias()), "country",
-						    token.getValue());
+						return propertyLike(criteriaContext, locationAlias, "country", token.getValue());
 				}
 			} else {
-//				Join<?,?> join = criteriaContext.addJoin("location",locationAlias.getAlias());
-				return Optional.of(criteriaContext.getCriteriaBuilder().equal(getRootOrJoin(criteriaContext, locationAlias.getAlias()).get("uuid"), token.getValue()));
+				return Optional.of(criteriaContext.getCriteriaBuilder().equal(locationAlias.get("uuid"), token.getValue()));
 			}
 			
 			return Optional.empty();
@@ -898,14 +892,13 @@ public abstract class BaseDao {
 	}
 	
 	protected <T,U> Optional<Predicate> handleMedicationReference(OpenmrsFhirCriteriaContext<T,U> criteriaContext,
-	        @Nonnull String medicationAlias, ReferenceAndListParam medicationReference) {
+	        @Nonnull From<?,?> medicationAlias, ReferenceAndListParam medicationReference) {
 		if (medicationReference == null) {
 			return Optional.empty();
 		}
 		
 		return handleAndListParam(criteriaContext.getCriteriaBuilder(), medicationReference,
-		    token -> Optional.of(criteriaContext.getCriteriaBuilder()
-		            .equal(getRootOrJoin(criteriaContext, medicationAlias).get("uuid"), token.getIdPart())));
+		    token -> Optional.of(criteriaContext.getCriteriaBuilder().equal(medicationAlias.get("uuid"), token.getIdPart())));
 	}
 	
 	protected <T,U> Optional<Predicate> handleMedicationRequestReference(OpenmrsFhirCriteriaContext<T,U> criteriaContext,
