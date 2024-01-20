@@ -155,17 +155,19 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 	
 	@Override
 	protected <V,U> String paramToProp(OpenmrsFhirCriteriaContext<V,U> criteriaContext, @Nonnull String param) {
+		From<?, ?> person = getPersonProperty(criteriaContext);
+		From<?, ?> address =criteriaContext.addJoin(person, "addresses", "pad");
 		switch (param) {
 			case SP_BIRTHDATE:
-				return "birthdate";
+				address.get("birthdate");
 			case SP_ADDRESS_CITY:
-				return "pad.cityVillage";
+				address.get("cityVillage");
 			case SP_ADDRESS_STATE:
-				return "pad.stateProvince";
+				address.get("stateProvince");
 			case SP_ADDRESS_POSTALCODE:
-				return "pad.postalCode";
+				address.get("postalCode");
 			case SP_ADDRESS_COUNTRY:
-				return "pad.country";
+				address.get("country");
 			default:
 				return null;
 		}

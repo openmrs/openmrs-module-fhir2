@@ -110,8 +110,7 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 					break;
 				case FhirConstants.GENDER_SEARCH_HANDLER:
 					entry.getValue().forEach(p -> handleGender(criteriaContext, getPersonProperty(criteriaContext),
-					    p.getPropertyName(), (TokenAndListParam) p.getParam()).ifPresent(criteriaContext::addPredicate));
-					criteriaContext.finalizeQuery();
+					    p.getPropertyName(), (TokenAndListParam) p.getParam()).ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery()));
 					break;
 				case FhirConstants.IDENTIFIER_SEARCH_HANDLER:
 					entry.getValue().forEach(
@@ -120,21 +119,18 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 				case FhirConstants.DATE_RANGE_SEARCH_HANDLER:
 					entry.getValue()
 					        .forEach(dateRangeParam -> handleDateRange(criteriaContext, dateRangeParam.getPropertyName(),
-					            (DateRangeParam) dateRangeParam.getParam()).ifPresent(criteriaContext::addPredicate));
-					criteriaContext.finalizeQuery();
+					            (DateRangeParam) dateRangeParam.getParam()).ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery()));
 					break;
 				case FhirConstants.BOOLEAN_SEARCH_HANDLER:
 					entry.getValue().forEach(
 					    b -> handleBoolean(criteriaContext, b.getPropertyName(), (TokenAndListParam) b.getParam())
-					            .ifPresent(criteriaContext::addPredicate));
-					criteriaContext.finalizeQuery();
+					            .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery()));
 					break;
 				case FhirConstants.ADDRESS_SEARCH_HANDLER:
 					handleAddresses(criteriaContext, entry);
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(criteriaContext::addPredicate);
-					criteriaContext.finalizeQuery();
+					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
 					break;
 			}
 		});
