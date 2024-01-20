@@ -11,6 +11,7 @@ package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.openmrs.module.fhir2.FhirConstants.ENCOUNTER_TYPE_REFERENCE_SEARCH_HANDLER;
 
+import javax.persistence.criteria.From;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
@@ -45,12 +46,9 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 					break;
 				case FhirConstants.LOCATION_REFERENCE_SEARCH_HANDLER:
 					entry.getValue().forEach(param -> {
-						handleLocationReference(criteriaContext, "l", (ReferenceAndListParam) param.getParam())
-						        .ifPresent(l -> {
-							        criteriaContext.getRoot().join("location", JoinType.INNER).alias("l");
-							        criteriaContext.addPredicate(l);
-							        criteriaContext.finalizeQuery();
-						        });
+						From<?,?> locationAlias = criteriaContext.addJoin("location", "l");
+						handleLocationReference(criteriaContext, locationAlias, (ReferenceAndListParam) param.getParam())
+						        .ifPresent(l -> criteriaContext.addPredicate(l).finalizeQuery());
 					});
 					break;
 				case FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER:

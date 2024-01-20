@@ -24,7 +24,7 @@ public abstract class BasePractitionerDao<T extends OpenmrsObject & Auditable> e
 	
 	@Override
 	protected <U> void setupSearchParams(OpenmrsFhirCriteriaContext<T,U> criteriaContext, SearchParameterMap theParams) {
-		criteriaContext.getRoot().join("person").alias("p");
+		criteriaContext.addJoin("person", "p");
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.IDENTIFIER_SEARCH_HANDLER:
@@ -38,8 +38,7 @@ public abstract class BasePractitionerDao<T extends OpenmrsObject & Auditable> e
 					handleAddresses(criteriaContext, entry);
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(criteriaContext::addPredicate);
-					criteriaContext.finalizeQuery();
+					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(handler -> criteriaContext.addPredicate(handler).finalizeQuery());
 					break;
 			}
 		});

@@ -13,6 +13,7 @@ import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.From;
 import javax.persistence.criteria.Root;
 
 import java.util.List;
@@ -132,8 +133,7 @@ public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLo
 	private <U> void handleTag(OpenmrsFhirCriteriaContext<Location,U> criteriaContext, TokenAndListParam tags) {
 		if (tags != null) {
 			criteriaContext.addJoin("tags", "t");
-			handleAndListParam(criteriaContext.getCriteriaBuilder(), tags,
-			    (tag) -> criteriaContext.getJoin("t").map(
+			handleAndListParam(criteriaContext.getCriteriaBuilder(), tags, (tag) -> criteriaContext.getJoin("t").map(
 			        locationTag -> criteriaContext.getCriteriaBuilder().equal(locationTag.get("name"), tag.getValue())))
 			                .ifPresent(criteriaContext::addPredicate);
 			criteriaContext.finalizeQuery();
@@ -141,11 +141,8 @@ public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLo
 	}
 	
 	private <U> void handleParentLocation(OpenmrsFhirCriteriaContext<Location,U> criteriaContext, ReferenceAndListParam parent) {
-		handleLocationReference(criteriaContext, "loc", parent).ifPresent(loc -> {
-			criteriaContext.addJoin("parentLocation", "loc");
-			criteriaContext.addPredicate(loc);
-			criteriaContext.finalizeQuery();
-		});
+		From<?,?> locationAlias = criteriaContext.addJoin("parentLocation", "loc");
+		handleLocationReference(criteriaContext, locationAlias, parent).ifPresent(loc -> criteriaContext.addPredicate(loc).finalizeQuery());
 	}
 	
 	@Override

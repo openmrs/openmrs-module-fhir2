@@ -16,6 +16,7 @@ import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.From;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -89,25 +90,25 @@ public class FhirEncounterDaoImpl extends BaseEncounterDao<Encounter> implements
 	
 	@Override
 	protected <U> void handleDate(OpenmrsFhirCriteriaContext<Encounter,U> criteriaContext, DateRangeParam dateRangeParam) {
-		handleDateRange(criteriaContext, "encounterDatetime", dateRangeParam).ifPresent(criteriaContext::addPredicate);
-		criteriaContext.finalizeQuery();
+		handleDateRange(criteriaContext, "encounterDatetime", dateRangeParam)
+				.ifPresent(encounterDatetime -> criteriaContext.addPredicate(encounterDatetime).finalizeQuery());
 	}
 	
 	@Override
 	protected <U> void handleEncounterType(OpenmrsFhirCriteriaContext<Encounter,U> criteriaContext,
 	        TokenAndListParam tokenAndListParam) {
-		handleAndListParam(criteriaContext.getCriteriaBuilder(), tokenAndListParam, t -> {
-			Join<Encounter, EncounterType> et = criteriaContext.getRoot().join("encounterType");
-			return Optional.of(criteriaContext.getCriteriaBuilder().equal(et.get("uuid"), t.getValue()));
-		}).ifPresent(criteriaContext::addPredicate);
-		criteriaContext.finalizeQuery();
+		Join<?,?> join = criteriaContext.addJoin("encounterType","et");
+		
+		handleAndListParam(criteriaContext.getCriteriaBuilder(), tokenAndListParam, t -> Optional
+				.of(criteriaContext.getCriteriaBuilder().equal(join.get("uuid"), t.getValue())))
+				.ifPresent(t -> criteriaContext.addPredicate(t).finalizeQuery());
 	}
 	
 	@Override
 	protected <U> void handleParticipant(OpenmrsFhirCriteriaContext<Encounter,U> criteriaContext,
 	        ReferenceAndListParam referenceAndListParam) {
-		criteriaContext.getRoot().join("encounterProviders");
-		handleParticipantReference(criteriaContext, referenceAndListParam);
+		From<?,?> epJoin = criteriaContext.addJoin("encounterProviders", "ep");
+		handleParticipantReference(criteriaContext, referenceAndListParam,epJoin);
 	}
 	
 	@Override

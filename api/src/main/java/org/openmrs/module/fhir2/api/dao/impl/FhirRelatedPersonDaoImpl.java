@@ -207,10 +207,9 @@ public class FhirRelatedPersonDaoImpl extends BaseFhirDao<Relationship> implemen
 			}
 		}
 		
-		handlePersonAddress(criteriaContext, "pad", city, state, postalCode, country).ifPresent(c -> {
-			criteriaContext.getRoot().join("m.addresses").alias("pad");
-			criteriaContext.addPredicate(c);
-			criteriaContext.finalizeQuery();
-		});
+		From<?, ?> personJoin = criteriaContext.addJoin("personA", "m");
+		From<?,?> padJoin = criteriaContext.addJoin(personJoin,"addresses","pad");
+		handlePersonAddress(criteriaContext, padJoin, city, state, postalCode, country).ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
 	}
+	
 }

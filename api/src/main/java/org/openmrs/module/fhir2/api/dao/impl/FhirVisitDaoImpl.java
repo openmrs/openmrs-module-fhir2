@@ -11,6 +11,7 @@ package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hl7.fhir.r4.model.Encounter.SP_DATE;
 
+import javax.persistence.criteria.From;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 
@@ -33,8 +34,7 @@ public class FhirVisitDaoImpl extends BaseEncounterDao<Visit> implements FhirVis
 	
 	@Override
 	protected <U> void handleDate(OpenmrsFhirCriteriaContext<Visit,U> criteriaContext, DateRangeParam dateRangeParam) {
-		handleDateRange(criteriaContext, "startDatetime", dateRangeParam);
-		criteriaContext.finalizeQuery();
+		handleDateRange(criteriaContext, "startDatetime", dateRangeParam).ifPresent(handle -> criteriaContext.addPredicate(handle).finalizeQuery());
 	}
 	
 	@Override
@@ -43,19 +43,15 @@ public class FhirVisitDaoImpl extends BaseEncounterDao<Visit> implements FhirVis
 		Join<?, ?> visitTypeJoin = criteriaContext.addJoin("visitType", "vt");
 		handleAndListParam(criteriaContext.getCriteriaBuilder(), tokenAndListParam,
 		    t -> Optional.of(criteriaContext.getCriteriaBuilder().equal(visitTypeJoin.get("uuid"), t.getValue())))
-		            .ifPresent(t -> {
-			            criteriaContext.getRoot().join("visitType");
-			            criteriaContext.addPredicate(t);
-			            criteriaContext.finalizeQuery();
-		            });
+		            .ifPresent(t -> criteriaContext.addPredicate(t).finalizeQuery());
 	}
 	
 	@Override
 	protected <U> void handleParticipant(OpenmrsFhirCriteriaContext<Visit,U> criteriaContext,
 	        ReferenceAndListParam referenceAndListParam) {
-		Join<Visit, Encounter> encounterJoin = criteriaContext.getRoot().join("encounters", JoinType.INNER);
-		encounterJoin.join("encounterProviders", JoinType.INNER);
-		handleParticipantReference(criteriaContext, referenceAndListParam);
+		Join<?, ?> encounterJoin = criteriaContext.addJoin("encounters","en" );
+		From<?, ?> epJoin = criteriaContext.addJoin(encounterJoin,"encounters","ep" );
+		handleParticipantReference(criteriaContext, referenceAndListParam, epJoin);
 	}
 	
 	@Override
