@@ -48,13 +48,11 @@ public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDa
 					    (ReferenceAndListParam) param.getParam(), "ownerReference", "o"));
 					break;
 				case FhirConstants.STATUS_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handleStatus((TokenAndListParam) param.getParam())
-					        .ifPresent(criteriaContext::addPredicate));
-					criteriaContext.finalizeQuery();
+					entry.getValue().forEach(param -> handleStatus(criteriaContext, (TokenAndListParam) param.getParam())
+					        .ifPresent(handler -> criteriaContext.addPredicate(handler).finalizeQuery()));
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(criteriaContext::addPredicate);
-					criteriaContext.finalizeQuery();
+					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(handler -> criteriaContext.addPredicate(handler).finalizeQuery());
 					break;
 			}
 		});
@@ -76,8 +74,7 @@ public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDa
 		return (ref != null && ref.getIdPart() != null && ref.getResourceType() != null);
 	}
 	
-	private Optional<Predicate> handleStatus(TokenAndListParam tokenAndListParam) {
-		OpenmrsFhirCriteriaContext<FhirTask,FhirTask> criteriaContext = createCriteriaContext(FhirTask.class);
+	private <U> Optional<Predicate> handleStatus(OpenmrsFhirCriteriaContext<FhirTask,U> criteriaContext,TokenAndListParam tokenAndListParam) {
 		
 		return handleAndListParam(criteriaContext.getCriteriaBuilder(), tokenAndListParam, token -> {
 			if (token.getValue() != null) {

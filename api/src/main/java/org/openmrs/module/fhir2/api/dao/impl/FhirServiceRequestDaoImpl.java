@@ -58,8 +58,7 @@ public class FhirServiceRequestDaoImpl extends BaseFhirDao<TestOrder> implements
 				case FhirConstants.DATE_RANGE_SEARCH_HANDLER:
 					entry.getValue().forEach(
 					    dateRangeParam -> handleDateRange(criteriaContext, (DateRangeParam) dateRangeParam.getParam())
-					            .ifPresent(criteriaContext::addPredicate));
-					criteriaContext.finalizeQuery();
+					            .ifPresent(d -> criteriaContext.addPredicate(d).finalizeQuery()));
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
 					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(criteriaContext::addPredicate);
@@ -72,8 +71,8 @@ public class FhirServiceRequestDaoImpl extends BaseFhirDao<TestOrder> implements
 	private <U> void handleCodedConcept(OpenmrsFhirCriteriaContext<TestOrder,U> criteriaContext, TokenAndListParam code) {
 		if (code != null) {
 			From<?,?> conceptJoin = criteriaContext.addJoin("concept", "c");
-			handleCodeableConcept(criteriaContext, code, conceptJoin, "cm", "crt").ifPresent(criteriaContext::addPredicate);
-			criteriaContext.finalizeQuery();
+			handleCodeableConcept(criteriaContext, code, conceptJoin, "cm", "crt")
+					.ifPresent(handler -> criteriaContext.addPredicate(handler).finalizeQuery());
 		}
 	}
 	
@@ -91,13 +90,11 @@ public class FhirServiceRequestDaoImpl extends BaseFhirDao<TestOrder> implements
 		                            Optional.of(criteriaContext.getCriteriaBuilder()
 		                                    .or(toCriteriaArray(Stream.of(
 		                                        handleDate(criteriaContext, "scheduledDate", dateRangeParam.getLowerBound()),
-		                                        handleDate(criteriaContext, "dateActivated",
-		                                            dateRangeParam.getLowerBound()))))),
+		                                        handleDate(criteriaContext, "dateActivated", dateRangeParam.getLowerBound()))))),
 		                            Optional.of(criteriaContext.getCriteriaBuilder()
 		                                    .or(toCriteriaArray(Stream.of(
 		                                        handleDate(criteriaContext, "dateStopped", dateRangeParam.getUpperBound()),
-		                                        handleDate(criteriaContext, "autoExpireDate",
-		                                            dateRangeParam.getUpperBound())))))))));
+		                                        handleDate(criteriaContext, "autoExpireDate", dateRangeParam.getUpperBound())))))))));
 	}
 	
 }
