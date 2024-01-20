@@ -37,11 +37,9 @@ public class FhirPractitionerDaoImpl extends BasePractitionerDao<Provider> imple
 	
 	@Override
 	protected <U> void handleIdentifier(OpenmrsFhirCriteriaContext<Provider,U> criteriaContext, TokenAndListParam identifier) {
-		handleAndListParam(criteriaContext.getCriteriaBuilder(), identifier,
-		    param -> Optional.of(
+		handleAndListParam(criteriaContext.getCriteriaBuilder(), identifier, param -> Optional.of(
 		        criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("identifier"), param.getValue())))
-		                .ifPresent(criteriaContext::addPredicate);
-		criteriaContext.finalizeQuery();
+		                .ifPresent(handler -> criteriaContext.addPredicate(handler).finalizeQuery());
 	}
 	
 	@Override

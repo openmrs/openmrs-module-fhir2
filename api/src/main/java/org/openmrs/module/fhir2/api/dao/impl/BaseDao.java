@@ -559,7 +559,7 @@ public abstract class BaseDao {
 	}
 	
 	protected <T,U> Optional<Predicate> handleLocationReference(OpenmrsFhirCriteriaContext<T,U> criteriaContext,
-	        @Nonnull String locationAlias, ReferenceAndListParam locationReference) {
+	        @Nonnull From<?,?> locationAlias, ReferenceAndListParam locationReference) {
 		
 		if (locationReference == null) {
 			return Optional.empty();
@@ -569,24 +569,24 @@ public abstract class BaseDao {
 			if (token.getChain() != null) {
 				switch (token.getChain()) {
 					case Location.SP_NAME:
-						return propertyLike(criteriaContext, getRootOrJoin(criteriaContext, locationAlias), "name",
+						return propertyLike(criteriaContext, getRootOrJoin(criteriaContext, locationAlias.getAlias()), "name",
 						    token.getValue());
 					case Location.SP_ADDRESS_CITY:
-						return propertyLike(criteriaContext, getRootOrJoin(criteriaContext, locationAlias), "cityVillage",
+						return propertyLike(criteriaContext, getRootOrJoin(criteriaContext, locationAlias.getAlias()), "cityVillage",
 						    token.getValue());
 					case Location.SP_ADDRESS_STATE:
-						return propertyLike(criteriaContext, getRootOrJoin(criteriaContext, locationAlias), "stateProvince",
+						return propertyLike(criteriaContext, getRootOrJoin(criteriaContext, locationAlias.getAlias()), "stateProvince",
 						    token.getValue());
 					case Location.SP_ADDRESS_POSTALCODE:
-						return propertyLike(criteriaContext, getRootOrJoin(criteriaContext, locationAlias), "postalCode",
+						return propertyLike(criteriaContext, getRootOrJoin(criteriaContext, locationAlias.getAlias()), "postalCode",
 						    token.getValue());
 					case Location.SP_ADDRESS_COUNTRY:
-						return propertyLike(criteriaContext, getRootOrJoin(criteriaContext, locationAlias), "country",
+						return propertyLike(criteriaContext, getRootOrJoin(criteriaContext, locationAlias.getAlias()), "country",
 						    token.getValue());
 				}
 			} else {
-				return Optional.of(criteriaContext.getCriteriaBuilder()
-				        .equal(criteriaContext.getRoot().get(String.format("%s..uuid", locationAlias)), token.getValue()));
+//				Join<?,?> join = criteriaContext.addJoin("location",locationAlias.getAlias());
+				return Optional.of(criteriaContext.getCriteriaBuilder().equal(getRootOrJoin(criteriaContext, locationAlias.getAlias()).get("uuid"), token.getValue()));
 			}
 			
 			return Optional.empty();
@@ -594,36 +594,26 @@ public abstract class BaseDao {
 	}
 	
 	protected <T,U> void handleParticipantReference(OpenmrsFhirCriteriaContext<T,U> criteriaContext,
-	        ReferenceAndListParam participantReference) {
+	        ReferenceAndListParam participantReference, From<?, ?> epJoin) {
 		if (participantReference != null) {
-			Optional<Join<?, ?>> encounterProvider = criteriaContext.getJoin("ep");
-			if (!encounterProvider.isPresent()) {
-				return;
-			}
 			
 			handleAndListParam(criteriaContext.getCriteriaBuilder(), participantReference, participantToken -> {
 				if (participantToken.getChain() != null) {
 					switch (participantToken.getChain()) {
 						case Practitioner.SP_IDENTIFIER:
-							criteriaContext.addJoin(encounterProvider.get(), "provider", "p");
+							criteriaContext.addJoin(epJoin, "provider", "p");
 							return criteriaContext.getJoin("p").map(providerJoin -> criteriaContext.getCriteriaBuilder()
 							        .like(providerJoin.get("identifier"), participantToken.getValue()));
 						case Practitioner.SP_GIVEN: {
-							Join<?, ?> encounterProviderProvider = criteriaContext.addJoin(encounterProvider.get(),
-							    "provider", "pro");
-							Join<?, ?> encounterProviderPerson = criteriaContext.addJoin(encounterProviderProvider, "person",
-							    "ps");
-							Join<?, ?> encounterProviderPersonName = criteriaContext.addJoin(encounterProviderPerson,
-							    "names", "pn");
+							Join<?, ?> encounterProviderProvider = criteriaContext.addJoin(epJoin,"provider", "pro");
+							Join<?, ?> encounterProviderPerson = criteriaContext.addJoin(encounterProviderProvider, "person","ps");
+							Join<?, ?> encounterProviderPersonName = criteriaContext.addJoin(encounterProviderPerson,"names", "pn");
 							
-							return Optional.of(criteriaContext.getCriteriaBuilder()
-							        .like(encounterProviderPersonName.get("givenName"), participantToken.getValue()));
+							return Optional.of(criteriaContext.getCriteriaBuilder().like(encounterProviderPersonName.get("givenName"), participantToken.getValue()));
 						}
 						case Practitioner.SP_FAMILY: {
-							Join<?, ?> encounterProviderProvider = criteriaContext.addJoin(encounterProvider.get(),
-							    "provider", "pro");
-							Join<?, ?> encounterProviderPerson = criteriaContext.addJoin(encounterProviderProvider, "person",
-							    "ps");
+							Join<?, ?> encounterProviderProvider = criteriaContext.addJoin(epJoin,"provider", "pro");
+							Join<?, ?> encounterProviderPerson = criteriaContext.addJoin(encounterProviderProvider, "person","ps");
 							Join<?, ?> encounterProviderPersonName = criteriaContext.addJoin(encounterProviderPerson,
 							    "names", "pn");
 							
@@ -631,8 +621,7 @@ public abstract class BaseDao {
 							        .like(encounterProviderPersonName.get("familyName"), participantToken.getValue()));
 						}
 						case Practitioner.SP_NAME: {
-							Join<?, ?> encounterProviderProvider = criteriaContext.addJoin(encounterProvider.get(),
-							    "provider", "pro");
+							Join<?, ?> encounterProviderProvider = criteriaContext.addJoin(epJoin,"provider", "pro");
 							Join<?, ?> encounterProviderPerson = criteriaContext.addJoin(encounterProviderProvider, "person",
 							    "ps");
 							Join<?, ?> encounterProviderPersonName = criteriaContext.addJoin(encounterProviderPerson,
@@ -653,7 +642,7 @@ public abstract class BaseDao {
 						}
 					}
 				} else {
-					Join<?, ?> encounterProviderProvider = criteriaContext.addJoin(encounterProvider.get(), "provider",
+					Join<?, ?> encounterProviderProvider = criteriaContext.addJoin(epJoin, "provider",
 					    "pro");
 					return Optional.of(criteriaContext.getCriteriaBuilder().equal(encounterProviderProvider.get("pro.uuid"),
 					    participantToken.getValue()));
@@ -717,13 +706,13 @@ public abstract class BaseDao {
 	}
 	
 	protected <T,U> Optional<Predicate> handleCodeableConcept(OpenmrsFhirCriteriaContext<T,U> criteriaContext,
-	        TokenAndListParam concepts, @Nonnull String conceptAlias, @Nonnull String conceptMapAlias,
+	        TokenAndListParam concepts, @Nonnull From<?, ?> ConceptAliasJoin, @Nonnull String conceptMapAlias,
 	        @Nonnull String conceptReferenceTermAlias) {
 		if (concepts == null) {
 			return Optional.empty();
 		}
 		
-		Optional<Join<?, ?>> conceptAliasJoin = criteriaContext.getJoin(conceptAlias);
+		Optional<Join<?, ?>> conceptAliasJoin = criteriaContext.getJoin(ConceptAliasJoin.getAlias());
 		return conceptAliasJoin
 		        .map(join -> handleAndListParamBySystem(criteriaContext.getCriteriaBuilder(), concepts, (system, tokens) -> {
 			        if (system.isEmpty()) {
@@ -877,7 +866,7 @@ public abstract class BaseDao {
 	protected abstract <T, U> Optional<Predicate> handleLastUpdated(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
 	        DateRangeParam param);
 	
-	protected <T, U> Optional<Predicate> handlePersonAddress(OpenmrsFhirCriteriaContext<T, U> criteriaContext, String aliasPrefix,
+	protected <T, U> Optional<Predicate> handlePersonAddress(OpenmrsFhirCriteriaContext<T, U> criteriaContext, From<?,?> aliasPrefix,
 	        StringAndListParam city, StringAndListParam state, StringAndListParam postalCode, StringAndListParam country) {
 		if (city == null && state == null && postalCode == null && country == null) {
 			return Optional.empty();
@@ -887,22 +876,22 @@ public abstract class BaseDao {
 		
 		if (city != null) {
 			predicateList.add(handleAndListParam(criteriaContext.getCriteriaBuilder(), city,
-			    c -> propertyLike(criteriaContext, getRootOrJoin(criteriaContext, aliasPrefix), "cityVillage", c)));
+			    c -> propertyLike(criteriaContext, aliasPrefix, "cityVillage", c)));
 		}
 		
 		if (state != null) {
 			predicateList.add(handleAndListParam(criteriaContext.getCriteriaBuilder(), state,
-			    c -> propertyLike(criteriaContext, getRootOrJoin(criteriaContext, aliasPrefix), "stateProvince", c)));
+			    c -> propertyLike(criteriaContext, aliasPrefix, "stateProvince", c)));
 		}
 		
 		if (postalCode != null) {
 			predicateList.add(handleAndListParam(criteriaContext.getCriteriaBuilder(), postalCode,
-			    c -> propertyLike(criteriaContext, getRootOrJoin(criteriaContext, aliasPrefix), "postalCode", c)));
+			    c -> propertyLike(criteriaContext, aliasPrefix, "postalCode", c)));
 		}
 		
 		if (country != null) {
 			predicateList.add(handleAndListParam(criteriaContext.getCriteriaBuilder(), country,
-			    c -> propertyLike(criteriaContext, getRootOrJoin(criteriaContext, aliasPrefix), "country", c)));
+			    c -> propertyLike(criteriaContext, aliasPrefix, "country", c)));
 		}
 		
 		return Optional.of(criteriaContext.getCriteriaBuilder().and(toCriteriaArray(predicateList.stream())));

@@ -195,11 +195,8 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 		}
 		
 		From<?, ?> person = getPersonProperty(criteriaContext);
-		criteriaContext.addJoin(person, "addresses", "pad");
-		handlePersonAddress(criteriaContext, "pad", city, state, postalCode, country).ifPresent(c -> {
-			criteriaContext.addPredicate(c);
-			criteriaContext.finalizeQuery();
-		});
+		From<?,?> padJoin = criteriaContext.addJoin(person, "addresses", "pad");
+		handlePersonAddress(criteriaContext, padJoin, city, state, postalCode, country).ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
 	}
 	
 	protected <U> void handleNames(OpenmrsFhirCriteriaContext<T,U> criteriaContext, List<PropParam<?>> params) {

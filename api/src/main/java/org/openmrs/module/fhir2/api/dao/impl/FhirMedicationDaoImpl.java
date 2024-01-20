@@ -24,6 +24,9 @@ import org.openmrs.module.fhir2.api.dao.FhirMedicationDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.stereotype.Component;
 
+import javax.persistence.criteria.From;
+import javax.persistence.criteria.Join;
+
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class FhirMedicationDaoImpl extends BaseFhirDao<Drug> implements FhirMedicationDao {
@@ -55,20 +58,21 @@ public class FhirMedicationDaoImpl extends BaseFhirDao<Drug> implements FhirMedi
 	// TODO: look into DetachedCriteria and how to translate it to jpa criteria api
 	private <U> void handleIngredientCode(OpenmrsFhirCriteriaContext<Drug,U> criteriaContext, TokenAndListParam ingredientCode) {
 		if (ingredientCode != null) {
-			criteriaContext.getRoot().join("ingredients").alias("i");
-			DetachedCriteria detachedCriteria = DetachedCriteria.forClass(Concept.class, "ic");
-			handleCodeableConcept(criteriaContext, ingredientCode, "ic", "icm", "icrt")
+			Join<?,?> ingredientsJoin = criteriaContext.addJoin("ingredients", "i");
+			From<?,?> conceptJoin = criteriaContext.addJoin(ingredientsJoin,"concept", "ic");
+			
+			handleCodeableConcept(criteriaContext, ingredientCode, conceptJoin, "icm", "icrt")
 			        .ifPresent(criteriaContext::addPredicate);
 			criteriaContext.finalizeQuery();
-			detachedCriteria.setProjection(Projections.property("conceptId"));
-			and(Subqueries.propertyIn("i.ingredient", detachedCriteria));
+			criteriaContext.getRoot().get("conceptId");
+//			and(Subqueries.propertyIn("i.ingredient", detachedCriteria));
 		}
 	}
 	
 	private <U> void handleMedicationCode(OpenmrsFhirCriteriaContext<Drug,U> criteriaContext, TokenAndListParam code) {
 		if (code != null) {
-			criteriaContext.getRoot().join("concept").alias("cc");
-			handleCodeableConcept(criteriaContext, code, "cc", "ccm", "ccrt").ifPresent(criteriaContext::addPredicate);
+			From<?,?> conceptJoin = criteriaContext.addJoin("concept", "c");
+			handleCodeableConcept(criteriaContext, code, conceptJoin, "ccm", "ccrt").ifPresent(criteriaContext::addPredicate);
 			criteriaContext.finalizeQuery();
 		}
 	}
@@ -76,7 +80,8 @@ public class FhirMedicationDaoImpl extends BaseFhirDao<Drug> implements FhirMedi
 	private <U> void handleMedicationDosageForm(OpenmrsFhirCriteriaContext<Drug,U> criteriaContext, TokenAndListParam dosageForm) {
 		if (dosageForm != null) {
 			criteriaContext.getRoot().join("dosageForm").alias("dc");
-			handleCodeableConcept(criteriaContext, dosageForm, "dc", "dcm", "dcrt").ifPresent(criteriaContext::addPredicate);
+			From<?,?> dosageFormJoin = criteriaContext.addJoin("dosageForm", "dc");
+			handleCodeableConcept(criteriaContext, dosageForm, dosageFormJoin, "dcm", "dcrt").ifPresent(criteriaContext::addPredicate);
 			criteriaContext.finalizeQuery();
 		}
 	}

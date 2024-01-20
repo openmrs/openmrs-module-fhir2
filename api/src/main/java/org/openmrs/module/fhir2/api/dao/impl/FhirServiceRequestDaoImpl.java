@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
+import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
 
 import java.util.Optional;
@@ -70,11 +71,8 @@ public class FhirServiceRequestDaoImpl extends BaseFhirDao<TestOrder> implements
 	
 	private <U> void handleCodedConcept(OpenmrsFhirCriteriaContext<TestOrder,U> criteriaContext, TokenAndListParam code) {
 		if (code != null) {
-			if (!criteriaContext.getJoin("c").isPresent()) {
-				criteriaContext.addJoin("concept", "c");
-			}
-			
-			handleCodeableConcept(criteriaContext, code, "c", "cm", "crt").ifPresent(criteriaContext::addPredicate);
+			From<?,?> conceptJoin = criteriaContext.addJoin("concept", "c");
+			handleCodeableConcept(criteriaContext, code, conceptJoin, "cm", "crt").ifPresent(criteriaContext::addPredicate);
 			criteriaContext.finalizeQuery();
 		}
 	}

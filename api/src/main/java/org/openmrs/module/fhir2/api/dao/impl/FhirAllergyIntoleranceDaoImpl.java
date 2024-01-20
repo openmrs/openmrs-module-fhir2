@@ -94,10 +94,10 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implemen
 	
 	private <U> void handleManifestation(OpenmrsFhirCriteriaContext<Allergy,U> criteriaContext, TokenAndListParam code) {
 		if (code != null) {
-			Join<?, ?> reactionJoin = criteriaContext.addJoin("reactions", "r");
-			criteriaContext.addJoin(reactionJoin, "reaction", "rc");
+			Join<?, ?> reactionsJoin = criteriaContext.addJoin("reactions", "r");
+			Join<?,?> reactionJoin = criteriaContext.addJoin(reactionsJoin, "reaction", "rc");
 			
-			handleCodeableConcept(criteriaContext, code, "rc", "rcm", "rcrt").ifPresent(criteriaContext::addPredicate);
+			handleCodeableConcept(criteriaContext, code, reactionJoin, "rcm", "rcrt").ifPresent(criteriaContext::addPredicate);
 			criteriaContext.finalizeQuery();
 		}
 	}
@@ -105,9 +105,9 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implemen
 	private <U> void handleAllergen(OpenmrsFhirCriteriaContext<Allergy,U> criteriaContext, TokenAndListParam code) {
 		if (code != null) {
 			Join<?, ?> allergenJoin = criteriaContext.addJoin("allergen", "allergen");
-			criteriaContext.addJoin(allergenJoin, "codedAllergen", "ac");
+			Join<?,?> codedAllergenJoin = criteriaContext.addJoin(allergenJoin, "codedAllergen", "ac");
 			
-			handleCodeableConcept(criteriaContext, code, "ac", "acm", "acrt").ifPresent(criteriaContext::addPredicate);
+			handleCodeableConcept(criteriaContext, code, codedAllergenJoin, "acm", "acrt").ifPresent(criteriaContext::addPredicate);
 			criteriaContext.finalizeQuery();
 		}
 	}

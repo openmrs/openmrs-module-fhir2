@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import javax.annotation.Nonnull;
+import javax.persistence.criteria.From;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 
@@ -226,12 +227,8 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 					if (Observation.SP_CODE.equals(hasMemberRef.getChain())) {
 						TokenAndListParam code = new TokenAndListParam()
 						        .addAnd(new TokenParam().setValue(hasMemberRef.getValue()));
-						
-						if (!criteriaContext.getJoin("c").isPresent()) {
-							criteriaContext.addJoin(groupMembersJoin, "concept", "c");
-						}
-						
-						return handleCodeableConcept(criteriaContext, code, "c", "cm", "crt");
+						Join<?, ?> conceptJoin = criteriaContext.addJoin(groupMembersJoin,"concept", "c");
+						return handleCodeableConcept(criteriaContext, code, conceptJoin, "cm", "crt");
 					}
 				} else {
 					if (StringUtils.isNotBlank(hasMemberRef.getIdPart())) {
@@ -256,9 +253,8 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 	
 	private <U> void handleCodedConcept(OpenmrsFhirCriteriaContext<Obs,U> criteriaContext, TokenAndListParam code) {
 		if (code != null) {
-			criteriaContext.addJoin("concept", "c");
-			
-			handleCodeableConcept(criteriaContext, code, "c", "cm", "crt").ifPresent(criteriaContext::addPredicate);
+			From<?, ?> concept = criteriaContext.addJoin("concept", "c");
+			handleCodeableConcept(criteriaContext, code, concept, "cm", "crt").ifPresent(criteriaContext::addPredicate);
 			criteriaContext.finalizeQuery();
 		}
 	}
@@ -267,6 +263,7 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 		if (category == null) {
 			Join<?, ?> conceptJoin = criteriaContext.addJoin("concept", "c");
 			Join<?, ?> conceptClassJoin = criteriaContext.addJoin(conceptJoin, "conceptClass", "cc");
+			
 			handleAndListParam(criteriaContext.getCriteriaBuilder(), category, (param) -> {
 				if (param.getValue() == null) {
 					return Optional.empty();
@@ -285,10 +282,8 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 	
 	private <U> void handleValueCodedConcept(OpenmrsFhirCriteriaContext<Obs,U> criteriaContext, TokenAndListParam valueConcept) {
 		if (valueConcept != null) {
-			if (!criteriaContext.getJoin("vc").isPresent()) {
-				criteriaContext.addJoin("valueCoded", "vc");
-			}
-			handleCodeableConcept(criteriaContext, valueConcept, "vc", "vcm", "vcrt")
+			Join<?, ?> valueCodedJoin = criteriaContext.addJoin("valueCoded", "vc");
+			handleCodeableConcept(criteriaContext, valueConcept, valueCodedJoin, "vcm", "vcrt")
 			        .ifPresent(criteriaContext::addPredicate);
 			criteriaContext.finalizeQuery();
 		}

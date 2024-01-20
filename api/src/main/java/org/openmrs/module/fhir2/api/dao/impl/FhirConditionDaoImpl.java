@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import javax.annotation.Nonnull;
+import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
 
 import java.util.List;
@@ -106,8 +107,9 @@ public class FhirConditionDaoImpl extends BaseFhirDao<Condition> implements Fhir
 	
 	private <U> void handleCode(OpenmrsFhirCriteriaContext<Condition,U> criteriaContext, TokenAndListParam code) {
 		if (code != null) {
-			criteriaContext.getRoot().join("condition.coded").alias("cd");
-			handleCodeableConcept(criteriaContext, code, "cd", "map", "term").ifPresent(criteriaContext::addPredicate);
+			From<?,?> conditionJoin = criteriaContext.addJoin("condition", "condition");
+			From<?,?> codedJoin = criteriaContext.addJoin(conditionJoin,"coded", "cd");
+			handleCodeableConcept(criteriaContext, code, codedJoin, "map", "term").ifPresent(criteriaContext::addPredicate);
 			criteriaContext.finalizeQuery();
 		}
 	}
