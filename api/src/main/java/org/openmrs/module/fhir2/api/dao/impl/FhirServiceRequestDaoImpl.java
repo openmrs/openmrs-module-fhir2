@@ -61,8 +61,7 @@ public class FhirServiceRequestDaoImpl extends BaseFhirDao<TestOrder> implements
 					            .ifPresent(d -> criteriaContext.addPredicate(d).finalizeQuery()));
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(criteriaContext::addPredicate);
-					criteriaContext.finalizeQuery();
+					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
 					break;
 			}
 		});

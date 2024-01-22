@@ -53,21 +53,18 @@ public class FhirPersonDaoImpl extends BasePersonDao<Person> implements FhirPers
 					break;
 				case FhirConstants.GENDER_SEARCH_HANDLER:
 					entry.getValue().forEach(param -> handleGender(criteriaContext, getPersonProperty(criteriaContext),
-					    "gender", (TokenAndListParam) param.getParam()).ifPresent(criteriaContext::addPredicate));
-					criteriaContext.finalizeQuery();
+					    "gender", (TokenAndListParam) param.getParam()).ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery()));
 					break;
 				case FhirConstants.DATE_RANGE_SEARCH_HANDLER:
 					entry.getValue().forEach(
 					    param -> handleDateRange(criteriaContext, "birthdate", (DateRangeParam) param.getParam())
-					            .ifPresent(criteriaContext::addPredicate));
-					criteriaContext.finalizeQuery();
+					            .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery()));
 					break;
 				case FhirConstants.ADDRESS_SEARCH_HANDLER:
 					handleAddresses(criteriaContext, entry);
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(criteriaContext::addPredicate);
-					criteriaContext.finalizeQuery();
+					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
 					break;
 			}
 		});

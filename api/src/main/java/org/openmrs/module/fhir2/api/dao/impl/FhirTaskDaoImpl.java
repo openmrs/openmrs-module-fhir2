@@ -106,7 +106,6 @@ public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDa
 			}
 			
 			return Optional.empty();
-		}).ifPresent(criteriaContext::addPredicate);
-		criteriaContext.finalizeQuery();
+		}).ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
 	}
 }

@@ -193,8 +193,7 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 				case FhirConstants.DATE_RANGE_SEARCH_HANDLER:
 					entry.getValue()
 					        .forEach(dateRangeParam -> handleDateRange(criteriaContext, dateRangeParam.getPropertyName(),
-					            (DateRangeParam) dateRangeParam.getParam()).ifPresent(criteriaContext::addPredicate));
-					criteriaContext.finalizeQuery();
+					            (DateRangeParam) dateRangeParam.getParam()).ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery()));
 					break;
 				case FhirConstants.HAS_MEMBER_SEARCH_HANDLER:
 					entry.getValue().forEach(hasMemberReference -> handleHasMemberReference(criteriaContext,
@@ -202,17 +201,14 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 					break;
 				case FhirConstants.QUANTITY_SEARCH_HANDLER:
 					entry.getValue().forEach(quantity -> handleQuantity(criteriaContext, quantity.getPropertyName(),
-					    (QuantityAndListParam) quantity.getParam()).ifPresent(criteriaContext::addPredicate));
-					criteriaContext.finalizeQuery();
+					    (QuantityAndListParam) quantity.getParam()).ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery()));
 					break;
 				case FhirConstants.VALUE_STRING_SEARCH_HANDLER:
 					entry.getValue().forEach(string -> handleValueStringParam(criteriaContext, string.getPropertyName(),
-					    (StringAndListParam) string.getParam()).ifPresent(criteriaContext::addPredicate));
-					criteriaContext.finalizeQuery();
+					    (StringAndListParam) string.getParam()).ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery()));
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(criteriaContext::addPredicate);
-					criteriaContext.finalizeQuery();
+					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
 					break;
 			}
 		});
@@ -238,8 +234,7 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 				}
 				
 				return Optional.empty();
-			}).ifPresent(criteriaContext::addPredicate);
-			criteriaContext.finalizeQuery();
+			}).ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
 		}
 	}
 	
@@ -254,8 +249,7 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 	private <U> void handleCodedConcept(OpenmrsFhirCriteriaContext<Obs,U> criteriaContext, TokenAndListParam code) {
 		if (code != null) {
 			From<?, ?> concept = criteriaContext.addJoin("concept", "c");
-			handleCodeableConcept(criteriaContext, code, concept, "cm", "crt").ifPresent(criteriaContext::addPredicate);
-			criteriaContext.finalizeQuery();
+			handleCodeableConcept(criteriaContext, code, concept, "cm", "crt").ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
 		}
 	}
 	
@@ -275,8 +269,7 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 				return Optional.of(
 				    context.getCriteriaBuilder().in(criteriaContext.getRoot().get("concept").get("conceptClass").get("uuid"))
 				            .value(context.getCriteriaQuery().subquery(String.class)));
-			}).ifPresent(criteriaContext::addPredicate);
-			criteriaContext.finalizeQuery();
+			}).ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
 		}
 	}
 	
@@ -284,8 +277,7 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 		if (valueConcept != null) {
 			Join<?, ?> valueCodedJoin = criteriaContext.addJoin("valueCoded", "vc");
 			handleCodeableConcept(criteriaContext, valueConcept, valueCodedJoin, "vcm", "vcrt")
-			        .ifPresent(criteriaContext::addPredicate);
-			criteriaContext.finalizeQuery();
+			        .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
 		}
 	}
 	

@@ -110,8 +110,7 @@ public class FhirConceptDaoImpl extends BaseFhirDao<Concept> implements FhirConc
 		Join<?, ?> conceptNamesJoin = criteriaContext.addJoin("names", "cn");
 		handleAndListParam(criteriaContext.getCriteriaBuilder(), titlePattern,
 		    (title) -> propertyLike(criteriaContext, conceptNamesJoin, "name", title))
-		            .ifPresent(criteriaContext::addPredicate);
-		criteriaContext.finalizeQuery();
+		            .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
 	}
 	
 	protected <U> void createConceptMapCriteriaBuilder(@Nonnull ConceptSource conceptSource, String mappingCode) {

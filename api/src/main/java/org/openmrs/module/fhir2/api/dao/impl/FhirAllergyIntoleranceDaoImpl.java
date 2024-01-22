@@ -63,8 +63,7 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implemen
 				case FhirConstants.CATEGORY_SEARCH_HANDLER: {
 					From<?, ?> allergyJoin = criteriaContext.addJoin("allergen", "allergen");
 					entry.getValue().forEach(param -> handleAllergenCategory(criteriaContext, allergyJoin, "allergenType",
-					    (TokenAndListParam) param.getParam()).ifPresent(criteriaContext::addPredicate));
-					criteriaContext.finalizeQuery();
+					    (TokenAndListParam) param.getParam()).ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery()));
 					break;
 				}
 				case FhirConstants.ALLERGEN_SEARCH_HANDLER:
@@ -81,12 +80,10 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implemen
 					entry.getValue()
 					        .forEach(param -> handleBoolean(criteriaContext, "voided",
 					            convertStringStatusToBoolean((TokenAndListParam) param.getParam()))
-					                    .ifPresent(criteriaContext::addPredicate));
-					criteriaContext.finalizeQuery();
+					                    .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery()));
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(criteriaContext::addPredicate);
-					criteriaContext.finalizeQuery();
+					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
 					break;
 			}
 		});
@@ -97,8 +94,7 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implemen
 			Join<?, ?> reactionsJoin = criteriaContext.addJoin("reactions", "r");
 			Join<?,?> reactionJoin = criteriaContext.addJoin(reactionsJoin, "reaction", "rc");
 			
-			handleCodeableConcept(criteriaContext, code, reactionJoin, "rcm", "rcrt").ifPresent(criteriaContext::addPredicate);
-			criteriaContext.finalizeQuery();
+			handleCodeableConcept(criteriaContext, code, reactionJoin, "rcm", "rcrt").ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
 		}
 	}
 	
@@ -107,8 +103,7 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implemen
 			Join<?, ?> allergenJoin = criteriaContext.addJoin("allergen", "allergen");
 			Join<?,?> codedAllergenJoin = criteriaContext.addJoin(allergenJoin, "codedAllergen", "ac");
 			
-			handleCodeableConcept(criteriaContext, code, codedAllergenJoin, "acm", "acrt").ifPresent(criteriaContext::addPredicate);
-			criteriaContext.finalizeQuery();
+			handleCodeableConcept(criteriaContext, code, codedAllergenJoin, "acm", "acrt").ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
 		}
 	}
 	
@@ -143,8 +138,7 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implemen
 			}
 			catch (FHIRException ignored) {}
 			return Optional.empty();
-		}).ifPresent(criteriaContext::addPredicate);
-		criteriaContext.finalizeQuery();
+		}).ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
 	}
 	
 	private <T,U> Optional<Predicate> handleAllergenCategory(OpenmrsFhirCriteriaContext<T,U> criteriaContext,

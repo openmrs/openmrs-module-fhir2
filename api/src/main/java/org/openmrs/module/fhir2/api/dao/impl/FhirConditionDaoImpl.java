@@ -90,16 +90,14 @@ public class FhirConditionDaoImpl extends BaseFhirDao<Condition> implements Fhir
 				case FhirConstants.DATE_RANGE_SEARCH_HANDLER:
 					entry.getValue().forEach(
 					    param -> handleDateRange(criteriaContext, param.getPropertyName(), (DateRangeParam) param.getParam())
-					            .ifPresent(criteriaContext::addPredicate));
-					criteriaContext.finalizeQuery();
+					            .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery()));
 					break;
 				case FhirConstants.QUANTITY_SEARCH_HANDLER:
 					entry.getValue()
 					        .forEach(param -> handleOnsetAge(criteriaContext, (QuantityAndListParam) param.getParam()));
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(criteriaContext::addPredicate);
-					criteriaContext.finalizeQuery();
+					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
 					break;
 			}
 		});
@@ -109,8 +107,7 @@ public class FhirConditionDaoImpl extends BaseFhirDao<Condition> implements Fhir
 		if (code != null) {
 			From<?,?> conditionJoin = criteriaContext.addJoin("condition", "condition");
 			From<?,?> codedJoin = criteriaContext.addJoin(conditionJoin,"coded", "cd");
-			handleCodeableConcept(criteriaContext, code, codedJoin, "map", "term").ifPresent(criteriaContext::addPredicate);
-			criteriaContext.finalizeQuery();
+			handleCodeableConcept(criteriaContext, code, codedJoin, "map", "term").ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
 		}
 	}
 	
@@ -118,15 +115,13 @@ public class FhirConditionDaoImpl extends BaseFhirDao<Condition> implements Fhir
 		handleAndListParam(criteriaContext.getCriteriaBuilder(), status,
 		    tokenParam -> Optional.of(criteriaContext.getCriteriaBuilder()
 		            .equal(criteriaContext.getRoot().get("clinicalStatus"), convertStatus(tokenParam.getValue()))))
-		                    .ifPresent(criteriaContext::addPredicate);
-		criteriaContext.finalizeQuery();
+		                    .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
 	}
 	
 	private <U> void handleOnsetAge(OpenmrsFhirCriteriaContext<Condition,U> criteriaContext, QuantityAndListParam onsetAge) {
 		handleAndListParam(criteriaContext.getCriteriaBuilder(), onsetAge,
 		    onsetAgeParam -> handleAgeByDateProperty(criteriaContext, "onsetDate", onsetAgeParam))
-		            .ifPresent(criteriaContext::addPredicate);
-		criteriaContext.finalizeQuery();
+		            .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
 	}
 	
 	@Override

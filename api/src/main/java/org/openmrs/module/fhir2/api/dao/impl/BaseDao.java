@@ -525,7 +525,7 @@ public abstract class BaseDao {
 			}
 			
 			return Optional.empty();
-		}).ifPresent(criteriaContext::addPredicate);
+		}).ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
 	}
 	
 	protected <T, U> Optional<Predicate> handleGender(OpenmrsFhirCriteriaContext<T, U> criteriaContext, From<?, ?> from,
@@ -638,13 +638,12 @@ public abstract class BaseDao {
 				} else {
 					Join<?, ?> encounterProviderProvider = criteriaContext.addJoin(epJoin, "provider",
 					    "pro");
-					return Optional.of(criteriaContext.getCriteriaBuilder().equal(encounterProviderProvider.get("pro.uuid"),
+					return Optional.of(criteriaContext.getCriteriaBuilder().equal(encounterProviderProvider.get("uuid"),
 					    participantToken.getValue()));
 				}
 				
 				return Optional.empty();
-			}).ifPresent(criteriaContext::addPredicate);
-			criteriaContext.finalizeQuery();
+			}).ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
 		}
 	}
 	
@@ -690,12 +689,12 @@ public abstract class BaseDao {
 						}
 					}
 				} else {
-					return Optional.of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("ro.uuid"),
+					return Optional.of(criteriaContext.getCriteriaBuilder().equal(orderer.get("uuid"),
 					    participantToken.getValue()));
 				}
 				
 				return Optional.empty();
-			}).ifPresent(criteriaContext::addPredicate);
+			}).ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
 		}
 	}
 	
@@ -757,22 +756,19 @@ public abstract class BaseDao {
 			                propertyLike(criteriaContext, personNameAliasJoin, "givenName", tokenParam),
 			                propertyLike(criteriaContext, personNameAliasJoin, "middleName", tokenParam),
 			                propertyLike(criteriaContext, personNameAliasJoin, "familyName", tokenParam)))
-			            .flatMap(Collection::stream)).ifPresent(criteriaContext::addPredicate);
-			criteriaContext.finalizeQuery();
+			            .flatMap(Collection::stream)).ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
 		}
 		
 		if (given != null) {
 			handleAndListParam(criteriaContext.getCriteriaBuilder(), given,
 			    (givenName) -> propertyLike(criteriaContext, personNameAliasJoin, "givenName", givenName))
-			            .ifPresent(criteriaContext::addPredicate);
-			criteriaContext.finalizeQuery();
+			            .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
 		}
 		
 		if (family != null) {
 			handleAndListParam(criteriaContext.getCriteriaBuilder(), family,
 			    (familyName) -> propertyLike(criteriaContext, personNameAliasJoin, "familyName", familyName))
-			            .ifPresent(criteriaContext::addPredicate);
-			criteriaContext.finalizeQuery();
+			            .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
 		}
 	}
 	
@@ -827,7 +823,7 @@ public abstract class BaseDao {
 				}
 				
 				return Optional.empty();
-			}).ifPresent(criteriaContext::addPredicate);
+			}).ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
 		}
 	}
 	
