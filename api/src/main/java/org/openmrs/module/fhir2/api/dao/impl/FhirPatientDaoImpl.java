@@ -165,8 +165,7 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 			                criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("voided"), false))));
 			
 			return Optional.of(criteriaContext.getCriteriaBuilder().or(toCriteriaArray(arrayList)));
-		}).ifPresent(criteriaContext::addPredicate);
-		criteriaContext.finalizeQuery();
+		}).ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
 	}
 	
 	protected <U> void handleIdentifier(OpenmrsFhirCriteriaContext<Patient,U> criteriaContext, TokenAndListParam identifier) {
@@ -189,8 +188,7 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 				    criteriaContext.getCriteriaBuilder().equal(identifiersIdentifierTypeJoin.get("name"), system),
 				    criteriaContext.getCriteriaBuilder().in(identifiersJoin.get("identifier")).value(tokensToList(tokens))));
 			}
-		}).ifPresent(criteriaContext::addPredicate);
-		criteriaContext.finalizeQuery();
+		}).ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
 	}
 	
 	@Override

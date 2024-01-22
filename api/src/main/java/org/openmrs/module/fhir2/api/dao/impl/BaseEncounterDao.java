@@ -64,8 +64,7 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 					        .forEach(param -> handleEncounterType(criteriaContext, (TokenAndListParam) param.getParam()));
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(criteriaContext::addPredicate);
-					criteriaContext.finalizeQuery();
+					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
 					break;
 				case FhirConstants.HAS_SEARCH_HANDLER:
 					entry.getValue()

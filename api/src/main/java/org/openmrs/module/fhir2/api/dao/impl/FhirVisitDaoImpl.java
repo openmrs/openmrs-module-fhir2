@@ -50,7 +50,7 @@ public class FhirVisitDaoImpl extends BaseEncounterDao<Visit> implements FhirVis
 	protected <U> void handleParticipant(OpenmrsFhirCriteriaContext<Visit,U> criteriaContext,
 	        ReferenceAndListParam referenceAndListParam) {
 		Join<?, ?> encounterJoin = criteriaContext.addJoin("encounters","en" );
-		From<?, ?> epJoin = criteriaContext.addJoin(encounterJoin,"encounters","ep" );
+		From<?, ?> epJoin = criteriaContext.addJoin(encounterJoin,"encounterProviders","ep" );
 		handleParticipantReference(criteriaContext, referenceAndListParam, epJoin);
 	}
 	

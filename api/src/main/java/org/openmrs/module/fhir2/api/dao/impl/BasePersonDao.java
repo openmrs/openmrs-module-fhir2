@@ -159,7 +159,7 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 		From<?, ?> address =criteriaContext.addJoin(person, "addresses", "pad");
 		switch (param) {
 			case SP_BIRTHDATE:
-				address.get("birthdate");
+				return "birthdate";
 			case SP_ADDRESS_CITY:
 				address.get("cityVillage");
 			case SP_ADDRESS_STATE:
