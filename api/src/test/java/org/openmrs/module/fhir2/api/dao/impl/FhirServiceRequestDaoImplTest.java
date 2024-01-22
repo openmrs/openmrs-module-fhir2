@@ -128,6 +128,12 @@ public class FhirServiceRequestDaoImplTest extends BaseModuleContextSensitiveTes
 	}
 	
 	@Test
+	public void shouldApplyHasConstraintsForObservationsBasedOnUnknownCategoryCorrectly() {
+		runHasObservationBasedOnTest("category", "__UnknownCategory", new String[] {}, new String[] { WRONG_UUID,
+		        ORDER_WITH_OBSERVATION_CATEGORY_PROCEDURE_UUID, ORDER_WITH_OBSERVATION_CATEGORY_LABORATORY_UUID });
+	}
+	
+	@Test
 	public void shouldApplyHasConstraintsForObservationsBasedOnAnyDateCorrectly() {
 		runHasObservationBasedOnTest("date", null, new String[] { ORDER_WITH_OBSERVATION_CATEGORY_LABORATORY_UUID },
 		    new String[] { WRONG_UUID });
@@ -278,6 +284,38 @@ public class FhirServiceRequestDaoImplTest extends BaseModuleContextSensitiveTes
 	public void shouldApplyHasConstraintsForObservationsBasedOnSpecificPerformerCorrectly() {
 		runHasObservationBasedOnTest("performer", "3c08ebc2-6d9d-46c6-bdc4-e8a1871d7a7d",
 		    new String[] { ORDER_WITH_PROVIDER_UUID }, new String[] { WRONG_UUID, ORDER_WITH_TEXT_VALUE_UUID });
+	}
+	
+	@Test
+	public void shouldReturnNoResultsForInvalidSearchParameter() {
+		runHasObservationBasedOnTest("__NotPerformer", "3c08ebc2-6d9d-46c6-bdc4-e8a1871d7a7d", new String[] {},
+		    new String[] { WRONG_UUID, ORDER_WITH_TEXT_VALUE_UUID, ORDER_WITH_PROVIDER_UUID });
+	}
+	
+	@Test
+	public void shouldReturnNoResultsForMalformattedNumeric() {
+		runHasObservationBasedOnTest("value-quantity", "twelve", new String[] {},
+		    new String[] { WRONG_UUID, ORDER_WITH_TEXT_VALUE_UUID, ORDER_WITH_NUMERIC_VALUE_UUID });
+	}
+	
+	@Test
+	public void shouldReturnNoResultsForMalformattedDate() {
+		runHasObservationBasedOnTest("value-date", "yesterday", new String[] {},
+		    new String[] { WRONG_UUID, ORDER_WITH_TEXT_VALUE_UUID, ORDER_WITH_NUMERIC_VALUE_UUID });
+	}
+	
+	@Test
+	public void shouldReturnNoResultsForUnknownReferencesForHasSearch() {
+		HasOrListParam hasOrListParam = new HasOrListParam();
+		hasOrListParam.add(new HasParam("Observation", "__notBased-on", "status", null));
+		HasAndListParam hasAndListParam = new HasAndListParam();
+		hasAndListParam.addAnd(hasOrListParam);
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.HAS_SEARCH_HANDLER,
+		    hasAndListParam);
+		
+		List<TestOrder> results = dao.getSearchResults(theParams);
+		
+		assertThat(results, notNullValue());
 	}
 	
 	@Test
