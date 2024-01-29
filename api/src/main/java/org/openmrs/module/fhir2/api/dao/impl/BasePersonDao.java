@@ -54,7 +54,7 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 	 * @return the property that points to the person for this object
 	 */
 	@SuppressWarnings("UnstableApiUsage")
-	protected <V,U> From<?, ?> getPersonProperty(OpenmrsFhirCriteriaContext<V,U> criteriaContext) {
+	protected <V, U> From<?, ?> getPersonProperty(OpenmrsFhirCriteriaContext<V, U> criteriaContext) {
 		Class<? super T> rawType = typeToken.getRawType();
 		if (rawType.equals(Person.class) || rawType.equals(Patient.class)) {
 			return criteriaContext.getRoot();
@@ -64,7 +64,7 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 	}
 	
 	@Override
-	protected <V,U> Collection<Order> paramToProps(OpenmrsFhirCriteriaContext<V,U> criteriaContext,
+	protected <V, U> Collection<Order> paramToProps(OpenmrsFhirCriteriaContext<V, U> criteriaContext,
 	        @Nonnull SortState sortState) {
 		String param = sortState.getParameter();
 		
@@ -154,9 +154,9 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 	}
 	
 	@Override
-	protected <V,U> String paramToProp(OpenmrsFhirCriteriaContext<V,U> criteriaContext, @Nonnull String param) {
+	protected <V, U> String paramToProp(OpenmrsFhirCriteriaContext<V, U> criteriaContext, @Nonnull String param) {
 		From<?, ?> person = getPersonProperty(criteriaContext);
-		From<?, ?> address =criteriaContext.addJoin(person, "addresses", "pad");
+		From<?, ?> address = criteriaContext.addJoin(person, "addresses", "pad");
 		switch (param) {
 			case SP_BIRTHDATE:
 				return "birthdate";
@@ -173,7 +173,7 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 		}
 	}
 	
-	protected <U> void handleAddresses(OpenmrsFhirCriteriaContext<T,U> criteriaContext,
+	protected <U> void handleAddresses(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
 	        Map.Entry<String, List<PropParam<?>>> entry) {
 		StringAndListParam city = null;
 		StringAndListParam country = null;
@@ -197,11 +197,12 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 		}
 		
 		From<?, ?> person = getPersonProperty(criteriaContext);
-		From<?,?> padJoin = criteriaContext.addJoin(person, "addresses", "pad");
-		handlePersonAddress(criteriaContext, padJoin, city, state, postalCode, country).ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
+		From<?, ?> padJoin = criteriaContext.addJoin(person, "addresses", "pad");
+		handlePersonAddress(criteriaContext, padJoin, city, state, postalCode, country)
+		        .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
 	}
 	
-	protected <U> void handleNames(OpenmrsFhirCriteriaContext<T,U> criteriaContext, List<PropParam<?>> params) {
+	protected <U> void handleNames(OpenmrsFhirCriteriaContext<T, U> criteriaContext, List<PropParam<?>> params) {
 		StringAndListParam name = null;
 		StringAndListParam given = null;
 		StringAndListParam family = null;

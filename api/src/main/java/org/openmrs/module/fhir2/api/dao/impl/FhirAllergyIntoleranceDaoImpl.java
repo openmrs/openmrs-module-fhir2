@@ -53,7 +53,8 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implemen
 	}
 	
 	@Override
-	protected <U> void setupSearchParams(OpenmrsFhirCriteriaContext<Allergy,U> criteriaContext, SearchParameterMap theParams) {
+	protected <U> void setupSearchParams(OpenmrsFhirCriteriaContext<Allergy, U> criteriaContext,
+	        SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER:
@@ -62,8 +63,10 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implemen
 					break;
 				case FhirConstants.CATEGORY_SEARCH_HANDLER: {
 					From<?, ?> allergyJoin = criteriaContext.addJoin("allergen", "allergen");
-					entry.getValue().forEach(param -> handleAllergenCategory(criteriaContext, allergyJoin, "allergenType",
-					    (TokenAndListParam) param.getParam()).ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery()));
+					entry.getValue()
+					        .forEach(param -> handleAllergenCategory(criteriaContext, allergyJoin, "allergenType",
+					            (TokenAndListParam) param.getParam())
+					                    .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery()));
 					break;
 				}
 				case FhirConstants.ALLERGEN_SEARCH_HANDLER:
@@ -83,31 +86,35 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implemen
 					                    .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery()));
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
+					handleCommonSearchParameters(criteriaContext, entry.getValue())
+					        .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
 					break;
 			}
 		});
 	}
 	
-	private <U> void handleManifestation(OpenmrsFhirCriteriaContext<Allergy,U> criteriaContext, TokenAndListParam code) {
+	private <U> void handleManifestation(OpenmrsFhirCriteriaContext<Allergy, U> criteriaContext, TokenAndListParam code) {
 		if (code != null) {
 			Join<?, ?> reactionsJoin = criteriaContext.addJoin("reactions", "r");
-			Join<?,?> reactionJoin = criteriaContext.addJoin(reactionsJoin, "reaction", "rc");
+			Join<?, ?> reactionJoin = criteriaContext.addJoin(reactionsJoin, "reaction", "rc");
 			
-			handleCodeableConcept(criteriaContext, code, reactionJoin, "rcm", "rcrt").ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
+			handleCodeableConcept(criteriaContext, code, reactionJoin, "rcm", "rcrt")
+			        .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
 		}
 	}
 	
-	private <U> void handleAllergen(OpenmrsFhirCriteriaContext<Allergy,U> criteriaContext, TokenAndListParam code) {
+	private <U> void handleAllergen(OpenmrsFhirCriteriaContext<Allergy, U> criteriaContext, TokenAndListParam code) {
 		if (code != null) {
 			Join<?, ?> allergenJoin = criteriaContext.addJoin("allergen", "allergen");
-			Join<?,?> codedAllergenJoin = criteriaContext.addJoin(allergenJoin, "codedAllergen", "ac");
+			Join<?, ?> codedAllergenJoin = criteriaContext.addJoin(allergenJoin, "codedAllergen", "ac");
 			
-			handleCodeableConcept(criteriaContext, code, codedAllergenJoin, "acm", "acrt").ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
+			handleCodeableConcept(criteriaContext, code, codedAllergenJoin, "acm", "acrt")
+			        .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
 		}
 	}
 	
-	private <U> void handleSeverity(OpenmrsFhirCriteriaContext<Allergy,U> criteriaContext, TokenAndListParam severityParam) {
+	private <U> void handleSeverity(OpenmrsFhirCriteriaContext<Allergy, U> criteriaContext,
+	        TokenAndListParam severityParam) {
 		if (severityParam == null) {
 			return;
 		}
@@ -141,7 +148,7 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implemen
 		}).ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
 	}
 	
-	private <T,U> Optional<Predicate> handleAllergenCategory(OpenmrsFhirCriteriaContext<T,U> criteriaContext,
+	private <T, U> Optional<Predicate> handleAllergenCategory(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
 	        From<?, ?> allergyJoin, String propertyName, TokenAndListParam categoryParam) {
 		if (categoryParam == null) {
 			return Optional.empty();
@@ -173,7 +180,7 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implemen
 	}
 	
 	@Override
-	protected <V,U> String paramToProp(OpenmrsFhirCriteriaContext<V,U> criteriaContext, @NonNull String param) {
+	protected <V, U> String paramToProp(OpenmrsFhirCriteriaContext<V, U> criteriaContext, @NonNull String param) {
 		if (AllergyIntolerance.SP_SEVERITY.equals(param)) {
 			return "severity";
 		}

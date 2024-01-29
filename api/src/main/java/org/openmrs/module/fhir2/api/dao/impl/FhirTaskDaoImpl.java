@@ -36,7 +36,8 @@ import org.springframework.stereotype.Component;
 public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDao {
 	
 	@Override
-	protected <U> void setupSearchParams(OpenmrsFhirCriteriaContext<FhirTask,U> criteriaContext, SearchParameterMap theParams) {
+	protected <U> void setupSearchParams(OpenmrsFhirCriteriaContext<FhirTask, U> criteriaContext,
+	        SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.BASED_ON_REFERENCE_SEARCH_HANDLER:
@@ -52,7 +53,8 @@ public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDa
 					        .ifPresent(handler -> criteriaContext.addPredicate(handler).finalizeQuery()));
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(handler -> criteriaContext.addPredicate(handler).finalizeQuery());
+					handleCommonSearchParameters(criteriaContext, entry.getValue())
+					        .ifPresent(handler -> criteriaContext.addPredicate(handler).finalizeQuery());
 					break;
 			}
 		});
@@ -74,7 +76,8 @@ public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDa
 		return (ref != null && ref.getIdPart() != null && ref.getResourceType() != null);
 	}
 	
-	private <U> Optional<Predicate> handleStatus(OpenmrsFhirCriteriaContext<FhirTask,U> criteriaContext,TokenAndListParam tokenAndListParam) {
+	private <U> Optional<Predicate> handleStatus(OpenmrsFhirCriteriaContext<FhirTask, U> criteriaContext,
+	        TokenAndListParam tokenAndListParam) {
 		
 		return handleAndListParam(criteriaContext.getCriteriaBuilder(), tokenAndListParam, token -> {
 			if (token.getValue() != null) {
@@ -91,8 +94,8 @@ public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDa
 		});
 	}
 	
-	private <U> void handleReference(OpenmrsFhirCriteriaContext<FhirTask,U> criteriaContext, ReferenceAndListParam reference,
-	        String property, String alias) {
+	private <U> void handleReference(OpenmrsFhirCriteriaContext<FhirTask, U> criteriaContext,
+	        ReferenceAndListParam reference, String property, String alias) {
 		handleAndListParam(criteriaContext.getCriteriaBuilder(), reference, param -> {
 			if (validReferenceParam(param)) {
 				Join<?, ?> taskAliasJoin = criteriaContext.addJoin(property, alias);

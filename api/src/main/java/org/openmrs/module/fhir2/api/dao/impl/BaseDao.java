@@ -370,8 +370,8 @@ public abstract class BaseDao {
 	 * @param dateRangeParam the {@link DateRangeParam} to handle
 	 * @return a {@link Criterion} to be added to the query for the indicated date range
 	 */
-	protected <T, U> Optional<Predicate> handleDateRange(OpenmrsFhirCriteriaContext<T, U> criteriaContext, String propertyName,
-	        DateRangeParam dateRangeParam) {
+	protected <T, U> Optional<Predicate> handleDateRange(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
+	        String propertyName, DateRangeParam dateRangeParam) {
 		if (dateRangeParam == null) {
 			return Optional.empty();
 		}
@@ -434,8 +434,8 @@ public abstract class BaseDao {
 		return Optional.empty();
 	}
 	
-	protected <T, U> Optional<Predicate> handleQuantity(OpenmrsFhirCriteriaContext<T, U> criteriaContext, String propertyName,
-	        QuantityParam quantityParam) {
+	protected <T, U> Optional<Predicate> handleQuantity(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
+	        String propertyName, QuantityParam quantityParam) {
 		if (quantityParam == null) {
 			return Optional.empty();
 		}
@@ -558,8 +558,8 @@ public abstract class BaseDao {
 		});
 	}
 	
-	protected <T,U> Optional<Predicate> handleLocationReference(OpenmrsFhirCriteriaContext<T,U> criteriaContext,
-	        @Nonnull From<?,?> locationAlias, ReferenceAndListParam locationReference) {
+	protected <T, U> Optional<Predicate> handleLocationReference(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
+	        @Nonnull From<?, ?> locationAlias, ReferenceAndListParam locationReference) {
 		
 		if (locationReference == null) {
 			return Optional.empty();
@@ -587,7 +587,7 @@ public abstract class BaseDao {
 		});
 	}
 	
-	protected <T,U> void handleParticipantReference(OpenmrsFhirCriteriaContext<T,U> criteriaContext,
+	protected <T, U> void handleParticipantReference(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
 	        ReferenceAndListParam participantReference, From<?, ?> epJoin) {
 		if (participantReference != null) {
 			
@@ -599,15 +599,19 @@ public abstract class BaseDao {
 							return criteriaContext.getJoin("p").map(providerJoin -> criteriaContext.getCriteriaBuilder()
 							        .like(providerJoin.get("identifier"), participantToken.getValue()));
 						case Practitioner.SP_GIVEN: {
-							Join<?, ?> encounterProviderProvider = criteriaContext.addJoin(epJoin,"provider", "pro");
-							Join<?, ?> encounterProviderPerson = criteriaContext.addJoin(encounterProviderProvider, "person","ps");
-							Join<?, ?> encounterProviderPersonName = criteriaContext.addJoin(encounterProviderPerson,"names", "pn");
+							Join<?, ?> encounterProviderProvider = criteriaContext.addJoin(epJoin, "provider", "pro");
+							Join<?, ?> encounterProviderPerson = criteriaContext.addJoin(encounterProviderProvider, "person",
+							    "ps");
+							Join<?, ?> encounterProviderPersonName = criteriaContext.addJoin(encounterProviderPerson,
+							    "names", "pn");
 							
-							return Optional.of(criteriaContext.getCriteriaBuilder().like(encounterProviderPersonName.get("givenName"), participantToken.getValue()));
+							return Optional.of(criteriaContext.getCriteriaBuilder()
+							        .like(encounterProviderPersonName.get("givenName"), participantToken.getValue()));
 						}
 						case Practitioner.SP_FAMILY: {
-							Join<?, ?> encounterProviderProvider = criteriaContext.addJoin(epJoin,"provider", "pro");
-							Join<?, ?> encounterProviderPerson = criteriaContext.addJoin(encounterProviderProvider, "person","ps");
+							Join<?, ?> encounterProviderProvider = criteriaContext.addJoin(epJoin, "provider", "pro");
+							Join<?, ?> encounterProviderPerson = criteriaContext.addJoin(encounterProviderProvider, "person",
+							    "ps");
 							Join<?, ?> encounterProviderPersonName = criteriaContext.addJoin(encounterProviderPerson,
 							    "names", "pn");
 							
@@ -615,7 +619,7 @@ public abstract class BaseDao {
 							        .like(encounterProviderPersonName.get("familyName"), participantToken.getValue()));
 						}
 						case Practitioner.SP_NAME: {
-							Join<?, ?> encounterProviderProvider = criteriaContext.addJoin(epJoin,"provider", "pro");
+							Join<?, ?> encounterProviderProvider = criteriaContext.addJoin(epJoin, "provider", "pro");
 							Join<?, ?> encounterProviderPerson = criteriaContext.addJoin(encounterProviderProvider, "person",
 							    "ps");
 							Join<?, ?> encounterProviderPersonName = criteriaContext.addJoin(encounterProviderPerson,
@@ -636,8 +640,7 @@ public abstract class BaseDao {
 						}
 					}
 				} else {
-					Join<?, ?> encounterProviderProvider = criteriaContext.addJoin(epJoin, "provider",
-					    "pro");
+					Join<?, ?> encounterProviderProvider = criteriaContext.addJoin(epJoin, "provider", "pro");
 					return Optional.of(criteriaContext.getCriteriaBuilder().equal(encounterProviderProvider.get("uuid"),
 					    participantToken.getValue()));
 				}
@@ -648,7 +651,7 @@ public abstract class BaseDao {
 	}
 	
 	//Added this method to allow handling classes with provider instead  of encounterProvider
-	protected <T,U> void handleProviderReference(OpenmrsFhirCriteriaContext<T,U> criteriaContext,
+	protected <T, U> void handleProviderReference(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
 	        ReferenceAndListParam providerReference) {
 		if (providerReference != null) {
 			Join<?, ?> orderer = criteriaContext.addJoin("orderer", "ord");
@@ -689,8 +692,8 @@ public abstract class BaseDao {
 						}
 					}
 				} else {
-					return Optional.of(criteriaContext.getCriteriaBuilder().equal(orderer.get("uuid"),
-					    participantToken.getValue()));
+					return Optional.of(
+					    criteriaContext.getCriteriaBuilder().equal(orderer.get("uuid"), participantToken.getValue()));
 				}
 				
 				return Optional.empty();
@@ -698,7 +701,7 @@ public abstract class BaseDao {
 		}
 	}
 	
-	protected <T,U> Optional<Predicate> handleCodeableConcept(OpenmrsFhirCriteriaContext<T,U> criteriaContext,
+	protected <T, U> Optional<Predicate> handleCodeableConcept(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
 	        TokenAndListParam concepts, @Nonnull From<?, ?> ConceptAliasJoin, @Nonnull String conceptMapAlias,
 	        @Nonnull String conceptReferenceTermAlias) {
 		if (concepts == null) {
@@ -732,12 +735,12 @@ public abstract class BaseDao {
 		
 	}
 	
-	protected <T,U> void handleNames(OpenmrsFhirCriteriaContext<T,U> criteriaContext, StringAndListParam name,
+	protected <T, U> void handleNames(OpenmrsFhirCriteriaContext<T, U> criteriaContext, StringAndListParam name,
 	        StringAndListParam given, StringAndListParam family) {
 		handleNames(criteriaContext, name, given, family, criteriaContext.getRoot());
 	}
 	
-	protected <T,U> void handleNames(OpenmrsFhirCriteriaContext<T,U> criteriaContext, StringAndListParam name,
+	protected <T, U> void handleNames(OpenmrsFhirCriteriaContext<T, U> criteriaContext, StringAndListParam name,
 	        StringAndListParam given, StringAndListParam family, From<?, ?> person) {
 		
 		if (name == null && given == null && family == null) {
@@ -772,12 +775,12 @@ public abstract class BaseDao {
 		}
 	}
 	
-	protected <T,U> void handlePatientReference(OpenmrsFhirCriteriaContext<T,U> criteriaContext,
+	protected <T, U> void handlePatientReference(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
 	        ReferenceAndListParam patientReference) {
 		handlePatientReference(criteriaContext, patientReference, "patient");
 	}
 	
-	protected <T,U> void handlePatientReference(OpenmrsFhirCriteriaContext<T,U> criteriaContext,
+	protected <T, U> void handlePatientReference(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
 	        ReferenceAndListParam patientReference, String associationPath) {
 		if (patientReference != null) {
 			Join<?, ?> associationPathJoin = criteriaContext.addJoin(associationPath, "p");
@@ -856,8 +859,9 @@ public abstract class BaseDao {
 	protected abstract <T, U> Optional<Predicate> handleLastUpdated(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
 	        DateRangeParam param);
 	
-	protected <T, U> Optional<Predicate> handlePersonAddress(OpenmrsFhirCriteriaContext<T, U> criteriaContext, From<?,?> aliasPrefix,
-	        StringAndListParam city, StringAndListParam state, StringAndListParam postalCode, StringAndListParam country) {
+	protected <T, U> Optional<Predicate> handlePersonAddress(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
+	        From<?, ?> aliasPrefix, StringAndListParam city, StringAndListParam state, StringAndListParam postalCode,
+	        StringAndListParam country) {
 		if (city == null && state == null && postalCode == null && country == null) {
 			return Optional.empty();
 		}
@@ -887,17 +891,17 @@ public abstract class BaseDao {
 		return Optional.of(criteriaContext.getCriteriaBuilder().and(toCriteriaArray(predicateList.stream())));
 	}
 	
-	protected <T,U> Optional<Predicate> handleMedicationReference(OpenmrsFhirCriteriaContext<T,U> criteriaContext,
-	        @Nonnull From<?,?> medicationAlias, ReferenceAndListParam medicationReference) {
+	protected <T, U> Optional<Predicate> handleMedicationReference(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
+	        @Nonnull From<?, ?> medicationAlias, ReferenceAndListParam medicationReference) {
 		if (medicationReference == null) {
 			return Optional.empty();
 		}
 		
-		return handleAndListParam(criteriaContext.getCriteriaBuilder(), medicationReference,
-		    token -> Optional.of(criteriaContext.getCriteriaBuilder().equal(medicationAlias.get("uuid"), token.getIdPart())));
+		return handleAndListParam(criteriaContext.getCriteriaBuilder(), medicationReference, token -> Optional
+		        .of(criteriaContext.getCriteriaBuilder().equal(medicationAlias.get("uuid"), token.getIdPart())));
 	}
 	
-	protected <T,U> Optional<Predicate> handleMedicationRequestReference(OpenmrsFhirCriteriaContext<T,U> criteriaContext,
+	protected <T, U> Optional<Predicate> handleMedicationRequestReference(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
 	        @Nonnull String drugOrderAlias, ReferenceAndListParam drugOrderReference) {
 		if (drugOrderReference == null) {
 			return Optional.empty();
@@ -917,14 +921,14 @@ public abstract class BaseDao {
 	 * @param criteriaContext The {@link OpenmrsFhirCriteriaContext} for the current query
 	 * @param sort the {@link SortSpec} which defines the sorting to be translated
 	 */
-	protected <T,U> void handleSort(OpenmrsFhirCriteriaContext<T,U> criteriaContext, SortSpec sort) {
+	protected <T, U> void handleSort(OpenmrsFhirCriteriaContext<T, U> criteriaContext, SortSpec sort) {
 		handleSort(criteriaContext, sort, this::paramToProps)
 		        .ifPresent(l -> l.forEach(criteriaContext.getCriteriaQuery()::orderBy));
 	}
 	
-	protected <T,U> Optional<List<javax.persistence.criteria.Order>> handleSort(OpenmrsFhirCriteriaContext<T,U> criteriaContext,
-	        SortSpec sort,
-	        BiFunction<OpenmrsFhirCriteriaContext<T,U>, SortState, Collection<javax.persistence.criteria.Order>> paramToProp) {
+	protected <T, U> Optional<List<javax.persistence.criteria.Order>> handleSort(
+	        OpenmrsFhirCriteriaContext<T, U> criteriaContext, SortSpec sort,
+	        BiFunction<OpenmrsFhirCriteriaContext<T, U>, SortState, Collection<javax.persistence.criteria.Order>> paramToProp) {
 		List<javax.persistence.criteria.Order> orderings = new ArrayList<>();
 		SortSpec sortSpec = sort;
 		while (sortSpec != null) {
@@ -947,7 +951,7 @@ public abstract class BaseDao {
 	}
 	
 	@SuppressWarnings("unchecked")
-	protected <T,U> Predicate generateSystemQuery(OpenmrsFhirCriteriaContext<T,U> criteriaContext, String system,
+	protected <T, U> Predicate generateSystemQuery(OpenmrsFhirCriteriaContext<T, U> criteriaContext, String system,
 	        List<String> codes, String conceptReferenceTermAlias) {
 		//detached criteria
 		Specification<FhirConceptSource> spec = (root, query,
@@ -973,7 +977,7 @@ public abstract class BaseDao {
 		}
 	}
 	
-	protected <T,U> Predicate generateActiveOrderQuery(OpenmrsFhirCriteriaContext<T,U> criteriaContext, String path,
+	protected <T, U> Predicate generateActiveOrderQuery(OpenmrsFhirCriteriaContext<T, U> criteriaContext, String path,
 	        Date onDate) {
 		// ACTIVE = date activated null or less than or equal to current datetime, date stopped null or in the future, auto expire date null or in the future
 		return criteriaContext.getCriteriaBuilder().and(
@@ -991,23 +995,24 @@ public abstract class BaseDao {
 		            onDate)));
 	}
 	
-	protected <T,U> Predicate generateActiveOrderQuery(OpenmrsFhirCriteriaContext<T,U> criteriaContext, String path) {
+	protected <T, U> Predicate generateActiveOrderQuery(OpenmrsFhirCriteriaContext<T, U> criteriaContext, String path) {
 		return generateActiveOrderQuery(criteriaContext, path, new Date());
 	}
 	
-	protected <T,U> Predicate generateActiveOrderQuery(OpenmrsFhirCriteriaContext<T,U> criteriaContext, Date onDate) {
+	protected <T, U> Predicate generateActiveOrderQuery(OpenmrsFhirCriteriaContext<T, U> criteriaContext, Date onDate) {
 		return generateActiveOrderQuery(criteriaContext, "", onDate);
 	}
 	
-	protected <T,U> Predicate generateActiveOrderQuery(OpenmrsFhirCriteriaContext<T,U> criteriaContext) {
+	protected <T, U> Predicate generateActiveOrderQuery(OpenmrsFhirCriteriaContext<T, U> criteriaContext) {
 		return generateActiveOrderQuery(criteriaContext, new Date());
 	}
 	
-	protected <T,U> Predicate generateNotCancelledOrderQuery(OpenmrsFhirCriteriaContext<T,U> criteriaContext) {
+	protected <T, U> Predicate generateNotCancelledOrderQuery(OpenmrsFhirCriteriaContext<T, U> criteriaContext) {
 		return generateNotCancelledOrderQuery(criteriaContext, "");
 	}
 	
-	protected <T,U> Predicate generateNotCancelledOrderQuery(OpenmrsFhirCriteriaContext<T,U> criteriaContext, String path) {
+	protected <T, U> Predicate generateNotCancelledOrderQuery(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
+	        String path) {
 		Date now = new Date();
 		
 		return criteriaContext.getCriteriaBuilder().or(
@@ -1049,7 +1054,7 @@ public abstract class BaseDao {
 	 * @param sortState a {@link SortState} object describing the current sort state
 	 * @return the corresponding ordering(s) needed for this property
 	 */
-	protected <T,U> Collection<Order> paramToProps(OpenmrsFhirCriteriaContext<T,U> criteriaContext,
+	protected <T, U> Collection<Order> paramToProps(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
 	        @Nonnull SortState sortState) {
 		Collection<String> prop = paramToProps(criteriaContext, sortState.getParameter());
 		if (prop != null) {
@@ -1074,7 +1079,8 @@ public abstract class BaseDao {
 	 * @param param the FHIR parameter to map
 	 * @return the name of the corresponding property from the current query
 	 */
-	protected <T,U> Collection<String> paramToProps(OpenmrsFhirCriteriaContext<T,U> criteriaContext, @Nonnull String param) {
+	protected <T, U> Collection<String> paramToProps(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
+	        @Nonnull String param) {
 		String prop = paramToProp(criteriaContext, param);
 		
 		if (prop != null) {
@@ -1091,11 +1097,11 @@ public abstract class BaseDao {
 	 * @param param the FHIR parameter to map
 	 * @return the name of the corresponding property from the current query
 	 */
-	protected <T,U> String paramToProp(OpenmrsFhirCriteriaContext<T,U> criteriaContext, @Nonnull String param) {
+	protected <T, U> String paramToProp(OpenmrsFhirCriteriaContext<T, U> criteriaContext, @Nonnull String param) {
 		return null;
 	}
 	
-	protected <T,U> Optional<Predicate> propertyLike(OpenmrsFhirCriteriaContext<T,U> criteriaContext, From<?, ?> from,
+	protected <T, U> Optional<Predicate> propertyLike(OpenmrsFhirCriteriaContext<T, U> criteriaContext, From<?, ?> from,
 	        @Nonnull String propertyName, String value) {
 		if (value == null) {
 			return Optional.empty();
@@ -1104,7 +1110,7 @@ public abstract class BaseDao {
 		return propertyLike(criteriaContext, from, propertyName, new StringParam(value));
 	}
 	
-	protected <T,U> Optional<Predicate> propertyLike(OpenmrsFhirCriteriaContext<T,U> criteriaContext, From<?, ?> from,
+	protected <T, U> Optional<Predicate> propertyLike(OpenmrsFhirCriteriaContext<T, U> criteriaContext, From<?, ?> from,
 	        @Nonnull String propertyName, StringParam param) {
 		if (param == null) {
 			return Optional.empty();
@@ -1172,7 +1178,7 @@ public abstract class BaseDao {
 		private String parameter;
 	}
 	
-	protected <T,U> Optional<Predicate> handleAgeByDateProperty(OpenmrsFhirCriteriaContext<T,U> criteriaContext,
+	protected <T, U> Optional<Predicate> handleAgeByDateProperty(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
 	        @Nonnull String datePropertyName, @Nonnull QuantityParam age) {
 		BigDecimal value = age.getValue();
 		if (value == null) {

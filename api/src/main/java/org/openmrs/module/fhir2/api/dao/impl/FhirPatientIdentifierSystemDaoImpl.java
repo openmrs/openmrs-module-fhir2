@@ -77,7 +77,7 @@ public class FhirPatientIdentifierSystemDaoImpl implements FhirPatientIdentifier
 	@Override
 	public Optional<FhirPatientIdentifierSystem> getFhirPatientIdentifierSystem(
 	        @Nonnull PatientIdentifierType patientIdentifierType) {
-		OpenmrsFhirCriteriaContext<FhirPatientIdentifierSystem,FhirPatientIdentifierSystem> criteriaContext = openmrsFhirCriteriaContext();
+		OpenmrsFhirCriteriaContext<FhirPatientIdentifierSystem, FhirPatientIdentifierSystem> criteriaContext = openmrsFhirCriteriaContext();
 		
 		criteriaContext.getCriteriaQuery().where(criteriaContext.getCriteriaBuilder()
 		        .equal(criteriaContext.getRoot().get("patientIdentifierType"), patientIdentifierType));
@@ -92,7 +92,7 @@ public class FhirPatientIdentifierSystemDaoImpl implements FhirPatientIdentifier
 		return fhirPatientIdentifierSystem;
 	}
 	
-	private OpenmrsFhirCriteriaContext<FhirPatientIdentifierSystem,FhirPatientIdentifierSystem> openmrsFhirCriteriaContext() {
+	private OpenmrsFhirCriteriaContext<FhirPatientIdentifierSystem, FhirPatientIdentifierSystem> openmrsFhirCriteriaContext() {
 		EntityManager em = sessionFactory.getCurrentSession();
 		CriteriaBuilder cb = em.getCriteriaBuilder();
 		CriteriaQuery<FhirPatientIdentifierSystem> cq = cb.createQuery(FhirPatientIdentifierSystem.class);

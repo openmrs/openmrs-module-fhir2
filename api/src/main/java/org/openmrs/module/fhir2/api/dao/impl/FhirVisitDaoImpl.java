@@ -13,7 +13,6 @@ import static org.hl7.fhir.r4.model.Encounter.SP_DATE;
 
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
 
 import java.util.Optional;
 
@@ -23,7 +22,6 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.NonNull;
 import lombok.Setter;
-import org.openmrs.Encounter;
 import org.openmrs.Visit;
 import org.openmrs.module.fhir2.api.dao.FhirVisitDao;
 import org.springframework.stereotype.Component;
@@ -33,12 +31,13 @@ import org.springframework.stereotype.Component;
 public class FhirVisitDaoImpl extends BaseEncounterDao<Visit> implements FhirVisitDao {
 	
 	@Override
-	protected <U> void handleDate(OpenmrsFhirCriteriaContext<Visit,U> criteriaContext, DateRangeParam dateRangeParam) {
-		handleDateRange(criteriaContext, "startDatetime", dateRangeParam).ifPresent(handle -> criteriaContext.addPredicate(handle).finalizeQuery());
+	protected <U> void handleDate(OpenmrsFhirCriteriaContext<Visit, U> criteriaContext, DateRangeParam dateRangeParam) {
+		handleDateRange(criteriaContext, "startDatetime", dateRangeParam)
+		        .ifPresent(handle -> criteriaContext.addPredicate(handle).finalizeQuery());
 	}
 	
 	@Override
-	protected <U> void handleEncounterType(OpenmrsFhirCriteriaContext<Visit,U> criteriaContext,
+	protected <U> void handleEncounterType(OpenmrsFhirCriteriaContext<Visit, U> criteriaContext,
 	        TokenAndListParam tokenAndListParam) {
 		Join<?, ?> visitTypeJoin = criteriaContext.addJoin("visitType", "vt");
 		handleAndListParam(criteriaContext.getCriteriaBuilder(), tokenAndListParam,
@@ -47,15 +46,15 @@ public class FhirVisitDaoImpl extends BaseEncounterDao<Visit> implements FhirVis
 	}
 	
 	@Override
-	protected <U> void handleParticipant(OpenmrsFhirCriteriaContext<Visit,U> criteriaContext,
+	protected <U> void handleParticipant(OpenmrsFhirCriteriaContext<Visit, U> criteriaContext,
 	        ReferenceAndListParam referenceAndListParam) {
-		Join<?, ?> encounterJoin = criteriaContext.addJoin("encounters","en" );
-		From<?, ?> epJoin = criteriaContext.addJoin(encounterJoin,"encounterProviders","ep" );
+		Join<?, ?> encounterJoin = criteriaContext.addJoin("encounters", "en");
+		From<?, ?> epJoin = criteriaContext.addJoin(encounterJoin, "encounterProviders", "ep");
 		handleParticipantReference(criteriaContext, referenceAndListParam, epJoin);
 	}
 	
 	@Override
-	protected <V,U> String paramToProp(OpenmrsFhirCriteriaContext<V,U> criteriaContext, @NonNull String param) {
+	protected <V, U> String paramToProp(OpenmrsFhirCriteriaContext<V, U> criteriaContext, @NonNull String param) {
 		switch (param) {
 			case SP_DATE:
 				return "startDatetime";

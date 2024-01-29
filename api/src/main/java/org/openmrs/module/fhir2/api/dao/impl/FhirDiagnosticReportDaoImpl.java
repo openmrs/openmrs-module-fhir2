@@ -32,7 +32,7 @@ import org.springframework.stereotype.Component;
 public class FhirDiagnosticReportDaoImpl extends BaseFhirDao<FhirDiagnosticReport> implements FhirDiagnosticReportDao {
 	
 	@Override
-	protected <U> void setupSearchParams(OpenmrsFhirCriteriaContext<FhirDiagnosticReport,U> criteriaContext,
+	protected <U> void setupSearchParams(OpenmrsFhirCriteriaContext<FhirDiagnosticReport, U> criteriaContext,
 	        SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
@@ -58,21 +58,23 @@ public class FhirDiagnosticReportDaoImpl extends BaseFhirDao<FhirDiagnosticRepor
 					    param -> handleObservationReference(criteriaContext, (ReferenceAndListParam) param.getParam()));
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
+					handleCommonSearchParameters(criteriaContext, entry.getValue())
+					        .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
 					break;
 			}
 		});
 	}
 	
-	private <U> void handleCodedConcept(OpenmrsFhirCriteriaContext<FhirDiagnosticReport,U> criteriaContext,
+	private <U> void handleCodedConcept(OpenmrsFhirCriteriaContext<FhirDiagnosticReport, U> criteriaContext,
 	        TokenAndListParam code) {
 		if (code != null) {
-			From<?,?> from = criteriaContext.addJoin("code", "c");
-			handleCodeableConcept(criteriaContext, code, from, "cm", "crt").ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
+			From<?, ?> from = criteriaContext.addJoin("code", "c");
+			handleCodeableConcept(criteriaContext, code, from, "cm", "crt")
+			        .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
 		}
 	}
 	
-	private <U> void handleObservationReference(OpenmrsFhirCriteriaContext<FhirDiagnosticReport,U> criteriaContext,
+	private <U> void handleObservationReference(OpenmrsFhirCriteriaContext<FhirDiagnosticReport, U> criteriaContext,
 	        ReferenceAndListParam result) {
 		if (result != null) {
 			Join<?, ?> resultsJoin = criteriaContext.addJoin("results", "obs");
@@ -84,7 +86,7 @@ public class FhirDiagnosticReportDaoImpl extends BaseFhirDao<FhirDiagnosticRepor
 	}
 	
 	@Override
-	protected <V,U> String paramToProp(OpenmrsFhirCriteriaContext<V,U> criteriaContext, @NonNull String param) {
+	protected <V, U> String paramToProp(OpenmrsFhirCriteriaContext<V, U> criteriaContext, @NonNull String param) {
 		if (DiagnosticReport.SP_ISSUED.equals(param)) {
 			return "issued";
 		}

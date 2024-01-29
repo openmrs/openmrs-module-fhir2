@@ -10,11 +10,7 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import javax.annotation.Nonnull;
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
-import javax.persistence.criteria.Root;
 
 import java.util.List;
 
@@ -43,7 +39,8 @@ public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLo
 	LocationService locationService;
 	
 	@Override
-	protected <U> void setupSearchParams(OpenmrsFhirCriteriaContext<Location,U> criteriaContext, SearchParameterMap theParams) {
+	protected <U> void setupSearchParams(OpenmrsFhirCriteriaContext<Location, U> criteriaContext,
+	        SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.NAME_SEARCH_HANDLER:
@@ -70,7 +67,8 @@ public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLo
 					entry.getValue().forEach(param -> handleTag(criteriaContext, (TokenAndListParam) param.getParam()));
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
+					handleCommonSearchParameters(criteriaContext, entry.getValue())
+					        .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
 					break;
 			}
 		});
@@ -79,8 +77,8 @@ public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLo
 	@Override
 	public List<LocationAttribute> getActiveAttributesByLocationAndAttributeTypeUuid(@Nonnull Location location,
 	        @Nonnull String locationAttributeTypeUuid) {
-		OpenmrsFhirCriteriaContext<LocationAttribute,LocationAttribute> criteriaContext = createCriteriaContext(
-				LocationAttribute.class);
+		OpenmrsFhirCriteriaContext<LocationAttribute, LocationAttribute> criteriaContext = createCriteriaContext(
+		    LocationAttribute.class);
 		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot());
 		
 		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().and(
@@ -93,53 +91,57 @@ public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLo
 		return criteriaContext.getEntityManager().createQuery(criteriaContext.finalizeQuery()).getResultList();
 	}
 	
-	private <U> void handleName(OpenmrsFhirCriteriaContext<Location,U> criteriaContext, StringAndListParam namePattern) {
+	private <U> void handleName(OpenmrsFhirCriteriaContext<Location, U> criteriaContext, StringAndListParam namePattern) {
 		handleAndListParam(criteriaContext.getCriteriaBuilder(), namePattern,
 		    (name) -> propertyLike(criteriaContext, criteriaContext.getRoot(), "name", name))
 		            .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
 	}
 	
-	private <U> void handleCity(OpenmrsFhirCriteriaContext<Location,U> criteriaContext, StringAndListParam cityPattern) {
+	private <U> void handleCity(OpenmrsFhirCriteriaContext<Location, U> criteriaContext, StringAndListParam cityPattern) {
 		handleAndListParam(criteriaContext.getCriteriaBuilder(), cityPattern,
 		    (city) -> propertyLike(criteriaContext, criteriaContext.getRoot(), "cityVillage", city))
 		            .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
 	}
 	
-	private <U> void handleCountry(OpenmrsFhirCriteriaContext<Location,U> criteriaContext, StringAndListParam countryPattern) {
+	private <U> void handleCountry(OpenmrsFhirCriteriaContext<Location, U> criteriaContext,
+	        StringAndListParam countryPattern) {
 		handleAndListParam(criteriaContext.getCriteriaBuilder(), countryPattern,
 		    (country) -> propertyLike(criteriaContext, criteriaContext.getRoot(), "country", country))
 		            .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
 	}
 	
-	private <U> void handlePostalCode(OpenmrsFhirCriteriaContext<Location,U> criteriaContext,
+	private <U> void handlePostalCode(OpenmrsFhirCriteriaContext<Location, U> criteriaContext,
 	        StringAndListParam postalCodePattern) {
 		handleAndListParam(criteriaContext.getCriteriaBuilder(), postalCodePattern,
 		    (postalCode) -> propertyLike(criteriaContext, criteriaContext.getRoot(), "postalCode", postalCode))
 		            .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
 	}
 	
-	private <U> void handleState(OpenmrsFhirCriteriaContext<Location,U> criteriaContext, StringAndListParam statePattern) {
+	private <U> void handleState(OpenmrsFhirCriteriaContext<Location, U> criteriaContext, StringAndListParam statePattern) {
 		handleAndListParam(criteriaContext.getCriteriaBuilder(), statePattern,
 		    (state) -> propertyLike(criteriaContext, criteriaContext.getRoot(), "stateProvince", state))
 		            .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
 	}
 	
-	private <U> void handleTag(OpenmrsFhirCriteriaContext<Location,U> criteriaContext, TokenAndListParam tags) {
+	private <U> void handleTag(OpenmrsFhirCriteriaContext<Location, U> criteriaContext, TokenAndListParam tags) {
 		if (tags != null) {
 			criteriaContext.addJoin("tags", "t");
-			handleAndListParam(criteriaContext.getCriteriaBuilder(), tags, (tag) -> criteriaContext.getJoin("t").map(
+			handleAndListParam(criteriaContext.getCriteriaBuilder(), tags,
+			    (tag) -> criteriaContext.getJoin("t").map(
 			        locationTag -> criteriaContext.getCriteriaBuilder().equal(locationTag.get("name"), tag.getValue())))
 			                .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
 		}
 	}
 	
-	private <U> void handleParentLocation(OpenmrsFhirCriteriaContext<Location,U> criteriaContext, ReferenceAndListParam parent) {
-		From<?,?> locationAlias = criteriaContext.addJoin("parentLocation", "loc");
-		handleLocationReference(criteriaContext, locationAlias, parent).ifPresent(loc -> criteriaContext.addPredicate(loc).finalizeQuery());
+	private <U> void handleParentLocation(OpenmrsFhirCriteriaContext<Location, U> criteriaContext,
+	        ReferenceAndListParam parent) {
+		From<?, ?> locationAlias = criteriaContext.addJoin("parentLocation", "loc");
+		handleLocationReference(criteriaContext, locationAlias, parent)
+		        .ifPresent(loc -> criteriaContext.addPredicate(loc).finalizeQuery());
 	}
 	
 	@Override
-	protected <V,U> String paramToProp(OpenmrsFhirCriteriaContext<V,U> criteriaContext, @NonNull String param) {
+	protected <V, U> String paramToProp(OpenmrsFhirCriteriaContext<V, U> criteriaContext, @NonNull String param) {
 		switch (param) {
 			case org.hl7.fhir.r4.model.Location.SP_NAME:
 				return "name";

@@ -41,7 +41,7 @@ public class FhirContactPointMapDaoImpl implements FhirContactPointMapDao {
 	
 	@Override
 	public Optional<FhirContactPointMap> getFhirContactPointMapByUuid(String uuid) {
-		OpenmrsFhirCriteriaContext<FhirContactPointMap,FhirContactPointMap> criteriaContext = openmrsFhirCriteriaContext();
+		OpenmrsFhirCriteriaContext<FhirContactPointMap, FhirContactPointMap> criteriaContext = openmrsFhirCriteriaContext();
 		criteriaContext
 		        .addPredicate(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("uuid"), uuid));
 		
@@ -56,7 +56,7 @@ public class FhirContactPointMapDaoImpl implements FhirContactPointMapDao {
 			return Optional.empty();
 		}
 		
-		OpenmrsFhirCriteriaContext<FhirContactPointMap,FhirContactPointMap> criteriaContext = openmrsFhirCriteriaContext();
+		OpenmrsFhirCriteriaContext<FhirContactPointMap, FhirContactPointMap> criteriaContext = openmrsFhirCriteriaContext();
 		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot());
 		
 		return criteriaContext.getEntityManager().createQuery(
@@ -89,7 +89,7 @@ public class FhirContactPointMapDaoImpl implements FhirContactPointMapDao {
 			return Optional.empty();
 		}
 		
-		OpenmrsFhirCriteriaContext<FhirContactPointMap,FhirContactPointMap> criteriaContext = openmrsFhirCriteriaContext();
+		OpenmrsFhirCriteriaContext<FhirContactPointMap, FhirContactPointMap> criteriaContext = openmrsFhirCriteriaContext();
 		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot());
 		
 		return criteriaContext.getEntityManager().createQuery(
@@ -100,7 +100,7 @@ public class FhirContactPointMapDaoImpl implements FhirContactPointMapDao {
 	
 	@Override
 	public FhirContactPointMap saveFhirContactPointMap(@Nonnull FhirContactPointMap contactPointMap) {
-		OpenmrsFhirCriteriaContext<FhirContactPointMap,FhirContactPointMap> criteriaContext = openmrsFhirCriteriaContext();
+		OpenmrsFhirCriteriaContext<FhirContactPointMap, FhirContactPointMap> criteriaContext = openmrsFhirCriteriaContext();
 		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot());
 		
 		FhirContactPointMap existingContactPointMap = criteriaContext.getEntityManager().createQuery(
@@ -121,7 +121,7 @@ public class FhirContactPointMapDaoImpl implements FhirContactPointMapDao {
 		}
 	}
 	
-	private OpenmrsFhirCriteriaContext<FhirContactPointMap,FhirContactPointMap> openmrsFhirCriteriaContext() {
+	private OpenmrsFhirCriteriaContext<FhirContactPointMap, FhirContactPointMap> openmrsFhirCriteriaContext() {
 		EntityManager em = sessionFactory.getCurrentSession();
 		CriteriaBuilder cb = em.getCriteriaBuilder();
 		CriteriaQuery<FhirContactPointMap> cq = cb.createQuery(FhirContactPointMap.class);
