@@ -33,7 +33,6 @@ import lombok.AccessLevel;
 import lombok.NonNull;
 import lombok.Setter;
 import org.openmrs.Encounter;
-import org.openmrs.EncounterType;
 import org.openmrs.Order;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirEncounterDao;
@@ -52,7 +51,7 @@ public class FhirEncounterDaoImpl extends BaseEncounterDao<Encounter> implements
 	
 	@Override
 	public List<String> getSearchResultUuids(@Nonnull SearchParameterMap theParams) {
-		OpenmrsFhirCriteriaContext<Encounter,Encounter> criteriaContext = createCriteriaContext(Encounter.class);
+		OpenmrsFhirCriteriaContext<Encounter, Encounter> criteriaContext = createCriteriaContext(Encounter.class);
 		
 		if (!theParams.getParameters(FhirConstants.LASTN_ENCOUNTERS_SEARCH_HANDLER).isEmpty()) {
 			setupSearchParams(criteriaContext, theParams);
@@ -89,30 +88,30 @@ public class FhirEncounterDaoImpl extends BaseEncounterDao<Encounter> implements
 	}
 	
 	@Override
-	protected <U> void handleDate(OpenmrsFhirCriteriaContext<Encounter,U> criteriaContext, DateRangeParam dateRangeParam) {
+	protected <U> void handleDate(OpenmrsFhirCriteriaContext<Encounter, U> criteriaContext, DateRangeParam dateRangeParam) {
 		handleDateRange(criteriaContext, "encounterDatetime", dateRangeParam)
-				.ifPresent(encounterDatetime -> criteriaContext.addPredicate(encounterDatetime).finalizeQuery());
+		        .ifPresent(encounterDatetime -> criteriaContext.addPredicate(encounterDatetime).finalizeQuery());
 	}
 	
 	@Override
-	protected <U> void handleEncounterType(OpenmrsFhirCriteriaContext<Encounter,U> criteriaContext,
+	protected <U> void handleEncounterType(OpenmrsFhirCriteriaContext<Encounter, U> criteriaContext,
 	        TokenAndListParam tokenAndListParam) {
-		Join<?,?> join = criteriaContext.addJoin("encounterType","et");
+		Join<?, ?> join = criteriaContext.addJoin("encounterType", "et");
 		
-		handleAndListParam(criteriaContext.getCriteriaBuilder(), tokenAndListParam, t -> Optional
-				.of(criteriaContext.getCriteriaBuilder().equal(join.get("uuid"), t.getValue())))
-				.ifPresent(t -> criteriaContext.addPredicate(t).finalizeQuery());
+		handleAndListParam(criteriaContext.getCriteriaBuilder(), tokenAndListParam,
+		    t -> Optional.of(criteriaContext.getCriteriaBuilder().equal(join.get("uuid"), t.getValue())))
+		            .ifPresent(t -> criteriaContext.addPredicate(t).finalizeQuery());
 	}
 	
 	@Override
-	protected <U> void handleParticipant(OpenmrsFhirCriteriaContext<Encounter,U> criteriaContext,
+	protected <U> void handleParticipant(OpenmrsFhirCriteriaContext<Encounter, U> criteriaContext,
 	        ReferenceAndListParam referenceAndListParam) {
-		From<?,?> epJoin = criteriaContext.addJoin("encounterProviders", "ep");
-		handleParticipantReference(criteriaContext, referenceAndListParam,epJoin);
+		From<?, ?> epJoin = criteriaContext.addJoin("encounterProviders", "ep");
+		handleParticipantReference(criteriaContext, referenceAndListParam, epJoin);
 	}
 	
 	@Override
-	protected <V,U> String paramToProp(OpenmrsFhirCriteriaContext<V,U> criteriaContext, @NonNull String param) {
+	protected <V, U> String paramToProp(OpenmrsFhirCriteriaContext<V, U> criteriaContext, @NonNull String param) {
 		switch (param) {
 			case SP_DATE:
 				return "encounterDatetime";
@@ -122,7 +121,8 @@ public class FhirEncounterDaoImpl extends BaseEncounterDao<Encounter> implements
 	}
 	
 	@Override
-	protected <T,U> Predicate generateNotCompletedOrderQuery(OpenmrsFhirCriteriaContext<T,U> criteriaContext, String path) {
+	protected <T, U> Predicate generateNotCompletedOrderQuery(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
+	        String path) {
 		return criteriaContext.getCriteriaBuilder().or(
 		    criteriaContext.getCriteriaBuilder().isNull(criteriaContext.getRoot().join(path).get("fulfillerStatus")),
 		    criteriaContext.getCriteriaBuilder().notEqual(criteriaContext.getRoot().join(path).get("fulfillerStatus"),
@@ -130,15 +130,15 @@ public class FhirEncounterDaoImpl extends BaseEncounterDao<Encounter> implements
 	}
 	
 	@Override
-	protected <T,U> Predicate generateFulfillerStatusRestriction(OpenmrsFhirCriteriaContext<T,U> criteriaContext, String path,
-	        String fulfillerStatus) {
+	protected <T, U> Predicate generateFulfillerStatusRestriction(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
+	        String path, String fulfillerStatus) {
 		return criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().join(path).get("fulfillerStatus"),
 		    Order.FulfillerStatus.valueOf(fulfillerStatus.toUpperCase()));
 	}
 	
 	@Override
-	protected <T,U> Predicate generateNotFulfillerStatusRestriction(OpenmrsFhirCriteriaContext<T,U> criteriaContext, String path,
-	        String fulfillerStatus) {
+	protected <T, U> Predicate generateNotFulfillerStatusRestriction(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
+	        String path, String fulfillerStatus) {
 		return criteriaContext.getCriteriaBuilder().or(
 		    criteriaContext.getCriteriaBuilder().isNull(criteriaContext.getRoot().join(path).get("fulfillerStatus")),
 		    criteriaContext.getCriteriaBuilder().notEqual(criteriaContext.getRoot().join(path).get("fulfillerStatus"),

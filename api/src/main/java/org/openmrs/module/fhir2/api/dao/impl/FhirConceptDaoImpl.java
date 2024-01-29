@@ -52,7 +52,7 @@ public class FhirConceptDaoImpl extends BaseFhirDao<Concept> implements FhirConc
 			return Optional.empty();
 		}
 		
-		OpenmrsFhirCriteriaContext<Concept,Concept> criteriaContext = createCriteriaContext(Concept.class);
+		OpenmrsFhirCriteriaContext<Concept, Concept> criteriaContext = createCriteriaContext(Concept.class);
 		
 		createConceptMapCriteriaBuilder(conceptSource, mappingCode);
 		Optional<Join<?, ?>> conceptAliasJoin = criteriaContext.getJoin("concept");
@@ -81,12 +81,12 @@ public class FhirConceptDaoImpl extends BaseFhirDao<Concept> implements FhirConc
 			return Collections.emptyList();
 		}
 		
-		OpenmrsFhirCriteriaContext<ConceptMap,ConceptMap> criteriaContext = createCriteriaContext(ConceptMap.class);
+		OpenmrsFhirCriteriaContext<ConceptMap, ConceptMap> criteriaContext = createCriteriaContext(ConceptMap.class);
 		createConceptMapCriteriaBuilder(conceptSource, mappingCode);
 		Join<?, ?> conceptJoin = criteriaContext.addJoin("concept", "concept");
 		criteriaContext.addOrder(criteriaContext.getCriteriaBuilder().asc(conceptJoin.get("retired")));
 		
-		OpenmrsFhirCriteriaContext<Concept,Concept> fhirCriteriaContext = createCriteriaContext(Concept.class);
+		OpenmrsFhirCriteriaContext<Concept, Concept> fhirCriteriaContext = createCriteriaContext(Concept.class);
 		
 		return fhirCriteriaContext.getEntityManager().createQuery(fhirCriteriaContext.getCriteriaQuery())
 		        .unwrap(org.hibernate.query.Query.class).setResultTransformer(DistinctRootEntityResultTransformer.INSTANCE)
@@ -94,7 +94,8 @@ public class FhirConceptDaoImpl extends BaseFhirDao<Concept> implements FhirConc
 	}
 	
 	@Override
-	protected <U> void setupSearchParams(OpenmrsFhirCriteriaContext<Concept,U> criteriaContext, SearchParameterMap theParams) {
+	protected <U> void setupSearchParams(OpenmrsFhirCriteriaContext<Concept, U> criteriaContext,
+	        SearchParameterMap theParams) {
 		criteriaContext.getCriteriaBuilder()
 		        .and(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("set"), true));
 		theParams.getParameters().forEach(entry -> {
@@ -106,7 +107,7 @@ public class FhirConceptDaoImpl extends BaseFhirDao<Concept> implements FhirConc
 		});
 	}
 	
-	protected <U> void handleTitle(OpenmrsFhirCriteriaContext<Concept,U> criteriaContext, StringAndListParam titlePattern) {
+	protected <U> void handleTitle(OpenmrsFhirCriteriaContext<Concept, U> criteriaContext, StringAndListParam titlePattern) {
 		Join<?, ?> conceptNamesJoin = criteriaContext.addJoin("names", "cn");
 		handleAndListParam(criteriaContext.getCriteriaBuilder(), titlePattern,
 		    (title) -> propertyLike(criteriaContext, conceptNamesJoin, "name", title))
@@ -114,7 +115,7 @@ public class FhirConceptDaoImpl extends BaseFhirDao<Concept> implements FhirConc
 	}
 	
 	protected <U> void createConceptMapCriteriaBuilder(@Nonnull ConceptSource conceptSource, String mappingCode) {
-		OpenmrsFhirCriteriaContext<ConceptMap,ConceptMap> criteriaContext = createCriteriaContext(ConceptMap.class);
+		OpenmrsFhirCriteriaContext<ConceptMap, ConceptMap> criteriaContext = createCriteriaContext(ConceptMap.class);
 		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot().get("concept"));
 		criteriaContext.addJoin("conceptMapType", "mapType");
 		criteriaContext.addJoin("concept", "concept");

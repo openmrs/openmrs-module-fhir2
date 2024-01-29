@@ -45,15 +45,18 @@ public class FhirPersonDaoImpl extends BasePersonDao<Person> implements FhirPers
 	}
 	
 	@Override
-	protected <U> void setupSearchParams(OpenmrsFhirCriteriaContext<Person,U> criteriaContext, SearchParameterMap theParams) {
+	protected <U> void setupSearchParams(OpenmrsFhirCriteriaContext<Person, U> criteriaContext,
+	        SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.NAME_SEARCH_HANDLER:
 					entry.getValue().forEach(param -> handleNames(criteriaContext, entry.getValue()));
 					break;
 				case FhirConstants.GENDER_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handleGender(criteriaContext, getPersonProperty(criteriaContext),
-					    "gender", (TokenAndListParam) param.getParam()).ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery()));
+					entry.getValue()
+					        .forEach(param -> handleGender(criteriaContext, getPersonProperty(criteriaContext), "gender",
+					            (TokenAndListParam) param.getParam())
+					                    .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery()));
 					break;
 				case FhirConstants.DATE_RANGE_SEARCH_HANDLER:
 					entry.getValue().forEach(
@@ -64,14 +67,15 @@ public class FhirPersonDaoImpl extends BasePersonDao<Person> implements FhirPers
 					handleAddresses(criteriaContext, entry);
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
+					handleCommonSearchParameters(criteriaContext, entry.getValue())
+					        .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
 					break;
 			}
 		});
 	}
 	
 	@Override
-	protected <T,U> Optional<Predicate> handleLastUpdated(OpenmrsFhirCriteriaContext<T,U> criteriaContext,
+	protected <T, U> Optional<Predicate> handleLastUpdated(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
 	        DateRangeParam param) {
 		return Optional.of(criteriaContext.getCriteriaBuilder().or(toCriteriaArray(
 		    handleDateRange(criteriaContext, "personDateChanged", param),
@@ -83,7 +87,7 @@ public class FhirPersonDaoImpl extends BasePersonDao<Person> implements FhirPers
 	}
 	
 	@Override
-	protected <U> void handleVoidable(OpenmrsFhirCriteriaContext<Person,U> criteriaContext) {
+	protected <U> void handleVoidable(OpenmrsFhirCriteriaContext<Person, U> criteriaContext) {
 		criteriaContext.addPredicate(
 		    criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("personVoided"), false));
 	}

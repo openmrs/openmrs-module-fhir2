@@ -23,7 +23,7 @@ import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 public abstract class BasePractitionerDao<T extends OpenmrsObject & Auditable> extends BasePersonDao<T> {
 	
 	@Override
-	protected <U> void setupSearchParams(OpenmrsFhirCriteriaContext<T,U> criteriaContext, SearchParameterMap theParams) {
+	protected <U> void setupSearchParams(OpenmrsFhirCriteriaContext<T, U> criteriaContext, SearchParameterMap theParams) {
 		criteriaContext.addJoin("person", "p");
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
@@ -38,11 +38,13 @@ public abstract class BasePractitionerDao<T extends OpenmrsObject & Auditable> e
 					handleAddresses(criteriaContext, entry);
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(handler -> criteriaContext.addPredicate(handler).finalizeQuery());
+					handleCommonSearchParameters(criteriaContext, entry.getValue())
+					        .ifPresent(handler -> criteriaContext.addPredicate(handler).finalizeQuery());
 					break;
 			}
 		});
 	}
 	
-	protected abstract <U> void handleIdentifier(OpenmrsFhirCriteriaContext<T,U> criteriaContext, TokenAndListParam identifier);
+	protected abstract <U> void handleIdentifier(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
+	        TokenAndListParam identifier);
 }

@@ -36,7 +36,8 @@ public class FhirServiceRequestDaoImpl extends BaseFhirDao<TestOrder> implements
 	}
 	
 	@Override
-	protected <U> void setupSearchParams(OpenmrsFhirCriteriaContext<TestOrder,U> criteriaContext, SearchParameterMap theParams) {
+	protected <U> void setupSearchParams(OpenmrsFhirCriteriaContext<TestOrder, U> criteriaContext,
+	        SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER:
@@ -61,21 +62,22 @@ public class FhirServiceRequestDaoImpl extends BaseFhirDao<TestOrder> implements
 					            .ifPresent(d -> criteriaContext.addPredicate(d).finalizeQuery()));
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
+					handleCommonSearchParameters(criteriaContext, entry.getValue())
+					        .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
 					break;
 			}
 		});
 	}
 	
-	private <U> void handleCodedConcept(OpenmrsFhirCriteriaContext<TestOrder,U> criteriaContext, TokenAndListParam code) {
+	private <U> void handleCodedConcept(OpenmrsFhirCriteriaContext<TestOrder, U> criteriaContext, TokenAndListParam code) {
 		if (code != null) {
-			From<?,?> conceptJoin = criteriaContext.addJoin("concept", "c");
+			From<?, ?> conceptJoin = criteriaContext.addJoin("concept", "c");
 			handleCodeableConcept(criteriaContext, code, conceptJoin, "cm", "crt")
-					.ifPresent(handler -> criteriaContext.addPredicate(handler).finalizeQuery());
+			        .ifPresent(handler -> criteriaContext.addPredicate(handler).finalizeQuery());
 		}
 	}
 	
-	private <T,U> Optional<Predicate> handleDateRange(OpenmrsFhirCriteriaContext<T,U> criteriaContext,
+	private <T, U> Optional<Predicate> handleDateRange(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
 	        DateRangeParam dateRangeParam) {
 		if (dateRangeParam == null) {
 			return Optional.empty();
@@ -89,11 +91,13 @@ public class FhirServiceRequestDaoImpl extends BaseFhirDao<TestOrder> implements
 		                            Optional.of(criteriaContext.getCriteriaBuilder()
 		                                    .or(toCriteriaArray(Stream.of(
 		                                        handleDate(criteriaContext, "scheduledDate", dateRangeParam.getLowerBound()),
-		                                        handleDate(criteriaContext, "dateActivated", dateRangeParam.getLowerBound()))))),
+		                                        handleDate(criteriaContext, "dateActivated",
+		                                            dateRangeParam.getLowerBound()))))),
 		                            Optional.of(criteriaContext.getCriteriaBuilder()
 		                                    .or(toCriteriaArray(Stream.of(
 		                                        handleDate(criteriaContext, "dateStopped", dateRangeParam.getUpperBound()),
-		                                        handleDate(criteriaContext, "autoExpireDate", dateRangeParam.getUpperBound())))))))));
+		                                        handleDate(criteriaContext, "autoExpireDate",
+		                                            dateRangeParam.getUpperBound())))))))));
 	}
 	
 }

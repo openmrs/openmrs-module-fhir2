@@ -118,7 +118,8 @@ public class FhirTask extends BaseOpenmrsMetadata {
 	private Set<FhirTaskInput> input;
 	
 	/**
-	 * Outputs produced by the Task. see <a href="https://www.hl7.org/fhir/task-definitions.html#Task.output">...</a>
+	 * Outputs produced by the Task. see
+	 * <a href="https://www.hl7.org/fhir/task-definitions.html#Task.output">...</a>
 	 */
 	@OneToMany(cascade = CascadeType.ALL)
 	@JoinColumn(name = "task_id")

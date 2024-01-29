@@ -46,7 +46,7 @@ import org.springframework.stereotype.Component;
 public class FhirRelatedPersonDaoImpl extends BaseFhirDao<Relationship> implements FhirRelatedPersonDao {
 	
 	@Override
-	protected <U> void setupSearchParams(OpenmrsFhirCriteriaContext<Relationship,U> criteriaContext,
+	protected <U> void setupSearchParams(OpenmrsFhirCriteriaContext<Relationship, U> criteriaContext,
 	        SearchParameterMap theParams) {
 		From<?, ?> personJoin = criteriaContext.addJoin("personA", "m");
 		theParams.getParameters().forEach(entry -> {
@@ -69,14 +69,15 @@ public class FhirRelatedPersonDaoImpl extends BaseFhirDao<Relationship> implemen
 					handleAddresses(criteriaContext, entry);
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
+					handleCommonSearchParameters(criteriaContext, entry.getValue())
+					        .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
 					break;
 			}
 		});
 	}
 	
 	@Override
-	protected <T,U> Collection<Order> paramToProps(OpenmrsFhirCriteriaContext<T,U> criteriaContext,
+	protected <T, U> Collection<Order> paramToProps(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
 	        @Nonnull SortState sortState) {
 		String param = sortState.getParameter();
 		
@@ -165,7 +166,7 @@ public class FhirRelatedPersonDaoImpl extends BaseFhirDao<Relationship> implemen
 	}
 	
 	@Override
-	protected <V,U> String paramToProp(OpenmrsFhirCriteriaContext<V,U> criteriaContext, @Nonnull String param) {
+	protected <V, U> String paramToProp(OpenmrsFhirCriteriaContext<V, U> criteriaContext, @Nonnull String param) {
 		switch (param) {
 			case SP_BIRTHDATE:
 				return "m.birthdate";
@@ -182,7 +183,7 @@ public class FhirRelatedPersonDaoImpl extends BaseFhirDao<Relationship> implemen
 		}
 	}
 	
-	private <U> void handleAddresses(OpenmrsFhirCriteriaContext<Relationship,U> criteriaContext,
+	private <U> void handleAddresses(OpenmrsFhirCriteriaContext<Relationship, U> criteriaContext,
 	        Map.Entry<String, List<PropParam<?>>> entry) {
 		StringAndListParam city = null;
 		StringAndListParam country = null;
@@ -206,8 +207,9 @@ public class FhirRelatedPersonDaoImpl extends BaseFhirDao<Relationship> implemen
 		}
 		
 		From<?, ?> personJoin = criteriaContext.addJoin("personA", "m");
-		From<?,?> padJoin = criteriaContext.addJoin(personJoin,"addresses","pad");
-		handlePersonAddress(criteriaContext, padJoin, city, state, postalCode, country).ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
+		From<?, ?> padJoin = criteriaContext.addJoin(personJoin, "addresses", "pad");
+		handlePersonAddress(criteriaContext, padJoin, city, state, postalCode, country)
+		        .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
 	}
 	
 }

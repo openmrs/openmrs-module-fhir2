@@ -98,7 +98,8 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 	}
 	
 	@Override
-	protected <U> void setupSearchParams(OpenmrsFhirCriteriaContext<Patient,U> criteriaContext, SearchParameterMap theParams) {
+	protected <U> void setupSearchParams(OpenmrsFhirCriteriaContext<Patient, U> criteriaContext,
+	        SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.QUERY_SEARCH_HANDLER:
@@ -109,8 +110,10 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 					handleNames(criteriaContext, entry.getValue());
 					break;
 				case FhirConstants.GENDER_SEARCH_HANDLER:
-					entry.getValue().forEach(p -> handleGender(criteriaContext, getPersonProperty(criteriaContext),
-					    p.getPropertyName(), (TokenAndListParam) p.getParam()).ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery()));
+					entry.getValue()
+					        .forEach(p -> handleGender(criteriaContext, getPersonProperty(criteriaContext),
+					            p.getPropertyName(), (TokenAndListParam) p.getParam())
+					                    .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery()));
 					break;
 				case FhirConstants.IDENTIFIER_SEARCH_HANDLER:
 					entry.getValue().forEach(
@@ -119,7 +122,8 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 				case FhirConstants.DATE_RANGE_SEARCH_HANDLER:
 					entry.getValue()
 					        .forEach(dateRangeParam -> handleDateRange(criteriaContext, dateRangeParam.getPropertyName(),
-					            (DateRangeParam) dateRangeParam.getParam()).ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery()));
+					            (DateRangeParam) dateRangeParam.getParam())
+					                    .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery()));
 					break;
 				case FhirConstants.BOOLEAN_SEARCH_HANDLER:
 					entry.getValue().forEach(
@@ -130,13 +134,15 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 					handleAddresses(criteriaContext, entry);
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
+					handleCommonSearchParameters(criteriaContext, entry.getValue())
+					        .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
 					break;
 			}
 		});
 	}
 	
-	private <U> void handlePatientQuery(OpenmrsFhirCriteriaContext<Patient,U> criteriaContext, @Nonnull StringAndListParam query) {
+	private <U> void handlePatientQuery(OpenmrsFhirCriteriaContext<Patient, U> criteriaContext,
+	        @Nonnull StringAndListParam query) {
 		if (query == null) {
 			return;
 		}
@@ -168,7 +174,8 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 		}).ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
 	}
 	
-	protected <U> void handleIdentifier(OpenmrsFhirCriteriaContext<Patient,U> criteriaContext, TokenAndListParam identifier) {
+	protected <U> void handleIdentifier(OpenmrsFhirCriteriaContext<Patient, U> criteriaContext,
+	        TokenAndListParam identifier) {
 		if (identifier == null) {
 			return;
 		}
@@ -192,7 +199,7 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 	}
 	
 	@Override
-	protected <V,U> String paramToProp(OpenmrsFhirCriteriaContext<V,U> criteriaContext, @NonNull String param) {
+	protected <V, U> String paramToProp(OpenmrsFhirCriteriaContext<V, U> criteriaContext, @NonNull String param) {
 		if (SP_DEATH_DATE.equalsIgnoreCase(param)) {
 			return "deathDate";
 		}

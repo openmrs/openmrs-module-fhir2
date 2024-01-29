@@ -32,17 +32,20 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 /**
- * {@code OpenmrsFhirCriteriaContext} is a holder object for building criteria queries in the FHIR2 DAO API. It is
- * provided as a convenience since the old Hibernate Criteria API allowed us to simply pass a Criteria object around,
- * but the JPA2 Criteria API requires us to pass several different classes around.
- * <br/><br/>
- * Criteria queries are built up mostly by calling methods on this class to add various joins, predicates, and sort orders
- * which are built into a {@link CriteriaQuery<U>} by calling {@link #finalizeQuery()}. {@link #finalizeQuery()} should
- * only be called once the full query has been built and only just before running the query if possible.
- * <br/><br/>
- * The type {@code T} indicates the type of object that is the "root" of the query. For most queries, the type {@code U},
- * which is the expected type of the result, will be the same as {@code T}; however, for some queries, like those that
- * count results, {@code U} will have a different type.
+ * {@code OpenmrsFhirCriteriaContext} is a holder object for building criteria queries in the FHIR2
+ * DAO API. It is provided as a convenience since the old Hibernate Criteria API allowed us to
+ * simply pass a Criteria object around, but the JPA2 Criteria API requires us to pass several
+ * different classes around. <br/>
+ * <br/>
+ * Criteria queries are built up mostly by calling methods on this class to add various joins,
+ * predicates, and sort orders which are built into a {@link CriteriaQuery<U>} by calling
+ * {@link #finalizeQuery()}. {@link #finalizeQuery()} should only be called once the full query has
+ * been built and only just before running the query if possible. <br/>
+ * <br/>
+ * The type {@code T} indicates the type of object that is the "root" of the query. For most
+ * queries, the type {@code U}, which is the expected type of the result, will be the same as
+ * {@code T}; however, for some queries, like those that count results, {@code U} will have a
+ * different type.
  *
  * @param <T> The root type for the query
  * @param <U> The type for the result of the query

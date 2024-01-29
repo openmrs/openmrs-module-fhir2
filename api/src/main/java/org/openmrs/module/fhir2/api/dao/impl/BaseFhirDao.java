@@ -15,17 +15,15 @@ import static org.openmrs.module.fhir2.FhirConstants.EXACT_TOTAL_SEARCH_PARAMETE
 
 import javax.annotation.Nonnull;
 import javax.persistence.CacheStoreMode;
-import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
+import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Selection;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -36,20 +34,15 @@ import java.util.stream.Stream;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import com.google.common.reflect.TypeToken;
-import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.Hibernate;
+import org.hibernate.metamodel.spi.MetamodelImplementor;
 import org.hibernate.proxy.HibernateProxy;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.openmrs.Auditable;
-import org.openmrs.BaseOpenmrsObject;
-import org.openmrs.Encounter;
 import org.openmrs.Obs;
 import org.openmrs.OpenmrsObject;
 import org.openmrs.Order;
-import org.openmrs.Patient;
-import org.openmrs.Person;
 import org.openmrs.Retireable;
-import org.openmrs.TestOrder;
 import org.openmrs.Voidable;
 import org.openmrs.aop.RequiredDataAdvice;
 import org.openmrs.api.handler.RetireHandler;
@@ -58,7 +51,6 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirDao;
 import org.openmrs.module.fhir2.api.search.param.PropParam;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
-import org.openmrs.module.fhir2.model.FhirTask;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -80,18 +72,6 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	private final boolean isVoidable;
 	
 	private final boolean isImmutable;
-	
-	private final String person = getIdPropertyName(Person.class);
-	
-	private final String encounter = getIdPropertyName(Encounter.class);
-	
-	private final String obs = getIdPropertyName(Obs.class);
-	
-	private final String fhirTask = getIdPropertyName(FhirTask.class);
-	
-	private final String testOrder = getIdPropertyName(TestOrder.class);
-	
-	private final String patient = getIdPropertyName(Patient.class);
 	
 	@SuppressWarnings({ "UnstableApiUsage" })
 	protected BaseFhirDao() {
@@ -184,102 +164,37 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	@Override
 	@SuppressWarnings({ "unchecked", "UnstableApiUsage" })
 	public List<T> getSearchResults(@Nonnull SearchParameterMap theParams) {
-		OpenmrsFhirCriteriaContext<T, T> criteriaContext = getSearchResultCriteria(theParams);
+		List<T> results;
+		OpenmrsFhirCriteriaContext<T, ?> criteriaContext = getSearchResultCriteria(theParams);
+		String idProperty = getIdPropertyName(criteriaContext);
 		
 		handleSort(criteriaContext, theParams.getSortSpec());
+		handleIdPropertyOrdering(criteriaContext, idProperty);
 		
-		if (Person.class.isAssignableFrom(BaseOpenmrsObject.class)) {
-			handleIdPropertyOrdering(criteriaContext, person);
-		} else if (Encounter.class.isAssignableFrom(BaseOpenmrsObject.class)) {
-			handleIdPropertyOrdering(criteriaContext, encounter);
-		} else if (Obs.class.isAssignableFrom(BaseOpenmrsObject.class)) {
-			handleIdPropertyOrdering(criteriaContext, obs);
-		} else if (FhirTask.class.isAssignableFrom(BaseOpenmrsObject.class)) {
-			handleIdPropertyOrdering(criteriaContext, fhirTask);
-		} else if (Patient.class.isAssignableFrom(BaseOpenmrsObject.class)) {
-			handleIdPropertyOrdering(criteriaContext, patient);
-		}
-		
-		criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery())
-		        .setFirstResult(theParams.getFromIndex());
+		TypedQuery<T> executableQuery = (TypedQuery<T>) criteriaContext.getEntityManager()
+		        .createQuery(criteriaContext.getCriteriaQuery());
+		executableQuery.setFirstResult(theParams.getFromIndex());
 		if (theParams.getToIndex() != Integer.MAX_VALUE) {
 			int maxResults = theParams.getToIndex() - theParams.getFromIndex();
-			criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).setMaxResults(maxResults);
+			executableQuery.setMaxResults(maxResults);
 		}
 		
-		List<T> results;
 		if (hasDistinctResults()) {
-			results = criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).getResultList();
+			results = (List<T>) criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery())
+			        .getResultList();
 		} else {
-			EntityManager em = sessionFactory.getCurrentSession();
-			CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
-			CriteriaQuery<Object[]> criteriaQuery = criteriaBuilder.createQuery(Object[].class);
-			Root<T> root = (Root<T>) criteriaQuery.from(typeToken.getRawType());
+			criteriaContext.getCriteriaQuery().multiselect(criteriaContext.getRoot().get(idProperty).alias("id"))
+			        .distinct(true);
+			criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot().get(getIdPropertyName(criteriaContext)))
+			        .distinct(true);
+			List<Integer> id = (List<Integer>) criteriaContext.getEntityManager()
+			        .createQuery(criteriaContext.getCriteriaQuery()).getResultList();
 			
-			List<Selection<?>> selectionList = new ArrayList<>();
-			if (Person.class.isAssignableFrom(BaseOpenmrsObject.class)) {
-				handleIdPropertySelection(selectionList, root, criteriaBuilder, person);
-			} else if (Encounter.class.isAssignableFrom(BaseOpenmrsObject.class)) {
-				handleIdPropertySelection(selectionList, root, criteriaBuilder, encounter);
-			} else if (Obs.class.isAssignableFrom(BaseOpenmrsObject.class)) {
-				handleIdPropertySelection(selectionList, root, criteriaBuilder, obs);
-			}else if (FhirTask.class.isAssignableFrom(BaseOpenmrsObject.class)) {
-				handleIdPropertySelection(selectionList, root, criteriaBuilder, fhirTask);
-			} else if (Patient.class.isAssignableFrom(BaseOpenmrsObject.class)) {
-				handleIdPropertySelection(selectionList, root, criteriaBuilder, patient);
-			}
-			
-			criteriaQuery.multiselect(selectionList);
-			handleSort(criteriaContext, theParams.getSortSpec(), this::paramToProps).ifPresent(
-			    orders -> orders.forEach(order -> selectionList.add(root.get(getPropertyName(order.getExpression())))));
-			List<T> ids = new ArrayList<>();
-			if (selectionList.size() > 1) {
-				for (Object[] o : em.createQuery(criteriaQuery).getResultList()) {
-					ids.add((T) o[0]);
-				}
-			} else {
-				EntityManager manager = sessionFactory.getCurrentSession();
-				CriteriaBuilder builder = manager.getCriteriaBuilder();
-				CriteriaQuery<T> cq = (CriteriaQuery<T>) builder.createQuery(typeToken.getRawType());
-				Root<T> rt = (Root<T>) cq.from(typeToken.getRawType());
-				cq.select(rt);
-				ids = manager.createQuery(cq).getResultList();
-			}
-			
-			CriteriaQuery<T> idsCriteriaQuery = (CriteriaQuery<T>) criteriaBuilder.createQuery(typeToken.getRawType());
-			Root<T> idsRoot = (Root<T>) idsCriteriaQuery.from(typeToken.getRawType());
-			
-			if (Person.class.isAssignableFrom(BaseOpenmrsObject.class)) {
-				handleIdPropertyInCondition(idsCriteriaQuery, idsRoot, ids, person);
-			} else if (Encounter.class.isAssignableFrom(BaseOpenmrsObject.class)) {
-				handleIdPropertyInCondition(idsCriteriaQuery, idsRoot, ids, encounter);
-			} else if (Obs.class.isAssignableFrom(BaseOpenmrsObject.class)) {
-				handleIdPropertyInCondition(idsCriteriaQuery, idsRoot, ids, obs);
-			} else if (FhirTask.class.isAssignableFrom(BaseOpenmrsObject.class)) {
-				handleIdPropertyInCondition(idsCriteriaQuery, idsRoot, ids, fhirTask);
-			} else if (Patient.class.isAssignableFrom(BaseOpenmrsObject.class)) {
-				handleIdPropertyInCondition(idsCriteriaQuery, idsRoot, ids, patient);
-			}
-			
-			results = em.createQuery(idsCriteriaQuery).getResultList();
-			
-			// Need to reapply ordering
-			handleSort(criteriaContext, theParams.getSortSpec());
-			
-			if (Person.class.isAssignableFrom(BaseOpenmrsObject.class)) {
-				handleIdPropertyOrdering(criteriaBuilder, idsCriteriaQuery, idsRoot, person);
-			} else if (Encounter.class.isAssignableFrom(BaseOpenmrsObject.class)) {
-				handleIdPropertyOrdering(criteriaBuilder, idsCriteriaQuery, idsRoot, encounter);
-			} else if (Obs.class.isAssignableFrom(BaseOpenmrsObject.class)) {
-				handleIdPropertyOrdering(criteriaBuilder, idsCriteriaQuery, idsRoot, obs);
-			} else if (FhirTask.class.isAssignableFrom(BaseOpenmrsObject.class)) {
-				handleIdPropertyOrdering(criteriaBuilder, idsCriteriaQuery, idsRoot, fhirTask);
-			} else if (Patient.class.isAssignableFrom(BaseOpenmrsObject.class)) {
-				handleIdPropertyOrdering(criteriaBuilder, idsCriteriaQuery, idsRoot, patient);
-			}
-			
-			results = criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).getResultList();
+			OpenmrsFhirCriteriaContext<T, T> wrapperQuery = createCriteriaContext(typeToken.getRawType());
+			wrapperQuery.getCriteriaQuery().where(wrapperQuery.getRoot().get(idProperty).in(id));
+			results = wrapperQuery.getEntityManager().createQuery(wrapperQuery.getCriteriaQuery()).getResultList();
 		}
+		
 		return results.stream().map(this::deproxyResult).collect(Collectors.toList());
 	}
 	
@@ -288,26 +203,15 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	public int getSearchResultsCount(@Nonnull SearchParameterMap theParams) {
 		OpenmrsFhirCriteriaContext<T, Long> criteriaContext = getSearchResultCriteria(theParams);
 		applyExactTotal(criteriaContext, theParams);
-
+		
 		if (hasDistinctResults()) {
 			criteriaContext.getCriteriaQuery().select(criteriaContext.getCriteriaBuilder().count(criteriaContext.getRoot()));
 		} else {
-			//the id property differs across various openmrs entities
-			if (Person.class.isAssignableFrom(typeToken.getRawType())) {
-				criteriaContext.getCriteriaQuery().select(criteriaContext.getCriteriaBuilder().countDistinct(criteriaContext.getRoot().get(person)));
-			} else if (Encounter.class.isAssignableFrom(typeToken.getRawType())) {
-				criteriaContext.getCriteriaQuery().select(criteriaContext.getCriteriaBuilder().countDistinct(criteriaContext.getRoot().get(encounter)));
-			} else if (Obs.class.isAssignableFrom(typeToken.getRawType())) {
-				criteriaContext.getCriteriaQuery().select(criteriaContext.getCriteriaBuilder().countDistinct(criteriaContext.getRoot().get(obs)));
-			} else if (FhirTask.class.isAssignableFrom(BaseOpenmrsObject.class)) {
-				criteriaContext.getCriteriaQuery().select(criteriaContext.getCriteriaBuilder().countDistinct(criteriaContext.getRoot().get(fhirTask)));
-			} else if (TestOrder.class.isAssignableFrom(BaseOpenmrsObject.class)) {
-				criteriaContext.getCriteriaQuery().select(criteriaContext.getCriteriaBuilder().countDistinct(criteriaContext.getRoot().get(testOrder)));
-			} else if (Patient.class.isAssignableFrom(BaseOpenmrsObject.class)) {
-				criteriaContext.getCriteriaQuery().select(criteriaContext.getCriteriaBuilder().countDistinct(criteriaContext.getRoot().get(patient)));
-			}
+			criteriaContext.getCriteriaQuery().select(criteriaContext.getCriteriaBuilder()
+			        .countDistinct(criteriaContext.getRoot().get(getIdPropertyName(criteriaContext))));
 		}
-			return criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).getSingleResult().intValue();
+		return criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).getSingleResult()
+		        .intValue();
 	}
 	
 	/**
@@ -321,7 +225,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 		return true;
 	}
 	
-	protected <U> void createAlias(OpenmrsFhirCriteriaContext<T,U> criteriaContext, String referencedEntity, String alias) {
+	protected <U> void createAlias(OpenmrsFhirCriteriaContext<T, U> criteriaContext, String referencedEntity, String alias) {
 		criteriaContext.getRoot().join(referencedEntity).alias(alias);
 	}
 	
@@ -335,7 +239,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 		return handleLastUpdatedMutable(criteriaContext, param);
 	}
 	
-	protected <V,U> Optional<Predicate> handleLastUpdatedMutable(OpenmrsFhirCriteriaContext<V,U> criteriaContext,
+	protected <V, U> Optional<Predicate> handleLastUpdatedMutable(OpenmrsFhirCriteriaContext<V, U> criteriaContext,
 	        DateRangeParam param) {
 		// @formatter:off
 		return Optional.of(criteriaContext.getCriteriaBuilder().or(toCriteriaArray(handleDateRange(criteriaContext,"dateChanged", param), Optional.of(
@@ -344,7 +248,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	}
 	
 	// Implementation of handleLastUpdated for "immutable" types, that is, those that cannot be changed
-	protected <V,U> Optional<Predicate> handleLastUpdatedImmutable(OpenmrsFhirCriteriaContext<V,U> criteriaContext,
+	protected <V, U> Optional<Predicate> handleLastUpdatedImmutable(OpenmrsFhirCriteriaContext<V, U> criteriaContext,
 	        DateRangeParam param) {
 		return handleDateRange(criteriaContext, "dateCreated", param);
 	}
@@ -355,7 +259,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	 *
 	 * @param criteriaContext The {@link OpenmrsFhirCriteriaContext} for the current query
 	 */
-	protected <U> void handleVoidable(OpenmrsFhirCriteriaContext<T,U> criteriaContext) {
+	protected <U> void handleVoidable(OpenmrsFhirCriteriaContext<T, U> criteriaContext) {
 		criteriaContext
 		        .addPredicate(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("voided"), false));
 	}
@@ -366,7 +270,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	 *
 	 * @param criteriaContext The {@link OpenmrsFhirCriteriaContext} for the current query
 	 */
-	protected <U> void handleRetireable(OpenmrsFhirCriteriaContext<T,U> criteriaContext) {
+	protected <U> void handleRetireable(OpenmrsFhirCriteriaContext<T, U> criteriaContext) {
 		criteriaContext
 		        .addPredicate(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("retired"), false));
 	}
@@ -405,8 +309,8 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	}
 	
 	@Override
-	protected <V, U> Collection<javax.persistence.criteria.Order> paramToProps(OpenmrsFhirCriteriaContext<V, U> criteriaContext,
-	        @Nonnull SortState sortState) {
+	protected <V, U> Collection<javax.persistence.criteria.Order> paramToProps(
+	        OpenmrsFhirCriteriaContext<V, U> criteriaContext, @Nonnull SortState sortState) {
 		String param = sortState.getParameter();
 		
 		if (FhirConstants.SP_LAST_UPDATED.equalsIgnoreCase(param)) {
@@ -433,7 +337,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	}
 	
 	@Override
-	protected <V,U> String paramToProp(OpenmrsFhirCriteriaContext<V,U> criteriaContext, @Nonnull String param) {
+	protected <V, U> String paramToProp(OpenmrsFhirCriteriaContext<V, U> criteriaContext, @Nonnull String param) {
 		if (DomainResource.SP_RES_ID.equals(param)) {
 			return "uuid";
 		}
@@ -442,7 +346,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	}
 	
 	@SuppressWarnings("unchecked")
-	protected <V,U> void applyExactTotal(OpenmrsFhirCriteriaContext<V,U> criteriaContext, SearchParameterMap theParams) {
+	protected <V, U> void applyExactTotal(OpenmrsFhirCriteriaContext<V, U> criteriaContext, SearchParameterMap theParams) {
 		List<PropParam<?>> exactTotal = theParams.getParameters(EXACT_TOTAL_SEARCH_PARAMETER);
 		if (!exactTotal.isEmpty()) {
 			PropParam<Boolean> propParam = (PropParam<Boolean>) exactTotal.get(0);
@@ -475,44 +379,34 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 		}
 	}
 	
+	@SuppressWarnings({ "UnstableApiUsage" })
+	protected <V, U> String getIdPropertyName(OpenmrsFhirCriteriaContext<V, U> criteriaContext) {
+		return ((MetamodelImplementor) criteriaContext.getEntityManager().getEntityManagerFactory().getMetamodel())
+		        .entityPersister(typeToken.getRawType()).getIdentifierPropertyName();
+	}
+	
 	/**
 	 * Handles the ordering of the criteria based on the specified id property name.
 	 *
 	 * @param criteriaContext The criteria context containing the criteria builder and root.
 	 * @param idPropertyName The name of the id property to be used for ordering.
 	 */
-	private <V,U> void handleIdPropertyOrdering(OpenmrsFhirCriteriaContext<V,U> criteriaContext, String idPropertyName) {
+	protected <V, U> void handleIdPropertyOrdering(OpenmrsFhirCriteriaContext<V, U> criteriaContext, String idPropertyName) {
 		criteriaContext.getCriteriaQuery()
 		        .orderBy(criteriaContext.getCriteriaBuilder().asc(criteriaContext.getRoot().get(idPropertyName)));
 	}
 	
 	/**
-	 * Handles the ordering
-	 * of the criteria based on the specified id property name.
+	 * Handles the ordering of the criteria based on the specified id property name.
 	 *
 	 * @param criteriaBuilder The criteria builder to build expressions
 	 * @param criteriaQuery The criteria query for the idPropertyName.
 	 * @param idsRoot The root of the criteria query for the idPropertyName
 	 * @param idPropertyName The name of the id property to be used for ordering.
 	 */
-	private void handleIdPropertyOrdering(CriteriaBuilder criteriaBuilder, CriteriaQuery<T> criteriaQuery, Root<T> idsRoot,
+	protected void handleIdPropertyOrdering(CriteriaBuilder criteriaBuilder, CriteriaQuery<T> criteriaQuery, Root<T> idsRoot,
 	        String idPropertyName) {
 		criteriaQuery.orderBy(criteriaBuilder.asc(idsRoot.get(idPropertyName)));
-	}
-	
-	/**
-	 * Handles the selection list based on the specified id property name, adding both the property and
-	 * its distinct count.
-	 *
-	 * @param selectionList The list of selections to be populated.
-	 * @param root The root of the criteria query.
-	 * @param criteriaBuilder The criteria builder to build selection expressions.
-	 * @param idPropertyName The name of the id property to be used for selection.
-	 */
-	private void handleIdPropertySelection(List<Selection<?>> selectionList, Root<T> root, CriteriaBuilder criteriaBuilder,
-	        String idPropertyName) {
-		selectionList.add(root.get(idPropertyName));
-		selectionList.add(criteriaBuilder.countDistinct(root.get(idPropertyName)));
 	}
 	
 	/**
@@ -524,24 +418,9 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	 * @param ids The list of ids to be used in the "IN" condition.
 	 * @param idPropertyName The name of the id property to be used in the "IN" condition.
 	 */
-	private void handleIdPropertyInCondition(CriteriaQuery<T> idsCriteriaQuery, Root<T> idsRoot, List<T> ids,
+	protected void handleIdPropertyInCondition(CriteriaQuery<T> idsCriteriaQuery, Root<T> idsRoot, List<T> ids,
 	        String idPropertyName) {
 		idsCriteriaQuery.where(idsRoot.get(idPropertyName).in(ids));
-	}
-	
-	/**
-	 * Determines the name of the id property for the given entity class. This method assumes a specific
-	 * naming convention based on the entity type.
-	 *
-	 * @param openmrsEntityClass The openmrs class for which the id property name is requested.
-	 * @return The name of the id property for the specified entity class.
-	 * @throws IllegalArgumentException If the entity class is not supported or recognized.
-	 */
-	private String getIdPropertyName(Class<? extends BaseOpenmrsObject> openmrsEntityClass) {
-		return Stream
-		        .of(Pair.of(Person.class, "personId"), Pair.of(Encounter.class, "encounterId"), Pair.of(Obs.class, "obsId"), Pair.of(FhirTask.class, "id"),
-				        Pair.of(TestOrder.class,"orderId"), Pair.of(Patient.class,"patientId")).filter(pair -> pair.getLeft().isAssignableFrom(openmrsEntityClass)).findFirst().map(Pair::getRight)
-		        .orElseThrow(() -> new IllegalArgumentException("Unsupported entity type: " + openmrsEntityClass.getName()));
 	}
 	
 	protected static <V> V deproxyObject(V object) {
