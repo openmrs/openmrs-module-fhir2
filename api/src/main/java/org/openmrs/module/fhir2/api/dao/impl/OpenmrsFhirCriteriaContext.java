@@ -19,6 +19,7 @@ import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -118,6 +119,11 @@ public class OpenmrsFhirCriteriaContext<T, U> {
 		});
 	}
 	
+	public <V> OpenmrsFhirCriteriaSubquery<V> addSubquery(Class<V> type) {
+		Subquery<V> subquery = criteriaQuery.subquery(type);
+		return new OpenmrsFhirCriteriaSubquery<>(criteriaBuilder, subquery, subquery.from(type));
+	}
+	
 	public OpenmrsFhirCriteriaContext<T, U> addPredicate(Predicate predicate) {
 		predicates.add(predicate);
 		return this;
@@ -135,10 +141,6 @@ public class OpenmrsFhirCriteriaContext<T, U> {
 	
 	public Optional<Join<?, ?>> getJoin(String alias) {
 		return Optional.ofNullable(aliases.get(alias));
-	}
-	
-	public boolean hasAlias(String alias) {
-		return aliases.containsKey(alias);
 	}
 	
 	public CriteriaQuery<U> finalizeQuery() {
