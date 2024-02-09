@@ -704,35 +704,35 @@ public abstract class BaseDao {
 	protected <T, U> Optional<Predicate> handleCodeableConcept(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
 	        TokenAndListParam concepts, @Nonnull From<?, ?> ConceptAliasJoin, @Nonnull String conceptMapAlias,
 	        @Nonnull String conceptReferenceTermAlias) {
-		if (concepts == null) {
-			return Optional.empty();
-		}
-		
-		Optional<Join<?, ?>> conceptAliasJoin = criteriaContext.getJoin(ConceptAliasJoin.getAlias());
-		return conceptAliasJoin
-		        .map(join -> handleAndListParamBySystem(criteriaContext.getCriteriaBuilder(), concepts, (system, tokens) -> {
-			        if (system.isEmpty()) {
-				        criteriaContext.getCriteriaBuilder()
-				                .literal(tokensToParams(tokens).map(NumberUtils::toInt).collect(Collectors.toList()));
-				        return Optional
-				                .of(criteriaContext.getCriteriaBuilder().or(
-				                    criteriaContext.getCriteriaBuilder()
-				                            .in(join.get("conceptId")
-				                                    .in(criteriaContext.getCriteriaBuilder()
-				                                            .literal(tokensToParams(tokens).map(NumberUtils::toInt)
-				                                                    .collect(Collectors.toList())))),
-				                    criteriaContext.getCriteriaBuilder().in(join.get("uuid")
-				                            .in(criteriaContext.getCriteriaBuilder().literal(tokensToList(tokens))))));
-				        
-			        } else {
-				        Join<?, ?> conceptMapAliasJoin = criteriaContext.addJoin(join, "conceptMappings", conceptMapAlias);
-				        criteriaContext.addJoin(conceptMapAliasJoin, "conceptReferenceTerm", conceptReferenceTermAlias);
-				        
-				        return Optional.of(
-				            generateSystemQuery(criteriaContext, system, tokensToList(tokens), conceptReferenceTermAlias));
-			        }
-		        })).orElse(null);
-		
+		//		if (concepts == null) {
+		//			return Optional.empty();
+		//		}
+		//
+		//		Optional<Join<?, ?>> conceptAliasJoin = criteriaContext.getJoin(ConceptAliasJoin.getAlias());
+		//		return conceptAliasJoin
+		//		        .map(join -> handleAndListParamBySystem(criteriaContext.getCriteriaBuilder(), concepts, (system, tokens) -> {
+		//			        if (system.isEmpty()) {
+		//				        criteriaContext.getCriteriaBuilder()
+		//				                .literal(tokensToParams(tokens).map(NumberUtils::toInt).collect(Collectors.toList()));
+		//				        return Optional
+		//				                .of(criteriaContext.getCriteriaBuilder().or(
+		//				                    criteriaContext.getCriteriaBuilder()
+		//				                            .in(join.get("conceptId")
+		//				                                    .in(criteriaContext.getCriteriaBuilder()
+		//				                                            .literal(tokensToParams(tokens).map(NumberUtils::toInt)
+		//				                                                    .collect(Collectors.toList())))),
+		//				                    criteriaContext.getCriteriaBuilder().in(join.get("uuid")
+		//				                            .in(criteriaContext.getCriteriaBuilder().literal(tokensToList(tokens))))));
+		//
+		//			        } else {
+		//				        Join<?, ?> conceptMapAliasJoin = criteriaContext.addJoin(join, "conceptMappings", conceptMapAlias);
+		//				        criteriaContext.addJoin(conceptMapAliasJoin, "conceptReferenceTerm", conceptReferenceTermAlias);
+		//
+		//				        return Optional.of(
+		//				            generateSystemQuery(criteriaContext, system, tokensToList(tokens), conceptReferenceTermAlias));
+		//			        }
+		//		        })).orElse(null);
+		return Optional.empty();
 	}
 	
 	protected <T, U> void handleNames(OpenmrsFhirCriteriaContext<T, U> criteriaContext, StringAndListParam name,
@@ -950,31 +950,18 @@ public abstract class BaseDao {
 		return Optional.of(orderings);
 	}
 	
-	@SuppressWarnings("unchecked")
-	protected <T, U> Predicate generateSystemQuery(OpenmrsFhirCriteriaContext<T, U> criteriaContext, String system,
+	protected <T, U> Optional<Predicate> generateSystemQuery(OpenmrsFhirCriteriaContext<T, U> criteriaContext, String system,
 	        List<String> codes, String conceptReferenceTermAlias) {
-		//detached criteria
-		Specification<FhirConceptSource> spec = (root, query,
-		        cb) -> (Predicate) query.select(root.get("conceptSource")).where(cb.equal(root.get("url"), system));
+		OpenmrsFhirCriteriaSubquery<FhirConceptSource> conceptSourceSubquery = criteriaContext
+		        .addSubquery(FhirConceptSource.class);
+		conceptSourceSubquery.addPredicate(
+		    conceptSourceSubquery.getCriteriaBuilder().equal(conceptSourceSubquery.getRoot().get("url"), system));
 		
-		criteriaContext.getCriteriaQuery().where(spec.toPredicate((Root<FhirConceptSource>) criteriaContext.getRoot(),
-		    (CriteriaQuery<FhirConceptSource>) criteriaContext.getCriteriaQuery(), criteriaContext.getCriteriaBuilder()));
-		
-		if (codes.size() > 1) {
-			return criteriaContext.getCriteriaBuilder().and(
-			    criteriaContext.getCriteriaBuilder().equal(
-			        getRootOrJoin(criteriaContext, conceptReferenceTermAlias).get("conceptSource"),
-			        criteriaContext.getCriteriaQuery()),
-			    criteriaContext.getCriteriaBuilder().in(criteriaContext.getRoot()
-			            .get(String.format("%s.code", conceptReferenceTermAlias)).get(codes.toString())));
-		} else {
-			return criteriaContext.getCriteriaBuilder().and(
-			    criteriaContext.getCriteriaBuilder().equal(
-			        getRootOrJoin(criteriaContext, conceptReferenceTermAlias).get("conceptSource"),
-			        criteriaContext.getCriteriaQuery()),
-			    criteriaContext.getCriteriaBuilder().equal(
-			        criteriaContext.getRoot().get(String.format("%s.code", conceptReferenceTermAlias)), codes.get(0)));
-		}
+		return criteriaContext.getJoin(conceptReferenceTermAlias)
+		        .map((conceptReferenceTermJoin) -> criteriaContext.getCriteriaBuilder().and(
+		            criteriaContext.getCriteriaBuilder().in(conceptReferenceTermJoin.get("conceptSource"))
+		                    .value(conceptSourceSubquery.finalizeQuery()),
+		            criteriaContext.getCriteriaBuilder().in(conceptReferenceTermJoin.get("code")).value(codes)));
 	}
 	
 	protected <T, U> Predicate generateActiveOrderQuery(OpenmrsFhirCriteriaContext<T, U> criteriaContext, String path,
