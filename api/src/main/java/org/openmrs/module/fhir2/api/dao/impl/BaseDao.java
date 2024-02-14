@@ -702,37 +702,33 @@ public abstract class BaseDao {
 	}
 	
 	protected <T, U> Optional<Predicate> handleCodeableConcept(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
-	        TokenAndListParam concepts, @Nonnull From<?, ?> ConceptAliasJoin, @Nonnull String conceptMapAlias,
+	        TokenAndListParam concepts, @Nonnull From<?, ?> conceptAlias, @Nonnull String conceptMapAlias,
 	        @Nonnull String conceptReferenceTermAlias) {
-		//		if (concepts == null) {
-		//			return Optional.empty();
-		//		}
-		//
-		//		Optional<Join<?, ?>> conceptAliasJoin = criteriaContext.getJoin(ConceptAliasJoin.getAlias());
-		//		return conceptAliasJoin
-		//		        .map(join -> handleAndListParamBySystem(criteriaContext.getCriteriaBuilder(), concepts, (system, tokens) -> {
-		//			        if (system.isEmpty()) {
-		//				        criteriaContext.getCriteriaBuilder()
-		//				                .literal(tokensToParams(tokens).map(NumberUtils::toInt).collect(Collectors.toList()));
-		//				        return Optional
-		//				                .of(criteriaContext.getCriteriaBuilder().or(
-		//				                    criteriaContext.getCriteriaBuilder()
-		//				                            .in(join.get("conceptId")
-		//				                                    .in(criteriaContext.getCriteriaBuilder()
-		//				                                            .literal(tokensToParams(tokens).map(NumberUtils::toInt)
-		//				                                                    .collect(Collectors.toList())))),
-		//				                    criteriaContext.getCriteriaBuilder().in(join.get("uuid")
-		//				                            .in(criteriaContext.getCriteriaBuilder().literal(tokensToList(tokens))))));
-		//
-		//			        } else {
-		//				        Join<?, ?> conceptMapAliasJoin = criteriaContext.addJoin(join, "conceptMappings", conceptMapAlias);
-		//				        criteriaContext.addJoin(conceptMapAliasJoin, "conceptReferenceTerm", conceptReferenceTermAlias);
-		//
-		//				        return Optional.of(
-		//				            generateSystemQuery(criteriaContext, system, tokensToList(tokens), conceptReferenceTermAlias));
-		//			        }
-		//		        })).orElse(null);
-		return Optional.empty();
+		if (concepts == null) {
+			return Optional.empty();
+		}
+		
+		return handleAndListParamBySystem(criteriaContext.getCriteriaBuilder(), concepts, (system, tokens) -> {
+			if (system.isEmpty()) {
+				criteriaContext.getCriteriaBuilder()
+				        .literal(tokensToParams(tokens).map(NumberUtils::toInt).collect(Collectors.toList()));
+				return Optional
+				        .of(criteriaContext
+				                .getCriteriaBuilder().or(
+				                    criteriaContext.getCriteriaBuilder()
+				                            .in(conceptAlias.get("conceptId")
+				                                    .in(criteriaContext.getCriteriaBuilder()
+				                                            .literal(tokensToParams(tokens).map(NumberUtils::toInt)
+				                                                    .collect(Collectors.toList())))),
+				                    criteriaContext.getCriteriaBuilder().in(conceptAlias.get("uuid")
+				                            .in(criteriaContext.getCriteriaBuilder().literal(tokensToList(tokens))))));
+			} else {
+				Join<?, ?> conceptMapAliasJoin = criteriaContext.addJoin(conceptAlias, "conceptMappings", conceptMapAlias);
+				criteriaContext.addJoin(conceptMapAliasJoin, "conceptReferenceTerm", conceptReferenceTermAlias);
+				
+				return generateSystemQuery(criteriaContext, system, tokensToList(tokens), conceptReferenceTermAlias);
+			}
+		});
 	}
 	
 	protected <T, U> void handleNames(OpenmrsFhirCriteriaContext<T, U> criteriaContext, StringAndListParam name,
@@ -922,8 +918,7 @@ public abstract class BaseDao {
 	 * @param sort the {@link SortSpec} which defines the sorting to be translated
 	 */
 	protected <T, U> void handleSort(OpenmrsFhirCriteriaContext<T, U> criteriaContext, SortSpec sort) {
-		handleSort(criteriaContext, sort, this::paramToProps)
-		        .ifPresent(l -> l.forEach(criteriaContext.getCriteriaQuery()::orderBy));
+		handleSort(criteriaContext, sort, this::paramToProps).ifPresent(l -> l.forEach(criteriaContext::addOrder));
 	}
 	
 	protected <T, U> Optional<List<javax.persistence.criteria.Order>> handleSort(
@@ -932,8 +927,8 @@ public abstract class BaseDao {
 		List<javax.persistence.criteria.Order> orderings = new ArrayList<>();
 		SortSpec sortSpec = sort;
 		while (sortSpec != null) {
-			SortState state = SortState.builder().criteriaBuilder(criteriaContext.getCriteriaBuilder())
-			        .sortOrder(sortSpec.getOrder()).parameter(sortSpec.getParamName().toLowerCase()).build();
+			SortState state = SortState.builder().context(criteriaContext).sortOrder(sortSpec.getOrder())
+			        .parameter(sortSpec.getParamName().toLowerCase()).build();
 			
 			Collection<javax.persistence.criteria.Order> orders = paramToProp.apply(criteriaContext, state);
 			if (orders != null) {
@@ -1158,7 +1153,7 @@ public abstract class BaseDao {
 	@EqualsAndHashCode
 	public static final class SortState {
 		
-		private CriteriaBuilder criteriaBuilder;
+		private OpenmrsFhirCriteriaContext context;
 		
 		private SortOrderEnum sortOrder;
 		
