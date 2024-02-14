@@ -1264,12 +1264,12 @@ public abstract class BaseDao {
 			case LESSTHAN:
 			case STARTS_AFTER:
 				return Optional.ofNullable(criteriaContext.getCriteriaBuilder().greaterThanOrEqualTo(
-				    criteriaContext.getRoot().get("datePropertyName"),
+				    criteriaContext.getRoot().get(datePropertyName),
 				    Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant())));
 			case GREATERTHAN_OR_EQUALS:
 			case GREATERTHAN:
 				return Optional.ofNullable(
-				    criteriaContext.getCriteriaBuilder().lessThanOrEqualTo(criteriaContext.getRoot().get("datePropertyName"),
+				    criteriaContext.getCriteriaBuilder().lessThanOrEqualTo(criteriaContext.getRoot().get(datePropertyName),
 				        Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant())));
 			// Ignoring ENDS_BEFORE as it is not meaningful for age.
 		}

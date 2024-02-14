@@ -173,5 +173,4 @@ public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLo
 	public LocationAttributeType getLocationAttributeTypeByUuid(String uuid) {
 		return locationService.getLocationAttributeTypeByUuid(uuid);
 	}
-	
 }
