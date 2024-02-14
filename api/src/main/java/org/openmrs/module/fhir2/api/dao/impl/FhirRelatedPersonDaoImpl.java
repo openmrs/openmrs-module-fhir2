@@ -19,10 +19,7 @@ import static org.hl7.fhir.r4.model.Person.SP_BIRTHDATE;
 import static org.hl7.fhir.r4.model.Person.SP_NAME;
 
 import javax.annotation.Nonnull;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Order;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import javax.persistence.criteria.*;
 
 import java.util.Collection;
 import java.util.List;
@@ -62,7 +59,7 @@ public class FhirRelatedPersonDaoImpl extends BaseFhirDao<Relationship> implemen
 					break;
 				case FhirConstants.DATE_RANGE_SEARCH_HANDLER:
 					entry.getValue().forEach(
-					    param -> handleDateRange(criteriaContext, "m.birthdate", (DateRangeParam) param.getParam())
+					    param -> handleDateRange(criteriaContext, personJoin,"birthdate", (DateRangeParam) param.getParam())
 					            .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery()));
 					break;
 				case FhirConstants.ADDRESS_SEARCH_HANDLER:
@@ -84,12 +81,13 @@ public class FhirRelatedPersonDaoImpl extends BaseFhirDao<Relationship> implemen
 		if (param == null) {
 			return null;
 		}
-		
+
+		From<?, ?> personJoin = criteriaContext.addJoin("personA", "m");
 		if (param.startsWith("address") && !criteriaContext.getJoin("pad").isPresent()) {
-			criteriaContext.addJoin("m.addresses", "pad", javax.persistence.criteria.JoinType.LEFT);
+			criteriaContext.addJoin(personJoin,"addresses", "pad", javax.persistence.criteria.JoinType.LEFT);
 		} else if (param.equals(SP_NAME) || param.equals(SP_GIVEN) || param.equals(SP_FAMILY)) {
 			if (!criteriaContext.getJoin("pn").isPresent()) {
-				criteriaContext.addJoin("m.names", "pn", javax.persistence.criteria.JoinType.LEFT);
+				criteriaContext.addJoin(personJoin, "names", "pn", javax.persistence.criteria.JoinType.LEFT);
 			}
 			
 			Root<PersonName> subRoot = criteriaContext.getCriteriaQuery().subquery(Integer.class).from(PersonName.class);
@@ -166,18 +164,32 @@ public class FhirRelatedPersonDaoImpl extends BaseFhirDao<Relationship> implemen
 	}
 	
 	@Override
-	protected <V, U> String paramToProp(OpenmrsFhirCriteriaContext<V, U> criteriaContext, @Nonnull String param) {
+	protected <V, U> Path<Object> paramToProp(OpenmrsFhirCriteriaContext<V, U> criteriaContext, @Nonnull String param) {
 		switch (param) {
-			case SP_BIRTHDATE:
-				return "m.birthdate";
-			case SP_ADDRESS_CITY:
-				return "pad.cityVillage";
-			case SP_ADDRESS_STATE:
-				return "pad.stateProvince";
-			case SP_ADDRESS_POSTALCODE:
-				return "pad.postalCode";
-			case SP_ADDRESS_COUNTRY:
-				return "pad.country";
+			case SP_BIRTHDATE: {
+				From<?, ?> personJoin = criteriaContext.addJoin("personA", "m");
+				return personJoin.get("birthdate");
+			}
+			case SP_ADDRESS_CITY: {
+				From<?, ?> personJoin = criteriaContext.addJoin("personA", "m");
+				From<?, ?> pad = criteriaContext.addJoin(personJoin, "addresses", "pad", javax.persistence.criteria.JoinType.LEFT);
+				return pad.get("cityVillage");
+			}
+			case SP_ADDRESS_STATE: {
+				From<?, ?> personJoin = criteriaContext.addJoin("personA", "m");
+				From<?, ?> pad = criteriaContext.addJoin(personJoin, "addresses", "pad", javax.persistence.criteria.JoinType.LEFT);
+				return pad.get("stateProvince");
+			}
+			case SP_ADDRESS_POSTALCODE: {
+				From<?, ?> personJoin = criteriaContext.addJoin("personA", "m");
+				From<?, ?> pad = criteriaContext.addJoin(personJoin, "addresses", "pad", javax.persistence.criteria.JoinType.LEFT);
+				return pad.get("postalCode");
+			}
+			case SP_ADDRESS_COUNTRY: {
+				From<?, ?> personJoin = criteriaContext.addJoin("personA", "m");
+				From<?, ?> pad = criteriaContext.addJoin(personJoin, "addresses", "pad", javax.persistence.criteria.JoinType.LEFT);
+				return pad.get("country");
+			}
 			default:
 				return super.paramToProp(criteriaContext, param);
 		}
