@@ -317,11 +317,13 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 			if (isImmutable) {
 				switch (sortState.getSortOrder()) {
 					case ASC:
-						return Collections.singletonList(
-						    criteriaContext.getCriteriaBuilder().asc(criteriaContext.getRoot().get("dateCreated")));
+						return Collections
+						        .singletonList((javax.persistence.criteria.Order) criteriaContext.getCriteriaQuery().orderBy(
+						            criteriaContext.getCriteriaBuilder().asc(criteriaContext.getRoot().get("dateCreated"))));
 					case DESC:
 						return Collections.singletonList(
-						    criteriaContext.getCriteriaBuilder().desc(criteriaContext.getRoot().get("dateCreated")));
+						    (javax.persistence.criteria.Order) criteriaContext.getCriteriaQuery().orderBy(
+						        criteriaContext.getCriteriaBuilder().desc(criteriaContext.getRoot().get("dateCreated"))));
 				}
 			}
 			
