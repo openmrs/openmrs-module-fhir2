@@ -162,63 +162,48 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 		
 		return criteriaContext;
 	}
-	
+
 	@Override
 	@SuppressWarnings({ "unchecked", "UnstableApiUsage" })
 	public List<T> getSearchResults(@Nonnull SearchParameterMap theParams) {
 		List<T> results;
 		OpenmrsFhirCriteriaContext<T, ?> criteriaContext = getSearchResultCriteria(theParams);
 		String idProperty = getIdPropertyName(criteriaContext);
-		
+
 		handleSort(criteriaContext, theParams.getSortSpec());
 		handleIdPropertyOrdering(criteriaContext, idProperty);
-		
+
 		TypedQuery<T> executableQuery = (TypedQuery<T>) criteriaContext.getEntityManager()
-		        .createQuery(criteriaContext.getCriteriaQuery());
+				.createQuery(criteriaContext.getCriteriaQuery());
+
 		executableQuery.setFirstResult(theParams.getFromIndex());
 		if (theParams.getToIndex() != Integer.MAX_VALUE) {
 			int maxResults = theParams.getToIndex() - theParams.getFromIndex();
-			executableQuery.setMaxResults(maxResults);
+			if (maxResults >= 0) {
+				executableQuery.setMaxResults(maxResults);
+			} else {
+				// TODO: this is really just a workaround, we can find a better way of handling the negative results
+				int negative = theParams.getFromIndex() - theParams.getToIndex();
+				executableQuery.setMaxResults(negative);
+			}
 		}
-		
+
 		if (hasDistinctResults()) {
 			results = (List<T>) criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery())
-			        .getResultList();
+					.getResultList();
 		} else {
-			OpenmrsFhirCriteriaContext<T, Object[]> selectionQuery = createCriteriaContext(typeToken.getRawType());
-			List<Selection<?>> selectionList = new ArrayList<>();
-			selectionList.add(criteriaContext.getRoot().get(idProperty));
-			criteriaContext.getCriteriaQuery().multiselect(criteriaContext.getRoot().get(idProperty).alias("id")).distinct(true);
-
-			// TODO: This sorting has to be looked into!
-			handleSort(criteriaContext, theParams.getSortSpec(), this::paramToProps).ifPresent(
-					orders -> orders.forEach(order -> selectionList.add(selectionQuery.getRoot().get(getIdPropertyName(criteriaContext)))));
-
+			criteriaContext.getCriteriaQuery().multiselect(criteriaContext.getRoot().get(idProperty).alias("id"))
+					.distinct(true);
 			criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot().get(getIdPropertyName(criteriaContext)))
 					.distinct(true);
+			List<Integer> id = (List<Integer>) criteriaContext.getEntityManager()
+					.createQuery(criteriaContext.getCriteriaQuery()).getResultList();
 
-			List<T> ids = new ArrayList<>();
-			if (selectionList.size() > 1) {
-				List<Object[]> resultList = (List<Object[]>) criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).getResultList();
-				for (Object[] item : resultList) {
-					ids.add((T) item[0]);
-				}
-			} else {
-				ids = (List<T>) criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).getResultList();
-			}
-
-			// Use distinct ids from the original query to return entire objects
 			OpenmrsFhirCriteriaContext<T, T> wrapperQuery = createCriteriaContext(typeToken.getRawType());
-			wrapperQuery.getCriteriaQuery().where(wrapperQuery.getRoot().get(idProperty).in(ids));
-			wrapperQuery.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).getResultList();
-
-			// Need to reapply ordering
-			handleSort(wrapperQuery, theParams.getSortSpec());
-			handleIdPropertyOrdering(wrapperQuery, idProperty);
-
+			wrapperQuery.getCriteriaQuery().where(wrapperQuery.getRoot().get(idProperty).in(id));
 			results = wrapperQuery.getEntityManager().createQuery(wrapperQuery.getCriteriaQuery()).getResultList();
 		}
-		
+
 		return results.stream().map(this::deproxyResult).collect(Collectors.toList());
 	}
 	
@@ -386,24 +371,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 			        .setHint("org.hibernate.cacheRegion", COUNT_QUERY_CACHE);
 		}
 	}
-	
-	/**
-	 * Extracts the property name from the given JPA Criteria API expression.
-	 *
-	 * @param expression The JPA Criteria API expression, typically representing a property or
-	 *            attribute.
-	 * @return The property name extracted from the expression.
-	 * @throws IllegalArgumentException If the expression is not of type {@code Path<?>}.
-	 */
-	public static String getPropertyName(Expression<?> expression) {
-		if (expression instanceof Path<?>) {
-			Path<?> path = (Path<?>) expression;
-			return path.getJavaType().getSimpleName();
-		} else {
-			throw new IllegalArgumentException("Unsupported expression type: " + expression.getClass());
-		}
-	}
-	
+
 	@SuppressWarnings({ "UnstableApiUsage" })
 	protected <V, U> String getIdPropertyName(OpenmrsFhirCriteriaContext<V, U> criteriaContext) {
 		return ((MetamodelImplementor) criteriaContext.getEntityManager().getEntityManagerFactory().getMetamodel())
@@ -420,34 +388,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 		criteriaContext.getCriteriaQuery()
 		        .orderBy(criteriaContext.getCriteriaBuilder().asc(criteriaContext.getRoot().get(idPropertyName)));
 	}
-	
-	/**
-	 * Handles the ordering of the criteria based on the specified id property name.
-	 *
-	 * @param criteriaBuilder The criteria builder to build expressions
-	 * @param criteriaQuery The criteria query for the idPropertyName.
-	 * @param idsRoot The root of the criteria query for the idPropertyName
-	 * @param idPropertyName The name of the id property to be used for ordering.
-	 */
-	protected void handleIdPropertyOrdering(CriteriaBuilder criteriaBuilder, CriteriaQuery<T> criteriaQuery, Root<T> idsRoot,
-	        String idPropertyName) {
-		criteriaQuery.orderBy(criteriaBuilder.asc(idsRoot.get(idPropertyName)));
-	}
-	
-	/**
-	 * Handles the "IN" condition in the criteria query based on the specified id property name and a
-	 * list of ids.
-	 *
-	 * @param idsCriteriaQuery The criteria query for ids.
-	 * @param idsRoot The root of the criteria query for ids.
-	 * @param ids The list of ids to be used in the "IN" condition.
-	 * @param idPropertyName The name of the id property to be used in the "IN" condition.
-	 */
-	protected void handleIdPropertyInCondition(CriteriaQuery<T> idsCriteriaQuery, Root<T> idsRoot, List<T> ids,
-	        String idPropertyName) {
-		idsCriteriaQuery.where(idsRoot.get(idPropertyName).in(ids));
-	}
-	
+
 	protected static <V> V deproxyObject(V object) {
 		if (object instanceof HibernateProxy) {
 			Hibernate.initialize(object);
