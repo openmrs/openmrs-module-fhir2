@@ -23,7 +23,9 @@ import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Selection;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -183,15 +185,37 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 			results = (List<T>) criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery())
 			        .getResultList();
 		} else {
-			criteriaContext.getCriteriaQuery().multiselect(criteriaContext.getRoot().get(idProperty).alias("id"))
-			        .distinct(true);
+			OpenmrsFhirCriteriaContext<T, Object[]> selectionQuery = createCriteriaContext(typeToken.getRawType());
+			List<Selection<?>> selectionList = new ArrayList<>();
+			selectionList.add(criteriaContext.getRoot().get(idProperty));
+			criteriaContext.getCriteriaQuery().multiselect(criteriaContext.getRoot().get(idProperty).alias("id")).distinct(true);
+
+			// TODO: This sorting has to be looked into!
+			handleSort(criteriaContext, theParams.getSortSpec(), this::paramToProps).ifPresent(
+					orders -> orders.forEach(order -> selectionList.add(selectionQuery.getRoot().get(getIdPropertyName(criteriaContext)))));
+
 			criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot().get(getIdPropertyName(criteriaContext)))
-			        .distinct(true);
-			List<Integer> id = (List<Integer>) criteriaContext.getEntityManager()
-			        .createQuery(criteriaContext.getCriteriaQuery()).getResultList();
-			
+					.distinct(true);
+
+			List<T> ids = new ArrayList<>();
+			if (selectionList.size() > 1) {
+				List<Object[]> resultList = (List<Object[]>) criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).getResultList();
+				for (Object[] item : resultList) {
+					ids.add((T) item[0]);
+				}
+			} else {
+				ids = (List<T>) criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).getResultList();
+			}
+
+			// Use distinct ids from the original query to return entire objects
 			OpenmrsFhirCriteriaContext<T, T> wrapperQuery = createCriteriaContext(typeToken.getRawType());
-			wrapperQuery.getCriteriaQuery().where(wrapperQuery.getRoot().get(idProperty).in(id));
+			wrapperQuery.getCriteriaQuery().where(wrapperQuery.getRoot().get(idProperty).in(ids));
+			wrapperQuery.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).getResultList();
+
+			// Need to reapply ordering
+			handleSort(wrapperQuery, theParams.getSortSpec());
+			handleIdPropertyOrdering(wrapperQuery, idProperty);
+
 			results = wrapperQuery.getEntityManager().createQuery(wrapperQuery.getCriteriaQuery()).getResultList();
 		}
 		
@@ -199,8 +223,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	}
 	
 	@Override
-	@SuppressWarnings({ "UnstableApiUsage" })
-	public int getSearchResultsCount(@Nonnull SearchParameterMap theParams) {
+    public int getSearchResultsCount(@Nonnull SearchParameterMap theParams) {
 		OpenmrsFhirCriteriaContext<T, Long> criteriaContext = getSearchResultCriteria(theParams);
 		applyExactTotal(criteriaContext, theParams);
 		
