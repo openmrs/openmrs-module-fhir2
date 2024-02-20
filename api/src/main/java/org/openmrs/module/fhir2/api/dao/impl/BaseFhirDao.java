@@ -17,15 +17,8 @@ import javax.annotation.Nonnull;
 import javax.persistence.CacheStoreMode;
 import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Selection;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -162,20 +155,20 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 		
 		return criteriaContext;
 	}
-
+	
 	@Override
 	@SuppressWarnings({ "unchecked", "UnstableApiUsage" })
 	public List<T> getSearchResults(@Nonnull SearchParameterMap theParams) {
 		List<T> results;
 		OpenmrsFhirCriteriaContext<T, ?> criteriaContext = getSearchResultCriteria(theParams);
 		String idProperty = getIdPropertyName(criteriaContext);
-
+		
 		handleSort(criteriaContext, theParams.getSortSpec());
 		handleIdPropertyOrdering(criteriaContext, idProperty);
-
+		
 		TypedQuery<T> executableQuery = (TypedQuery<T>) criteriaContext.getEntityManager()
-				.createQuery(criteriaContext.getCriteriaQuery());
-
+		        .createQuery(criteriaContext.getCriteriaQuery());
+		
 		executableQuery.setFirstResult(theParams.getFromIndex());
 		if (theParams.getToIndex() != Integer.MAX_VALUE) {
 			int maxResults = theParams.getToIndex() - theParams.getFromIndex();
@@ -187,28 +180,28 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 				executableQuery.setMaxResults(negative);
 			}
 		}
-
+		
 		if (hasDistinctResults()) {
 			results = (List<T>) criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery())
-					.getResultList();
+			        .getResultList();
 		} else {
 			criteriaContext.getCriteriaQuery().multiselect(criteriaContext.getRoot().get(idProperty).alias("id"))
-					.distinct(true);
+			        .distinct(true);
 			criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot().get(getIdPropertyName(criteriaContext)))
-					.distinct(true);
+			        .distinct(true);
 			List<Integer> id = (List<Integer>) criteriaContext.getEntityManager()
-					.createQuery(criteriaContext.getCriteriaQuery()).getResultList();
-
+			        .createQuery(criteriaContext.getCriteriaQuery()).getResultList();
+			
 			OpenmrsFhirCriteriaContext<T, T> wrapperQuery = createCriteriaContext(typeToken.getRawType());
 			wrapperQuery.getCriteriaQuery().where(wrapperQuery.getRoot().get(idProperty).in(id));
 			results = wrapperQuery.getEntityManager().createQuery(wrapperQuery.getCriteriaQuery()).getResultList();
 		}
-
+		
 		return results.stream().map(this::deproxyResult).collect(Collectors.toList());
 	}
 	
 	@Override
-    public int getSearchResultsCount(@Nonnull SearchParameterMap theParams) {
+	public int getSearchResultsCount(@Nonnull SearchParameterMap theParams) {
 		OpenmrsFhirCriteriaContext<T, Long> criteriaContext = getSearchResultCriteria(theParams);
 		applyExactTotal(criteriaContext, theParams);
 		
@@ -371,7 +364,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 			        .setHint("org.hibernate.cacheRegion", COUNT_QUERY_CACHE);
 		}
 	}
-
+	
 	@SuppressWarnings({ "UnstableApiUsage" })
 	protected <V, U> String getIdPropertyName(OpenmrsFhirCriteriaContext<V, U> criteriaContext) {
 		return ((MetamodelImplementor) criteriaContext.getEntityManager().getEntityManagerFactory().getMetamodel())
@@ -388,7 +381,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 		criteriaContext.getCriteriaQuery()
 		        .orderBy(criteriaContext.getCriteriaBuilder().asc(criteriaContext.getRoot().get(idPropertyName)));
 	}
-
+	
 	protected static <V> V deproxyObject(V object) {
 		if (object instanceof HibernateProxy) {
 			Hibernate.initialize(object);

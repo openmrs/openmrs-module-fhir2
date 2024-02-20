@@ -166,12 +166,12 @@ public class FhirRelatedPersonDaoImpl extends BaseFhirDao<Relationship> implemen
 	@Override
 	protected <V, U> String paramToProp(OpenmrsFhirCriteriaContext<V, U> criteriaContext, @Nonnull String param) {
 		From<?, ?> personJoin = criteriaContext.addJoin("personA", "m");
-		From<?,?> pad = criteriaContext.addJoin(personJoin, "addresses", "pad", javax.persistence.criteria.JoinType.LEFT);
+		From<?, ?> pad = criteriaContext.addJoin(personJoin, "addresses", "pad", javax.persistence.criteria.JoinType.LEFT);
 		switch (param) {
 			case SP_BIRTHDATE:
-				 personJoin.get("birthdate");
+				personJoin.get("birthdate");
 			case SP_ADDRESS_CITY:
-				 pad.get("cityVillage");
+				pad.get("cityVillage");
 			case SP_ADDRESS_STATE:
 				pad.get("stateProvince");
 			case SP_ADDRESS_POSTALCODE:

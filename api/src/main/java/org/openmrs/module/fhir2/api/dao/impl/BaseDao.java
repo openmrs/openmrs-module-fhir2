@@ -947,7 +947,7 @@ public abstract class BaseDao {
 	
 	protected <T, U> Optional<Predicate> generateSystemQuery(OpenmrsFhirCriteriaContext<T, U> criteriaContext, String system,
 	        List<String> codes, String conceptReferenceTermAlias) {
-		OpenmrsFhirCriteriaSubquery<FhirConceptSource> conceptSourceSubquery = criteriaContext
+		OpenmrsFhirCriteriaSubquery<FhirConceptSource, FhirConceptSource> conceptSourceSubquery = criteriaContext
 		        .addSubquery(FhirConceptSource.class);
 		conceptSourceSubquery.addPredicate(
 		    conceptSourceSubquery.getCriteriaBuilder().equal(conceptSourceSubquery.getRoot().get("url"), system));

@@ -22,7 +22,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public class OpenmrsFhirCriteriaSubquery<Q> {
+public class OpenmrsFhirCriteriaSubquery<Q, U> {
 	
 	@Getter
 	@NonNull
@@ -30,7 +30,7 @@ public class OpenmrsFhirCriteriaSubquery<Q> {
 	
 	@Getter
 	@NonNull
-	Subquery<Q> subquery;
+	Subquery<U> subquery;
 	
 	@Getter
 	@NonNull
@@ -38,12 +38,12 @@ public class OpenmrsFhirCriteriaSubquery<Q> {
 	
 	private final List<Predicate> predicates = new ArrayList<>();
 	
-	public OpenmrsFhirCriteriaSubquery<Q> addPredicate(Predicate predicate) {
+	public OpenmrsFhirCriteriaSubquery<Q, U> addPredicate(Predicate predicate) {
 		predicates.add(predicate);
 		return this;
 	}
 	
-	public Subquery<Q> finalizeQuery() {
+	public Subquery<U> finalizeQuery() {
 		return subquery.where(predicates.toArray(new Predicate[0]));
 	}
 }
