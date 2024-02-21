@@ -214,6 +214,10 @@ public class OpenmrsFhirCriteriaContext<T, U> {
 	public Optional<Join<?, ?>> getJoin(String alias) {
 		return Optional.ofNullable(aliases.get(alias));
 	}
+
+	public Optional<Join<?, ?>> getJoin(From<?,?> alias) {
+		return Optional.ofNullable(aliases.get(alias.getAlias()));
+	}
 	
 	public CriteriaQuery<U> finalizeQuery() {
 		return criteriaQuery.where(predicates.toArray(new Predicate[0])).orderBy(orders);
