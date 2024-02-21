@@ -47,39 +47,28 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 	
 	@Override
 	public Patient getPatientById(@Nonnull Integer id) {
-		EntityManager em = sessionFactory.getCurrentSession();
-		CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
-		CriteriaQuery<Patient> criteriaQuery = criteriaBuilder.createQuery(Patient.class);
-		Root<Patient> root = criteriaQuery.from(Patient.class);
+		OpenmrsFhirCriteriaContext<Patient, Patient> criteriaContext = createCriteriaContext(Patient.class);
+		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot()).where(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("patientId"), id));
 		
-		criteriaQuery.select(root).where(criteriaBuilder.equal(root.get("patientId"), id));
-		
-		TypedQuery<Patient> query = em.createQuery(criteriaQuery);
+		TypedQuery<Patient> query = criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery());
 		return query.getResultList().stream().findFirst().orElse(null);
 	}
 	
 	@Override
 	public List<Patient> getPatientsByIds(@Nonnull Collection<Integer> ids) {
-		EntityManager em = sessionFactory.getCurrentSession();
-		CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
-		CriteriaQuery<Patient> criteriaQuery = criteriaBuilder.createQuery(Patient.class);
-		Root<Patient> root = criteriaQuery.from(Patient.class);
+		OpenmrsFhirCriteriaContext<Patient, Patient> criteriaContext = createCriteriaContext(Patient.class);
 		
-		criteriaQuery.select(root);
-		criteriaQuery.where(root.get("id").in(ids));
-		return em.createQuery(criteriaQuery).getResultList();
+		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot());
+		criteriaContext.getCriteriaQuery().where(criteriaContext.getRoot().get("id").in(ids));
+		return criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).getResultList();
 	}
 	
 	@Override
 	public PatientIdentifierType getPatientIdentifierTypeByNameOrUuid(String name, String uuid) {
-		EntityManager em = sessionFactory.getCurrentSession();
-		CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
-		CriteriaQuery<PatientIdentifierType> cq = criteriaBuilder.createQuery(PatientIdentifierType.class);
-		Root<PatientIdentifierType> rt = cq.from(PatientIdentifierType.class);
-		
-		cq.select(rt).where(criteriaBuilder.or(criteriaBuilder.and(criteriaBuilder.equal(rt.get("name"), name),
-		    criteriaBuilder.equal(rt.get("retired"), false)), criteriaBuilder.equal(rt.get("uuid"), uuid)));
-		List<PatientIdentifierType> identifierTypes = em.createQuery(cq).getResultList();
+		OpenmrsFhirCriteriaContext<PatientIdentifierType, PatientIdentifierType> criteriaContext = createCriteriaContext(PatientIdentifierType.class);
+		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot()).where(criteriaContext.getCriteriaBuilder().or(criteriaContext.getCriteriaBuilder().and(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("name"), name),
+		    criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("retired"), false)), criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("uuid"), uuid)));
+		List<PatientIdentifierType> identifierTypes = criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).getResultList();
 		
 		if (identifierTypes.isEmpty()) {
 			return null;

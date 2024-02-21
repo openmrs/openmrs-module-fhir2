@@ -828,21 +828,21 @@ public abstract class BaseDao {
 	
 	protected <T, U> Optional<Predicate> handleCommonSearchParameters(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
 	        List<PropParam<?>> theCommonParams) {
-		List<Optional<? extends Predicate>> criterionList = new ArrayList<>();
+		List<Optional<? extends Predicate>> predicateList = new ArrayList<>();
 		
 		for (PropParam<?> commonSearchParam : theCommonParams) {
 			switch (commonSearchParam.getPropertyName()) {
 				case FhirConstants.ID_PROPERTY:
-					criterionList.add(handleAndListParam(criteriaContext.getCriteriaBuilder(),
+					predicateList.add(handleAndListParam(criteriaContext.getCriteriaBuilder(),
 					    (TokenAndListParam) commonSearchParam.getParam(), param -> Optional.of(criteriaContext
 					            .getCriteriaBuilder().equal(criteriaContext.getRoot().get("uuid"), param.getValue()))));
 					break;
 				case FhirConstants.LAST_UPDATED_PROPERTY:
-					criterionList.add(handleLastUpdated(criteriaContext, (DateRangeParam) commonSearchParam.getParam()));
+					predicateList.add(handleLastUpdated(criteriaContext, (DateRangeParam) commonSearchParam.getParam()));
 					break;
 			}
 		}
-		return Optional.of(criteriaContext.getCriteriaBuilder().and(toCriteriaArray(criterionList.stream())));
+		return Optional.of(criteriaContext.getCriteriaBuilder().and(toCriteriaArray(predicateList.stream())));
 	}
 	
 	/**
@@ -898,7 +898,7 @@ public abstract class BaseDao {
 	}
 	
 	protected <T, U> Optional<Predicate> handleMedicationRequestReference(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
-	        @Nonnull String drugOrderAlias, ReferenceAndListParam drugOrderReference) {
+	        @Nonnull From<?,?> drugOrderAlias, ReferenceAndListParam drugOrderReference) {
 		if (drugOrderReference == null) {
 			return Optional.empty();
 		}
@@ -1289,6 +1289,15 @@ public abstract class BaseDao {
 		} else {
 			return criteriaContext.getJoin(alias).orElseThrow(() -> new IllegalStateException(
 			        "Tried to reference alias " + alias + " before creating a join with that name"));
+		}
+	}
+
+	protected <T, U> From<?, ?> getRootOrJoin(OpenmrsFhirCriteriaContext<T, U> criteriaContext, From<?,?> alias) {
+		if (alias == null) {
+			return criteriaContext.getRoot();
+		} else {
+			return criteriaContext.getJoin(alias).orElseThrow(() -> new IllegalStateException(
+					"Tried to reference alias " + alias + " before creating a join with that name"));
 		}
 	}
 	

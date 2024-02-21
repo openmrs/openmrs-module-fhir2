@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import javax.annotation.Nonnull;
+import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
 
 import java.util.List;
@@ -72,12 +73,9 @@ public class FhirMedicationDispenseDaoImpl_2_6 extends BaseFhirDao<MedicationDis
 					    e -> handleEncounterReference(criteriaContext, (ReferenceAndListParam) e.getParam(), "e"));
 					break;
 				case FhirConstants.MEDICATION_REQUEST_REFERENCE_SEARCH_HANDLER:
-					entry.getValue().forEach(e -> handleMedicationRequestReference(criteriaContext, "drugOrder",
-					    (ReferenceAndListParam) e.getParam()).ifPresent(c -> {
-						    criteriaContext.addJoin("drugOrder", "drugOrder");
-						    criteriaContext.addPredicate(c);
-						    criteriaContext.finalizeQuery();
-					    }));
+					From<?,?> drugOrder = criteriaContext.addJoin("drugOrder", "drugOrder");
+					entry.getValue().forEach(e -> handleMedicationRequestReference(criteriaContext, drugOrder,
+					    (ReferenceAndListParam) e.getParam()).ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery()));
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
 					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(criteriaContext::addPredicate);
