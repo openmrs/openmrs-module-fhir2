@@ -14,12 +14,17 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.hl7.fhir.r4.utils.client.FHIRToolingClient.DATE_FORMAT;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
 
+import java.text.ParseException;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
 
+import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -209,6 +214,23 @@ public class DosageTranslatorImplTest {
 		assertThat(result.getDoseAndRate().get(0).getDoseQuantity().getUnit(), is("mg"));
 		assertNull(result.getDoseAndRate().get(0).getDoseQuantity().getSystem());
 		assertThat(result.getDoseAndRate().get(0).getDoseQuantity().getCode(), is(CONCEPT_UUID));
+	}
+	
+	@Test
+	public void toFhirResource_shouldReturnDosageWhenSubmittingDrugOrderWithDoseUnitButNoDose() throws ParseException {
+		Concept mg = new Concept();
+		mg.addName(new ConceptName("mg", Locale.ENGLISH));
+		mg.setUuid(CONCEPT_UUID);
+		
+		drugOrder.setDose(null);
+		drugOrder.setDoseUnits(mg);
+		drugOrder.setAsNeeded(Boolean.TRUE);
+		drugOrder.setDosingInstructions(DOSING_INSTRUCTION);
+		Dosage result = dosageTranslator.toFhirResource(drugOrder);
+
+		assertThat(result, notNullValue());
+		assertThat(result.getAsNeededBooleanType().booleanValue(), is(true));
+		assertThat(result.getText(), equalTo(DOSING_INSTRUCTION));
 	}
 	
 	@Test
