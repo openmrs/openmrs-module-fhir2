@@ -51,7 +51,7 @@ public class DosageTranslatorImpl implements DosageTranslator {
 		dosage.setRoute(conceptTranslator.toFhirResource(drugOrder.getRoute()));
 		dosage.setTiming(timingTranslator.toFhirResource(drugOrder));
 		
-		if (drugOrder.getDose() != null || drugOrder.getDoseUnits() != null) {
+		if (drugOrder.getDose() != null) {
 			Dosage.DosageDoseAndRateComponent doseAndRate = new Dosage.DosageDoseAndRateComponent();
 			Quantity dose = new SimpleQuantity();
 			dose.setValue(drugOrder.getDose());
@@ -66,7 +66,7 @@ public class DosageTranslatorImpl implements DosageTranslator {
 			doseAndRate.setDose(dose);
 			dosage.addDoseAndRate(doseAndRate);
 		}
-		
+
 		return dosage;
 	}
 	
