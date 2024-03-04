@@ -14,9 +14,13 @@ import static org.openmrs.module.fhir2.FhirConstants.COUNT_QUERY_CACHE;
 import static org.openmrs.module.fhir2.FhirConstants.EXACT_TOTAL_SEARCH_PARAMETER;
 
 import javax.annotation.Nonnull;
+import javax.persistence.CacheRetrieveMode;
 import javax.persistence.CacheStoreMode;
+import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 
 import java.util.Collection;
@@ -165,7 +169,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 		
 		handleSort(criteriaContext, theParams.getSortSpec());
 		handleIdPropertyOrdering(criteriaContext, idProperty);
-		
+
 		TypedQuery<T> executableQuery = (TypedQuery<T>) criteriaContext.getEntityManager()
 		        .createQuery(criteriaContext.getCriteriaQuery());
 		
@@ -347,21 +351,19 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 		
 		return super.paramToProp(criteriaContext, param);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	protected <V, U> void applyExactTotal(OpenmrsFhirCriteriaContext<V, U> criteriaContext, SearchParameterMap theParams) {
 		List<PropParam<?>> exactTotal = theParams.getParameters(EXACT_TOTAL_SEARCH_PARAMETER);
+		EntityManager manager = criteriaContext.getEntityManager();
 		if (!exactTotal.isEmpty()) {
 			PropParam<Boolean> propParam = (PropParam<Boolean>) exactTotal.get(0);
 			if (propParam.getParam()) {
-				criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery())
-				        .setHint("javax.persistence.cache.storeMode", CacheStoreMode.REFRESH);
+				manager.setProperty("javax.persistence.cache.retrieveMode", CacheRetrieveMode.BYPASS);
 			}
 		} else {
-			criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).setHint(HINT_CACHEABLE,
-			    "true");
-			criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery())
-			        .setHint("org.hibernate.cacheRegion", COUNT_QUERY_CACHE);
+			manager.setProperty("javax.persistence.cache.storeMode", CacheStoreMode.USE);
+			manager.setProperty("javax.persistence.cache.region", COUNT_QUERY_CACHE);
 		}
 	}
 	
