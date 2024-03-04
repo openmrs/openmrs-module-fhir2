@@ -76,7 +76,6 @@ public class FhirMedicationDaoImpl extends BaseFhirDao<Drug> implements FhirMedi
 	private <U> void handleMedicationDosageForm(OpenmrsFhirCriteriaContext<Drug, U> criteriaContext,
 	        TokenAndListParam dosageForm) {
 		if (dosageForm != null) {
-			criteriaContext.getRoot().join("dosageForm").alias("dc");
 			From<?, ?> dosageFormJoin = criteriaContext.addJoin("dosageForm", "dc");
 			handleCodeableConcept(criteriaContext, dosageForm, dosageFormJoin, "dcm", "dcrt")
 			        .ifPresent(criteriaContext::addPredicate);
