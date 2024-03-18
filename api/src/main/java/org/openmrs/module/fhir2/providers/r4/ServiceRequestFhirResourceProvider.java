@@ -25,6 +25,7 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.HasAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -39,8 +40,10 @@ import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.ServiceRequest;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirServiceRequestService;
 import org.openmrs.module.fhir2.api.annotations.R4Provider;
+import org.openmrs.module.fhir2.api.search.param.ServiceRequestSearchParams;
 import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -108,6 +111,7 @@ public class ServiceRequestFhirResourceProvider implements IResourceProvider {
 	        @OptionalParam(name = ServiceRequest.SP_OCCURRENCE) DateRangeParam occurrence,
 	        @OptionalParam(name = ServiceRequest.SP_RES_ID) TokenAndListParam uuid,
 	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated,
+	        @OptionalParam(name = FhirConstants.HAS_SEARCH_HANDLER) HasAndListParam hasAndListParam,
 	        @IncludeParam(allow = { "ServiceRequest:" + ServiceRequest.SP_PATIENT,
 	                "ServiceRequest:" + ServiceRequest.SP_REQUESTER,
 	                "ServiceRequest:" + ServiceRequest.SP_ENCOUNTER }) HashSet<Include> includes) {
@@ -119,7 +123,7 @@ public class ServiceRequestFhirResourceProvider implements IResourceProvider {
 			includes = null;
 		}
 		
-		return serviceRequestService.searchForServiceRequests(patientReference, code, encounterReference,
-		    participantReference, occurrence, uuid, lastUpdated, includes);
+		return serviceRequestService.searchForServiceRequests(new ServiceRequestSearchParams(patientReference, code,
+		        encounterReference, participantReference, occurrence, hasAndListParam, uuid, lastUpdated, null, includes));
 	}
 }

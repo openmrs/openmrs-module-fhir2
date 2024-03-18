@@ -18,18 +18,21 @@ import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import javax.servlet.ServletException;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.HasAndListParam;
+import ca.uhn.fhir.rest.param.HasOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
@@ -40,6 +43,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -48,6 +52,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirServiceRequestService;
+import org.openmrs.module.fhir2.api.search.param.ServiceRequestSearchParams;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -88,16 +93,7 @@ public class ServiceRequestFhirResourceProviderWebTest extends BaseFhirR4Resourc
 	private FhirServiceRequestService service;
 	
 	@Captor
-	private ArgumentCaptor<ReferenceAndListParam> referenceAndListParamArgumentCaptor;
-	
-	@Captor
-	private ArgumentCaptor<TokenAndListParam> tokenAndListParamArgumentCaptor;
-	
-	@Captor
-	private ArgumentCaptor<DateRangeParam> dateRangeParamArgumentCaptor;
-	
-	@Captor
-	private ArgumentCaptor<HashSet<Include>> includeArgumentCaptor;
+	private ArgumentCaptor<ServiceRequestSearchParams> serviceRequestSearchParamsArgumentCaptor;
 	
 	private ServiceRequest serviceRequest;
 	
@@ -145,16 +141,15 @@ public class ServiceRequestFhirResourceProviderWebTest extends BaseFhirR4Resourc
 	public void searchForServiceRequests_shouldSearchForServiceRequestsByPatientUUID() throws Exception {
 		verifyUri(String.format("/ServiceRequest?patient=%s", PATIENT_UUID));
 		
-		verify(service).searchForServiceRequests(referenceAndListParamArgumentCaptor.capture(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull());
+		verify(service).searchForServiceRequests(serviceRequestSearchParamsArgumentCaptor.capture());
 		
-		assertThat(referenceAndListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getValue(),
+		ReferenceAndListParam referenceAndListParam = serviceRequestSearchParamsArgumentCaptor.getValue()
+		        .getPatientReference();
+		assertThat(referenceAndListParam, notNullValue());
+		assertThat(referenceAndListParam.getValuesAsQueryTokens(), not(empty()));
+		assertThat(referenceAndListParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(PATIENT_UUID));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getChain(),
+		assertThat(referenceAndListParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getChain(),
 		    equalTo(null));
 	}
 	
@@ -162,16 +157,15 @@ public class ServiceRequestFhirResourceProviderWebTest extends BaseFhirR4Resourc
 	public void searchForServiceRequests_shouldSearchForServiceRequestsByPatientName() throws Exception {
 		verifyUri(String.format("/ServiceRequest?patient.name=%s", PATIENT_GIVEN_NAME));
 		
-		verify(service).searchForServiceRequests(referenceAndListParamArgumentCaptor.capture(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull());
+		verify(service).searchForServiceRequests(serviceRequestSearchParamsArgumentCaptor.capture());
 		
-		assertThat(referenceAndListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getValue(),
+		ReferenceAndListParam referenceAndListParam = serviceRequestSearchParamsArgumentCaptor.getValue()
+		        .getPatientReference();
+		assertThat(referenceAndListParam, notNullValue());
+		assertThat(referenceAndListParam.getValuesAsQueryTokens(), not(empty()));
+		assertThat(referenceAndListParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(PATIENT_GIVEN_NAME));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getChain(),
+		assertThat(referenceAndListParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getChain(),
 		    equalTo(Patient.SP_NAME));
 	}
 	
@@ -179,16 +173,15 @@ public class ServiceRequestFhirResourceProviderWebTest extends BaseFhirR4Resourc
 	public void searchForServiceRequests_shouldSearchForServiceRequestsByPatientGivenName() throws Exception {
 		verifyUri(String.format("/ServiceRequest?patient.given=%s", PATIENT_GIVEN_NAME));
 		
-		verify(service).searchForServiceRequests(referenceAndListParamArgumentCaptor.capture(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull());
+		verify(service).searchForServiceRequests(serviceRequestSearchParamsArgumentCaptor.capture());
 		
-		assertThat(referenceAndListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getValue(),
+		ReferenceAndListParam referenceAndListParam = serviceRequestSearchParamsArgumentCaptor.getValue()
+		        .getPatientReference();
+		assertThat(referenceAndListParam, notNullValue());
+		assertThat(referenceAndListParam.getValuesAsQueryTokens(), not(empty()));
+		assertThat(referenceAndListParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(PATIENT_GIVEN_NAME));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getChain(),
+		assertThat(referenceAndListParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getChain(),
 		    equalTo(Patient.SP_GIVEN));
 	}
 	
@@ -196,16 +189,15 @@ public class ServiceRequestFhirResourceProviderWebTest extends BaseFhirR4Resourc
 	public void searchForServiceRequests_shouldSearchForServiceRequestsByPatientFamilyName() throws Exception {
 		verifyUri(String.format("/ServiceRequest?patient.family=%s", PATIENT_FAMILY_NAME));
 		
-		verify(service).searchForServiceRequests(referenceAndListParamArgumentCaptor.capture(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull());
+		verify(service).searchForServiceRequests(serviceRequestSearchParamsArgumentCaptor.capture());
 		
-		assertThat(referenceAndListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getValue(),
+		ReferenceAndListParam referenceAndListParam = serviceRequestSearchParamsArgumentCaptor.getValue()
+		        .getPatientReference();
+		assertThat(referenceAndListParam, notNullValue());
+		assertThat(referenceAndListParam.getValuesAsQueryTokens(), not(empty()));
+		assertThat(referenceAndListParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(PATIENT_FAMILY_NAME));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getChain(),
+		assertThat(referenceAndListParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getChain(),
 		    equalTo(Patient.SP_FAMILY));
 	}
 	
@@ -213,16 +205,15 @@ public class ServiceRequestFhirResourceProviderWebTest extends BaseFhirR4Resourc
 	public void searchForServiceRequests_shouldSearchForServiceRequestsByPatientIdentifier() throws Exception {
 		verifyUri(String.format("/ServiceRequest?patient.identifier=%s", PATIENT_IDENTIFIER));
 		
-		verify(service).searchForServiceRequests(referenceAndListParamArgumentCaptor.capture(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull());
+		verify(service).searchForServiceRequests(serviceRequestSearchParamsArgumentCaptor.capture());
 		
-		assertThat(referenceAndListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getValue(),
+		ReferenceAndListParam referenceAndListParam = serviceRequestSearchParamsArgumentCaptor.getValue()
+		        .getPatientReference();
+		assertThat(referenceAndListParam, notNullValue());
+		assertThat(referenceAndListParam.getValuesAsQueryTokens(), not(empty()));
+		assertThat(referenceAndListParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(PATIENT_IDENTIFIER));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getChain(),
+		assertThat(referenceAndListParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getChain(),
 		    equalTo(Patient.SP_IDENTIFIER));
 	}
 	
@@ -230,16 +221,15 @@ public class ServiceRequestFhirResourceProviderWebTest extends BaseFhirR4Resourc
 	public void searchForServiceRequests_shouldSearchForServiceRequestsBySubjectUUID() throws Exception {
 		verifyUri(String.format("/ServiceRequest?subject=%s", PATIENT_UUID));
 		
-		verify(service).searchForServiceRequests(referenceAndListParamArgumentCaptor.capture(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull());
+		verify(service).searchForServiceRequests(serviceRequestSearchParamsArgumentCaptor.capture());
 		
-		assertThat(referenceAndListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getValue(),
+		ReferenceAndListParam referenceAndListParam = serviceRequestSearchParamsArgumentCaptor.getValue()
+		        .getPatientReference();
+		assertThat(referenceAndListParam, notNullValue());
+		assertThat(referenceAndListParam.getValuesAsQueryTokens(), not(empty()));
+		assertThat(referenceAndListParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(PATIENT_UUID));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getChain(),
+		assertThat(referenceAndListParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getChain(),
 		    equalTo(null));
 	}
 	
@@ -247,16 +237,15 @@ public class ServiceRequestFhirResourceProviderWebTest extends BaseFhirR4Resourc
 	public void searchForServiceRequests_shouldSearchForServiceRequestsBySubjectName() throws Exception {
 		verifyUri(String.format("/ServiceRequest?subject.name=%s", PATIENT_GIVEN_NAME));
 		
-		verify(service).searchForServiceRequests(referenceAndListParamArgumentCaptor.capture(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull());
+		verify(service).searchForServiceRequests(serviceRequestSearchParamsArgumentCaptor.capture());
 		
-		assertThat(referenceAndListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getValue(),
+		ReferenceAndListParam referenceAndListParam = serviceRequestSearchParamsArgumentCaptor.getValue()
+		        .getPatientReference();
+		assertThat(referenceAndListParam, notNullValue());
+		assertThat(referenceAndListParam.getValuesAsQueryTokens(), not(empty()));
+		assertThat(referenceAndListParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(PATIENT_GIVEN_NAME));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getChain(),
+		assertThat(referenceAndListParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getChain(),
 		    equalTo(Patient.SP_NAME));
 	}
 	
@@ -264,16 +253,15 @@ public class ServiceRequestFhirResourceProviderWebTest extends BaseFhirR4Resourc
 	public void searchForServiceRequests_shouldSearchForServiceRequestsBySubjectGivenName() throws Exception {
 		verifyUri(String.format("/ServiceRequest?subject.given=%s", PATIENT_GIVEN_NAME));
 		
-		verify(service).searchForServiceRequests(referenceAndListParamArgumentCaptor.capture(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull());
+		verify(service).searchForServiceRequests(serviceRequestSearchParamsArgumentCaptor.capture());
 		
-		assertThat(referenceAndListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getValue(),
+		ReferenceAndListParam referenceAndListParam = serviceRequestSearchParamsArgumentCaptor.getValue()
+		        .getPatientReference();
+		assertThat(referenceAndListParam, notNullValue());
+		assertThat(referenceAndListParam.getValuesAsQueryTokens(), not(empty()));
+		assertThat(referenceAndListParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(PATIENT_GIVEN_NAME));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getChain(),
+		assertThat(referenceAndListParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getChain(),
 		    equalTo(Patient.SP_GIVEN));
 	}
 	
@@ -281,16 +269,15 @@ public class ServiceRequestFhirResourceProviderWebTest extends BaseFhirR4Resourc
 	public void searchForServiceRequests_shouldSearchForServiceRequestsBySubjectFamilyName() throws Exception {
 		verifyUri(String.format("/ServiceRequest?subject.family=%s", PATIENT_FAMILY_NAME));
 		
-		verify(service).searchForServiceRequests(referenceAndListParamArgumentCaptor.capture(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull());
+		verify(service).searchForServiceRequests(serviceRequestSearchParamsArgumentCaptor.capture());
 		
-		assertThat(referenceAndListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getValue(),
+		ReferenceAndListParam referenceAndListParam = serviceRequestSearchParamsArgumentCaptor.getValue()
+		        .getPatientReference();
+		assertThat(referenceAndListParam, notNullValue());
+		assertThat(referenceAndListParam.getValuesAsQueryTokens(), not(empty()));
+		assertThat(referenceAndListParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(PATIENT_FAMILY_NAME));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getChain(),
+		assertThat(referenceAndListParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getChain(),
 		    equalTo(Patient.SP_FAMILY));
 	}
 	
@@ -298,16 +285,15 @@ public class ServiceRequestFhirResourceProviderWebTest extends BaseFhirR4Resourc
 	public void searchForServiceRequests_shouldSearchForServiceRequestsBySubjectIdentifier() throws Exception {
 		verifyUri(String.format("/ServiceRequest?subject.identifier=%s", PATIENT_IDENTIFIER));
 		
-		verify(service).searchForServiceRequests(referenceAndListParamArgumentCaptor.capture(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull());
+		verify(service).searchForServiceRequests(serviceRequestSearchParamsArgumentCaptor.capture());
 		
-		assertThat(referenceAndListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getValue(),
+		ReferenceAndListParam referenceAndListParam = serviceRequestSearchParamsArgumentCaptor.getValue()
+		        .getPatientReference();
+		assertThat(referenceAndListParam, notNullValue());
+		assertThat(referenceAndListParam.getValuesAsQueryTokens(), not(empty()));
+		assertThat(referenceAndListParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(PATIENT_IDENTIFIER));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getChain(),
+		assertThat(referenceAndListParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getChain(),
 		    equalTo(Patient.SP_IDENTIFIER));
 	}
 	
@@ -315,16 +301,15 @@ public class ServiceRequestFhirResourceProviderWebTest extends BaseFhirR4Resourc
 	public void searchForServiceRequests_shouldSearchForServiceRequestsByParticipantUUID() throws Exception {
 		verifyUri(String.format("/ServiceRequest?requester=%s", PARTICIPANT_UUID));
 		
-		verify(service).searchForServiceRequests(isNull(), isNull(), isNull(), referenceAndListParamArgumentCaptor.capture(),
-		    isNull(), isNull(), isNull(), isNull());
+		verify(service).searchForServiceRequests(serviceRequestSearchParamsArgumentCaptor.capture());
 		
-		assertThat(referenceAndListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getValue(),
+		ReferenceAndListParam referenceAndListParam = serviceRequestSearchParamsArgumentCaptor.getValue()
+		        .getParticipantReference();
+		assertThat(referenceAndListParam, notNullValue());
+		assertThat(referenceAndListParam.getValuesAsQueryTokens(), not(empty()));
+		assertThat(referenceAndListParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(PARTICIPANT_UUID));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getChain(),
+		assertThat(referenceAndListParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getChain(),
 		    equalTo(null));
 	}
 	
@@ -332,16 +317,15 @@ public class ServiceRequestFhirResourceProviderWebTest extends BaseFhirR4Resourc
 	public void searchForServiceRequests_shouldSearchForServiceRequestsByParticipantName() throws Exception {
 		verifyUri(String.format("/ServiceRequest?requester.name=%s", PARTICIPANT_GIVEN_NAME));
 		
-		verify(service).searchForServiceRequests(isNull(), isNull(), isNull(), referenceAndListParamArgumentCaptor.capture(),
-		    isNull(), isNull(), isNull(), isNull());
+		verify(service).searchForServiceRequests(serviceRequestSearchParamsArgumentCaptor.capture());
 		
-		assertThat(referenceAndListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getValue(),
+		ReferenceAndListParam referenceAndListParam = serviceRequestSearchParamsArgumentCaptor.getValue()
+		        .getParticipantReference();
+		assertThat(referenceAndListParam, notNullValue());
+		assertThat(referenceAndListParam.getValuesAsQueryTokens(), not(empty()));
+		assertThat(referenceAndListParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(PARTICIPANT_GIVEN_NAME));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getChain(),
+		assertThat(referenceAndListParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getChain(),
 		    equalTo(Practitioner.SP_NAME));
 	}
 	
@@ -349,16 +333,15 @@ public class ServiceRequestFhirResourceProviderWebTest extends BaseFhirR4Resourc
 	public void searchForServiceRequests_shouldSearchForServiceRequestsByParticipantGivenName() throws Exception {
 		verifyUri(String.format("/ServiceRequest?requester.given=%s", PARTICIPANT_GIVEN_NAME));
 		
-		verify(service).searchForServiceRequests(isNull(), isNull(), isNull(), referenceAndListParamArgumentCaptor.capture(),
-		    isNull(), isNull(), isNull(), isNull());
+		verify(service).searchForServiceRequests(serviceRequestSearchParamsArgumentCaptor.capture());
 		
-		assertThat(referenceAndListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getValue(),
+		ReferenceAndListParam referenceAndListParam = serviceRequestSearchParamsArgumentCaptor.getValue()
+		        .getParticipantReference();
+		assertThat(referenceAndListParam, notNullValue());
+		assertThat(referenceAndListParam.getValuesAsQueryTokens(), not(empty()));
+		assertThat(referenceAndListParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(PARTICIPANT_GIVEN_NAME));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getChain(),
+		assertThat(referenceAndListParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getChain(),
 		    equalTo(Practitioner.SP_GIVEN));
 	}
 	
@@ -366,16 +349,15 @@ public class ServiceRequestFhirResourceProviderWebTest extends BaseFhirR4Resourc
 	public void searchForServiceRequests_shouldSearchForServiceRequestsByParticipantFamilyName() throws Exception {
 		verifyUri(String.format("/ServiceRequest?requester.family=%s", PARTICIPANT_FAMILY_NAME));
 		
-		verify(service).searchForServiceRequests(isNull(), isNull(), isNull(), referenceAndListParamArgumentCaptor.capture(),
-		    isNull(), isNull(), isNull(), isNull());
+		verify(service).searchForServiceRequests(serviceRequestSearchParamsArgumentCaptor.capture());
 		
-		assertThat(referenceAndListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getValue(),
+		ReferenceAndListParam referenceAndListParam = serviceRequestSearchParamsArgumentCaptor.getValue()
+		        .getParticipantReference();
+		assertThat(referenceAndListParam, notNullValue());
+		assertThat(referenceAndListParam.getValuesAsQueryTokens(), not(empty()));
+		assertThat(referenceAndListParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(PARTICIPANT_FAMILY_NAME));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getChain(),
+		assertThat(referenceAndListParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getChain(),
 		    equalTo(Practitioner.SP_FAMILY));
 	}
 	
@@ -383,66 +365,16 @@ public class ServiceRequestFhirResourceProviderWebTest extends BaseFhirR4Resourc
 	public void searchForServiceRequests_shouldSearchForServiceRequestsByParticipantIdentifier() throws Exception {
 		verifyUri(String.format("/ServiceRequest?requester.identifier=%s", PARTICIPANT_IDENTIFIER));
 		
-		verify(service).searchForServiceRequests(isNull(), isNull(), isNull(), referenceAndListParamArgumentCaptor.capture(),
-		    isNull(), isNull(), isNull(), isNull());
+		verify(service).searchForServiceRequests(serviceRequestSearchParamsArgumentCaptor.capture());
 		
-		assertThat(referenceAndListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getValue(),
+		ReferenceAndListParam referenceAndListParam = serviceRequestSearchParamsArgumentCaptor.getValue()
+		        .getParticipantReference();
+		assertThat(referenceAndListParam, notNullValue());
+		assertThat(referenceAndListParam.getValuesAsQueryTokens(), not(empty()));
+		assertThat(referenceAndListParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(PARTICIPANT_IDENTIFIER));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getChain(),
+		assertThat(referenceAndListParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getChain(),
 		    equalTo(Practitioner.SP_IDENTIFIER));
-	}
-	
-	@Test
-	public void searchForServiceRequests_shouldSearchForServiceRequestsByEncounterUUID() throws Exception {
-		verifyUri(String.format("/ServiceRequest?encounter=%s", ENCOUNTER_UUID));
-		
-		verify(service).searchForServiceRequests(isNull(), isNull(), referenceAndListParamArgumentCaptor.capture(), isNull(),
-		    isNull(), isNull(), isNull(), isNull());
-		
-		assertThat(referenceAndListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getValue(),
-		    equalTo(ENCOUNTER_UUID));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getChain(),
-		    equalTo(null));
-	}
-	
-	@Test
-	public void searchForServiceRequests_shouldSearchForServiceRequestsByCode() throws Exception {
-		verifyUri(String.format("/ServiceRequest?code=%s", CODE));
-		
-		verify(service).searchForServiceRequests(isNull(), tokenAndListParamArgumentCaptor.capture(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull());
-		
-		assertThat(tokenAndListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
-		        .getValue(),
-		    equalTo(CODE));
-	}
-	
-	@Test
-	public void searchForServiceRequests_shouldSearchForServiceRequestsByOccurrence() throws Exception {
-		verifyUri(String.format("/ServiceRequest?occurrence=eq%s", OCCURRENCE_DATE));
-		
-		verify(service).searchForServiceRequests(isNull(), isNull(), isNull(), isNull(),
-		    dateRangeParamArgumentCaptor.capture(), isNull(), isNull(), isNull());
-		
-		assertThat(dateRangeParamArgumentCaptor.getValue(), notNullValue());
-		
-		Calendar calendar = Calendar.getInstance();
-		calendar.set(2010, Calendar.MARCH, 31);
-		
-		assertThat(dateRangeParamArgumentCaptor.getValue().getLowerBound().getValue(),
-		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
-		assertThat(dateRangeParamArgumentCaptor.getValue().getUpperBound().getValue(),
-		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
 	}
 	
 	@Test
@@ -450,26 +382,73 @@ public class ServiceRequestFhirResourceProviderWebTest extends BaseFhirR4Resourc
 		verifyUri(
 		    String.format("/ServiceRequest?requester.given=%s&occurrence=eq%s", PARTICIPANT_GIVEN_NAME, OCCURRENCE_DATE));
 		
-		verify(service).searchForServiceRequests(isNull(), isNull(), isNull(), referenceAndListParamArgumentCaptor.capture(),
-		    dateRangeParamArgumentCaptor.capture(), isNull(), isNull(), isNull());
+		verify(service).searchForServiceRequests(serviceRequestSearchParamsArgumentCaptor.capture());
 		
-		assertThat(referenceAndListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getValue(),
+		ReferenceAndListParam referenceAndListParam = serviceRequestSearchParamsArgumentCaptor.getValue()
+		        .getParticipantReference();
+		assertThat(referenceAndListParam, notNullValue());
+		assertThat(referenceAndListParam.getValuesAsQueryTokens(), not(empty()));
+		assertThat(referenceAndListParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(PARTICIPANT_GIVEN_NAME));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getChain(),
+		assertThat(referenceAndListParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getChain(),
 		    equalTo(Practitioner.SP_GIVEN));
 		
-		assertThat(dateRangeParamArgumentCaptor.getValue(), notNullValue());
+		DateRangeParam dateRangeParam = serviceRequestSearchParamsArgumentCaptor.getValue().getOccurrence();
+		assertThat(dateRangeParam, notNullValue());
 		
 		Calendar calendar = Calendar.getInstance();
 		calendar.set(2010, Calendar.MARCH, 31);
 		
-		assertThat(dateRangeParamArgumentCaptor.getValue().getLowerBound().getValue(),
+		assertThat(dateRangeParam.getLowerBound().getValue(),
 		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
-		assertThat(dateRangeParamArgumentCaptor.getValue().getUpperBound().getValue(),
+		assertThat(dateRangeParam.getUpperBound().getValue(),
+		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
+	}
+	
+	@Test
+	public void searchForServiceRequests_shouldSearchForServiceRequestsByEncounterUUID() throws Exception {
+		verifyUri(String.format("/ServiceRequest?encounter=%s", ENCOUNTER_UUID));
+		
+		verify(service).searchForServiceRequests(serviceRequestSearchParamsArgumentCaptor.capture());
+		
+		ReferenceAndListParam referenceAndListParam = serviceRequestSearchParamsArgumentCaptor.getValue()
+		        .getEncounterReference();
+		assertThat(referenceAndListParam, notNullValue());
+		assertThat(referenceAndListParam.getValuesAsQueryTokens(), not(empty()));
+		assertThat(referenceAndListParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
+		    equalTo(ENCOUNTER_UUID));
+		assertThat(referenceAndListParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getChain(),
+		    equalTo(null));
+	}
+	
+	@Test
+	public void searchForServiceRequests_shouldSearchForServiceRequestsByCode() throws Exception {
+		verifyUri(String.format("/ServiceRequest?code=%s", CODE));
+		
+		verify(service).searchForServiceRequests(serviceRequestSearchParamsArgumentCaptor.capture());
+		
+		TokenAndListParam tokenAndListParam = serviceRequestSearchParamsArgumentCaptor.getValue().getCode();
+		assertThat(tokenAndListParam, notNullValue());
+		assertThat(tokenAndListParam.getValuesAsQueryTokens(), not(empty()));
+		assertThat(tokenAndListParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
+		    equalTo(CODE));
+	}
+	
+	@Test
+	public void searchForServiceRequests_shouldSearchForServiceRequestsByOccurrence() throws Exception {
+		verifyUri(String.format("/ServiceRequest?occurrence=eq%s", OCCURRENCE_DATE));
+		
+		verify(service).searchForServiceRequests(serviceRequestSearchParamsArgumentCaptor.capture());
+		
+		DateRangeParam dateRangeParam = serviceRequestSearchParamsArgumentCaptor.getValue().getOccurrence();
+		assertThat(dateRangeParam, notNullValue());
+		
+		Calendar calendar = Calendar.getInstance();
+		calendar.set(2010, Calendar.MARCH, 31);
+		
+		assertThat(dateRangeParam.getLowerBound().getValue(),
+		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
+		assertThat(dateRangeParam.getUpperBound().getValue(),
 		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
 	}
 	
@@ -477,13 +456,12 @@ public class ServiceRequestFhirResourceProviderWebTest extends BaseFhirR4Resourc
 	public void searchForServiceRequests_shouldSearchForServiceRequestsByUUID() throws Exception {
 		verifyUri(String.format("/ServiceRequest?_id=%s", SERVICE_REQUEST_UUID));
 		
-		verify(service).searchForServiceRequests(isNull(), isNull(), isNull(), isNull(), isNull(),
-		    tokenAndListParamArgumentCaptor.capture(), isNull(), isNull());
+		verify(service).searchForServiceRequests(serviceRequestSearchParamsArgumentCaptor.capture());
 		
-		assertThat(tokenAndListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
-		        .getValue(),
+		TokenAndListParam tokenAndListParam = serviceRequestSearchParamsArgumentCaptor.getValue().getId();
+		assertThat(tokenAndListParam, notNullValue());
+		assertThat(tokenAndListParam.getValuesAsQueryTokens(), not(empty()));
+		assertThat(tokenAndListParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(SERVICE_REQUEST_UUID));
 	}
 	
@@ -491,17 +469,17 @@ public class ServiceRequestFhirResourceProviderWebTest extends BaseFhirR4Resourc
 	public void searchForServiceRequests_shouldSearchForServiceRequestsByLastUpdatedDate() throws Exception {
 		verifyUri(String.format("/ServiceRequest?_lastUpdated=%s", LAST_UPDATED_DATE));
 		
-		verify(service).searchForServiceRequests(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    dateRangeParamArgumentCaptor.capture(), isNull());
+		verify(service).searchForServiceRequests(serviceRequestSearchParamsArgumentCaptor.capture());
 		
-		assertThat(dateRangeParamArgumentCaptor.getValue(), notNullValue());
+		DateRangeParam dateRangeParam = serviceRequestSearchParamsArgumentCaptor.getValue().getLastUpdated();
+		assertThat(dateRangeParam, notNullValue());
 		
 		Calendar calendar = Calendar.getInstance();
 		calendar.set(2020, Calendar.SEPTEMBER, 3);
 		
-		assertThat(dateRangeParamArgumentCaptor.getValue().getLowerBound().getValue(),
+		assertThat(dateRangeParam.getLowerBound().getValue(),
 		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
-		assertThat(dateRangeParamArgumentCaptor.getValue().getUpperBound().getValue(),
+		assertThat(dateRangeParam.getUpperBound().getValue(),
 		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
 	}
 	
@@ -509,67 +487,118 @@ public class ServiceRequestFhirResourceProviderWebTest extends BaseFhirR4Resourc
 	public void searchForServiceRequests_shouldAddRelatedPatientsWhenIncluded() throws Exception {
 		verifyUri("/ServiceRequest?_include=ServiceRequest:patient");
 		
-		verify(service).searchForServiceRequests(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    includeArgumentCaptor.capture());
+		verify(service).searchForServiceRequests(serviceRequestSearchParamsArgumentCaptor.capture());
 		
-		assertThat(includeArgumentCaptor.getValue(), notNullValue());
-		assertThat(includeArgumentCaptor.getValue().size(), equalTo(1));
-		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamName(),
-		    equalTo(FhirConstants.INCLUDE_PATIENT_PARAM));
-		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamType(),
-		    equalTo(FhirConstants.SERVICE_REQUEST));
+		HashSet<Include> include = serviceRequestSearchParamsArgumentCaptor.getValue().getIncludes();
+		assertThat(include, notNullValue());
+		assertThat(include.size(), equalTo(1));
+		assertThat(include.iterator().next().getParamName(), equalTo(FhirConstants.INCLUDE_PATIENT_PARAM));
+		assertThat(include.iterator().next().getParamType(), equalTo(FhirConstants.SERVICE_REQUEST));
 	}
 	
 	@Test
 	public void searchForServiceRequests_shouldAddRelatedRequesterWhenIncluded() throws Exception {
 		verifyUri("/ServiceRequest?_include=ServiceRequest:requester");
 		
-		verify(service).searchForServiceRequests(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    includeArgumentCaptor.capture());
+		verify(service).searchForServiceRequests(serviceRequestSearchParamsArgumentCaptor.capture());
 		
-		assertThat(includeArgumentCaptor.getValue(), notNullValue());
-		assertThat(includeArgumentCaptor.getValue().size(), equalTo(1));
-		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamName(),
-		    equalTo(FhirConstants.INCLUDE_REQUESTER_PARAM));
-		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamType(),
-		    equalTo(FhirConstants.SERVICE_REQUEST));
+		HashSet<Include> include = serviceRequestSearchParamsArgumentCaptor.getValue().getIncludes();
+		assertThat(include, notNullValue());
+		assertThat(include.size(), equalTo(1));
+		assertThat(include.iterator().next().getParamName(), equalTo(FhirConstants.INCLUDE_REQUESTER_PARAM));
+		assertThat(include.iterator().next().getParamType(), equalTo(FhirConstants.SERVICE_REQUEST));
 	}
 	
 	@Test
 	public void searchForServiceRequests_shouldAddRelatedEncounterWhenIncluded() throws Exception {
 		verifyUri("/ServiceRequest?_include=ServiceRequest:encounter");
 		
-		verify(service).searchForServiceRequests(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    includeArgumentCaptor.capture());
+		verify(service).searchForServiceRequests(serviceRequestSearchParamsArgumentCaptor.capture());
 		
-		assertThat(includeArgumentCaptor.getValue(), notNullValue());
-		assertThat(includeArgumentCaptor.getValue().size(), equalTo(1));
-		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamName(),
-		    equalTo(FhirConstants.INCLUDE_ENCOUNTER_PARAM));
-		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamType(),
-		    equalTo(FhirConstants.SERVICE_REQUEST));
+		HashSet<Include> include = serviceRequestSearchParamsArgumentCaptor.getValue().getIncludes();
+		assertThat(include, notNullValue());
+		assertThat(include.size(), equalTo(1));
+		assertThat(include.iterator().next().getParamName(), equalTo(FhirConstants.INCLUDE_ENCOUNTER_PARAM));
+		assertThat(include.iterator().next().getParamType(), equalTo(FhirConstants.SERVICE_REQUEST));
 	}
 	
 	@Test
 	public void searchForServiceRequests_shouldHandleMultipleIncludes() throws Exception {
 		verifyUri("/ServiceRequest?_include=ServiceRequest:requester&_include=ServiceRequest:patient");
 		
-		verify(service).searchForServiceRequests(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    includeArgumentCaptor.capture());
+		verify(service).searchForServiceRequests(serviceRequestSearchParamsArgumentCaptor.capture());
 		
-		assertThat(includeArgumentCaptor.getValue(), notNullValue());
-		assertThat(includeArgumentCaptor.getValue().size(), equalTo(2));
+		HashSet<Include> include = serviceRequestSearchParamsArgumentCaptor.getValue().getIncludes();
+		assertThat(include, notNullValue());
+		assertThat(include.size(), equalTo(2));
 		
-		assertThat(includeArgumentCaptor.getValue(),
-		    hasItem(allOf(hasProperty("paramName", equalTo(FhirConstants.INCLUDE_REQUESTER_PARAM)),
-		        hasProperty("paramType", equalTo(FhirConstants.SERVICE_REQUEST)))));
-		assertThat(includeArgumentCaptor.getValue(),
-		    hasItem(allOf(hasProperty("paramName", equalTo(FhirConstants.INCLUDE_PATIENT_PARAM)),
-		        hasProperty("paramType", equalTo(FhirConstants.SERVICE_REQUEST)))));
+		assertThat(include, hasItem(allOf(hasProperty("paramName", equalTo(FhirConstants.INCLUDE_REQUESTER_PARAM)),
+		    hasProperty("paramType", equalTo(FhirConstants.SERVICE_REQUEST)))));
+		assertThat(include, hasItem(allOf(hasProperty("paramName", equalTo(FhirConstants.INCLUDE_PATIENT_PARAM)),
+		    hasProperty("paramType", equalTo(FhirConstants.SERVICE_REQUEST)))));
+	}
+	
+	@Test
+	public void searchForServiceRequests_shouldHandleHasAndListParameter() throws Exception {
+		verifyUri("/ServiceRequest?_has:Observation:based-on:category=laboratory");
+		
+		verify(service).searchForServiceRequests(serviceRequestSearchParamsArgumentCaptor.capture());
+		
+		HasAndListParam hasAndListParam = serviceRequestSearchParamsArgumentCaptor.getValue().getHasAndListParam();
+		assertThat(hasAndListParam, notNullValue());
+		assertThat(hasAndListParam.size(), equalTo(1));
+		
+		List<HasOrListParam> hasOrListParams = hasAndListParam.getValuesAsQueryTokens();
+		assertThat(hasOrListParams.size(), equalTo(1));
+		
+		List<String> valuesFound = new ArrayList<>();
+		
+		for (HasOrListParam hasOrListParam : hasOrListParams) {
+			hasOrListParam.getValuesAsQueryTokens().forEach(hasParam -> {
+				assertThat(hasParam.getTargetResourceType(), equalTo(FhirConstants.OBSERVATION));
+				assertThat(hasParam.getReferenceFieldName(), equalTo("based-on"));
+				valuesFound.add(hasParam.getParameterName() + "=" + hasParam.getParameterValue());
+			});
+		}
+		Collections.sort(valuesFound);
+		
+		assertThat(valuesFound.size(), equalTo(1));
+		assertThat(valuesFound.get(0), equalTo("category=laboratory"));
+	}
+	
+	@Test
+	@Ignore
+	public void searchForServiceRequests_shouldHandleHasAndListParameterWithColonNotAfterParameterName() throws Exception {
+		verifyUri("/ServiceRequest?_has:Observation:based-on:category:not=laboratory");
+		
+		verify(service).searchForServiceRequests(serviceRequestSearchParamsArgumentCaptor.capture());
+		
+		/*
+		 * TODO:
+		 * The [HL7 documentation](https://www.hl7.org/fhir/search.html#has) discourages this use-case.
+		 * Implementation of verification is pending confirmation to act against this recommendation. 
+		 */
+		
+	}
+	
+	@Test
+	@Ignore
+	public void searchForServiceRequests_shouldHandleHasAndListParameterWithColonNotAfterParameterNameAndNoValue()
+	        throws Exception {
+		verifyUri("/ServiceRequest?_has:Observation:based-on:not");
+		
+		verify(service).searchForServiceRequests(serviceRequestSearchParamsArgumentCaptor.capture());
+		
+		/*
+		 * TODO:
+		 * The [HL7 documentation](https://www.hl7.org/fhir/search.html#has) discourages this use-case.
+		 * Implementation of verification is pending confirmation to act against this recommendation. 
+		 */
+		
 	}
 	
 	private void verifyUri(String uri) throws Exception {
-		when(service.searchForServiceRequests(any(), any(), any(), any(), any(), any(), any(), any()))
+		when(service.searchForServiceRequests(any()))
 		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(serviceRequest), 10, 1));
 		
 		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.JSON).go();
