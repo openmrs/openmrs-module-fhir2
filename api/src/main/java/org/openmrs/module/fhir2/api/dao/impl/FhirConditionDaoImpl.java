@@ -9,9 +9,9 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
-import static org.hibernate.criterion.Restrictions.eq;
-
 import javax.annotation.Nonnull;
+import javax.persistence.criteria.From;
+import javax.persistence.criteria.Predicate;
 
 import java.util.List;
 import java.util.Optional;
@@ -21,9 +21,8 @@ import ca.uhn.fhir.rest.param.QuantityAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
+import lombok.NonNull;
 import lombok.Setter;
-import org.hibernate.Criteria;
-import org.hibernate.criterion.Criterion;
 import org.openmrs.Condition;
 import org.openmrs.ConditionClinicalStatus;
 import org.openmrs.annotation.Authorized;
@@ -74,65 +73,76 @@ public class FhirConditionDaoImpl extends BaseFhirDao<Condition> implements Fhir
 	}
 	
 	@Override
-	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
+	protected <U> void setupSearchParams(OpenmrsFhirCriteriaContext<Condition, U> criteriaContext,
+	        SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER:
-					entry.getValue()
-					        .forEach(param -> handlePatientReference(criteria, (ReferenceAndListParam) param.getParam()));
+					entry.getValue().forEach(
+					    param -> handlePatientReference(criteriaContext, (ReferenceAndListParam) param.getParam()));
 					break;
 				case FhirConstants.CODED_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handleCode(criteria, (TokenAndListParam) param.getParam()));
+					entry.getValue().forEach(param -> handleCode(criteriaContext, (TokenAndListParam) param.getParam()));
 					break;
 				case FhirConstants.CONDITION_CLINICAL_STATUS_HANDLER:
-					entry.getValue().forEach(param -> handleClinicalStatus(criteria, (TokenAndListParam) param.getParam()));
+					entry.getValue()
+					        .forEach(param -> handleClinicalStatus(criteriaContext, (TokenAndListParam) param.getParam()));
 					break;
 				case FhirConstants.DATE_RANGE_SEARCH_HANDLER:
-					entry.getValue()
-					        .forEach(param -> handleDateRange(param.getPropertyName(), (DateRangeParam) param.getParam())
-					                .ifPresent(criteria::add));
+					entry.getValue().forEach(
+					    param -> handleDateRange(criteriaContext, param.getPropertyName(), (DateRangeParam) param.getParam())
+					            .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery()));
 					break;
 				case FhirConstants.QUANTITY_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handleOnsetAge(criteria, (QuantityAndListParam) param.getParam()));
+					entry.getValue()
+					        .forEach(param -> handleOnsetAge(criteriaContext, (QuantityAndListParam) param.getParam()));
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(entry.getValue()).ifPresent(criteria::add);
+					handleCommonSearchParameters(criteriaContext, entry.getValue())
+					        .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
 					break;
 			}
 		});
 	}
 	
-	private void handleCode(Criteria criteria, TokenAndListParam code) {
+	private <U> void handleCode(OpenmrsFhirCriteriaContext<Condition, U> criteriaContext, TokenAndListParam code) {
 		if (code != null) {
-			criteria.createAlias("condition.coded", "cd");
-			handleCodeableConcept(criteria, code, "cd", "map", "term").ifPresent(criteria::add);
+			From<?, ?> conditionJoin = criteriaContext.addJoin("condition", "condition");
+			From<?, ?> codedJoin = criteriaContext.addJoin(conditionJoin, "coded", "cd");
+			handleCodeableConcept(criteriaContext, code, codedJoin, "map", "term")
+			        .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
 		}
 	}
 	
-	private void handleClinicalStatus(Criteria criteria, TokenAndListParam status) {
-		handleAndListParam(status, tokenParam -> Optional.of(eq("clinicalStatus", convertStatus(tokenParam.getValue()))))
-		        .ifPresent(criteria::add);
+	private <U> void handleClinicalStatus(OpenmrsFhirCriteriaContext<Condition, U> criteriaContext,
+	        TokenAndListParam status) {
+		handleAndListParam(criteriaContext.getCriteriaBuilder(), status,
+		    tokenParam -> Optional.of(criteriaContext.getCriteriaBuilder()
+		            .equal(criteriaContext.getRoot().get("clinicalStatus"), convertStatus(tokenParam.getValue()))))
+		                    .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
 	}
 	
-	private void handleOnsetAge(Criteria criteria, QuantityAndListParam onsetAge) {
-		handleAndListParam(onsetAge, onsetAgeParam -> handleAgeByDateProperty("onsetDate", onsetAgeParam))
-		        .ifPresent(criteria::add);
+	private <U> void handleOnsetAge(OpenmrsFhirCriteriaContext<Condition, U> criteriaContext,
+	        QuantityAndListParam onsetAge) {
+		handleAndListParam(criteriaContext.getCriteriaBuilder(), onsetAge,
+		    onsetAgeParam -> handleAgeByDateProperty(criteriaContext, "onsetDate", onsetAgeParam))
+		            .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
 	}
 	
 	@Override
-	protected Optional<Criterion> handleLastUpdated(DateRangeParam param) {
-		return super.handleLastUpdatedImmutable(param);
+	protected <T, U> Optional<Predicate> handleLastUpdated(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
+	        DateRangeParam param) {
+		return super.handleLastUpdated(criteriaContext, param);
 	}
 	
 	@Override
-	protected String paramToProp(@Nonnull String param) {
+	protected <V, U> String paramToProp(OpenmrsFhirCriteriaContext<V, U> criteriaContext, @NonNull String param) {
 		switch (param) {
 			case org.hl7.fhir.r4.model.Condition.SP_ONSET_DATE:
 				return "onsetDate";
 			case org.hl7.fhir.r4.model.Condition.SP_RECORDED_DATE:
 				return "dateCreated";
 		}
-		
-		return super.paramToProp(param);
+		return super.paramToProp(criteriaContext, param);
 	}
 }

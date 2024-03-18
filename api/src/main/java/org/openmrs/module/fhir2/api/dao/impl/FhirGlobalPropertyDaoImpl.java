@@ -9,6 +9,11 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
+import javax.persistence.EntityManager;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,7 +21,6 @@ import java.util.Map;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Restrictions;
 import org.openmrs.GlobalProperty;
 import org.openmrs.api.APIException;
 import org.openmrs.module.fhir2.api.dao.FhirGlobalPropertyDao;
@@ -34,29 +38,42 @@ public class FhirGlobalPropertyDaoImpl implements FhirGlobalPropertyDao {
 	
 	@Override
 	public String getGlobalProperty(String property) throws APIException {
-		GlobalProperty globalProperty = (GlobalProperty) sessionFactory.getCurrentSession().get(GlobalProperty.class,
-		    property);
+		GlobalProperty globalProperty = sessionFactory.getCurrentSession().get(GlobalProperty.class, property);
 		return globalProperty == null ? null : globalProperty.getPropertyValue();
 	}
 	
 	@Override
 	public GlobalProperty getGlobalPropertyObject(String property) {
-		return (GlobalProperty) sessionFactory.getCurrentSession().createCriteria(GlobalProperty.class)
-		        .add(Restrictions.eq("property", property)).uniqueResult();
+		OpenmrsFhirCriteriaContext<GlobalProperty, GlobalProperty> criteriaContext = createCriteriaContext();
+		
+		criteriaContext.getCriteriaQuery()
+		        .where(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("property"), property));
+		return criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).getResultList().stream()
+		        .findFirst().orElse(null);
 	}
 	
 	@Override
-	@SuppressWarnings("unchecked")
 	public Map<String, String> getGlobalProperties(String... properties) {
 		Map<String, String> globalPropertiesMap = new HashMap<>();
 		
-		Collection<GlobalProperty> globalProperties = (sessionFactory.getCurrentSession()
-		        .createCriteria(GlobalProperty.class).add(Restrictions.in("property", properties)).list());
+		createCriteriaContext().getCriteriaQuery().where(
+		    createCriteriaContext().getCriteriaQuery().from(GlobalProperty.class).get("property").in((Object[]) properties));
+		Collection<GlobalProperty> globalProperties = createCriteriaContext().getEntityManager()
+		        .createQuery(createCriteriaContext().getCriteriaQuery()).getResultList();
 		
 		for (GlobalProperty property : globalProperties) {
 			globalPropertiesMap.put(property.getProperty(), property.getPropertyValue());
 		}
 		
 		return globalPropertiesMap;
+	}
+	
+	private OpenmrsFhirCriteriaContext<GlobalProperty, GlobalProperty> createCriteriaContext() {
+		EntityManager em = sessionFactory.getCurrentSession();
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<GlobalProperty> cq = cb.createQuery(GlobalProperty.class);
+		Root<GlobalProperty> root = cq.from(GlobalProperty.class);
+		
+		return new OpenmrsFhirCriteriaContext<>(em, cb, cq, root);
 	}
 }
