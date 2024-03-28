@@ -51,6 +51,8 @@ public class PersonNameTranslatorImpl implements PersonNameTranslator {
 		addNameExtension(humanName, "familyNameSuffix", name.getFamilyNameSuffix());
 		addNameExtension(humanName, "degree", name.getDegree());
 		
+		humanName.setText(name.getFullName());
+		
 		return humanName;
 	}
 	
