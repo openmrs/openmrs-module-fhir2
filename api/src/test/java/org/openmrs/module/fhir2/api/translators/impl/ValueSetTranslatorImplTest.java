@@ -25,41 +25,45 @@ import java.util.Optional;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
 import org.openmrs.Concept;
 import org.openmrs.ConceptDescription;
 import org.openmrs.ConceptMap;
+import org.openmrs.ConceptMapType;
 import org.openmrs.ConceptName;
 import org.openmrs.ConceptReferenceTerm;
 import org.openmrs.ConceptSet;
 import org.openmrs.ConceptSource;
+import org.openmrs.api.ConceptService;
+import org.openmrs.api.context.ServiceContext;
 import org.openmrs.module.fhir2.FhirTestConstants;
-import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.module.fhir2.api.FhirConceptSourceService;
 import org.openmrs.module.fhir2.model.FhirConceptSource;
-import org.openmrs.test.BaseModuleContextSensitiveTest;
-import org.springframework.test.context.ContextConfiguration;
 
-@ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
-public class ValueSetTranslatorImplTest extends BaseModuleContextSensitiveTest {
+public class ValueSetTranslatorImplTest {
 	
 	private static final String CONCEPT_UUID = "0f97e14e-cdc2-49ac-9255-b5126f8a5147";
 	
-	@Mock
+	private ConceptService conceptService;
+	
 	private FhirConceptSourceService conceptSourceService;
 	
-	@Mock
 	private Concept concept;
 	
 	private final ValueSetTranslatorImpl valueSetTranslator = new ValueSetTranslatorImpl();
 	
 	@Before
 	public void setup() {
+		conceptService = mock(ConceptService.class);
+		conceptSourceService = mock(FhirConceptSourceService.class);
+		concept = mock(Concept.class);
 		valueSetTranslator.setConceptSourceService(conceptSourceService);
 	}
 	
 	@Test
 	public void shouldTranslateConceptSetToValueSet() {
+		when(conceptService.getDefaultConceptMapType()).thenReturn(new ConceptMapType());
+		ServiceContext.getInstance().setConceptService(conceptService);
+		
 		ConceptName conceptName = new ConceptName();
 		conceptName.setName("test");
 		
