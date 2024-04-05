@@ -16,8 +16,6 @@ import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -28,15 +26,18 @@ import org.hl7.fhir.r4.model.StringType;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.PersonName;
-import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.ServiceContext;
 import org.openmrs.layout.name.NameSupport;
 import org.openmrs.layout.name.NameTemplate;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.serialization.SerializationException;
 import org.openmrs.serialization.SimpleXStreamSerializer;
+import org.openmrs.test.BaseModuleContextSensitiveTest;
+import org.springframework.test.context.ContextConfiguration;
 
-public class PersonNameTranslatorImplTest {
+@ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
+public class PersonNameTranslatorImplTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String PERSON_NAME_UUID = "123456-abcdef-123456";
 	
@@ -47,6 +48,8 @@ public class PersonNameTranslatorImplTest {
 	private static final String PERSON_MIDDLE_NAME_2 = "Friedrich";
 	
 	private static final String PERSON_FAMILY_NAME = "van Damme";
+	
+	private static final String NAME_FORMAT_LAYOUT_PROPERTY_NAME = "layout.name.format";
 	
 	private PersonNameTranslatorImpl personNameTranslator;
 	
@@ -165,9 +168,9 @@ public class PersonNameTranslatorImplTest {
 	
 	@Test
 	public void shouldUseDefaultNameTemplateToSetNameText() throws SerializationException {
-		AdministrationService administrationService = mock(AdministrationService.class);
-		ServiceContext.getInstance().setAdministrationService(administrationService);
-		when(administrationService.getGlobalProperty("layout.name.format")).thenReturn("test");
+		String originalProperty = ServiceContext.getInstance().getAdministrationService()
+		        .getGlobalProperty(NAME_FORMAT_LAYOUT_PROPERTY_NAME);
+		ServiceContext.getInstance().getAdministrationService().setGlobalProperty(NAME_FORMAT_LAYOUT_PROPERTY_NAME, "test");
 		
 		NameSupport nameSupportInstance = new NameSupport();
 		NameTemplate customNameTemplate = new SimpleXStreamSerializer()
@@ -199,6 +202,9 @@ public class PersonNameTranslatorImplTest {
 		assertThat(fhirName.getTextElement(), notNullValue());
 		assertThat(fhirName.getTextElement().getValue(),
 		    equalTo(PERSON_GIVEN_NAME + " " + PERSON_FAMILY_NAME + " " + PERSON_MIDDLE_NAME));
+		
+		ServiceContext.getInstance().getAdministrationService().setGlobalProperty(NAME_FORMAT_LAYOUT_PROPERTY_NAME,
+		    originalProperty);
 	}
 	
 	@Test
