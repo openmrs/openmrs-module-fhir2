@@ -21,15 +21,21 @@ import static org.hl7.fhir.r4.model.Person.SP_NAME;
 import javax.annotation.Nonnull;
 import javax.persistence.criteria.*;
 
+import java.util.Calendar;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Stream;
 
+import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
+import org.apache.commons.lang3.time.DateUtils;
 import org.openmrs.PersonName;
 import org.openmrs.Relationship;
 import org.openmrs.module.fhir2.FhirConstants;
@@ -59,7 +65,7 @@ public class FhirRelatedPersonDaoImpl extends BaseFhirDao<Relationship> implemen
 					break;
 				case FhirConstants.DATE_RANGE_SEARCH_HANDLER:
 					entry.getValue().forEach(
-					    param -> handleDateRange(criteriaContext, "birthdate", (DateRangeParam) param.getParam())
+					    param -> handleDateRange(criteriaContext, personJoin, (DateRangeParam) param.getParam())
 					            .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery()));
 					break;
 				case FhirConstants.ADDRESS_SEARCH_HANDLER:
@@ -72,7 +78,63 @@ public class FhirRelatedPersonDaoImpl extends BaseFhirDao<Relationship> implemen
 			}
 		});
 	}
-	
+
+	// TODO: find a way of integrating this with the handleDateRange functionality in BaseDao!
+	private <U> Optional<Predicate> handleDateRange(OpenmrsFhirCriteriaContext<Relationship,U> criteriaContext, From<?,?> personJoin, DateRangeParam param) {
+		if (param == null) {
+			return Optional.empty();
+		}
+
+		return Optional.ofNullable(criteriaContext.getCriteriaBuilder()
+				.and(toCriteriaArray(Stream.of(handleDate(criteriaContext, personJoin, param.getLowerBound()),
+						handleDate(criteriaContext, personJoin, param.getUpperBound())))));
+    }
+
+	private <U> Optional<Predicate> handleDate(OpenmrsFhirCriteriaContext<Relationship,U> criteriaContext, From<?,?> personJoin, DateParam dateParam) {
+		if (dateParam == null) {
+			return Optional.empty();
+		}
+
+		int calendarPrecision = dateParam.getPrecision().getCalendarConstant();
+		if (calendarPrecision > Calendar.SECOND) {
+			calendarPrecision = Calendar.SECOND;
+		}
+		// TODO We may want to not use the default Calendar
+		Date dateStart = DateUtils.truncate(dateParam.getValue(), calendarPrecision);
+		Date dateEnd = DateUtils.ceiling(dateParam.getValue(), calendarPrecision);
+
+		// TODO This does not properly handle FHIR Periods and Timings, though its unclear if we are using those
+		// see https://www.hl7.org/fhir/search.html#date
+		switch (dateParam.getPrefix()) {
+			case EQUAL:
+				return Optional.of(criteriaContext.getCriteriaBuilder().and(
+						criteriaContext.getCriteriaBuilder().greaterThanOrEqualTo(personJoin.get("birthdate"),
+								dateStart),
+						criteriaContext.getCriteriaBuilder().lessThan(personJoin.get("birthdate"), dateEnd)));
+			case NOT_EQUAL:
+				return Optional.of(criteriaContext.getCriteriaBuilder().not(criteriaContext.getCriteriaBuilder().and(
+						criteriaContext.getCriteriaBuilder().greaterThanOrEqualTo(personJoin.get("birthdate"),
+								dateStart),
+						criteriaContext.getCriteriaBuilder().lessThan(personJoin.get("birthdate"), dateEnd))));
+			case LESSTHAN_OR_EQUALS:
+			case LESSTHAN:
+				return Optional.of(criteriaContext.getCriteriaBuilder()
+						.lessThanOrEqualTo(personJoin.get("birthdate"), dateEnd));
+			case GREATERTHAN_OR_EQUALS:
+			case GREATERTHAN:
+				return Optional.of(criteriaContext.getCriteriaBuilder()
+						.greaterThanOrEqualTo(personJoin.get("birthdate"), dateStart));
+			case STARTS_AFTER:
+				return Optional.of(
+						criteriaContext.getCriteriaBuilder().greaterThan(personJoin.get("birthdate"), dateEnd));
+			case ENDS_BEFORE:
+				return Optional.of(
+						criteriaContext.getCriteriaBuilder().lessThan(personJoin.get("birthdate"), dateEnd));
+		}
+
+		return Optional.empty();
+    }
+
 	@Override
 	protected <T, U> Collection<Order> paramToProps(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
 	        @Nonnull SortState sortState) {
@@ -88,35 +150,37 @@ public class FhirRelatedPersonDaoImpl extends BaseFhirDao<Relationship> implemen
 		} else if (param.equals(SP_NAME) || param.equals(SP_GIVEN) || param.equals(SP_FAMILY)) {
 			CriteriaBuilder cb = criteriaContext.getCriteriaBuilder();
 			//pn1
-			OpenmrsFhirCriteriaSubquery<PersonName, Integer> personNameFirstSubquery = criteriaContext.addSubquery(PersonName.class, Integer.class);
+			OpenmrsFhirCriteriaSubquery<PersonName, Integer> personNameFirstSubquery = criteriaContext
+			        .addSubquery(PersonName.class, Integer.class);
 			personNameFirstSubquery.addPredicate(cb.and(cb.equal(personNameFirstSubquery.getRoot().get("voided"), false),
-					cb.equal(personNameFirstSubquery.getRoot().get("preferred"), true),
-					cb.equal(personNameFirstSubquery.getRoot().get("person"), criteriaContext.getRoot())));
+			    cb.equal(personNameFirstSubquery.getRoot().get("preferred"), true),
+			    cb.equal(personNameFirstSubquery.getRoot().get("person"), criteriaContext.getRoot())));
 			personNameFirstSubquery.getSubquery().select(cb.min(personNameFirstSubquery.getRoot().get("personNameId")));
 			//pn2
-			OpenmrsFhirCriteriaSubquery<PersonName, PersonName> personNameSecondSubquery = criteriaContext.addSubquery(PersonName.class);
+			OpenmrsFhirCriteriaSubquery<PersonName, PersonName> personNameSecondSubquery = criteriaContext
+			        .addSubquery(PersonName.class);
 			personNameSecondSubquery.addPredicate(cb.and(cb.equal(personNameSecondSubquery.getRoot().get("voided"), false),
-					cb.equal(personNameSecondSubquery.getRoot().get("preferred"), true),
-					cb.equal(personNameFirstSubquery.getRoot().get("person"), criteriaContext.getRoot())));
+			    cb.equal(personNameSecondSubquery.getRoot().get("preferred"), true),
+			    cb.equal(personNameFirstSubquery.getRoot().get("person"), criteriaContext.getRoot())));
 			//pn3
-			OpenmrsFhirCriteriaSubquery<PersonName, Integer> personNameThirdSubquery = criteriaContext.addSubquery(PersonName.class, Integer.class);
-			personNameThirdSubquery.addPredicate(cb.and(
-					cb.equal(personNameThirdSubquery.getRoot().get("voided"), false),
-					cb.equal(personNameThirdSubquery.getRoot().get("person"), criteriaContext.getRoot())));
+			OpenmrsFhirCriteriaSubquery<PersonName, Integer> personNameThirdSubquery = criteriaContext
+			        .addSubquery(PersonName.class, Integer.class);
+			personNameThirdSubquery.addPredicate(cb.and(cb.equal(personNameThirdSubquery.getRoot().get("voided"), false),
+			    cb.equal(personNameThirdSubquery.getRoot().get("person"), criteriaContext.getRoot())));
 			personNameThirdSubquery.getSubquery().select(cb.min(personNameFirstSubquery.getRoot().get("personNameId")));
 			//pn
 			Join<?, ?> personName = criteriaContext.addJoin(person, "names", "pn", JoinType.LEFT,
-					(personNameJoin) -> cb.and(cb.equal(personNameJoin.get("voided"), false), cb.or(
-							cb.equal(personNameJoin.get("personNameId"), personNameFirstSubquery.finalizeQuery()),
-							cb.and(cb.not(cb.exists(personNameSecondSubquery.finalizeQuery())),
-									cb.equal(personNameJoin.get("personNameId"), personNameThirdSubquery.finalizeQuery())),
-							cb.isNull(personNameJoin.get("personNameId")))));
+			    (personNameJoin) -> cb.and(cb.equal(personNameJoin.get("voided"), false),
+			        cb.or(cb.equal(personNameJoin.get("personNameId"), personNameFirstSubquery.finalizeQuery()),
+			            cb.and(cb.not(cb.exists(personNameSecondSubquery.finalizeQuery())),
+			                cb.equal(personNameJoin.get("personNameId"), personNameThirdSubquery.finalizeQuery())),
+			            cb.isNull(personNameJoin.get("personNameId")))));
 			
 			String[] properties = null;
 			switch (param) {
 				case SP_NAME:
-					properties = new String[] { "familyName", "familyName2", "givenName", "middleName",
-					        "familyNamePrefix", "familyNameSuffix" };
+					properties = new String[] { "familyName", "familyName2", "givenName", "middleName", "familyNamePrefix",
+					        "familyNameSuffix" };
 					break;
 				case SP_GIVEN:
 					properties = new String[] { "givenName" };
@@ -129,14 +193,12 @@ public class FhirRelatedPersonDaoImpl extends BaseFhirDao<Relationship> implemen
 			switch (sortState.getSortOrder()) {
 				case ASC:
 					for (String property : properties) {
-						criteriaContext
-						        .addOrder(criteriaContext.getCriteriaBuilder().asc(personName.get(property)));
+						criteriaContext.addOrder(criteriaContext.getCriteriaBuilder().asc(personName.get(property)));
 					}
 					break;
 				case DESC:
 					for (String property : properties) {
-						criteriaContext.addOrder(
-						    criteriaContext.getCriteriaBuilder().desc(personName.get(property)));
+						criteriaContext.addOrder(criteriaContext.getCriteriaBuilder().desc(personName.get(property)));
 					}
 					break;
 			}
@@ -165,7 +227,7 @@ public class FhirRelatedPersonDaoImpl extends BaseFhirDao<Relationship> implemen
 				return super.paramToProp(criteriaContext, param);
 		}
 	}
-
+	
 	private <U> void handleAddresses(OpenmrsFhirCriteriaContext<Relationship, U> criteriaContext,
 	        Map.Entry<String, List<PropParam<?>>> entry) {
 		StringAndListParam city = null;
