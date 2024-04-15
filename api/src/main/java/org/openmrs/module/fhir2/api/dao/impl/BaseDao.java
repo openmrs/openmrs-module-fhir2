@@ -710,18 +710,11 @@ public abstract class BaseDao {
 		
 		return handleAndListParamBySystem(criteriaContext.getCriteriaBuilder(), concepts, (system, tokens) -> {
 			if (system.isEmpty()) {
-				criteriaContext.getCriteriaBuilder()
-				        .literal(tokensToParams(tokens).map(NumberUtils::toInt).collect(Collectors.toList()));
-				return Optional
-				        .of(criteriaContext
-				                .getCriteriaBuilder().or(
-				                    criteriaContext.getCriteriaBuilder()
-				                            .in(conceptAlias.get("conceptId")
-				                                    .in(criteriaContext.getCriteriaBuilder()
-				                                            .literal(tokensToParams(tokens).map(NumberUtils::toInt)
-				                                                    .collect(Collectors.toList())))),
-				                    criteriaContext.getCriteriaBuilder().in(conceptAlias.get("uuid")
-				                            .in(criteriaContext.getCriteriaBuilder().literal(tokensToList(tokens))))));
+
+				Predicate inConceptId = criteriaContext.getCriteriaBuilder().in(conceptAlias.get("conceptId")).value(criteriaContext.getCriteriaBuilder().literal(tokensToParams(tokens).map(NumberUtils::toInt).collect(Collectors.toList())));
+				Predicate inUuid = criteriaContext.getCriteriaBuilder().in(conceptAlias.get("uuid")).value(criteriaContext.getCriteriaBuilder().literal(tokensToList(tokens)));
+
+				return Optional.of(criteriaContext.getCriteriaBuilder().or(inConceptId, inUuid));
 			} else {
 				Join<?, ?> conceptMapAliasJoin = criteriaContext.addJoin(conceptAlias, "conceptMappings", conceptMapAlias);
 				criteriaContext.addJoin(conceptMapAliasJoin, "conceptReferenceTerm", conceptReferenceTermAlias);
@@ -1279,7 +1272,7 @@ public abstract class BaseDao {
 		CriteriaQuery<U> cq = (CriteriaQuery<U>) cb.createQuery(rootType);
 		@SuppressWarnings("unchecked")
 		Root<T> root = (Root<T>) cq.from(rootType);
-		
+
 		return new OpenmrsFhirCriteriaContext<>(em, cb, cq, root);
 	}
 	
