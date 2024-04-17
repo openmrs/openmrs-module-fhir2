@@ -10,20 +10,19 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasProperty;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.*;
 
+import java.time.LocalDateTime;
+import java.time.Month;
+import java.time.ZoneId;
 import java.util.Collections;
+import java.util.Date;
 
 import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.Concept;
+import org.openmrs.api.ConceptService;
 import org.openmrs.api.db.hibernate.HibernateConceptDAO;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
@@ -46,6 +45,10 @@ public class FhirTaskDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String BASED_ON_ORDER_UUID = "7d96f25c-4949-4f72-9931-d808fbc226de";
 	
+	private static final String PARENT_TASK_UUID = "c0a3af38-c0a9-4c2e-9cc0-8e0440e357e5";
+	
+	private static final String TASK_CODE_CONCEPT_UUID = "efc232b8-e591-4e93-b135-1cf8b4e30b95";
+	
 	private static final FhirTask.TaskStatus NEW_STATUS = FhirTask.TaskStatus.ACCEPTED;
 	
 	private static final FhirTask.TaskIntent TASK_INTENT = FhirTask.TaskIntent.ORDER;
@@ -66,6 +69,9 @@ public class FhirTaskDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Autowired
 	private SessionFactory sessionFactory;
+	
+	@Autowired
+	private ConceptService conceptService;
 	
 	@Before
 	public void setup() throws Exception {
@@ -210,6 +216,92 @@ public class FhirTaskDaoImplTest extends BaseModuleContextSensitiveTest {
 		assertThat(result.getBasedOnReferences().size(), greaterThan(0));
 		assertThat(result.getBasedOnReferences(), hasItem(hasProperty("type", equalTo(FhirConstants.SERVICE_REQUEST))));
 		assertThat(result.getBasedOnReferences(), hasItem(hasProperty("reference", equalTo(BASED_ON_ORDER_UUID))));
+	}
+	
+	@Test
+	public void saveTask_shouldUpdateTaskCode() {
+		FhirTask toUpdate = dao.get(TASK_UUID);
+		
+		Concept taskCode = conceptService.getConceptByUuid(TASK_CODE_CONCEPT_UUID);
+		
+		toUpdate.setTaskCode(taskCode);
+		
+		dao.createOrUpdate(toUpdate);
+		
+		FhirTask result = dao.get(TASK_UUID);
+		
+		assertThat(result.getTaskCode(), notNullValue());
+		assertThat(result.getTaskCode(), equalTo(taskCode));
+	}
+	
+	@Test
+	public void saveTask_shouldUpdatePartOfReferences() {
+		FhirTask toUpdate = dao.get(TASK_UUID);
+		
+		FhirReference partOfReference = new FhirReference();
+		partOfReference.setType(FhirConstants.TASK);
+		partOfReference.setReference(PARENT_TASK_UUID);
+		partOfReference.setName("TEMP");
+		
+		toUpdate.setPartOfReferences(Collections.singleton(partOfReference));
+		
+		dao.createOrUpdate(toUpdate);
+		
+		FhirTask result = dao.get(TASK_UUID);
+		
+		assertThat(result.getPartOfReferences(), notNullValue());
+		assertThat(result.getPartOfReferences().size(), greaterThan(0));
+		assertThat(result.getPartOfReferences(), hasItem(hasProperty("type", equalTo(FhirConstants.TASK))));
+		assertThat(result.getPartOfReferences(), hasItem(hasProperty("reference", equalTo(PARENT_TASK_UUID))));
+	}
+	
+	@Test
+	public void saveTask_shouldUpdateExecutionStartTime() {
+		FhirTask toUpdate = dao.get(TASK_UUID);
+		
+		LocalDateTime localDateTime = LocalDateTime.of(2024, Month.APRIL, 12, 10, 0);
+		Date executionStartTime = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+		
+		toUpdate.setExecutionStartTime(executionStartTime);
+		
+		dao.createOrUpdate(toUpdate);
+		
+		FhirTask result = dao.get(TASK_UUID);
+		
+		assertThat(result.getExecutionStartTime(), notNullValue());
+		assertThat(result.getExecutionStartTime(), equalTo(executionStartTime));
+	}
+	
+	@Test
+	public void saveTask_shouldUpdateExecutionEndTime() {
+		FhirTask toUpdate = dao.get(TASK_UUID);
+		
+		LocalDateTime localDateTime = LocalDateTime.of(2024, Month.APRIL, 12, 17, 0);
+		Date executionEndTime = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+		
+		toUpdate.setExecutionEndTime(executionEndTime);
+		
+		dao.createOrUpdate(toUpdate);
+		
+		FhirTask result = dao.get(TASK_UUID);
+		
+		assertThat(result.getExecutionEndTime(), notNullValue());
+		assertThat(result.getExecutionEndTime(), equalTo(executionEndTime));
+	}
+	
+	@Test
+	public void saveTask_shouldUpdateComment() {
+		FhirTask toUpdate = dao.get(TASK_UUID);
+		
+		String comment = "Test task comment";
+		toUpdate.setComment(comment);
+		
+		dao.createOrUpdate(toUpdate);
+		
+		FhirTask result = dao.get(TASK_UUID);
+		
+		assertThat(result.getComment(), notNullValue());
+		assertThat(result.getComment(), equalTo(comment));
 	}
 	
 	@Test

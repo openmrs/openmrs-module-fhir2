@@ -22,6 +22,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -29,10 +30,8 @@ import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.Calendar;
 import java.util.function.Consumer;
 import java.util.function.Function;
-
 
 import org.exparity.hamcrest.date.DateMatchers;
 import org.hamcrest.CoreMatchers;
@@ -961,14 +960,16 @@ public class TaskTranslatorImplTest {
 	// Task Code
 	@Test
 	public void toFhirResource_shouldTranslateTaskCode() {
-		
 		FhirTask task = new FhirTask();
 		Concept openmrsObject = new Concept();
 		CodeableConcept fhirObject = newCodeableConcept();
-		when(conceptTranslator.toFhirResource(openmrsObject)).thenReturn(fhirObject);
 		
 		task.setTaskCode(openmrsObject);
+		
+		when(conceptTranslator.toFhirResource(openmrsObject)).thenReturn(fhirObject);
+		
 		Task result = taskTranslator.toFhirResource(task);
+		
 		assertThat(result.getCode(), CoreMatchers.notNullValue());
 		assertThat(result.getCode(), CoreMatchers.equalTo(fhirObject));
 	}
@@ -978,25 +979,30 @@ public class TaskTranslatorImplTest {
 		Task fhirTask = new Task();
 		Concept openmrsObject = new Concept();
 		CodeableConcept fhirObject = newCodeableConcept();
-		when(conceptTranslator.toOpenmrsType(fhirObject)).thenReturn(openmrsObject);
+		
 		fhirTask.setCode(fhirObject);
 		
+		when(conceptTranslator.toOpenmrsType(fhirObject)).thenReturn(openmrsObject);
+		
 		FhirTask task = taskTranslator.toOpenmrsType(fhirTask);
+		
 		assertThat(task.getTaskCode(), CoreMatchers.notNullValue());
 		assertThat(task.getTaskCode(), CoreMatchers.equalTo(openmrsObject));
 	}
 	
 	@Test
 	public void toOpenmrsType_shouldUpdateTaskCodeOnExistingTask() {
+		Concept openmrsObject = new Concept();
+		CodeableConcept fhirObject = newCodeableConcept();
+		
 		FhirTask task = new FhirTask();
 		task.setTaskCode(null);
 		task.setUuid(TASK_UUID);
 		
-		Concept openmrsObject = new Concept();
-		CodeableConcept fhirObject = newCodeableConcept();
-		when(conceptTranslator.toOpenmrsType(fhirObject)).thenReturn(openmrsObject);
 		Task fhirTask = taskTranslator.toFhirResource(task);
 		fhirTask.setCode(fhirObject);
+		
+		when(conceptTranslator.toOpenmrsType(fhirObject)).thenReturn(openmrsObject);
 		
 		FhirTask result = taskTranslator.toOpenmrsType(task, fhirTask);
 		
@@ -1042,6 +1048,7 @@ public class TaskTranslatorImplTest {
 		FhirTask task = new FhirTask();
 		task.setExecutionStartTime(startTime);
 		task.setExecutionEndTime(endTime);
+		
 		Task result = taskTranslator.toFhirResource(task);
 		
 		assertThat(result.getExecutionPeriod(), notNullValue());
@@ -1051,17 +1058,18 @@ public class TaskTranslatorImplTest {
 	
 	@Test
 	public void toOpenmrsType_shouldTranslateExecutionPeriodToExecutionStartAndEndTime() {
-		Task fhirTask = new Task();
+		Period executionPeriod = new Period();
 		Date startTime = new Date();
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(startTime);
 		calendar.add(Calendar.HOUR_OF_DAY, 2);
 		Date endTime = calendar.getTime();
 		
-		Period executionPeriod = new Period();
+		Task fhirTask = new Task();
 		executionPeriod.setStart(startTime);
 		executionPeriod.setEnd(endTime);
 		fhirTask.setExecutionPeriod(executionPeriod);
+		
 		FhirTask result = taskTranslator.toOpenmrsType(fhirTask);
 		
 		assertThat(result.getExecutionStartTime(), equalTo(startTime));
@@ -1069,7 +1077,7 @@ public class TaskTranslatorImplTest {
 	}
 	
 	@Test
-	public void toOpenmrsType_shouldupdateExecutionTimeOnExistingTask() {
+	public void toOpenmrsType_shouldUpdateExecutionTimeOnExistingTask() {
 		Date startTime = new Date();
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(startTime);
@@ -1086,6 +1094,7 @@ public class TaskTranslatorImplTest {
 		executionPeriod.setStart(startTime);
 		executionPeriod.setEnd(endTime);
 		fhirTask.setExecutionPeriod(executionPeriod);
+		
 		FhirTask result = taskTranslator.toOpenmrsType(task, fhirTask);
 		
 		assertThat(result.getExecutionStartTime(), equalTo(startTime));
@@ -1099,6 +1108,7 @@ public class TaskTranslatorImplTest {
 		task.setComment("Test Comment");
 		
 		Task result = taskTranslator.toFhirResource(task);
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getNote().get(0).getText(), equalTo("Test Comment"));
 	}
@@ -1107,7 +1117,9 @@ public class TaskTranslatorImplTest {
 	public void toOpenmrsType_shouldTranslateNoteToComment() {
 		Task task = new Task();
 		task.addNote(new Annotation().setText("Test Comment"));
+		
 		FhirTask result = taskTranslator.toOpenmrsType(task);
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getComment(), equalTo("Test Comment"));
 	}

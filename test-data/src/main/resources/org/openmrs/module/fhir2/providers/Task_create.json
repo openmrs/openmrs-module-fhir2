@@ -11,6 +11,22 @@
       "type": "ServiceRequest"
     }
   ],
+  "partOf": [
+    {
+      "reference": "38e11871-a69c-402b-be3d-e0efdc66dc24",
+      "type": "Task"
+    }
+  ],
+  "code": {
+    "coding": [
+      {
+        "system": "http://hl7.org/fhir/ValueSet/task-code",
+        "code": "5030",
+        "display": "Test Task Code"
+      }
+    ],
+    "text": "fulfill"
+  },
   "output": [
     {
       "type": {

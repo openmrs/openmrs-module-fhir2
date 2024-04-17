@@ -177,7 +177,7 @@ public class TaskFhirResourceProviderTest extends BaseFhirR3ProvenanceResourceTe
 		statusToken.setValue("ACCEPTED");
 		status.addAnd(new TokenOrListParam().add(statusToken));
 		
-		IBundleProvider results = resourceProvider.searchTasks(null, null, status, null, null, null, null);
+		IBundleProvider results = resourceProvider.searchTasks(null, null, null, null, status, null, null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		

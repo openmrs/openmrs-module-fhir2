@@ -55,7 +55,7 @@ public final class FhirConstants {
 	public static final String CLINICAL_FINDINGS_SYSTEM_URI = HL7_FHIR_CODE_SYSTEM_PREFIX + "/clinical-findings";
 	
 	public static final String TASK_STATUS_VALUE_SET_URI = "http://hl7.org/fhir/task-status";
-	
+
 	public static final String OBSERVATION_REFERENCE_RANGE_SYSTEM_URI = HL7_FHIR_CODE_SYSTEM_PREFIX
 	        + "/referencerange-meaning";
 	
@@ -267,11 +267,15 @@ public final class FhirConstants {
 	
 	public static final String STATUS_SEARCH_HANDLER = "status.search.handler";
 	
+	public static final String TASK_CODE_SEARCH_HANDLER = "task.code.search.handler";
+	
 	public static final String FULFILLER_STATUS_SEARCH_HANDLER = "fullfillerStatus.search.handler";
 	
 	public static final String BASED_ON_REFERENCE_SEARCH_HANDLER = "based.on.reference.search.handler";
 	
 	public static final String OWNER_REFERENCE_SEARCH_HANDLER = "owner.reference.search.handler";
+	
+	public static final String FOR_REFERENCE_SEARCH_HANDLER = "for.reference.search.handler";
 	
 	public static final String RESULT_SEARCH_HANDLER = "result.search.handler";
 	

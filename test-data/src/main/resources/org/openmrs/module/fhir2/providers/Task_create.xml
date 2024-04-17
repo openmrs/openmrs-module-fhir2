@@ -18,6 +18,17 @@
     <reference value="a7fd2d2a-e068-4c45-b613-8261d70b29b7"/>
     <type value="ServiceRequest"/>
   </basedOn>
+  <partOf>
+    <reference value="38e11871-a69c-402b-be3d-e0efdc66dc24"/>
+    <type value="Task"/>
+  </partOf>
+  <code>
+    <coding>
+      <system value="http://hl7.org/fhir/ValueSet/task-code"/>
+      <code value="5030"/>
+      <display value="Test Task Code"/>
+    </coding>
+  </code>
   <output>
     <type>
       <coding>
