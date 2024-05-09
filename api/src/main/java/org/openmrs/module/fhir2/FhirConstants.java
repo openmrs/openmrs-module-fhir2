@@ -55,7 +55,7 @@ public final class FhirConstants {
 	public static final String CLINICAL_FINDINGS_SYSTEM_URI = HL7_FHIR_CODE_SYSTEM_PREFIX + "/clinical-findings";
 	
 	public static final String TASK_STATUS_VALUE_SET_URI = "http://hl7.org/fhir/task-status";
-
+	
 	public static final String OBSERVATION_REFERENCE_RANGE_SYSTEM_URI = HL7_FHIR_CODE_SYSTEM_PREFIX
 	        + "/referencerange-meaning";
 	
