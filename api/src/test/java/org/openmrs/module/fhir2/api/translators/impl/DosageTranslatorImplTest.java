@@ -14,17 +14,13 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
-import static org.hl7.fhir.r4.utils.client.FHIRToolingClient.DATE_FORMAT;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
 
 import java.text.ParseException;
 import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.Locale;
 
-import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -227,7 +223,7 @@ public class DosageTranslatorImplTest {
 		drugOrder.setAsNeeded(Boolean.TRUE);
 		drugOrder.setDosingInstructions(DOSING_INSTRUCTION);
 		Dosage result = dosageTranslator.toFhirResource(drugOrder);
-
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getAsNeededBooleanType().booleanValue(), is(true));
 		assertThat(result.getText(), equalTo(DOSING_INSTRUCTION));

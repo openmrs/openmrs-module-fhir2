@@ -16,6 +16,11 @@ import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.util.Arrays;
+import java.util.Collections;
 
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.HumanName;
@@ -23,7 +28,13 @@ import org.hl7.fhir.r4.model.StringType;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.PersonName;
+import org.openmrs.api.AdministrationService;
+import org.openmrs.api.context.ServiceContext;
+import org.openmrs.layout.name.NameSupport;
+import org.openmrs.layout.name.NameTemplate;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.serialization.SerializationException;
+import org.openmrs.serialization.SimpleXStreamSerializer;
 
 public class PersonNameTranslatorImplTest {
 	
@@ -150,6 +161,44 @@ public class PersonNameTranslatorImplTest {
 		Extension extension = personNameTranslator.toFhirResource(name)
 		        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_NAME);
 		assertThat(extension.getExtension().size(), greaterThan(1));
+	}
+	
+	@Test
+	public void shouldUseDefaultNameTemplateToSetNameText() throws SerializationException {
+		AdministrationService administrationService = mock(AdministrationService.class);
+		ServiceContext.getInstance().setAdministrationService(administrationService);
+		when(administrationService.getGlobalProperty("layout.name.format")).thenReturn("test");
+		
+		NameSupport nameSupportInstance = new NameSupport();
+		NameTemplate customNameTemplate = new SimpleXStreamSerializer()
+		        .deserialize("<org.openmrs.layout.name.NameTemplate>\n" + "  <codeName>test</codeName>\n"
+		                + "  <displayName>Test Name Format</displayName>\n" + "  <nameMappings class=\"properties\">\n"
+		                + "    <property name=\"givenName\" value=\"PersonName.givenName\"/>\n"
+		                + "    <property name=\"middleName\" value=\"PersonName.middleName\"/>\n"
+		                + "    <property name=\"familyName\" value=\"PersonName.familyName\"/>\n" + "  </nameMappings>\n"
+		                + "  <sizeMappings class=\"properties\">\n" + "    <property name=\"givenName\" value=\"25\"/>\n"
+		                + "    <property name=\"middleName\" value=\"25\"/>\n"
+		                + "    <property name=\"familyName\" value=\"25\"/>\n" + "  </sizeMappings>\n"
+		                + "  <lineByLineFormat>\n" + "    <string>givenName</string>\n" + "    <string>familyName</string>\n"
+		                + "    <string>middleName</string>\n" + "  </lineByLineFormat>\n" + "  <requiredElements>\n"
+		                + "    <string>givenName</string>\n" + "    <string>familyName</string>\n"
+		                + "  </requiredElements>\n" + "</org.openmrs.layout.name.NameTemplate>",
+		            NameTemplate.class);
+		nameSupportInstance.setLayoutTemplates(Collections.singletonList(customNameTemplate));
+		nameSupportInstance.setSpecialTokens(Arrays.asList("prefix", "givenName", "middleName", "familyNamePrefix",
+		    "familyNameSuffix", "familyName2", "familyName", "degree"));
+		
+		PersonName name = new PersonName();
+		name.setGivenName(PERSON_GIVEN_NAME);
+		name.setMiddleName(PERSON_MIDDLE_NAME);
+		name.setFamilyName(PERSON_FAMILY_NAME);
+		
+		HumanName fhirName = personNameTranslator.toFhirResource(name);
+		
+		assertThat(fhirName, notNullValue());
+		assertThat(fhirName.getTextElement(), notNullValue());
+		assertThat(fhirName.getTextElement().getValue(),
+		    equalTo(PERSON_GIVEN_NAME + " " + PERSON_FAMILY_NAME + " " + PERSON_MIDDLE_NAME));
 	}
 	
 	@Test

@@ -66,7 +66,7 @@ public class DosageTranslatorImpl implements DosageTranslator {
 			doseAndRate.setDose(dose);
 			dosage.addDoseAndRate(doseAndRate);
 		}
-
+		
 		return dosage;
 	}
 	
