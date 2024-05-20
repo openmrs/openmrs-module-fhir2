@@ -50,6 +50,13 @@ public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDa
 					entry.getValue().forEach(
 					    param -> handleReference(criteria, (ReferenceAndListParam) param.getParam(), "ownerReference", "o"));
 					break;
+				case FhirConstants.FOR_REFERENCE_SEARCH_HANDLER:
+					entry.getValue().forEach(
+					    param -> handleReference(criteria, (ReferenceAndListParam) param.getParam(), "forReference", "f"));
+					break;
+				case FhirConstants.TASK_CODE_SEARCH_HANDLER:
+					entry.getValue().forEach(code -> handleTaskCodeConcept(criteria, (TokenAndListParam) code.getParam()));
+					break;
 				case FhirConstants.STATUS_SEARCH_HANDLER:
 					entry.getValue()
 					        .forEach(param -> handleStatus((TokenAndListParam) param.getParam()).ifPresent(criteria::add));
@@ -107,5 +114,15 @@ public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDa
 			
 			return Optional.empty();
 		}).ifPresent(criteria::add);
+	}
+	
+	private void handleTaskCodeConcept(Criteria criteria, TokenAndListParam code) {
+		if (code != null) {
+			if (lacksAlias(criteria, "tc")) {
+				criteria.createAlias("taskCode", "tc");
+			}
+			
+			handleCodeableConcept(criteria, code, "tc", "tcm", "tcrt").ifPresent(criteria::add);
+		}
 	}
 }

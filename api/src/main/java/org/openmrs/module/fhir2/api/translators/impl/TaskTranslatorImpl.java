@@ -21,9 +21,12 @@ import java.util.stream.Collectors;
 
 import lombok.AccessLevel;
 import lombok.Setter;
+import org.hl7.fhir.r4.model.Annotation;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Task;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.ReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.TaskInputTranslator;
 import org.openmrs.module.fhir2.api.translators.TaskOutputTranslator;
@@ -44,6 +47,9 @@ public class TaskTranslatorImpl implements TaskTranslator {
 	
 	@Autowired
 	private TaskOutputTranslator taskOutputTranslator;
+	
+	@Autowired
+	private ConceptTranslator conceptTranslator;
 	
 	@Override
 	public Task toFhirResource(@Nonnull FhirTask openmrsTask) {
@@ -116,6 +122,30 @@ public class TaskTranslatorImpl implements TaskTranslator {
 			        .filter(Objects::nonNull).collect(Collectors.toList()));
 		}
 		
+		if (openmrsTask.getTaskCode() != null) {
+			fhirTask.setCode(conceptTranslator.toFhirResource(openmrsTask.getTaskCode()));
+		}
+		
+		if (openmrsTask.getPartOfReferences() != null && !openmrsTask.getPartOfReferences().isEmpty()) {
+			fhirTask.setPartOf(openmrsTask.getPartOfReferences().stream().map(referenceTranslator::toFhirResource)
+			        .collect(Collectors.toList()));
+		}
+		
+		if (openmrsTask.getExecutionStartTime() != null || openmrsTask.getExecutionEndTime() != null) {
+			Period period = new Period();
+			if (openmrsTask.getExecutionStartTime() != null) {
+				period.setStart(openmrsTask.getExecutionStartTime());
+			}
+			if (openmrsTask.getExecutionEndTime() != null) {
+				period.setEnd(openmrsTask.getExecutionEndTime());
+			}
+			fhirTask.setExecutionPeriod(period);
+		}
+		
+		if (openmrsTask.getComment() != null) {
+			fhirTask.addNote(new Annotation().setText(openmrsTask.getComment()));
+		}
+		
 		fhirTask.setAuthoredOn(openmrsTask.getDateCreated());
 		
 		if (openmrsTask.getDateChanged() != null) {
@@ -181,6 +211,28 @@ public class TaskTranslatorImpl implements TaskTranslator {
 		if (!fhirTask.getOutput().isEmpty()) {
 			openmrsTask.setOutput(fhirTask.getOutput().stream().map(taskOutputTranslator::toOpenmrsType)
 			        .filter(Objects::nonNull).collect(Collectors.toSet()));
+		}
+		
+		if (fhirTask.hasCode()) {
+			openmrsTask.setTaskCode(conceptTranslator.toOpenmrsType(fhirTask.getCode()));
+		}
+		
+		if (fhirTask.hasExecutionPeriod()) {
+			if (fhirTask.getExecutionPeriod().hasStart()) {
+				openmrsTask.setExecutionStartTime(fhirTask.getExecutionPeriod().getStart());
+			}
+			if (fhirTask.getExecutionPeriod().hasEnd()) {
+				openmrsTask.setExecutionEndTime(fhirTask.getExecutionPeriod().getEnd());
+			}
+		}
+		
+		if (fhirTask.hasPartOf()) {
+			openmrsTask.setPartOfReferences(
+			    fhirTask.getPartOf().stream().map(referenceTranslator::toOpenmrsType).collect(Collectors.toSet()));
+		}
+		
+		if (fhirTask.hasNote()) {
+			openmrsTask.setComment(fhirTask.getNoteFirstRep().getText());
 		}
 		
 		openmrsTask.setName(FhirConstants.TASK + "/" + fhirTask.getId());

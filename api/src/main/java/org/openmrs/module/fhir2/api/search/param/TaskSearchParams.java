@@ -44,17 +44,23 @@ public class TaskSearchParams extends BaseResourceSearchParams {
 	
 	private ReferenceAndListParam ownerReference;
 	
+	private ReferenceAndListParam forReference;
+	
+	private TokenAndListParam taskCode;
+	
 	private TokenAndListParam status;
 	
 	@Builder
 	public TaskSearchParams(ReferenceAndListParam basedOnReference, ReferenceAndListParam ownerReference,
-	    TokenAndListParam status, TokenAndListParam id, DateRangeParam lastUpdated, SortSpec sort,
-	    HashSet<Include> includes) {
+	    ReferenceAndListParam forReference, TokenAndListParam taskCode, TokenAndListParam status, TokenAndListParam id,
+	    DateRangeParam lastUpdated, SortSpec sort, HashSet<Include> includes) {
 		
 		super(id, lastUpdated, sort, includes, null);
 		
 		this.basedOnReference = basedOnReference;
 		this.ownerReference = ownerReference;
+		this.forReference = forReference;
+		this.taskCode = taskCode;
 		this.status = status;
 		
 	}
@@ -63,6 +69,8 @@ public class TaskSearchParams extends BaseResourceSearchParams {
 	public SearchParameterMap toSearchParameterMap() {
 		return baseSearchParameterMap().addParameter(FhirConstants.BASED_ON_REFERENCE_SEARCH_HANDLER, getBasedOnReference())
 		        .addParameter(FhirConstants.OWNER_REFERENCE_SEARCH_HANDLER, getOwnerReference())
+		        .addParameter(FhirConstants.FOR_REFERENCE_SEARCH_HANDLER, getForReference())
+		        .addParameter(FhirConstants.TASK_CODE_SEARCH_HANDLER, getTaskCode())
 		        .addParameter(FhirConstants.STATUS_SEARCH_HANDLER, getStatus());
 	}
 }
