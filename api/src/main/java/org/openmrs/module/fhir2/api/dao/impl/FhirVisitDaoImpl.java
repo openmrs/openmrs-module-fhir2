@@ -9,10 +9,10 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
-import static org.hibernate.criterion.Restrictions.eq;
 import static org.hl7.fhir.r4.model.Encounter.SP_DATE;
 
-import javax.annotation.Nonnull;
+import javax.persistence.criteria.From;
+import javax.persistence.criteria.Join;
 
 import java.util.Optional;
 
@@ -20,8 +20,8 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
+import lombok.NonNull;
 import lombok.Setter;
-import org.hibernate.Criteria;
 import org.openmrs.Visit;
 import org.openmrs.module.fhir2.api.dao.FhirVisitDao;
 import org.springframework.stereotype.Component;
@@ -31,25 +31,30 @@ import org.springframework.stereotype.Component;
 public class FhirVisitDaoImpl extends BaseEncounterDao<Visit> implements FhirVisitDao {
 	
 	@Override
-	protected void handleDate(Criteria criteria, DateRangeParam dateRangeParam) {
-		handleDateRange("startDatetime", dateRangeParam).ifPresent(criteria::add);
+	protected <U> void handleDate(OpenmrsFhirCriteriaContext<Visit, U> criteriaContext, DateRangeParam dateRangeParam) {
+		handleDateRange(criteriaContext, "startDatetime", dateRangeParam)
+		        .ifPresent(handle -> criteriaContext.addPredicate(handle).finalizeQuery());
 	}
 	
 	@Override
-	protected void handleEncounterType(Criteria criteria, TokenAndListParam tokenAndListParam) {
-		handleAndListParam((TokenAndListParam) tokenAndListParam, t -> Optional.of(eq("vt.uuid", t.getValue())))
-		        .ifPresent(t -> criteria.createAlias("visitType", "vt").add(t));
+	protected <U> void handleEncounterType(OpenmrsFhirCriteriaContext<Visit, U> criteriaContext,
+	        TokenAndListParam tokenAndListParam) {
+		Join<?, ?> visitTypeJoin = criteriaContext.addJoin("visitType", "vt");
+		handleAndListParam(criteriaContext.getCriteriaBuilder(), tokenAndListParam,
+		    t -> Optional.of(criteriaContext.getCriteriaBuilder().equal(visitTypeJoin.get("uuid"), t.getValue())))
+		            .ifPresent(t -> criteriaContext.addPredicate(t).finalizeQuery());
 	}
 	
 	@Override
-	protected void handleParticipant(Criteria criteria, ReferenceAndListParam referenceAndListParam) {
-		criteria.createAlias("encounters", "en");
-		criteria.createAlias("en.encounterProviders", "ep");
-		handleParticipantReference(criteria, (ReferenceAndListParam) referenceAndListParam);
+	protected <U> void handleParticipant(OpenmrsFhirCriteriaContext<Visit, U> criteriaContext,
+	        ReferenceAndListParam referenceAndListParam) {
+		Join<?, ?> encounterJoin = criteriaContext.addJoin("encounters", "en");
+		From<?, ?> epJoin = criteriaContext.addJoin(encounterJoin, "encounterProviders", "ep");
+		handleParticipantReference(criteriaContext, referenceAndListParam, epJoin);
 	}
 	
 	@Override
-	protected String paramToProp(@Nonnull String param) {
+	protected <V, U> String paramToProp(OpenmrsFhirCriteriaContext<V, U> criteriaContext, @NonNull String param) {
 		switch (param) {
 			case SP_DATE:
 				return "startDatetime";

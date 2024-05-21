@@ -182,7 +182,9 @@ public final class FhirConstants {
 	public static final String GLOBAL_PROPERTY_MODERATE = "allergy.concept.severity.moderate";
 	
 	public static final String GLOBAL_PROPERTY_OTHER = "allergy.concept.severity.other";
-	
+
+	public static final String GLOBAL_PROPERTY_DEFAULT_CONCEPT_MAP_TYPE = "concept.defaultConceptMapType";
+
 	public static final String GLOBAL_PROPERTY_URI_PREFIX = "fhir2.uriPrefix";
 	
 	public static final String ENCOUNTER_REFERENCE_SEARCH_HANDLER = "encounter.reference.search.handler";
