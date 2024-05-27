@@ -1,0 +1,46 @@
+<!--/*
+This top section is not exported as a part of the Narrative,
+it is only present so that this template can be viewed in
+a browser.
+-->
+<html>
+
+<head>
+    <link rel="stylesheet" type="text/css" href="narrative.css"/>
+</head>
+
+<body>
+<!--*/-->
+
+<div>
+    <table class="hapiPropertyTable" th:if="${not resource.empty}">
+        <tbody>
+        <tr th:if="${resource.id}">
+            <td th:text="(#{narrative.propertyName.id} ?: 'Id') + ':'"></td>
+            <td th:text="${resource.id}"></td>
+        </tr>
+        <tr th:if="${resource.status}">
+            <td th:text="(#{narrative.propertyName.status} ?: 'Status') + ':'"></td>
+            <td th:text="${resource.status}"></td>
+        </tr>
+        <tr th:if="${resource.period}">
+            <td th:text="(#{narrative.propertyName.period} ?: 'Period') + ':'"></td>
+            <td th:narrative="${resource.period}"></td>
+        </tr>
+        <tr th:each="type : ${resource.type}" th:if="${type}">
+            <td th:text="(#{narrative.propertyName.type} ?: 'Type') + ':'"></td>
+            <td th:narrative="${type}"></td>
+        </tr>
+        <tr th:if="${not resource.patient.empty}">
+            <td th:text="(#{narrative.propertyName.patient} ?: 'Patient') + ':'"></td>
+            <td th:narrative="${resource.patient}"></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<!--/*-->
+</body>
+
+</html>
+<!--*/-->
