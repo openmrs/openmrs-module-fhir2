@@ -26,7 +26,6 @@ import lombok.Setter;
 import org.apache.commons.collections.CollectionUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Person;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.openmrs.module.fhir2.api.FhirQuestionnaireService;
 import org.openmrs.module.fhir2.api.annotations.R4Provider;
