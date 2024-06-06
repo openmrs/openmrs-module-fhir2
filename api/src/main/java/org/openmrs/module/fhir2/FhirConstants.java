@@ -352,4 +352,18 @@ public final class FhirConstants {
 	public static final String EXACT_TOTAL_SEARCH_PARAMETER = "_exactTotal";
 	
 	public static final String COUNT_QUERY_CACHE = "countQueryCache";
+	
+	public static final String HL7_FHIR_CODE_SYSTEM_PREFIX_R4 = "http://hl7.org/fhir/uv/sdc";
+	
+	public static final String STRUCTURE_DATA_CAPTURE_SYSTEM_URI_R4 = HL7_FHIR_CODE_SYSTEM_PREFIX_R4
+	        + "/StructureDefinition";
+	
+	public static final String SDC_QUESTIONNAIRE_ITEM_EXTRACTION_CONTEXT_STATUS_SYSTEM_URI_R4 = STRUCTURE_DATA_CAPTURE_SYSTEM_URI_R4
+	        + "/sdc-questionnaire-itemExtractionContext";
+	
+	public static final String SDC_QUESTIONNAIRE_ENTRY_MODE_STATUS_SYSTEM_URI_R4 = STRUCTURE_DATA_CAPTURE_SYSTEM_URI_R4
+	        + "/sdc-questionnaire-entryMode";
+	
+	public static final String QUESTIONNAIRE_ITEM_CONTROL_STATUS_SYSTEM_URI_R4 = STRUCTURE_DATA_CAPTURE_SYSTEM_URI_R4
+	        + "/questionnaire-itemControl";
 }
