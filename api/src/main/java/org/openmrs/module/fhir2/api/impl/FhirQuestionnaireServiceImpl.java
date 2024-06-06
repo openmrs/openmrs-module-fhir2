@@ -20,6 +20,7 @@ import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.QuestionnaireSearchParams;
 import org.openmrs.module.fhir2.api.translators.QuestionnaireTranslator;
+import org.openmrs.module.fhir2.api.util.FormResourceAuditable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @Getter(AccessLevel.PROTECTED)
 @Setter(AccessLevel.PACKAGE)
-public class FhirQuestionnaireServiceImpl extends BaseFhirService<Questionnaire, org.openmrs.Form> implements FhirQuestionnaireService {
+public class FhirQuestionnaireServiceImpl extends BaseFhirService<Questionnaire, FormResourceAuditable> implements FhirQuestionnaireService {
 	
 	@Autowired
 	private FhirQuestionnaireDao dao;
@@ -40,7 +41,7 @@ public class FhirQuestionnaireServiceImpl extends BaseFhirService<Questionnaire,
 	private SearchQueryInclude<Questionnaire> searchQueryInclude;
 	
 	@Autowired
-	private SearchQuery<org.openmrs.Form, Questionnaire, FhirQuestionnaireDao, QuestionnaireTranslator, SearchQueryInclude<Questionnaire>> searchQuery;
+	private SearchQuery<FormResourceAuditable, Questionnaire, FhirQuestionnaireDao, QuestionnaireTranslator, SearchQueryInclude<Questionnaire>> searchQuery;
 	
 	@Override
 	public IBundleProvider searchForQuestionnaire(QuestionnaireSearchParams questionnaireSearchParams) {
@@ -49,7 +50,7 @@ public class FhirQuestionnaireServiceImpl extends BaseFhirService<Questionnaire,
 	}
 	
 	@Override
-	protected boolean isVoided(org.openmrs.Form form) {
-		return form.getRetired();
+	protected boolean isVoided(FormResourceAuditable formResource) {
+		return formResource.getForm().getRetired();
 	}
 }
