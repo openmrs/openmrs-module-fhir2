@@ -102,9 +102,9 @@ public class QuestionnaireTranslatorImpl implements QuestionnaireTranslator {
 		
 		List<Extension> extensions = new ArrayList<>();
 		
-		Extension pageContextExtension = new Extension(FhirConstants.QUESTIONNAIRE_ITEM_CONTROL_STATUS_SYSTEM_URI_R4);
+		Extension pageContextExtension = new Extension(FhirConstants.SDC_QUESTIONNAIRE_ITEM_CONTROL_STATUS_SYSTEM_URI_R4);
 		Coding coding = new Coding();
-		coding.setSystem("http://hl7.org/fhir/questionnaire-item-control");
+		coding.setSystem(FhirConstants.QUESTIONNAIRE_ITEM_CONTROL_STATUS_SYSTEM_URI_R4);
 		coding.setCode("page");
 		coding.setDisplay("Page");
 
