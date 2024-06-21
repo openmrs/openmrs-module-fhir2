@@ -24,8 +24,6 @@ public final class FhirConstants {
 	
 	public static final String HL7_FHIR_CODE_SYSTEM_PREFIX_R3 = "http://hl7.org/fhir";
 
-	public static final String HL7_FHIR_CODE_SYSTEM_PREFIX_R4 = "http://hl7.org/fhir";
-
 	public static final String FHIR_TERMINOLOGY_DATA_OPERATION = HL7_FHIR_CODE_SYSTEM_PREFIX + "v3-DataOperation";
 	
 	public static final String FHIR_TERMINOLOGY_PROVENANCE_PARTICIPANT_TYPE = HL7_FHIR_CODE_SYSTEM_PREFIX
@@ -354,24 +352,6 @@ public final class FhirConstants {
 	public static final String EXACT_TOTAL_SEARCH_PARAMETER = "_exactTotal";
 	
 	public static final String COUNT_QUERY_CACHE = "countQueryCache";
-	
-	public static final String HL7_FHIR_UV_SDC_CODE_SYSTEM_PREFIX_R4 = HL7_FHIR_CODE_SYSTEM_PREFIX_R4 + "/uv/sdc";
-	
-	public static final String SDC_STRUCTURE_DEFINITION_SYSTEM_URI_R4 = HL7_FHIR_UV_SDC_CODE_SYSTEM_PREFIX_R4
-	        + "/StructureDefinition";
 
-	public static final String STRUCTURE_DEFINITION_SYSTEM_URI_R4 = HL7_FHIR_UV_SDC_CODE_SYSTEM_PREFIX_R4
-	        + "/StructureDefinition";
-	
-	public static final String SDC_QUESTIONNAIRE_ITEM_EXTRACTION_CONTEXT_STATUS_SYSTEM_URI_R4 = SDC_STRUCTURE_DEFINITION_SYSTEM_URI_R4
-	        + "/sdc-questionnaire-itemExtractionContext";
-	
-	public static final String SDC_QUESTIONNAIRE_ENTRY_MODE_STATUS_SYSTEM_URI_R4 = SDC_STRUCTURE_DEFINITION_SYSTEM_URI_R4
-	        + "/sdc-questionnaire-entryMode";
-	
-	public static final String SDC_QUESTIONNAIRE_ITEM_CONTROL_STATUS_SYSTEM_URI_R4 = STRUCTURE_DEFINITION_SYSTEM_URI_R4
-	        + "/questionnaire-itemControl";
-
-	public static final String QUESTIONNAIRE_ITEM_CONTROL_STATUS_SYSTEM_URI_R4 = HL7_FHIR_CODE_SYSTEM_PREFIX_R4
-	        + "/questionnaire-item-control";
+	public static final String FHIR_QUESTIONNAIRE_TYPE = "FHIR Questionnaire";
 }
