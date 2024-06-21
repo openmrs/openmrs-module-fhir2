@@ -20,6 +20,7 @@ import lombok.Setter;
 import org.hibernate.Criteria;
 import org.openmrs.Form;
 import org.openmrs.api.FormService;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirQuestionnaireDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.util.FormResourceAuditable;
@@ -29,31 +30,31 @@ import org.springframework.stereotype.Component;
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class FhirQuestionnaireDaoImpl extends BaseFhirDao<FormResourceAuditable> implements FhirQuestionnaireDao {
-	
-	@Autowired
-	private FormService formService;
-	
-	@Override
-	public FormResourceAuditable get(@Nonnull String uuid) {
-		Form form = formService.getFormByUuid(uuid);
-		return new FormResourceAuditable(formService.getFormResource(form, "JSON schema"));
-	}
-	
-	@Override
-	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
-		criteria.add(eq("set", true));
-		theParams.getParameters().forEach(entry -> {
-			switch (entry.getKey()) {
-				case TITLE_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handleTitle(criteria, (StringAndListParam) param.getParam()));
-					break;
-			}
-		});
-	}
-	
-	protected void handleTitle(Criteria criteria, StringAndListParam titlePattern) {
-		criteria.createAlias("names", "cn");
-		handleAndListParam(titlePattern, (title) -> propertyLike("cn.name", title)).ifPresent(criteria::add);
-	}
-	
+
+    @Autowired
+    private FormService formService;
+
+    @Override
+    public FormResourceAuditable get(@Nonnull String uuid) {
+        Form form = formService.getFormByUuid(uuid);
+        return new FormResourceAuditable(formService.getFormResource(form, FhirConstants.FHIR_QUESTIONNAIRE_TYPE));
+    }
+
+    @Override
+    protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
+        criteria.add(eq("set", true));
+        theParams.getParameters().forEach(entry -> {
+            switch (entry.getKey()) {
+                case TITLE_SEARCH_HANDLER:
+                    entry.getValue().forEach(param -> handleTitle(criteria, (StringAndListParam) param.getParam()));
+                    break;
+            }
+        });
+    }
+
+    protected void handleTitle(Criteria criteria, StringAndListParam titlePattern) {
+        criteria.createAlias("names", "cn");
+        handleAndListParam(titlePattern, (title) -> propertyLike("cn.name", title)).ifPresent(criteria::add);
+    }
+
 }
