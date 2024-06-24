@@ -9,7 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -18,7 +17,6 @@ import org.openmrs.module.fhir2.api.FhirQuestionnaireService;
 import org.openmrs.module.fhir2.api.dao.FhirQuestionnaireDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
-import org.openmrs.module.fhir2.api.search.param.QuestionnaireSearchParams;
 import org.openmrs.module.fhir2.api.translators.QuestionnaireTranslator;
 import org.openmrs.module.fhir2.api.util.FormResourceAuditable;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,11 +41,13 @@ public class FhirQuestionnaireServiceImpl extends BaseFhirService<Questionnaire,
 	@Autowired
 	private SearchQuery<FormResourceAuditable, Questionnaire, FhirQuestionnaireDao, QuestionnaireTranslator, SearchQueryInclude<Questionnaire>> searchQuery;
 	
+	/*
 	@Override
 	public IBundleProvider searchForQuestionnaire(QuestionnaireSearchParams questionnaireSearchParams) {
 		return searchQuery.getQueryResults(questionnaireSearchParams.toSearchParameterMap(), dao, translator,
 		    searchQueryInclude);
 	}
+	*/
 	
 	@Override
 	protected boolean isVoided(FormResourceAuditable formResource) {
