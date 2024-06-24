@@ -11,25 +11,15 @@ package org.openmrs.module.fhir2.providers.r4;
 
 import static lombok.AccessLevel.PACKAGE;
 
-import java.util.HashSet;
-
-import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.annotation.*;
-import ca.uhn.fhir.rest.api.SortSpec;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.StringAndListParam;
-import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.Setter;
-import org.apache.commons.collections.CollectionUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.openmrs.module.fhir2.api.FhirQuestionnaireService;
 import org.openmrs.module.fhir2.api.annotations.R4Provider;
-import org.openmrs.module.fhir2.api.search.param.QuestionnaireSearchParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -56,16 +46,19 @@ public class QuestionnaireFhirResourceProvider implements IResourceProvider {
 		return questionnaire;
 	}
 	
-	@Search
-	@SuppressWarnings("unused")
-	public IBundleProvider searchQuestionnaire(@OptionalParam(name = Questionnaire.SP_NAME) StringAndListParam name,
-	        @OptionalParam(name = Questionnaire.SP_RES_ID) TokenAndListParam id,
-	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated, @Sort SortSpec sort, HashSet<Include> includes) {
-		if (CollectionUtils.isEmpty(includes)) {
-			includes = null;
+	/*
+		@Search
+		@SuppressWarnings("unused")
+		public IBundleProvider searchQuestionnaire(@OptionalParam(name = Questionnaire.SP_NAME) StringAndListParam name,
+		        @OptionalParam(name = Questionnaire.SP_RES_ID) TokenAndListParam id,
+		        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated, @Sort SortSpec sort,
+		        HashSet<Include> includes) {
+			if (CollectionUtils.isEmpty(includes)) {
+				includes = null;
+			}
+	
+			return fhirQuestionnaireService
+			        .searchForQuestionnaire(new QuestionnaireSearchParams(name, id, lastUpdated, sort, includes));
 		}
-		
-		return fhirQuestionnaireService
-		        .searchForQuestionnaire(new QuestionnaireSearchParams(name, id, lastUpdated, sort, includes));
-	}
+		*/
 }
