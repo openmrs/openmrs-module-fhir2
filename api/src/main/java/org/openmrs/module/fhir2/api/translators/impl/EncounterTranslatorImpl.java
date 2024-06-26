@@ -149,7 +149,7 @@ public class EncounterTranslatorImpl extends BaseEncounterTranslator implements 
 		return existingEncounter;
 	}
 
-	public EncounterRole getDefaultEncounterRole() {
+	private EncounterRole getDefaultEncounterRole() {
 		EncounterRole role = encounterService.getEncounterRoleByName("Unknown");
 		if (role == null) {
 			throw new IllegalStateException("Missing encounter role named 'Unknown'");
