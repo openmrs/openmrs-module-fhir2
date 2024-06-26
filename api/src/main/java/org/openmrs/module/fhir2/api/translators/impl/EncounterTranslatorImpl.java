@@ -17,6 +17,7 @@ import javax.annotation.Nonnull;
 
 import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -128,6 +129,7 @@ public class EncounterTranslatorImpl extends BaseEncounterTranslator implements 
 		existingProviders.addAll(encounter
 		        .getParticipant().stream().map(encounterParticipantComponent -> participantTranslator
 		                .toOpenmrsType(new EncounterProvider(), encounterParticipantComponent))
+				.filter(Objects::nonNull)
 		        .collect(Collectors.toCollection(LinkedHashSet::new)));
 
 		for (EncounterProvider ep : existingEncounter.getEncounterProviders()) {
