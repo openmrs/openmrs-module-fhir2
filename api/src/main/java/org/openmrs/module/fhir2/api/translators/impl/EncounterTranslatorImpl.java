@@ -26,7 +26,6 @@ import org.hl7.fhir.r4.model.Encounter;
 import org.openmrs.EncounterProvider;
 import org.openmrs.EncounterType;
 import org.openmrs.Visit;
-import org.openmrs.api.EncounterService;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.EncounterLocationTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterParticipantTranslator;
@@ -59,9 +58,6 @@ public class EncounterTranslatorImpl extends BaseEncounterTranslator implements 
 	
 	@Autowired
 	private EncounterPeriodTranslator<org.openmrs.Encounter> encounterPeriodTranslator;
-	
-	@Autowired
-	private EncounterService encounterService;
 	
 	@Override
 	public Encounter toFhirResource(@Nonnull org.openmrs.Encounter openmrsEncounter) {

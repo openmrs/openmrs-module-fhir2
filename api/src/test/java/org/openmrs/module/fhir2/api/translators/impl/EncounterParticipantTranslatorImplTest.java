@@ -13,6 +13,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 import org.hl7.fhir.r4.model.Encounter;
@@ -24,7 +25,9 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.EncounterProvider;
+import org.openmrs.EncounterRole;
 import org.openmrs.Provider;
+import org.openmrs.api.EncounterService;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirPractitionerDao;
 
@@ -37,6 +40,9 @@ public class EncounterParticipantTranslatorImplTest {
 	
 	@Mock
 	private FhirPractitionerDao practitionerDao;
+	
+	@Mock
+	private EncounterService encounterService;
 	
 	private EncounterParticipantTranslatorImpl participantTranslator;
 	
@@ -55,6 +61,7 @@ public class EncounterParticipantTranslatorImplTest {
 		provider = new Provider();
 		provider.setUuid(PROVIDER_UUID);
 		encounterProvider.setProvider(provider);
+		participantTranslator.setEncounterService(encounterService);
 		
 		encounterParticipantComponent = new Encounter.EncounterParticipantComponent();
 		Reference reference = new Reference(PROVIDER_URI);
@@ -89,6 +96,7 @@ public class EncounterParticipantTranslatorImplTest {
 	@Test
 	public void shouldTranslateEncounterParticipantToEncounterProviderWithCorrectProvider() {
 		when(practitionerDao.get(PROVIDER_UUID)).thenReturn(provider);
+		when(encounterService.getEncounterRoleByName("Unknown")).thenReturn(new EncounterRole());
 		
 		EncounterProvider encounterProvider = participantTranslator.toOpenmrsType(new EncounterProvider(),
 		    encounterParticipantComponent);
@@ -101,5 +109,11 @@ public class EncounterParticipantTranslatorImplTest {
 	@Test(expected = NullPointerException.class)
 	public void shouldThrowExceptionWhenEncounterParticipantIsNull() {
 		participantTranslator.toOpenmrsType(new EncounterProvider(), null);
+	}
+	
+	@Test
+	public void toFhirResource_shouldThrowExceptionWhenUnknownRoleIsNull() {
+		assertThrows(IllegalStateException.class,
+		    () -> participantTranslator.toOpenmrsType(new EncounterProvider(), encounterParticipantComponent));
 	}
 }

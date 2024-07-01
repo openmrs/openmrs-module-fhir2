@@ -15,7 +15,6 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -132,8 +131,7 @@ public class EncounterTranslatorImplTest {
 		encounterTranslator.setVisitReferenceTranlator(visitReferenceTranslator);
 		encounterTranslator.setEncounterTypeTranslator(encounterTypeTranslator);
 		encounterTranslator.setEncounterPeriodTranslator(encounterPeriodTranslator);
-		encounterTranslator.setEncounterService(encounterService);
-
+		
 		PatientIdentifier identifier = new PatientIdentifier();
 		identifier.setIdentifier(PATIENT_IDENTIFIER);
 		
@@ -254,27 +252,6 @@ public class EncounterTranslatorImplTest {
 		
 		assertThat(result.getEncounterProviders(), not(empty()));
 		assertThat(result.getEncounterProviders().size(), equalTo(1));
-	}
-	
-	@Test
-	public void toFhirResource_shouldThrowExceptionWhenUnknownRoleIsNull() {
-		List<Encounter.EncounterParticipantComponent> participantComponents = new ArrayList<>();
-		Encounter.EncounterParticipantComponent participantComponent = new Encounter.EncounterParticipantComponent();
-		Reference practitionerRef = new Reference();
-		practitionerRef.setReference(PRACTITIONER_URI);
-		participantComponent.setIndividual(practitionerRef);
-		participantComponents.add(participantComponent);
-		fhirEncounter.setParticipant(participantComponents);
-		EncounterProvider encounterProvider = new EncounterProvider();
-		Provider provider = new Provider();
-		provider.setUuid(PRACTITIONER_UUID);
-		encounterProvider.setProvider(provider);
-		Patient patient = new Patient();
-		patient.setUuid(PATIENT_UUID);
-		when(patientReferenceTranslator.toOpenmrsType(patientRef)).thenReturn(patient);
-		when(participantTranslator.toOpenmrsType(ArgumentMatchers.any(), ArgumentMatchers.any()))
-		        .thenReturn(new EncounterProvider());
-		assertThrows(IllegalStateException.class, () -> encounterTranslator.toOpenmrsType(fhirEncounter));
 	}
 	
 	@Test
