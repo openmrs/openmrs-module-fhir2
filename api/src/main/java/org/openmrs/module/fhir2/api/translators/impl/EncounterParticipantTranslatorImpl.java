@@ -17,6 +17,8 @@ import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Encounter;
 import org.openmrs.EncounterProvider;
+import org.openmrs.EncounterRole;
+import org.openmrs.api.EncounterService;
 import org.openmrs.module.fhir2.api.dao.FhirPractitionerDao;
 import org.openmrs.module.fhir2.api.translators.EncounterParticipantTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +30,9 @@ public class EncounterParticipantTranslatorImpl extends BaseReferenceHandlingTra
 	
 	@Autowired
 	private FhirPractitionerDao practitionerDao;
+	
+	@Autowired
+	private EncounterService encounterService;
 	
 	@Override
 	public Encounter.EncounterParticipantComponent toFhirResource(@Nonnull EncounterProvider encounterProvider) {
@@ -49,6 +54,18 @@ public class EncounterParticipantTranslatorImpl extends BaseReferenceHandlingTra
 		getReferenceId(encounterParticipantComponent.getIndividual())
 		        .map(practitionerUuid -> practitionerDao.get(practitionerUuid)).ifPresent(encounterProvider::setProvider);
 		
+		if (encounterProvider.getEncounterRole() == null) {
+			encounterProvider.setEncounterRole(getDefaultEncounterRole());
+		}
+		
 		return encounterProvider;
+	}
+	
+	protected EncounterRole getDefaultEncounterRole() {
+		EncounterRole role = encounterService.getEncounterRoleByName("Unknown");
+		if (role == null) {
+			throw new IllegalStateException("Missing encounter role named 'Unknown'");
+		}
+		return role;
 	}
 }

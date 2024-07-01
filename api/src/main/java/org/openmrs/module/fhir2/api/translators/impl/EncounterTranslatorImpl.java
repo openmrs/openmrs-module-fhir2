@@ -24,7 +24,6 @@ import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Encounter;
 import org.openmrs.EncounterProvider;
-import org.openmrs.EncounterRole;
 import org.openmrs.EncounterType;
 import org.openmrs.Visit;
 import org.openmrs.api.EncounterService;
@@ -128,13 +127,10 @@ public class EncounterTranslatorImpl extends BaseEncounterTranslator implements 
 			existingProviders = new LinkedHashSet<>(encounter.getParticipant().size());
 		}
 		
-		existingProviders
-		        .addAll(encounter.getParticipant().stream().map(encounterParticipantComponent -> participantTranslator
-		                .toOpenmrsType(new EncounterProvider(), encounterParticipantComponent)).map(ep -> {
-			                ep.setEncounter(existingEncounter);
-			                ep.setEncounterRole(getDefaultEncounterRole());
-			                return ep;
-		                }).collect(Collectors.toCollection(LinkedHashSet::new)));
+		existingProviders.addAll(encounter.getParticipant().stream()
+		        .map(encounterParticipantComponent -> participantTranslator.toOpenmrsType(new EncounterProvider(),
+		            encounterParticipantComponent))
+		        .peek(ep -> ep.setEncounter(existingEncounter)).collect(Collectors.toCollection(LinkedHashSet::new)));
 		
 		existingEncounter.setEncounterProviders(existingProviders);
 		
@@ -144,13 +140,5 @@ public class EncounterTranslatorImpl extends BaseEncounterTranslator implements 
 		encounterPeriodTranslator.toOpenmrsType(existingEncounter, encounter.getPeriod());
 		
 		return existingEncounter;
-	}
-
-	private EncounterRole getDefaultEncounterRole() {
-		EncounterRole role = encounterService.getEncounterRoleByName("Unknown");
-		if (role == null) {
-			throw new IllegalStateException("Missing encounter role named 'Unknown'");
-		}
-		return role;
 	}
 }
