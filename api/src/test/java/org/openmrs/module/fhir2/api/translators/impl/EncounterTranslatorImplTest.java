@@ -246,7 +246,6 @@ public class EncounterTranslatorImplTest {
 		Patient patient = new Patient();
 		patient.setUuid(PATIENT_UUID);
 		when(patientReferenceTranslator.toOpenmrsType(patientRef)).thenReturn(patient);
-		when(encounterService.getEncounterRoleByName("Unknown")).thenReturn(new EncounterRole());
 		when(participantTranslator.toOpenmrsType(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(new EncounterProvider());
 		org.openmrs.Encounter result = encounterTranslator.toOpenmrsType(fhirEncounter);
 		

@@ -88,6 +88,7 @@ public class EncounterParticipantTranslatorImplTest {
 	
 	@Test
 	public void shouldTranslateEncounterParticipantToOpenMrsType() {
+		when(encounterService.getEncounterRoleByName("Unknown")).thenReturn(new EncounterRole());
 		EncounterProvider encounterProvider = participantTranslator.toOpenmrsType(new EncounterProvider(),
 		    encounterParticipantComponent);
 		assertThat(encounterProvider, notNullValue());
