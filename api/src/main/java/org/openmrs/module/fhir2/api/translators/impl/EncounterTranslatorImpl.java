@@ -17,7 +17,6 @@ import javax.annotation.Nonnull;
 
 import java.util.Collections;
 import java.util.LinkedHashSet;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -61,7 +60,7 @@ public class EncounterTranslatorImpl extends BaseEncounterTranslator implements 
 	
 	@Autowired
 	private EncounterPeriodTranslator<org.openmrs.Encounter> encounterPeriodTranslator;
-
+	
 	@Autowired
 	private EncounterService encounterService;
 	
@@ -129,15 +128,13 @@ public class EncounterTranslatorImpl extends BaseEncounterTranslator implements 
 			existingProviders = new LinkedHashSet<>(encounter.getParticipant().size());
 		}
 		
-		existingProviders.addAll(encounter
-		        .getParticipant().stream().map(encounterParticipantComponent -> participantTranslator
-		                .toOpenmrsType(new EncounterProvider(), encounterParticipantComponent))
-		        .collect(Collectors.toCollection(LinkedHashSet::new)));
-
-		for (EncounterProvider ep : existingEncounter.getEncounterProviders()) {
-			ep.setEncounter(existingEncounter);
-			ep.setEncounterRole(getDefaultEncounterRole());
-		}
+		existingProviders
+		        .addAll(encounter.getParticipant().stream().map(encounterParticipantComponent -> participantTranslator
+		                .toOpenmrsType(new EncounterProvider(), encounterParticipantComponent)).map(ep -> {
+			                ep.setEncounter(existingEncounter);
+			                ep.setEncounterRole(getDefaultEncounterRole());
+			                return ep;
+		                }).collect(Collectors.toCollection(LinkedHashSet::new)));
 		
 		existingEncounter.setEncounterProviders(existingProviders);
 		
