@@ -19,6 +19,7 @@ import org.hl7.fhir.r4.model.Encounter;
 import org.openmrs.EncounterProvider;
 import org.openmrs.EncounterRole;
 import org.openmrs.api.EncounterService;
+import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirPractitionerDao;
 import org.openmrs.module.fhir2.api.translators.EncounterParticipantTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,11 +29,16 @@ import org.springframework.stereotype.Component;
 @Setter(AccessLevel.PACKAGE)
 public class EncounterParticipantTranslatorImpl extends BaseReferenceHandlingTranslator implements EncounterParticipantTranslator {
 	
+	private static final String DEFAULT_ENCOUNTER_ROLE_UUID = "fhir2.encounterParticipantComponentUuid";
+	
 	@Autowired
 	private FhirPractitionerDao practitionerDao;
 	
 	@Autowired
 	private EncounterService encounterService;
+	
+	@Autowired
+	private FhirGlobalPropertyService globalPropertyService;
 	
 	@Override
 	public Encounter.EncounterParticipantComponent toFhirResource(@Nonnull EncounterProvider encounterProvider) {
@@ -62,10 +68,18 @@ public class EncounterParticipantTranslatorImpl extends BaseReferenceHandlingTra
 	}
 	
 	protected EncounterRole getDefaultEncounterRole() {
-		EncounterRole role = encounterService.getEncounterRoleByName("Unknown");
+		String defaultEncounterRoleUuid = globalPropertyService.getGlobalProperty(DEFAULT_ENCOUNTER_ROLE_UUID);
+		
+		String encounterRoleUuid = (defaultEncounterRoleUuid != null && !defaultEncounterRoleUuid.isEmpty())
+		        ? defaultEncounterRoleUuid
+		        : EncounterRole.UNKNOWN_ENCOUNTER_ROLE_UUID;
+		
+		EncounterRole role = encounterService.getEncounterRoleByUuid(encounterRoleUuid);
+		
 		if (role == null) {
-			throw new IllegalStateException("Missing encounter role named 'Unknown'");
+			throw new IllegalStateException("Default encounter role not found: " + encounterRoleUuid);
 		}
+		
 		return role;
 	}
 }
