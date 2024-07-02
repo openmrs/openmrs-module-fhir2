@@ -29,6 +29,7 @@ import org.openmrs.EncounterRole;
 import org.openmrs.Provider;
 import org.openmrs.api.EncounterService;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirPractitionerDao;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -44,6 +45,9 @@ public class EncounterParticipantTranslatorImplTest {
 	@Mock
 	private EncounterService encounterService;
 	
+	@Mock
+	private FhirGlobalPropertyService globalPropertyService;
+	
 	private EncounterParticipantTranslatorImpl participantTranslator;
 	
 	private EncounterProvider encounterProvider;
@@ -56,6 +60,7 @@ public class EncounterParticipantTranslatorImplTest {
 	public void setUp() {
 		participantTranslator = new EncounterParticipantTranslatorImpl();
 		participantTranslator.setPractitionerDao(practitionerDao);
+		participantTranslator.setGlobalPropertyService(globalPropertyService);
 		
 		encounterProvider = new EncounterProvider();
 		provider = new Provider();
@@ -88,7 +93,8 @@ public class EncounterParticipantTranslatorImplTest {
 	
 	@Test
 	public void shouldTranslateEncounterParticipantToOpenMrsType() {
-		when(encounterService.getEncounterRoleByName("Unknown")).thenReturn(new EncounterRole());
+		when(encounterService.getEncounterRoleByUuid(EncounterRole.UNKNOWN_ENCOUNTER_ROLE_UUID))
+		        .thenReturn(new EncounterRole());
 		EncounterProvider encounterProvider = participantTranslator.toOpenmrsType(new EncounterProvider(),
 		    encounterParticipantComponent);
 		assertThat(encounterProvider, notNullValue());
@@ -97,7 +103,8 @@ public class EncounterParticipantTranslatorImplTest {
 	@Test
 	public void shouldTranslateEncounterParticipantToEncounterProviderWithCorrectProvider() {
 		when(practitionerDao.get(PROVIDER_UUID)).thenReturn(provider);
-		when(encounterService.getEncounterRoleByName("Unknown")).thenReturn(new EncounterRole());
+		when(encounterService.getEncounterRoleByUuid(EncounterRole.UNKNOWN_ENCOUNTER_ROLE_UUID))
+		        .thenReturn(new EncounterRole());
 		
 		EncounterProvider encounterProvider = participantTranslator.toOpenmrsType(new EncounterProvider(),
 		    encounterParticipantComponent);
