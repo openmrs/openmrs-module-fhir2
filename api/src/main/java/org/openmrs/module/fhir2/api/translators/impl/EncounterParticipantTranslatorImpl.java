@@ -29,7 +29,7 @@ import org.springframework.stereotype.Component;
 @Setter(AccessLevel.PACKAGE)
 public class EncounterParticipantTranslatorImpl extends BaseReferenceHandlingTranslator implements EncounterParticipantTranslator {
 	
-	private static final String DEFAULT_ENCOUNTER_ROLE_UUID = "fhir2.encounterParticipantComponentUuid";
+	private static final String DEFAULT_ENCOUNTER_ROLE_UUID_PROPERTY = "fhir2.encounterParticipantComponentUuid";
 	
 	@Autowired
 	private FhirPractitionerDao practitionerDao;
@@ -68,7 +68,7 @@ public class EncounterParticipantTranslatorImpl extends BaseReferenceHandlingTra
 	}
 	
 	protected EncounterRole getDefaultEncounterRole() {
-		String defaultEncounterRoleUuid = globalPropertyService.getGlobalProperty(DEFAULT_ENCOUNTER_ROLE_UUID);
+		String defaultEncounterRoleUuid = globalPropertyService.getGlobalProperty(DEFAULT_ENCOUNTER_ROLE_UUID_PROPERTY);
 		
 		String encounterRoleUuid = (defaultEncounterRoleUuid != null && !defaultEncounterRoleUuid.isEmpty())
 		        ? defaultEncounterRoleUuid
