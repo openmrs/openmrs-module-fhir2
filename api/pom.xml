@@ -74,6 +74,10 @@
 			<version>${project.parent.version}</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.openmrs.module</groupId>
+			<artifactId>patientflags-api</artifactId>
+		</dependency>
     </dependencies>
 
 	<build>
