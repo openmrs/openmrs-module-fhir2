@@ -9,8 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
-import javax.annotation.Nonnull;
-
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -34,5 +32,5 @@ public class FhirFlagServiceImpl extends BaseFhirService<Flag, PatientFlag> impl
 	
 	@Autowired
 	private PatientFlagTranslator translator;
-
+	
 }
