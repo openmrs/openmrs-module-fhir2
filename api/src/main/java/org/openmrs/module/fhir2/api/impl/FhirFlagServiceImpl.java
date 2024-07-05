@@ -34,8 +34,5 @@ public class FhirFlagServiceImpl extends BaseFhirService<Flag, PatientFlag> impl
 	
 	@Autowired
 	private PatientFlagTranslator translator;
-	
-	public Flag getFlag(@Nonnull Integer id) {
-		return translator.toFhirResource(dao.getPatientFlagForPatientId(id));
-	}
+
 }

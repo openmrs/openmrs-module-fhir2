@@ -11,6 +11,9 @@ package org.openmrs.module.fhir2.api;
 
 import org.hl7.fhir.r4.model.Flag;
 
+import javax.annotation.Nonnull;
+
 public interface FhirFlagService extends FhirService<Flag> {
-	
+    @Override
+    Flag get(@Nonnull String uuid);
 }
