@@ -96,6 +96,8 @@ public class TaskFhirResourceProvider implements IResourceProvider {
 	public IBundleProvider searchTasks(
 	        @OptionalParam(name = Task.SP_BASED_ON, chainWhitelist = { "" }) ReferenceAndListParam basedOnReference,
 	        @OptionalParam(name = Task.SP_OWNER, chainWhitelist = { "" }) ReferenceAndListParam ownerReference,
+	        @OptionalParam(name = Task.SP_SUBJECT, chainWhitelist = { "" }) ReferenceAndListParam forReference,
+	        @OptionalParam(name = Task.SP_CODE) TokenAndListParam taskCode,
 	        @OptionalParam(name = Task.SP_STATUS) TokenAndListParam status,
 	        @OptionalParam(name = Task.SP_RES_ID) TokenAndListParam id,
 	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated, @Sort SortSpec sort,
@@ -105,7 +107,7 @@ public class TaskFhirResourceProvider implements IResourceProvider {
 		if (CollectionUtils.isEmpty(includes)) {
 			includes = null;
 		}
-		return new SearchQueryBundleProviderR3Wrapper(fhirTaskService.searchForTasks(
-		    new TaskSearchParams(basedOnReference, ownerReference, status, id, lastUpdated, sort, includes)));
+		return new SearchQueryBundleProviderR3Wrapper(fhirTaskService.searchForTasks(new TaskSearchParams(basedOnReference,
+		        ownerReference, forReference, taskCode, status, id, lastUpdated, sort, includes)));
 	}
 }

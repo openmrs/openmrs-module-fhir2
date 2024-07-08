@@ -596,7 +596,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR3IntegrationTest<T
 		
 		List<Bundle.BundleEntryComponent> entries = results.getEntry();
 		
-		assertThat(entries, hasSize(2));
+		assertThat(entries, hasSize(5));
 		assertThat(entries, everyItem(hasResource(hasProperty("status", is(Task.TaskStatus.REQUESTED)))));
 		assertThat(entries,
 		    containsInRelativeOrder(
@@ -647,7 +647,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR3IntegrationTest<T
 		
 		List<Bundle.BundleEntryComponent> entries = results.getEntry();
 		
-		assertThat(entries, hasSize(2));
+		assertThat(entries, hasSize(5));
 		assertThat(entries, everyItem(hasResource(hasProperty("status", is(Task.TaskStatus.REQUESTED)))));
 		assertThat(entries,
 		    containsInRelativeOrder(
@@ -673,7 +673,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR3IntegrationTest<T
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
-		assertThat(result, hasProperty("total", equalTo(2)));
+		assertThat(result, hasProperty("total", equalTo(5)));
 	}
 	
 	@Test
@@ -688,7 +688,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR3IntegrationTest<T
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
-		assertThat(result, hasProperty("total", equalTo(2)));
+		assertThat(result, hasProperty("total", equalTo(5)));
 	}
 	
 	@Test

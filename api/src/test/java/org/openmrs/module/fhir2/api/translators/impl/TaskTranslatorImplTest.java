@@ -22,6 +22,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -33,11 +34,14 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.exparity.hamcrest.date.DateMatchers;
+import org.hamcrest.CoreMatchers;
+import org.hl7.fhir.r4.model.Annotation;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
@@ -49,6 +53,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.BaseOpenmrsMetadata;
 import org.openmrs.Concept;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.model.FhirReference;
 import org.openmrs.module.fhir2.model.FhirTask;
 import org.openmrs.module.fhir2.model.FhirTaskInput;
@@ -58,6 +63,8 @@ import org.openmrs.module.fhir2.model.FhirTaskOutput;
 public class TaskTranslatorImplTest {
 	
 	private static final String TASK_UUID = "d899333c-5bd4-45cc-b1e7-2f9542dbcbf6";
+	
+	private static final String PARENT_TASK_UUID = "c899333d-5cd4-45cc-b1e8-2f9542a4bf6";
 	
 	private static final String PATIENT_UUID = "123456-abcdef-123456";
 	
@@ -94,6 +101,9 @@ public class TaskTranslatorImplTest {
 	@Mock
 	private TaskOutputTranslatorImpl taskOutputTranslator;
 	
+	@Mock
+	private ConceptTranslator conceptTranslator;
+	
 	private TaskTranslatorImpl taskTranslator;
 	
 	@Before
@@ -102,6 +112,7 @@ public class TaskTranslatorImplTest {
 		taskTranslator.setReferenceTranslator(referenceTranslator);
 		taskTranslator.setTaskInputTranslator(taskInputTranslator);
 		taskTranslator.setTaskOutputTranslator(taskOutputTranslator);
+		taskTranslator.setConceptTranslator(conceptTranslator);
 	}
 	
 	@Test
@@ -203,7 +214,7 @@ public class TaskTranslatorImplTest {
 	
 	@Test
 	public void toOpenmrsType_shouldTranslateNullElements() {
-		Task task = new Task().setBasedOn(null).setEncounter(null).setFor(null).setOwner(null).setInput(null)
+		Task task = new Task().setBasedOn(null).setEncounter(null).setFor(null).setOwner(null).setInput(null).setPartOf(null)
 		        .setOutput(null);
 		
 		FhirTask result = taskTranslator.toOpenmrsType(task);
@@ -946,6 +957,187 @@ public class TaskTranslatorImplTest {
 		
 	}
 	
+	// Task Code
+	@Test
+	public void toFhirResource_shouldTranslateTaskCode() {
+		FhirTask task = new FhirTask();
+		Concept openmrsObject = new Concept();
+		CodeableConcept fhirObject = newCodeableConcept();
+		
+		task.setTaskCode(openmrsObject);
+		
+		when(conceptTranslator.toFhirResource(openmrsObject)).thenReturn(fhirObject);
+		
+		Task result = taskTranslator.toFhirResource(task);
+		
+		assertThat(result.getCode(), CoreMatchers.notNullValue());
+		assertThat(result.getCode(), CoreMatchers.equalTo(fhirObject));
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldTranslateTaskCode() {
+		Task fhirTask = new Task();
+		Concept openmrsObject = new Concept();
+		CodeableConcept fhirObject = newCodeableConcept();
+		
+		fhirTask.setCode(fhirObject);
+		
+		when(conceptTranslator.toOpenmrsType(fhirObject)).thenReturn(openmrsObject);
+		
+		FhirTask task = taskTranslator.toOpenmrsType(fhirTask);
+		
+		assertThat(task.getTaskCode(), CoreMatchers.notNullValue());
+		assertThat(task.getTaskCode(), CoreMatchers.equalTo(openmrsObject));
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldUpdateTaskCodeOnExistingTask() {
+		Concept openmrsObject = new Concept();
+		CodeableConcept fhirObject = newCodeableConcept();
+		
+		FhirTask task = new FhirTask();
+		task.setTaskCode(null);
+		task.setUuid(TASK_UUID);
+		
+		Task fhirTask = taskTranslator.toFhirResource(task);
+		fhirTask.setCode(fhirObject);
+		
+		when(conceptTranslator.toOpenmrsType(fhirObject)).thenReturn(openmrsObject);
+		
+		FhirTask result = taskTranslator.toOpenmrsType(task, fhirTask);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getTaskCode(), equalTo(openmrsObject));
+	}
+	
+	// Task.partOf
+	@Test
+	public void toFhirResource_shouldTranslatePartOf() {
+		FhirTask task = new FhirTask();
+		
+		shouldTranslateReferenceListToFhir(task, FhirConstants.TASK, PARENT_TASK_UUID, task::setPartOfReferences,
+		    t -> new ArrayList<>(t.getPartOf()));
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldTranslatePartOf() {
+		Task task = new Task();
+		
+		shouldTranslateReferenceListToOpenmrs(task, FhirConstants.TASK, PARENT_TASK_UUID, task::setPartOf,
+		    FhirTask::getPartOfReferences);
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldUpdatePartOf() {
+		Task task = new Task();
+		
+		shouldUpdateReferenceListInOpenmrs(task, FhirConstants.TASK, PARENT_TASK_UUID, task::setPartOf,
+		    FhirTask::getPartOfReferences);
+	}
+	
+	//Task.executionPeriod
+	
+	@Test
+	public void toFhirResource_shouldTranslateExecutionStartAndEndTimeToExecutionPeriod() {
+		Date startTime = new Date();
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(startTime);
+		calendar.add(Calendar.HOUR_OF_DAY, 2);
+		Date endTime = calendar.getTime();
+		
+		FhirTask task = new FhirTask();
+		task.setExecutionStartTime(startTime);
+		task.setExecutionEndTime(endTime);
+		
+		Task result = taskTranslator.toFhirResource(task);
+		
+		assertThat(result.getExecutionPeriod(), notNullValue());
+		assertThat(result.getExecutionPeriod().getStart(), equalTo(startTime));
+		assertThat(result.getExecutionPeriod().getEnd(), equalTo(endTime));
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldTranslateExecutionPeriodToExecutionStartAndEndTime() {
+		Period executionPeriod = new Period();
+		Date startTime = new Date();
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(startTime);
+		calendar.add(Calendar.HOUR_OF_DAY, 2);
+		Date endTime = calendar.getTime();
+		
+		Task fhirTask = new Task();
+		executionPeriod.setStart(startTime);
+		executionPeriod.setEnd(endTime);
+		fhirTask.setExecutionPeriod(executionPeriod);
+		
+		FhirTask result = taskTranslator.toOpenmrsType(fhirTask);
+		
+		assertThat(result.getExecutionStartTime(), equalTo(startTime));
+		assertThat(result.getExecutionEndTime(), equalTo(endTime));
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldUpdateExecutionTimeOnExistingTask() {
+		Date startTime = new Date();
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(startTime);
+		calendar.add(Calendar.HOUR_OF_DAY, 2);
+		Date endTime = calendar.getTime();
+		
+		FhirTask task = new FhirTask();
+		task.setExecutionStartTime(null);
+		task.setExecutionEndTime(null);
+		task.setUuid(TASK_UUID);
+		
+		Task fhirTask = taskTranslator.toFhirResource(task);
+		Period executionPeriod = new Period();
+		executionPeriod.setStart(startTime);
+		executionPeriod.setEnd(endTime);
+		fhirTask.setExecutionPeriod(executionPeriod);
+		
+		FhirTask result = taskTranslator.toOpenmrsType(task, fhirTask);
+		
+		assertThat(result.getExecutionStartTime(), equalTo(startTime));
+		assertThat(result.getExecutionEndTime(), equalTo(endTime));
+	}
+	
+	//Task.note
+	@Test
+	public void toFhirResource_shouldTranslateCommentToNote() {
+		FhirTask task = new FhirTask();
+		task.setComment("Test Comment");
+		
+		Task result = taskTranslator.toFhirResource(task);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getNote().get(0).getText(), equalTo("Test Comment"));
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldTranslateNoteToComment() {
+		Task task = new Task();
+		task.addNote(new Annotation().setText("Test Comment"));
+		
+		FhirTask result = taskTranslator.toOpenmrsType(task);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getComment(), equalTo("Test Comment"));
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldUpdateCommentOnExistingTask() {
+		FhirTask task = new FhirTask();
+		task.setComment(null);
+		
+		Task fhirTask = taskTranslator.toFhirResource(task);
+		fhirTask.addNote(new Annotation().setText("Test Comment"));
+		
+		FhirTask result = taskTranslator.toOpenmrsType(fhirTask);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getComment(), equalTo("Test Comment"));
+	}
+	
 	// Task.authoredOn
 	@Test
 	public void toFhirResource_shouldTranslateAuthoredOn() {
@@ -1142,4 +1334,11 @@ public class TaskTranslatorImplTest {
 		assertThat(resultReference.iterator().next().getReference(), equalTo(refUuid));
 		assertThat(resultReference.iterator().next().getType(), equalTo(refType));
 	}
+	
+	private CodeableConcept newCodeableConcept() {
+		CodeableConcept c = new CodeableConcept();
+		c.addCoding(new Coding("system", "code", "display"));
+		return c;
+	}
+	
 }
