@@ -12,36 +12,36 @@ package org.openmrs.module.fhir2.api.translators;
 import javax.annotation.Nonnull;
 
 import org.hl7.fhir.r4.model.Questionnaire;
-import org.openmrs.module.fhir2.api.util.FormResourceAuditable;
+import org.openmrs.Form;
 
-public interface QuestionnaireTranslator extends OpenmrsFhirUpdatableTranslator<FormResourceAuditable, Questionnaire> {
+public interface QuestionnaireTranslator extends OpenmrsFhirUpdatableTranslator<Form, Questionnaire> {
 	
 	/**
 	 * Maps an {@link org.openmrs.Form} to a {@link Questionnaire}
 	 * 
-	 * @param formResource the form to translate
+	 * @param form the form to translate
 	 * @return the corresponding FHIR questionnaire resource
 	 */
 	@Override
-	Questionnaire toFhirResource(@Nonnull FormResourceAuditable formResource);
+	Questionnaire toFhirResource(@Nonnull Form form);
 	
 	/**
-	 * Maps a {@link Questionnaire} to an {@link org.openmrs.FormResource}
+	 * Maps a {@link Questionnaire} to an {@link org.openmrs.Form}
 	 * 
 	 * @param questionnaire the FHIR questionnaire to translate
-	 * @return the corresponding OpenMRS FormResource
+	 * @return the corresponding OpenMRS Form
 	 */
 	@Override
-	FormResourceAuditable toOpenmrsType(@Nonnull Questionnaire questionnaire);
+	Form toOpenmrsType(@Nonnull Questionnaire questionnaire);
 	
 	/**
-	 * Maps a {@link Questionnaire} to an existing {@link org.openmrs.FormResource}
+	 * Maps a {@link Questionnaire} to an existing {@link org.openmrs.Form}
 	 * 
-	 * @param currentFormResource the existing OpenMRS formResource to update
+	 * @param currentForm the existing OpenMRS form to update
 	 * @param questionnaire the FHIR questionnaire to translate
 	 * @return the updated OpenMRS formResource
 	 */
 	@Override
-	FormResourceAuditable toOpenmrsType(@Nonnull FormResourceAuditable currentFormResource,
+	Form toOpenmrsType(@Nonnull Form currentForm,
 	        @Nonnull Questionnaire questionnaire);
 }

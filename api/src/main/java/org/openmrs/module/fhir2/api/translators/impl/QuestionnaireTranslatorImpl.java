@@ -18,31 +18,42 @@ import ca.uhn.fhir.parser.IParser;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.*;
+import org.openmrs.Form;
+import org.openmrs.FormResource;
+import org.openmrs.api.FormService;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.*;
-import org.openmrs.module.fhir2.api.util.FormResourceAuditable;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class QuestionnaireTranslatorImpl implements QuestionnaireTranslator {
 
+
+    @Autowired
+    FormService formService;
+
     @Override
-    public Questionnaire toFhirResource(@Nonnull FormResourceAuditable openmrsFormResource) {
-        notNull(openmrsFormResource, "The Openmrs FormResource object should not be null");
+    public Questionnaire toFhirResource(@Nonnull Form openmrsForm) {
+        notNull(openmrsForm, "The Openmrs Form object should not be null");
+
+        FormResource resource = formService.getFormResource(openmrsForm, FhirConstants.FHIR_QUESTIONNAIRE_TYPE);
+        notNull(resource, "The Openmrs Form doesn't contain an FHIR Questionnaire");
 
         FhirContext ctx = FhirContext.forR4();
         IParser p = ctx.newJsonParser();
-        return p.parseResource(Questionnaire.class, openmrsFormResource.getValue().toString());
+        return p.parseResource(Questionnaire.class, resource.getValue().toString());
     }
 
     @Override
-    public FormResourceAuditable toOpenmrsType(@Nonnull org.hl7.fhir.r4.model.Questionnaire questionnaire) {
+    public Form toOpenmrsType(@Nonnull org.hl7.fhir.r4.model.Questionnaire questionnaire) {
         notNull(questionnaire, "The Questionnaire object should not be null");
-        return toOpenmrsType(new FormResourceAuditable(), questionnaire);
+        return toOpenmrsType(new Form(), questionnaire);
     }
 
     @Override
-    public FormResourceAuditable toOpenmrsType(@Nonnull FormResourceAuditable openmrsForm,
+    public Form toOpenmrsType(@Nonnull Form openmrsForm,
                                                @Nonnull org.hl7.fhir.r4.model.Questionnaire questionnaire) {
         notNull(openmrsForm, "The existing Openmrs Form object should not be null");
         notNull(questionnaire, "The Questionnaire object should not be null");

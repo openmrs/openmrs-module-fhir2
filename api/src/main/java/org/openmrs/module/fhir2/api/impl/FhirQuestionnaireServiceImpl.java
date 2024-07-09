@@ -9,25 +9,31 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
+import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Questionnaire;
+import org.openmrs.Form;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirQuestionnaireService;
 import org.openmrs.module.fhir2.api.dao.FhirQuestionnaireDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
+import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.QuestionnaireTranslator;
-import org.openmrs.module.fhir2.api.util.FormResourceAuditable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.HashSet;
 
 @Component
 @Transactional
 @Getter(AccessLevel.PROTECTED)
 @Setter(AccessLevel.PACKAGE)
-public class FhirQuestionnaireServiceImpl extends BaseFhirService<Questionnaire, FormResourceAuditable> implements FhirQuestionnaireService {
+public class FhirQuestionnaireServiceImpl extends BaseFhirService<Questionnaire, Form> implements FhirQuestionnaireService {
 	
 	@Autowired
 	private FhirQuestionnaireDao dao;
@@ -39,18 +45,23 @@ public class FhirQuestionnaireServiceImpl extends BaseFhirService<Questionnaire,
 	private SearchQueryInclude<Questionnaire> searchQueryInclude;
 	
 	@Autowired
-	private SearchQuery<FormResourceAuditable, Questionnaire, FhirQuestionnaireDao, QuestionnaireTranslator, SearchQueryInclude<Questionnaire>> searchQuery;
-	
-	/*
+	private SearchQuery<Form, Questionnaire, FhirQuestionnaireDao, QuestionnaireTranslator, SearchQueryInclude<Questionnaire>> searchQuery;
+
 	@Override
-	public IBundleProvider searchForQuestionnaire(QuestionnaireSearchParams questionnaireSearchParams) {
-		return searchQuery.getQueryResults(questionnaireSearchParams.toSearchParameterMap(), dao, translator,
-		    searchQueryInclude);
+	protected boolean isVoided(Form form) {
+		return form.getRetired();
 	}
-	*/
-	
+
 	@Override
-	protected boolean isVoided(FormResourceAuditable formResource) {
-		return formResource.getForm().getRetired();
+	public IBundleProvider getQuestionnaireEverything() {
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.EVERYTHING_SEARCH_HANDLER, "");
+
+		populateEverythingOperationParams(theParams);
+		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
+	}
+
+	private void populateEverythingOperationParams(SearchParameterMap theParams) {
+		HashSet<Include> revIncludes = new HashSet<>();
+		theParams.addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER, revIncludes);
 	}
 }

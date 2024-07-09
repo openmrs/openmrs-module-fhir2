@@ -11,7 +11,9 @@ package org.openmrs.module.fhir2.providers.r4;
 
 import static lombok.AccessLevel.PACKAGE;
 
+import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.Setter;
@@ -45,20 +47,15 @@ public class QuestionnaireFhirResourceProvider implements IResourceProvider {
 		}
 		return questionnaire;
 	}
-	
-	/*
-		@Search
-		@SuppressWarnings("unused")
-		public IBundleProvider searchQuestionnaire(@OptionalParam(name = Questionnaire.SP_NAME) StringAndListParam name,
-		        @OptionalParam(name = Questionnaire.SP_RES_ID) TokenAndListParam id,
-		        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated, @Sort SortSpec sort,
-		        HashSet<Include> includes) {
-			if (CollectionUtils.isEmpty(includes)) {
-				includes = null;
-			}
-	
-			return fhirQuestionnaireService
-			        .searchForQuestionnaire(new QuestionnaireSearchParams(name, id, lastUpdated, sort, includes));
-		}
-		*/
+
+	/**
+	 * The $everything operation fetches all the information related to all the questionnaires
+	 *
+	 * @return a bundle of resources which reference to or are referenced from the questionnaires
+	 */
+	@Operation(name = "everything", idempotent = true, type = Questionnaire.class, bundleType = BundleTypeEnum.SEARCHSET)
+	public IBundleProvider getQuestionnaireEverything() {
+		return fhirQuestionnaireService.getQuestionnaireEverything();
+	}
+
 }
