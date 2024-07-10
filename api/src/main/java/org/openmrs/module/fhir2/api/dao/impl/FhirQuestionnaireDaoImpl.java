@@ -12,37 +12,50 @@ package org.openmrs.module.fhir2.api.dao.impl;
 import static org.hibernate.criterion.Restrictions.eq;
 import static org.hibernate.criterion.Restrictions.in;
 
+import javax.annotation.Nonnull;
+
+import java.util.Collection;
+import java.util.List;
+
+import ca.uhn.fhir.rest.param.StringAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hibernate.Criteria;
 import org.openmrs.Form;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirQuestionnaireDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Nonnull;
-import java.util.Collection;
-import java.util.List;
-
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class FhirQuestionnaireDaoImpl extends BaseFhirDao<Form> implements FhirQuestionnaireDao {
-
-    @Override
-    public Form getQuestionnaireById(@Nonnull Integer id) {
-        return (Form) getSessionFactory().getCurrentSession().createCriteria(Form.class).add(eq("formId", id))
-                .uniqueResult();
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public List<Form> getQuestionnairesByIds(@Nonnull Collection<Integer> ids) {
-        return getSessionFactory().getCurrentSession().createCriteria(Form.class).add(in("id", ids)).list();
-    }
-
-    @Override
-    protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
-        criteria.add(eq("set", true));
-    }
-
+	
+	@Override
+	public Form getQuestionnaireById(@Nonnull Integer id) {
+		return (Form) getSessionFactory().getCurrentSession().createCriteria(Form.class).add(eq("formId", id))
+		        .uniqueResult();
+	}
+	
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<Form> getQuestionnairesByIds(@Nonnull Collection<Integer> ids) {
+		return getSessionFactory().getCurrentSession().createCriteria(Form.class).add(in("id", ids)).list();
+	}
+	
+	@Override
+	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
+		theParams.getParameters().forEach(entry -> {
+			switch (entry.getKey()) {
+				case FhirConstants.NAME_SEARCH_HANDLER:
+					entry.getValue().forEach(param -> handleName(criteria, (StringAndListParam) param.getParam()));
+					break;
+			}
+		});
+	}
+	
+	private void handleName(Criteria criteria, StringAndListParam namePattern) {
+		handleAndListParam(namePattern, (name) -> propertyLike("name", name)).ifPresent(criteria::add);
+	}
+	
 }
