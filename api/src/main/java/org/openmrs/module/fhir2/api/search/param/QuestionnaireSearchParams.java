@@ -9,9 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.search.param;
 
-import java.util.HashSet;
-
-import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
@@ -30,10 +27,10 @@ public class QuestionnaireSearchParams extends BaseResourceSearchParams {
 	private StringAndListParam name;
 	
 	@Builder
-	public QuestionnaireSearchParams(StringAndListParam name, TokenAndListParam id, DateRangeParam lastUpdated,
-	    SortSpec sort, HashSet<Include> includes) {
+	public QuestionnaireSearchParams(StringAndListParam name,  TokenAndListParam id, DateRangeParam lastUpdated,
+	    SortSpec sort) {
 		
-		super(id, lastUpdated, sort, includes, null);
+		super(id, lastUpdated, sort, null, null);
 		
 		this.name = name;
 	}

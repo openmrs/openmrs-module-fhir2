@@ -10,9 +10,23 @@
 package org.openmrs.module.fhir2.api;
 
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.TokenParam;
 import org.hl7.fhir.r4.model.Questionnaire;
+import org.openmrs.module.fhir2.api.search.param.QuestionnaireSearchParams;
+
+import javax.annotation.Nonnull;
+import java.util.Collection;
+import java.util.List;
 
 public interface FhirQuestionnaireService extends FhirService<Questionnaire> {
+
+    List<Questionnaire> getQuestionnairesByIds(@Nonnull Collection<Integer> ids);
+
+    Questionnaire getById(@Nonnull Integer id);
+
+    IBundleProvider searchForQuestionnaires(QuestionnaireSearchParams questionnaireSearchParams);
+
+    IBundleProvider getQuestionnaireEverything(TokenParam identifier);
 
     IBundleProvider getQuestionnaireEverything();
 }
