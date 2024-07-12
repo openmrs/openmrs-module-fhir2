@@ -63,31 +63,32 @@ public class FhirQuestionnaireDaoImpl extends BaseFhirDao<Form> implements FhirQ
 	public List<Form> getSearchResults(@Nonnull SearchParameterMap theParams) {
 		Session session = sessionFactory.openSession();
 		session.beginTransaction();
-
+		
 		// Create CriteriaBuilder
 		CriteriaBuilder builder = session.getCriteriaBuilder();
-
+		
 		// Create CriteriaQuery for main query
 		CriteriaQuery<Form> query = builder.createQuery(Form.class);
 		Root<Form> formRoot = query.from(Form.class);
 		formRoot.alias("f");
-
+		
 		// Create Subquery for FormResource
 		Subquery<Long> subquery = query.subquery(Long.class);
 		Root<FormResource> resourceRoot = subquery.from(FormResource.class);
 		subquery.select(resourceRoot.get("form").get("formId")); // Selecting formId to match in main query
-
+		
 		// Add predicates to the subquery
 		List<Predicate> subqueryPredicates = new ArrayList<>();
-		//subqueryPredicates.add(builder.equal(resourceRoot.get("form").get("formId"), formRoot.get("formId")));
+		subqueryPredicates.add(builder.equal(resourceRoot.get("form").get("formId"), formRoot.get("formId")));
 		subqueryPredicates.add(builder.equal(resourceRoot.get("name"), FhirConstants.FHIR_QUESTIONNAIRE_TYPE));
 		subquery.where(builder.and(subqueryPredicates.toArray(new Predicate[0])));
-
+		
 		// Main query predicates
 		List<Predicate> mainPredicates = new ArrayList<>();
+		setupSearchParams(mainPredicates, builder, formRoot, theParams);
 		mainPredicates.add(builder.equal(formRoot.get("retired"), false));
 		mainPredicates.add(builder.exists(subquery));
-
+		
 		// Add predicates to the query
 		query.select(formRoot).where(builder.and(mainPredicates.toArray(new Predicate[0])));
 		
@@ -104,20 +105,19 @@ public class FhirQuestionnaireDaoImpl extends BaseFhirDao<Form> implements FhirQ
 		
 		return criteria;
 	}
-	
-	@Override
-	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
+
+	protected void setupSearchParams(List<Predicate> predicates, CriteriaBuilder builder, Root<Form> root,
+									 SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.NAME_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handleName(criteria, (StringAndListParam) param.getParam()));
+					entry.getValue().forEach(param -> {
+						((StringAndListParam) param.getParam()).getValuesAsQueryTokens().stream().forEach(l -> l.getValuesAsQueryTokens().stream().forEach(v -> {
+							predicates.add(builder.equal(root.get("name"), v.getValue()));
+						}));
+					});
 					break;
 			}
 		});
 	}
-	
-	private void handleName(Criteria criteria, StringAndListParam namePattern) {
-		handleAndListParam(namePattern, (name) -> propertyLike("name", name)).ifPresent(criteria::add);
-	}
-	
 }
