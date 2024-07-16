@@ -12,11 +12,17 @@ package org.openmrs.module.fhir2.api.dao.impl;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import ca.uhn.fhir.rest.param.*;
 import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.Form;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
+import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -25,8 +31,6 @@ import org.springframework.test.context.ContextConfiguration;
 public class FhirQuestionnaireDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String FORM_UUID = "504c83c7-cfbf-4ae7-a4da-bdfa3236689f";
-	
-	private static final String BAD_FORM_UUID = "282390a6-3608-496d-9025-aecbc1235670";
 	
 	private static final String[] QUESTIONNAIRE_SEARCH_DATA_FILES = {
 	        "org/openmrs/module/fhir2/api/dao/impl/FhirQuestionnaireDaoImplTest_initial_data.xml" };
@@ -55,8 +59,46 @@ public class FhirQuestionnaireDaoImplTest extends BaseModuleContextSensitiveTest
 	}
 	
 	@Test
+	public void getQuestionnaireById_shouldRetrieveQuestionnaireByIds() {
+		List<Integer> ids = new ArrayList<>();
+		ids.add(10);
+		ids.add(20);
+		List<Form> result = dao.getQuestionnairesByIds(ids);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.size(), equalTo(2));
+		assertThat(result.get(0).getUuid(), equalTo(FORM_UUID));
+		assertThat(result.get(0).getId(), equalTo(1));
+	}
+	
+	@Test
 	public void getQuestionnaireById_shouldReturnNullIfQuestionnaireNotFound() {
 		assertThat(dao.getQuestionnaireById(0), nullValue());
+	}
+	
+	@Test
+	public void getSearchResults_shouldRetrieveAllQuestionnaires() {
+		
+		List<Form> result = dao.getSearchResults(new SearchParameterMap());
+		
+		assertThat(result, notNullValue());
+		assertThat(result.size(), equalTo(2));
+		assertThat(result.get(0).getUuid(), equalTo(FORM_UUID));
+		assertThat(result.get(0).getId(), equalTo(1));
+	}
+	
+	@Test
+	public void getSearchResults_shouldRetrieveQuestionnaireByParamName() {
+		
+		StringAndListParam listParam = new StringAndListParam();
+		listParam.addAnd(new StringParam("Form 1 name"));
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER, listParam);
+		
+		List<Form> result = dao.getSearchResults(theParams);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.get(0).getUuid(), equalTo(FORM_UUID));
+		assertThat(result.get(0).getId(), equalTo(1));
 	}
 	
 }

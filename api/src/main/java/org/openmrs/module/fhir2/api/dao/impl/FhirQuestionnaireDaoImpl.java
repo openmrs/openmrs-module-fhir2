@@ -24,7 +24,6 @@ import ca.uhn.fhir.rest.param.StringAndListParam;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.openmrs.Form;
@@ -75,7 +74,8 @@ public class FhirQuestionnaireDaoImpl extends BaseFhirDao<Form> implements FhirQ
 		// Create Subquery for FormResource
 		Subquery<Long> subquery = query.subquery(Long.class);
 		Root<FormResource> resourceRoot = subquery.from(FormResource.class);
-		subquery.select(resourceRoot.get("form").get("formId")); // Selecting formId to match in main query
+		resourceRoot.alias("fr");
+		subquery.select(resourceRoot.get("formResourceId")); // Selecting formId to match in main query
 		
 		// Add predicates to the subquery
 		List<Predicate> subqueryPredicates = new ArrayList<>();
@@ -94,16 +94,6 @@ public class FhirQuestionnaireDaoImpl extends BaseFhirDao<Form> implements FhirQ
 		
 		List<Form> results = session.createQuery(query).getResultList();
 		return results.stream().map(this::deproxyResult).collect(Collectors.toList());
-	}
-	
-	private Criteria getSearchResultCriteria(SearchParameterMap theParams) {
-		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(typeToken.getRawType());
-		
-		handleRetireable(criteria);
-		
-		setupSearchParams(criteria, theParams);
-		
-		return criteria;
 	}
 	
 	protected void setupSearchParams(List<Predicate> predicates, CriteriaBuilder builder, Root<Form> root,

@@ -21,6 +21,9 @@
     <person_name person_name_id="33" preferred="false" person_id="2" given_name="Some other name" middle_name=" " family_name="Last Name of other name" creator="1" date_created="2004-01-01 00:00:00.0" voided="false" uuid="c9714a2d-a97e-4673-80f8-ac8dd5ced083"/>
     <patient patient_id="2" creator="1" date_created="2005-01-01 00:00:00.0" voided="false"/>
     <patient patient_id="3" creator="1" date_created="2005-01-01 00:00:00.0" voided="true"/>
-    <form form_id="1" name="Form name" version="1" published="1" description="This is the form description" encounter_type="1" creator="1" date_created="2004-01-01 00:00:00.0" retired="false" uuid="504c83c7-cfbf-4ae7-a4da-bdfa3236689f"/>
-    <form_resource form_resource_id="1" form_id="1" name="FHIR Questionnaire" value_reference="e756e7ae-b6c5-4d64-91dd-4cf76b87f24e" uuid="504c83c7-cfbf-4ae7-a4da-bdfa3236689f"/>
+    <encounter_type encounter_type_id="1" name="Encounter type" description="Encounter" creator="1" date_created="2004-01-01 00:00:00.0" retired="false" uuid="504c83c7-cfbf-4ae7-a4da-bdfa3236689f"/>
+    <form form_id="1" name="Form 1 name" version="1" published="1" description="This is the form 1 description" encounter_type="1" creator="1" date_created="2004-01-01 00:00:00.0" retired="false" uuid="504c83c7-cfbf-4ae7-a4da-bdfa3236689f"/>
+    <form_resource form_resource_id="1" form_id="1" name="FHIR Questionnaire" value_reference="e756e7ae-b6c5-4d64-91dd-4cf76b87f24e" datatype="org.openmrs.customdatatype.datatype.LongFreeTextDatatype" uuid="504c83c7-cfbf-4ae7-a4da-bdfa32366891"/>
+    <form form_id="2" name="Form 2 name" version="1" published="1" description="This is the form 2 description" encounter_type="1" creator="1" date_created="2004-01-01 00:00:00.0" retired="false" uuid="104c83c7-cfbf-4ae7-a4da-bdfa3236689d"/>
+    <form_resource form_resource_id="2" form_id="2" name="FHIR Questionnaire" value_reference="d756e7ae-b6c5-4d64-91dd-4cf76b87f24d" datatype="org.openmrs.customdatatype.datatype.LongFreeTextDatatype" uuid="104c83c7-cfbf-4ae7-a4da-bdfa32366891"/>
 </dataset>
