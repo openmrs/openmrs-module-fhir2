@@ -23,7 +23,7 @@ public final class FhirConstants {
 	public static final String HL7_FHIR_CODE_SYSTEM_PREFIX = "http://terminology.hl7.org/CodeSystem";
 	
 	public static final String HL7_FHIR_CODE_SYSTEM_PREFIX_R3 = "http://hl7.org/fhir";
-
+	
 	public static final String FHIR_TERMINOLOGY_DATA_OPERATION = HL7_FHIR_CODE_SYSTEM_PREFIX + "v3-DataOperation";
 	
 	public static final String FHIR_TERMINOLOGY_PROVENANCE_PARTICIPANT_TYPE = HL7_FHIR_CODE_SYSTEM_PREFIX
@@ -356,6 +356,6 @@ public final class FhirConstants {
 	public static final String EXACT_TOTAL_SEARCH_PARAMETER = "_exactTotal";
 	
 	public static final String COUNT_QUERY_CACHE = "countQueryCache";
-
+	
 	public static final String FHIR_QUESTIONNAIRE_TYPE = "FHIR Questionnaire";
 }
