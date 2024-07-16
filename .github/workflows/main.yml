@@ -20,9 +20,9 @@ jobs:
       JAVA_VERSION: ${{ matrix.java-version }}
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up JDK
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: ${{ matrix.java-version }}
@@ -30,12 +30,12 @@ jobs:
         id: build_with_maven
         run: |
           mvn verify --batch-mode -P integration-test --file pom.xml
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: build_artifact
           path: ${{ github.workspace }}/omod/target
       - name: Send data to Codecov
-        uses: codecov/codecov-action@v1
+        uses: codecov/codecov-action@v4
         with:
           env_vars: PLATFORM, JAVA_VERSION
   test:
@@ -43,13 +43,13 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up JDK
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: 8
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: build_artifact
           path: ${{ github.workspace }}/omod/target
