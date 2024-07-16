@@ -105,16 +105,17 @@ public class FhirQuestionnaireDaoImpl extends BaseFhirDao<Form> implements FhirQ
 		
 		return criteria;
 	}
-
+	
 	protected void setupSearchParams(List<Predicate> predicates, CriteriaBuilder builder, Root<Form> root,
-									 SearchParameterMap theParams) {
+	        SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.NAME_SEARCH_HANDLER:
 					entry.getValue().forEach(param -> {
-						((StringAndListParam) param.getParam()).getValuesAsQueryTokens().stream().forEach(l -> l.getValuesAsQueryTokens().stream().forEach(v -> {
-							predicates.add(builder.equal(root.get("name"), v.getValue()));
-						}));
+						((StringAndListParam) param.getParam()).getValuesAsQueryTokens().stream()
+						        .forEach(l -> l.getValuesAsQueryTokens().stream().forEach(v -> {
+							        predicates.add(builder.equal(root.get("name"), v.getValue()));
+						        }));
 					});
 					break;
 			}

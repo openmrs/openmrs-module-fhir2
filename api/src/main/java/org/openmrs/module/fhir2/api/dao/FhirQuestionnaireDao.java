@@ -20,13 +20,13 @@ import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.util.PrivilegeConstants;
 
 public interface FhirQuestionnaireDao extends FhirDao<Form> {
-
+	
 	@Authorized(PrivilegeConstants.GET_FORMS)
 	Form getQuestionnaireById(@Nonnull Integer id);
-
+	
 	@Authorized(PrivilegeConstants.GET_FORMS)
 	List<Form> getQuestionnairesByIds(@Nonnull Collection<Integer> ids);
-
+	
 	@Override
 	@Authorized(PrivilegeConstants.GET_FORMS)
 	Form get(@Nonnull String uuid);
