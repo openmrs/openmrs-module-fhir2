@@ -357,5 +357,8 @@ public final class FhirConstants {
 	
 	public static final String COUNT_QUERY_CACHE = "countQueryCache";
 	
+	public static final String QUESTIONNAIRE = "Questionnaire";
+	
 	public static final String FHIR_QUESTIONNAIRE_TYPE = "FHIR Questionnaire";
+	
 }
