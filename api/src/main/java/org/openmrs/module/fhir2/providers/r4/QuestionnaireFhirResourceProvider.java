@@ -52,17 +52,16 @@ public class QuestionnaireFhirResourceProvider implements IResourceProvider {
 		}
 		return questionnaire;
 	}
-
+	
 	@Search
 	@SuppressWarnings("unused")
 	public IBundleProvider searchQuestionnaire(@OptionalParam(name = Questionnaire.SP_NAME) StringAndListParam name,
-											   @OptionalParam(name = Questionnaire.SP_RES_ID) TokenAndListParam id,
-											   @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated, @Sort SortSpec sort
-											   ) {
-
+	        @OptionalParam(name = Questionnaire.SP_RES_ID) TokenAndListParam id,
+	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated, @Sort SortSpec sort) {
+		
 		return fhirQuestionnaireService.searchForQuestionnaires(new QuestionnaireSearchParams(name, id, lastUpdated, sort));
 	}
-
+	
 	/**
 	 * The $everything operation fetches all the information related the specified questionnaire
 	 *
@@ -71,16 +70,16 @@ public class QuestionnaireFhirResourceProvider implements IResourceProvider {
 	 */
 	@Operation(name = "everything", idempotent = true, type = Questionnaire.class, bundleType = BundleTypeEnum.SEARCHSET)
 	public IBundleProvider getQuestionnaireEverything(@IdParam IdType questionnaireId) {
-
+		
 		if (questionnaireId == null || questionnaireId.getIdPart() == null || questionnaireId.getIdPart().isEmpty()) {
 			return null;
 		}
-
+		
 		TokenParam questionnaireReference = new TokenParam().setValue(questionnaireId.getIdPart());
-
+		
 		return fhirQuestionnaireService.getQuestionnaireEverything(questionnaireReference);
 	}
-
+	
 	/**
 	 * The $everything operation fetches all the information related to all the questionnaires
 	 *
@@ -90,5 +89,5 @@ public class QuestionnaireFhirResourceProvider implements IResourceProvider {
 	public IBundleProvider getQuestionnaireEverything() {
 		return fhirQuestionnaireService.getQuestionnaireEverything();
 	}
-
+	
 }
