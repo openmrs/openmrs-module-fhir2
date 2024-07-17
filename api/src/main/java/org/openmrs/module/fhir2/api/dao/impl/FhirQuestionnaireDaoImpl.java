@@ -60,8 +60,7 @@ public class FhirQuestionnaireDaoImpl extends BaseFhirDao<Form> implements FhirQ
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<Form> getSearchResults(@Nonnull SearchParameterMap theParams) {
-		Session session = sessionFactory.openSession();
-		session.beginTransaction();
+		Session session = sessionFactory.getCurrentSession();
 		
 		// Create CriteriaBuilder
 		CriteriaBuilder builder = session.getCriteriaBuilder();
