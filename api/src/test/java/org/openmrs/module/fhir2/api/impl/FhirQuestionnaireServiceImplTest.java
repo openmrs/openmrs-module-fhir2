@@ -224,7 +224,6 @@ public class FhirQuestionnaireServiceImplTest {
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, questionnaireId);
 		
 		when(dao.getSearchResults(any())).thenReturn(Collections.singletonList(form));
-		when(dao.getSearchResultsCount(any())).thenReturn(1);
 		when(questionnaireTranslator.toFhirResource(form)).thenReturn(fhirQuestionnaire);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(new SearchQueryBundleProvider<>(theParams,
 		        dao, questionnaireTranslator, globalPropertyService, searchQueryInclude));
