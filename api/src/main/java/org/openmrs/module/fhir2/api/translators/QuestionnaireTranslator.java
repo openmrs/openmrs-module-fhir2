@@ -14,7 +14,7 @@ import javax.annotation.Nonnull;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.openmrs.Form;
 
-public interface QuestionnaireTranslator extends OpenmrsFhirUpdatableTranslator<Form, Questionnaire> {
+public interface QuestionnaireTranslator extends OpenmrsFhirTranslator<Form, Questionnaire> {
 	
 	/**
 	 * Maps an {@link org.openmrs.Form} to a {@link Questionnaire}
@@ -25,23 +25,4 @@ public interface QuestionnaireTranslator extends OpenmrsFhirUpdatableTranslator<
 	@Override
 	Questionnaire toFhirResource(@Nonnull Form form);
 	
-	/**
-	 * Maps a {@link Questionnaire} to an {@link org.openmrs.Form}
-	 * 
-	 * @param questionnaire the FHIR questionnaire to translate
-	 * @return the corresponding OpenMRS Form
-	 */
-	@Override
-	Form toOpenmrsType(@Nonnull Questionnaire questionnaire);
-	
-	/**
-	 * Maps a {@link Questionnaire} to an existing {@link org.openmrs.Form}
-	 * 
-	 * @param currentForm the existing OpenMRS form to update
-	 * @param questionnaire the FHIR questionnaire to translate
-	 * @return the updated OpenMRS formResource
-	 */
-	@Override
-	Form toOpenmrsType(@Nonnull Form currentForm,
-	        @Nonnull Questionnaire questionnaire);
 }

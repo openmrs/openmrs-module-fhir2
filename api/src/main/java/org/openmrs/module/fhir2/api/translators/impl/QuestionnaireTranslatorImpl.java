@@ -29,35 +29,24 @@ import org.springframework.stereotype.Component;
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class QuestionnaireTranslatorImpl implements QuestionnaireTranslator {
-
-
-    @Autowired
-    FormService formService;
-
-    @Override
-    public Questionnaire toFhirResource(@Nonnull Form openmrsForm) {
-        notNull(openmrsForm, "The Openmrs Form object should not be null");
-
-        FormResource resource = formService.getFormResource(openmrsForm, FhirConstants.FHIR_QUESTIONNAIRE_TYPE);
-        notNull(resource, "The Openmrs Form doesn't contain an FHIR Questionnaire");
-
-        FhirContext ctx = FhirContext.forR4();
-        IParser p = ctx.newJsonParser();
-        return p.parseResource(Questionnaire.class, resource.getValue().toString());
-    }
-
-    @Override
-    public Form toOpenmrsType(@Nonnull org.hl7.fhir.r4.model.Questionnaire questionnaire) {
-        notNull(questionnaire, "The Questionnaire object should not be null");
-        return toOpenmrsType(new Form(), questionnaire);
-    }
-
-    @Override
-    public Form toOpenmrsType(@Nonnull Form openmrsForm,
-                                               @Nonnull org.hl7.fhir.r4.model.Questionnaire questionnaire) {
-        notNull(openmrsForm, "The existing Openmrs Form object should not be null");
-        notNull(questionnaire, "The Questionnaire object should not be null");
-
-        return null;
-    }
+	
+	@Autowired
+	FormService formService;
+	
+	@Override
+	public Questionnaire toFhirResource(@Nonnull Form openmrsForm) {
+		notNull(openmrsForm, "The Openmrs Form object should not be null");
+		
+		FormResource resource = formService.getFormResource(openmrsForm, FhirConstants.FHIR_QUESTIONNAIRE_TYPE);
+		notNull(resource, "The Openmrs Form doesn't contain an FHIR Questionnaire");
+		
+		FhirContext ctx = FhirContext.forR4();
+		IParser p = ctx.newJsonParser();
+		return p.parseResource(Questionnaire.class, resource.getValue().toString());
+	}
+	
+	@Override
+	public Form toOpenmrsType(@Nonnull Questionnaire resource) {
+		return formService.getForm(resource.getId());
+	}
 }
