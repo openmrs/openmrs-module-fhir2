@@ -159,7 +159,7 @@ public class FhirQuestionnaireServiceImplTest {
 	}
 	
 	@Test
-	public void searchForQuestionnaires_shouldReturnCollectionOfPatientWhenLastUpdatedMatched() {
+	public void searchForQuestionnaires_shouldReturnCollectionOfQuestionnaireWhenLastUpdatedMatched() {
 		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(LAST_UPDATED_DATE).setLowerBound(LAST_UPDATED_DATE);
 		
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
@@ -196,6 +196,47 @@ public class FhirQuestionnaireServiceImplTest {
 		
 		assertThat(results, notNullValue());
 		assertThat(get(results), empty());
+	}
+	
+	@Test
+	public void getQuestionnaireEverything_shouldReturnAllInformationAboutAllQuestionnaires() {
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.EVERYTHING_SEARCH_HANDLER, "");
+		
+		when(dao.getSearchResults(any())).thenReturn(Collections.singletonList(form));
+		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(new SearchQueryBundleProvider<>(theParams,
+		        dao, questionnaireTranslator, globalPropertyService, searchQueryInclude));
+		
+		when(questionnaireTranslator.toFhirResource(form)).thenReturn(fhirQuestionnaire);
+		
+		IBundleProvider results = questionnaireService.getQuestionnaireEverything();
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void getQuestionnaireEverything_shouldReturnAllInformationAboutSpecifiedQuestionnaire() {
+		TokenParam questionnaireId = new TokenParam().setValue(FORM_UUID);
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.EVERYTHING_SEARCH_HANDLER, "")
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, questionnaireId);
+		
+		when(dao.getSearchResults(any())).thenReturn(Collections.singletonList(form));
+		when(dao.getSearchResultsCount(any())).thenReturn(1);
+		when(questionnaireTranslator.toFhirResource(form)).thenReturn(fhirQuestionnaire);
+		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(new SearchQueryBundleProvider<>(theParams,
+		        dao, questionnaireTranslator, globalPropertyService, searchQueryInclude));
+		
+		IBundleProvider results = questionnaireService.getQuestionnaireEverything(questionnaireId);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		
 	}
 	
 	private List<IBaseResource> get(IBundleProvider results) {
