@@ -31,6 +31,8 @@ import org.springframework.test.context.ContextConfiguration;
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
 public class FhirQuestionnaireDaoImplTest extends BaseModuleContextSensitiveTest {
 	
+	private static final Integer FORM_2_ID = 2;
+	
 	private static final String FORM_2_UUID = "504c83c7-cfbf-4ae7-a4da-bdfa3236689f";
 	
 	private static final String FORM_2_NAME = "Form 2 name";
@@ -56,7 +58,7 @@ public class FhirQuestionnaireDaoImplTest extends BaseModuleContextSensitiveTest
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getUuid(), equalTo(FORM_2_UUID));
-		assertThat(result.getId(), equalTo(2));
+		assertThat(result.getId(), equalTo(FORM_2_ID));
 	}
 	
 	@Test
@@ -69,7 +71,7 @@ public class FhirQuestionnaireDaoImplTest extends BaseModuleContextSensitiveTest
 		assertThat(result, notNullValue());
 		assertThat(result.size(), equalTo(2));
 		assertThat(result.get(0).getUuid(), equalTo(FORM_2_UUID));
-		assertThat(result.get(0).getId(), equalTo(2));
+		assertThat(result.get(0).getId(), equalTo(FORM_2_ID));
 	}
 	
 	@Test
@@ -85,7 +87,7 @@ public class FhirQuestionnaireDaoImplTest extends BaseModuleContextSensitiveTest
 		assertThat(result, notNullValue());
 		assertThat(result.size(), equalTo(2));
 		assertThat(result.get(0).getUuid(), equalTo(FORM_2_UUID));
-		assertThat(result.get(0).getId(), equalTo(1));
+		assertThat(result.get(0).getId(), equalTo(FORM_2_ID));
 	}
 	
 	@Test
@@ -99,7 +101,7 @@ public class FhirQuestionnaireDaoImplTest extends BaseModuleContextSensitiveTest
 		
 		assertThat(result, notNullValue());
 		assertThat(result.get(0).getUuid(), equalTo(FORM_2_UUID));
-		assertThat(result.get(0).getId(), equalTo(1));
+		assertThat(result.get(0).getId(), equalTo(FORM_2_ID));
 	}
 	
 }
