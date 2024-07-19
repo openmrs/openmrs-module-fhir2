@@ -137,6 +137,8 @@ public final class FhirConstants {
 	
 	public static final String MEDICATION = "Medication";
 	
+	public static final String GROUP = "Group";
+	
 	public static final String MEDICATION_DISPENSE = "MedicationDispense";
 	
 	public static final String MEDICATION_REQUEST = "MedicationRequest";
@@ -356,4 +358,7 @@ public final class FhirConstants {
 	public static final String EXACT_TOTAL_SEARCH_PARAMETER = "_exactTotal";
 	
 	public static final String COUNT_QUERY_CACHE = "countQueryCache";
+	
+	public static final String INCLUDE_MEMBER_PARAM = "member";
+	
 }

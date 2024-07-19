@@ -14,6 +14,7 @@ import java.util.HashSet;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.HasAndListParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.Builder;
@@ -51,12 +52,14 @@ public class PatientSearchParams extends BaseResourceSearchParams {
 	
 	private StringAndListParam country;
 	
+	private HasAndListParam hasAndListParam;
+	
 	@Builder
 	public PatientSearchParams(StringAndListParam name, StringAndListParam given, StringAndListParam family,
 	    TokenAndListParam identifier, TokenAndListParam gender, DateRangeParam birthDate, DateRangeParam deathDate,
 	    TokenAndListParam deceased, StringAndListParam city, StringAndListParam state, StringAndListParam postalCode,
-	    StringAndListParam country, TokenAndListParam id, DateRangeParam lastUpdated, SortSpec sort,
-	    HashSet<Include> revIncludes) {
+	    StringAndListParam country, TokenAndListParam id, HasAndListParam hasAndListParam, DateRangeParam lastUpdated,
+	    SortSpec sort, HashSet<Include> revIncludes) {
 		
 		super(id, lastUpdated, sort, null, revIncludes);
 		
@@ -72,6 +75,7 @@ public class PatientSearchParams extends BaseResourceSearchParams {
 		this.state = state;
 		this.postalCode = postalCode;
 		this.country = country;
+		this.hasAndListParam = hasAndListParam;
 	}
 	
 	@Override
@@ -88,6 +92,7 @@ public class PatientSearchParams extends BaseResourceSearchParams {
 		        .addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.CITY_PROPERTY, getCity())
 		        .addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.STATE_PROPERTY, getState())
 		        .addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.POSTAL_CODE_PROPERTY, getPostalCode())
-		        .addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.COUNTRY_PROPERTY, getCountry());
+		        .addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.COUNTRY_PROPERTY, getCountry())
+		        .addParameter(FhirConstants.HAS_SEARCH_HANDLER, getHasAndListParam());
 	}
 }
