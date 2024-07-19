@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
@@ -38,6 +39,8 @@ public class FhirPatientDaoImplTest extends BaseModuleContextSensitiveTest {
 	private static final String BAD_PATIENT_UUID = "282390a6-3608-496d-9025-aecbc1235670";
 	
 	private static final String GROUP_A = "dfb29c44-2e39-46c4-8cd7-18f21c6d47b1";
+	
+	private static final String GROUP_B = "a25ce1d7-326c-43ff-a87f-63d9d2f60f11";
 	
 	private static final String PATIENT_GROUP_A = "61b38324-e2fd-4feb-95b7-9e9a2a4400df";
 	
@@ -103,5 +106,17 @@ public class FhirPatientDaoImplTest extends BaseModuleContextSensitiveTest {
 		
 		assertThat(result, notNullValue());
 		assertThat(result.get(0).getUuid(), equalTo(PATIENT_GROUP_A));
+	}
+	
+	@Test
+	public void getSearchResults_shouldReturnEmptyList() {
+		HasAndListParam groupParam = new HasAndListParam().addAnd(
+		    new HasOrListParam().add(new HasParam(FhirConstants.GROUP, FhirConstants.INCLUDE_MEMBER_PARAM, "id", GROUP_B)));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.HAS_SEARCH_HANDLER, groupParam);
+		List<Patient> result = dao.getSearchResults(theParams);
+		
+		assertThat(result, notNullValue());
+		assertThat(result, empty());
 	}
 }
