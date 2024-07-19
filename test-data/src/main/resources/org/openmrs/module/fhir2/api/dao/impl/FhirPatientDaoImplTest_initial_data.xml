@@ -39,4 +39,6 @@
     <patient_identifier patient_identifier_id="4" patient_id="4" identifier="5634-1" identifier_type="1" preferred="1" location_id="1" creator="1" date_created="2005-01-01 00:00:00.0" voided="true" uuid="e1bcf220-d116-4d98-93a4-2adf6282f797"/>
     <patient_identifier patient_identifier_id="5" patient_id="5" identifier="563422-5" identifier_type="1" preferred="1" location_id="1" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="f4798e60-b9ef-47d8-afa7-54a1dc9e27c1"/>
     <patient_identifier patient_identifier_id="6" patient_id="6" identifier="47622-6" identifier_type="1" preferred="1" location_id="1" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="86e0b6d5-0f4f-4acd-8c81-edeb985c0ab3"/>
+    <cohort cohort_id="1" name="Group A" description="Patients from Group A" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="dfb29c44-2e39-46c4-8cd7-18f21c6d47b1"/>
+    <cohort_member cohort_member_id="1" cohort_id="1" patient_id="2" start_date="2000-04-16" end_date="2030-04-16" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="1cf0dc57-ddc2-4f28-8e71-faf30bf2d923"/>
 </dataset>
