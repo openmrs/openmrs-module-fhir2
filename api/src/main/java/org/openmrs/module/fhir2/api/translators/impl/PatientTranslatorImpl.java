@@ -15,6 +15,7 @@ import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.
 
 import javax.annotation.Nonnull;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -144,6 +145,14 @@ public class PatientTranslatorImpl implements PatientTranslator {
 			PatientIdentifier omrsIdentifier = identifierTranslator.toOpenmrsType(identifier);
 			if (omrsIdentifier != null) {
 				currentPatient.addIdentifier(omrsIdentifier);
+			}
+		}
+		
+		for (PersonName existingName : currentPatient.getNames()) {
+			if (!existingName.getVoided()) {
+				existingName.setVoided(true);
+				existingName.setVoidReason("Updated with new name");
+				existingName.setDateVoided(new Date());
 			}
 		}
 		
