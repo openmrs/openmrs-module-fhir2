@@ -66,6 +66,8 @@ public class PatientTranslatorImplTest {
 	
 	private static final String PATIENT_IDENTIFIER_UUID = "654321-fedcba-654321";
 	
+	private static final String PATIENT_NAME_UUID = "1fdb5469-57c7-435f-b009-3dcceb23b0a2";
+	
 	private static final String PATIENT_GIVEN_NAME = "Jean Claude";
 	
 	private static final String PATIENT_FAMILY_NAME = "van Damme";
@@ -315,6 +317,27 @@ public class PatientTranslatorImplTest {
 		org.openmrs.Patient result = patientTranslator.toOpenmrsType(patient);
 		assertThat(result.getGivenName(), equalTo(PATIENT_GIVEN_NAME));
 		assertThat(result.getFamilyName(), equalTo(PATIENT_FAMILY_NAME));
+	}
+	
+	@Test
+	public void shouldTranslateFhirPatientNameToExistingOpenmrsPatientName() {
+		PersonName personName = new PersonName();
+		personName.setUuid(PATIENT_NAME_UUID);
+		personName.setGivenName(PATIENT_GIVEN_NAME);
+		personName.setFamilyName(PATIENT_FAMILY_NAME);
+		when(nameTranslator.toOpenmrsType(any(), any())).thenReturn(personName);
+		
+		Patient patient = new Patient();
+		HumanName name = new HumanName();
+		name.setId(PATIENT_NAME_UUID);
+		name.addGiven(PATIENT_GIVEN_NAME);
+		name.setFamily(PATIENT_FAMILY_NAME);
+		patient.addName(name);
+		
+		org.openmrs.Patient result = patientTranslator.toOpenmrsType(patient);
+		assertThat(result.getGivenName(), equalTo(PATIENT_GIVEN_NAME));
+		assertThat(result.getFamilyName(), equalTo(PATIENT_FAMILY_NAME));
+		assertThat(result.getPersonName().getUuid(), equalTo(PATIENT_NAME_UUID));
 	}
 	
 	@Test
