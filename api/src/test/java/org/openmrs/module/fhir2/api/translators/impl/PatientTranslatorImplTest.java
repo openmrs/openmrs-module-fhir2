@@ -304,7 +304,7 @@ public class PatientTranslatorImplTest {
 		PersonName personName = new PersonName();
 		personName.setGivenName(PATIENT_GIVEN_NAME);
 		personName.setFamilyName(PATIENT_FAMILY_NAME);
-		when(nameTranslator.toOpenmrsType(any())).thenReturn(personName);
+		when(nameTranslator.toOpenmrsType(any(), any())).thenReturn(personName);
 		
 		Patient patient = new Patient();
 		HumanName name = new HumanName();
