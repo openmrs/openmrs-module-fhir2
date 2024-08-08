@@ -125,7 +125,6 @@ public class SearchQueryInclude<U extends IBaseResource> {
 		return resourcesToBeReturned;
 	}
 	
-	@SuppressWarnings("unchecked")
 	private Set<IBaseResource> handleRevInclude(List<U> resourceList, HashSet<Include> includeSet,
 	        HashSet<Include> revIncludeSet) {
 		Set<IBaseResource> revIncludedResourcesSet = new HashSet<>();
