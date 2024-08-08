@@ -119,6 +119,8 @@ public class MedicationRequestTranslatorImplTest {
 	
 	private MedicationRequestTranslatorImpl medicationRequestTranslator;
 	
+	private MedicationRequestReferenceTranslatorImpl medicationRequestReferenceTranslator;
+	
 	private MedicationQuantityCodingTranslatorImpl quantityCodingTranslator;
 	
 	private MedicationRequest medicationRequest;
@@ -140,11 +142,14 @@ public class MedicationRequestTranslatorImplTest {
 		dispenseRequestComponentTranslator = new MedicationRequestDispenseRequestComponentTranslatorImpl();
 		dispenseRequestComponentTranslator.setQuantityCodingTranslator(quantityCodingTranslator);
 		
+		medicationRequestReferenceTranslator = new MedicationRequestReferenceTranslatorImpl();
+		
 		medicationRequestTranslator = new MedicationRequestTranslatorImpl();
 		medicationRequestTranslator.setStatusTranslator(medicationRequestStatusTranslator);
 		medicationRequestTranslator.setPractitionerReferenceTranslator(providerPractitionerReferenceTranslator);
 		medicationRequestTranslator.setMedicationRequestPriorityTranslator(medicationRequestPriorityTranslator);
 		medicationRequestTranslator.setMedicationReferenceTranslator(medicationReferenceTranslator);
+		medicationRequestTranslator.setMedicationRequestReferenceTranslator(medicationRequestReferenceTranslator);
 		medicationRequestTranslator.setEncounterReferenceTranslator(encounterReferenceTranslator);
 		medicationRequestTranslator.setPatientReferenceTranslator(patientReferenceTranslator);
 		medicationRequestTranslator.setConceptTranslator(conceptTranslator);

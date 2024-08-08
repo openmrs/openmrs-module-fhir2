@@ -39,7 +39,7 @@ import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EpisodeOfCareTranslatorImplTest {
-
+	
 	private static final String PATIENT_UUID = "8549f706-7e85-4c1d-9424-217d50a2988b";
 	
 	private static final String PATIENT_URI = FhirConstants.PATIENT + "/" + PATIENT_UUID;
@@ -162,6 +162,6 @@ public class EpisodeOfCareTranslatorImplTest {
 	@Test
 	public void shouldThrowsUnsupportedExceptionForTranslationToOpenmrsType() {
 		EpisodeOfCare episodeOfCare = new EpisodeOfCare();
-        assertThrows(UnsupportedOperationException.class, () -> episodeOfCareTranslator.toOpenmrsType(episodeOfCare));
+		assertThrows(UnsupportedOperationException.class, () -> episodeOfCareTranslator.toOpenmrsType(episodeOfCare));
 	}
 }

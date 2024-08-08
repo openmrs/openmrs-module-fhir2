@@ -9,6 +9,10 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static org.openmrs.module.fhir2.api.translators.impl.ReferenceHandlingTranslator.createEncounterReference;
+import static org.openmrs.module.fhir2.api.translators.impl.ReferenceHandlingTranslator.getReferenceId;
+import static org.openmrs.module.fhir2.api.translators.impl.ReferenceHandlingTranslator.getReferenceType;
+
 import javax.annotation.Nonnull;
 
 import lombok.AccessLevel;
@@ -23,7 +27,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class EncounterReferenceTranslatorImpl extends BaseReferenceHandlingTranslator implements EncounterReferenceTranslator<Encounter> {
+public class EncounterReferenceTranslatorImpl implements EncounterReferenceTranslator<Encounter> {
 	
 	@Autowired
 	private FhirEncounterDao encounterDao;

@@ -103,7 +103,7 @@ public class EncounterTranslatorImplTest {
 	
 	@Mock
 	private EncounterClassMap encounterClassMap;
-
+	
 	@Mock
 	private EncounterService encounterService;
 	
@@ -246,7 +246,8 @@ public class EncounterTranslatorImplTest {
 		Patient patient = new Patient();
 		patient.setUuid(PATIENT_UUID);
 		when(patientReferenceTranslator.toOpenmrsType(patientRef)).thenReturn(patient);
-		when(participantTranslator.toOpenmrsType(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(new EncounterProvider());
+		when(participantTranslator.toOpenmrsType(ArgumentMatchers.any(), ArgumentMatchers.any()))
+		        .thenReturn(new EncounterProvider());
 		org.openmrs.Encounter result = encounterTranslator.toOpenmrsType(fhirEncounter);
 		
 		assertThat(result.getEncounterProviders(), not(empty()));
