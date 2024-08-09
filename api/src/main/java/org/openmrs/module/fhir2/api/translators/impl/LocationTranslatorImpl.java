@@ -82,7 +82,7 @@ public class LocationTranslatorImpl implements LocationTranslator {
 		fhirLocation.setName(getMetadataTranslation(openmrsLocation));
 		fhirLocation.setDescription(openmrsLocation.getDescription());
 		fhirLocation.setAddress(locationAddressTranslator.toFhirResource(openmrsLocation));
-
+		
 		Location.LocationPositionComponent position = null;
 		if (openmrsLocation.getLatitude() != null && !openmrsLocation.getLatitude().isEmpty()) {
 			double latitude = NumberUtils.toDouble(openmrsLocation.getLatitude(), -1.0d);
@@ -91,7 +91,7 @@ public class LocationTranslatorImpl implements LocationTranslator {
 				position.setLatitude(latitude);
 			}
 		}
-
+		
 		if (openmrsLocation.getLongitude() != null && !openmrsLocation.getLongitude().isEmpty()) {
 			double longitude = NumberUtils.toDouble(openmrsLocation.getLongitude(), -1.0d);
 			if (longitude >= 0.0d) {
@@ -101,7 +101,7 @@ public class LocationTranslatorImpl implements LocationTranslator {
 				position.setLongitude(longitude);
 			}
 		}
-
+		
 		if (position != null) {
 			fhirLocation.setPosition(position);
 		}
@@ -122,11 +122,11 @@ public class LocationTranslatorImpl implements LocationTranslator {
 				    tag.getDescription());
 			}
 		}
-
+		
 		if (openmrsLocation.getParentLocation() != null) {
 			fhirLocation.setPartOf(locationReferenceTranslator.toFhirResource(openmrsLocation.getParentLocation()));
 		}
-
+		
 		fhirLocation.getMeta().setLastUpdated(getLastUpdated(openmrsLocation));
 		fhirLocation.getMeta().setVersionId(getVersionId(openmrsLocation));
 		

@@ -190,7 +190,7 @@ public class FhirUtils {
 		catch (Exception e) {
 			log.info("Caught exception while attempting to localize code [{}]", code, e);
 		}
-
+		
 		if (localization == null || localization.equals(code)) {
 			return null;
 		} else {
