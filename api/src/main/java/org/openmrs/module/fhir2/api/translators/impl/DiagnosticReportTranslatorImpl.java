@@ -60,8 +60,13 @@ public class DiagnosticReportTranslatorImpl implements DiagnosticReportTranslato
 		diagnosticReport.setId(fhirDiagnosticReport.getUuid());
 		
 		if (fhirDiagnosticReport.getStatus() != null) {
-			diagnosticReport
-			        .setStatus(DiagnosticReport.DiagnosticReportStatus.valueOf(fhirDiagnosticReport.getStatus().toString()));
+			try {
+				diagnosticReport.setStatus(
+				    DiagnosticReport.DiagnosticReportStatus.valueOf(fhirDiagnosticReport.getStatus().toString()));
+			}
+			catch (IllegalArgumentException e) {
+				diagnosticReport.setStatus(DiagnosticReport.DiagnosticReportStatus.UNKNOWN);
+			}
 		} else {
 			diagnosticReport.setStatus(DiagnosticReport.DiagnosticReportStatus.UNKNOWN);
 		}

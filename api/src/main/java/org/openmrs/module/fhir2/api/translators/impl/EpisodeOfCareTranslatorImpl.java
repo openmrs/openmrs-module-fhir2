@@ -64,7 +64,8 @@ public class EpisodeOfCareTranslatorImpl implements EpisodeOfCareTranslator {
 	
 	@Override
 	public PatientProgram toOpenmrsType(@Nonnull PatientProgram patientProgram, @Nonnull EpisodeOfCare episodeOfCare) {
-        throw new UnsupportedOperationException("Translation from FHIR resource EpisodeOfCare to OpenMRS object PatientProgram is not supported.");
+		throw new UnsupportedOperationException(
+		        "Translation from FHIR resource EpisodeOfCare to OpenMRS object PatientProgram is not supported.");
 	}
 	
 	private List<CodeableConcept> getType(PatientProgram patientProgram) {

@@ -30,7 +30,6 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
 import lombok.AccessLevel;
 import lombok.Setter;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.openmrs.GlobalProperty;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.GlobalPropertyListener;
@@ -152,7 +151,7 @@ public class FhirRestServlet extends RestfulServer implements ModuleLifecycleLis
 		registerInterceptor(new SupportMergePatchInterceptor());
 
 		String narrativesOverridePropertyFile = NarrativeUtils.getValidatedPropertiesFilePath(
-				globalPropertyService.getGlobalProperty(FhirConstants.NARRATIVES_OVERRIDE_PROPERTY_FILE, (String) null));
+				globalPropertyService.getGlobalProperty(FhirConstants.NARRATIVES_OVERRIDE_PROPERTY_FILE, null));
 
 		List<String> narrativePropertiesFiles;
 		if (narrativesOverridePropertyFile != null) {
@@ -206,10 +205,10 @@ public class FhirRestServlet extends RestfulServer implements ModuleLifecycleLis
 	}
 	
 	private BasePagingProvider createPagingProvider() {
-		int defaultPageSize = NumberUtils
-		        .toInt(globalPropertyService.getGlobalProperty(FhirConstants.OPENMRS_FHIR_DEFAULT_PAGE_SIZE), 10);
-		int maximumPageSize = NumberUtils
-		        .toInt(globalPropertyService.getGlobalProperty(FhirConstants.OPENMRS_FHIR_MAXIMUM_PAGE_SIZE), 100);
+		int defaultPageSize = globalPropertyService.getGlobalPropertyAsInteger(FhirConstants.OPENMRS_FHIR_DEFAULT_PAGE_SIZE,
+		    10);
+		int maximumPageSize = globalPropertyService.getGlobalPropertyAsInteger(FhirConstants.OPENMRS_FHIR_MAXIMUM_PAGE_SIZE,
+		    100);
 		
 		BasePagingProvider pagingProvider = new FifoMemoryPagingProvider(100);
 		pagingProvider.setDefaultPageSize(defaultPageSize);
@@ -223,6 +222,13 @@ public class FhirRestServlet extends RestfulServer implements ModuleLifecycleLis
 			AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 			bpp.setBeanFactory(ctx.getAutowireCapableBeanFactory());
 			bpp.processInjection(this);
+		}
+	}
+	
+	@Override
+	public void willRefresh() {
+		if (fhirRestServletListener != null) {
+			administrationService.removeGlobalPropertyListener(fhirRestServletListener);
 		}
 	}
 	
@@ -255,6 +261,13 @@ public class FhirRestServlet extends RestfulServer implements ModuleLifecycleLis
 				
 				administrationService.addGlobalPropertyListener(fhirRestServletListener);
 			}
+		}
+	}
+	
+	@Override
+	public void stopped() {
+		if (fhirRestServletListener != null) {
+			administrationService.removeGlobalPropertyListener(fhirRestServletListener);
 		}
 	}
 	

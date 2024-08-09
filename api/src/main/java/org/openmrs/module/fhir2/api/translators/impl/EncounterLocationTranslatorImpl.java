@@ -10,6 +10,8 @@
 package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.apache.commons.lang3.Validate.notNull;
+import static org.openmrs.module.fhir2.api.translators.impl.ReferenceHandlingTranslator.createLocationReference;
+import static org.openmrs.module.fhir2.api.translators.impl.ReferenceHandlingTranslator.getReferenceId;
 
 import javax.annotation.Nonnull;
 
@@ -24,7 +26,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class EncounterLocationTranslatorImpl extends BaseReferenceHandlingTranslator implements EncounterLocationTranslator {
+public class EncounterLocationTranslatorImpl implements EncounterLocationTranslator {
 	
 	@Autowired
 	private FhirLocationDao locationDao;

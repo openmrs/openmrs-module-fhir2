@@ -14,6 +14,7 @@ import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.
 
 import javax.annotation.Nonnull;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -148,10 +149,16 @@ public class PractitionerTranslatorProviderImpl implements PractitionerTranslato
 	}
 	
 	public List<ContactPoint> getProviderContactDetails(@Nonnull Provider provider) {
+		String providerContactPointAttributeType = globalPropertyService
+		        .getGlobalProperty(FhirConstants.PROVIDER_CONTACT_POINT_ATTRIBUTE_TYPE);
+		
+		if (providerContactPointAttributeType == null || providerContactPointAttributeType.isEmpty()) {
+			return Collections.emptyList();
+		}
+		
 		return fhirPractitionerDao
-		        .getActiveAttributesByPractitionerAndAttributeTypeUuid(provider,
-		            globalPropertyService.getGlobalProperty(FhirConstants.PROVIDER_CONTACT_POINT_ATTRIBUTE_TYPE))
-		        .stream().map(telecomTranslator::toFhirResource).collect(Collectors.toList());
+		        .getActiveAttributesByPractitionerAndAttributeTypeUuid(provider, providerContactPointAttributeType).stream()
+		        .map(telecomTranslator::toFhirResource).collect(Collectors.toList());
 	}
 	
 	@Override
