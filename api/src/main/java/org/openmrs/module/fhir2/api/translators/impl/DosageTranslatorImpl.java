@@ -14,7 +14,6 @@ import javax.annotation.Nonnull;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.BooleanType;
-import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Dosage;
 import org.hl7.fhir.r4.model.Quantity;
@@ -53,9 +52,7 @@ public class DosageTranslatorImpl implements DosageTranslator {
 		dosage.setTiming(timingTranslator.toFhirResource(drugOrder));
 		
 		if (drugOrder.getInstructions() != null) {
-			CodeableConcept additionalInstructions = new CodeableConcept();
-			additionalInstructions.setText(drugOrder.getInstructions());
-			dosage.addAdditionalInstruction(additionalInstructions);
+			dosage.addAdditionalInstruction().setText(drugOrder.getInstructions());
 		}
 		
 		if (drugOrder.getDose() != null) {
@@ -81,7 +78,7 @@ public class DosageTranslatorImpl implements DosageTranslator {
 	public DrugOrder toOpenmrsType(@Nonnull DrugOrder drugOrder, @Nonnull Dosage dosage) {
 		drugOrder.setDosingInstructions(dosage.getText());
 		
-		if (!dosage.getAdditionalInstruction().isEmpty()) {
+		if (dosage.hasAdditionalInstruction()) {
 			drugOrder.setInstructions(dosage.getAdditionalInstructionFirstRep().getText());
 		}
 		
