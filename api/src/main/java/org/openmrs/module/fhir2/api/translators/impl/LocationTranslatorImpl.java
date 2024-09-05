@@ -16,6 +16,7 @@ import static org.openmrs.module.fhir2.api.util.FhirUtils.getMetadataTranslation
 
 import javax.annotation.Nonnull;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -34,6 +35,7 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
 import org.openmrs.module.fhir2.api.translators.LocationAddressTranslator;
+import org.openmrs.module.fhir2.api.translators.LocationReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.LocationTagTranslator;
 import org.openmrs.module.fhir2.api.translators.LocationTranslator;
 import org.openmrs.module.fhir2.api.translators.LocationTypeTranslator;
@@ -43,13 +45,16 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class LocationTranslatorImpl extends BaseReferenceHandlingTranslator implements LocationTranslator {
+public class LocationTranslatorImpl implements LocationTranslator {
 	
 	@Autowired
 	private LocationAddressTranslator locationAddressTranslator;
 	
 	@Autowired
 	private LocationTagTranslator locationTagTranslator;
+	
+	@Autowired
+	private LocationReferenceTranslator locationReferenceTranslator;
 	
 	@Autowired
 	private TelecomTranslator<BaseOpenmrsData> telecomTranslator;
@@ -73,35 +78,41 @@ public class LocationTranslatorImpl extends BaseReferenceHandlingTranslator impl
 		}
 		
 		Location fhirLocation = new Location();
-		Location.LocationPositionComponent position = new Location.LocationPositionComponent();
 		fhirLocation.setId(openmrsLocation.getUuid());
 		fhirLocation.setName(getMetadataTranslation(openmrsLocation));
 		fhirLocation.setDescription(openmrsLocation.getDescription());
 		fhirLocation.setAddress(locationAddressTranslator.toFhirResource(openmrsLocation));
 		
-		double latitude = NumberUtils.toDouble(openmrsLocation.getLatitude(), -1.0d);
-		if (latitude >= 0.0d) {
-			position.setLatitude(latitude);
+		Location.LocationPositionComponent position = null;
+		if (openmrsLocation.getLatitude() != null && !openmrsLocation.getLatitude().isEmpty()) {
+			double latitude = NumberUtils.toDouble(openmrsLocation.getLatitude(), -1.0d);
+			if (latitude >= 0.0d) {
+				position = new Location.LocationPositionComponent();
+				position.setLatitude(latitude);
+			}
 		}
 		
-		double longitude = NumberUtils.toDouble(openmrsLocation.getLongitude(), -1.0d);
-		if (longitude >= 0.0d) {
-			position.setLongitude(longitude);
+		if (openmrsLocation.getLongitude() != null && !openmrsLocation.getLongitude().isEmpty()) {
+			double longitude = NumberUtils.toDouble(openmrsLocation.getLongitude(), -1.0d);
+			if (longitude >= 0.0d) {
+				if (position == null) {
+					position = new Location.LocationPositionComponent();
+				}
+				position.setLongitude(longitude);
+			}
 		}
 		
-		fhirLocation.setPosition(position);
+		if (position != null) {
+			fhirLocation.setPosition(position);
+		}
 		
 		if (!openmrsLocation.getRetired()) {
 			fhirLocation.setStatus(Location.LocationStatus.ACTIVE);
-		}
-		
-		if (openmrsLocation.getRetired()) {
+		} else {
 			fhirLocation.setStatus(Location.LocationStatus.INACTIVE);
 		}
 		
 		fhirLocation.setTelecom(getLocationContactDetails(openmrsLocation));
-		
-		fhirLocation.setType(locationTypeTranslator.toFhirResource(openmrsLocation));
 		
 		fhirLocation.setType(locationTypeTranslator.toFhirResource(openmrsLocation));
 		
@@ -111,8 +122,9 @@ public class LocationTranslatorImpl extends BaseReferenceHandlingTranslator impl
 				    tag.getDescription());
 			}
 		}
+		
 		if (openmrsLocation.getParentLocation() != null) {
-			fhirLocation.setPartOf(createLocationReference(openmrsLocation.getParentLocation()));
+			fhirLocation.setPartOf(locationReferenceTranslator.toFhirResource(openmrsLocation.getParentLocation()));
 		}
 		
 		fhirLocation.getMeta().setLastUpdated(getLastUpdated(openmrsLocation));
@@ -122,9 +134,14 @@ public class LocationTranslatorImpl extends BaseReferenceHandlingTranslator impl
 	}
 	
 	protected List<ContactPoint> getLocationContactDetails(@Nonnull org.openmrs.Location location) {
-		return fhirLocationDao
-		        .getActiveAttributesByLocationAndAttributeTypeUuid(location,
-		            propertyService.getGlobalProperty(FhirConstants.LOCATION_CONTACT_POINT_ATTRIBUTE_TYPE))
+		String locationContactPointAttributeType = propertyService
+		        .getGlobalProperty(FhirConstants.LOCATION_CONTACT_POINT_ATTRIBUTE_TYPE);
+		
+		if (locationContactPointAttributeType == null || locationContactPointAttributeType.isEmpty()) {
+			return Collections.emptyList();
+		}
+		
+		return fhirLocationDao.getActiveAttributesByLocationAndAttributeTypeUuid(location, locationContactPointAttributeType)
 		        .stream().map(telecomTranslator::toFhirResource).collect(Collectors.toList());
 	}
 	
@@ -199,6 +216,6 @@ public class LocationTranslatorImpl extends BaseReferenceHandlingTranslator impl
 			throw new IllegalArgumentException("Reference must be to a Location not a " + location.getType());
 		}
 		
-		return getReferenceId(location).map(uuid -> fhirLocationDao.get(uuid)).orElse(null);
+		return locationReferenceTranslator.toOpenmrsType(location);
 	}
 }
