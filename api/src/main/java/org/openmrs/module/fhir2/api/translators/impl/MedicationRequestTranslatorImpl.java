@@ -38,6 +38,7 @@ import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.MedicationReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.MedicationRequestDispenseRequestComponentTranslator;
 import org.openmrs.module.fhir2.api.translators.MedicationRequestPriorityTranslator;
+import org.openmrs.module.fhir2.api.translators.MedicationRequestReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.MedicationRequestStatusTranslator;
 import org.openmrs.module.fhir2.api.translators.MedicationRequestTranslator;
 import org.openmrs.module.fhir2.api.translators.OrderIdentifierTranslator;
@@ -48,7 +49,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class MedicationRequestTranslatorImpl extends BaseReferenceHandlingTranslator implements MedicationRequestTranslator {
+public class MedicationRequestTranslatorImpl implements MedicationRequestTranslator {
 	
 	@Autowired
 	private MedicationRequestStatusTranslator statusTranslator;
@@ -58,6 +59,9 @@ public class MedicationRequestTranslatorImpl extends BaseReferenceHandlingTransl
 	
 	@Autowired
 	private MedicationRequestPriorityTranslator medicationRequestPriorityTranslator;
+	
+	@Autowired
+	private MedicationRequestReferenceTranslator medicationRequestReferenceTranslator;
 	
 	@Autowired
 	private MedicationReferenceTranslator medicationReferenceTranslator;
@@ -115,11 +119,13 @@ public class MedicationRequestTranslatorImpl extends BaseReferenceHandlingTransl
 		
 		if (drugOrder.getPreviousOrder() != null
 		        && (drugOrder.getAction() == Order.Action.DISCONTINUE || drugOrder.getAction() == Order.Action.REVISE)) {
-			medicationRequest.setPriorPrescription(createOrderReference(drugOrder.getPreviousOrder())
-			        .setIdentifier(orderIdentifierTranslator.toFhirResource(drugOrder.getPreviousOrder())));
+			medicationRequest.setPriorPrescription(
+			    medicationRequestReferenceTranslator.toFhirResource((DrugOrder) drugOrder.getPreviousOrder())
+			            .setIdentifier(orderIdentifierTranslator.toFhirResource(drugOrder.getPreviousOrder())));
 		} else if (drugOrder.getPreviousOrder() != null && drugOrder.getAction() == Order.Action.RENEW) {
-			medicationRequest.setBasedOn(Collections.singletonList(createOrderReference(drugOrder.getPreviousOrder())
-			        .setIdentifier(orderIdentifierTranslator.toFhirResource(drugOrder.getPreviousOrder()))));
+			medicationRequest.setBasedOn(Collections.singletonList(
+			    medicationRequestReferenceTranslator.toFhirResource((DrugOrder) drugOrder.getPreviousOrder())
+			            .setIdentifier(orderIdentifierTranslator.toFhirResource(drugOrder.getPreviousOrder()))));
 		}
 		
 		if (drugOrder.getFulfillerStatus() != null) {

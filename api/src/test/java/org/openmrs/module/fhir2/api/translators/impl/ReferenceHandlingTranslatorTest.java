@@ -34,7 +34,7 @@ import org.openmrs.User;
 import org.openmrs.module.fhir2.FhirConstants;
 
 @RunWith(MockitoJUnitRunner.class)
-public class BaseReferenceHandlingTranslatorTest {
+public class ReferenceHandlingTranslatorTest {
 	
 	private static final String GIVEN_NAME = "Ricky";
 	
@@ -93,12 +93,8 @@ public class BaseReferenceHandlingTranslatorTest {
 	
 	private org.openmrs.Encounter encounter;
 	
-	private BaseReferenceHandlingTranslator referenceHandlingTranslator;
-	
 	@Before
 	public void setUp() {
-		referenceHandlingTranslator = new BaseReferenceHandlingTranslator() {};
-		
 		patient = new Patient();
 		patient.setUuid(PATIENT_UUID);
 		
@@ -138,61 +134,61 @@ public class BaseReferenceHandlingTranslatorTest {
 	
 	@Test
 	public void shouldExtractIdFromReference() {
-		assertThat(referenceHandlingTranslator.getReferenceId(new Reference().setReference(PATIENT_URI)).orElse(null),
+		assertThat(ReferenceHandlingTranslator.getReferenceId(new Reference().setReference(PATIENT_URI)).orElse(null),
 		    equalTo(PATIENT_UUID));
 	}
 	
 	@Test
 	public void shouldReturnNullIdForNullReference() {
-		assertThat(referenceHandlingTranslator.getReferenceId(new Reference()).orElse(null), nullValue());
+		assertThat(ReferenceHandlingTranslator.getReferenceId(new Reference()).orElse(null), nullValue());
 	}
 	
 	@Test
 	public void shouldNotExtractIdWhenIdMissingFromReference() {
-		assertThat(referenceHandlingTranslator.getReferenceId(new Reference().setReference(FhirConstants.PATIENT + "/"))
+		assertThat(ReferenceHandlingTranslator.getReferenceId(new Reference().setReference(FhirConstants.PATIENT + "/"))
 		        .orElse(null),
 		    nullValue());
 	}
 	
 	@Test
 	public void shouldReturnNullIdWhenNoSlashFound() {
-		assertThat(referenceHandlingTranslator.getReferenceId(new Reference().setReference(PATIENT_UUID)).orElse(null),
+		assertThat(ReferenceHandlingTranslator.getReferenceId(new Reference().setReference(PATIENT_UUID)).orElse(null),
 		    nullValue());
 	}
 	
 	@Test
 	public void shouldExtractReferenceTypeFromReference() {
-		assertThat(referenceHandlingTranslator.getReferenceType(new Reference().setReference(PATIENT_URI)).orElse(null),
+		assertThat(ReferenceHandlingTranslator.getReferenceType(new Reference().setReference(PATIENT_URI)).orElse(null),
 		    equalTo(FhirConstants.PATIENT));
 	}
 	
 	@Test
 	public void shouldReturnNullTypeForNullReference() {
-		assertThat(referenceHandlingTranslator.getReferenceType(new Reference()).orElse(null), nullValue());
+		assertThat(ReferenceHandlingTranslator.getReferenceType(new Reference()).orElse(null), nullValue());
 	}
 	
 	@Test
 	public void shouldReturnNullTypeWhenTypeMissing() {
 		assertThat(
-		    referenceHandlingTranslator.getReferenceType(new Reference().setReference("/" + PATIENT_UUID)).orElse(null),
+		    ReferenceHandlingTranslator.getReferenceType(new Reference().setReference("/" + PATIENT_UUID)).orElse(null),
 		    nullValue());
 	}
 	
 	@Test
 	public void shouldReturnNullTypeWhenNoSlashFound() {
-		assertThat(referenceHandlingTranslator.getReferenceType(new Reference().setReference(PATIENT_UUID)).orElse(null),
+		assertThat(ReferenceHandlingTranslator.getReferenceType(new Reference().setReference(PATIENT_UUID)).orElse(null),
 		    nullValue());
 	}
 	
 	@Test
 	public void shouldUseExplicitType() {
-		assertThat(referenceHandlingTranslator.getReferenceType(new Reference().setType(FhirConstants.PATIENT)).orElse(null),
+		assertThat(ReferenceHandlingTranslator.getReferenceType(new Reference().setType(FhirConstants.PATIENT)).orElse(null),
 		    equalTo(FhirConstants.PATIENT));
 	}
 	
 	@Test
 	public void shouldReturnPatientReference() {
-		Reference reference = referenceHandlingTranslator.createPatientReference(patient);
+		Reference reference = ReferenceHandlingTranslator.createPatientReference(patient);
 		
 		assertThat(reference, notNullValue());
 		assertThat(reference.getReference(), equalTo(PATIENT_URI));
@@ -201,7 +197,7 @@ public class BaseReferenceHandlingTranslatorTest {
 	
 	@Test
 	public void shouldReturnPatientReferenceWithCorrectDisplayName() {
-		Reference reference = referenceHandlingTranslator.createPatientReference(patient);
+		Reference reference = ReferenceHandlingTranslator.createPatientReference(patient);
 		
 		assertThat(reference, notNullValue());
 		assertThat(reference.getDisplay(), equalTo(NAME_DISPLAY));
@@ -209,7 +205,7 @@ public class BaseReferenceHandlingTranslatorTest {
 	
 	@Test
 	public void shouldAddPractitionerReference() {
-		Reference reference = referenceHandlingTranslator.createPractitionerReference(provider);
+		Reference reference = ReferenceHandlingTranslator.createPractitionerReference(provider);
 		
 		assertThat(reference, notNullValue());
 		assertThat(reference.getReference(), equalTo(PROVIDER_URI));
@@ -226,7 +222,7 @@ public class BaseReferenceHandlingTranslatorTest {
 		person.addName(name);
 		provider.setPerson(person);
 		
-		Reference reference = referenceHandlingTranslator.createPractitionerReference(provider);
+		Reference reference = ReferenceHandlingTranslator.createPractitionerReference(provider);
 		
 		assertThat(reference, notNullValue());
 		assertThat(reference.getDisplay(), equalTo(PROVIDER_DISPLAY));
@@ -234,7 +230,7 @@ public class BaseReferenceHandlingTranslatorTest {
 	
 	@Test
 	public void shouldReturnNullDisplayForPractitionerWithNullPerson() {
-		Reference reference = referenceHandlingTranslator.createPractitionerReference(provider);
+		Reference reference = ReferenceHandlingTranslator.createPractitionerReference(provider);
 		
 		assertThat(reference, notNullValue());
 		assertThat(reference.getDisplay(), nullValue());
@@ -242,7 +238,7 @@ public class BaseReferenceHandlingTranslatorTest {
 	
 	@Test
 	public void shouldAddLocationReference() {
-		Reference reference = referenceHandlingTranslator.createLocationReference(location);
+		Reference reference = ReferenceHandlingTranslator.createLocationReference(location);
 		
 		assertThat(reference, notNullValue());
 		assertThat(reference.getReference(), equalTo(LOCATION_URI));
@@ -254,7 +250,7 @@ public class BaseReferenceHandlingTranslatorTest {
 	public void shouldReturnNullDisplayWhenLocationNameIsNull() {
 		location.setName(null);
 		
-		Reference reference = referenceHandlingTranslator.createLocationReference(location);
+		Reference reference = ReferenceHandlingTranslator.createLocationReference(location);
 		
 		assertThat(reference, notNullValue());
 		assertThat(reference.getDisplay(), nullValue());
@@ -262,7 +258,7 @@ public class BaseReferenceHandlingTranslatorTest {
 	
 	@Test
 	public void shouldAddEncounterReference() {
-		Reference reference = referenceHandlingTranslator.createEncounterReference(encounter);
+		Reference reference = ReferenceHandlingTranslator.createEncounterReference(encounter);
 		
 		assertThat(reference, notNullValue());
 		assertThat(reference.getReference(), equalTo(ENCOUNTER_URI));
@@ -271,7 +267,7 @@ public class BaseReferenceHandlingTranslatorTest {
 	
 	@Test
 	public void shouldAddPractitionerGivenOpenMrsUserReference() {
-		Reference reference = referenceHandlingTranslator.createPractitionerReference(user);
+		Reference reference = ReferenceHandlingTranslator.createPractitionerReference(user);
 		
 		assertThat(reference, notNullValue());
 		assertThat(reference.getReference(), equalTo(PRACTITIONER_REFERENCE));
@@ -284,7 +280,7 @@ public class BaseReferenceHandlingTranslatorTest {
 		User user = new User();
 		user.setUuid(USER_UUID);
 		
-		Reference reference = referenceHandlingTranslator.createPractitionerReference(user);
+		Reference reference = ReferenceHandlingTranslator.createPractitionerReference(user);
 		
 		assertThat(reference, notNullValue());
 		assertThat(reference.getReference(), equalTo(PRACTITIONER_REFERENCE));
@@ -296,7 +292,7 @@ public class BaseReferenceHandlingTranslatorTest {
 		TestOrder order = new TestOrder();
 		order.setUuid(ORDER_UUID);
 		
-		Reference reference = referenceHandlingTranslator.createOrderReference(order);
+		Reference reference = ReferenceHandlingTranslator.createOrderReference(order);
 		
 		assertThat(reference, notNullValue());
 		assertThat(reference.getReference(), equalTo(TEST_ORDER_REFERENCE));
@@ -308,7 +304,7 @@ public class BaseReferenceHandlingTranslatorTest {
 		TestOrder order = new TestOrder() {};
 		order.setUuid(ORDER_UUID);
 		
-		Reference reference = referenceHandlingTranslator.createOrderReference(order);
+		Reference reference = ReferenceHandlingTranslator.createOrderReference(order);
 		
 		assertThat(reference, notNullValue());
 		assertThat(reference.getReference(), equalTo(TEST_ORDER_REFERENCE));
@@ -320,7 +316,7 @@ public class BaseReferenceHandlingTranslatorTest {
 		DrugOrder order = new DrugOrder();
 		order.setUuid(ORDER_UUID);
 		
-		Reference reference = referenceHandlingTranslator.createOrderReference(order);
+		Reference reference = ReferenceHandlingTranslator.createOrderReference(order);
 		
 		assertThat(reference, notNullValue());
 		assertThat(reference.getReference(), equalTo(DRUG_ORDER_REFERENCE));
@@ -332,7 +328,7 @@ public class BaseReferenceHandlingTranslatorTest {
 		DrugOrder order = new DrugOrder() {};
 		order.setUuid(ORDER_UUID);
 		
-		Reference reference = referenceHandlingTranslator.createOrderReference(order);
+		Reference reference = ReferenceHandlingTranslator.createOrderReference(order);
 		
 		assertThat(reference, notNullValue());
 		assertThat(reference.getReference(), equalTo(DRUG_ORDER_REFERENCE));
@@ -344,7 +340,7 @@ public class BaseReferenceHandlingTranslatorTest {
 		Order order = new Order();
 		order.setUuid(ORDER_UUID);
 		
-		Reference reference = referenceHandlingTranslator.createOrderReference(order);
+		Reference reference = ReferenceHandlingTranslator.createOrderReference(order);
 		
 		assertThat(reference, nullValue());
 	}
@@ -354,7 +350,7 @@ public class BaseReferenceHandlingTranslatorTest {
 		Order order = new Order() {};
 		order.setUuid(ORDER_UUID);
 		
-		Reference reference = referenceHandlingTranslator.createOrderReference(order);
+		Reference reference = ReferenceHandlingTranslator.createOrderReference(order);
 		
 		assertThat(reference, nullValue());
 	}
@@ -364,7 +360,7 @@ public class BaseReferenceHandlingTranslatorTest {
 		DrugOrder order = new DrugOrder();
 		order.setUuid(ORDER_UUID);
 		
-		Reference reference = referenceHandlingTranslator.createDrugOrderReference(order);
+		Reference reference = ReferenceHandlingTranslator.createDrugOrderReference(order);
 		
 		assertThat(reference, notNullValue());
 		assertThat(reference.getReference(), equalTo(DRUG_ORDER_REFERENCE));
@@ -373,13 +369,13 @@ public class BaseReferenceHandlingTranslatorTest {
 	
 	@Test
 	public void shouldReturnNullForNullDrugOrder() {
-		Reference reference = referenceHandlingTranslator.createDrugOrderReference(null);
+		Reference reference = ReferenceHandlingTranslator.createDrugOrderReference(null);
 		assertThat(reference, nullValue());
 	}
 	
 	@Test
 	public void shouldReturnLocationReferenceForUuid() {
-		Reference reference = referenceHandlingTranslator.createLocationReferenceByUuid(LOCATION_UUID);
+		Reference reference = ReferenceHandlingTranslator.createLocationReferenceByUuid(LOCATION_UUID);
 		assertThat(reference, notNullValue());
 		assertThat(reference.getReference(), equalTo(LOCATION_URI));
 		assertThat(reference.getType(), equalTo(FhirConstants.LOCATION));
