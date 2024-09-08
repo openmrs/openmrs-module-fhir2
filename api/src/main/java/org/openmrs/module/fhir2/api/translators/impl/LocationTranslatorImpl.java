@@ -16,6 +16,7 @@ import static org.openmrs.module.fhir2.api.util.FhirUtils.getMetadataTranslation
 
 import javax.annotation.Nonnull;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -25,6 +26,7 @@ import lombok.Setter;
 import org.apache.commons.lang.math.NumberUtils;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ContactPoint;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Reference;
 import org.openmrs.BaseOpenmrsData;
@@ -62,6 +64,10 @@ public class LocationTranslatorImpl extends BaseReferenceHandlingTranslator impl
 	
 	@Autowired
 	private FhirLocationDao fhirLocationDao;
+	
+	private static final String MFL_LOCATION_IDENTIFIER_URI = "http://moh.bw.org/ext/location/identifier/mfl";
+	
+	private static final String MFL_LOCATION_ATTRIBUTE_TYPE_UUID = "8a845a89-6aa5-4111-81d3-0af31c45c002";
 	
 	/**
 	 * @see org.openmrs.module.fhir2.api.translators.LocationTranslator#toFhirResource(org.openmrs.Location)
@@ -117,6 +123,24 @@ public class LocationTranslatorImpl extends BaseReferenceHandlingTranslator impl
 		
 		fhirLocation.getMeta().setLastUpdated(getLastUpdated(openmrsLocation));
 		fhirLocation.getMeta().setVersionId(getVersionId(openmrsLocation));
+		
+		//Update MFL Code as an identifier. Fetch the MFL code from the location attribute defined in global property MFL_LOCATION_ATTRIBUTE_TYPE_UUID
+		String mflLocationAttributeType = propertyService.getGlobalProperty(MFL_LOCATION_ATTRIBUTE_TYPE_UUID);
+		if (mflLocationAttributeType != null && !mflLocationAttributeType.isEmpty()) {
+			Collection<LocationAttribute> locationAttributeTypes = openmrsLocation.getActiveAttributes();
+			if (!locationAttributeTypes.isEmpty()) {
+				locationAttributeTypes.stream().filter(
+				    locationAttribute -> locationAttribute.getAttributeType().getUuid().equals(mflLocationAttributeType))
+				        .findFirst().ifPresent(locationAttribute -> {
+					        String mflCode = (String) locationAttribute.getValue();
+					        
+					        Identifier mflIdentifier = new Identifier();
+					        mflIdentifier.setSystem(MFL_LOCATION_IDENTIFIER_URI);
+					        mflIdentifier.setValue(mflCode);
+					        fhirLocation.addIdentifier(mflIdentifier);
+				        });
+			}
+		}
 		
 		return fhirLocation;
 	}
