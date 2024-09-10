@@ -80,10 +80,6 @@ public class FhirActivator extends BaseModuleActivator implements ApplicationCon
 	
 	@Override
 	public void willRefreshContext() {
-		if (globalPropertyHolder != null) {
-			Context.getAdministrationService().removeGlobalPropertyListener(globalPropertyHolder);
-		}
-		
 		lifecycleListeners.forEach(ModuleLifecycleListener::willRefresh);
 		unloadModules();
 	}
@@ -92,11 +88,10 @@ public class FhirActivator extends BaseModuleActivator implements ApplicationCon
 	public void contextRefreshed() {
 		if (globalPropertyHolder == null) {
 			globalPropertyHolder = new FhirGlobalPropertyHolder();
+			Context.getAdministrationService().addGlobalPropertyListener(globalPropertyHolder);
 		}
 		
 		FhirGlobalPropertyHolder.reset();
-		
-		Context.getAdministrationService().addGlobalPropertyListener(globalPropertyHolder);
 		
 		if (!started) {
 			return;
@@ -111,7 +106,6 @@ public class FhirActivator extends BaseModuleActivator implements ApplicationCon
 	@Override
 	public void willStop() {
 		lifecycleListeners.forEach(ModuleLifecycleListener::willStop);
-		unloadModules();
 		
 		if (globalPropertyHolder != null) {
 			Context.getAdministrationService().removeGlobalPropertyListener(globalPropertyHolder);
@@ -121,6 +115,7 @@ public class FhirActivator extends BaseModuleActivator implements ApplicationCon
 	@Override
 	public void stopped() {
 		lifecycleListeners.forEach(ModuleLifecycleListener::stopped);
+		unloadModules();
 		
 		globalPropertyHolder = null;
 		started = false;
