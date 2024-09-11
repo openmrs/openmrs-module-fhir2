@@ -65,8 +65,10 @@ public class LocationTranslatorImpl extends BaseReferenceHandlingTranslator impl
 	@Autowired
 	private FhirLocationDao fhirLocationDao;
 	
+	//TODO: Move this to a global property
 	private static final String MFL_LOCATION_IDENTIFIER_URI = "http://moh.bw.org/ext/location/identifier/mfl";
 	
+	//TODO: Move this to a global property
 	private static final String MFL_LOCATION_ATTRIBUTE_TYPE_UUID = "8a845a89-6aa5-4111-81d3-0af31c45c002";
 	
 	/**
@@ -125,21 +127,18 @@ public class LocationTranslatorImpl extends BaseReferenceHandlingTranslator impl
 		fhirLocation.getMeta().setVersionId(getVersionId(openmrsLocation));
 		
 		//Update MFL Code as an identifier. Fetch the MFL code from the location attribute defined in global property MFL_LOCATION_ATTRIBUTE_TYPE_UUID
-		String mflLocationAttributeType = propertyService.getGlobalProperty(MFL_LOCATION_ATTRIBUTE_TYPE_UUID);
-		if (mflLocationAttributeType != null && !mflLocationAttributeType.isEmpty()) {
-			Collection<LocationAttribute> locationAttributeTypes = openmrsLocation.getActiveAttributes();
-			if (!locationAttributeTypes.isEmpty()) {
-				locationAttributeTypes.stream().filter(
-				    locationAttribute -> locationAttribute.getAttributeType().getUuid().equals(mflLocationAttributeType))
-				        .findFirst().ifPresent(locationAttribute -> {
-					        String mflCode = (String) locationAttribute.getValue();
-					        
-					        Identifier mflIdentifier = new Identifier();
-					        mflIdentifier.setSystem(MFL_LOCATION_IDENTIFIER_URI);
-					        mflIdentifier.setValue(mflCode);
-					        fhirLocation.addIdentifier(mflIdentifier);
-				        });
-			}
+		Collection<LocationAttribute> locationAttributeTypes = openmrsLocation.getActiveAttributes();
+		if (!locationAttributeTypes.isEmpty()) {
+			locationAttributeTypes.stream().filter(
+			    locationAttribute -> locationAttribute.getAttributeType().getUuid().equals(MFL_LOCATION_ATTRIBUTE_TYPE_UUID))
+			        .findFirst().ifPresent(locationAttribute -> {
+				        String mflCode = (String) locationAttribute.getValue();
+				        
+				        Identifier mflIdentifier = new Identifier();
+				        mflIdentifier.setSystem(MFL_LOCATION_IDENTIFIER_URI);
+				        mflIdentifier.setValue(mflCode);
+				        fhirLocation.addIdentifier(mflIdentifier);
+			        });
 		}
 		
 		return fhirLocation;
