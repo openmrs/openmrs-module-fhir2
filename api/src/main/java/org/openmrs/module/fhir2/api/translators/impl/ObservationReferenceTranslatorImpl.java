@@ -9,10 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
-import static org.openmrs.module.fhir2.api.translators.impl.ReferenceHandlingTranslator.createObservationReference;
-import static org.openmrs.module.fhir2.api.translators.impl.ReferenceHandlingTranslator.getReferenceId;
-import static org.openmrs.module.fhir2.api.translators.impl.ReferenceHandlingTranslator.getReferenceType;
-
 import javax.annotation.Nonnull;
 
 import lombok.AccessLevel;
@@ -27,7 +23,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class ObservationReferenceTranslatorImpl implements ObservationReferenceTranslator {
+public class ObservationReferenceTranslatorImpl extends BaseReferenceHandlingTranslator implements ObservationReferenceTranslator {
 	
 	@Autowired
 	private FhirObservationDao observationDao;

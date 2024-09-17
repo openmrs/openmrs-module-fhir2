@@ -20,24 +20,19 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Type;
-import org.openmrs.Location;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirPatientIdentifierSystemService;
 import org.openmrs.module.fhir2.api.FhirPatientService;
 import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
-import org.openmrs.module.fhir2.api.translators.LocationReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientIdentifierTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class PatientIdentifierTranslatorImpl implements PatientIdentifierTranslator {
-	
-	@Autowired
-	private LocationReferenceTranslator locationReferenceTranslator;
+public class PatientIdentifierTranslatorImpl extends BaseReferenceHandlingTranslator implements PatientIdentifierTranslator {
 	
 	@Autowired
 	private FhirPatientIdentifierSystemService patientIdentifierSystemService;
@@ -75,7 +70,7 @@ public class PatientIdentifierTranslatorImpl implements PatientIdentifierTransla
 		
 		if (identifier.getLocation() != null) {
 			patientIdentifier.addExtension().setUrl(FhirConstants.OPENMRS_FHIR_EXT_PATIENT_IDENTIFIER_LOCATION)
-			        .setValue(locationReferenceTranslator.toFhirResource(identifier.getLocation()));
+			        .setValue(createLocationReference(identifier.getLocation()));
 		}
 		
 		return patientIdentifier;
@@ -116,10 +111,8 @@ public class PatientIdentifierTranslatorImpl implements PatientIdentifierTransla
 			        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_PATIENT_IDENTIFIER_LOCATION).getValue();
 			
 			if (identifierLocationType instanceof Reference) {
-				Location location = locationReferenceTranslator.toOpenmrsType((Reference) identifierLocationType);
-				if (location != null) {
-					patientIdentifier.setLocation(location);
-				}
+				getReferenceId((Reference) identifierLocationType).map(uuid -> locationDao.get(uuid))
+				        .ifPresent(patientIdentifier::setLocation);
 			}
 		}
 		

@@ -93,7 +93,7 @@ public class SearchQueryBundleProvider<T extends OpenmrsObject & Auditable, U ex
 	@Override
 	public Integer preferredPageSize() {
 		if (pageSize == null) {
-			pageSize = globalPropertyService.getGlobalPropertyAsInteger(FhirConstants.OPENMRS_FHIR_DEFAULT_PAGE_SIZE, 10);
+			pageSize = globalPropertyService.getGlobalProperty(FhirConstants.OPENMRS_FHIR_DEFAULT_PAGE_SIZE, 10);
 		}
 		
 		return pageSize;

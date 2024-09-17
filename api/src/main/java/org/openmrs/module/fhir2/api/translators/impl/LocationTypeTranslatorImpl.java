@@ -78,12 +78,8 @@ public class LocationTypeTranslatorImpl implements LocationTypeTranslator {
 	
 	@Override
 	public Location toOpenmrsType(@Nonnull Location location, @Nonnull List<CodeableConcept> types) {
-		LocationAttributeType typeAttributeType = null;
-		
-		String locationAttributeType = globalPropertyService.getGlobalProperty(FhirConstants.LOCATION_TYPE_ATTRIBUTE_TYPE);
-		if (locationAttributeType != null && !locationAttributeType.isEmpty()) {
-			typeAttributeType = locationDao.getLocationAttributeTypeByUuid(locationAttributeType);
-		}
+		LocationAttributeType typeAttributeType = locationDao.getLocationAttributeTypeByUuid(
+		    globalPropertyService.getGlobalProperty(FhirConstants.LOCATION_TYPE_ATTRIBUTE_TYPE));
 		
 		if (typeAttributeType != null) {
 			Optional<Concept> typeConcept = types.stream().filter(Objects::nonNull).filter(CodeableConcept::hasCoding)

@@ -15,7 +15,6 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.when;
-import static org.openmrs.module.fhir2.api.translators.impl.ReferenceHandlingTranslator.getReferenceId;
 
 import java.util.Collections;
 import java.util.Date;
@@ -280,7 +279,8 @@ public class AllergyIntoleranceTranslatorImplTest {
 		AllergyIntolerance allergyIntolerance = allergyIntoleranceTranslator.toFhirResource(omrsAllergy);
 		assertThat(allergyIntolerance.getPatient(), notNullValue());
 		assertThat(allergyIntolerance.getPatient().getType(), is(FhirTestConstants.PATIENT));
-		assertThat(getReferenceId(allergyIntolerance.getPatient()).orElse(null), equalTo(PATIENT_UUID));
+		assertThat(allergyIntoleranceTranslator.getReferenceId(allergyIntolerance.getPatient()).orElse(null),
+		    equalTo(PATIENT_UUID));
 	}
 	
 	@Test
@@ -298,7 +298,8 @@ public class AllergyIntoleranceTranslatorImplTest {
 		
 		assertThat(allergyIntolerance.getRecorder(), notNullValue());
 		assertThat(allergyIntolerance.getRecorder().getType(), is(FhirTestConstants.PRACTITIONER));
-		assertThat(getReferenceId(allergyIntolerance.getRecorder()).orElse(null), equalTo(CREATOR_UUID));
+		assertThat(allergyIntoleranceTranslator.getReferenceId(allergyIntolerance.getRecorder()).orElse(null),
+		    equalTo(CREATOR_UUID));
 	}
 	
 	@Test

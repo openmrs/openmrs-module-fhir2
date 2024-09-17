@@ -150,8 +150,6 @@ public class AllergyIntoleranceFhirResourceProviderIntegrationTest extends BaseF
 		assertThat(allergy.getPatient().getReferenceElement().getIdPart(), equalTo("da7f524f-27ce-4bb2-86d6-6d1d05312bd5"));
 		assertThat(allergy.getRecorder().getReferenceElement().getIdPart(), equalTo("c98a1558-e131-11de-babe-001e378eb67e"));
 		assertThat(allergy.getCategory().get(0).getCode(), equalTo("medication"));
-		assertThat(allergy.hasReaction(), is(true));
-		assertThat(allergy.getReactionFirstRep().hasSeverity(), is(true));
 		assertThat(allergy.getReactionFirstRep().getSeverity().toCode(), equalTo("severe"));
 		assertThat(allergy.getReactionFirstRep().getManifestationFirstRep().getCodingFirstRep().getCode(),
 		    equalTo("5088AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"));
@@ -202,8 +200,6 @@ public class AllergyIntoleranceFhirResourceProviderIntegrationTest extends BaseF
 		assertThat(allergy.getPatient().getReferenceElement().getIdPart(), equalTo("da7f524f-27ce-4bb2-86d6-6d1d05312bd5"));
 		assertThat(allergy.getRecorder().getReferenceElement().getIdPart(), equalTo("c98a1558-e131-11de-babe-001e378eb67e"));
 		assertThat(allergy.getCategory().get(0).getCode(), equalTo("medication"));
-		assertThat(allergy.hasReaction(), equalTo(true));
-		assertThat(allergy.getReactionFirstRep().hasSeverity(), equalTo(true));
 		assertThat(allergy.getReactionFirstRep().getSeverity().toCode(), equalTo("severe"));
 		assertThat(allergy.getReactionFirstRep().getManifestationFirstRep().getCodingFirstRep().getCode(),
 		    equalTo("5088AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"));

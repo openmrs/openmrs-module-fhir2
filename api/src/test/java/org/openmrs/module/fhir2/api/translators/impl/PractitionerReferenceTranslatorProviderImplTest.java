@@ -14,7 +14,6 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
-import static org.openmrs.module.fhir2.api.translators.impl.ReferenceHandlingTranslator.getReferenceId;
 
 import org.hamcrest.Matchers;
 import org.hl7.fhir.r4.model.Practitioner;
@@ -55,7 +54,7 @@ public class PractitionerReferenceTranslatorProviderImplTest {
 		Reference result = referenceTranslatorProvider.toFhirResource(provider);
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(FhirConstants.PRACTITIONER));
-		assertThat(getReferenceId(result).orElse(null), equalTo(PRACTITIONER_UUID));
+		assertThat(referenceTranslatorProvider.getReferenceId(result).orElse(null), equalTo(PRACTITIONER_UUID));
 	}
 	
 	@Test

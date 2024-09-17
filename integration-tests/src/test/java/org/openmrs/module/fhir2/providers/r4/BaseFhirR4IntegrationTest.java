@@ -35,7 +35,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 
 public abstract class BaseFhirR4IntegrationTest<T extends IResourceProvider, U extends DomainResource> extends BaseFhirIntegrationTest<T, U> {
 	
-	private static final FhirContext FHIR_CONTEXT = FhirContext.forR4Cached();
+	private static final FhirContext FHIR_CONTEXT = FhirContext.forR4();
 	
 	@Override
 	public String getServletName() {

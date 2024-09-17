@@ -52,6 +52,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletConfig;
 import org.springframework.mock.web.MockServletContext;
+import org.springframework.transaction.annotation.Transactional;
 
 public abstract class BaseFhirResourceProviderWebTest<T extends IResourceProvider, U extends IBaseResource> {
 	
@@ -117,19 +118,15 @@ public abstract class BaseFhirResourceProviderWebTest<T extends IResourceProvide
 		servlet.setGlobalPropertyService(new FhirGlobalPropertyServiceImpl() {
 			
 			@Override
-			public String getGlobalProperty(String property, String defaultValue) {
-				return defaultValue;
-			}
-			
-			@Override
-			public int getGlobalPropertyAsInteger(String property, int defaultValue) throws APIException {
+			@Transactional(readOnly = true)
+			public String getGlobalProperty(String property) throws APIException {
 				switch (property) {
 					case FhirConstants.OPENMRS_FHIR_DEFAULT_PAGE_SIZE:
-						return 10;
+						return "10";
 					case FhirConstants.OPENMRS_FHIR_MAXIMUM_PAGE_SIZE:
-						return 100;
+						return "100";
 				}
-				return -1;
+				return null;
 			}
 		});
 		

@@ -14,7 +14,6 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.when;
-import static org.openmrs.module.fhir2.api.translators.impl.ReferenceHandlingTranslator.getReferenceId;
 
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Reference;
@@ -52,7 +51,7 @@ public class ObservationReferenceTranslatorImplTest {
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(FhirConstants.OBSERVATION));
-		assertThat(getReferenceId(result).orElse(null), equalTo(UUID));
+		assertThat(observationReferenceTranslator.getReferenceId(result).orElse(null), equalTo(UUID));
 	}
 	
 	@Test

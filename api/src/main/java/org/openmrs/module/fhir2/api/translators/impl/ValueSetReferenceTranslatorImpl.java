@@ -9,8 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
-import static org.openmrs.module.fhir2.api.translators.impl.ReferenceHandlingTranslator.createValueSetReference;
-
 import javax.annotation.Nonnull;
 
 import lombok.AccessLevel;
@@ -22,7 +20,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class ValueSetReferenceTranslatorImpl implements ValueSetReferenceTranslator {
+public class ValueSetReferenceTranslatorImpl extends BaseReferenceHandlingTranslator implements ValueSetReferenceTranslator {
 	
 	@Override
 	public Reference toFhirResource(@Nonnull Concept concept) {

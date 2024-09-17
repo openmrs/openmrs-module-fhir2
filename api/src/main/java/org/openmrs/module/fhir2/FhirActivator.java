@@ -27,7 +27,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.openmrs.api.context.Context;
 import org.openmrs.module.BaseModuleActivator;
 import org.openmrs.module.Module;
 import org.openmrs.module.ModuleException;
@@ -37,7 +36,6 @@ import org.openmrs.module.fhir2.api.dao.FhirDao;
 import org.openmrs.module.fhir2.api.spi.ModuleLifecycleListener;
 import org.openmrs.module.fhir2.api.spi.ServiceClassLoader;
 import org.openmrs.module.fhir2.api.translators.FhirTranslator;
-import org.openmrs.module.fhir2.api.util.FhirGlobalPropertyHolder;
 import org.openmrs.module.fhir2.model.GroupMember;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
@@ -54,8 +52,6 @@ public class FhirActivator extends BaseModuleActivator implements ApplicationCon
 	
 	@Getter
 	private static ConfigurableApplicationContext applicationContext;
-	
-	private static FhirGlobalPropertyHolder globalPropertyHolder = null;
 	
 	private final Map<String, Set<Class<?>>> services = new HashMap<>();
 	
@@ -86,13 +82,6 @@ public class FhirActivator extends BaseModuleActivator implements ApplicationCon
 	
 	@Override
 	public void contextRefreshed() {
-		if (globalPropertyHolder == null) {
-			globalPropertyHolder = new FhirGlobalPropertyHolder();
-			Context.getAdministrationService().addGlobalPropertyListener(globalPropertyHolder);
-		}
-		
-		FhirGlobalPropertyHolder.reset();
-		
 		if (!started) {
 			return;
 		}
@@ -106,18 +95,13 @@ public class FhirActivator extends BaseModuleActivator implements ApplicationCon
 	@Override
 	public void willStop() {
 		lifecycleListeners.forEach(ModuleLifecycleListener::willStop);
-		
-		if (globalPropertyHolder != null) {
-			Context.getAdministrationService().removeGlobalPropertyListener(globalPropertyHolder);
-		}
+		unloadModules();
 	}
 	
 	@Override
 	public void stopped() {
 		lifecycleListeners.forEach(ModuleLifecycleListener::stopped);
-		unloadModules();
 		
-		globalPropertyHolder = null;
 		started = false;
 		log.info("Shutdown FHIR");
 	}
@@ -133,7 +117,7 @@ public class FhirActivator extends BaseModuleActivator implements ApplicationCon
 	}
 	
 	@Override
-	public void setApplicationContext(@Nonnull ApplicationContext applicationContext) throws BeansException {
+	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
 		if (applicationContext instanceof ConfigurableApplicationContext) {
 			FhirActivator.applicationContext = (ConfigurableApplicationContext) applicationContext;
 		}

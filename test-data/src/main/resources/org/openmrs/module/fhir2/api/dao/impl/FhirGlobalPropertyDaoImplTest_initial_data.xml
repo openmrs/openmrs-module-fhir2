@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!--
+    This Source Code Form is subject to the terms of the Mozilla Public License,
+    v. 2.0. If a copy of the MPL was not distributed with this file, You can
+    obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+    the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+
+    Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+    graphic logo is a trademark of OpenMRS Inc.
+-->
+<dataset>
+    <global_property property="fhir2.personAttributeTypeUuid" property_value="1289123-230-23n210-11nj2" description="Set person attribute type uuid" uuid="cd9d0baa-a88b-4553-907a-b4ea7811ebf8"/>
+    <global_property property="fhir2.locationAttributeTypeUuid" property_value="street name" description="location attribute type" uuid="abcde432-1691-11df-9755-7038c432abcd"/>
+    <global_property property="allergy.concept.severity.moderate" property_value="1499AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" description="UUID for the MODERATE severity concept" uuid="0740f2f2-3759-4c07-aff2-b8e512b32c77"/>
+    <global_property property="allergy.concept.severity.severe" property_value="1599AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" description="UUID for the SEVERE severity concept" uuid="abc66632-1691-11df-9755-7038c432abcd"/>
+</dataset>

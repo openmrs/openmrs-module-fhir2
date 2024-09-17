@@ -26,7 +26,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 
 public abstract class BaseFhirR3ResourceProviderWebTest<T extends IResourceProvider, U extends IBaseResource> extends BaseFhirResourceProviderWebTest<T, U> {
 	
-	private static final FhirContext FHIR_CONTEXT = FhirContext.forDstu3Cached();
+	private static final FhirContext FHIR_CONTEXT = FhirContext.forDstu3();
 	
 	@Override
 	public String getServletName() {

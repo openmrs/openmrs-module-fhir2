@@ -14,7 +14,6 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.when;
-import static org.openmrs.module.fhir2.api.translators.impl.ReferenceHandlingTranslator.getReferenceId;
 
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.Before;
@@ -51,7 +50,7 @@ public class MedicationReferenceTranslatorImplTest {
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(FhirConstants.MEDICATION));
-		assertThat(getReferenceId(result).orElse(null), equalTo(MEDICATION_UUID));
+		assertThat(medicationReferenceTranslator.getReferenceId(result).orElse(null), equalTo(MEDICATION_UUID));
 	}
 	
 	@Test

@@ -14,6 +14,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -151,6 +152,13 @@ public class LocationTypeTranslatorImplTest {
 		typeAttribute.setAttributeType(typeAttributeType);
 		typeAttribute.setValue(TYPE_CONCEPT_UUID);
 		omrsLocation.addAttribute(typeAttribute);
+		
+		when(locationDao.getLocationAttributeTypeByUuid(LOCATION_ATTRIBUTE_TYPE_UUID)).thenReturn(typeAttributeType);
+		when(globalPropertyService.getGlobalProperty(FhirConstants.LOCATION_TYPE_ATTRIBUTE_TYPE))
+		        .thenReturn(LOCATION_ATTRIBUTE_TYPE_UUID);
+		when(conceptTranslator.toOpenmrsType(eq(fhirTypeConcept))).thenReturn(typeConcept);
+		when(locationDao.getActiveAttributesByLocationAndAttributeTypeUuid(any(), any()))
+		        .thenReturn(Collections.singletonList(typeAttribute));
 		
 		Location result = locationTypeTranslator.toOpenmrsType(omrsLocation, Collections.singletonList(fhirTypeConcept));
 		

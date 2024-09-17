@@ -7,20 +7,23 @@
  * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
  * graphic logo is a trademark of OpenMRS Inc.
  */
-package org.openmrs.module.fhir2.api;
+package org.openmrs.module.fhir2.api.dao;
 
 import java.util.Map;
 
+import org.openmrs.GlobalProperty;
+import org.openmrs.annotation.Authorized;
 import org.openmrs.api.APIException;
+import org.openmrs.util.PrivilegeConstants;
 
-public interface FhirGlobalPropertyService {
+public interface FhirGlobalPropertyDao {
 	
+	@Authorized(PrivilegeConstants.GET_GLOBAL_PROPERTIES)
 	String getGlobalProperty(String property) throws APIException;
 	
-	Integer getGlobalProperty(String property, Integer defaultValue);
+	@Authorized(PrivilegeConstants.GET_GLOBAL_PROPERTIES)
+	GlobalProperty getGlobalPropertyObject(String property);
 	
-	String getGlobalProperty(String property, String defaultValue);
-	
+	@Authorized(PrivilegeConstants.GET_GLOBAL_PROPERTIES)
 	Map<String, String> getGlobalProperties(String... properties);
-	
 }

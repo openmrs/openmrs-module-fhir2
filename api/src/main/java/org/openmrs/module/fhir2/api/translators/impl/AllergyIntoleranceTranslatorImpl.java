@@ -39,7 +39,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class AllergyIntoleranceTranslatorImpl implements AllergyIntoleranceTranslator {
+public class AllergyIntoleranceTranslatorImpl extends BaseReferenceHandlingTranslator implements AllergyIntoleranceTranslator {
 	
 	@Autowired
 	private PractitionerReferenceTranslator<User> practitionerReferenceTranslator;

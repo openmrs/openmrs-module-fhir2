@@ -63,7 +63,7 @@ public class SearchQueryBundleProviderTest {
 	
 	@Test
 	public void shouldReturnPreferredPageSize() {
-		when(globalPropertyService.getGlobalPropertyAsInteger(anyString(), anyInt())).thenReturn(10);
+		when(globalPropertyService.getGlobalProperty(anyString(), anyInt())).thenReturn(10);
 		
 		assertThat(searchQueryBundleProvider.preferredPageSize(), notNullValue());
 		assertThat(searchQueryBundleProvider.preferredPageSize(), equalTo(10));

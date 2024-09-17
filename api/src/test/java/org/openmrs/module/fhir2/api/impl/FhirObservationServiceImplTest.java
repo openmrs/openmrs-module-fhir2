@@ -131,7 +131,7 @@ public class FhirObservationServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap();
 		theParams.addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientReference);
 		
-		when(globalPropertyService.getGlobalPropertyAsInteger(anyString(), anyInt())).thenReturn(10);
+		when(globalPropertyService.getGlobalProperty(anyString(), anyInt())).thenReturn(10);
 		when(dao.getSearchResults(any())).thenReturn(Collections.singletonList(obs));
 		when(dao.getSearchResultsCount(any())).thenReturn(1);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
@@ -182,7 +182,7 @@ public class FhirObservationServiceImplTest {
 		        .addParameter(FhirConstants.MAX_SEARCH_HANDLER, max)
 		        .addParameter(FhirConstants.LASTN_OBSERVATION_SEARCH_HANDLER, new StringParam());
 		
-		when(globalPropertyService.getGlobalPropertyAsInteger(anyString(), anyInt())).thenReturn(10);
+		when(globalPropertyService.getGlobalProperty(anyString(), anyInt())).thenReturn(10);
 		when(dao.getSearchResults(any())).thenReturn(Collections.singletonList(obs));
 		when(dao.getSearchResultsCount(any())).thenReturn(1);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
@@ -235,7 +235,7 @@ public class FhirObservationServiceImplTest {
 		        .addParameter(FhirConstants.MAX_SEARCH_HANDLER, max)
 		        .addParameter(FhirConstants.LASTN_OBSERVATION_SEARCH_HANDLER, new StringParam());
 		
-		when(globalPropertyService.getGlobalPropertyAsInteger(anyString(), anyInt())).thenReturn(10);
+		when(globalPropertyService.getGlobalProperty(anyString(), anyInt())).thenReturn(10);
 		when(dao.getSearchResults(any())).thenReturn(Collections.singletonList(obs));
 		when(dao.getSearchResultsCount(any())).thenReturn(1);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
@@ -280,7 +280,7 @@ public class FhirObservationServiceImplTest {
 		        .addParameter(FhirConstants.MAX_SEARCH_HANDLER, max)
 		        .addParameter(FhirConstants.LASTN_OBSERVATION_SEARCH_HANDLER, new StringParam());
 		
-		when(globalPropertyService.getGlobalPropertyAsInteger(anyString(), anyInt())).thenReturn(10);
+		when(globalPropertyService.getGlobalProperty(anyString(), anyInt())).thenReturn(10);
 		when(dao.getSearchResults(any())).thenReturn(Collections.singletonList(obs));
 		when(dao.getSearchResultsCount(any())).thenReturn(1);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
@@ -332,7 +332,7 @@ public class FhirObservationServiceImplTest {
 		        .addParameter(FhirConstants.MAX_SEARCH_HANDLER, max)
 		        .addParameter(FhirConstants.LASTN_OBSERVATION_SEARCH_HANDLER, new StringParam());
 		
-		when(globalPropertyService.getGlobalPropertyAsInteger(anyString(), anyInt())).thenReturn(10);
+		when(globalPropertyService.getGlobalProperty(anyString(), anyInt())).thenReturn(10);
 		when(dao.getSearchResults(any())).thenReturn(Collections.singletonList(obs));
 		when(dao.getSearchResultsCount(any())).thenReturn(1);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
@@ -385,7 +385,7 @@ public class FhirObservationServiceImplTest {
 		        .addParameter(FhirConstants.MAX_SEARCH_HANDLER, max)
 		        .addParameter(FhirConstants.LASTN_OBSERVATION_SEARCH_HANDLER, new StringParam());
 		
-		when(globalPropertyService.getGlobalPropertyAsInteger(anyString(), anyInt())).thenReturn(10);
+		when(globalPropertyService.getGlobalProperty(anyString(), anyInt())).thenReturn(10);
 		when(dao.getSearchResults(any())).thenReturn(Collections.singletonList(obs));
 		when(dao.getSearchResultsCount(any())).thenReturn(1);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
@@ -430,7 +430,7 @@ public class FhirObservationServiceImplTest {
 		        .addParameter(FhirConstants.MAX_SEARCH_HANDLER, max)
 		        .addParameter(FhirConstants.LASTN_OBSERVATION_SEARCH_HANDLER, new StringParam());
 		
-		when(globalPropertyService.getGlobalPropertyAsInteger(anyString(), anyInt())).thenReturn(10);
+		when(globalPropertyService.getGlobalProperty(anyString(), anyInt())).thenReturn(10);
 		when(dao.getSearchResults(any())).thenReturn(Collections.singletonList(obs));
 		when(dao.getSearchResultsCount(any())).thenReturn(1);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
