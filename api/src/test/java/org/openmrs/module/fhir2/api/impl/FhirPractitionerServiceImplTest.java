@@ -221,7 +221,7 @@ public class FhirPractitionerServiceImplTest {
 		when(userService.searchForUsers(any())).thenReturn(new SimpleBundleProvider());
 		
 		IBundleProvider results = practitionerService.searchForPractitioners(
-		    new PractitionerSearchParams(null, name, null, null, null, null, null, null, null, null, null));
+		    new PractitionerSearchParams(null, name, null, null, null, null, null, null, null, null, null, null));
 		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
@@ -240,7 +240,7 @@ public class FhirPractitionerServiceImplTest {
 		when(userService.searchForUsers(any())).thenReturn(new SimpleBundleProvider(practitioner2));
 		
 		IBundleProvider results = practitionerService.searchForPractitioners(
-		    new PractitionerSearchParams(null, name, null, null, null, null, null, null, null, null, null));
+		    new PractitionerSearchParams(null, name, null, null, null, null, null, null, null, null, null, null));
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -264,7 +264,7 @@ public class FhirPractitionerServiceImplTest {
 		when(userService.searchForUsers(any())).thenReturn(new SimpleBundleProvider(practitioner2));
 		
 		IBundleProvider results = practitionerService.searchForPractitioners(
-		    new PractitionerSearchParams(null, name, null, null, null, null, null, null, null, null, null));
+		    new PractitionerSearchParams(null, name, null, null, null, null, null, null, null, null, null, null));
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -284,7 +284,7 @@ public class FhirPractitionerServiceImplTest {
 		when(userService.searchForUsers(any())).thenReturn(new SimpleBundleProvider());
 		
 		IBundleProvider results = practitionerService.searchForPractitioners(
-		    new PractitionerSearchParams(null, name, null, null, null, null, null, null, null, null, null));
+		    new PractitionerSearchParams(null, name, null, null, null, null, null, null, null, null, null, null));
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -306,7 +306,7 @@ public class FhirPractitionerServiceImplTest {
 		when(userService.searchForUsers(any())).thenReturn(new SimpleBundleProvider());
 		
 		IBundleProvider results = practitionerService.searchForPractitioners(
-		    new PractitionerSearchParams(identifier, null, null, null, null, null, null, null, null, null, null));
+		    new PractitionerSearchParams(identifier, null, null, null, null, null, null, null, null, null, null, null));
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -327,7 +327,7 @@ public class FhirPractitionerServiceImplTest {
 		when(userService.searchForUsers(any())).thenReturn(new SimpleBundleProvider());
 		
 		IBundleProvider results = practitionerService.searchForPractitioners(
-		    new PractitionerSearchParams(identifier, null, null, null, null, null, null, null, null, null, null));
+		    new PractitionerSearchParams(identifier, null, null, null, null, null, null, null, null, null, null, null));
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -351,7 +351,7 @@ public class FhirPractitionerServiceImplTest {
 		when(userService.searchForUsers(any())).thenReturn(new SimpleBundleProvider(practitioner2));
 		
 		IBundleProvider results = practitionerService.searchForPractitioners(
-		    new PractitionerSearchParams(null, null, givenName, null, null, null, null, null, null, null, null));
+		    new PractitionerSearchParams(null, null, givenName, null, null, null, null, null, null, null, null, null));
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -373,7 +373,7 @@ public class FhirPractitionerServiceImplTest {
 		when(userService.searchForUsers(any())).thenReturn(new SimpleBundleProvider());
 		
 		IBundleProvider results = practitionerService.searchForPractitioners(
-		    new PractitionerSearchParams(null, null, givenName, null, null, null, null, null, null, null, null));
+		    new PractitionerSearchParams(null, null, givenName, null, null, null, null, null, null, null, null, null));
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -396,7 +396,7 @@ public class FhirPractitionerServiceImplTest {
 		when(userService.searchForUsers(any())).thenReturn(new SimpleBundleProvider());
 		
 		IBundleProvider results = practitionerService.searchForPractitioners(
-		    new PractitionerSearchParams(null, null, null, familyName, null, null, null, null, null, null, null));
+		    new PractitionerSearchParams(null, null, null, familyName, null, null, null, null, null, null, null, null));
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -416,7 +416,7 @@ public class FhirPractitionerServiceImplTest {
 		when(userService.searchForUsers(any())).thenReturn(new SimpleBundleProvider(practitioner2));
 		
 		IBundleProvider results = practitionerService.searchForPractitioners(
-		    new PractitionerSearchParams(null, null, null, familyName, null, null, null, null, null, null, null));
+		    new PractitionerSearchParams(null, null, null, familyName, null, null, null, null, null, null, null, null));
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -440,7 +440,7 @@ public class FhirPractitionerServiceImplTest {
 		when(userService.searchForUsers(any())).thenReturn(new SimpleBundleProvider(practitioner2));
 		
 		IBundleProvider results = practitionerService.searchForPractitioners(
-		    new PractitionerSearchParams(null, null, null, familyName, null, null, null, null, null, null, null));
+		    new PractitionerSearchParams(null, null, null, familyName, null, null, null, null, null, null, null, null));
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -461,7 +461,7 @@ public class FhirPractitionerServiceImplTest {
 		when(userService.searchForUsers(any())).thenReturn(new SimpleBundleProvider());
 		
 		IBundleProvider results = practitionerService.searchForPractitioners(
-		    new PractitionerSearchParams(null, null, null, familyName, null, null, null, null, null, null, null));
+		    new PractitionerSearchParams(null, null, null, familyName, null, null, null, null, null, null, null, null));
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -483,7 +483,7 @@ public class FhirPractitionerServiceImplTest {
 		when(userService.searchForUsers(any())).thenReturn(new SimpleBundleProvider());
 		
 		IBundleProvider results = practitionerService.searchForPractitioners(
-		    new PractitionerSearchParams(null, null, null, null, city, null, null, null, null, null, null));
+		    new PractitionerSearchParams(null, null, null, null, city, null, null, null, null, null, null, null));
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -504,7 +504,7 @@ public class FhirPractitionerServiceImplTest {
 		when(userService.searchForUsers(any())).thenReturn(new SimpleBundleProvider());
 		
 		IBundleProvider results = practitionerService.searchForPractitioners(
-		    new PractitionerSearchParams(null, null, null, null, city, null, null, null, null, null, null));
+		    new PractitionerSearchParams(null, null, null, null, city, null, null, null, null, null, null, null));
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -526,7 +526,7 @@ public class FhirPractitionerServiceImplTest {
 		when(userService.searchForUsers(any())).thenReturn(new SimpleBundleProvider());
 		
 		IBundleProvider results = practitionerService.searchForPractitioners(
-		    new PractitionerSearchParams(null, null, null, null, null, state, null, null, null, null, null));
+		    new PractitionerSearchParams(null, null, null, null, null, state, null, null, null, null, null, null));
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -547,7 +547,7 @@ public class FhirPractitionerServiceImplTest {
 		when(userService.searchForUsers(any())).thenReturn(new SimpleBundleProvider());
 		
 		IBundleProvider results = practitionerService.searchForPractitioners(
-		    new PractitionerSearchParams(null, null, null, null, null, state, null, null, null, null, null));
+		    new PractitionerSearchParams(null, null, null, null, null, state, null, null, null, null, null, null));
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -569,7 +569,7 @@ public class FhirPractitionerServiceImplTest {
 		when(userService.searchForUsers(any())).thenReturn(new SimpleBundleProvider());
 		
 		IBundleProvider results = practitionerService.searchForPractitioners(
-		    new PractitionerSearchParams(null, null, null, null, null, null, postalCode, null, null, null, null));
+		    new PractitionerSearchParams(null, null, null, null, null, null, postalCode, null, null, null, null, null));
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -590,7 +590,7 @@ public class FhirPractitionerServiceImplTest {
 		when(userService.searchForUsers(any())).thenReturn(new SimpleBundleProvider());
 		
 		IBundleProvider results = practitionerService.searchForPractitioners(
-		    new PractitionerSearchParams(null, null, null, null, null, null, postalCode, null, null, null, null));
+		    new PractitionerSearchParams(null, null, null, null, null, null, postalCode, null, null, null, null, null));
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -612,7 +612,7 @@ public class FhirPractitionerServiceImplTest {
 		when(userService.searchForUsers(any())).thenReturn(new SimpleBundleProvider());
 		
 		IBundleProvider results = practitionerService.searchForPractitioners(
-		    new PractitionerSearchParams(null, null, null, null, null, null, null, country, null, null, null));
+		    new PractitionerSearchParams(null, null, null, null, null, null, null, country, null, null, null, null));
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -633,7 +633,7 @@ public class FhirPractitionerServiceImplTest {
 		when(userService.searchForUsers(any())).thenReturn(new SimpleBundleProvider());
 		
 		IBundleProvider results = practitionerService.searchForPractitioners(
-		    new PractitionerSearchParams(null, null, null, null, null, null, null, country, null, null, null));
+		    new PractitionerSearchParams(null, null, null, null, null, null, null, country, null, null, null, null));
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -656,7 +656,7 @@ public class FhirPractitionerServiceImplTest {
 		when(userService.searchForUsers(any())).thenReturn(new SimpleBundleProvider());
 		
 		IBundleProvider results = practitionerService.searchForPractitioners(
-		    new PractitionerSearchParams(null, null, null, null, null, null, null, null, uuid, null, null));
+		    new PractitionerSearchParams(null, null, null, null, null, null, null, null, uuid, null, null, null));
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -678,7 +678,7 @@ public class FhirPractitionerServiceImplTest {
 		when(userService.searchForUsers(any())).thenReturn(new SimpleBundleProvider());
 		
 		IBundleProvider results = practitionerService.searchForPractitioners(
-		    new PractitionerSearchParams(null, null, null, null, null, null, null, null, uuid, null, null));
+		    new PractitionerSearchParams(null, null, null, null, null, null, null, null, uuid, null, null, null));
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -701,7 +701,7 @@ public class FhirPractitionerServiceImplTest {
 		when(userService.searchForUsers(any())).thenReturn(new SimpleBundleProvider());
 		
 		IBundleProvider results = practitionerService.searchForPractitioners(
-		    new PractitionerSearchParams(null, null, null, null, null, null, null, null, null, lastUpdated, null));
+		    new PractitionerSearchParams(null, null, null, null, null, null, null, null, null, null, lastUpdated, null));
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -724,7 +724,7 @@ public class FhirPractitionerServiceImplTest {
 		when(userService.searchForUsers(any())).thenReturn(new SimpleBundleProvider());
 		
 		IBundleProvider results = practitionerService.searchForPractitioners(
-		    new PractitionerSearchParams(null, null, null, null, null, null, null, null, null, lastUpdated, null));
+		    new PractitionerSearchParams(null, null, null, null, null, null, null, null, null, null, lastUpdated, null));
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -750,7 +750,7 @@ public class FhirPractitionerServiceImplTest {
 		when(userService.searchForUsers(any())).thenReturn(new SimpleBundleProvider());
 		
 		IBundleProvider results = practitionerService.searchForPractitioners(
-		    new PractitionerSearchParams(null, null, null, null, null, null, null, null, null, null, revIncludes));
+		    new PractitionerSearchParams(null, null, null, null, null, null, null, null, null, null, null, revIncludes));
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -776,7 +776,7 @@ public class FhirPractitionerServiceImplTest {
 		when(userService.searchForUsers(any())).thenReturn(new SimpleBundleProvider());
 		
 		IBundleProvider results = practitionerService.searchForPractitioners(
-		    new PractitionerSearchParams(null, null, null, null, null, null, null, null, null, null, revIncludes));
+		    new PractitionerSearchParams(null, null, null, null, null, null, null, null, null, null, null, revIncludes));
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -806,7 +806,7 @@ public class FhirPractitionerServiceImplTest {
 		        .thenReturn(Arrays.asList(practitioner2, new Encounter()));
 		
 		IBundleProvider results = practitionerService.searchForPractitioners(
-		    new PractitionerSearchParams(null, null, null, null, null, null, null, null, null, null, revIncludes));
+		    new PractitionerSearchParams(null, null, null, null, null, null, null, null, null, null, null, revIncludes));
 		
 		List<IBaseResource> resultList = get(results);
 		
