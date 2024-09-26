@@ -109,6 +109,8 @@ public final class FhirConstants {
 	
 	public static final String OPENMRS_FHIR_EXT_ENCOUNTER_TAG = OPENMRS_FHIR_EXT_PREFIX + "/encounter-tag";
 	
+	public static final String OPENMRS_FHIR_EXT_PRACTITIONER_TAG = OPENMRS_FHIR_EXT_PREFIX + "/practitioner-tag";
+	
 	public static final String OPENMRS_FHIR_EXT_OBSERVATION_REFERENCE_RANGE = OPENMRS_FHIR_EXT_PREFIX
 	        + "/obs/reference-range";
 	

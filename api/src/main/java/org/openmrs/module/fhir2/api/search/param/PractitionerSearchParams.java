@@ -42,10 +42,13 @@ public class PractitionerSearchParams extends BaseResourceSearchParams {
 	
 	private StringAndListParam country;
 	
+	private TokenAndListParam tag;
+	
 	@Builder
 	public PractitionerSearchParams(TokenAndListParam identifier, StringAndListParam name, StringAndListParam given,
 	    StringAndListParam family, StringAndListParam city, StringAndListParam state, StringAndListParam postalCode,
-	    StringAndListParam country, TokenAndListParam id, DateRangeParam lastUpdated, HashSet<Include> revIncludes) {
+	    StringAndListParam country, TokenAndListParam id, TokenAndListParam tag, DateRangeParam lastUpdated,
+	    HashSet<Include> revIncludes) {
 		
 		super(id, lastUpdated, null, null, revIncludes);
 		
@@ -57,6 +60,7 @@ public class PractitionerSearchParams extends BaseResourceSearchParams {
 		this.state = state;
 		this.postalCode = postalCode;
 		this.country = country;
+		this.tag = tag;
 	}
 	
 	@Override
@@ -68,6 +72,7 @@ public class PractitionerSearchParams extends BaseResourceSearchParams {
 		        .addParameter(FhirConstants.CITY_SEARCH_HANDLER, getCity())
 		        .addParameter(FhirConstants.STATE_SEARCH_HANDLER, getState())
 		        .addParameter(FhirConstants.POSTALCODE_SEARCH_HANDLER, getPostalCode())
-		        .addParameter(FhirConstants.COUNTRY_SEARCH_HANDLER, getCountry());
+		        .addParameter(FhirConstants.COUNTRY_SEARCH_HANDLER, getCountry())
+		        .addParameter(FhirConstants.TAG_SEARCH_HANDLER, getTag());
 	}
 }

@@ -15,6 +15,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.equalToIgnoringCase;
 import static org.hamcrest.Matchers.everyItem;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
@@ -493,6 +494,65 @@ public class PractitionerFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R4/Practitioner/"))));
 		assertThat(entries, everyItem(hasResource(instanceOf(Practitioner.class))));
 		assertThat(entries, everyItem(hasResource(validResource())));
+		// uuids of 3 providers from the test data set
+		assertThat(entries, hasItem(hasProperty("fullUrl", containsString("f9badd80-ab76-11e2-9e96-0800200c9a66"))));
+		assertThat(entries, hasItem(hasProperty("fullUrl", containsString("f23add80-ab76-11e2-9e96-0800210c9a56"))));
+		assertThat(entries, hasItem(hasProperty("fullUrl", containsString("f23add80-ab76-11e2-9e96-0803210c9a56"))));
+		// users
+		assertThat(entries, hasItem(hasProperty("fullUrl", containsString("c98a1558-e131-11de-babe-001e378eb67e")))); // user from standard test dataset
+		assertThat(entries, hasItem(hasProperty("fullUrl", containsString("A4F30A1B-5EB9-11DF-A648-37A07F9C90FB")))); // daemon user
+		assertThat(entries, hasItem(hasProperty("fullUrl", containsString("c98a1558-e131-11de-babe-001e378eb67e")))); // super user
+	}
+	
+	@Test
+	public void shouldOnlyReturnProvidersWhenLimitingUsingProviderTag() throws Exception {
+		MockHttpServletResponse response = get("/Practitioner?_tag=provider").accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle results = readBundleResponse(response);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(results.hasEntry(), is(true));
+		
+		List<Bundle.BundleEntryComponent> entries = results.getEntry();
+		
+		assertThat(entries.size(), is(3)); // 3 providers in the test data set for this test
+		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R4/Practitioner/"))));
+		assertThat(entries, everyItem(hasResource(instanceOf(Practitioner.class))));
+		assertThat(entries, everyItem(hasResource(validResource())));
+		// uuids of 3 providers from the test data set
+		assertThat(entries, hasItem(hasProperty("fullUrl", containsString("f9badd80-ab76-11e2-9e96-0800200c9a66"))));
+		assertThat(entries, hasItem(hasProperty("fullUrl", containsString("f23add80-ab76-11e2-9e96-0800210c9a56"))));
+		assertThat(entries, hasItem(hasProperty("fullUrl", containsString("f23add80-ab76-11e2-9e96-0803210c9a56"))));
+	}
+	
+	@Test
+	public void shouldOnlyReturnUsersWhenLimitingUsingUserTag() throws Exception {
+		MockHttpServletResponse response = get("/Practitioner?_tag=user").accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle results = readBundleResponse(response);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(results.hasEntry(), is(true));
+		
+		List<Bundle.BundleEntryComponent> entries = results.getEntry();
+		
+		assertThat(entries.size(), is(3)); // 3 users between standard test data and super user/daemon user
+		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R4/Practitioner/"))));
+		assertThat(entries, everyItem(hasResource(instanceOf(Practitioner.class))));
+		assertThat(entries, everyItem(hasResource(validResource())));
+		assertThat(entries, hasItem(hasProperty("fullUrl", containsString("c98a1558-e131-11de-babe-001e378eb67e")))); // user from standard test dataset
+		assertThat(entries, hasItem(hasProperty("fullUrl", containsString("A4F30A1B-5EB9-11DF-A648-37A07F9C90FB")))); // daemon user
+		assertThat(entries, hasItem(hasProperty("fullUrl", containsString("c98a1558-e131-11de-babe-001e378eb67e")))); // super user
 	}
 	
 	@Test
