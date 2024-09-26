@@ -11,11 +11,7 @@ package org.openmrs.module.fhir2.api.impl;
 
 import javax.annotation.Nonnull;
 
-import java.util.Collections;
-
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.param.InternalCodingDt;
-import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -25,7 +21,6 @@ import lombok.Setter;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.openmrs.Provider;
 import org.openmrs.User;
-import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.FhirPractitionerService;
 import org.openmrs.module.fhir2.api.FhirUserService;
@@ -97,36 +92,17 @@ public class FhirPractitionerServiceImpl extends BaseFhirService<Practitioner, P
 	@Override
 	@Transactional(readOnly = true)
 	public IBundleProvider searchForPractitioners(PractitionerSearchParams practitionerSearchParams) {
+		IBundleProvider providerBundle = searchQuery.getQueryResults(practitionerSearchParams.toSearchParameterMap(), dao,
+		    translator, searchQueryInclude);
+		SearchParameterMap theParams = new SearchParameterMap();
+		IBundleProvider userBundle = userService.searchForUsers(theParams);
 		
-		IBundleProvider providerBundle = null;
-		IBundleProvider userBundle = null;
-		
-		if (shouldSearchExplicitlyFor(practitionerSearchParams.getTag(), "provider")) {
-			providerBundle = searchQuery.getQueryResults(practitionerSearchParams.toSearchParameterMap(), dao, translator,
-			    searchQueryInclude);
-		}
-		
-		if (shouldSearchExplicitlyFor(practitionerSearchParams.getTag(), "user")) {
-			SearchParameterMap theParams = new SearchParameterMap();
-			userBundle = userService.searchForUsers(theParams);
-		}
-		
-		if (providerBundle != null && userBundle != null) {
+		if (!providerBundle.isEmpty() && !userBundle.isEmpty()) {
 			return new TwoSearchQueryBundleProvider(providerBundle, userBundle, globalPropertyService);
-		} else if (providerBundle == null && userBundle != null) {
+		} else if (providerBundle.isEmpty() && !userBundle.isEmpty()) {
 			return userBundle;
 		}
 		
 		return providerBundle;
-	}
-	
-	protected boolean shouldSearchExplicitlyFor(TokenAndListParam tokenAndListParam, @Nonnull String valueToCheck) {
-		if (tokenAndListParam == null || tokenAndListParam.size() == 0 || valueToCheck.isEmpty()) {
-			return true;
-		}
-		
-		return tokenAndListParam.getValuesAsQueryTokens().stream().anyMatch(
-		    tokenOrListParam -> tokenOrListParam.doesCodingListMatch(Collections
-		            .singletonList(new InternalCodingDt(FhirConstants.OPENMRS_FHIR_EXT_PRACTITIONER_TAG, valueToCheck))));
 	}
 }

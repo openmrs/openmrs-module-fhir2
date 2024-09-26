@@ -113,7 +113,6 @@ public class PractitionerFhirResourceProvider implements IResourceProvider {
 	        @OptionalParam(name = Practitioner.SP_ADDRESS_POSTALCODE) StringAndListParam postalCode,
 	        @OptionalParam(name = Practitioner.SP_ADDRESS_COUNTRY) StringAndListParam country,
 	        @OptionalParam(name = Practitioner.SP_RES_ID) TokenAndListParam id,
-	        @OptionalParam(name = "_tag") TokenAndListParam tag,
 	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated,
 	        @IncludeParam(reverse = true, allow = { "Encounter:" + Encounter.SP_PARTICIPANT,
 	                "MedicationRequest:" + MedicationRequest.SP_REQUESTER,
@@ -125,7 +124,7 @@ public class PractitionerFhirResourceProvider implements IResourceProvider {
 		
 		return new SearchQueryBundleProviderR3Wrapper(
 		        practitionerService.searchForPractitioners(new PractitionerSearchParams(identifier, name, given, family,
-		                city, state, postalCode, country, id, tag, lastUpdated, revIncludes)));
+		                city, state, postalCode, country, id, lastUpdated, revIncludes)));
 	}
 	
 }
