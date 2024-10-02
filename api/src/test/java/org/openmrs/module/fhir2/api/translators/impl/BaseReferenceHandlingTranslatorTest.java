@@ -60,8 +60,7 @@ public class BaseReferenceHandlingTranslatorTest {
 	
 	private static final String PROVIDER_URI = FhirConstants.PRACTITIONER + "/" + PROVIDER_UUID;
 	
-	private static final String PROVIDER_DISPLAY = "Ricky Morty (" + FhirConstants.IDENTIFIER + ": "
-	        + PROVIDER_TEST_IDENTIFIER + ")";
+	private static final String PROVIDER_DISPLAY = "Ricky Morty";
 	
 	private static final String LOCATION_UUID = "2321gh23-kj34h45-34jk3-34k34k";
 	

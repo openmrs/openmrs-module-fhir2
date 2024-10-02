@@ -135,7 +135,6 @@ public abstract class BaseReferenceHandlingTranslator {
 			
 			if (provider.getIdentifier() != null) {
 				reference.setIdentifier(new Identifier().setValue(provider.getIdentifier()));
-				sb.append(" (").append(FhirConstants.IDENTIFIER).append(": ").append(provider.getIdentifier()).append(")");
 			}
 			
 			reference.setDisplay(sb.toString());
