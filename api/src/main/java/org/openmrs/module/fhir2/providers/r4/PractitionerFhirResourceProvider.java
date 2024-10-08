@@ -32,7 +32,6 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
-import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -123,7 +122,6 @@ public class PractitionerFhirResourceProvider implements IResourceProvider {
 	        @OptionalParam(name = Practitioner.SP_ADDRESS_POSTALCODE) StringAndListParam postalCode,
 	        @OptionalParam(name = Practitioner.SP_ADDRESS_COUNTRY) StringAndListParam country,
 	        @OptionalParam(name = Practitioner.SP_RES_ID) TokenAndListParam id,
-	        @OptionalParam(name = "providerRole") StringOrListParam providerRole,
 	        @OptionalParam(name = "_tag") TokenAndListParam tag,
 	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated,
 	        @IncludeParam(reverse = true, allow = { "Encounter:" + Encounter.SP_PARTICIPANT,
@@ -134,6 +132,6 @@ public class PractitionerFhirResourceProvider implements IResourceProvider {
 		}
 		
 		return practitionerService.searchForPractitioners(new PractitionerSearchParams(identifier, name, given, family, city,
-		        state, postalCode, country, id, providerRole, tag, lastUpdated, revIncludes));
+		        state, postalCode, country, id, tag, lastUpdated, revIncludes));
 	}
 }

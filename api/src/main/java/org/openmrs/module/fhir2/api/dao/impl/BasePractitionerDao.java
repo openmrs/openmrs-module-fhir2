@@ -9,15 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
-import static org.hibernate.criterion.Restrictions.eq;
-
-import java.util.Optional;
-
-import ca.uhn.fhir.rest.param.StringOrListParam;
-import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import org.hibernate.Criteria;
-import org.hibernate.criterion.Criterion;
 import org.openmrs.Auditable;
 import org.openmrs.OpenmrsObject;
 import org.openmrs.module.fhir2.FhirConstants;
@@ -44,8 +37,6 @@ public abstract class BasePractitionerDao<T extends OpenmrsObject & Auditable> e
 				case FhirConstants.ADDRESS_SEARCH_HANDLER:
 					handleAddresses(criteria, entry);
 					break;
-				case FhirConstants.PROVIDER_ROLE_SEARCH_HANDLER:
-					handlerProviderRoles(criteria, (StringOrListParam) entry.getValue());
 				case FhirConstants.COMMON_SEARCH_HANDLER:
 					handleCommonSearchParameters(entry.getValue()).ifPresent(criteria::add);
 					break;
@@ -54,17 +45,6 @@ public abstract class BasePractitionerDao<T extends OpenmrsObject & Auditable> e
 	}
 	
 	protected abstract void handleIdentifier(Criteria criteria, TokenAndListParam identifier);
-	
-	protected void handlerProviderRoles(Criteria criteria, StringOrListParam providerRole) {
-		handleOrListParam(providerRole, param -> handleProviderRole(criteria, param)).ifPresent(criteria::add);
-	}
-	
-	protected Optional<Criterion> handleProviderRole(Criteria criteria, StringParam providerRole) {
-		if (lacksAlias(criteria, "pr")) {
-			criteria.createAlias("providerRole", "pr");
-		}
-		return Optional.of(eq("pr.uuid", providerRole));
-	}
 	
 	@Override
 	protected String getSqlAlias() {
