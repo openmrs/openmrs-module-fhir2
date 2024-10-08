@@ -11,6 +11,7 @@ package org.openmrs.module.fhir2.api.dao.impl;
 
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Path;
 
 import java.util.Optional;
 
@@ -86,9 +87,9 @@ public class FhirDiagnosticReportDaoImpl extends BaseFhirDao<FhirDiagnosticRepor
 	}
 	
 	@Override
-	protected <V, U> String paramToProp(OpenmrsFhirCriteriaContext<V, U> criteriaContext, @NonNull String param) {
+	protected <V, U> Path<?> paramToProp(OpenmrsFhirCriteriaContext<V, U> criteriaContext, @NonNull String param) {
 		if (DiagnosticReport.SP_ISSUED.equals(param)) {
-			return "issued";
+			return criteriaContext.getRoot().get("issued");
 		}
 		
 		return super.paramToProp(criteriaContext, param);

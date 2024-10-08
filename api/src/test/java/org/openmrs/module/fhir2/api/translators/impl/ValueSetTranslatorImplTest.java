@@ -53,7 +53,7 @@ public class ValueSetTranslatorImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Mock
 	private Concept concept;
-
+	
 	@Autowired
 	private FhirGlobalPropertyService globalPropertyService;
 	
@@ -63,7 +63,7 @@ public class ValueSetTranslatorImplTest extends BaseModuleContextSensitiveTest {
 	public void setup() {
 		valueSetTranslator.setConceptSourceService(conceptSourceService);
 	}
-
+	
 	@Before
 	public void setGlobalProperty() {
 		when(globalPropertyService.getGlobalProperty(GLOBAL_PROPERTY_DEFAULT_CONCEPT_MAP_TYPE)).thenReturn("NARROWER-THAN");

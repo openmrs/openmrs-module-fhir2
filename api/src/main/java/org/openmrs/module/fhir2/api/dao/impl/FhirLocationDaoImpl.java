@@ -11,6 +11,7 @@ package org.openmrs.module.fhir2.api.dao.impl;
 
 import javax.annotation.Nonnull;
 import javax.persistence.criteria.From;
+import javax.persistence.criteria.Path;
 
 import java.util.List;
 
@@ -141,18 +142,18 @@ public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLo
 	}
 	
 	@Override
-	protected <V, U> String paramToProp(OpenmrsFhirCriteriaContext<V, U> criteriaContext, @NonNull String param) {
+	protected <V, U> Path<?> paramToProp(OpenmrsFhirCriteriaContext<V, U> criteriaContext, @NonNull String param) {
 		switch (param) {
 			case org.hl7.fhir.r4.model.Location.SP_NAME:
-				return "name";
+				return criteriaContext.getRoot().get("name");
 			case org.hl7.fhir.r4.model.Location.SP_ADDRESS_CITY:
-				return "cityVillage";
+				return criteriaContext.getRoot().get("cityVillage");
 			case org.hl7.fhir.r4.model.Location.SP_ADDRESS_STATE:
-				return "stateProvince";
+				return criteriaContext.getRoot().get("stateProvince");
 			case org.hl7.fhir.r4.model.Location.SP_ADDRESS_COUNTRY:
-				return "country";
+				return criteriaContext.getRoot().get("country");
 			case org.hl7.fhir.r4.model.Location.SP_ADDRESS_POSTALCODE:
-				return "postalCode";
+				return criteriaContext.getRoot().get("postalCode");
 			default:
 				return super.paramToProp(criteriaContext, param);
 			

@@ -12,6 +12,7 @@ package org.openmrs.module.fhir2.api.dao.impl;
 import javax.annotation.Nonnull;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
 import java.util.Date;
@@ -290,9 +291,9 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 	}
 	
 	@Override
-	protected <V, U> String paramToProp(OpenmrsFhirCriteriaContext<V, U> criteriaContext, @NonNull String paramName) {
+	protected <V, U> Path<?> paramToProp(OpenmrsFhirCriteriaContext<V, U> criteriaContext, @NonNull String paramName) {
 		if (Observation.SP_DATE.equals(paramName)) {
-			return "obsDatetime";
+			return criteriaContext.getRoot().get("obsDatetime");
 		}
 		
 		return null;

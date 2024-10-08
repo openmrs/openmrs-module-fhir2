@@ -64,9 +64,9 @@ public class FhirRelatedPersonDaoImpl extends BaseFhirDao<Relationship> implemen
 					            .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery()));
 					break;
 				case FhirConstants.DATE_RANGE_SEARCH_HANDLER:
-					entry.getValue().forEach(
-					    param -> handleDateRange(criteriaContext, personJoin, (DateRangeParam) param.getParam())
-					            .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery()));
+					entry.getValue()
+					        .forEach(param -> handleDateRange(criteriaContext, personJoin, (DateRangeParam) param.getParam())
+					                .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery()));
 					break;
 				case FhirConstants.ADDRESS_SEARCH_HANDLER:
 					handleAddresses(criteriaContext, entry);
@@ -78,23 +78,25 @@ public class FhirRelatedPersonDaoImpl extends BaseFhirDao<Relationship> implemen
 			}
 		});
 	}
-
+	
 	// TODO: find a way of integrating this with the handleDateRange functionality in BaseDao!
-	private <U> Optional<Predicate> handleDateRange(OpenmrsFhirCriteriaContext<Relationship,U> criteriaContext, From<?,?> personJoin, DateRangeParam param) {
+	private <U> Optional<Predicate> handleDateRange(OpenmrsFhirCriteriaContext<Relationship, U> criteriaContext,
+	        From<?, ?> personJoin, DateRangeParam param) {
 		if (param == null) {
 			return Optional.empty();
 		}
-
+		
 		return Optional.ofNullable(criteriaContext.getCriteriaBuilder()
-				.and(toCriteriaArray(Stream.of(handleDate(criteriaContext, personJoin, param.getLowerBound()),
-						handleDate(criteriaContext, personJoin, param.getUpperBound())))));
-    }
-
-	private <U> Optional<Predicate> handleDate(OpenmrsFhirCriteriaContext<Relationship,U> criteriaContext, From<?,?> personJoin, DateParam dateParam) {
+		        .and(toCriteriaArray(Stream.of(handleDate(criteriaContext, personJoin, param.getLowerBound()),
+		            handleDate(criteriaContext, personJoin, param.getUpperBound())))));
+	}
+	
+	private <U> Optional<Predicate> handleDate(OpenmrsFhirCriteriaContext<Relationship, U> criteriaContext,
+	        From<?, ?> personJoin, DateParam dateParam) {
 		if (dateParam == null) {
 			return Optional.empty();
 		}
-
+		
 		int calendarPrecision = dateParam.getPrecision().getCalendarConstant();
 		if (calendarPrecision > Calendar.SECOND) {
 			calendarPrecision = Calendar.SECOND;
@@ -102,42 +104,40 @@ public class FhirRelatedPersonDaoImpl extends BaseFhirDao<Relationship> implemen
 		// TODO We may want to not use the default Calendar
 		Date dateStart = DateUtils.truncate(dateParam.getValue(), calendarPrecision);
 		Date dateEnd = DateUtils.ceiling(dateParam.getValue(), calendarPrecision);
-
+		
 		// TODO This does not properly handle FHIR Periods and Timings, though its unclear if we are using those
 		// see https://www.hl7.org/fhir/search.html#date
 		switch (dateParam.getPrefix()) {
 			case EQUAL:
 				return Optional.of(criteriaContext.getCriteriaBuilder().and(
-						criteriaContext.getCriteriaBuilder().greaterThanOrEqualTo(personJoin.get("birthdate"),
-								dateStart),
-						criteriaContext.getCriteriaBuilder().lessThan(personJoin.get("birthdate"), dateEnd)));
+				    criteriaContext.getCriteriaBuilder().greaterThanOrEqualTo(personJoin.get("birthdate"), dateStart),
+				    criteriaContext.getCriteriaBuilder().lessThan(personJoin.get("birthdate"), dateEnd)));
 			case NOT_EQUAL:
-				return Optional.of(criteriaContext.getCriteriaBuilder().not(criteriaContext.getCriteriaBuilder().and(
-						criteriaContext.getCriteriaBuilder().greaterThanOrEqualTo(personJoin.get("birthdate"),
-								dateStart),
-						criteriaContext.getCriteriaBuilder().lessThan(personJoin.get("birthdate"), dateEnd))));
+				return Optional.of(criteriaContext.getCriteriaBuilder()
+				        .not(criteriaContext.getCriteriaBuilder().and(
+				            criteriaContext.getCriteriaBuilder().greaterThanOrEqualTo(personJoin.get("birthdate"),
+				                dateStart),
+				            criteriaContext.getCriteriaBuilder().lessThan(personJoin.get("birthdate"), dateEnd))));
 			case LESSTHAN_OR_EQUALS:
 			case LESSTHAN:
-				return Optional.of(criteriaContext.getCriteriaBuilder()
-						.lessThanOrEqualTo(personJoin.get("birthdate"), dateEnd));
+				return Optional
+				        .of(criteriaContext.getCriteriaBuilder().lessThanOrEqualTo(personJoin.get("birthdate"), dateEnd));
 			case GREATERTHAN_OR_EQUALS:
 			case GREATERTHAN:
-				return Optional.of(criteriaContext.getCriteriaBuilder()
-						.greaterThanOrEqualTo(personJoin.get("birthdate"), dateStart));
+				return Optional.of(
+				    criteriaContext.getCriteriaBuilder().greaterThanOrEqualTo(personJoin.get("birthdate"), dateStart));
 			case STARTS_AFTER:
-				return Optional.of(
-						criteriaContext.getCriteriaBuilder().greaterThan(personJoin.get("birthdate"), dateEnd));
+				return Optional.of(criteriaContext.getCriteriaBuilder().greaterThan(personJoin.get("birthdate"), dateEnd));
 			case ENDS_BEFORE:
-				return Optional.of(
-						criteriaContext.getCriteriaBuilder().lessThan(personJoin.get("birthdate"), dateEnd));
+				return Optional.of(criteriaContext.getCriteriaBuilder().lessThan(personJoin.get("birthdate"), dateEnd));
 		}
-
+		
 		return Optional.empty();
-    }
-
+	}
+	
 	@Override
 	protected <T, U> Collection<Order> paramToProps(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
-	        @Nonnull SortState sortState) {
+	        @Nonnull SortState<T, U> sortState) {
 		String param = sortState.getParameter();
 		
 		if (param == null) {
@@ -209,7 +209,7 @@ public class FhirRelatedPersonDaoImpl extends BaseFhirDao<Relationship> implemen
 	}
 	
 	@Override
-	protected <V, U> String paramToProp(OpenmrsFhirCriteriaContext<V, U> criteriaContext, @Nonnull String param) {
+	protected <V, U> Path<?> paramToProp(OpenmrsFhirCriteriaContext<V, U> criteriaContext, @Nonnull String param) {
 		From<?, ?> personJoin = criteriaContext.addJoin("personA", "m");
 		From<?, ?> pad = criteriaContext.addJoin(personJoin, "addresses", "pad", javax.persistence.criteria.JoinType.LEFT);
 		switch (param) {
@@ -254,7 +254,7 @@ public class FhirRelatedPersonDaoImpl extends BaseFhirDao<Relationship> implemen
 		From<?, ?> personJoin = criteriaContext.addJoin("personA", "m");
 		From<?, ?> padJoin = criteriaContext.addJoin(personJoin, "addresses", "pad");
 		handlePersonAddress(criteriaContext, padJoin, city, state, postalCode, country)
-		        .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
+		        .ifPresent(criteriaContext::addPredicate);
 	}
 	
 }

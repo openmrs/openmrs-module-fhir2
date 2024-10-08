@@ -12,13 +12,10 @@ package org.openmrs.module.fhir2.api.dao.impl;
 import static org.hl7.fhir.r4.model.Patient.SP_DEATH_DATE;
 
 import javax.annotation.Nonnull;
-import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -48,7 +45,8 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 	@Override
 	public Patient getPatientById(@Nonnull Integer id) {
 		OpenmrsFhirCriteriaContext<Patient, Patient> criteriaContext = createCriteriaContext(Patient.class);
-		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot()).where(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("patientId"), id));
+		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot())
+		        .where(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("patientId"), id));
 		
 		TypedQuery<Patient> query = criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery());
 		return query.getResultList().stream().findFirst().orElse(null);
@@ -65,10 +63,19 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 	
 	@Override
 	public PatientIdentifierType getPatientIdentifierTypeByNameOrUuid(String name, String uuid) {
-		OpenmrsFhirCriteriaContext<PatientIdentifierType, PatientIdentifierType> criteriaContext = createCriteriaContext(PatientIdentifierType.class);
-		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot()).where(criteriaContext.getCriteriaBuilder().or(criteriaContext.getCriteriaBuilder().and(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("name"), name),
-		    criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("retired"), false)), criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("uuid"), uuid)));
-		List<PatientIdentifierType> identifierTypes = criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).getResultList();
+		OpenmrsFhirCriteriaContext<PatientIdentifierType, PatientIdentifierType> criteriaContext = createCriteriaContext(
+		    PatientIdentifierType.class);
+		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot())
+		        .where(
+		            criteriaContext
+		                    .getCriteriaBuilder().or(
+		                        criteriaContext.getCriteriaBuilder().and(
+		                            criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("name"), name),
+		                            criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("retired"),
+		                                false)),
+		                        criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("uuid"), uuid)));
+		List<PatientIdentifierType> identifierTypes = criteriaContext.getEntityManager()
+		        .createQuery(criteriaContext.getCriteriaQuery()).getResultList();
 		
 		if (identifierTypes.isEmpty()) {
 			return null;
@@ -188,9 +195,9 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 	}
 	
 	@Override
-	protected <V, U> String paramToProp(OpenmrsFhirCriteriaContext<V, U> criteriaContext, @NonNull String param) {
+	protected <V, U> Path<?> paramToProp(OpenmrsFhirCriteriaContext<V, U> criteriaContext, @NonNull String param) {
 		if (SP_DEATH_DATE.equalsIgnoreCase(param)) {
-			return "deathDate";
+			return criteriaContext.getRoot().get("deathDate");
 		}
 		return super.paramToProp(criteriaContext, param);
 	}

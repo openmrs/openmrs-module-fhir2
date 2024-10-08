@@ -13,6 +13,7 @@ import static org.hl7.fhir.r4.model.Encounter.SP_DATE;
 
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Path;
 
 import java.util.Optional;
 
@@ -54,10 +55,10 @@ public class FhirVisitDaoImpl extends BaseEncounterDao<Visit> implements FhirVis
 	}
 	
 	@Override
-	protected <V, U> String paramToProp(OpenmrsFhirCriteriaContext<V, U> criteriaContext, @NonNull String param) {
+	protected <V, U> Path<?> paramToProp(OpenmrsFhirCriteriaContext<V, U> criteriaContext, @NonNull String param) {
 		switch (param) {
 			case SP_DATE:
-				return "startDatetime";
+				return criteriaContext.getRoot().get("startDatetime");
 			default:
 				return null;
 		}

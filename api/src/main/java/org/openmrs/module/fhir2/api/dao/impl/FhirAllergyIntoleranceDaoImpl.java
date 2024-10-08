@@ -12,6 +12,7 @@ package org.openmrs.module.fhir2.api.dao.impl;
 import javax.annotation.Nonnull;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
 import java.util.Map;
@@ -180,9 +181,9 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implemen
 	}
 	
 	@Override
-	protected <V, U> String paramToProp(OpenmrsFhirCriteriaContext<V, U> criteriaContext, @NonNull String param) {
+	protected <V, U> Path<?> paramToProp(OpenmrsFhirCriteriaContext<V, U> criteriaContext, @NonNull String param) {
 		if (AllergyIntolerance.SP_SEVERITY.equals(param)) {
-			return "severity";
+			return criteriaContext.getRoot().get("severity");
 		}
 		
 		return super.paramToProp(criteriaContext, param);

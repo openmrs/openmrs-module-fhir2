@@ -16,6 +16,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Order;
+import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
@@ -245,7 +246,13 @@ public abstract class BaseDao {
 			return Optional.empty();
 		}
 		
-		return Optional.of(criteriaBuilder.and((toCriteriaArray(handleAndListParam(andListParam).map(handler)))));
+		Predicate[] predicates = toCriteriaArray(handleAndListParam(andListParam).map(handler));
+		
+		if (predicates.length == 0) {
+			return Optional.empty();
+		}
+		
+		return Optional.of(criteriaBuilder.and(predicates));
 	}
 	
 	protected <T extends IQueryParameterOr<U>, U extends IQueryParameterType> Optional<Predicate> handleAndListParamAsStream(
@@ -255,8 +262,14 @@ public abstract class BaseDao {
 			return Optional.empty();
 		}
 		
-		return Optional.of(criteriaBuilder.and((toCriteriaArray(handleAndListParam(andListParam)
-		        .map(orListParam -> handleOrListParamAsStream(criteriaBuilder, orListParam, handler))))));
+		Predicate[] predicates = toCriteriaArray(handleAndListParam(andListParam)
+		        .map(orListParam -> handleOrListParamAsStream(criteriaBuilder, orListParam, handler)));
+		
+		if (predicates.length == 0) {
+			return Optional.empty();
+		}
+		
+		return Optional.of(criteriaBuilder.and(predicates));
 	}
 	
 	/**
@@ -274,7 +287,13 @@ public abstract class BaseDao {
 			return Optional.empty();
 		}
 		
-		return Optional.of(criteriaBuilder.or(toCriteriaArray(handleOrListParam(orListParam).map(handler))));
+		Predicate[] predicates = toCriteriaArray(handleOrListParam(orListParam).map(handler));
+		
+		if (predicates.length == 0) {
+			return Optional.empty();
+		}
+		
+		return Optional.of(criteriaBuilder.or(predicates));
 	}
 	
 	protected <T extends IQueryParameterType> Optional<Predicate> handleOrListParamAsStream(CriteriaBuilder criteriaBuilder,
@@ -283,7 +302,13 @@ public abstract class BaseDao {
 			return Optional.empty();
 		}
 		
-		return Optional.of(criteriaBuilder.or(toCriteriaArray(handleOrListParam(orListParam).flatMap(handler))));
+		Predicate[] predicates = toCriteriaArray(handleOrListParam(orListParam).flatMap(handler));
+		
+		if (predicates.length == 0) {
+			return Optional.empty();
+		}
+		
+		return Optional.of(criteriaBuilder.or(predicates));
 	}
 	
 	/**
@@ -710,10 +735,13 @@ public abstract class BaseDao {
 		
 		return handleAndListParamBySystem(criteriaContext.getCriteriaBuilder(), concepts, (system, tokens) -> {
 			if (system.isEmpty()) {
-
-				Predicate inConceptId = criteriaContext.getCriteriaBuilder().in(conceptAlias.get("conceptId")).value(criteriaContext.getCriteriaBuilder().literal(tokensToParams(tokens).map(NumberUtils::toInt).collect(Collectors.toList())));
-				Predicate inUuid = criteriaContext.getCriteriaBuilder().in(conceptAlias.get("uuid")).value(criteriaContext.getCriteriaBuilder().literal(tokensToList(tokens)));
-
+				
+				Predicate inConceptId = criteriaContext.getCriteriaBuilder().in(conceptAlias.get("conceptId"))
+				        .value(criteriaContext.getCriteriaBuilder()
+				                .literal(tokensToParams(tokens).map(NumberUtils::toInt).collect(Collectors.toList())));
+				Predicate inUuid = criteriaContext.getCriteriaBuilder().in(conceptAlias.get("uuid"))
+				        .value(criteriaContext.getCriteriaBuilder().literal(tokensToList(tokens)));
+				
 				return Optional.of(criteriaContext.getCriteriaBuilder().or(inConceptId, inUuid));
 			} else {
 				Join<?, ?> conceptMapAliasJoin = criteriaContext.addJoin(conceptAlias, "conceptMappings", conceptMapAlias);
@@ -891,7 +919,7 @@ public abstract class BaseDao {
 	}
 	
 	protected <T, U> Optional<Predicate> handleMedicationRequestReference(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
-	        @Nonnull From<?,?> drugOrderAlias, ReferenceAndListParam drugOrderReference) {
+	        @Nonnull From<?, ?> drugOrderAlias, ReferenceAndListParam drugOrderReference) {
 		if (drugOrderReference == null) {
 			return Optional.empty();
 		}
@@ -914,16 +942,16 @@ public abstract class BaseDao {
 		handleSort(criteriaContext, sort, this::paramToProps).ifPresent(l -> l.forEach(criteriaContext::addOrder));
 	}
 	
-	protected <T, U> Optional<List<javax.persistence.criteria.Order>> handleSort(
-	        OpenmrsFhirCriteriaContext<T, U> criteriaContext, SortSpec sort,
-	        BiFunction<OpenmrsFhirCriteriaContext<T, U>, SortState, Collection<javax.persistence.criteria.Order>> paramToProp) {
-		List<javax.persistence.criteria.Order> orderings = new ArrayList<>();
+	protected <T, U> Optional<List<Order>> handleSort(OpenmrsFhirCriteriaContext<T, U> criteriaContext, SortSpec sort,
+	        BiFunction<OpenmrsFhirCriteriaContext<T, U>, SortState<T, U>, Collection<javax.persistence.criteria.Order>> paramToProp) {
+		
+		List<Order> orderings = new ArrayList<>();
 		SortSpec sortSpec = sort;
 		while (sortSpec != null) {
-			SortState state = SortState.builder().context(criteriaContext).sortOrder(sortSpec.getOrder())
+			SortState<T, U> state = SortState.<T, U> builder().context(criteriaContext).sortOrder(sortSpec.getOrder())
 			        .parameter(sortSpec.getParamName().toLowerCase()).build();
 			
-			Collection<javax.persistence.criteria.Order> orders = paramToProp.apply(criteriaContext, state);
+			Collection<Order> orders = paramToProp.apply(criteriaContext, state);
 			if (orders != null) {
 				orderings.addAll(orders);
 			}
@@ -1029,18 +1057,15 @@ public abstract class BaseDao {
 	 * @param sortState a {@link SortState} object describing the current sort state
 	 * @return the corresponding ordering(s) needed for this property
 	 */
-	protected <T, U> Collection<Order> paramToProps(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
-	        @Nonnull SortState sortState) {
-		Collection<String> prop = paramToProps(criteriaContext, sortState.getParameter());
+	protected <T, U> Collection<Order> paramToProps(@Nonnull OpenmrsFhirCriteriaContext<T, U> criteriaContext,
+	        @Nonnull SortState<T, U> sortState) {
+		Collection<Path<?>> prop = paramToProps(criteriaContext, sortState.getParameter());
 		if (prop != null) {
 			switch (sortState.getSortOrder()) {
 				case ASC:
-					return prop.stream().map(s -> criteriaContext.getCriteriaBuilder().asc(criteriaContext.getRoot().get(s)))
-					        .collect(Collectors.toList());
+					return prop.stream().map(p -> criteriaContext.getCriteriaBuilder().asc(p)).collect(Collectors.toList());
 				case DESC:
-					return prop.stream()
-					        .map(s -> criteriaContext.getCriteriaBuilder().desc(criteriaContext.getRoot().get(s)))
-					        .collect(Collectors.toList());
+					return prop.stream().map(p -> criteriaContext.getCriteriaBuilder().desc(p)).collect(Collectors.toList());
 			}
 		}
 		
@@ -1054,9 +1079,9 @@ public abstract class BaseDao {
 	 * @param param the FHIR parameter to map
 	 * @return the name of the corresponding property from the current query
 	 */
-	protected <T, U> Collection<String> paramToProps(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
+	protected <T, U> Collection<Path<?>> paramToProps(@Nonnull OpenmrsFhirCriteriaContext<T, U> criteriaContext,
 	        @Nonnull String param) {
-		String prop = paramToProp(criteriaContext, param);
+		Path<?> prop = paramToProp(criteriaContext, param);
 		
 		if (prop != null) {
 			return Collections.singleton(prop);
@@ -1072,7 +1097,7 @@ public abstract class BaseDao {
 	 * @param param the FHIR parameter to map
 	 * @return the name of the corresponding property from the current query
 	 */
-	protected <T, U> String paramToProp(OpenmrsFhirCriteriaContext<T, U> criteriaContext, @Nonnull String param) {
+	protected <T, U> Path<?> paramToProp(OpenmrsFhirCriteriaContext<T, U> criteriaContext, @Nonnull String param) {
 		return null;
 	}
 	
@@ -1126,15 +1151,15 @@ public abstract class BaseDao {
 	
 	@SafeVarargs
 	@SuppressWarnings("unused")
-	protected final Predicate[] toCriteriaArray(Optional<? extends Predicate>... predicate) {
+	protected final @Nonnull Predicate[] toCriteriaArray(@Nonnull Optional<? extends Predicate>... predicate) {
 		return toCriteriaArray(Arrays.stream(predicate));
 	}
 	
-	protected Predicate[] toCriteriaArray(Collection<Optional<? extends Predicate>> collection) {
+	protected @Nonnull Predicate[] toCriteriaArray(@Nonnull Collection<Optional<? extends Predicate>> collection) {
 		return toCriteriaArray(collection.stream());
 	}
 	
-	protected Predicate[] toCriteriaArray(Stream<Optional<? extends Predicate>> predicateStream) {
+	protected @Nonnull Predicate[] toCriteriaArray(@Nonnull Stream<Optional<? extends Predicate>> predicateStream) {
 		return predicateStream.filter(Optional::isPresent).map(Optional::get).toArray(Predicate[]::new);
 	}
 	
@@ -1144,9 +1169,9 @@ public abstract class BaseDao {
 	@Data
 	@Builder
 	@EqualsAndHashCode
-	public static final class SortState {
+	public static final class SortState<T, U> {
 		
-		private OpenmrsFhirCriteriaContext context;
+		private OpenmrsFhirCriteriaContext<T, U> context;
 		
 		private SortOrderEnum sortOrder;
 		
@@ -1272,7 +1297,7 @@ public abstract class BaseDao {
 		CriteriaQuery<U> cq = (CriteriaQuery<U>) cb.createQuery(rootType);
 		@SuppressWarnings("unchecked")
 		Root<T> root = (Root<T>) cq.from(rootType);
-
+		
 		return new OpenmrsFhirCriteriaContext<>(em, cb, cq, root);
 	}
 	
@@ -1284,13 +1309,13 @@ public abstract class BaseDao {
 			        "Tried to reference alias " + alias + " before creating a join with that name"));
 		}
 	}
-
-	protected <T, U> From<?, ?> getRootOrJoin(OpenmrsFhirCriteriaContext<T, U> criteriaContext, From<?,?> alias) {
+	
+	protected <T, U> From<?, ?> getRootOrJoin(OpenmrsFhirCriteriaContext<T, U> criteriaContext, From<?, ?> alias) {
 		if (alias == null) {
 			return criteriaContext.getRoot();
 		} else {
 			return criteriaContext.getJoin(alias).orElseThrow(() -> new IllegalStateException(
-					"Tried to reference alias " + alias + " before creating a join with that name"));
+			        "Tried to reference alias " + alias + " before creating a join with that name"));
 		}
 	}
 	

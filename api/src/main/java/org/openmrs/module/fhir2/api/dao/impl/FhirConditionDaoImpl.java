@@ -11,6 +11,7 @@ package org.openmrs.module.fhir2.api.dao.impl;
 
 import javax.annotation.Nonnull;
 import javax.persistence.criteria.From;
+import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
 import java.util.List;
@@ -136,12 +137,12 @@ public class FhirConditionDaoImpl extends BaseFhirDao<Condition> implements Fhir
 	}
 	
 	@Override
-	protected <V, U> String paramToProp(OpenmrsFhirCriteriaContext<V, U> criteriaContext, @NonNull String param) {
+	protected <V, U> Path<?> paramToProp(OpenmrsFhirCriteriaContext<V, U> criteriaContext, @NonNull String param) {
 		switch (param) {
 			case org.hl7.fhir.r4.model.Condition.SP_ONSET_DATE:
-				return "onsetDate";
+				return criteriaContext.getRoot().get("onsetDate");
 			case org.hl7.fhir.r4.model.Condition.SP_RECORDED_DATE:
-				return "dateCreated";
+				return criteriaContext.getRoot().get("dateCreated");
 		}
 		return super.paramToProp(criteriaContext, param);
 	}

@@ -24,6 +24,7 @@ import javax.persistence.criteria.From;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Order;
+import javax.persistence.criteria.Path;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -66,7 +67,7 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 	
 	@Override
 	protected <V, U> Collection<Order> paramToProps(OpenmrsFhirCriteriaContext<V, U> criteriaContext,
-	        @Nonnull SortState sortState) {
+	        @Nonnull SortState<V, U> sortState) {
 		String param = sortState.getParameter();
 		
 		if (param == null) {
@@ -148,7 +149,7 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 			        // first patient name if there are no preferred patient name
 			        cb.and(cb.not(cb.exists(personNameSecondSubquery.finalizeQuery())),
 			            cb.equal(personNameJoin.get("personNameId"), personNameThirdSubquery.finalizeQuery())),
-					// ultimate fallback, I guess?
+			        // ultimate fallback, I guess?
 			        cb.isNull(personNameJoin.get("personNameId")))));
 			
 			String[] properties = null;
@@ -179,29 +180,29 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 					break;
 			}
 			
-			criteriaContext.getCriteriaQuery().orderBy(sortStateOrders);
 			return sortStateOrders;
-			
 		}
 		
 		return super.paramToProps(criteriaContext, sortState);
 	}
 	
 	@Override
-	protected <V, U> String paramToProp(OpenmrsFhirCriteriaContext<V, U> criteriaContext, @Nonnull String param) {
+	protected <V, U> Path<?> paramToProp(OpenmrsFhirCriteriaContext<V, U> criteriaContext, @Nonnull String param) {
 		From<?, ?> person = getPersonProperty(criteriaContext);
-		From<?, ?> address = criteriaContext.addJoin(person, "addresses", "pad");
+		From<?, ?> address = criteriaContext.getJoin("pad")
+		        .orElseGet(() -> criteriaContext.addJoin(person, "addresses", "pad"));
+		
 		switch (param) {
 			case SP_BIRTHDATE:
-				return "birthdate";
+				return person.get("birthdate");
 			case SP_ADDRESS_CITY:
-				address.get("cityVillage");
+				return address.get("cityVillage");
 			case SP_ADDRESS_STATE:
-				address.get("stateProvince");
+				return address.get("stateProvince");
 			case SP_ADDRESS_POSTALCODE:
-				address.get("postalCode");
+				return address.get("postalCode");
 			case SP_ADDRESS_COUNTRY:
-				address.get("country");
+				return address.get("country");
 			default:
 				return null;
 		}
@@ -233,7 +234,7 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 		From<?, ?> person = getPersonProperty(criteriaContext);
 		From<?, ?> padJoin = criteriaContext.addJoin(person, "addresses", "pad");
 		handlePersonAddress(criteriaContext, padJoin, city, state, postalCode, country)
-		        .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
+		        .ifPresent(criteriaContext::addPredicate);
 	}
 	
 	protected <U> void handleNames(OpenmrsFhirCriteriaContext<T, U> criteriaContext, List<PropParam<?>> params) {
