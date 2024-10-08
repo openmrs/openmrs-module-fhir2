@@ -41,22 +41,22 @@ import org.openmrs.module.fhir2.api.util.FhirUtils;
 
 @Setter(AccessLevel.PACKAGE)
 @Slf4j
-public abstract class BaseReferenceHandlingTranslator {
+public final class ReferenceHandlingTranslator {
 	
-	protected Reference createEncounterReference(@Nonnull Encounter encounter) {
+	public static Reference createEncounterReference(@Nonnull Encounter encounter) {
 		return createEncounterReference((OpenmrsObject) encounter);
 	}
 	
-	protected Reference createEncounterReference(@Nonnull Visit visit) {
+	public static Reference createEncounterReference(@Nonnull Visit visit) {
 		return createEncounterReference((OpenmrsObject) visit);
 	}
 	
-	private Reference createEncounterReference(@Nonnull OpenmrsObject encounter) {
+	private static Reference createEncounterReference(@Nonnull OpenmrsObject encounter) {
 		return new Reference().setReference(FhirConstants.ENCOUNTER + "/" + encounter.getUuid())
 		        .setType(FhirConstants.ENCOUNTER);
 	}
 	
-	protected Reference createValueSetReference(@Nonnull Concept concept) {
+	public static Reference createValueSetReference(@Nonnull Concept concept) {
 		if (concept == null || !concept.getSet()) {
 			return null;
 		}
@@ -64,26 +64,26 @@ public abstract class BaseReferenceHandlingTranslator {
 		        .setType(FhirConstants.VALUESET);
 	}
 	
-	protected Reference createMedicationReference(@Nonnull Drug drug) {
+	public static Reference createMedicationReference(@Nonnull Drug drug) {
 		return new Reference().setReference(FhirConstants.MEDICATION + "/" + drug.getUuid())
 		        .setType(FhirConstants.MEDICATION).setDisplay(drug.getDisplayName());
 	}
 	
-	protected Reference createObservationReference(@Nonnull Obs obs) {
+	public static Reference createObservationReference(@Nonnull Obs obs) {
 		return new Reference().setReference(FhirConstants.OBSERVATION + "/" + obs.getUuid())
 		        .setType(FhirConstants.OBSERVATION);
 	}
 	
-	protected Reference createLocationReferenceByUuid(@Nonnull String uuid) {
+	public static Reference createLocationReferenceByUuid(@Nonnull String uuid) {
 		return new Reference().setReference(FhirConstants.LOCATION + "/" + uuid).setType(FhirConstants.LOCATION);
 	}
 	
-	protected Reference createLocationReference(@Nonnull Location location) {
+	public static Reference createLocationReference(@Nonnull Location location) {
 		return new Reference().setReference(FhirConstants.LOCATION + "/" + location.getUuid())
 		        .setType(FhirConstants.LOCATION).setDisplay(getMetadataTranslation(location));
 	}
 	
-	protected Reference createPatientReference(@Nonnull Patient patient) {
+	public static Reference createPatientReference(@Nonnull Patient patient) {
 		Reference reference = new Reference().setReference(FhirConstants.PATIENT + "/" + patient.getUuid())
 		        .setType(FhirConstants.PATIENT);
 		
@@ -108,7 +108,7 @@ public abstract class BaseReferenceHandlingTranslator {
 		return reference;
 	}
 	
-	protected Reference createPractitionerReference(@Nonnull User user) {
+	public static Reference createPractitionerReference(@Nonnull User user) {
 		Reference reference = new Reference().setReference(FhirConstants.PRACTITIONER + "/" + user.getUuid())
 		        .setType(FhirConstants.PRACTITIONER);
 		
@@ -121,7 +121,7 @@ public abstract class BaseReferenceHandlingTranslator {
 		return reference;
 	}
 	
-	protected Reference createPractitionerReference(@Nonnull Provider provider) {
+	public static Reference createPractitionerReference(@Nonnull Provider provider) {
 		Reference reference = new Reference().setReference(FhirConstants.PRACTITIONER + "/" + provider.getUuid())
 		        .setType(FhirConstants.PRACTITIONER);
 		
@@ -143,7 +143,7 @@ public abstract class BaseReferenceHandlingTranslator {
 		return reference;
 	}
 	
-	protected Reference createOrderReference(@Nonnull Order order) {
+	public static Reference createOrderReference(@Nonnull Order order) {
 		if (order == null) {
 			return null;
 		}
@@ -159,7 +159,7 @@ public abstract class BaseReferenceHandlingTranslator {
 		}
 	}
 	
-	protected Reference createDrugOrderReference(@Nonnull DrugOrder drugOrder) {
+	public static Reference createDrugOrderReference(@Nonnull DrugOrder drugOrder) {
 		if (drugOrder == null) {
 			return null;
 		}
@@ -167,11 +167,11 @@ public abstract class BaseReferenceHandlingTranslator {
 		        .setType(FhirConstants.MEDICATION_REQUEST);
 	}
 	
-	protected Optional<String> getReferenceType(Reference reference) {
+	public static Optional<String> getReferenceType(Reference reference) {
 		return FhirUtils.getReferenceType(reference);
 	}
 	
-	protected Optional<String> getReferenceId(Reference reference) {
+	public static Optional<String> getReferenceId(Reference reference) {
 		return FhirUtils.referenceToId(reference.getReference());
 	}
 }

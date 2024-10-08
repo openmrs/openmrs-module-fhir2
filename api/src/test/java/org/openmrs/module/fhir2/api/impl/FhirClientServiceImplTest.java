@@ -31,8 +31,8 @@ public class FhirClientServiceImplTest {
 	
 	@Before
 	public void setup() {
-		FhirContext fhirR3 = FhirContext.forDstu3();
-		FhirContext fhirR4 = FhirContext.forR4();
+		FhirContext fhirR3 = FhirContext.forDstu3Cached();
+		FhirContext fhirR4 = FhirContext.forR4Cached();
 		
 		fhirClientService = new FhirClientServiceImpl(fhirR3, fhirR4);
 	}
