@@ -285,6 +285,8 @@ public final class FhirConstants {
 	
 	public static final String ENCOUNTER_TYPE_REFERENCE_SEARCH_HANDLER = "type.reference.search.handler";
 	
+	public static final String PROVIDER_ROLE_SEARCH_HANDLER = "providerRole.search.handler";
+	
 	public static final String ID_PROPERTY = "_id.property";
 	
 	public static final String LAST_UPDATED_PROPERTY = "_lastUpdated.property";

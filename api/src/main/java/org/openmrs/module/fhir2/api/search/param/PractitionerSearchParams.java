@@ -14,6 +14,7 @@ import java.util.HashSet;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
+import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.Builder;
 import lombok.Data;
@@ -42,13 +43,15 @@ public class PractitionerSearchParams extends BaseResourceSearchParams {
 	
 	private StringAndListParam country;
 	
+	private StringOrListParam providerRole;
+	
 	private TokenAndListParam tag;
 	
 	@Builder
 	public PractitionerSearchParams(TokenAndListParam identifier, StringAndListParam name, StringAndListParam given,
 	    StringAndListParam family, StringAndListParam city, StringAndListParam state, StringAndListParam postalCode,
-	    StringAndListParam country, TokenAndListParam id, TokenAndListParam tag, DateRangeParam lastUpdated,
-	    HashSet<Include> revIncludes) {
+	    StringAndListParam country, TokenAndListParam id, StringOrListParam providerRole, TokenAndListParam tag,
+	    DateRangeParam lastUpdated, HashSet<Include> revIncludes) {
 		
 		super(id, lastUpdated, null, null, revIncludes);
 		
@@ -60,6 +63,7 @@ public class PractitionerSearchParams extends BaseResourceSearchParams {
 		this.state = state;
 		this.postalCode = postalCode;
 		this.country = country;
+		this.providerRole = providerRole;
 		this.tag = tag;
 	}
 	
@@ -73,6 +77,7 @@ public class PractitionerSearchParams extends BaseResourceSearchParams {
 		        .addParameter(FhirConstants.STATE_SEARCH_HANDLER, getState())
 		        .addParameter(FhirConstants.POSTALCODE_SEARCH_HANDLER, getPostalCode())
 		        .addParameter(FhirConstants.COUNTRY_SEARCH_HANDLER, getCountry())
+		        .addParameter(FhirConstants.PROVIDER_ROLE_SEARCH_HANDLER, getProviderRole())
 		        .addParameter(FhirConstants.TAG_SEARCH_HANDLER, getTag());
 	}
 }

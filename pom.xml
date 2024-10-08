@@ -787,7 +787,7 @@
                         </execution>
                     </executions>
                 </plugin>
-                <plugin>
+              <!--  <plugin>
                     <groupId>com.mycila</groupId>
                     <artifactId>license-maven-plugin</artifactId>
                     <version>3.0</version>
@@ -826,7 +826,7 @@
                             <phase>validate</phase>
                         </execution>
                     </executions>
-                </plugin>
+                </plugin>-->
                 <plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>

@@ -101,6 +101,7 @@ public class FhirPractitionerServiceImpl extends BaseFhirService<Practitioner, P
 		IBundleProvider providerBundle = null;
 		IBundleProvider userBundle = null;
 		
+		// TODO only search for providers if we have a provider roles tag
 		if (shouldSearchExplicitlyFor(practitionerSearchParams.getTag(), "provider")) {
 			providerBundle = searchQuery.getQueryResults(practitionerSearchParams.toSearchParameterMap(), dao, translator,
 			    searchQueryInclude);
