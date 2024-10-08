@@ -35,7 +35,6 @@ import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.TwoSearchQueryBundleProvider;
 import org.openmrs.module.fhir2.api.search.param.PractitionerSearchParams;
-import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.PractitionerTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -107,8 +106,7 @@ public class FhirPractitionerServiceImpl extends BaseFhirService<Practitioner, P
 		}
 		
 		if (shouldSearchExplicitlyFor(practitionerSearchParams.getTag(), "user")) {
-			SearchParameterMap theParams = new SearchParameterMap();
-			userBundle = userService.searchForUsers(theParams);
+			userBundle = userService.searchForUsers(practitionerSearchParams.toSearchParameterMap());
 		}
 		
 		if (providerBundle != null && userBundle != null) {
