@@ -90,8 +90,7 @@ public class FhirEncounterDaoImpl extends BaseEncounterDao<Encounter> implements
 	
 	@Override
 	protected <U> void handleDate(OpenmrsFhirCriteriaContext<Encounter, U> criteriaContext, DateRangeParam dateRangeParam) {
-		handleDateRange(criteriaContext, "encounterDatetime", dateRangeParam)
-		        .ifPresent(encounterDatetime -> criteriaContext.addPredicate(encounterDatetime).finalizeQuery());
+		handleDateRange(criteriaContext, "encounterDatetime", dateRangeParam).ifPresent(criteriaContext::addPredicate);
 	}
 	
 	@Override
@@ -101,7 +100,7 @@ public class FhirEncounterDaoImpl extends BaseEncounterDao<Encounter> implements
 		
 		handleAndListParam(criteriaContext.getCriteriaBuilder(), tokenAndListParam,
 		    t -> Optional.of(criteriaContext.getCriteriaBuilder().equal(join.get("uuid"), t.getValue())))
-		            .ifPresent(t -> criteriaContext.addPredicate(t).finalizeQuery());
+		            .ifPresent(criteriaContext::addPredicate);
 	}
 	
 	@Override

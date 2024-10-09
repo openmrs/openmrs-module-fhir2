@@ -52,15 +52,14 @@ public class FhirDiagnosticReportDaoImpl extends BaseFhirDao<FhirDiagnosticRepor
 				case FhirConstants.DATE_RANGE_SEARCH_HANDLER:
 					entry.getValue()
 					        .forEach(param -> handleDateRange(criteriaContext, "issued", (DateRangeParam) param.getParam())
-					                .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery()));
+					                .ifPresent(criteriaContext::addPredicate));
 					break;
 				case FhirConstants.RESULT_SEARCH_HANDLER:
 					entry.getValue().forEach(
 					    param -> handleObservationReference(criteriaContext, (ReferenceAndListParam) param.getParam()));
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(criteriaContext, entry.getValue())
-					        .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
+					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(criteriaContext::addPredicate);
 					break;
 			}
 		});
@@ -70,8 +69,7 @@ public class FhirDiagnosticReportDaoImpl extends BaseFhirDao<FhirDiagnosticRepor
 	        TokenAndListParam code) {
 		if (code != null) {
 			From<?, ?> from = criteriaContext.addJoin("code", "c");
-			handleCodeableConcept(criteriaContext, code, from, "cm", "crt")
-			        .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
+			handleCodeableConcept(criteriaContext, code, from, "cm", "crt").ifPresent(criteriaContext::addPredicate);
 		}
 	}
 	
@@ -82,7 +80,7 @@ public class FhirDiagnosticReportDaoImpl extends BaseFhirDao<FhirDiagnosticRepor
 			
 			handleAndListParam(criteriaContext.getCriteriaBuilder(), result,
 			    token -> Optional.of(criteriaContext.getCriteriaBuilder().equal(resultsJoin.get("uuid"), token.getIdPart())))
-			            .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
+			            .ifPresent(criteriaContext::addPredicate);
 		}
 	}
 	

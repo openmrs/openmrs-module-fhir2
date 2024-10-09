@@ -76,7 +76,7 @@ public class FhirMedicationDispenseDaoImpl_2_6 extends BaseFhirDao<MedicationDis
 				case FhirConstants.MEDICATION_REQUEST_REFERENCE_SEARCH_HANDLER:
 					From<?,?> drugOrder = criteriaContext.addJoin("drugOrder", "drugOrder");
 					entry.getValue().forEach(e -> handleMedicationRequestReference(criteriaContext, drugOrder,
-					    (ReferenceAndListParam) e.getParam()).ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery()));
+					    (ReferenceAndListParam) e.getParam()).ifPresent(criteriaContext::addPredicate));
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
 					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(criteriaContext::addPredicate);

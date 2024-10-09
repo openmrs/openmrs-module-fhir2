@@ -97,7 +97,7 @@ public class FhirGroupDaoImpl extends BaseFhirDao<Cohort> implements FhirGroupDa
 				}
 				
 				return Optional.empty();
-			}).ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
+			}).ifPresent(criteriaContext::addPredicate);
 		}
 	}
 }

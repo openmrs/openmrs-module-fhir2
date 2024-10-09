@@ -65,7 +65,7 @@ public class FhirMedicationRequestDaoImpl extends BaseFhirDao<DrugOrder> impleme
 				case FhirConstants.FULFILLER_STATUS_SEARCH_HANDLER:
 					entry.getValue()
 					        .forEach(param -> handleFulfillerStatus(criteriaContext, (TokenAndListParam) param.getParam())
-					                .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery()));
+					                .ifPresent(criteriaContext::addPredicate));
 					break;
 				case FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER:
 					entry.getValue().forEach(
@@ -85,17 +85,14 @@ public class FhirMedicationRequestDaoImpl extends BaseFhirDao<DrugOrder> impleme
 					break;
 				case FhirConstants.MEDICATION_REFERENCE_SEARCH_HANDLER:
 					From<?, ?> medicationAlias = criteriaContext.addJoin("drug", "d");
-					entry.getValue()
-					        .forEach(d -> handleMedicationReference(criteriaContext, medicationAlias,
-					            (ReferenceAndListParam) d.getParam())
-					                    .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery()));
+					entry.getValue().forEach(d -> handleMedicationReference(criteriaContext, medicationAlias,
+					    (ReferenceAndListParam) d.getParam()).ifPresent(criteriaContext::addPredicate));
 					break;
 				case FhirConstants.STATUS_SEARCH_HANDLER:
 					entry.getValue().forEach(param -> handleStatus(criteriaContext, (TokenAndListParam) param.getParam())
-					        .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery()));
+					        .ifPresent(criteriaContext::addPredicate));
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(criteriaContext, entry.getValue())
-					        .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
+					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(criteriaContext::addPredicate);
 					break;
 			}
 		});
@@ -151,8 +148,7 @@ public class FhirMedicationRequestDaoImpl extends BaseFhirDao<DrugOrder> impleme
 	private <U> void handleCodedConcept(OpenmrsFhirCriteriaContext<DrugOrder, U> criteriaContext, TokenAndListParam code) {
 		if (code != null) {
 			From<?, ?> conceptJoin = criteriaContext.addJoin("concept", "c");
-			handleCodeableConcept(criteriaContext, code, conceptJoin, "cm", "crt")
-			        .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
+			handleCodeableConcept(criteriaContext, code, conceptJoin, "cm", "crt").ifPresent(criteriaContext::addPredicate);
 		}
 	}
 	

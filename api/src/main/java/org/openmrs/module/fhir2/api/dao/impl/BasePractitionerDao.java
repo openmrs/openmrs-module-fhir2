@@ -38,8 +38,7 @@ public abstract class BasePractitionerDao<T extends OpenmrsObject & Auditable> e
 					handleAddresses(criteriaContext, entry);
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(criteriaContext, entry.getValue())
-					        .ifPresent(handler -> criteriaContext.addPredicate(handler).finalizeQuery());
+					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(criteriaContext::addPredicate);
 					break;
 			}
 		});

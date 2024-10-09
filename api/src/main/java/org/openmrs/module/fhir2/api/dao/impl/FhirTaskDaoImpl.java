@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import javax.annotation.Nonnull;
+import javax.persistence.criteria.From;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 
@@ -49,19 +50,19 @@ public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDa
 					    (ReferenceAndListParam) param.getParam(), "ownerReference", "o"));
 					break;
 				case FhirConstants.FOR_REFERENCE_SEARCH_HANDLER:
-					entry.getValue().forEach(
-					    param -> handleReference(criteria, (ReferenceAndListParam) param.getParam(), "forReference", "f"));
+					entry.getValue().forEach(param -> handleReference(criteriaContext,
+					    (ReferenceAndListParam) param.getParam(), "forReference", "f"));
 					break;
 				case FhirConstants.TASK_CODE_SEARCH_HANDLER:
-					entry.getValue().forEach(code -> handleTaskCodeConcept(criteria, (TokenAndListParam) code.getParam()));
+					entry.getValue()
+					        .forEach(code -> handleTaskCodeConcept(criteriaContext, (TokenAndListParam) code.getParam()));
 					break;
 				case FhirConstants.STATUS_SEARCH_HANDLER:
 					entry.getValue().forEach(param -> handleStatus(criteriaContext, (TokenAndListParam) param.getParam())
-					        .ifPresent(handler -> criteriaContext.addPredicate(handler).finalizeQuery()));
+					        .ifPresent(criteriaContext::addPredicate));
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(criteriaContext, entry.getValue())
-					        .ifPresent(handler -> criteriaContext.addPredicate(handler).finalizeQuery());
+					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(criteriaContext::addPredicate);
 					break;
 			}
 		});
@@ -116,16 +117,14 @@ public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDa
 			}
 			
 			return Optional.empty();
-		}).ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
+		}).ifPresent(criteriaContext::addPredicate);
 	}
 	
-	private void handleTaskCodeConcept(Criteria criteria, TokenAndListParam code) {
+	private <U> void handleTaskCodeConcept(OpenmrsFhirCriteriaContext<FhirTask, U> criteriaContext, TokenAndListParam code) {
 		if (code != null) {
-			if (lacksAlias(criteria, "tc")) {
-				criteria.createAlias("taskCode", "tc");
-			}
+			From<?, ?> join = criteriaContext.addJoin("taskCode", "tc");
 			
-			handleCodeableConcept(criteria, code, "tc", "tcm", "tcrt").ifPresent(criteria::add);
+			handleCodeableConcept(criteriaContext, code, join, "tcm", "tcrt").ifPresent(criteriaContext::addPredicate);
 		}
 	}
 }

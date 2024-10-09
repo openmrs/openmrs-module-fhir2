@@ -62,8 +62,7 @@ public class FhirServiceRequestDaoImpl extends BaseFhirDao<TestOrder> implements
 					            .ifPresent(d -> criteriaContext.addPredicate(d).finalizeQuery()));
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(criteriaContext, entry.getValue())
-					        .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
+					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(criteriaContext::addPredicate);
 					break;
 			}
 		});
@@ -72,8 +71,7 @@ public class FhirServiceRequestDaoImpl extends BaseFhirDao<TestOrder> implements
 	private <U> void handleCodedConcept(OpenmrsFhirCriteriaContext<TestOrder, U> criteriaContext, TokenAndListParam code) {
 		if (code != null) {
 			From<?, ?> conceptJoin = criteriaContext.addJoin("concept", "c");
-			handleCodeableConcept(criteriaContext, code, conceptJoin, "cm", "crt")
-			        .ifPresent(handler -> criteriaContext.addPredicate(handler).finalizeQuery());
+			handleCodeableConcept(criteriaContext, code, conceptJoin, "cm", "crt").ifPresent(criteriaContext::addPredicate);
 		}
 	}
 	

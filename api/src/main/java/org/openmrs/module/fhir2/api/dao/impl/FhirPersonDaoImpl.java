@@ -9,9 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
-import static org.hibernate.criterion.Restrictions.eq;
-
 import javax.annotation.Nonnull;
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Predicate;
 
 import java.util.List;
@@ -22,7 +21,6 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
-import org.hibernate.sql.JoinType;
 import org.openmrs.Person;
 import org.openmrs.PersonAttribute;
 import org.openmrs.module.fhir2.FhirConstants;
@@ -38,10 +36,17 @@ public class FhirPersonDaoImpl extends BasePersonDao<Person> implements FhirPers
 	@SuppressWarnings("unchecked")
 	public List<PersonAttribute> getActiveAttributesByPersonAndAttributeTypeUuid(@Nonnull Person person,
 	        @Nonnull String personAttributeTypeUuid) {
-		return (List<PersonAttribute>) getSessionFactory().getCurrentSession().createCriteria(PersonAttribute.class)
-		        .createAlias("person", "p", JoinType.INNER_JOIN, eq("p.id", person.getId()))
-		        .createAlias("attributeType", "pat").add(eq("pat.uuid", personAttributeTypeUuid)).add(eq("voided", false))
-		        .list();
+		OpenmrsFhirCriteriaContext<PersonAttribute, PersonAttribute> criteriaContext = createCriteriaContext(
+		    PersonAttribute.class);
+		CriteriaBuilder cb = criteriaContext.getCriteriaBuilder();
+		
+		criteriaContext.addJoin("person", "p",
+		    (from) -> cb.and(cb.equal(from.get("id"), person.getId()), cb.equal(from.get("voided"), false)));
+		criteriaContext.addJoin("attributeType", "pat",
+		    (from) -> cb.and(cb.equal(from.get("uuid"), personAttributeTypeUuid), cb.equal(from.get("retired"), false)));
+		criteriaContext.addPredicate(cb.equal(criteriaContext.getRoot().get("voided"), false));
+		
+		return criteriaContext.getEntityManager().createQuery(criteriaContext.finalizeQuery()).getResultList();
 	}
 	
 	@Override
@@ -53,22 +58,19 @@ public class FhirPersonDaoImpl extends BasePersonDao<Person> implements FhirPers
 					entry.getValue().forEach(param -> handleNames(criteriaContext, entry.getValue()));
 					break;
 				case FhirConstants.GENDER_SEARCH_HANDLER:
-					entry.getValue()
-					        .forEach(param -> handleGender(criteriaContext, getPersonProperty(criteriaContext), "gender",
-					            (TokenAndListParam) param.getParam())
-					                    .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery()));
+					entry.getValue().forEach(param -> handleGender(criteriaContext, getPersonProperty(criteriaContext),
+					    "gender", (TokenAndListParam) param.getParam()).ifPresent(criteriaContext::addPredicate));
 					break;
 				case FhirConstants.DATE_RANGE_SEARCH_HANDLER:
 					entry.getValue().forEach(
 					    param -> handleDateRange(criteriaContext, "birthdate", (DateRangeParam) param.getParam())
-					            .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery()));
+					            .ifPresent(criteriaContext::addPredicate));
 					break;
 				case FhirConstants.ADDRESS_SEARCH_HANDLER:
 					handleAddresses(criteriaContext, entry);
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(criteriaContext, entry.getValue())
-					        .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
+					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(criteriaContext::addPredicate);
 					break;
 			}
 		});

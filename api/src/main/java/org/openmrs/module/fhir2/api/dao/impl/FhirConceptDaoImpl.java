@@ -67,7 +67,6 @@ public class FhirConceptDaoImpl extends BaseFhirDao<Concept> implements FhirConc
 		
 		criteriaContext.addOrder(
 		    criteriaContext.getCriteriaBuilder().asc(criteriaContext.getRoot().join("concept").get("retired")));
-		criteriaContext.finalizeQuery();
 		
 		return Optional.ofNullable(
 		    criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).getSingleResult());
@@ -111,7 +110,7 @@ public class FhirConceptDaoImpl extends BaseFhirDao<Concept> implements FhirConc
 		Join<?, ?> conceptNamesJoin = criteriaContext.addJoin("names", "cn");
 		handleAndListParam(criteriaContext.getCriteriaBuilder(), titlePattern,
 		    (title) -> propertyLike(criteriaContext, conceptNamesJoin, "name", title))
-		            .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
+		            .ifPresent(criteriaContext::addPredicate);
 	}
 	
 	protected <U> void createConceptMapCriteriaBuilder(@Nonnull ConceptSource conceptSource, String mappingCode) {
@@ -129,9 +128,7 @@ public class FhirConceptDaoImpl extends BaseFhirDao<Concept> implements FhirConc
 			criteriaContext.addPredicate(
 			    criteriaContext.getCriteriaBuilder().equal(conceptReferenceTermJoin.get("code"), mappingCode));
 		}
-		criteriaContext
-		        .addPredicate(
-		            criteriaContext.getCriteriaBuilder().equal(conceptReferenceTermJoin.get("conceptSource"), conceptSource))
-		        .finalizeQuery();
+		criteriaContext.addPredicate(
+		    criteriaContext.getCriteriaBuilder().equal(conceptReferenceTermJoin.get("conceptSource"), conceptSource));
 	}
 }

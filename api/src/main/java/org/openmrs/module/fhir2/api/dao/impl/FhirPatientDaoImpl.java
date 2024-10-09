@@ -106,10 +106,8 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 					handleNames(criteriaContext, entry.getValue());
 					break;
 				case FhirConstants.GENDER_SEARCH_HANDLER:
-					entry.getValue()
-					        .forEach(p -> handleGender(criteriaContext, getPersonProperty(criteriaContext),
-					            p.getPropertyName(), (TokenAndListParam) p.getParam())
-					                    .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery()));
+					entry.getValue().forEach(p -> handleGender(criteriaContext, getPersonProperty(criteriaContext),
+					    p.getPropertyName(), (TokenAndListParam) p.getParam()).ifPresent(criteriaContext::addPredicate));
 					break;
 				case FhirConstants.IDENTIFIER_SEARCH_HANDLER:
 					entry.getValue().forEach(
@@ -118,20 +116,18 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 				case FhirConstants.DATE_RANGE_SEARCH_HANDLER:
 					entry.getValue()
 					        .forEach(dateRangeParam -> handleDateRange(criteriaContext, dateRangeParam.getPropertyName(),
-					            (DateRangeParam) dateRangeParam.getParam())
-					                    .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery()));
+					            (DateRangeParam) dateRangeParam.getParam()).ifPresent(criteriaContext::addPredicate));
 					break;
 				case FhirConstants.BOOLEAN_SEARCH_HANDLER:
 					entry.getValue().forEach(
 					    b -> handleBoolean(criteriaContext, b.getPropertyName(), (TokenAndListParam) b.getParam())
-					            .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery()));
+					            .ifPresent(criteriaContext::addPredicate));
 					break;
 				case FhirConstants.ADDRESS_SEARCH_HANDLER:
 					handleAddresses(criteriaContext, entry);
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(criteriaContext, entry.getValue())
-					        .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
+					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(criteriaContext::addPredicate);
 					break;
 			}
 		});
@@ -167,7 +163,7 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 			                criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("voided"), false))));
 			
 			return Optional.of(criteriaContext.getCriteriaBuilder().or(toCriteriaArray(arrayList)));
-		}).ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
+		}).ifPresent(criteriaContext::addPredicate);
 	}
 	
 	protected <U> void handleIdentifier(OpenmrsFhirCriteriaContext<Patient, U> criteriaContext,
@@ -191,7 +187,7 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 				    criteriaContext.getCriteriaBuilder().equal(identifiersIdentifierTypeJoin.get("name"), system),
 				    criteriaContext.getCriteriaBuilder().in(identifiersJoin.get("identifier")).value(tokensToList(tokens))));
 			}
-		}).ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
+		}).ifPresent(criteriaContext::addPredicate);
 	}
 	
 	@Override

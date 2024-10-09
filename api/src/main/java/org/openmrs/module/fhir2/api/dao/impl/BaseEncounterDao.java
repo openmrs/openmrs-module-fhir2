@@ -47,7 +47,7 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 					entry.getValue().forEach(param -> {
 						From<?, ?> locationAlias = criteriaContext.addJoin("location", "l");
 						handleLocationReference(criteriaContext, locationAlias, (ReferenceAndListParam) param.getParam())
-						        .ifPresent(l -> criteriaContext.addPredicate(l).finalizeQuery());
+						        .ifPresent(criteriaContext::addPredicate);
 					});
 					break;
 				case FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER:
@@ -63,8 +63,7 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 					        .forEach(param -> handleEncounterType(criteriaContext, (TokenAndListParam) param.getParam()));
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(criteriaContext, entry.getValue())
-					        .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
+					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(criteriaContext::addPredicate);
 					break;
 				case FhirConstants.HAS_SEARCH_HANDLER:
 					entry.getValue()
@@ -92,8 +91,8 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 					Set<String> values = new HashSet<>();
 					hasOrListParam.getValuesAsQueryTokens().forEach(orParam -> values.add(orParam.getParameterValue()));
 					
-					log.debug("Handling hasParam = " + hasParam.getQueryParameterQualifier());
-					log.debug("With value in " + values);
+					log.debug("Handling hasParam = {}", hasParam.getQueryParameterQualifier());
+					log.debug("With value in {}", values);
 					
 					boolean handled = false;
 					
@@ -165,7 +164,6 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 								}
 								handled = true;
 							}
-							criteriaContext.finalizeQuery();
 						}
 					}
 					if (!handled) {

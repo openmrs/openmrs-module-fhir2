@@ -550,7 +550,7 @@ public abstract class BaseDao {
 			}
 			
 			return Optional.empty();
-		}).ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
+		}).ifPresent(criteriaContext::addPredicate);
 	}
 	
 	protected <T, U> Optional<Predicate> handleGender(OpenmrsFhirCriteriaContext<T, U> criteriaContext, From<?, ?> from,
@@ -671,7 +671,7 @@ public abstract class BaseDao {
 				}
 				
 				return Optional.empty();
-			}).ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
+			}).ifPresent(criteriaContext::addPredicate);
 		}
 	}
 	
@@ -722,11 +722,11 @@ public abstract class BaseDao {
 				}
 				
 				return Optional.empty();
-			}).ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
+			}).ifPresent(criteriaContext::addPredicate);
 		}
 	}
 	
-	protected <T, U> Optional<Predicate> handleCodeableConcept(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
+	protected <T, U> Optional<Predicate> handleCodeableConcept(@Nonnull OpenmrsFhirCriteriaContext<T, U> criteriaContext,
 	        TokenAndListParam concepts, @Nonnull From<?, ?> conceptAlias, @Nonnull String conceptMapAlias,
 	        @Nonnull String conceptReferenceTermAlias) {
 		if (concepts == null) {
@@ -776,19 +776,19 @@ public abstract class BaseDao {
 			                propertyLike(criteriaContext, personNameAliasJoin, "givenName", tokenParam),
 			                propertyLike(criteriaContext, personNameAliasJoin, "middleName", tokenParam),
 			                propertyLike(criteriaContext, personNameAliasJoin, "familyName", tokenParam)))
-			            .flatMap(Collection::stream)).ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
+			            .flatMap(Collection::stream)).ifPresent(criteriaContext::addPredicate);
 		}
 		
 		if (given != null) {
 			handleAndListParam(criteriaContext.getCriteriaBuilder(), given,
 			    (givenName) -> propertyLike(criteriaContext, personNameAliasJoin, "givenName", givenName))
-			            .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
+			            .ifPresent(criteriaContext::addPredicate);
 		}
 		
 		if (family != null) {
 			handleAndListParam(criteriaContext.getCriteriaBuilder(), family,
 			    (familyName) -> propertyLike(criteriaContext, personNameAliasJoin, "familyName", familyName))
-			            .ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
+			            .ifPresent(criteriaContext::addPredicate);
 		}
 	}
 	
@@ -843,7 +843,7 @@ public abstract class BaseDao {
 				}
 				
 				return Optional.empty();
-			}).ifPresent(c -> criteriaContext.addPredicate(c).finalizeQuery());
+			}).ifPresent(criteriaContext::addPredicate);
 		}
 	}
 	

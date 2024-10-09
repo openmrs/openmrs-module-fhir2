@@ -33,8 +33,7 @@ public class FhirVisitDaoImpl extends BaseEncounterDao<Visit> implements FhirVis
 	
 	@Override
 	protected <U> void handleDate(OpenmrsFhirCriteriaContext<Visit, U> criteriaContext, DateRangeParam dateRangeParam) {
-		handleDateRange(criteriaContext, "startDatetime", dateRangeParam)
-		        .ifPresent(handle -> criteriaContext.addPredicate(handle).finalizeQuery());
+		handleDateRange(criteriaContext, "startDatetime", dateRangeParam).ifPresent(criteriaContext::addPredicate);
 	}
 	
 	@Override
@@ -43,7 +42,7 @@ public class FhirVisitDaoImpl extends BaseEncounterDao<Visit> implements FhirVis
 		Join<?, ?> visitTypeJoin = criteriaContext.addJoin("visitType", "vt");
 		handleAndListParam(criteriaContext.getCriteriaBuilder(), tokenAndListParam,
 		    t -> Optional.of(criteriaContext.getCriteriaBuilder().equal(visitTypeJoin.get("uuid"), t.getValue())))
-		            .ifPresent(t -> criteriaContext.addPredicate(t).finalizeQuery());
+		            .ifPresent(criteriaContext::addPredicate);
 	}
 	
 	@Override

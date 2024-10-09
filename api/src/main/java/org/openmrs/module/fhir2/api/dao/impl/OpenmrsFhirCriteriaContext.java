@@ -106,6 +106,38 @@ public class OpenmrsFhirCriteriaContext<T, U> {
 	}
 	
 	/**
+	 * Adds a join to the query managed by this {@link OpenmrsFhirCriteriaContext}. This join implicitly
+	 * joins with the root using the specified attribute.
+	 *
+	 * @param attributeName The name of the attribute (from the root object) to join on
+	 * @param alias The alias to use for this join
+	 * @param onGenerator A {@link Function} that takes a {@link From} object and returns the predicate
+	 *            for the on clause
+	 * @return Returns the new {@link Join} that has been added to the criteria context
+	 */
+	public Join<?, ?> addJoin(@Nonnull String attributeName, @Nonnull String alias,
+	        @Nonnull Function<From<?, ?>, Predicate> onGenerator) {
+		return addJoin(getRoot(), attributeName, alias, JoinType.INNER, onGenerator);
+	}
+	
+	/**
+	 * Adds a join to the query managed by this {@link OpenmrsFhirCriteriaContext}. This join implicitly
+	 * joins with the root using the specified attribute.
+	 *
+	 * @param attributeName The name of the attribute (from the root object) to join on
+	 * @param alias The alias to use for this join
+	 * @param joinType The {@link JoinType} representing the type of join, i.e., {@code INNER},
+	 *            {@code LEFT}, {@code RIGHT}
+	 * @param onGenerator A {@link Function} that takes a {@link From} object and returns the predicate
+	 *            for the on clause
+	 * @return Returns the new {@link Join} that has been added to the criteria context
+	 */
+	public Join<?, ?> addJoin(@Nonnull String attributeName, @Nonnull String alias, @Nonnull JoinType joinType,
+	        @Nonnull Function<From<?, ?>, Predicate> onGenerator) {
+		return addJoin(getRoot(), attributeName, alias, joinType, onGenerator);
+	}
+	
+	/**
 	 * Adds a join to the query managed by this {@link OpenmrsFhirCriteriaContext}. This join is
 	 * explicitly joined to the {@link From} object passed in, which should be either the root or
 	 * another join.
@@ -149,8 +181,8 @@ public class OpenmrsFhirCriteriaContext<T, U> {
 	 *            for the on clause
 	 * @return Returns the new {@link Join} that has been added to the criteria context
 	 */
-	public Join<?, ?> addJoin(From<?, ?> from, @Nonnull String attributeName, @Nonnull String alias,
-	        Function<From<?, ?>, Predicate> onGenerator) {
+	public Join<?, ?> addJoin(@Nonnull From<?, ?> from, @Nonnull String attributeName, @Nonnull String alias,
+	        @Nonnull Function<From<?, ?>, Predicate> onGenerator) {
 		return addJoin(from, attributeName, alias, JoinType.INNER, onGenerator);
 	}
 	
@@ -171,8 +203,8 @@ public class OpenmrsFhirCriteriaContext<T, U> {
 	 */
 	public Join<?, ?> addJoin(From<?, ?> from, @Nonnull String attributeName, @Nonnull String alias,
 	        @Nonnull JoinType joinType, Function<From<?, ?>, Predicate> onGenerator) {
-		return Optional.ofNullable(aliases.get(alias)).orElseGet(() -> {
-			Join newJoin = from.join(attributeName, joinType);
+		return Optional.<Join<?, ?>> ofNullable(aliases.get(alias)).orElseGet(() -> {
+			Join<?, ?> newJoin = from.join(attributeName, joinType);
 			newJoin.alias(alias);
 			aliases.put(alias, newJoin);
 			
