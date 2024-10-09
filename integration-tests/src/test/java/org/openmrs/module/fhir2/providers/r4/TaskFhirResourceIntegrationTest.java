@@ -27,6 +27,7 @@ import static org.openmrs.module.fhir2.api.util.GeneralUtils.inputStreamToString
 
 import java.io.InputStream;
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
@@ -37,13 +38,7 @@ import java.util.Objects;
 
 import lombok.AccessLevel;
 import lombok.Getter;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.DateTimeType;
-import org.hl7.fhir.r4.model.DecimalType;
-import org.hl7.fhir.r4.model.OperationOutcome;
-import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.StringType;
-import org.hl7.fhir.r4.model.Task;
+import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Task.ParameterComponent;
 import org.hl7.fhir.r4.model.Task.TaskOutputComponent;
 import org.junit.Before;
@@ -178,7 +173,9 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		assertThat(task.getAuthoredOn(), within(1, ChronoUnit.MINUTES, new Date()));
 		assertThat(task.getLastModified(), within(1, ChronoUnit.MINUTES, new Date()));
 		assertThat(task, validResource());
+		assertThat(task.getCode().getText(), equalTo("fulfill"));
 		assertThat(task.getBasedOn(), hasSize(2));
+		assertThat(task.getPartOf(), hasSize(1));
 		
 		assertThat(task.getOutput(), hasSize(4));
 		assertThat(task.getInput(), hasSize(4));
@@ -195,8 +192,10 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		assertThat(newTask.getIntent(), equalTo(task.getIntent()));
 		assertThat(task.getAuthoredOn(), equalTo(task.getAuthoredOn()));
 		assertThat(task.getLastModified(), equalTo(task.getLastModified()));
+		assertThat(task.getCode(), equalTo(task.getCode()));
 		assertThat(newTask.getOutput(), hasSize(4));
 		assertThat(newTask.getInput(), hasSize(4));
+		assertThat(newTask.getPartOf(), hasSize(1));
 		
 		List<TaskOutputComponent> outputList = newTask.getOutput();
 		outputList.sort(Comparator.comparing(o -> o.getValue().toString()));
@@ -294,8 +293,10 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		assertThat(task.getAuthoredOn(), within(1, ChronoUnit.MINUTES, new Date()));
 		assertThat(task.getLastModified(), within(1, ChronoUnit.MINUTES, new Date()));
 		assertThat(task, validResource());
+		assertThat(task.getCode().getText(), equalTo("fulfill"));
 		assertThat(task.getOutput(), hasSize(4));
 		assertThat(task.getInput(), hasSize(4));
+		assertThat(task.getPartOf(), hasSize(1));
 		
 		response = get("/Task/" + task.getIdElement().getIdPart()).accept(FhirMediaTypes.XML).go();
 		
@@ -309,8 +310,10 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		assertThat(newTask.getIntent(), equalTo(task.getIntent()));
 		assertThat(task.getAuthoredOn(), equalTo(task.getAuthoredOn()));
 		assertThat(task.getLastModified(), equalTo(task.getLastModified()));
+		assertThat(newTask.getCode().getText(), equalTo(task.getCode().getText()));
 		assertThat(newTask.getOutput(), hasSize(4));
 		assertThat(newTask.getInput(), hasSize(4));
+		assertThat(newTask.getPartOf(), hasSize(1));
 		
 		List<TaskOutputComponent> outputList = newTask.getOutput();
 		outputList.sort(Comparator.comparing(o -> o.getValue().toString()));
@@ -400,6 +403,11 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		
 		assertThat(task.getStatus(), is(Task.TaskStatus.ACCEPTED));
 		
+		LocalDateTime localDateTime = LocalDateTime.of(2024, Month.APRIL, 12, 10, 0);
+		Date executionEndTime = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+		
+		task.setExecutionPeriod(new Period().setEnd(executionEndTime));
+		task.addNote(new Annotation().setText("Test Comment"));
 		task.setStatus(Task.TaskStatus.COMPLETED);
 		
 		response = put("/Task/" + TASK_UUID).jsonContent(toJson(task)).accept(FhirMediaTypes.JSON).go();
@@ -413,6 +421,9 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		assertThat(updatedTask, notNullValue());
 		assertThat(updatedTask.getIdElement().getIdPart(), equalTo(TASK_UUID));
 		assertThat(updatedTask.getStatus(), is(Task.TaskStatus.COMPLETED));
+		assertThat(updatedTask.getNoteFirstRep().getText(), equalTo("Test Comment"));
+		assertThat(updatedTask.getExecutionPeriod().getEnd(), equalTo(executionEndTime));
+		assertThat(updatedTask, validResource());
 		assertThat(updatedTask, validResource());
 		
 		response = get("/Task/" + TASK_UUID).accept(FhirMediaTypes.JSON).go();
@@ -478,7 +489,12 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		
 		assertThat(task.getStatus(), is(Task.TaskStatus.ACCEPTED));
 		
+		LocalDateTime localDateTime = LocalDateTime.of(2024, Month.APRIL, 12, 10, 0);
+		Date executionStartTime = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+		
 		task.setStatus(Task.TaskStatus.COMPLETED);
+		task.setExecutionPeriod(new Period().setStart(executionStartTime));
+		task.addNote(new Annotation().setText("Test Comment"));
 		
 		response = put("/Task/" + TASK_UUID).xmlContent(toXML(task)).accept(FhirMediaTypes.XML).go();
 		
@@ -491,6 +507,8 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		assertThat(updatedTask, notNullValue());
 		assertThat(updatedTask.getIdElement().getIdPart(), equalTo(TASK_UUID));
 		assertThat(updatedTask.getStatus(), is(Task.TaskStatus.COMPLETED));
+		assertThat(updatedTask.getExecutionPeriod().getStart(), equalTo(executionStartTime));
+		assertThat(updatedTask.getNoteFirstRep().getText(), equalTo("Test Comment"));
 		assertThat(updatedTask, validResource());
 		
 		response = get("/Task/" + TASK_UUID).accept(FhirMediaTypes.XML).go();
@@ -677,7 +695,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		
 		List<Bundle.BundleEntryComponent> entries = results.getEntry();
 		
-		assertThat(entries, hasSize(2));
+		assertThat(entries, hasSize(5));
 		assertThat(entries, everyItem(hasResource(hasProperty("status", is(Task.TaskStatus.REQUESTED)))));
 		assertThat(entries,
 		    containsInRelativeOrder(
@@ -728,7 +746,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		
 		List<Bundle.BundleEntryComponent> entries = results.getEntry();
 		
-		assertThat(entries, hasSize(2));
+		assertThat(entries, hasSize(5));
 		assertThat(entries, everyItem(hasResource(hasProperty("status", is(Task.TaskStatus.REQUESTED)))));
 		assertThat(entries,
 		    containsInRelativeOrder(
@@ -754,7 +772,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
-		assertThat(result, hasProperty("total", equalTo(2)));
+		assertThat(result, hasProperty("total", equalTo(5)));
 	}
 	
 	@Test
@@ -769,7 +787,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
-		assertThat(result, hasProperty("total", equalTo(2)));
+		assertThat(result, hasProperty("total", equalTo(5)));
 	}
 	
 	@Test

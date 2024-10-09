@@ -30,6 +30,7 @@ import org.mockito.Mock;
 import org.openmrs.Concept;
 import org.openmrs.ConceptDescription;
 import org.openmrs.ConceptMap;
+import org.openmrs.ConceptMapType;
 import org.openmrs.ConceptName;
 import org.openmrs.ConceptReferenceTerm;
 import org.openmrs.ConceptSet;
@@ -86,8 +87,10 @@ public class ValueSetTranslatorImplTest extends BaseModuleContextSensitiveTest {
 		ConceptMap conceptMap = mock(ConceptMap.class);
 		ConceptReferenceTerm conceptReferenceTerm = mock(ConceptReferenceTerm.class);
 		ConceptSource conceptSource = mock(ConceptSource.class);
+		ConceptMapType conceptMapType = mock(ConceptMapType.class);
 		
 		when(conceptMap.getConceptReferenceTerm()).thenReturn(conceptReferenceTerm);
+		when(conceptMap.getConceptMapType()).thenReturn(conceptMapType);
 		when(conceptReferenceTerm.getConceptSource()).thenReturn(conceptSource);
 		when(conceptReferenceTerm.getCode()).thenReturn("1000-1");
 		when(conceptSource.getName()).thenReturn("LOINC");

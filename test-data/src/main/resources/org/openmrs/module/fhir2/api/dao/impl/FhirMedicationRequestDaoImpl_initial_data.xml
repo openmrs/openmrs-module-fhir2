@@ -116,4 +116,5 @@
     <drug_order order_id="8" drug_inventory_id="2003" dose="325.0" dose_units="50" as_needed="false" frequency="3"
                 dosing_type="org.openmrs.SimpleDosingInstructions" route="22" quantity="1.0" quantity_units="51"
                 num_refills="10" dispense_as_written="0" />
+
 </dataset>

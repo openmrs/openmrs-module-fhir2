@@ -123,10 +123,10 @@ public class EncounterTranslatorImpl extends BaseEncounterTranslator implements 
 			existingProviders = new LinkedHashSet<>(encounter.getParticipant().size());
 		}
 		
-		existingProviders.addAll(encounter
-		        .getParticipant().stream().map(encounterParticipantComponent -> participantTranslator
-		                .toOpenmrsType(new EncounterProvider(), encounterParticipantComponent))
-		        .collect(Collectors.toCollection(LinkedHashSet::new)));
+		existingProviders.addAll(encounter.getParticipant().stream()
+		        .map(encounterParticipantComponent -> participantTranslator.toOpenmrsType(new EncounterProvider(),
+		            encounterParticipantComponent))
+		        .peek(ep -> ep.setEncounter(existingEncounter)).collect(Collectors.toCollection(LinkedHashSet::new)));
 		
 		existingEncounter.setEncounterProviders(existingProviders);
 		

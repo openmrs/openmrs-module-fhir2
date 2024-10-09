@@ -180,7 +180,7 @@ public class TaskFhirResourceProviderTest extends BaseFhirProvenanceResourceTest
 		statusToken.setValue("ACCEPTED");
 		status.addAnd(new TokenOrListParam().add(statusToken));
 		
-		IBundleProvider results = resourceProvider.searchTasks(null, null, status, null, null, null, null);
+		IBundleProvider results = resourceProvider.searchTasks(null, null, null, null, status, null, null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -204,10 +204,10 @@ public class TaskFhirResourceProviderTest extends BaseFhirProvenanceResourceTest
 		HashSet<Include> includes = new HashSet<>();
 		includes.add(new Include("Task:patient"));
 		
-		when(taskService.searchForTasks(new TaskSearchParams(null, null, null, null, null, null, includes)))
+		when(taskService.searchForTasks(new TaskSearchParams(null, null, null, null, null, null, null, null, includes)))
 		        .thenReturn(new MockIBundleProvider<>(Arrays.asList(task, new Patient()), PREFERRED_PAGE_SIZE, COUNT));
 		
-		IBundleProvider results = resourceProvider.searchTasks(null, null, null, null, null, null, includes);
+		IBundleProvider results = resourceProvider.searchTasks(null, null, null, null, null, null, null, null, includes);
 		
 		List<IBaseResource> resources = getResources(results);
 		
@@ -224,10 +224,10 @@ public class TaskFhirResourceProviderTest extends BaseFhirProvenanceResourceTest
 		HashSet<Include> includes = new HashSet<>();
 		includes.add(new Include("Task:owner"));
 		
-		when(taskService.searchForTasks(new TaskSearchParams(null, null, null, null, null, null, includes)))
+		when(taskService.searchForTasks(new TaskSearchParams(null, null, null, null, null, null, null, null, includes)))
 		        .thenReturn(new MockIBundleProvider<>(Arrays.asList(task, new Practitioner()), PREFERRED_PAGE_SIZE, COUNT));
 		
-		IBundleProvider results = resourceProvider.searchTasks(null, null, null, null, null, null, includes);
+		IBundleProvider results = resourceProvider.searchTasks(null, null, null, null, null, null, null, null, includes);
 		
 		List<IBaseResource> resources = getResources(results);
 		
@@ -244,10 +244,10 @@ public class TaskFhirResourceProviderTest extends BaseFhirProvenanceResourceTest
 		HashSet<Include> includes = new HashSet<>();
 		includes.add(new Include("Task:encounter"));
 		
-		when(taskService.searchForTasks(new TaskSearchParams(null, null, null, null, null, null, includes)))
+		when(taskService.searchForTasks(new TaskSearchParams(null, null, null, null, null, null, null, null, includes)))
 		        .thenReturn(new MockIBundleProvider<>(Arrays.asList(task, new Encounter()), PREFERRED_PAGE_SIZE, COUNT));
 		
-		IBundleProvider results = resourceProvider.searchTasks(null, null, null, null, null, null, includes);
+		IBundleProvider results = resourceProvider.searchTasks(null, null, null, null, null, null, null, null, includes);
 		
 		List<IBaseResource> resources = getResources(results);
 		
@@ -264,10 +264,11 @@ public class TaskFhirResourceProviderTest extends BaseFhirProvenanceResourceTest
 		HashSet<Include> includes = new HashSet<>();
 		includes.add(new Include("Task:based-on"));
 		
-		when(taskService.searchForTasks(new TaskSearchParams(null, null, null, null, null, null, includes))).thenReturn(
-		    new MockIBundleProvider<>(Arrays.asList(task, new ServiceRequest()), PREFERRED_PAGE_SIZE, COUNT));
+		when(taskService.searchForTasks(new TaskSearchParams(null, null, null, null, null, null, null, null, includes)))
+		        .thenReturn(
+		            new MockIBundleProvider<>(Arrays.asList(task, new ServiceRequest()), PREFERRED_PAGE_SIZE, COUNT));
 		
-		IBundleProvider results = resourceProvider.searchTasks(null, null, null, null, null, null, includes);
+		IBundleProvider results = resourceProvider.searchTasks(null, null, null, null, null, null, null, null, includes);
 		
 		List<IBaseResource> resources = getResources(results);
 		

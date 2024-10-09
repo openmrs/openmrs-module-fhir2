@@ -35,15 +35,8 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.openmrs.EncounterProvider;
-import org.openmrs.EncounterType;
-import org.openmrs.Location;
-import org.openmrs.Patient;
-import org.openmrs.PatientIdentifier;
-import org.openmrs.PatientIdentifierType;
-import org.openmrs.PersonName;
-import org.openmrs.Provider;
-import org.openmrs.Visit;
+import org.openmrs.*;
+import org.openmrs.api.EncounterService;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.mappings.EncounterClassMap;
 import org.openmrs.module.fhir2.api.translators.EncounterLocationTranslator;
@@ -110,6 +103,9 @@ public class EncounterTranslatorImplTest {
 	
 	@Mock
 	private EncounterClassMap encounterClassMap;
+	
+	@Mock
+	private EncounterService encounterService;
 	
 	private Patient patient;
 	
@@ -250,6 +246,8 @@ public class EncounterTranslatorImplTest {
 		Patient patient = new Patient();
 		patient.setUuid(PATIENT_UUID);
 		when(patientReferenceTranslator.toOpenmrsType(patientRef)).thenReturn(patient);
+		when(participantTranslator.toOpenmrsType(ArgumentMatchers.any(), ArgumentMatchers.any()))
+		        .thenReturn(new EncounterProvider());
 		org.openmrs.Encounter result = encounterTranslator.toOpenmrsType(fhirEncounter);
 		
 		assertThat(result.getEncounterProviders(), not(empty()));

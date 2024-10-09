@@ -9,6 +9,10 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static org.openmrs.module.fhir2.api.translators.impl.ReferenceHandlingTranslator.createPractitionerReference;
+import static org.openmrs.module.fhir2.api.translators.impl.ReferenceHandlingTranslator.getReferenceId;
+import static org.openmrs.module.fhir2.api.translators.impl.ReferenceHandlingTranslator.getReferenceType;
+
 import javax.annotation.Nonnull;
 
 import lombok.AccessLevel;
@@ -23,7 +27,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class PractitionerReferenceTranslatorUserImpl extends BaseReferenceHandlingTranslator implements PractitionerReferenceTranslator<User> {
+public class PractitionerReferenceTranslatorUserImpl implements PractitionerReferenceTranslator<User> {
 	
 	@Autowired
 	private FhirUserDao userDao;

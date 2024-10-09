@@ -971,13 +971,24 @@
                                  referencedTableName="users" referencedColumnNames="user_id"/>
     </changeSet>
 
-    <changeSet id="fix_target_uuid_column" author="moses_mutesa" dbms="mysql,mariadb,postgresql">
+    <changeSet id="fix_target_uuid_column" author="moses_mutesa" dbms="mysql,mariadb">
         <preConditions onFail="MARK_RAN" onError="WARN">
             <tableExists tableName="fhir_reference"/>
-                <columnExists tableName="fhir_reference" columnName="target_uuid"/>
+	    <columnExists tableName="fhir_reference" columnName="target_uuid"/>
+	    <indexExists tableName="fhir_reference" indexName="target_uuid"/>
         </preConditions>
         <modifyDataType columnName="target_uuid" newDataType="char(38)" tableName="fhir_reference"/>
         <dropUniqueConstraint constraintName="target_uuid"  tableName="fhir_reference" uniqueColumns="target_uuid"/>  
+    </changeSet>
+
+    <changeSet id="fix_target_uuid_column" author="moses_mutesa" dbms="postgresql">
+        <preConditions onFail="MARK_RAN" onError="WARN">
+            <tableExists tableName="fhir_reference"/>
+            <columnExists tableName="fhir_reference" columnName="target_uuid"/>
+	    <indexExists tableName="fhir_reference" indexName="fhir_reference_target_uuid_key"/>
+        </preConditions>
+        <modifyDataType columnName="target_uuid" newDataType="char(38)" tableName="fhir_reference"/>
+        <dropUniqueConstraint constraintName="fhir_reference_target_uuid_key"  tableName="fhir_reference" uniqueColumns="target_uuid"/>  
     </changeSet>
 
     <changeSet id="drop_fhir_duration_unit_map_20220412" author="mseaton">
@@ -1067,4 +1078,47 @@
             <column name="attribute_type_id" />
         </createIndex>
     </changeSet>
+
+    <changeSet id="alter_fhir_task_20230903" author="r.kalai">
+        <preConditions onFail="MARK_RAN" onError="WARN">
+            <tableExists tableName="fhir_task"/>
+        </preConditions>
+        <addColumn tableName="fhir_task">
+            <column name="execution_start_time" type="datetime"/>
+            <column name="execution_end_time" type="datetime"/>
+            <column name="task_code" type="int"/>
+            <column name="comment" type="varchar(255)"/>
+        </addColumn>
+        <addForeignKeyConstraint baseTableName="fhir_task" baseColumnNames="task_code"
+                                 constraintName="task_code_fk"
+                                 referencedTableName="concept"
+                                 referencedColumnNames="concept_id"/>
+    </changeSet>
+
+    <changeSet id="add_part_of_reference_join_table_20200311" author="r.kalai">
+        <preConditions onFail="MARK_RAN" onError="WARN">
+            <not>
+                <tableExists tableName="fhir_task_part_of_reference"/>
+            </not>
+            <tableExists tableName="fhir_task"/>
+            <tableExists tableName="fhir_reference"/>
+        </preConditions>
+        <createTable tableName="fhir_task_part_of_reference">
+            <column name="task_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="reference_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="fhir_task_part_of_reference" baseColumnNames="task_id"
+                                 constraintName="task_part_of_fk"
+                                 referencedTableName="fhir_task"
+                                 referencedColumnNames="task_id"/>
+        <addForeignKeyConstraint baseTableName="fhir_task_part_of_reference" baseColumnNames="reference_id"
+                                 constraintName="reference_part_of_fk"
+                                 referencedTableName="fhir_reference"
+                                 referencedColumnNames="reference_id"/>
+    </changeSet>
+
 </databaseChangeLog>

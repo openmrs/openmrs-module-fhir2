@@ -12,6 +12,7 @@ package org.openmrs.module.fhir2.api.translators.impl;
 import static org.apache.commons.lang3.Validate.notNull;
 import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getLastUpdated;
 import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getVersionId;
+import static org.openmrs.module.fhir2.api.translators.impl.ReferenceHandlingTranslator.createOrderReference;
 
 import javax.annotation.Nonnull;
 
@@ -47,7 +48,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class ServiceRequestTranslatorImpl extends BaseReferenceHandlingTranslator implements ServiceRequestTranslator<TestOrder> {
+public class ServiceRequestTranslatorImpl implements ServiceRequestTranslator<TestOrder> {
 	
 	private static final int START_INDEX = 0;
 	
@@ -140,7 +141,7 @@ public class ServiceRequestTranslatorImpl extends BaseReferenceHandlingTranslato
 		IBundleProvider results = taskService.searchForTasks(new TaskSearchParams(
 		        new ReferenceAndListParam()
 		                .addAnd(new ReferenceOrListParam().add(new ReferenceParam("ServiceRequest", null, orderUuid))),
-		        null, null, null, null, null, null));
+		        null, null, null, null, null, null, null, null));
 		
 		Collection<Task> serviceRequestTasks = results.getResources(START_INDEX, END_INDEX).stream().map(p -> (Task) p)
 		        .collect(Collectors.toList());
