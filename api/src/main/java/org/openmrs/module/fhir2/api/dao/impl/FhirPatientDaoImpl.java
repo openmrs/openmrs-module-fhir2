@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.HasAndListParam;
@@ -37,8 +36,8 @@ import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Projections;
 import org.hibernate.sql.JoinType;
-import org.openmrs.Cohort;
 import org.openmrs.CohortMembership;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifierType;
@@ -141,7 +140,10 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 							case FhirConstants.GROUP:
 								switch (hasParam.getReferenceFieldName()) {
 									case FhirConstants.INCLUDE_MEMBER_PARAM:
-										groupIds.add(paramValue);
+										switch (hasParam.getParameterName()) {
+											case "id":
+												groupIds.add(paramValue);
+										}
 										break;
 								}
 								break;
@@ -164,12 +166,11 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 	}
 	
 	private List<Integer> getGroupMemberIds(String groupId) {
-		Cohort cohort = groupDao.get(groupId);
-		if (cohort != null) {
-			return cohort.getMemberships().stream().map(CohortMembership::getPatientId).collect(Collectors.toList());
-		} else {
-			return Collections.emptyList();
-		}
+		Criteria subquery = getSessionFactory().getCurrentSession().createCriteria(CohortMembership.class, "cm")
+		        .createAlias("cm.cohort", "co").add(eq("co.uuid", groupId))
+		        .setProjection(Projections.property("cm.patientId"));
+		
+		return subquery.list();
 	}
 	
 	private void handlePatientQuery(Criteria criteria, @Nonnull StringAndListParam query) {
