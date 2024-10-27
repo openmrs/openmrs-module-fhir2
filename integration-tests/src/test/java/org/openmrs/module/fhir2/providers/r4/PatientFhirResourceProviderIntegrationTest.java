@@ -561,7 +561,7 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR4Integr
 	
 	@Test
 	public void shouldAllowNamedQueryForPatientsAsJson() throws Exception {
-		MockHttpServletResponse response = get("/Patient?_query=openmrsPatients&q=Doe&_sort=given")
+		MockHttpServletResponse response = get("/Patient?_query=openmrsPatients&q=Doe&_sort=given&deceased=false")
 		        .accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
@@ -647,7 +647,7 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR4Integr
 	
 	@Test
 	public void shouldAllowNamedQueryForPatientsAsXml() throws Exception {
-		MockHttpServletResponse response = get("/Patient?_query=openmrsPatients&q=Doe&_sort=given")
+		MockHttpServletResponse response = get("/Patient?_query=openmrsPatients&q=Doe&_sort=given&deceased=false")
 		        .accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
