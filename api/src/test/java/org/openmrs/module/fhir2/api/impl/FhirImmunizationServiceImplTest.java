@@ -202,6 +202,7 @@ public class FhirImmunizationServiceImplTest extends BaseModuleContextSensitiveT
 		
 		// verify (in chronological order)
 		assertThat(immunizations.size(), is(2));
+		
 		{
 			Immunization immunization = immunizations.get(0);
 			Coding coding = immunization.getVaccineCode().getCoding().get(0);

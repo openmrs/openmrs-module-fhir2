@@ -18,11 +18,10 @@ import javax.persistence.CacheStoreMode;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Selection;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -46,6 +45,7 @@ import org.openmrs.Voidable;
 import org.openmrs.aop.RequiredDataAdvice;
 import org.openmrs.api.handler.RetireHandler;
 import org.openmrs.api.handler.VoidHandler;
+import org.openmrs.logic.op.In;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirDao;
 import org.openmrs.module.fhir2.api.search.param.PropParam;
@@ -83,8 +83,8 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	@Override
 	@Transactional(readOnly = true)
 	public T get(@Nonnull String uuid) {
-		@SuppressWarnings({ "UnstableApiUsage" })
-		OpenmrsFhirCriteriaContext<T, T> criteriaContext = createCriteriaContext(typeToken.getRawType());
+		@SuppressWarnings({ "UnstableApiUsage", "unchecked" })
+		OpenmrsFhirCriteriaContext<T, T> criteriaContext = createCriteriaContext((Class<T>) typeToken.getRawType());
 		
 		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot());
 		criteriaContext
@@ -103,8 +103,8 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	@Override
 	@Transactional(readOnly = true)
 	public List<T> get(@Nonnull Collection<String> uuids) {
-		@SuppressWarnings({ "UnstableApiUsage" })
-		OpenmrsFhirCriteriaContext<T, T> criteriaContext = createCriteriaContext(typeToken.getRawType());
+		@SuppressWarnings({ "UnstableApiUsage", "unchecked" })
+		OpenmrsFhirCriteriaContext<T, T> criteriaContext = createCriteriaContext((Class<T>) typeToken.getRawType());
 		
 		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot());
 		criteriaContext.addPredicate(criteriaContext.getRoot().get("uuid").in(uuids));
@@ -145,10 +145,13 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 		return existing;
 	}
 	
-	@SuppressWarnings("UnstableApiUsage")
-	protected <U> OpenmrsFhirCriteriaContext<T, U> getSearchResultCriteria(SearchParameterMap theParams) {
-		OpenmrsFhirCriteriaContext<T, U> criteriaContext = createCriteriaContext(typeToken.getRawType());
-		
+	@SuppressWarnings({ "UnstableApiUsage", "unchecked" })
+	protected OpenmrsFhirCriteriaContext<T, T> getSearchResultCriteria(SearchParameterMap theParams) {
+		return getSearchResultCriteria(createCriteriaContext((Class<T>) typeToken.getRawType()), theParams);
+	}
+	
+	protected <U> OpenmrsFhirCriteriaContext<T, U> getSearchResultCriteria(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
+	        SearchParameterMap theParams) {
 		if (isVoidable) {
 			handleVoidable(criteriaContext);
 		} else if (isRetireable) {
@@ -161,53 +164,50 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	}
 	
 	@Override
-	@SuppressWarnings({ "unchecked", "UnstableApiUsage" })
 	public List<T> getSearchResults(@Nonnull SearchParameterMap theParams) {
 		List<T> results;
-		OpenmrsFhirCriteriaContext<T, ?> criteriaContext = getSearchResultCriteria(theParams);
-		String idProperty = getIdPropertyName(criteriaContext);
-		
-		handleSort(criteriaContext, theParams.getSortSpec());
-		handleIdPropertyOrdering(criteriaContext, idProperty);
-		
-		TypedQuery<T> executableQuery = (TypedQuery<T>) criteriaContext.getEntityManager()
-		        .createQuery(criteriaContext.finalizeQuery());
-		
-		executableQuery.setFirstResult(theParams.getFromIndex());
-		if (theParams.getToIndex() != Integer.MAX_VALUE) {
-			int maxResults = theParams.getToIndex() - theParams.getFromIndex();
-			if (maxResults >= 0) {
-				executableQuery.setMaxResults(maxResults);
-			} else {
-				// TODO: this is really just a workaround, we can find a better way of handling the negative results
-				int negative = theParams.getFromIndex() - theParams.getToIndex();
-				executableQuery.setMaxResults(negative);
-			}
-		}
 		
 		if (hasDistinctResults()) {
-			results = executableQuery.getResultList();
-		} else {
-			List<Selection<?>> selectionList = new ArrayList<>();
-			selectionList.add(criteriaContext.getRoot().get(idProperty).alias("id"));
-			criteriaContext.getCriteriaQuery().multiselect(selectionList).distinct(true);
+			OpenmrsFhirCriteriaContext<T, T> criteriaContext = getSearchResultCriteria(theParams);
+			String idProperty = getIdPropertyName(criteriaContext);
 			
-			criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot().get(getIdPropertyName(criteriaContext)))
-			        .distinct(true);
+			handleSort(criteriaContext, theParams.getSortSpec());
+			handleIdPropertyOrdering(criteriaContext, idProperty);
 			
-			List<Integer> ids = new ArrayList<>();
-			if (selectionList.size() > 1) {
-				for (Object[] o : ((List<Object[]>) criteriaContext.getEntityManager()
-				        .createQuery(criteriaContext.getCriteriaQuery()).getResultList())) {
-					ids.add((Integer) o[0]);
+			CriteriaQuery<T> criteriaQuery = criteriaContext.finalizeQuery();
+			criteriaQuery.select(criteriaContext.getRoot());
+			
+			TypedQuery<T> executableQuery = criteriaContext.getEntityManager().createQuery(criteriaQuery);
+			
+			executableQuery.setFirstResult(theParams.getFromIndex());
+			if (theParams.getToIndex() != Integer.MAX_VALUE) {
+				int maxResults = theParams.getToIndex() - theParams.getFromIndex();
+				if (maxResults >= 0) {
+					executableQuery.setMaxResults(maxResults);
+				} else {
+					// TODO: this is really just a workaround, we can find a better way of handling the negative results
+					int negative = theParams.getFromIndex() - theParams.getToIndex();
+					executableQuery.setMaxResults(negative);
 				}
-			} else {
-				ids = (List<Integer>) criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery())
-				        .getResultList();
 			}
 			
+			results = executableQuery.getResultList();
+		} else {
+			@SuppressWarnings({ "UnstableApiUsage", "unchecked" })
+			OpenmrsFhirCriteriaContext<T, Integer> criteriaContext = createCriteriaContext((Class<T>) typeToken.getRawType(),
+			    Integer.class);
+			String idProperty = getIdPropertyName(criteriaContext);
+			
+			handleSort(criteriaContext, theParams.getSortSpec());
+			handleIdPropertyOrdering(criteriaContext, idProperty);
+			
+			CriteriaQuery<Integer> query = criteriaContext.finalizeIdQuery(idProperty);
+			
+			List<Integer> ids = criteriaContext.getEntityManager().createQuery(query).getResultList();
+			
 			// Use distinct ids from the original query to return entire objects
-			OpenmrsFhirCriteriaContext<T, T> wrapperQuery = createCriteriaContext(typeToken.getRawType());
+			@SuppressWarnings({ "UnstableApiUsage", "unchecked" })
+			OpenmrsFhirCriteriaContext<T, T> wrapperQuery = createCriteriaContext((Class<T>) typeToken.getRawType());
 			wrapperQuery.getCriteriaQuery().where(wrapperQuery.getRoot().get(idProperty).in(ids));
 			
 			// Need to reapply ordering
@@ -222,7 +222,9 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	
 	@Override
 	public int getSearchResultsCount(@Nonnull SearchParameterMap theParams) {
-		OpenmrsFhirCriteriaContext<T, Long> criteriaContext = getSearchResultCriteria(theParams);
+		@SuppressWarnings({ "UnstableApiUsage", "unchecked" })
+		OpenmrsFhirCriteriaContext<T, Long> criteriaContext = getSearchResultCriteria(
+		    createCriteriaContext((Class<T>) typeToken.getRawType(), Long.class), theParams);
 		applyExactTotal(criteriaContext, theParams);
 		
 		if (hasDistinctResults()) {

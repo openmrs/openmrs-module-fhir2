@@ -17,7 +17,6 @@ import static org.hamcrest.Matchers.nullValue;
 
 import java.util.List;
 
-import org.hamcrest.CoreMatchers;
 import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
@@ -85,10 +84,10 @@ public class FhirPersonDaoImplTest extends BaseModuleContextSensitiveTest {
 	@Test
 	public void delete_shouldVoidPerson() {
 		Person person = fhirPersonDao.delete(PERSON_UUID);
-		assertThat(person.getVoided(), CoreMatchers.equalTo(true));
-		assertThat(person.getDateVoided(), not(CoreMatchers.nullValue()));
-		assertThat(person.getVoidedBy(), CoreMatchers.equalTo(Context.getAuthenticatedUser()));
-		assertThat(person.getVoidReason(), CoreMatchers.equalTo("Voided via FHIR API"));
+		
+		assertThat(person.getVoided(), equalTo(true));
+		assertThat(person.getDateVoided(), not(nullValue()));
+		assertThat(person.getVoidedBy(), equalTo(Context.getAuthenticatedUser()));
+		assertThat(person.getVoidReason(), equalTo("Voided via FHIR API"));
 	}
-	
 }

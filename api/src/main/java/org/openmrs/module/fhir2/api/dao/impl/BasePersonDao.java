@@ -97,7 +97,7 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 			 *     )
 			 */
 			OpenmrsFhirCriteriaSubquery<PersonName, Integer> personNameFirstSubquery = criteriaContext
-			        .addSubquery(PersonName.class, Integer.class);
+			        .addSubquery(PersonName.class);
 			personNameFirstSubquery.addPredicate(cb.and(cb.equal(personNameFirstSubquery.getRoot().get("voided"), false),
 			    cb.equal(personNameFirstSubquery.getRoot().get("preferred"), true),
 			    cb.equal(personNameFirstSubquery.getRoot().get("person"), criteriaContext.getRoot())));
@@ -116,7 +116,7 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 			 *         where pn2_.voided = false and pn2_.preferred = true and pn2_.person_id = p1.person_id
 			 *     )
 			 */
-			OpenmrsFhirCriteriaSubquery<PersonName, PersonName> personNameSecondSubquery = criteriaContext
+			OpenmrsFhirCriteriaSubquery<PersonName, Integer> personNameSecondSubquery = criteriaContext
 			        .addSubquery(PersonName.class);
 			personNameSecondSubquery.addPredicate(cb.and(cb.equal(personNameSecondSubquery.getRoot().get("voided"), false),
 			    cb.equal(personNameSecondSubquery.getRoot().get("preferred"), true),
@@ -137,7 +137,7 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 			 *     )
 			 */
 			OpenmrsFhirCriteriaSubquery<PersonName, Integer> personNameThirdSubquery = criteriaContext
-			        .addSubquery(PersonName.class, Integer.class);
+			        .addSubquery(PersonName.class);
 			personNameThirdSubquery.addPredicate(cb.and(cb.equal(personNameThirdSubquery.getRoot().get("voided"), false),
 			    cb.equal(personNameThirdSubquery.getRoot().get("person"), criteriaContext.getRoot())));
 			personNameThirdSubquery.getSubquery().select(cb.min(personNameFirstSubquery.getRoot().get("personNameId")));

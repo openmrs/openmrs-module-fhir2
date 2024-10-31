@@ -805,8 +805,7 @@ public abstract class BaseDao {
 				if (patientToken.getChain() != null) {
 					switch (patientToken.getChain()) {
 						case Patient.SP_IDENTIFIER:
-							Join<?, ?> associationPathIdentifiersJoin = criteriaContext.addJoin(associationPathJoin,
-							    "identifiers", "pi");
+							Join<?, ?> associationPathIdentifiersJoin = criteriaContext.addJoin("identifiers", "pi");
 							return Optional.of(criteriaContext.getCriteriaBuilder()
 							        .like(associationPathIdentifiersJoin.get("identifier"), patientToken.getValue()));
 						case Patient.SP_GIVEN: {
@@ -968,8 +967,8 @@ public abstract class BaseDao {
 	
 	protected <T, U> Optional<Predicate> generateSystemQuery(OpenmrsFhirCriteriaContext<T, U> criteriaContext, String system,
 	        List<String> codes, String conceptReferenceTermAlias) {
-		OpenmrsFhirCriteriaSubquery<FhirConceptSource, FhirConceptSource> conceptSourceSubquery = criteriaContext
-		        .addSubquery(FhirConceptSource.class);
+		OpenmrsFhirCriteriaSubquery<FhirConceptSource, String> conceptSourceSubquery = criteriaContext
+		        .addSubquery(FhirConceptSource.class, String.class);
 		conceptSourceSubquery.addPredicate(
 		    conceptSourceSubquery.getCriteriaBuilder().equal(conceptSourceSubquery.getRoot().get("url"), system));
 		
@@ -1290,13 +1289,20 @@ public abstract class BaseDao {
 		return Optional.empty();
 	}
 	
-	protected <T, U> OpenmrsFhirCriteriaContext<T, U> createCriteriaContext(Class<? super T> rootType) {
+	protected <T> OpenmrsFhirCriteriaContext<T, T> createCriteriaContext(Class<T> rootType) {
 		EntityManager em = sessionFactory.getCurrentSession();
 		CriteriaBuilder cb = em.getCriteriaBuilder();
-		@SuppressWarnings("unchecked")
-		CriteriaQuery<U> cq = (CriteriaQuery<U>) cb.createQuery(rootType);
-		@SuppressWarnings("unchecked")
-		Root<T> root = (Root<T>) cq.from(rootType);
+		CriteriaQuery<T> cq = cb.createQuery(rootType);
+		Root<T> root = cq.from(rootType);
+		
+		return new OpenmrsFhirCriteriaContext<>(em, cb, cq, root);
+	}
+	
+	protected <T, U> OpenmrsFhirCriteriaContext<T, U> createCriteriaContext(Class<T> rootType, Class<U> resultType) {
+		EntityManager em = sessionFactory.getCurrentSession();
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<U> cq = cb.createQuery(resultType);
+		Root<T> root = cq.from(rootType);
 		
 		return new OpenmrsFhirCriteriaContext<>(em, cb, cq, root);
 	}

@@ -11,6 +11,7 @@ package org.openmrs.module.fhir2.api.dao.impl;
 
 import javax.annotation.Nonnull;
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
 
 import java.util.List;
@@ -33,7 +34,7 @@ import org.springframework.stereotype.Component;
 public class FhirPersonDaoImpl extends BasePersonDao<Person> implements FhirPersonDao {
 	
 	@Override
-    public List<PersonAttribute> getActiveAttributesByPersonAndAttributeTypeUuid(@Nonnull Person person,
+	public List<PersonAttribute> getActiveAttributesByPersonAndAttributeTypeUuid(@Nonnull Person person,
 	        @Nonnull String personAttributeTypeUuid) {
 		OpenmrsFhirCriteriaContext<PersonAttribute, PersonAttribute> criteriaContext = createCriteriaContext(
 		    PersonAttribute.class);

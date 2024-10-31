@@ -33,6 +33,7 @@ import lombok.NonNull;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.Observation;
 import org.openmrs.Concept;
+import org.openmrs.ConceptClass;
 import org.openmrs.Obs;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirEncounterDao;
@@ -251,23 +252,23 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 	}
 	
 	private <U> void handleConceptClass(OpenmrsFhirCriteriaContext<Obs, U> criteriaContext, TokenAndListParam category) {
-		if (category == null) {
-			Join<?, ?> conceptJoin = criteriaContext.addJoin("concept", "c");
-			Join<?, ?> conceptClassJoin = criteriaContext.addJoin(conceptJoin, "conceptClass", "cc");
+		Join<?, ?> conceptJoin = criteriaContext.addJoin("concept", "c");
+		Join<?, ?> conceptClassJoin = criteriaContext.addJoin(conceptJoin, "conceptClass", "cc");
+		
+		handleAndListParam(criteriaContext.getCriteriaBuilder(), category, (param) -> {
+			if (param.getValue() == null) {
+				return Optional.empty();
+			}
 			
-			handleAndListParam(criteriaContext.getCriteriaBuilder(), category, (param) -> {
-				if (param.getValue() == null) {
-					return Optional.empty();
-				}
-				OpenmrsFhirCriteriaContext<String, U> context = createCriteriaContext(String.class);
-				context.getCriteriaQuery().subquery(String.class).select(conceptClassJoin.get("uuid"))
-				        .where(context.getCriteriaBuilder().equal(context.getRoot().get("category"), param.getValue()));
-				
-				return Optional.of(
-				    context.getCriteriaBuilder().in(criteriaContext.getRoot().get("concept").get("conceptClass").get("uuid"))
-				            .value(context.getCriteriaQuery().subquery(String.class)));
-			}).ifPresent(criteriaContext::addPredicate);
-		}
+			OpenmrsFhirCriteriaContext<String, ?> context = createCriteriaContext(String.class);
+			OpenmrsFhirCriteriaSubquery<ConceptClass, String> subquery = context.addSubquery(ConceptClass.class,
+			    String.class);
+			subquery.setProjection(subquery.getRoot().get("uuid"));
+			subquery.addPredicate(subquery.getCriteriaBuilder().equal(subquery.getRoot().get("category"), param.getValue()));
+			
+			return Optional
+			        .of(context.getCriteriaBuilder().in(conceptClassJoin.get("uuid")).value(subquery.finalizeQuery()));
+		}).ifPresent(criteriaContext::addPredicate);
 	}
 	
 	private <U> void handleValueCodedConcept(OpenmrsFhirCriteriaContext<Obs, U> criteriaContext,

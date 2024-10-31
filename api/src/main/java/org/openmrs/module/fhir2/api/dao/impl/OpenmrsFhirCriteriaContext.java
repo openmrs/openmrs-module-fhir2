@@ -219,12 +219,12 @@ public class OpenmrsFhirCriteriaContext<T, U> {
 		});
 	}
 	
-	public <V> OpenmrsFhirCriteriaSubquery<V, V> addSubquery(Class<V> type) {
-		return addSubquery(type, type);
+	public <V> OpenmrsFhirCriteriaSubquery<V, Integer> addSubquery(Class<V> fromType) {
+		return addSubquery(fromType, Integer.class);
 	}
 	
-	public <V, W> OpenmrsFhirCriteriaSubquery<V, W> addSubquery(Class<V> fromType, Class<W> resultType) {
-		Subquery<W> subquery = criteriaQuery.subquery(resultType);
+	public <V, U> OpenmrsFhirCriteriaSubquery<V, U> addSubquery(Class<V> fromType, Class<U> resultType) {
+		Subquery<U> subquery = criteriaQuery.subquery(resultType);
 		return new OpenmrsFhirCriteriaSubquery<>(criteriaBuilder, subquery, subquery.from(fromType));
 	}
 	
@@ -253,5 +253,12 @@ public class OpenmrsFhirCriteriaContext<T, U> {
 	
 	public CriteriaQuery<U> finalizeQuery() {
 		return criteriaQuery.where(predicates.toArray(new Predicate[0])).orderBy(orders);
+	}
+	
+	public CriteriaQuery<U> finalizeIdQuery(String idProperty) {
+		Root<? super T> root = criteriaQuery.from(getRoot().getModel());
+		
+		return criteriaQuery.distinct(true).select(root.get(idProperty)).where(predicates.toArray(new Predicate[0]))
+		        .orderBy(orders);
 	}
 }

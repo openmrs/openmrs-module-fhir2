@@ -150,20 +150,20 @@ public class FhirRelatedPersonDaoImpl extends BaseFhirDao<Relationship> implemen
 			CriteriaBuilder cb = criteriaContext.getCriteriaBuilder();
 			//pn1
 			OpenmrsFhirCriteriaSubquery<PersonName, Integer> personNameFirstSubquery = criteriaContext
-			        .addSubquery(PersonName.class, Integer.class);
+			        .addSubquery(PersonName.class);
 			personNameFirstSubquery.addPredicate(cb.and(cb.equal(personNameFirstSubquery.getRoot().get("voided"), false),
 			    cb.equal(personNameFirstSubquery.getRoot().get("preferred"), true),
 			    cb.equal(personNameFirstSubquery.getRoot().get("person"), criteriaContext.getRoot())));
 			personNameFirstSubquery.getSubquery().select(cb.min(personNameFirstSubquery.getRoot().get("personNameId")));
 			//pn2
-			OpenmrsFhirCriteriaSubquery<PersonName, PersonName> personNameSecondSubquery = criteriaContext
+			OpenmrsFhirCriteriaSubquery<PersonName, Integer> personNameSecondSubquery = criteriaContext
 			        .addSubquery(PersonName.class);
 			personNameSecondSubquery.addPredicate(cb.and(cb.equal(personNameSecondSubquery.getRoot().get("voided"), false),
 			    cb.equal(personNameSecondSubquery.getRoot().get("preferred"), true),
 			    cb.equal(personNameFirstSubquery.getRoot().get("person"), criteriaContext.getRoot())));
 			//pn3
 			OpenmrsFhirCriteriaSubquery<PersonName, Integer> personNameThirdSubquery = criteriaContext
-			        .addSubquery(PersonName.class, Integer.class);
+			        .addSubquery(PersonName.class);
 			personNameThirdSubquery.addPredicate(cb.and(cb.equal(personNameThirdSubquery.getRoot().get("voided"), false),
 			    cb.equal(personNameThirdSubquery.getRoot().get("person"), criteriaContext.getRoot())));
 			personNameThirdSubquery.getSubquery().select(cb.min(personNameFirstSubquery.getRoot().get("personNameId")));

@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
@@ -20,13 +21,18 @@ import java.util.List;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 @RequiredArgsConstructor
-public class OpenmrsFhirCriteriaSubquery<Q, U> {
+public class OpenmrsFhirCriteriaSubquery<V, U> {
 	
 	@Getter
 	@NonNull
 	private final CriteriaBuilder criteriaBuilder;
+	
+	@Getter
+	@Setter
+	Expression<U> projection = null;
 	
 	@Getter
 	@NonNull
@@ -34,16 +40,20 @@ public class OpenmrsFhirCriteriaSubquery<Q, U> {
 	
 	@Getter
 	@NonNull
-	Root<Q> root;
+	Root<V> root;
 	
 	private final List<Predicate> predicates = new ArrayList<>();
 	
-	public OpenmrsFhirCriteriaSubquery<Q, U> addPredicate(Predicate predicate) {
+	public OpenmrsFhirCriteriaSubquery<V, U> addPredicate(Predicate predicate) {
 		predicates.add(predicate);
 		return this;
 	}
 	
 	public Subquery<U> finalizeQuery() {
+		if (projection != null) {
+			subquery = subquery.select(projection);
+		}
+		
 		return subquery.where(predicates.toArray(new Predicate[0]));
 	}
 }
