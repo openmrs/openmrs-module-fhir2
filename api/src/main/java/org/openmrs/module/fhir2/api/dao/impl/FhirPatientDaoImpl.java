@@ -90,8 +90,9 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 					handleNames(criteria, entry.getValue());
 					break;
 				case FhirConstants.GENDER_SEARCH_HANDLER:
-					entry.getValue().forEach(
-					    p -> handleGender(p.getPropertyName(), (TokenAndListParam) p.getParam()).ifPresent(criteria::add));
+					entry.getValue()
+					        .forEach(p -> handleGender(FhirConstants.GENDER_PROPERTY, (TokenAndListParam) p.getParam())
+					                .ifPresent(criteria::add));
 					break;
 				case FhirConstants.IDENTIFIER_SEARCH_HANDLER:
 					entry.getValue()

@@ -225,6 +225,14 @@ public final class FhirConstants {
 	
 	public static final String FAMILY_PROPERTY = "family.property";
 	
+	public static final String GENDER_PROPERTY = "gender";
+	
+	public static final String BIRTHDATE_PROPERTY = "birthdate";
+	
+	public static final String DEATHDATE_PROPERTY = "deathDate";
+	
+	public static final String DECEASED_PROPERTY = "dead";
+	
 	public static final String CITY_PROPERTY = "city.property";
 	
 	public static final String COUNTRY_PROPERTY = "country.property";
