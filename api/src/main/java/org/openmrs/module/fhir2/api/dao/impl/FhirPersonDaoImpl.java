@@ -33,15 +33,14 @@ import org.springframework.stereotype.Component;
 public class FhirPersonDaoImpl extends BasePersonDao<Person> implements FhirPersonDao {
 	
 	@Override
-	@SuppressWarnings("unchecked")
-	public List<PersonAttribute> getActiveAttributesByPersonAndAttributeTypeUuid(@Nonnull Person person,
+    public List<PersonAttribute> getActiveAttributesByPersonAndAttributeTypeUuid(@Nonnull Person person,
 	        @Nonnull String personAttributeTypeUuid) {
 		OpenmrsFhirCriteriaContext<PersonAttribute, PersonAttribute> criteriaContext = createCriteriaContext(
 		    PersonAttribute.class);
 		CriteriaBuilder cb = criteriaContext.getCriteriaBuilder();
 		
 		criteriaContext.addJoin("person", "p",
-		    (from) -> cb.and(cb.equal(from.get("id"), person.getId()), cb.equal(from.get("voided"), false)));
+		    (from) -> cb.and(cb.equal(from.get("personId"), person.getId()), cb.equal(from.get("personVoided"), false)));
 		criteriaContext.addJoin("attributeType", "pat",
 		    (from) -> cb.and(cb.equal(from.get("uuid"), personAttributeTypeUuid), cb.equal(from.get("retired"), false)));
 		criteriaContext.addPredicate(cb.equal(criteriaContext.getRoot().get("voided"), false));
