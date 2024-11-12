@@ -9,12 +9,9 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
-import static org.hibernate.criterion.Restrictions.and;
-import static org.hibernate.criterion.Restrictions.eq;
-import static org.hibernate.criterion.Restrictions.isNull;
-import static org.hibernate.criterion.Restrictions.or;
-
 import javax.annotation.Nonnull;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Predicate;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,9 +21,6 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
-import org.hibernate.Criteria;
-import org.hibernate.criterion.Criterion;
-import org.hibernate.sql.JoinType;
 import org.openmrs.Person;
 import org.openmrs.PersonAttribute;
 import org.openmrs.module.fhir2.FhirConstants;
@@ -39,54 +33,64 @@ import org.springframework.stereotype.Component;
 public class FhirPersonDaoImpl extends BasePersonDao<Person> implements FhirPersonDao {
 	
 	@Override
-	@SuppressWarnings("unchecked")
-	public List<PersonAttribute> getActiveAttributesByPersonAndAttributeTypeUuid(@Nonnull Person person,
+    public List<PersonAttribute> getActiveAttributesByPersonAndAttributeTypeUuid(@Nonnull Person person,
 	        @Nonnull String personAttributeTypeUuid) {
-		return (List<PersonAttribute>) getSessionFactory().getCurrentSession().createCriteria(PersonAttribute.class)
-		        .createAlias("person", "p", JoinType.INNER_JOIN, eq("p.id", person.getId()))
-		        .createAlias("attributeType", "pat").add(eq("pat.uuid", personAttributeTypeUuid)).add(eq("voided", false))
-		        .list();
+		OpenmrsFhirCriteriaContext<PersonAttribute, PersonAttribute> criteriaContext = createCriteriaContext(
+		    PersonAttribute.class);
+		CriteriaBuilder cb = criteriaContext.getCriteriaBuilder();
+		
+		criteriaContext.addJoin("person", "p",
+		    (from) -> cb.and(cb.equal(from.get("personId"), person.getId()), cb.equal(from.get("personVoided"), false)));
+		criteriaContext.addJoin("attributeType", "pat",
+		    (from) -> cb.and(cb.equal(from.get("uuid"), personAttributeTypeUuid), cb.equal(from.get("retired"), false)));
+		criteriaContext.addPredicate(cb.equal(criteriaContext.getRoot().get("voided"), false));
+		
+		return criteriaContext.getEntityManager().createQuery(criteriaContext.finalizeQuery()).getResultList();
 	}
 	
 	@Override
-	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
+	protected <U> void setupSearchParams(OpenmrsFhirCriteriaContext<Person, U> criteriaContext,
+	        SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.NAME_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handleNames(criteria, entry.getValue()));
+					entry.getValue().forEach(param -> handleNames(criteriaContext, entry.getValue()));
 					break;
 				case FhirConstants.GENDER_SEARCH_HANDLER:
-					entry.getValue().forEach(
-					    param -> handleGender("gender", (TokenAndListParam) param.getParam()).ifPresent(criteria::add));
+					entry.getValue().forEach(param -> handleGender(criteriaContext, getPersonProperty(criteriaContext),
+					    "gender", (TokenAndListParam) param.getParam()).ifPresent(criteriaContext::addPredicate));
 					break;
 				case FhirConstants.DATE_RANGE_SEARCH_HANDLER:
 					entry.getValue().forEach(
-					    param -> handleDateRange("birthdate", (DateRangeParam) param.getParam()).ifPresent(criteria::add));
+					    param -> handleDateRange(criteriaContext, "birthdate", (DateRangeParam) param.getParam())
+					            .ifPresent(criteriaContext::addPredicate));
 					break;
 				case FhirConstants.ADDRESS_SEARCH_HANDLER:
-					handleAddresses(criteria, entry);
+					handleAddresses(criteriaContext, entry);
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(entry.getValue()).ifPresent(criteria::add);
+					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(criteriaContext::addPredicate);
 					break;
 			}
 		});
 	}
 	
 	@Override
-	protected Optional<Criterion> handleLastUpdated(DateRangeParam param) {
-		return Optional.of(or(toCriteriaArray(handleDateRange("personDateChanged", param), Optional.of(and(toCriteriaArray(
-		    Stream.of(Optional.of(isNull("personDateChanged")), handleDateRange("personDateCreated", param))))))));
+	protected <T, U> Optional<Predicate> handleLastUpdated(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
+	        DateRangeParam param) {
+		return Optional.of(criteriaContext.getCriteriaBuilder().or(toCriteriaArray(
+		    handleDateRange(criteriaContext, "personDateChanged", param),
+		    Optional.of(criteriaContext.getCriteriaBuilder()
+		            .and(toCriteriaArray(Stream.of(
+		                Optional.of(
+		                    criteriaContext.getCriteriaBuilder().isNull(criteriaContext.getRoot().get("personDateChanged"))),
+		                handleDateRange(criteriaContext, "personDateCreated", param))))))));
 	}
 	
 	@Override
-	protected String getSqlAlias() {
-		return "this_";
-	}
-	
-	@Override
-	protected void handleVoidable(Criteria criteria) {
-		criteria.add(eq("personVoided", false));
+	protected <U> void handleVoidable(OpenmrsFhirCriteriaContext<Person, U> criteriaContext) {
+		criteriaContext.addPredicate(
+		    criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("personVoided"), false));
 	}
 	
 }
