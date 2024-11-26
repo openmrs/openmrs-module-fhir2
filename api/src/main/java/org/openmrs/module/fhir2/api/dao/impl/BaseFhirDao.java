@@ -196,6 +196,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 			@SuppressWarnings({ "UnstableApiUsage", "unchecked" })
 			OpenmrsFhirCriteriaContext<T, Integer> criteriaContext = createCriteriaContext((Class<T>) typeToken.getRawType(),
 			    Integer.class);
+
 			String idProperty = getIdPropertyName(criteriaContext);
 			
 			handleSort(criteriaContext, theParams.getSortSpec());
@@ -225,6 +226,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 		@SuppressWarnings({ "UnstableApiUsage", "unchecked" })
 		OpenmrsFhirCriteriaContext<T, Long> criteriaContext = getSearchResultCriteria(
 		    createCriteriaContext((Class<T>) typeToken.getRawType(), Long.class), theParams);
+		
 		applyExactTotal(criteriaContext, theParams);
 		
 		if (hasDistinctResults()) {
@@ -233,8 +235,8 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 			criteriaContext.getCriteriaQuery().select(criteriaContext.getCriteriaBuilder()
 			        .countDistinct(criteriaContext.getRoot().get(getIdPropertyName(criteriaContext))));
 		}
-		return criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).getSingleResult()
-		        .intValue();
+		
+		return criteriaContext.getEntityManager().createQuery(criteriaContext.finalizeQuery()).getSingleResult().intValue();
 	}
 	
 	/**
