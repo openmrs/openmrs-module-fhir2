@@ -29,6 +29,7 @@ import static org.hamcrest.Matchers.startsWith;
 import static org.hl7.fhir.r4.model.Patient.SP_FAMILY;
 import static org.hl7.fhir.r4.model.Patient.SP_GIVEN;
 import static org.mockito.Mockito.when;
+import static org.openmrs.module.fhir2.matchers.FhirMatchers.isDeceased;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -113,6 +114,10 @@ public class PatientSearchQueryTest extends BaseModuleContextSensitiveTest {
 	private static final String PATIENT_BIRTHDATE_LOWER_BOUND = "1975-04-08";
 	
 	private static final String PATIENT_BIRTHDATE_PATIENT_UUID = "ca17fcc5-ec96-487f-b9ea-42973c8973e3";
+	
+	private static final String PATIENT_DEATH_DATE = "2003-01-01";
+	
+	private static final String PATIENT_DEATH_DATE_LOWER_BOUND = "2001-08-01";
 	
 	private static final String PATIENT_ADDRESS_CITY = "Indianapolis";
 	
@@ -603,6 +608,89 @@ public class PatientSearchQueryTest extends BaseModuleContextSensitiveTest {
 		
 		assertThat(resultList, hasSize(equalTo(1)));
 		assertThat(resultList.get(0).getIdElement().getIdPart(), equalTo(PATIENT_UUID));
+	}
+	
+	@Test
+	public void searchForPatients_shouldSearchForPatientsByDeceasedStatus() {
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.BOOLEAN_SEARCH_HANDLER,
+		    FhirConstants.DECEASED_PROPERTY, new TokenAndListParam().addAnd(new TokenParam("true")));
+		
+		IBundleProvider results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(2));
+		
+		List<Patient> resultList = get(results);
+		
+		assertThat(resultList, hasSize(equalTo(2)));
+		assertThat(resultList, everyItem(isDeceased()));
+	}
+	
+	@Test
+	public void searchForPatients_shouldSearchForPatientsByDeceasedDate() {
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER,
+		    FhirConstants.DEATHDATE_PROPERTY, new DateRangeParam().setLowerBound(PATIENT_DEATH_DATE));
+		
+		IBundleProvider results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(1));
+		
+		List<Patient> resultList = get(results);
+		
+		assertThat(resultList, hasSize(equalTo(1)));
+		assertThat(resultList, everyItem(isDeceased()));
+	}
+	
+	@Test
+	public void searchForPatients_shouldSearchForPatientsByDeceasedDateWithLowerBound() {
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER,
+		    FhirConstants.DEATHDATE_PROPERTY, new DateRangeParam().setLowerBound(PATIENT_DEATH_DATE));
+		
+		IBundleProvider results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), greaterThanOrEqualTo(1));
+		
+		List<Patient> resultList = get(results);
+		
+		assertThat(resultList, not(empty()));
+		assertThat(resultList, everyItem(isDeceased()));
+	}
+	
+	@Test
+	public void searchForPatients_shouldSearchForPatientsByDeathDateWithUpperBound() {
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER,
+		    FhirConstants.DEATHDATE_PROPERTY, new DateRangeParam().setUpperBound(PATIENT_DEATH_DATE));
+		
+		IBundleProvider results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), greaterThan(1));
+		
+		List<Patient> resultList = get(results);
+		
+		assertThat(resultList, not(empty()));
+		assertThat(resultList, hasSize(greaterThan(1)));
+		assertThat(resultList, everyItem(isDeceased()));
+	}
+	
+	@Test
+	public void searchForPatients_shouldSearchForPatientsByDeathDateWithinBoundaries() {
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER,
+		    FhirConstants.DEATHDATE_PROPERTY,
+		    new DateRangeParam().setLowerBound(PATIENT_DEATH_DATE_LOWER_BOUND).setUpperBound(PATIENT_DEATH_DATE));
+		
+		IBundleProvider results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), greaterThan(1));
+		
+		List<Patient> resultList = get(results);
+		
+		assertThat(resultList, not(empty()));
+		assertThat(resultList, hasSize(greaterThan(1)));
+		assertThat(resultList, everyItem(isDeceased()));
 	}
 	
 	@Test
