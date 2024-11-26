@@ -11,6 +11,7 @@ package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.openmrs.module.fhir2.FhirConstants.ENCOUNTER_TYPE_REFERENCE_SEARCH_HANDLER;
 
+import javax.annotation.Nonnull;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
@@ -37,7 +38,7 @@ import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> extends BaseFhirDao<T> {
 	
 	@Override
-	protected <U> void setupSearchParams(OpenmrsFhirCriteriaContext<T, U> criteriaContext, SearchParameterMap theParams) {
+	protected <U> void setupSearchParams(@Nonnull OpenmrsFhirCriteriaContext<T, U> criteriaContext, @Nonnull SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.DATE_RANGE_SEARCH_HANDLER:

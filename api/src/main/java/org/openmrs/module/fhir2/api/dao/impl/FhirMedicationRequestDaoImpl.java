@@ -58,8 +58,8 @@ public class FhirMedicationRequestDaoImpl extends BaseFhirDao<DrugOrder> impleme
 	}
 	
 	@Override
-	protected <U> void setupSearchParams(OpenmrsFhirCriteriaContext<DrugOrder, U> criteriaContext,
-	        SearchParameterMap theParams) {
+	protected <U> void setupSearchParams(@Nonnull OpenmrsFhirCriteriaContext<DrugOrder, U> criteriaContext,
+										 @Nonnull SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.FULFILLER_STATUS_SEARCH_HANDLER:

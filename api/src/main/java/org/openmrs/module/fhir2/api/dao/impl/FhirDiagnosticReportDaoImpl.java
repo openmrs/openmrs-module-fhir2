@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
+import javax.annotation.Nonnull;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Path;
@@ -33,8 +34,8 @@ import org.springframework.stereotype.Component;
 public class FhirDiagnosticReportDaoImpl extends BaseFhirDao<FhirDiagnosticReport> implements FhirDiagnosticReportDao {
 	
 	@Override
-	protected <U> void setupSearchParams(OpenmrsFhirCriteriaContext<FhirDiagnosticReport, U> criteriaContext,
-	        SearchParameterMap theParams) {
+	protected <U> void setupSearchParams(@Nonnull OpenmrsFhirCriteriaContext<FhirDiagnosticReport, U> criteriaContext,
+										 @Nonnull SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER:
@@ -85,7 +86,7 @@ public class FhirDiagnosticReportDaoImpl extends BaseFhirDao<FhirDiagnosticRepor
 	}
 	
 	@Override
-	protected <V, U> Path<?> paramToProp(OpenmrsFhirCriteriaContext<V, U> criteriaContext, @NonNull String param) {
+	protected <V, U> Path<?> paramToProp(@Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext, @NonNull String param) {
 		if (DiagnosticReport.SP_ISSUED.equals(param)) {
 			return criteriaContext.getRoot().get("issued");
 		}

@@ -11,6 +11,7 @@ package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hl7.fhir.r4.model.Encounter.SP_DATE;
 
+import javax.annotation.Nonnull;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Path;
@@ -54,7 +55,7 @@ public class FhirVisitDaoImpl extends BaseEncounterDao<Visit> implements FhirVis
 	}
 	
 	@Override
-	protected <V, U> Path<?> paramToProp(OpenmrsFhirCriteriaContext<V, U> criteriaContext, @NonNull String param) {
+	protected <V, U> Path<?> paramToProp(@Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext, @NonNull String param) {
 		switch (param) {
 			case SP_DATE:
 				return criteriaContext.getRoot().get("startDatetime");

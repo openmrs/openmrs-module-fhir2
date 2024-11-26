@@ -66,8 +66,8 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 	}
 	
 	@Override
-	protected <V, U> Collection<Order> paramToProps(OpenmrsFhirCriteriaContext<V, U> criteriaContext,
-	        @Nonnull SortState<V, U> sortState) {
+	protected <V, U> Collection<Order> paramToProps(@Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext,
+                                                    @Nonnull SortState<V, U> sortState) {
 		String param = sortState.getParameter();
 		
 		if (param == null) {
@@ -187,7 +187,7 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 	}
 	
 	@Override
-	protected <V, U> Path<?> paramToProp(OpenmrsFhirCriteriaContext<V, U> criteriaContext, @Nonnull String param) {
+	protected <V, U> Path<?> paramToProp(@Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext, @Nonnull String param) {
 		From<?, ?> person = getPersonProperty(criteriaContext);
 		From<?, ?> address = criteriaContext.getJoin("pad")
 		        .orElseGet(() -> criteriaContext.addJoin(person, "addresses", "pad"));

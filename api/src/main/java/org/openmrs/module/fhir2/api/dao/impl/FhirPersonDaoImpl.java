@@ -11,7 +11,6 @@ package org.openmrs.module.fhir2.api.dao.impl;
 
 import javax.annotation.Nonnull;
 import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
 
 import java.util.List;
@@ -50,8 +49,8 @@ public class FhirPersonDaoImpl extends BasePersonDao<Person> implements FhirPers
 	}
 	
 	@Override
-	protected <U> void setupSearchParams(OpenmrsFhirCriteriaContext<Person, U> criteriaContext,
-	        SearchParameterMap theParams) {
+	protected <U> void setupSearchParams(@Nonnull OpenmrsFhirCriteriaContext<Person, U> criteriaContext,
+										 @Nonnull SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.NAME_SEARCH_HANDLER:
@@ -77,8 +76,8 @@ public class FhirPersonDaoImpl extends BasePersonDao<Person> implements FhirPers
 	}
 	
 	@Override
-	protected <T, U> Optional<Predicate> handleLastUpdated(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
-	        DateRangeParam param) {
+	protected <T, U> Optional<Predicate> handleLastUpdated(@Nonnull OpenmrsFhirCriteriaContext<T, U> criteriaContext,
+                                                           DateRangeParam param) {
 		return Optional.of(criteriaContext.getCriteriaBuilder().or(toCriteriaArray(
 		    handleDateRange(criteriaContext, "personDateChanged", param),
 		    Optional.of(criteriaContext.getCriteriaBuilder()
@@ -89,7 +88,7 @@ public class FhirPersonDaoImpl extends BasePersonDao<Person> implements FhirPers
 	}
 	
 	@Override
-	protected <U> void handleVoidable(OpenmrsFhirCriteriaContext<Person, U> criteriaContext) {
+	protected <U> void handleVoidable(@Nonnull OpenmrsFhirCriteriaContext<Person, U> criteriaContext) {
 		criteriaContext.addPredicate(
 		    criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("personVoided"), false));
 	}

@@ -54,8 +54,8 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implemen
 	}
 	
 	@Override
-	protected <U> void setupSearchParams(OpenmrsFhirCriteriaContext<Allergy, U> criteriaContext,
-	        SearchParameterMap theParams) {
+	protected <U> void setupSearchParams(@Nonnull OpenmrsFhirCriteriaContext<Allergy, U> criteriaContext,
+										 @Nonnull SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER:
@@ -178,7 +178,7 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implemen
 	}
 	
 	@Override
-	protected <V, U> Path<?> paramToProp(OpenmrsFhirCriteriaContext<V, U> criteriaContext, @NonNull String param) {
+	protected <V, U> Path<?> paramToProp(@Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext, @NonNull String param) {
 		if (AllergyIntolerance.SP_SEVERITY.equals(param)) {
 			return criteriaContext.getRoot().get("severity");
 		}

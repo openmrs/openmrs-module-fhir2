@@ -74,8 +74,8 @@ public class FhirConditionDaoImpl extends BaseFhirDao<Condition> implements Fhir
 	}
 	
 	@Override
-	protected <U> void setupSearchParams(OpenmrsFhirCriteriaContext<Condition, U> criteriaContext,
-	        SearchParameterMap theParams) {
+	protected <U> void setupSearchParams(@Nonnull OpenmrsFhirCriteriaContext<Condition, U> criteriaContext,
+										 @Nonnull SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER:
@@ -129,13 +129,13 @@ public class FhirConditionDaoImpl extends BaseFhirDao<Condition> implements Fhir
 	}
 	
 	@Override
-	protected <T, U> Optional<Predicate> handleLastUpdated(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
-	        DateRangeParam param) {
+	protected <T, U> Optional<Predicate> handleLastUpdated(@Nonnull OpenmrsFhirCriteriaContext<T, U> criteriaContext,
+														   DateRangeParam param) {
 		return super.handleLastUpdated(criteriaContext, param);
 	}
 	
 	@Override
-	protected <V, U> Path<?> paramToProp(OpenmrsFhirCriteriaContext<V, U> criteriaContext, @NonNull String param) {
+	protected <V, U> Path<?> paramToProp(@Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext, @NonNull String param) {
 		switch (param) {
 			case org.hl7.fhir.r4.model.Condition.SP_ONSET_DATE:
 				return criteriaContext.getRoot().get("onsetDate");

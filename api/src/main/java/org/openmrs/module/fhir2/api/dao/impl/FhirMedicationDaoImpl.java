@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
+import javax.annotation.Nonnull;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Join;
 
@@ -26,7 +27,7 @@ import org.springframework.stereotype.Component;
 public class FhirMedicationDaoImpl extends BaseFhirDao<Drug> implements FhirMedicationDao {
 	
 	@Override
-	protected <U> void setupSearchParams(OpenmrsFhirCriteriaContext<Drug, U> criteriaContext, SearchParameterMap theParams) {
+	protected <U> void setupSearchParams(@Nonnull OpenmrsFhirCriteriaContext<Drug, U> criteriaContext, @Nonnull SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.CODED_SEARCH_HANDLER:

@@ -49,8 +49,8 @@ import org.springframework.stereotype.Component;
 public class FhirRelatedPersonDaoImpl extends BaseFhirDao<Relationship> implements FhirRelatedPersonDao {
 	
 	@Override
-	protected <U> void setupSearchParams(OpenmrsFhirCriteriaContext<Relationship, U> criteriaContext,
-	        SearchParameterMap theParams) {
+	protected <U> void setupSearchParams(@Nonnull OpenmrsFhirCriteriaContext<Relationship, U> criteriaContext,
+										 @Nonnull SearchParameterMap theParams) {
 		From<?, ?> personJoin = criteriaContext.addJoin("personA", "m");
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
@@ -135,8 +135,8 @@ public class FhirRelatedPersonDaoImpl extends BaseFhirDao<Relationship> implemen
 	}
 	
 	@Override
-	protected <T, U> Collection<Order> paramToProps(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
-	        @Nonnull SortState<T, U> sortState) {
+	protected <T, U> Collection<Order> paramToProps(@Nonnull OpenmrsFhirCriteriaContext<T, U> criteriaContext,
+                                                    @Nonnull SortState<T, U> sortState) {
 		String param = sortState.getParameter();
 		
 		if (param == null) {
@@ -208,7 +208,7 @@ public class FhirRelatedPersonDaoImpl extends BaseFhirDao<Relationship> implemen
 	}
 	
 	@Override
-	protected <V, U> Path<?> paramToProp(OpenmrsFhirCriteriaContext<V, U> criteriaContext, @Nonnull String param) {
+	protected <V, U> Path<?> paramToProp(@Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext, @Nonnull String param) {
 		From<?, ?> personJoin = criteriaContext.addJoin("personA", "m");
 		From<?, ?> pad = criteriaContext.addJoin(personJoin, "addresses", "pad", javax.persistence.criteria.JoinType.LEFT);
 		switch (param) {

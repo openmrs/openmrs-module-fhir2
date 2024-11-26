@@ -37,8 +37,8 @@ import org.springframework.stereotype.Component;
 public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDao {
 	
 	@Override
-	protected <U> void setupSearchParams(OpenmrsFhirCriteriaContext<FhirTask, U> criteriaContext,
-	        SearchParameterMap theParams) {
+	protected <U> void setupSearchParams(@Nonnull OpenmrsFhirCriteriaContext<FhirTask, U> criteriaContext,
+										 @Nonnull SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.BASED_ON_REFERENCE_SEARCH_HANDLER:

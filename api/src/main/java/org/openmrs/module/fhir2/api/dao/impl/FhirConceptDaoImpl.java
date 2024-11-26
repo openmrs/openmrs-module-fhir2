@@ -93,8 +93,8 @@ public class FhirConceptDaoImpl extends BaseFhirDao<Concept> implements FhirConc
 	}
 	
 	@Override
-	protected <U> void setupSearchParams(OpenmrsFhirCriteriaContext<Concept, U> criteriaContext,
-	        SearchParameterMap theParams) {
+	protected <U> void setupSearchParams(@Nonnull OpenmrsFhirCriteriaContext<Concept, U> criteriaContext,
+										 @Nonnull SearchParameterMap theParams) {
 		criteriaContext.getCriteriaBuilder()
 		        .and(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("set"), true));
 		theParams.getParameters().forEach(entry -> {

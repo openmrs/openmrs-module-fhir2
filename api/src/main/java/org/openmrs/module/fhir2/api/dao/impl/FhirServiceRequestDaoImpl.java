@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
+import javax.annotation.Nonnull;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
 
@@ -36,8 +37,8 @@ public class FhirServiceRequestDaoImpl extends BaseFhirDao<TestOrder> implements
 	}
 	
 	@Override
-	protected <U> void setupSearchParams(OpenmrsFhirCriteriaContext<TestOrder, U> criteriaContext,
-	        SearchParameterMap theParams) {
+	protected <U> void setupSearchParams(@Nonnull OpenmrsFhirCriteriaContext<TestOrder, U> criteriaContext,
+										 @Nonnull SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER:

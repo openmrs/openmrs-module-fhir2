@@ -111,7 +111,7 @@ public class FhirEncounterDaoImpl extends BaseEncounterDao<Encounter> implements
 	}
 	
 	@Override
-	protected <V, U> Path<?> paramToProp(OpenmrsFhirCriteriaContext<V, U> criteriaContext, @NonNull String param) {
+	protected <V, U> Path<?> paramToProp(@Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext, @NonNull String param) {
 		switch (param) {
 			case SP_DATE:
 				return criteriaContext.getRoot().get("encounterDatetime");

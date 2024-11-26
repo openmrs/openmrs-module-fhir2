@@ -40,8 +40,8 @@ public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLo
 	LocationService locationService;
 	
 	@Override
-	protected <U> void setupSearchParams(OpenmrsFhirCriteriaContext<Location, U> criteriaContext,
-	        SearchParameterMap theParams) {
+	protected <U> void setupSearchParams(@Nonnull OpenmrsFhirCriteriaContext<Location, U> criteriaContext,
+										 @Nonnull SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.NAME_SEARCH_HANDLER:
@@ -140,7 +140,7 @@ public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLo
 	}
 	
 	@Override
-	protected <V, U> Path<?> paramToProp(OpenmrsFhirCriteriaContext<V, U> criteriaContext, @NonNull String param) {
+	protected <V, U> Path<?> paramToProp(@Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext, @NonNull String param) {
 		switch (param) {
 			case org.hl7.fhir.r4.model.Location.SP_NAME:
 				return criteriaContext.getRoot().get("name");
@@ -159,17 +159,17 @@ public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLo
 	}
 	
 	@Override
-	public LocationTag getLocationTagByName(String tag) {
+	public LocationTag getLocationTagByName(@Nonnull String tag) {
 		return locationService.getLocationTagByName(tag);
 	}
 	
 	@Override
-	public LocationTag saveLocationTag(LocationTag tag) {
+	public LocationTag saveLocationTag(@Nonnull LocationTag tag) {
 		return locationService.saveLocationTag(tag);
 	}
 	
 	@Override
-	public LocationAttributeType getLocationAttributeTypeByUuid(String uuid) {
+	public LocationAttributeType getLocationAttributeTypeByUuid(@Nonnull String uuid) {
 		return locationService.getLocationAttributeTypeByUuid(uuid);
 	}
 }

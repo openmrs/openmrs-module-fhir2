@@ -94,8 +94,8 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 	}
 	
 	@Override
-	protected <U> void setupSearchParams(OpenmrsFhirCriteriaContext<Patient, U> criteriaContext,
-	        SearchParameterMap theParams) {
+	protected <U> void setupSearchParams(@Nonnull OpenmrsFhirCriteriaContext<Patient, U> criteriaContext,
+										 @Nonnull SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.QUERY_SEARCH_HANDLER:
@@ -191,7 +191,7 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 	}
 	
 	@Override
-	protected <V, U> Path<?> paramToProp(OpenmrsFhirCriteriaContext<V, U> criteriaContext, @NonNull String param) {
+	protected <V, U> Path<?> paramToProp(@Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext, @NonNull String param) {
 		if (SP_DEATH_DATE.equalsIgnoreCase(param)) {
 			return criteriaContext.getRoot().get("deathDate");
 		}

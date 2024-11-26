@@ -153,7 +153,7 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 	}
 	
 	@Override
-	protected <U> void setupSearchParams(OpenmrsFhirCriteriaContext<Obs, U> criteriaContext, SearchParameterMap theParams) {
+	protected <U> void setupSearchParams(@Nonnull OpenmrsFhirCriteriaContext<Obs, U> criteriaContext, @Nonnull SearchParameterMap theParams) {
 		if (!theParams.getParameters(FhirConstants.LASTN_ENCOUNTERS_SEARCH_HANDLER).isEmpty()) {
 			ReferenceAndListParam encountersReferences = new ReferenceAndListParam();
 			ReferenceOrListParam referenceOrListParam = new ReferenceOrListParam();
@@ -281,7 +281,7 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 	}
 	
 	@Override
-	protected <V, U> Path<?> paramToProp(OpenmrsFhirCriteriaContext<V, U> criteriaContext, @NonNull String paramName) {
+	protected <V, U> Path<?> paramToProp(@Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext, @NonNull String paramName) {
 		if (Observation.SP_DATE.equals(paramName)) {
 			return criteriaContext.getRoot().get("obsDatetime");
 		}

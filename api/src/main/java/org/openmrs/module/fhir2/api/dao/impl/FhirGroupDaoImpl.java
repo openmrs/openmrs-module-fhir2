@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
+import javax.annotation.Nonnull;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 
@@ -36,8 +37,8 @@ public class FhirGroupDaoImpl extends BaseFhirDao<Cohort> implements FhirGroupDa
 	private static final String PERSON_ALIAS = "person";
 	
 	@Override
-	protected <U> void setupSearchParams(OpenmrsFhirCriteriaContext<Cohort, U> criteriaContext,
-	        SearchParameterMap theParams) {
+	protected <U> void setupSearchParams(@Nonnull OpenmrsFhirCriteriaContext<Cohort, U> criteriaContext,
+										 @Nonnull SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			if (FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER.equals(entry.getKey())) {
 				entry.getValue()
