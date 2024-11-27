@@ -29,6 +29,7 @@ import org.openmrs.ConceptSource;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.fhir2.api.dao.FhirConceptDao;
+import org.openmrs.module.fhir2.api.dao.internals.OpenmrsFhirCriteriaContext;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -94,7 +95,7 @@ public class FhirConceptDaoImpl extends BaseFhirDao<Concept> implements FhirConc
 	
 	@Override
 	protected <U> void setupSearchParams(@Nonnull OpenmrsFhirCriteriaContext<Concept, U> criteriaContext,
-										 @Nonnull SearchParameterMap theParams) {
+	        @Nonnull SearchParameterMap theParams) {
 		criteriaContext.getCriteriaBuilder()
 		        .and(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("set"), true));
 		theParams.getParameters().forEach(entry -> {

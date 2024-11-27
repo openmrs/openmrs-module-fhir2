@@ -7,19 +7,15 @@
  * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
  * graphic logo is a trademark of OpenMRS Inc.
  */
-package org.openmrs.module.fhir2.api.dao.impl;
+package org.openmrs.module.fhir2.api.dao.internals;
 
 import javax.annotation.Nonnull;
-import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Subquery;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -28,35 +24,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
-/**
- * {@code OpenmrsFhirCriteriaContext} is a holder object for building criteria queries in the FHIR2
- * DAO API. It is provided as a convenience since the old Hibernate Criteria API allowed us to
- * simply pass a Criteria object around, but the JPA2 Criteria API requires us to pass several
- * different classes around. <br/>
- * <br/>
- * Criteria queries are built up mostly by calling methods on this class to add various joins,
- * predicates, and sort orders which are built into a {@link CriteriaQuery<U>} by calling
- * {@link #finalizeQuery()}. {@link #finalizeQuery()} should only be called once the full query has
- * been built and only just before running the query if possible. <br/>
- * <br/>
- * The type {@code T} indicates the type of object that is the "root" of the query. For most
- * queries, the type {@code U}, which is the expected type of the result, will be the same as
- * {@code T}; however, for some queries, like those that count results, {@code U} will have a
- * different type.
- *
- * @param <T> The root type for the query
- * @param <U> The type for the result of the query
- */
 @RequiredArgsConstructor
-public class OpenmrsFhirCriteriaContext<T, U> {
-	
-	@Getter
-	@NonNull
-	private final EntityManager entityManager;
+public abstract class BaseFhirCriteriaHolder<V, U> {
 	
 	@Getter
 	@NonNull
@@ -64,20 +38,13 @@ public class OpenmrsFhirCriteriaContext<T, U> {
 	
 	@Getter
 	@NonNull
-	private final CriteriaQuery<U> criteriaQuery;
+	Root<V> root;
 	
-	@Getter
-	@NonNull
-	private final Root<T> root;
-	
+	@Getter(AccessLevel.PROTECTED)
 	private final Map<String, Join<?, ?>> aliases = new LinkedHashMap<>();
 	
+	@Getter(AccessLevel.PROTECTED)
 	private final List<Predicate> predicates = new ArrayList<>();
-	
-	private final List<Order> orders = new ArrayList<>();
-	
-	@Getter
-	private final List<T> results = new ArrayList<>();
 	
 	/**
 	 * Adds a join to the query managed by this {@link OpenmrsFhirCriteriaContext}. This join implicitly
@@ -219,27 +186,8 @@ public class OpenmrsFhirCriteriaContext<T, U> {
 		});
 	}
 	
-	public <V> OpenmrsFhirCriteriaSubquery<V, Integer> addSubquery(Class<V> fromType) {
-		return addSubquery(fromType, Integer.class);
-	}
-	
-	public <V, U> OpenmrsFhirCriteriaSubquery<V, U> addSubquery(Class<V> fromType, Class<U> resultType) {
-		Subquery<U> subquery = criteriaQuery.subquery(resultType);
-		return new OpenmrsFhirCriteriaSubquery<>(criteriaBuilder, subquery, subquery.from(fromType));
-	}
-	
-	public OpenmrsFhirCriteriaContext<T, U> addPredicate(Predicate predicate) {
+	public BaseFhirCriteriaHolder<V, U> addPredicate(Predicate predicate) {
 		predicates.add(predicate);
-		return this;
-	}
-	
-	public OpenmrsFhirCriteriaContext<T, U> addOrder(Order order) {
-		orders.add(order);
-		return this;
-	}
-	
-	public OpenmrsFhirCriteriaContext<T, U> addResults(T result) {
-		results.add(result);
 		return this;
 	}
 	
@@ -251,14 +199,4 @@ public class OpenmrsFhirCriteriaContext<T, U> {
 		return Optional.ofNullable(aliases.get(alias.getAlias()));
 	}
 	
-	public CriteriaQuery<U> finalizeQuery() {
-		return criteriaQuery.where(predicates.toArray(new Predicate[0])).orderBy(orders);
-	}
-	
-	public CriteriaQuery<U> finalizeIdQuery(String idProperty) {
-		Root<? super T> root = criteriaQuery.from(getRoot().getModel());
-		
-		return criteriaQuery.distinct(true).select(root.get(idProperty)).where(predicates.toArray(new Predicate[0]))
-		        .orderBy(orders);
-	}
 }

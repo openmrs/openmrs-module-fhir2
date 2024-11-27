@@ -7,46 +7,37 @@
  * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
  * graphic logo is a trademark of OpenMRS Inc.
  */
-package org.openmrs.module.fhir2.api.dao.impl;
+package org.openmrs.module.fhir2.api.dao.internals;
 
+import javax.annotation.Nonnull;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
-@RequiredArgsConstructor
-public class OpenmrsFhirCriteriaSubquery<V, U> {
+@Getter
+public class OpenmrsFhirCriteriaSubquery<V, U> extends BaseFhirCriteriaHolder<V, U> {
 	
-	@Getter
-	@NonNull
-	private final CriteriaBuilder criteriaBuilder;
-	
-	@Getter
-	@Setter
-	Expression<U> projection = null;
-	
-	@Getter
 	@NonNull
 	Subquery<U> subquery;
 	
-	@Getter
-	@NonNull
-	Root<V> root;
+	@Setter
+	Expression<U> projection = null;
 	
-	private final List<Predicate> predicates = new ArrayList<>();
+	public OpenmrsFhirCriteriaSubquery(@NonNull CriteriaBuilder criteriaBuilder, @Nonnull Subquery<U> subquery,
+	    @NonNull Root<V> root) {
+		super(criteriaBuilder, root);
+		this.subquery = subquery;
+	}
 	
+	@Override
 	public OpenmrsFhirCriteriaSubquery<V, U> addPredicate(Predicate predicate) {
-		predicates.add(predicate);
-		return this;
+		return (OpenmrsFhirCriteriaSubquery<V, U>) super.addPredicate(predicate);
 	}
 	
 	public Subquery<U> finalizeQuery() {
@@ -54,6 +45,6 @@ public class OpenmrsFhirCriteriaSubquery<V, U> {
 			subquery = subquery.select(projection);
 		}
 		
-		return subquery.where(predicates.toArray(new Predicate[0]));
+		return subquery.where(getPredicates().toArray(new Predicate[0]));
 	}
 }

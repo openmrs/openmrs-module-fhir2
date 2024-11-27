@@ -38,6 +38,8 @@ import org.openmrs.Patient;
 import org.openmrs.Person;
 import org.openmrs.PersonName;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.dao.internals.OpenmrsFhirCriteriaContext;
+import org.openmrs.module.fhir2.api.dao.internals.OpenmrsFhirCriteriaSubquery;
 import org.openmrs.module.fhir2.api.search.param.PropParam;
 
 /**
@@ -67,7 +69,7 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 	
 	@Override
 	protected <V, U> Collection<Order> paramToProps(@Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext,
-                                                    @Nonnull SortState<V, U> sortState) {
+	        @Nonnull SortState<V, U> sortState) {
 		String param = sortState.getParameter();
 		
 		if (param == null) {

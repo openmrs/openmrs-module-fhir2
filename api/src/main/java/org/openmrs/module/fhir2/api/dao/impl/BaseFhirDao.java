@@ -45,9 +45,9 @@ import org.openmrs.Voidable;
 import org.openmrs.aop.RequiredDataAdvice;
 import org.openmrs.api.handler.RetireHandler;
 import org.openmrs.api.handler.VoidHandler;
-import org.openmrs.logic.op.In;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirDao;
+import org.openmrs.module.fhir2.api.dao.internals.OpenmrsFhirCriteriaContext;
 import org.openmrs.module.fhir2.api.search.param.PropParam;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.transaction.annotation.Transactional;
@@ -194,13 +194,10 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 			results = executableQuery.getResultList();
 		} else {
 			@SuppressWarnings({ "UnstableApiUsage", "unchecked" })
-			OpenmrsFhirCriteriaContext<T, Integer> criteriaContext = createCriteriaContext((Class<T>) typeToken.getRawType(),
-			    Integer.class);
-
-			String idProperty = getIdPropertyName(criteriaContext);
+			OpenmrsFhirCriteriaContext<T, Integer> criteriaContext = getSearchResultCriteria(
+			    createCriteriaContext((Class<T>) typeToken.getRawType(), Integer.class), theParams);
 			
-			handleSort(criteriaContext, theParams.getSortSpec());
-			handleIdPropertyOrdering(criteriaContext, idProperty);
+			String idProperty = getIdPropertyName(criteriaContext);
 			
 			CriteriaQuery<Integer> query = criteriaContext.finalizeIdQuery(idProperty);
 			
@@ -209,13 +206,13 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 			// Use distinct ids from the original query to return entire objects
 			@SuppressWarnings({ "UnstableApiUsage", "unchecked" })
 			OpenmrsFhirCriteriaContext<T, T> wrapperQuery = createCriteriaContext((Class<T>) typeToken.getRawType());
-			wrapperQuery.getCriteriaQuery().where(wrapperQuery.getRoot().get(idProperty).in(ids));
 			
-			// Need to reapply ordering
-			handleSort(criteriaContext, theParams.getSortSpec());
-			handleIdPropertyOrdering(criteriaContext, idProperty);
+			// FIXME Maybe like this?
+			handleSort(wrapperQuery, theParams.getSortSpec());
+			handleIdPropertyOrdering(wrapperQuery, idProperty);
 			
-			results = wrapperQuery.getEntityManager().createQuery(wrapperQuery.getCriteriaQuery()).getResultList();
+			results = wrapperQuery.getEntityManager().createQuery(wrapperQuery.finalizeWrapperQuery(idProperty, ids))
+			        .getResultList();
 		}
 		
 		return results.stream().map(this::deproxyResult).collect(Collectors.toList());
@@ -269,8 +266,8 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	}
 	
 	// Implementation of handleLastUpdated for "immutable" types, that is, those that cannot be changed
-	protected <V, U> Optional<Predicate> handleLastUpdatedImmutable(@Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext,
-	        DateRangeParam param) {
+	protected <V, U> Optional<Predicate> handleLastUpdatedImmutable(
+	        @Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext, DateRangeParam param) {
 		return handleDateRange(criteriaContext, "dateCreated", param);
 	}
 	
@@ -325,7 +322,8 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	 * @param criteriaContext The {@link OpenmrsFhirCriteriaContext} for the current query
 	 * @param theParams the parameters for this search
 	 */
-	protected <U> void setupSearchParams(@Nonnull OpenmrsFhirCriteriaContext<T, U> criteriaContext, @Nonnull SearchParameterMap theParams) {
+	protected <U> void setupSearchParams(@Nonnull OpenmrsFhirCriteriaContext<T, U> criteriaContext,
+	        @Nonnull SearchParameterMap theParams) {
 		
 	}
 	
@@ -366,7 +364,8 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 		return super.paramToProp(criteriaContext, param);
 	}
 	
-	protected <V, U> void applyExactTotal(@Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext, SearchParameterMap theParams) {
+	protected <V, U> void applyExactTotal(@Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext,
+	        SearchParameterMap theParams) {
 		List<PropParam<?>> exactTotal = theParams.getParameters(EXACT_TOTAL_SEARCH_PARAMETER);
 		
 		EntityManager manager = criteriaContext.getEntityManager();
@@ -394,9 +393,9 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	 * @param criteriaContext The criteria context containing the criteria builder and root.
 	 * @param idPropertyName The name of the id property to be used for ordering.
 	 */
-	protected <V, U> void handleIdPropertyOrdering(@Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext, String idPropertyName) {
-		criteriaContext.getCriteriaQuery()
-		        .orderBy(criteriaContext.getCriteriaBuilder().asc(criteriaContext.getRoot().get(idPropertyName)));
+	protected <V, U> void handleIdPropertyOrdering(@Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext,
+	        String idPropertyName) {
+		criteriaContext.addOrder(criteriaContext.getCriteriaBuilder().asc(criteriaContext.getRoot().get(idPropertyName)));
 	}
 	
 	protected static <V> V deproxyObject(@Nonnull V object) {

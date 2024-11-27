@@ -25,6 +25,7 @@ import org.openmrs.Person;
 import org.openmrs.PersonAttribute;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirPersonDao;
+import org.openmrs.module.fhir2.api.dao.internals.OpenmrsFhirCriteriaContext;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.stereotype.Component;
 
@@ -50,7 +51,7 @@ public class FhirPersonDaoImpl extends BasePersonDao<Person> implements FhirPers
 	
 	@Override
 	protected <U> void setupSearchParams(@Nonnull OpenmrsFhirCriteriaContext<Person, U> criteriaContext,
-										 @Nonnull SearchParameterMap theParams) {
+	        @Nonnull SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.NAME_SEARCH_HANDLER:
@@ -77,7 +78,7 @@ public class FhirPersonDaoImpl extends BasePersonDao<Person> implements FhirPers
 	
 	@Override
 	protected <T, U> Optional<Predicate> handleLastUpdated(@Nonnull OpenmrsFhirCriteriaContext<T, U> criteriaContext,
-                                                           DateRangeParam param) {
+	        DateRangeParam param) {
 		return Optional.of(criteriaContext.getCriteriaBuilder().or(toCriteriaArray(
 		    handleDateRange(criteriaContext, "personDateChanged", param),
 		    Optional.of(criteriaContext.getCriteriaBuilder()

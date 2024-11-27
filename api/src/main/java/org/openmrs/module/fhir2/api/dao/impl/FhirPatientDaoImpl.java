@@ -35,6 +35,7 @@ import org.openmrs.Patient;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirPatientDao;
+import org.openmrs.module.fhir2.api.dao.internals.OpenmrsFhirCriteriaContext;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.stereotype.Component;
 
@@ -95,7 +96,7 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 	
 	@Override
 	protected <U> void setupSearchParams(@Nonnull OpenmrsFhirCriteriaContext<Patient, U> criteriaContext,
-										 @Nonnull SearchParameterMap theParams) {
+	        @Nonnull SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.QUERY_SEARCH_HANDLER:
@@ -196,6 +197,13 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 			return criteriaContext.getRoot().get("deathDate");
 		}
 		return super.paramToProp(criteriaContext, param);
+	}
+	
+	@Override
+	protected <V, U> String getIdPropertyName(@Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext) {
+		// since a patient is-a person, the id returned by default is "personId", but this is not actually
+		// a property of patient, so the selection fails
+		return "patientId";
 	}
 	
 	@Override

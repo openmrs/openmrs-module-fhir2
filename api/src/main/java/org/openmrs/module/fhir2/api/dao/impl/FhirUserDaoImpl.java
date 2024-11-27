@@ -16,6 +16,7 @@ import lombok.AccessLevel;
 import lombok.Setter;
 import org.openmrs.User;
 import org.openmrs.module.fhir2.api.dao.FhirUserDao;
+import org.openmrs.module.fhir2.api.dao.internals.OpenmrsFhirCriteriaContext;
 import org.springframework.stereotype.Component;
 
 @Component

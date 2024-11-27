@@ -29,6 +29,7 @@ import org.openmrs.ConditionClinicalStatus;
 import org.openmrs.annotation.Authorized;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirConditionDao;
+import org.openmrs.module.fhir2.api.dao.internals.OpenmrsFhirCriteriaContext;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.util.PrivilegeConstants;
 import org.springframework.stereotype.Component;
@@ -75,7 +76,7 @@ public class FhirConditionDaoImpl extends BaseFhirDao<Condition> implements Fhir
 	
 	@Override
 	protected <U> void setupSearchParams(@Nonnull OpenmrsFhirCriteriaContext<Condition, U> criteriaContext,
-										 @Nonnull SearchParameterMap theParams) {
+	        @Nonnull SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER:
@@ -130,7 +131,7 @@ public class FhirConditionDaoImpl extends BaseFhirDao<Condition> implements Fhir
 	
 	@Override
 	protected <T, U> Optional<Predicate> handleLastUpdated(@Nonnull OpenmrsFhirCriteriaContext<T, U> criteriaContext,
-														   DateRangeParam param) {
+	        DateRangeParam param) {
 		return super.handleLastUpdated(criteriaContext, param);
 	}
 	

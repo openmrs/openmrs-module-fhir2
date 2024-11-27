@@ -9,13 +9,14 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
+import javax.annotation.Nonnull;
+
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import org.openmrs.Auditable;
 import org.openmrs.OpenmrsObject;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.dao.internals.OpenmrsFhirCriteriaContext;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
-
-import javax.annotation.Nonnull;
 
 /**
  * Base class for DAOs implementing the search for FHIR Practitioners
@@ -25,7 +26,8 @@ import javax.annotation.Nonnull;
 public abstract class BasePractitionerDao<T extends OpenmrsObject & Auditable> extends BasePersonDao<T> {
 	
 	@Override
-	protected <U> void setupSearchParams(@Nonnull OpenmrsFhirCriteriaContext<T, U> criteriaContext, @Nonnull SearchParameterMap theParams) {
+	protected <U> void setupSearchParams(@Nonnull OpenmrsFhirCriteriaContext<T, U> criteriaContext,
+	        @Nonnull SearchParameterMap theParams) {
 		criteriaContext.addJoin("person", "p");
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {

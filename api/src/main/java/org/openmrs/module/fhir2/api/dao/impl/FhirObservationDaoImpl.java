@@ -14,6 +14,7 @@ import javax.persistence.criteria.From;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 import java.util.Date;
 import java.util.List;
@@ -38,7 +39,10 @@ import org.openmrs.Obs;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirEncounterDao;
 import org.openmrs.module.fhir2.api.dao.FhirObservationDao;
+import org.openmrs.module.fhir2.api.dao.internals.OpenmrsFhirCriteriaContext;
+import org.openmrs.module.fhir2.api.dao.internals.OpenmrsFhirCriteriaSubquery;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
+import org.openmrs.module.fhir2.model.FhirObservationCategoryMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -153,7 +157,8 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 	}
 	
 	@Override
-	protected <U> void setupSearchParams(@Nonnull OpenmrsFhirCriteriaContext<Obs, U> criteriaContext, @Nonnull SearchParameterMap theParams) {
+	protected <U> void setupSearchParams(@Nonnull OpenmrsFhirCriteriaContext<Obs, U> criteriaContext,
+	        @Nonnull SearchParameterMap theParams) {
 		if (!theParams.getParameters(FhirConstants.LASTN_ENCOUNTERS_SEARCH_HANDLER).isEmpty()) {
 			ReferenceAndListParam encountersReferences = new ReferenceAndListParam();
 			ReferenceOrListParam referenceOrListParam = new ReferenceOrListParam();
@@ -260,14 +265,17 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 				return Optional.empty();
 			}
 			
-			OpenmrsFhirCriteriaContext<String, ?> context = createCriteriaContext(String.class);
-			OpenmrsFhirCriteriaSubquery<ConceptClass, String> subquery = context.addSubquery(ConceptClass.class,
+			OpenmrsFhirCriteriaSubquery<ConceptClass, ?> context = criteriaContext.addSubquery(ConceptClass.class,
 			    String.class);
-			subquery.setProjection(subquery.getRoot().get("uuid"));
-			subquery.addPredicate(subquery.getCriteriaBuilder().equal(subquery.getRoot().get("category"), param.getValue()));
+			context.setProjection(context.getRoot().get("uuid"));
+			Root<FhirObservationCategoryMap> observationCategoryMapRoot = criteriaContext.getCriteriaQuery()
+			        .from(FhirObservationCategoryMap.class);
+			context.addJoin(observationCategoryMapRoot, "conceptClass", "ocm");
+			context.addPredicate(
+			    context.getCriteriaBuilder().equal(observationCategoryMapRoot.get("observationCategory"), param.getValue()));
 			
-			return Optional
-			        .of(context.getCriteriaBuilder().in(conceptClassJoin.get("uuid")).value(subquery.finalizeQuery()));
+			return Optional.of(
+			    criteriaContext.getCriteriaBuilder().in(conceptClassJoin.get("uuid")).value(context.finalizeQuery()));
 		}).ifPresent(criteriaContext::addPredicate);
 	}
 	
@@ -281,7 +289,8 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 	}
 	
 	@Override
-	protected <V, U> Path<?> paramToProp(@Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext, @NonNull String paramName) {
+	protected <V, U> Path<?> paramToProp(@Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext,
+	        @NonNull String paramName) {
 		if (Observation.SP_DATE.equals(paramName)) {
 			return criteriaContext.getRoot().get("obsDatetime");
 		}
