@@ -154,7 +154,14 @@ public class PatientTranslatorImpl implements PatientTranslator {
 		}
 		
 		for (HumanName name : patient.getName()) {
-			currentPatient.addName(nameTranslator.toOpenmrsType(name));
+			PersonName existingName = null;
+			if (name.hasId()) {
+				existingName = currentPatient.getNames().stream().filter(n -> n.getUuid().equals(name.getId())).findFirst()
+				        .orElse(null);
+			}
+			
+			PersonName pn = nameTranslator.toOpenmrsType(existingName != null ? existingName : new PersonName(), name);
+			currentPatient.addName(pn);
 		}
 		
 		if (patient.hasGender()) {
