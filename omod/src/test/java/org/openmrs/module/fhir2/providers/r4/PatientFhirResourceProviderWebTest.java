@@ -31,13 +31,17 @@ import static org.openmrs.module.fhir2.api.util.GeneralUtils.inputStreamToString
 import javax.servlet.ServletException;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.HasAndListParam;
+import ca.uhn.fhir.rest.param.HasOrListParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -493,6 +497,32 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirR4ResourceProvid
 		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
 		assertThat(lastUpdatedParam.getUpperBound().getValue(),
 		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
+	}
+	
+	@Test
+	public void shouldHandleHasAndListParameterForGroupMemberId() throws Exception {
+		verifyUri("/Patient?_has:Group:member:id=123e4567-e89b-12d3-a456-426614174000,abcdefab-1234-abcd-1234-abcdefabcdef");
+		
+		verify(patientService).searchForPatients(patientSearchParamsCaptor.capture());
+		HasAndListParam hasAndListParam = patientSearchParamsCaptor.getValue().getHasAndListParam();
+		
+		List<HasOrListParam> hasOrListParams = hasAndListParam.getValuesAsQueryTokens();
+		assertThat(hasOrListParams.size(), equalTo(1));
+		
+		List<String> valuesFound = new ArrayList<>();
+		for (HasOrListParam hasOrListParam : hasOrListParams) {
+			hasOrListParam.getValuesAsQueryTokens().forEach(hasParam -> {
+				assertThat(hasParam.getTargetResourceType(), equalTo(FhirConstants.GROUP));
+				assertThat(hasParam.getReferenceFieldName(), equalTo(FhirConstants.INCLUDE_MEMBER_PARAM));
+				assertThat(hasParam.getParameterName(), equalTo("id"));
+				valuesFound.add(hasParam.getParameterValue());
+			});
+		}
+		Collections.sort(valuesFound);
+		
+		assertThat(valuesFound.size(), equalTo(2));
+		assertThat(valuesFound.get(0), equalTo("123e4567-e89b-12d3-a456-426614174000"));
+		assertThat(valuesFound.get(1), equalTo("abcdefab-1234-abcd-1234-abcdefabcdef"));
 	}
 	
 	@Test
