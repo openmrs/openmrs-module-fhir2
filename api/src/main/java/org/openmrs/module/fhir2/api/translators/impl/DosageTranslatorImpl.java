@@ -51,6 +51,10 @@ public class DosageTranslatorImpl implements DosageTranslator {
 		dosage.setRoute(conceptTranslator.toFhirResource(drugOrder.getRoute()));
 		dosage.setTiming(timingTranslator.toFhirResource(drugOrder));
 		
+		if (drugOrder.getInstructions() != null) {
+			dosage.addAdditionalInstruction().setText(drugOrder.getInstructions());
+		}
+		
 		if (drugOrder.getDose() != null) {
 			Dosage.DosageDoseAndRateComponent doseAndRate = new Dosage.DosageDoseAndRateComponent();
 			Quantity dose = new SimpleQuantity();
@@ -73,6 +77,11 @@ public class DosageTranslatorImpl implements DosageTranslator {
 	@Override
 	public DrugOrder toOpenmrsType(@Nonnull DrugOrder drugOrder, @Nonnull Dosage dosage) {
 		drugOrder.setDosingInstructions(dosage.getText());
+		
+		if (dosage.hasAdditionalInstruction()) {
+			drugOrder.setInstructions(dosage.getAdditionalInstructionFirstRep().getText());
+		}
+		
 		if (dosage.getAsNeededBooleanType() != null) {
 			drugOrder.setAsNeeded(dosage.getAsNeededBooleanType().getValue());
 		}

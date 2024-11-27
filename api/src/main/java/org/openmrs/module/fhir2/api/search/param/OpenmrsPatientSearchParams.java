@@ -74,7 +74,7 @@ public class OpenmrsPatientSearchParams extends BaseResourceSearchParams {
 		        .addParameter(FhirConstants.GENDER_SEARCH_HANDLER, "gender", getGender())
 		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, "birthdate", getBirthDate())
 		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, "deathDate", getDeathDate())
-		        .addParameter(FhirConstants.BOOLEAN_SEARCH_HANDLER, getDeceased())
+		        .addParameter(FhirConstants.BOOLEAN_SEARCH_HANDLER, "dead", getDeceased())
 		        .addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.CITY_PROPERTY, getCity())
 		        .addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.STATE_PROPERTY, getState())
 		        .addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.POSTAL_CODE_PROPERTY, getPostalCode())

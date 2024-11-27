@@ -19,6 +19,7 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import static org.openmrs.module.fhir2.api.translators.impl.ReferenceHandlingTranslator.getReferenceId;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -46,6 +47,7 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
 import org.openmrs.module.fhir2.api.translators.LocationAddressTranslator;
+import org.openmrs.module.fhir2.api.translators.LocationReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.LocationTagTranslator;
 import org.openmrs.module.fhir2.api.translators.LocationTypeTranslator;
 import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
@@ -90,6 +92,8 @@ public class LocationTranslatorImplTest {
 	@Mock
 	private LocationAddressTranslator locationAddressTranslator;
 	
+	private LocationReferenceTranslator locationReferenceTranslator = new LocationReferenceTranslatorImpl();
+	
 	@Mock
 	private LocationTagTranslator locationTagTranslator;
 	
@@ -112,13 +116,17 @@ public class LocationTranslatorImplTest {
 	@Before
 	public void setup() {
 		omrsLocation = new Location();
+		
+		((LocationReferenceTranslatorImpl) locationReferenceTranslator).setLocationDao(fhirLocationDao);
+		
 		locationTranslator = new LocationTranslatorImpl();
 		locationTranslator.setLocationAddressTranslator(locationAddressTranslator);
+		locationTranslator.setLocationReferenceTranslator(locationReferenceTranslator);
 		locationTranslator.setTelecomTranslator(telecomTranslator);
 		locationTranslator.setFhirLocationDao(fhirLocationDao);
-		locationTranslator.setPropertyService(propertyService);
 		locationTranslator.setLocationTagTranslator(locationTagTranslator);
 		locationTranslator.setLocationTypeTranslator(locationTypeTranslator);
+		locationTranslator.setPropertyService(propertyService);
 	}
 	
 	@Test
@@ -341,11 +349,13 @@ public class LocationTranslatorImplTest {
 		parentLocation.setUuid(PARENT_LOCATION_UUID);
 		parentLocation.setName(PARENT_LOCATION_NAME);
 		omrsLocation.setParentLocation(parentLocation);
+		
 		Reference locationReference = locationTranslator.toFhirResource(omrsLocation).getPartOf();
+		
 		assertThat(locationReference, notNullValue());
 		assertThat(locationReference.getType(), is(FhirConstants.LOCATION));
 		assertThat(locationReference.getDisplay(), is(PARENT_LOCATION_NAME));
-		assertThat(locationTranslator.getReferenceId(locationReference).orElse(null), equalTo(PARENT_LOCATION_UUID));
+		assertThat(getReferenceId(locationReference).orElse(null), equalTo(PARENT_LOCATION_UUID));
 	}
 	
 	@Test
@@ -388,14 +398,16 @@ public class LocationTranslatorImplTest {
 		Location parentLocation = new Location();
 		parentLocation.setUuid(PARENT_LOCATION_UUID);
 		when(fhirLocationDao.get(PARENT_LOCATION_UUID)).thenReturn(parentLocation);
+		
 		Location result = locationTranslator.getOpenmrsParentLocation(locationReference);
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getUuid(), is(PARENT_LOCATION_UUID));
 	}
 	
 	@Test
 	public void getOpenmrsParentLocation_shouldReturnNullIfLocationHasNoIdentifier() {
-		Reference locationReference = new Reference().setReference(FhirConstants.LOCATION + "/" + PARENT_LOCATION_UUID)
+		Reference locationReference = new Reference().setReference(FhirConstants.LOCATION + "/")
 		        .setType(FhirConstants.LOCATION);
 		
 		Location result = locationTranslator.getOpenmrsParentLocation(locationReference);

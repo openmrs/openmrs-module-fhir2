@@ -110,6 +110,14 @@ public class DosageTranslatorImplTest {
 	}
 	
 	@Test
+	public void toFhirResource_shouldTranslateOrdersInstructionToDosageAdditionalInstructions() {
+		drugOrder.setInstructions(DOSING_INSTRUCTION);
+		Dosage result = dosageTranslator.toFhirResource(drugOrder);
+		assertThat(result, notNullValue());
+		assertThat(result.getAdditionalInstruction().get(0).getText(), equalTo(DOSING_INSTRUCTION));
+	}
+	
+	@Test
 	public void toFhirResource_shouldTranslateDrugOrderRouteToRoute() {
 		Concept concept = new Concept();
 		concept.setUuid(CONCEPT_UUID);
@@ -316,5 +324,17 @@ public class DosageTranslatorImplTest {
 		DrugOrder result = dosageTranslator.toOpenmrsType(new DrugOrder(), dosage);
 		assertThat(result, notNullValue());
 		assertThat(result.getDoseUnits(), equalTo(mg));
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldTranslateAdditionalInstructionsToOrderInstructions() {
+		Dosage dosage = new Dosage();
+		CodeableConcept additionalInstructions = new CodeableConcept();
+		additionalInstructions.setText(DOSING_INSTRUCTION);
+		dosage.addAdditionalInstruction(additionalInstructions);
+		
+		DrugOrder result = dosageTranslator.toOpenmrsType(new DrugOrder(), dosage);
+		assertThat(result, notNullValue());
+		assertThat(result.getInstructions(), equalTo(DOSING_INSTRUCTION));
 	}
 }

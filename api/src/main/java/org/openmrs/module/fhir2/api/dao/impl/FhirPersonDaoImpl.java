@@ -57,7 +57,8 @@ public class FhirPersonDaoImpl extends BasePersonDao<Person> implements FhirPers
 					break;
 				case FhirConstants.GENDER_SEARCH_HANDLER:
 					entry.getValue().forEach(
-					    param -> handleGender("gender", (TokenAndListParam) param.getParam()).ifPresent(criteria::add));
+					    param -> handleGender(FhirConstants.GENDER_PROPERTY, (TokenAndListParam) param.getParam())
+					            .ifPresent(criteria::add));
 					break;
 				case FhirConstants.DATE_RANGE_SEARCH_HANDLER:
 					entry.getValue().forEach(
