@@ -19,11 +19,15 @@ import javax.annotation.Nonnull;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.Set;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.HasAndListParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
@@ -32,17 +36,24 @@ import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Projections;
 import org.hibernate.sql.JoinType;
+import org.openmrs.CohortMembership;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.dao.FhirGroupDao;
 import org.openmrs.module.fhir2.api.dao.FhirPatientDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPatientDao {
+	
+	@Autowired
+	private FhirGroupDao groupDao;
 	
 	@Override
 	public Patient getPatientById(@Nonnull Integer id) {
@@ -112,8 +123,55 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 				case FhirConstants.COMMON_SEARCH_HANDLER:
 					handleCommonSearchParameters(entry.getValue()).ifPresent(criteria::add);
 					break;
+				case FhirConstants.HAS_SEARCH_HANDLER:
+					entry.getValue().forEach(param -> handleHasAndListParam(criteria, (HasAndListParam) param.getParam()));
+					break;
 			}
 		});
+	}
+	
+	protected void handleHasAndListParam(Criteria criteria, HasAndListParam hasAndListParam) {
+		if (hasAndListParam != null) {
+			List<String> groupIds = new ArrayList<>();
+			hasAndListParam.getValuesAsQueryTokens().forEach(hasOrListParam -> {
+				hasOrListParam.getValuesAsQueryTokens().forEach(hasParam -> {
+					if (hasParam != null) {
+						String paramValue = hasParam.getParameterValue();
+						switch (hasParam.getTargetResourceType()) {
+							case FhirConstants.GROUP:
+								switch (hasParam.getReferenceFieldName()) {
+									case FhirConstants.INCLUDE_MEMBER_PARAM:
+										switch (hasParam.getParameterName()) {
+											case "id":
+												groupIds.add(paramValue);
+										}
+										break;
+								}
+								break;
+						}
+					}
+				});
+			});
+			
+			if (!groupIds.isEmpty()) {
+				verifyPatientInGroups(criteria, groupIds);
+			}
+		}
+	}
+	
+	private void verifyPatientInGroups(Criteria criteria, List<String> groupIds) {
+		Set<Integer> patientIds = new HashSet<>();
+		groupIds.forEach(groupId -> patientIds.addAll(getGroupMemberIds(groupId)));
+		
+		criteria.add(in("patientId", patientIds.isEmpty() ? Collections.emptyList() : patientIds));
+	}
+	
+	private List<Integer> getGroupMemberIds(String groupId) {
+		Criteria subquery = getSessionFactory().getCurrentSession().createCriteria(CohortMembership.class, "cm")
+		        .createAlias("cm.cohort", "co").add(eq("co.uuid", groupId))
+		        .setProjection(Projections.property("cm.patientId"));
+		
+		return subquery.list();
 	}
 	
 	private void handlePatientQuery(Criteria criteria, @Nonnull StringAndListParam query) {
