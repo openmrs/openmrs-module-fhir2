@@ -55,6 +55,7 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirDao;
 import org.openmrs.module.fhir2.api.search.param.PropParam;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
+import org.openmrs.util.OpenmrsClassLoader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.transaction.annotation.Transactional;
@@ -100,6 +101,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	@Override
 	@Transactional(readOnly = true)
 	public T get(@Nonnull String uuid) {
+		Thread.currentThread().setContextClassLoader(OpenmrsClassLoader.getInstance());
 		@SuppressWarnings("unchecked")
 		T result = (T) sessionFactory.getCurrentSession().createCriteria(typeToken.getRawType()).add(eq("uuid", uuid))
 		        .uniqueResult();
@@ -115,6 +117,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	@Transactional(readOnly = true)
 	@SuppressWarnings("unchecked")
 	public List<T> get(@Nonnull Collection<String> uuids) {
+		Thread.currentThread().setContextClassLoader(OpenmrsClassLoader.getInstance());
 		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(typeToken.getRawType());
 		criteria.add(in("uuid", uuids));
 		
@@ -210,6 +213,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<T> getSearchResults(@Nonnull SearchParameterMap theParams) {
+		Thread.currentThread().setContextClassLoader(OpenmrsClassLoader.getInstance());
 		Criteria criteria = getSearchResultCriteria(theParams);
 		
 		handleSort(criteria, theParams.getSortSpec());
