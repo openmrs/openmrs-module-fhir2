@@ -31,16 +31,13 @@ import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.DrugOrder;
+import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.openmrs.module.fhir2.FhirConstants;
-import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
-import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.test.context.ContextConfiguration;
 
-@ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
-public class FhirMedicationRequestDaoImplTest extends BaseModuleContextSensitiveTest {
+public class FhirMedicationRequestDaoImplTest extends BaseFhirContextSensitiveTest {
 	
 	private static final String DRUG_ORDER_UUID = "6d0ae116-707a-4629-9850-f15206e63ab0";
 	

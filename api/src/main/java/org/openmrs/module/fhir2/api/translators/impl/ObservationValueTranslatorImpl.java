@@ -50,8 +50,9 @@ public class ObservationValueTranslatorImpl implements ObservationValueTranslato
 		
 		// IMPORTANT boolean values are stored as a coded value, so for this to
 		// work, we must check for a boolean value before a general coded value
-		if (obs.getValueBoolean() != null) {
-			return new BooleanType(obs.getValueBoolean());
+		Boolean valueBoolean = getValueBoolean(obs);
+		if (valueBoolean != null) {
+			return new BooleanType(valueBoolean);
 		} else if (obs.getValueCoded() != null) {
 			return conceptTranslator.toFhirResource(obs.getValueCoded());
 		} else if (obs.getValueDrug() != null) {
@@ -99,11 +100,25 @@ public class ObservationValueTranslatorImpl implements ObservationValueTranslato
 		} else if (resource instanceof Quantity) {
 			obs.setValueNumeric(((Quantity) resource).getValue().doubleValue());
 		} else if (resource instanceof BooleanType) {
-			obs.setValueBoolean(((BooleanType) resource).getValue());
+			setValueBoolean(obs, ((BooleanType) resource).getValue());
 		} else if (resource instanceof StringType) {
 			obs.setValueText(((StringType) resource).getValue());
 		}
 		
 		return obs;
+	}
+	
+	/**
+	 * @return the valueBoolean of the given obs
+	 */
+	protected Boolean getValueBoolean(Obs obs) {
+		return obs.getValueBoolean();
+	}
+	
+	/**
+	 * sets the valueBoolean property of the given obs to the given value
+	 */
+	protected void setValueBoolean(Obs obs, Boolean valueBoolean) {
+		obs.setValueBoolean(valueBoolean);
 	}
 }

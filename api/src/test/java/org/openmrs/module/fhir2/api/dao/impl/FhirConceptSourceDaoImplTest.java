@@ -28,15 +28,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.ConceptSource;
 import org.openmrs.api.ConceptService;
+import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.openmrs.module.fhir2.FhirTestConstants;
-import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.module.fhir2.model.FhirConceptSource;
-import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
 
-@ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
-public class FhirConceptSourceDaoImplTest extends BaseModuleContextSensitiveTest {
+public class FhirConceptSourceDaoImplTest extends BaseFhirContextSensitiveTest {
 	
 	private static final String CONCEPT_SOURCE_FHIR_DATA = "org/openmrs/module/fhir2/api/dao/impl/FhirConceptSourceDaoImplTest_initial_data.xml";
 	

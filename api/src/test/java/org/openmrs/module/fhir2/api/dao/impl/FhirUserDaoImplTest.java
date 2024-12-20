@@ -17,14 +17,11 @@ import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.User;
-import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
-import org.openmrs.test.BaseModuleContextSensitiveTest;
+import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.test.context.ContextConfiguration;
 
-@ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
-public class FhirUserDaoImplTest extends BaseModuleContextSensitiveTest {
+public class FhirUserDaoImplTest extends BaseFhirContextSensitiveTest {
 	
 	private static final String USER_NAME = "firstaccount";
 	

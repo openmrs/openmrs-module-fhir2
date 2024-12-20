@@ -12,7 +12,6 @@ package org.openmrs.module.fhir2.api.impl;
 import java.util.List;
 import java.util.Optional;
 
-import lombok.AccessLevel;
 import lombok.Setter;
 import org.openmrs.Concept;
 import org.openmrs.ConceptMap;
@@ -26,7 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @Transactional
-@Setter(AccessLevel.PACKAGE)
+@Setter
 public class FhirConceptServiceImpl implements FhirConceptService {
 	
 	@Autowired

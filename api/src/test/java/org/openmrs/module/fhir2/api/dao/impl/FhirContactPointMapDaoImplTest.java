@@ -26,15 +26,12 @@ import org.openmrs.ProviderAttributeType;
 import org.openmrs.api.LocationService;
 import org.openmrs.api.PersonService;
 import org.openmrs.api.ProviderService;
-import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
+import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.openmrs.module.fhir2.api.FhirContactPointMapService;
 import org.openmrs.module.fhir2.model.FhirContactPointMap;
-import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
 
-@ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
-public class FhirContactPointMapDaoImplTest extends BaseModuleContextSensitiveTest {
+public class FhirContactPointMapDaoImplTest extends BaseFhirContextSensitiveTest {
 	
 	@Autowired
 	private SessionFactory sessionFactory;

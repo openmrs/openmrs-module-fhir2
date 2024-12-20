@@ -26,14 +26,11 @@ import org.openmrs.ConditionClinicalStatus;
 import org.openmrs.ConditionVerificationStatus;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.PatientService;
-import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
-import org.openmrs.test.BaseModuleContextSensitiveTest;
+import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.test.context.ContextConfiguration;
 
-@ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
-public class FhirConditionDaoImpl_Test extends BaseModuleContextSensitiveTest {
+public class FhirConditionDaoImpl_Test extends BaseFhirContextSensitiveTest {
 	
 	private static final String CONDITION_UUID = "2cc6880e-2c46-15e4-9038-a6c5e4d22fb7";
 	

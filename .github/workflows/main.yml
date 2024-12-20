@@ -55,11 +55,11 @@ jobs:
           path: ${{ github.workspace }}/omod/target
       - name: run db and web containers
         run: |
-          docker-compose -f docker/docker-compose-refqa.yml up -d
+          docker compose -f docker/docker-compose-refqa.yml up -d
       - name: wait for openmrs instance to start
         run: while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' http://localhost:8080/openmrs/login.htm)" != "200" ]]; do sleep 1; done
       - name: Run End to End tests
         run: mvn verify --batch-mode -P e2e-test --file pom.xml
       - name: Stop db and web containers
         if: always()
-        run: docker-compose -f "docker/docker-compose-refqa.yml" down
+        run: docker compose -f "docker/docker-compose-refqa.yml" down

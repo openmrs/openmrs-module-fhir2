@@ -9,19 +9,16 @@
  */
 package org.openmrs.module.fhir2;
 
-import org.mockito.Mockito;
-import org.openmrs.module.fhir2.api.util.LocalDateTimeFactory;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
+import org.junit.Before;
+import org.openmrs.module.fhir2.api.util.FhirGlobalPropertyHolder;
+import org.openmrs.test.BaseModuleContextSensitiveTest;
+import org.springframework.test.context.ContextConfiguration;
 
-@Configuration
-public class MockedCalendarFactoryConfiguration {
+@ContextConfiguration(classes = { TestFhirSpringConfiguration.class }, inheritLocations = false)
+public abstract class BaseFhirContextSensitiveTest extends BaseModuleContextSensitiveTest {
 	
-	@Bean
-	@Primary
-	public LocalDateTimeFactory getCalendarFactory() {
-		return Mockito.mock(LocalDateTimeFactory.class);
+	@Before
+	public void setupBaseFhirContextSensitive() {
+		FhirGlobalPropertyHolder.reset();
 	}
-	
 }

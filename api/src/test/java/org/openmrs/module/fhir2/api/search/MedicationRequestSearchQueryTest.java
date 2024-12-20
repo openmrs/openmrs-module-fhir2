@@ -44,15 +44,13 @@ import org.hl7.fhir.r4.model.Practitioner;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.DrugOrder;
+import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.FhirTestConstants;
-import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.module.fhir2.api.dao.FhirMedicationRequestDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.MedicationRequestTranslator;
-import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
 
 /*
  * Notes on test data:
@@ -70,8 +68,7 @@ import org.springframework.test.context.ContextConfiguration;
  * 		Total numbers of non-voided, non-discontinued orders = (10 - 2) + (5 - 2) = 11
  * 		Total number of active orders (non-voided, non-discontunue, not stopped and not expired) = (10 - 5) + (5 - 5) = 5
  */
-@ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
-public class MedicationRequestSearchQueryTest extends BaseModuleContextSensitiveTest {
+public class MedicationRequestSearchQueryTest extends BaseFhirContextSensitiveTest {
 	
 	private static final String MEDICATION_REQUEST_DATA_XMLS = "org/openmrs/module/fhir2/api/dao/impl/FhirMedicationRequestDaoImpl_initial_data.xml";
 	

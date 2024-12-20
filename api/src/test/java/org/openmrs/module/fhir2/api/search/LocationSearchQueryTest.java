@@ -48,19 +48,16 @@ import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Location;
 import org.junit.Before;
 import org.junit.Test;
+import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.openmrs.module.fhir2.FhirConstants;
-import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.LocationTranslator;
-import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.openmrs.test.SkipBaseSetup;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
 
 @SkipBaseSetup
-@ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
-public class LocationSearchQueryTest extends BaseModuleContextSensitiveTest {
+public class LocationSearchQueryTest extends BaseFhirContextSensitiveTest {
 	
 	public static final String LOCATION_UUID = "5db6ae3c-867e-45a0-a1ce-f86219b64e1c";
 	

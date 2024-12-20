@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Optional;
 
 import ca.uhn.fhir.rest.param.StringAndListParam;
-import lombok.AccessLevel;
 import lombok.Setter;
 import org.hibernate.Criteria;
 import org.hibernate.transform.DistinctRootEntityResultTransformer;
@@ -38,7 +37,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-@Setter(AccessLevel.PACKAGE)
+@Setter
 public class FhirConceptDaoImpl extends BaseFhirDao<Concept> implements FhirConceptDao {
 	
 	@Autowired

@@ -18,13 +18,10 @@ import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.PatientIdentifierType;
-import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
-import org.openmrs.test.BaseModuleContextSensitiveTest;
+import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
 
-@ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
-public class FhirPatientDaoImplPatientIdentifierTest extends BaseModuleContextSensitiveTest {
+public class FhirPatientDaoImplPatientIdentifierTest extends BaseFhirContextSensitiveTest {
 	
 	private static final String PATIENT_IDENTIFIER_TYPE_NAME = "Test Identifier Type";
 	

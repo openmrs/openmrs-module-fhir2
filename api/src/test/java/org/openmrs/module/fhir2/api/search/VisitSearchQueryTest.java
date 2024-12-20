@@ -41,17 +41,14 @@ import org.hl7.fhir.r4.model.Practitioner;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.Visit;
+import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.openmrs.module.fhir2.FhirConstants;
-import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.module.fhir2.api.dao.FhirVisitDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.EncounterTranslator;
-import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
 
-@ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
-public class VisitSearchQueryTest extends BaseModuleContextSensitiveTest {
+public class VisitSearchQueryTest extends BaseFhirContextSensitiveTest {
 	
 	private static final String VISIT_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirVisitDaoImplTest_initial_data.xml";
 	

@@ -24,15 +24,12 @@ import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.Patient;
+import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.openmrs.module.fhir2.FhirConstants;
-import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
-import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
 
-@ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
-public class FhirPatientDaoImplTest extends BaseModuleContextSensitiveTest {
+public class FhirPatientDaoImplTest extends BaseFhirContextSensitiveTest {
 	
 	private static final String PATIENT_UUID = "256ccf6d-6b41-455c-9be2-51ff4386ae76";
 	

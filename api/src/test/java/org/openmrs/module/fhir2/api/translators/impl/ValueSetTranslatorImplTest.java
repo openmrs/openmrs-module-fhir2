@@ -20,11 +20,12 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Optional;
 
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Concept;
 import org.openmrs.ConceptDescription;
 import org.openmrs.ConceptMap;
@@ -33,17 +34,14 @@ import org.openmrs.ConceptName;
 import org.openmrs.ConceptReferenceTerm;
 import org.openmrs.ConceptSet;
 import org.openmrs.ConceptSource;
-import org.openmrs.api.ConceptService;
-import org.openmrs.api.context.ServiceContext;
 import org.openmrs.module.fhir2.FhirTestConstants;
 import org.openmrs.module.fhir2.api.FhirConceptSourceService;
 import org.openmrs.module.fhir2.model.FhirConceptSource;
 
+@RunWith(MockitoJUnitRunner.class)
 public class ValueSetTranslatorImplTest {
 	
 	private static final String CONCEPT_UUID = "0f97e14e-cdc2-49ac-9255-b5126f8a5147";
-	
-	private ConceptService conceptService;
 	
 	private FhirConceptSourceService conceptSourceService;
 	
@@ -53,7 +51,6 @@ public class ValueSetTranslatorImplTest {
 	
 	@Before
 	public void setup() {
-		conceptService = mock(ConceptService.class);
 		conceptSourceService = mock(FhirConceptSourceService.class);
 		concept = mock(Concept.class);
 		valueSetTranslator.setConceptSourceService(conceptSourceService);
@@ -61,9 +58,6 @@ public class ValueSetTranslatorImplTest {
 	
 	@Test
 	public void shouldTranslateConceptSetToValueSet() {
-		when(conceptService.getDefaultConceptMapType()).thenReturn(new ConceptMapType());
-		ServiceContext.getInstance().setConceptService(conceptService);
-		
 		ConceptName conceptName = new ConceptName();
 		conceptName.setName("test");
 		
@@ -84,8 +78,6 @@ public class ValueSetTranslatorImplTest {
 		when(conceptMap.getConceptReferenceTerm()).thenReturn(conceptReferenceTerm);
 		when(conceptMap.getConceptMapType()).thenReturn(conceptMapType);
 		when(conceptReferenceTerm.getConceptSource()).thenReturn(conceptSource);
-		when(conceptReferenceTerm.getCode()).thenReturn("1000-1");
-		when(conceptSource.getName()).thenReturn("LOINC");
 		concept1.addConceptMapping(conceptMap);
 		
 		FhirConceptSource loinc = new FhirConceptSource();
@@ -93,7 +85,6 @@ public class ValueSetTranslatorImplTest {
 		loincConceptSource.setName("LOINC");
 		loinc.setConceptSource(loincConceptSource);
 		loinc.setUrl(FhirTestConstants.LOINC_SYSTEM_URL);
-		when(conceptSourceService.getFhirConceptSource(loincConceptSource)).thenReturn(Optional.of(loinc));
 		
 		ConceptSet conceptSet = new ConceptSet();
 		conceptSet.setConceptSet(concept);

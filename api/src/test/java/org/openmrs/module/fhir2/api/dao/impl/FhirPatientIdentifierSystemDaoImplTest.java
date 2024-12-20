@@ -24,15 +24,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.api.PatientService;
-import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
+import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.openmrs.module.fhir2.api.FhirPatientIdentifierSystemService;
 import org.openmrs.module.fhir2.model.FhirPatientIdentifierSystem;
-import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
 
-@ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
-public class FhirPatientIdentifierSystemDaoImplTest extends BaseModuleContextSensitiveTest {
+public class FhirPatientIdentifierSystemDaoImplTest extends BaseFhirContextSensitiveTest {
 	
 	private FhirPatientIdentifierSystemDaoImpl dao;
 	
