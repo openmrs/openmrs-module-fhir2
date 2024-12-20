@@ -14,21 +14,18 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
 import org.openmrs.Allergen;
 import org.openmrs.AllergenType;
 import org.openmrs.Allergy;
 import org.openmrs.AllergyReaction;
 import org.openmrs.Concept;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
-import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
+import org.openmrs.module.fhir2.api.dao.FhirAllergyIntoleranceDao;
 import org.openmrs.module.fhir2.api.dao.FhirConceptDao;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
@@ -43,22 +40,13 @@ public class FhirAllergyIntoleranceDaoImplTest extends BaseModuleContextSensitiv
 	private static final String CODED_REACTION_UUID = "5087AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	
 	@Autowired
-	@Qualifier("sessionFactory")
-	private SessionFactory sessionFactory;
-	
-	@Mock
-	private FhirGlobalPropertyService globalPropertyService;
-	
-	private FhirAllergyIntoleranceDaoImpl allergyDao;
+	private FhirAllergyIntoleranceDao allergyDao;
 	
 	@Autowired
 	private FhirConceptDao conceptDao;
 	
 	@Before
 	public void setup() throws Exception {
-		allergyDao = new FhirAllergyIntoleranceDaoImpl();
-		allergyDao.setSessionFactory(sessionFactory);
-		allergyDao.setGlobalPropertyService(globalPropertyService);
 		executeDataSet(ALLERGY_INTOLERANCE_INITIAL_DATA_XML);
 	}
 	

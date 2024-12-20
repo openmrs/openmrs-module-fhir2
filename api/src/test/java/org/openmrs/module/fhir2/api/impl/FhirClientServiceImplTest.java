@@ -18,11 +18,9 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
 
 public class FhirClientServiceImplTest {
 	
-	@Mock
 	private static final String R3_URL = "https://demo.openmrs.org/openmrs/ws/fhir2/R3";
 	
 	private static final String R4_URL = "https://demo.openmrs.org/openmrs/ws/fhir2/R4";

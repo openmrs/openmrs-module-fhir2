@@ -13,7 +13,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hl7.fhir.r4.model.Patient.SP_IDENTIFIER;
-import static org.mockito.Mockito.when;
 import static org.openmrs.module.fhir2.FhirConstants.ENCOUNTER;
 import static org.openmrs.module.fhir2.FhirConstants.PATIENT;
 import static org.openmrs.module.fhir2.FhirConstants.PRACTITIONER;
@@ -43,13 +42,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.Obs;
 import org.openmrs.Provider;
+import org.openmrs.api.AdministrationService;
 import org.openmrs.api.ObsService;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
-import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.util.ImmunizationObsGroupHelper;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
@@ -68,21 +68,21 @@ public class FhirImmunizationServiceImplTest extends BaseModuleContextSensitiveT
 	private ObsService obsService;
 	
 	@Autowired
-	private FhirGlobalPropertyService globalPropertyService;
+	@Qualifier("adminService")
+	private AdministrationService administrationService;
 	
 	@Autowired
 	private ImmunizationObsGroupHelper helper;
 	
 	@Before
 	public void setup() throws Exception {
-		when(globalPropertyService.getGlobalProperty(FhirConstants.IMMUNIZATIONS_ENCOUNTER_TYPE_PROPERTY))
-		        .thenReturn("29c02aff-9a93-46c9-bf6f-48b552fcb1fa");
-		when(globalPropertyService.getGlobalProperty(FhirConstants.ADMINISTERING_ENCOUNTER_ROLE_PROPERTY))
-		        .thenReturn("546cce2d-6d58-4097-ba92-206c1a2a0462");
-		
 		executeDataSet(IMMUNIZATIONS_METADATA_XML);
 		executeDataSet(IMMUNIZATIONS_INITIAL_DATA_XML);
 		executeDataSet(PRACTITIONER_INITIAL_DATA_XML);
+		administrationService.setGlobalProperty(FhirConstants.IMMUNIZATIONS_ENCOUNTER_TYPE_PROPERTY,
+		    "29c02aff-9a93-46c9-bf6f-48b552fcb1fa");
+		administrationService.setGlobalProperty(FhirConstants.ADMINISTERING_ENCOUNTER_ROLE_PROPERTY,
+		    "546cce2d-6d58-4097-ba92-206c1a2a0462");
 	}
 	
 	/**

@@ -24,12 +24,10 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.mockito.Mockito.when;
 import static org.openmrs.test.OpenmrsMatchers.hasId;
 import static org.openmrs.test.OpenmrsMatchers.hasUuid;
 
-import java.time.LocalDateTime;
-import java.time.Month;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 
@@ -47,18 +45,19 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import org.apache.commons.lang.time.DateUtils;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.Condition;
+import org.openmrs.api.ConditionService;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.module.fhir2.api.dao.FhirConditionDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.ConditionTranslator;
-import org.openmrs.module.fhir2.api.util.LocalDateTimeFactory;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -143,7 +142,7 @@ public class ConditionSearchQueryTest extends BaseModuleContextSensitiveTest {
 	private SearchQuery<Condition, org.hl7.fhir.r4.model.Condition, FhirConditionDao<Condition>, ConditionTranslator<Condition>, SearchQueryInclude<org.hl7.fhir.r4.model.Condition>> searchQuery;
 	
 	@Autowired
-	private LocalDateTimeFactory localDateTimeFactory;
+	ConditionService conditionService;
 	
 	@Before
 	public void setup() {
@@ -649,11 +648,14 @@ public class ConditionSearchQueryTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void searchForConditions_shouldReturnConditionByOnsetAgeLessThanHour() {
-		QuantityOrListParam orList = new QuantityOrListParam();
-		orList.addOr(new QuantityParam(ParamPrefixEnum.LESSTHAN, 1.5, "", "h"));
-		QuantityAndListParam onsetAgeParam = new QuantityAndListParam().addAnd(orList);
+		Condition condition = conditionService.getConditionByUuid(CONDITION_UUID);
+		Date onsetDate = DateUtils.addMinutes(new Date(), -45);
+		condition.setOnsetDate(onsetDate);
+		conditionService.saveCondition(condition);
 		
-		when(localDateTimeFactory.now()).thenReturn(LocalDateTime.of(2020, Month.MARCH, 13, 19, 10, 0));
+		QuantityOrListParam orList = new QuantityOrListParam();
+		orList.addOr(new QuantityParam(ParamPrefixEnum.LESSTHAN, 1, "", "h"));
+		QuantityAndListParam onsetAgeParam = new QuantityAndListParam().addAnd(orList);
 		
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER,
 		    onsetAgeParam);
@@ -670,11 +672,14 @@ public class ConditionSearchQueryTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void searchForConditions_shouldReturnConditionByOnsetAgeEqualHour() {
+		Condition condition = conditionService.getConditionByUuid(CONDITION_UUID);
+		Date onsetDate = DateUtils.addHours(new Date(), -3);
+		condition.setOnsetDate(onsetDate);
+		conditionService.saveCondition(condition);
+		
 		QuantityOrListParam orList = new QuantityOrListParam();
 		orList.addOr(new QuantityParam(ParamPrefixEnum.EQUAL, 3, "", "h"));
 		QuantityAndListParam onsetAgeParam = new QuantityAndListParam().addAnd(orList);
-		
-		when(localDateTimeFactory.now()).thenReturn(LocalDateTime.of(2020, Month.MARCH, 13, 22, 0, 0));
 		
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER,
 		    onsetAgeParam);
@@ -691,13 +696,16 @@ public class ConditionSearchQueryTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void searchForConditions_shouldReturnConditionByOnsetAgeIntervalDay() {
+		Condition condition = conditionService.getConditionByUuid(CONDITION_UUID);
+		Date onsetDate = DateUtils.addDays(new Date(), -9);
+		condition.setOnsetDate(onsetDate);
+		conditionService.saveCondition(condition);
+		
 		QuantityOrListParam orListLower = new QuantityOrListParam();
 		QuantityOrListParam orListUpper = new QuantityOrListParam();
 		orListLower.addOr(new QuantityParam(ParamPrefixEnum.LESSTHAN, 11, "", "d"));
 		orListUpper.addOr(new QuantityParam(ParamPrefixEnum.GREATERTHAN, 8, "", "d"));
 		QuantityAndListParam onsetAgeParam = new QuantityAndListParam().addAnd(orListLower).addAnd(orListUpper);
-		
-		when(localDateTimeFactory.now()).thenReturn(LocalDateTime.of(2020, Month.MARCH, 22, 22, 0, 0));
 		
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER,
 		    onsetAgeParam);
@@ -719,7 +727,7 @@ public class ConditionSearchQueryTest extends BaseModuleContextSensitiveTest {
 		orList.addOr(new QuantityParam(ParamPrefixEnum.LESSTHAN, 2, "", "wk"));
 		QuantityAndListParam onsetAgeParam = new QuantityAndListParam().addAnd(orList);
 		
-		when(localDateTimeFactory.now()).thenReturn(LocalDateTime.of(2020, Month.MARCH, 13, 22, 0, 0));
+		//when(localDateTimeFactory.now()).thenReturn(LocalDateTime.of(2020, Month.MARCH, 13, 22, 0, 0));
 		
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER,
 		    onsetAgeParam);
@@ -738,7 +746,7 @@ public class ConditionSearchQueryTest extends BaseModuleContextSensitiveTest {
 		orList.addOr(new QuantityParam(ParamPrefixEnum.LESSTHAN, 1.5, "", "WRONG_UNIT"));
 		QuantityAndListParam onsetAgeParam = new QuantityAndListParam().addAnd(orList);
 		
-		when(localDateTimeFactory.now()).thenReturn(LocalDateTime.of(2020, Month.MARCH, 13, 19, 10, 0));
+		//when(localDateTimeFactory.now()).thenReturn(LocalDateTime.of(2020, Month.MARCH, 13, 19, 10, 0));
 		
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER,
 		    onsetAgeParam);
