@@ -10,7 +10,7 @@
 package org.openmrs.module.fhir2.web.servlet;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -62,19 +62,10 @@ public class FhirRestServletTest {
 		when(mockRequest.getMethod()).thenReturn("GET");
 		when(mockRequest.getRequestURI()).thenReturn("/fhir");
 		
-		ClassLoader initialClassLoader = Thread.currentThread().getContextClassLoader();
-		
-		assertNotEquals("ContextClassLoader should not be OpenmrsClassLoader initially",
-		    OpenmrsClassLoader.getInstance().getClass().getName(), initialClassLoader.getClass().getName());
-		
-		// replay
+		Thread.currentThread().setContextClassLoader(null);
+		assertNull(Thread.currentThread().getContextClassLoader());
 		servlet.service(mockRequest, mockResponse);
-		
-		// Verify
-		ClassLoader newClassLoader = Thread.currentThread().getContextClassLoader();
-		
-		assertEquals("ContextClassLoader should be OpenmrsClassLoader after service method",
-		    OpenmrsClassLoader.getInstance().getClass().getName(), newClassLoader.getClass().getName());
+		assertEquals(OpenmrsClassLoader.getInstance(), Thread.currentThread().getContextClassLoader());
 	}
 	
 	class TestableFhirRestServlet extends FhirRestServlet {
