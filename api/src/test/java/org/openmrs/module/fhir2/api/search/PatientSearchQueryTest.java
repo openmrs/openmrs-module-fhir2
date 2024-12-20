@@ -57,20 +57,14 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.junit.Before;
 import org.junit.Test;
-import org.openmrs.api.AdministrationService;
+import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.openmrs.module.fhir2.FhirConstants;
-import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
-import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirPatientDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.PatientTranslator;
-import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.test.context.ContextConfiguration;
 
-@ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
-public class PatientSearchQueryTest extends BaseModuleContextSensitiveTest {
+public class PatientSearchQueryTest extends BaseFhirContextSensitiveTest {
 	
 	private static final String[] PATIENT_SEARCH_DATA_FILES = {
 	        "org/openmrs/module/fhir2/api/dao/impl/FhirPatientDaoImplTest_initial_data.xml",
@@ -148,13 +142,6 @@ public class PatientSearchQueryTest extends BaseModuleContextSensitiveTest {
 	
 	@Autowired
 	private SearchQueryInclude<Patient> searchQueryInclude;
-	
-	@Autowired
-	private FhirGlobalPropertyService globalPropertyService;
-	
-	@Autowired
-	@Qualifier("adminService")
-	private AdministrationService administrationService;
 	
 	@Autowired
 	private SearchQuery<org.openmrs.Patient, Patient, FhirPatientDao, PatientTranslator, SearchQueryInclude<Patient>> searchQuery;

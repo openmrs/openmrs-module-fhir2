@@ -19,14 +19,11 @@ import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.Cohort;
-import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
-import org.openmrs.test.BaseModuleContextSensitiveTest;
+import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.test.context.ContextConfiguration;
 
-@ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
-public class FhirGroupDaoImplTest extends BaseModuleContextSensitiveTest {
+public class FhirGroupDaoImplTest extends BaseFhirContextSensitiveTest {
 	
 	private static final String COHORT_UUID = "1d64befb-3b2e-48e5-85f5-353d43e23e46";
 	

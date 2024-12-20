@@ -53,17 +53,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.Condition;
 import org.openmrs.api.ConditionService;
+import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.openmrs.module.fhir2.FhirConstants;
-import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.module.fhir2.api.dao.FhirConditionDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.ConditionTranslator;
-import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
 
-@ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
-public class ConditionSearchQueryTest extends BaseModuleContextSensitiveTest {
+public class ConditionSearchQueryTest extends BaseFhirContextSensitiveTest {
 	
 	private static final String CONDITION_UUID = "604953c5-b5c6-4e1e-be95-e37d8f392046";
 	

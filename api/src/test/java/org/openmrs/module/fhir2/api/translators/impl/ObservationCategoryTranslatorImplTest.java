@@ -18,14 +18,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.Concept;
 import org.openmrs.ConceptClass;
-import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
+import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.openmrs.module.fhir2.api.translators.ObservationCategoryTranslator;
-import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
 
-@ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
-public class ObservationCategoryTranslatorImplTest extends BaseModuleContextSensitiveTest {
+public class ObservationCategoryTranslatorImplTest extends BaseFhirContextSensitiveTest {
 	
 	private final String OBSERVATION_CATEGORY_CONCEPT_CLASS_DATA = "org/openmrs/module/fhir2/mapping/FhirObservationCategoryTest_initial_data.xml";
 	

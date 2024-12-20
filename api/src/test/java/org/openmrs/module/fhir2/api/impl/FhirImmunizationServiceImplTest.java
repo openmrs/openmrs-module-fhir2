@@ -44,16 +44,13 @@ import org.openmrs.Obs;
 import org.openmrs.Provider;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.ObsService;
+import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.openmrs.module.fhir2.FhirConstants;
-import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.module.fhir2.api.util.ImmunizationObsGroupHelper;
-import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.test.context.ContextConfiguration;
 
-@ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
-public class FhirImmunizationServiceImplTest extends BaseModuleContextSensitiveTest {
+public class FhirImmunizationServiceImplTest extends BaseFhirContextSensitiveTest {
 	
 	private static final String IMMUNIZATIONS_METADATA_XML = "org/openmrs/module/fhir2/Immunization_metadata.xml";
 	

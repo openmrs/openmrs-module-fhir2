@@ -46,18 +46,15 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.Allergy;
 import org.openmrs.api.AdministrationService;
+import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.openmrs.module.fhir2.FhirConstants;
-import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.module.fhir2.api.dao.FhirAllergyIntoleranceDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.AllergyIntoleranceTranslator;
-import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.test.context.ContextConfiguration;
 
-@ContextConfiguration(classes = { TestFhirSpringConfiguration.class }, inheritLocations = false)
-public class AllergyIntoleranceSearchQueryTest extends BaseModuleContextSensitiveTest {
+public class AllergyIntoleranceSearchQueryTest extends BaseFhirContextSensitiveTest {
 	
 	private static final String ALLERGY_INTOLERANCE_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirAllergyIntoleranceDaoImplTest_initial_data.xml";
 	

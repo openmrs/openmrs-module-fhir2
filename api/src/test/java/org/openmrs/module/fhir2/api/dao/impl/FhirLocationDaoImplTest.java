@@ -24,14 +24,11 @@ import org.openmrs.LocationAttributeType;
 import org.openmrs.LocationTag;
 import org.openmrs.api.LocationService;
 import org.openmrs.customdatatype.datatype.FreeTextDatatype;
-import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
+import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
-import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
 
-@ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
-public class FhirLocationDaoImplTest extends BaseModuleContextSensitiveTest {
+public class FhirLocationDaoImplTest extends BaseFhirContextSensitiveTest {
 	
 	private static final String LOCATION_UUID = "c0938432-1691-11df-97a5-7038c432";
 	
