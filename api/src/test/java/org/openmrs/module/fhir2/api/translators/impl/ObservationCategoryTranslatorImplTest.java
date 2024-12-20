@@ -13,15 +13,13 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 
-import org.hibernate.SessionFactory;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
 import org.openmrs.Concept;
 import org.openmrs.ConceptClass;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
-import org.openmrs.module.fhir2.api.mappings.ObservationCategoryMap;
+import org.openmrs.module.fhir2.api.translators.ObservationCategoryTranslator;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -37,27 +35,17 @@ public class ObservationCategoryTranslatorImplTest extends BaseModuleContextSens
 	
 	private final String EXAM_CONCEPT_CLASS_UUID = "8d491a9a-c2cc-11de-8d13-0010c6dffd0f";
 	
-	@Mock
-	private ObservationCategoryMap categoryMap;
-	
-	@Autowired
-	private SessionFactory sessionFactory;
-	
 	private Concept concept;
 	
 	private CodeableConcept codeableConcept;
 	
-	private ObservationCategoryTranslatorImpl observationCategoryTranslator;
+	@Autowired
+	ObservationCategoryTranslator observationCategoryTranslator;
 	
 	@Before
 	public void setup() throws Exception {
-		observationCategoryTranslator = new ObservationCategoryTranslatorImpl();
-		categoryMap = new ObservationCategoryMap();
-		concept = new Concept();
-		categoryMap.setSessionFactory(sessionFactory);
-		observationCategoryTranslator.setCategoryMap(categoryMap);
-		
 		executeDataSet(OBSERVATION_CATEGORY_CONCEPT_CLASS_DATA);
+		concept = new Concept();
 	}
 	
 	@Test

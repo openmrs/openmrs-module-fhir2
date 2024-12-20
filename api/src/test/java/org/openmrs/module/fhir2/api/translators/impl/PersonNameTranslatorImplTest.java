@@ -27,15 +27,17 @@ import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.PersonName;
 import org.openmrs.api.AdministrationService;
-import org.openmrs.api.context.ServiceContext;
 import org.openmrs.layout.name.NameSupport;
 import org.openmrs.layout.name.NameTemplate;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.serialization.SerializationException;
 import org.openmrs.serialization.SimpleXStreamSerializer;
 
+@RunWith(MockitoJUnitRunner.class)
 public class PersonNameTranslatorImplTest {
 	
 	private static final String PERSON_NAME_UUID = "123456-abcdef-123456";
@@ -166,7 +168,6 @@ public class PersonNameTranslatorImplTest {
 	@Test
 	public void shouldUseDefaultNameTemplateToSetNameText() throws SerializationException {
 		AdministrationService administrationService = mock(AdministrationService.class);
-		ServiceContext.getInstance().setAdministrationService(administrationService);
 		when(administrationService.getGlobalProperty("layout.name.format")).thenReturn("test");
 		
 		NameSupport nameSupportInstance = new NameSupport();
