@@ -14,7 +14,6 @@ import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.Optional;
 
-import lombok.AccessLevel;
 import lombok.Setter;
 import org.openmrs.ConceptSource;
 import org.openmrs.Duration;
@@ -28,7 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @Transactional
-@Setter(AccessLevel.PACKAGE)
+@Setter
 public class FhirConceptSourceServiceImpl implements FhirConceptSourceService {
 	
 	@Autowired

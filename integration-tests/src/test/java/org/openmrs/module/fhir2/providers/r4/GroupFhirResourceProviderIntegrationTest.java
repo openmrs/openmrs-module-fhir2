@@ -45,8 +45,6 @@ public class GroupFhirResourceProviderIntegrationTest extends BaseFhirR4Integrat
 	
 	private static final String COHORT_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirCohortDaoImplTest_initial_data.xml";
 	
-	private static final String PATIENT_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirPatientDaoImplTest_initial_data.xml";
-	
 	private static final String JSON_CREATE_GROUP_DOCUMENT = "org/openmrs/module/fhir2/providers/GroupWebTest_create.json";
 	
 	private static final String XML_CREATE_GROUP_DOCUMENT = "org/openmrs/module/fhir2/providers/GroupWebTest_create.xml";
@@ -63,7 +61,6 @@ public class GroupFhirResourceProviderIntegrationTest extends BaseFhirR4Integrat
 	@Override
 	public void setup() throws Exception {
 		super.setup();
-		executeDataSet(PATIENT_DATA_XML);
 		executeDataSet(COHORT_DATA_XML);
 	}
 	
@@ -387,7 +384,7 @@ public class GroupFhirResourceProviderIntegrationTest extends BaseFhirR4Integrat
 	
 	@Test
 	public void shouldReturnCountForGroupAsJson() throws Exception {
-		MockHttpServletResponse response = get("/Group?_summary=count").accept(FhirMediaTypes.JSON).go();
+		MockHttpServletResponse response = get("/Group").accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
@@ -402,7 +399,7 @@ public class GroupFhirResourceProviderIntegrationTest extends BaseFhirR4Integrat
 	
 	@Test
 	public void shouldReturnCountForGroupAsXml() throws Exception {
-		MockHttpServletResponse response = get("/Group?_summary=count").accept(FhirMediaTypes.XML).go();
+		MockHttpServletResponse response = get("/Group").accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));

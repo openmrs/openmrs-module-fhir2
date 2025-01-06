@@ -19,14 +19,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.Concept;
 import org.openmrs.api.ConceptService;
-import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
+import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.openmrs.module.fhir2.api.translators.DurationUnitTranslator;
-import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
 
-@ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
-public class DurationUnitTranslatorImplTest extends BaseModuleContextSensitiveTest {
+public class DurationUnitTranslatorImplTest extends BaseFhirContextSensitiveTest {
 	
 	private static final String DURATION_UNIT_CONCEPT_DATA = "org/openmrs/module/fhir2/mapping/FhirDurationUnitTranslatorTest_initial_data.xml";
 	

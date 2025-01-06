@@ -28,7 +28,6 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.startsWith;
 import static org.hl7.fhir.r4.model.Patient.SP_FAMILY;
 import static org.hl7.fhir.r4.model.Patient.SP_GIVEN;
-import static org.mockito.Mockito.when;
 import static org.openmrs.module.fhir2.matchers.FhirMatchers.isDeceased;
 
 import java.util.HashMap;
@@ -58,18 +57,14 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.junit.Before;
 import org.junit.Test;
+import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.openmrs.module.fhir2.FhirConstants;
-import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
-import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirPatientDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.PatientTranslator;
-import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
 
-@ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
-public class PatientSearchQueryTest extends BaseModuleContextSensitiveTest {
+public class PatientSearchQueryTest extends BaseFhirContextSensitiveTest {
 	
 	private static final String[] PATIENT_SEARCH_DATA_FILES = {
 	        "org/openmrs/module/fhir2/api/dao/impl/FhirPatientDaoImplTest_initial_data.xml",
@@ -149,9 +144,6 @@ public class PatientSearchQueryTest extends BaseModuleContextSensitiveTest {
 	private SearchQueryInclude<Patient> searchQueryInclude;
 	
 	@Autowired
-	private FhirGlobalPropertyService globalPropertyService;
-	
-	@Autowired
 	private SearchQuery<org.openmrs.Patient, Patient, FhirPatientDao, PatientTranslator, SearchQueryInclude<Patient>> searchQuery;
 	
 	@Before
@@ -159,15 +151,6 @@ public class PatientSearchQueryTest extends BaseModuleContextSensitiveTest {
 		for (String search_data : PATIENT_SEARCH_DATA_FILES) {
 			executeDataSet(search_data);
 		}
-	}
-	
-	@Before
-	public void setupMocks() {
-		SEVERITY_CONCEPT_UUIDS.put(FhirConstants.GLOBAL_PROPERTY_SEVERE, SEVERITY_SEVERE_CONCEPT_UUID);
-		
-		when(globalPropertyService.getGlobalProperties(FhirConstants.GLOBAL_PROPERTY_MILD,
-		    FhirConstants.GLOBAL_PROPERTY_MODERATE, FhirConstants.GLOBAL_PROPERTY_SEVERE,
-		    FhirConstants.GLOBAL_PROPERTY_OTHER)).thenReturn(SEVERITY_CONCEPT_UUIDS);
 	}
 	
 	private IBundleProvider search(SearchParameterMap theParams) {
