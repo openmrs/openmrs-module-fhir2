@@ -136,6 +136,6 @@ public class LocationFhirResourceProvider implements IResourceProvider {
 		}
 		
 		return (fhirLocationService.searchForLocations(new LocationSearchParams(name, city, country, postalCode, state, tag,
-		        parent, id, lastUpdated, sort, includes, revIncludes)));
+		        parent, null, id, lastUpdated, sort, includes, revIncludes)));
 	}
 }

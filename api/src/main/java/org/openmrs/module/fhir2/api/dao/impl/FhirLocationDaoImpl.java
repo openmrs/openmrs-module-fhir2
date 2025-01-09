@@ -9,7 +9,9 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
+import static org.hibernate.criterion.Restrictions.and;
 import static org.hibernate.criterion.Restrictions.eq;
+import static org.hibernate.criterion.Restrictions.or;
 
 import javax.annotation.Nonnull;
 
@@ -18,6 +20,7 @@ import java.util.Optional;
 
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
+import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
@@ -64,6 +67,9 @@ public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLo
 					entry.getValue()
 					        .forEach(param -> handleParentLocation(criteria, (ReferenceAndListParam) param.getParam()));
 					break;
+				case FhirConstants.LOCATION_ANCESTOR_SEARCH_HANDLER:
+					entry.getValue().forEach(param -> handleAncestorLocation(criteria, (StringParam) param.getParam()));
+					break;
 				case FhirConstants.TAG_SEARCH_HANDLER:
 					entry.getValue().forEach(param -> handleTag(criteria, (TokenAndListParam) param.getParam()));
 					break;
@@ -82,6 +88,21 @@ public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLo
 		        .createAlias("location", "l", JoinType.INNER_JOIN, eq("l.id", location.getId()))
 		        .createAlias("attributeType", "lat").add(eq("lat.uuid", locationAttributeTypeUuid)).add(eq("voided", false))
 		        .list();
+	}
+	
+	private void handleAncestorLocation(Criteria criteria, StringParam ancestor) {
+		// TODO: what kind of
+		//handleLocationReference("loc", ancestor).ifPresent(loc ->
+		criteria.createAlias("parentLocation", "ancestor1", JoinType.LEFT_OUTER_JOIN)
+		        .createAlias("ancestor1.parentLocation", "ancestor2", JoinType.LEFT_OUTER_JOIN)
+		        .createAlias("ancestor2.parentLocation", "ancestor3", JoinType.LEFT_OUTER_JOIN)
+		        .add(or(and(eq("uuid", ancestor.getValue()), eq("retired", false)),
+		            and(eq("ancestor1.uuid", ancestor.getValue()), eq("ancestor1.retired", false)),
+		            and(eq("ancestor2.uuid", ancestor.getValue()), eq("ancestor2.retired", false)),
+		            and(eq("ancestor3.uuid", ancestor.getValue()), eq("ancestor3.retired", false)))
+				// TODO add more ancestors
+				);
+		//)JoinType.INNER_JOIN;
 	}
 	
 	private void handleName(Criteria criteria, StringAndListParam namePattern) {

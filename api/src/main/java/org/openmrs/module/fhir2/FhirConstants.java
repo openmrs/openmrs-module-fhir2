@@ -245,6 +245,8 @@ public final class FhirConstants {
 	
 	public static final String LOCATION_REFERENCE_SEARCH_HANDLER = "location.reference.search.handler";
 	
+	public static final String LOCATION_ANCESTOR_SEARCH_HANDLER = "location.ancestor.search.handler";
+	
 	public static final String DOSAGE_FORM_SEARCH_HANDLER = "dosage.form.search.handler";
 	
 	public static final String INGREDIENT_SEARCH_HANDLER = "ingredient.search.handler";

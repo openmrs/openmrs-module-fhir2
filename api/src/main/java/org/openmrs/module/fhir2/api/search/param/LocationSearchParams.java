@@ -16,6 +16,7 @@ import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
+import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.Builder;
 import lombok.Data;
@@ -42,10 +43,12 @@ public class LocationSearchParams extends BaseResourceSearchParams {
 	
 	private ReferenceAndListParam parent;
 	
+	private StringParam ancestor;
+	
 	@Builder
 	public LocationSearchParams(StringAndListParam name, StringAndListParam city, StringAndListParam country,
 	    StringAndListParam postalCode, StringAndListParam state, TokenAndListParam tag, ReferenceAndListParam parent,
-	    TokenAndListParam id, DateRangeParam lastUpdated, SortSpec sort, HashSet<Include> includes,
+	    StringParam ancestor, TokenAndListParam id, DateRangeParam lastUpdated, SortSpec sort, HashSet<Include> includes,
 	    HashSet<Include> revIncludes) {
 		
 		super(id, lastUpdated, sort, includes, revIncludes);
@@ -57,6 +60,7 @@ public class LocationSearchParams extends BaseResourceSearchParams {
 		this.state = state;
 		this.tag = tag;
 		this.parent = parent;
+		this.ancestor = ancestor;
 	}
 	
 	@Override
@@ -67,7 +71,8 @@ public class LocationSearchParams extends BaseResourceSearchParams {
 		        .addParameter(FhirConstants.POSTALCODE_SEARCH_HANDLER, getPostalCode())
 		        .addParameter(FhirConstants.STATE_SEARCH_HANDLER, getState())
 		        .addParameter(FhirConstants.TAG_SEARCH_HANDLER, getTag())
-		        .addParameter(FhirConstants.LOCATION_REFERENCE_SEARCH_HANDLER, getParent());
+		        .addParameter(FhirConstants.LOCATION_REFERENCE_SEARCH_HANDLER, getParent())
+		        .addParameter(FhirConstants.LOCATION_ANCESTOR_SEARCH_HANDLER, getAncestor());
 	}
 	
 }

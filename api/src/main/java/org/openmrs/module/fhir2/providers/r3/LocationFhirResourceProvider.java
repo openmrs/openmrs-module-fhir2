@@ -129,6 +129,6 @@ public class LocationFhirResourceProvider implements IResourceProvider {
 		}
 		
 		return new SearchQueryBundleProviderR3Wrapper(locationService.searchForLocations(new LocationSearchParams(name, city,
-		        country, postalCode, state, tag, parent, id, lastUpdated, sort, includes, revIncludes)));
+		        country, postalCode, state, tag, parent, null, id, lastUpdated, sort, includes, revIncludes)));
 	}
 }
