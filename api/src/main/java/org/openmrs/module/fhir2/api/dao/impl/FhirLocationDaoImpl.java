@@ -96,7 +96,7 @@ public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLo
 	private void handleAncestorLocation(Criteria criteria, ReferenceAndListParam ancestor) {
 		
 		List<Criterion> elementOrAncestorEqualsReferenceCriteria = new ArrayList<>();
-		Optional<Criterion> elementEqualsReferenceCriterion = handleLocationReference(ancestor); // note: "partof:below" is inclusive of the element itself
+		Optional<Criterion> elementEqualsReferenceCriterion = handleLocationReference(ancestor); // note: "below" is inclusive of the element itself
 		elementEqualsReferenceCriterion.ifPresent(elementOrAncestorEqualsReferenceCriteria::add);
 		
 		// we need to add a join to the parentLocation for each level of hierarchy we want to search, and add a "equals" criterion for each level
