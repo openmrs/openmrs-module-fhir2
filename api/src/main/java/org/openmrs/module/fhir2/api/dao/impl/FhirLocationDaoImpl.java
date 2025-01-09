@@ -10,9 +10,11 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hibernate.criterion.Restrictions.eq;
+import static org.hibernate.criterion.Restrictions.or;
 
 import javax.annotation.Nonnull;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,6 +24,7 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hibernate.Criteria;
+import org.hibernate.criterion.Criterion;
 import org.hibernate.sql.JoinType;
 import org.openmrs.Location;
 import org.openmrs.LocationAttribute;
@@ -37,6 +40,8 @@ import org.springframework.stereotype.Component;
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLocationDao {
+	
+	private static final int SUPPORTED_LOCATION_HIERARCHY_SEARCH_DEPTH = 9;
 	
 	@Autowired
 	LocationService locationService;
@@ -64,6 +69,10 @@ public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLo
 					entry.getValue()
 					        .forEach(param -> handleParentLocation(criteria, (ReferenceAndListParam) param.getParam()));
 					break;
+				case FhirConstants.LOCATION_ANCESTOR_SEARCH_HANDLER:
+					entry.getValue()
+					        .forEach(param -> handleAncestorLocation(criteria, (ReferenceAndListParam) param.getParam()));
+					break;
 				case FhirConstants.TAG_SEARCH_HANDLER:
 					entry.getValue().forEach(param -> handleTag(criteria, (TokenAndListParam) param.getParam()));
 					break;
@@ -82,6 +91,25 @@ public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLo
 		        .createAlias("location", "l", JoinType.INNER_JOIN, eq("l.id", location.getId()))
 		        .createAlias("attributeType", "lat").add(eq("lat.uuid", locationAttributeTypeUuid)).add(eq("voided", false))
 		        .list();
+	}
+	
+	private void handleAncestorLocation(Criteria criteria, ReferenceAndListParam ancestor) {
+		
+		List<Criterion> elementOrAncestorEqualsReferenceCriteria = new ArrayList<>();
+		Optional<Criterion> elementEqualsReferenceCriterion = handleLocationReference(ancestor); // note: "below" is inclusive of the element itself
+		elementEqualsReferenceCriterion.ifPresent(elementOrAncestorEqualsReferenceCriteria::add);
+		
+		// we need to add a join to the parentLocation for each level of hierarchy we want to search, and add a "equals" criterion for each level
+		int depth = 1;
+		while (depth <= SUPPORTED_LOCATION_HIERARCHY_SEARCH_DEPTH) {
+			Optional<Criterion> ancestorEqualsReferenceCriterion = handleLocationReference("ancestor" + depth, ancestor);
+			ancestorEqualsReferenceCriterion.ifPresent(elementOrAncestorEqualsReferenceCriteria::add);
+			criteria.createAlias(depth == 1 ? "parentLocation" : "ancestor" + (depth - 1) + ".parentLocation",
+			    "ancestor" + depth, JoinType.LEFT_OUTER_JOIN);
+			depth++;
+		}
+		
+		criteria.add(or(elementOrAncestorEqualsReferenceCriteria.toArray(new Criterion[0])));
 	}
 	
 	private void handleName(Criteria criteria, StringAndListParam namePattern) {

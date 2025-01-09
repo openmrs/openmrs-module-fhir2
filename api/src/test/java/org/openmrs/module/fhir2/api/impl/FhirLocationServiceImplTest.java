@@ -158,7 +158,7 @@ public class FhirLocationServiceImplTest {
 		when(locationDao.getSearchResults(any())).thenReturn(locations);
 		
 		IBundleProvider results = fhirLocationService.searchForLocations(
-		    new LocationSearchParams(null, null, null, null, null, null, null, null, null, null, null, null));
+		    new LocationSearchParams(null, null, null, null, null, null, null, null, null, null, null, null, null));
 		
 		assertThat(results, notNullValue());
 		
