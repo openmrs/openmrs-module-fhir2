@@ -157,7 +157,7 @@ public class LocationFhirResourceProviderTest extends BaseFhirR3ProvenanceResour
 		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(location), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchLocations(nameParam, null, null, null, null, null, null, null, null,
-		    null, null, null);
+		    null, null, null, null);
 		
 		assertThat(results, notNullValue());
 		
@@ -176,7 +176,7 @@ public class LocationFhirResourceProviderTest extends BaseFhirR3ProvenanceResour
 		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(location), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchLocations(null, cityParam, null, null, null, null, null, null, null,
-		    null, null, null);
+		    null, null, null, null);
 		
 		assertThat(results, notNullValue());
 		
@@ -196,7 +196,7 @@ public class LocationFhirResourceProviderTest extends BaseFhirR3ProvenanceResour
 		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(location), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchLocations(null, null, countryParam, null, null, null, null, null,
-		    null, null, null, null);
+		    null, null, null, null, null);
 		
 		assertThat(results, notNullValue());
 		
@@ -215,7 +215,7 @@ public class LocationFhirResourceProviderTest extends BaseFhirR3ProvenanceResour
 		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(location), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchLocations(null, null, null, null, stateParam, null, null, null,
-		    null, null, null, null);
+		    null, null, null, null, null);
 		
 		assertThat(results, notNullValue());
 		
@@ -235,7 +235,7 @@ public class LocationFhirResourceProviderTest extends BaseFhirR3ProvenanceResour
 		            new MockIBundleProvider<>(Collections.singletonList(location), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchLocations(null, null, null, postalCodeParam, null, null, null, null,
-		    null, null, null, null);
+		    null, null, null, null, null);
 		
 		assertThat(results, notNullValue());
 		
@@ -255,7 +255,7 @@ public class LocationFhirResourceProviderTest extends BaseFhirR3ProvenanceResour
 		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(location), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchLocations(null, null, null, null, null, tag, null, null, null, null,
-		    null, null);
+		    null, null, null);
 		
 		assertThat(results, notNullValue());
 		
@@ -277,7 +277,7 @@ public class LocationFhirResourceProviderTest extends BaseFhirR3ProvenanceResour
 		            new MockIBundleProvider<>(Collections.singletonList(location), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchLocations(null, null, null, null, null, null, locationParentName,
-		    null, null, null, null, null);
+		    null, null, null, null, null, null);
 		
 		List<Location> resultList = get(results);
 		
@@ -297,7 +297,7 @@ public class LocationFhirResourceProviderTest extends BaseFhirR3ProvenanceResour
 		            new MockIBundleProvider<>(Collections.singletonList(location), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchLocations(null, null, null, null, null, null, locationParentCity,
-		    null, null, null, null, null);
+		    null, null, null, null, null, null);
 		
 		List<Location> resultList = get(results);
 		
@@ -317,7 +317,7 @@ public class LocationFhirResourceProviderTest extends BaseFhirR3ProvenanceResour
 		            new MockIBundleProvider<>(Collections.singletonList(location), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchLocations(null, null, null, null, null, null, locationParentCountry,
-		    null, null, null, null, null);
+		    null, null, null, null, null, null);
 		
 		List<Location> resultList = get(results);
 		
@@ -337,7 +337,7 @@ public class LocationFhirResourceProviderTest extends BaseFhirR3ProvenanceResour
 		            new MockIBundleProvider<>(Collections.singletonList(location), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchLocations(null, null, null, null, null, null,
-		    locationParentPostalCode, null, null, null, null, null);
+		    locationParentPostalCode, null, null, null, null, null, null);
 		
 		List<Location> resultList = get(results);
 		
@@ -357,7 +357,7 @@ public class LocationFhirResourceProviderTest extends BaseFhirR3ProvenanceResour
 		            new MockIBundleProvider<>(Collections.singletonList(location), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchLocations(null, null, null, null, null, null, locationParentState,
-		    null, null, null, null, null);
+		    null, null, null, null, null, null);
 		
 		List<Location> resultList = get(results);
 		
@@ -374,8 +374,8 @@ public class LocationFhirResourceProviderTest extends BaseFhirR3ProvenanceResour
 		    new LocationSearchParams(null, null, null, null, null, null, null, null, uuid, null, null, null, null)))
 		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(location), PREFERRED_PAGE_SIZE, COUNT));
 		
-		IBundleProvider results = resourceProvider.searchLocations(null, null, null, null, null, null, null, uuid, null,
-		    null, null, null);
+		IBundleProvider results = resourceProvider.searchLocations(null, null, null, null, null, null, null, null, uuid,
+		    null, null, null, null);
 		
 		List<Location> resultList = get(results);
 		
@@ -393,7 +393,7 @@ public class LocationFhirResourceProviderTest extends BaseFhirR3ProvenanceResour
 		    new LocationSearchParams(null, null, null, null, null, null, null, null, null, lastUpdated, null, null, null)))
 		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(location), PREFERRED_PAGE_SIZE, COUNT));
 		
-		IBundleProvider results = resourceProvider.searchLocations(null, null, null, null, null, null, null, null,
+		IBundleProvider results = resourceProvider.searchLocations(null, null, null, null, null, null, null, null, null,
 		    lastUpdated, null, null, null);
 		
 		List<Location> resultList = get(results);
@@ -415,7 +415,7 @@ public class LocationFhirResourceProviderTest extends BaseFhirR3ProvenanceResour
 		                new MockIBundleProvider<>(Arrays.asList(location, new Location()), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchLocations(null, null, null, null, null, null, null, null, null,
-		    includeSet, null, null);
+		    null, includeSet, null, null);
 		
 		List<Location> resultList = get(results);
 		
@@ -435,7 +435,7 @@ public class LocationFhirResourceProviderTest extends BaseFhirR3ProvenanceResour
 		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(location), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchLocations(null, null, null, null, null, null, null, null, null,
-		    includeSet, null, null);
+		    null, includeSet, null, null);
 		
 		List<IBaseResource> resultList = results.getResources(START_INDEX, END_INDEX);
 		
@@ -456,7 +456,7 @@ public class LocationFhirResourceProviderTest extends BaseFhirR3ProvenanceResour
 		                new MockIBundleProvider<>(Arrays.asList(location, new Encounter()), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchLocations(null, null, null, null, null, null, null, null, null,
-		    null, revIncludeSet, null);
+		    null, null, revIncludeSet, null);
 		
 		List<IBaseResource> resultList = results.getResources(START_INDEX, END_INDEX);
 		
@@ -476,7 +476,7 @@ public class LocationFhirResourceProviderTest extends BaseFhirR3ProvenanceResour
 		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(location), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchLocations(null, null, null, null, null, null, null, null, null,
-		    null, revIncludeSet, null);
+		    null, null, revIncludeSet, null);
 		
 		List<Location> resultList = get(results);
 		
@@ -498,7 +498,7 @@ public class LocationFhirResourceProviderTest extends BaseFhirR3ProvenanceResour
 		        .addAnd(new StringOrListParam().add(new StringParam(LOCATION_NAME)));
 		
 		IBundleProvider results = resourceProvider.searchLocations(location, null, null, null, null, null, null, null, null,
-		    null, null, null);
+		    null, null, null, null);
 		
 		List<Location> resultList = get(results);
 		
