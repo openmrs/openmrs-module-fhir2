@@ -16,7 +16,6 @@ import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
-import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.Builder;
 import lombok.Data;
@@ -43,13 +42,13 @@ public class LocationSearchParams extends BaseResourceSearchParams {
 	
 	private ReferenceAndListParam parent;
 	
-	private StringParam ancestor;
+	private ReferenceAndListParam ancestor;
 	
 	@Builder
 	public LocationSearchParams(StringAndListParam name, StringAndListParam city, StringAndListParam country,
 	    StringAndListParam postalCode, StringAndListParam state, TokenAndListParam tag, ReferenceAndListParam parent,
-	    StringParam ancestor, TokenAndListParam id, DateRangeParam lastUpdated, SortSpec sort, HashSet<Include> includes,
-	    HashSet<Include> revIncludes) {
+	    ReferenceAndListParam ancestor, TokenAndListParam id, DateRangeParam lastUpdated, SortSpec sort,
+	    HashSet<Include> includes, HashSet<Include> revIncludes) {
 		
 		super(id, lastUpdated, sort, includes, revIncludes);
 		

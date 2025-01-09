@@ -100,6 +100,16 @@ public class LocationSearchQueryTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String LOCATION_ANCESTOR_TEST_UUID = "76cd2d30-2411-44ef-84ea-8b7473256a6a";
 	
+	private static final String LOCATION_ANCESTOR_TEST_NAME = "Test location 4";
+	
+	private static final String LOCATION_ANCESTOR_TEST_CITY = "Scituate";
+	
+	private static final String LOCATION_ANCESTOR_TEST_COUNTRY = "USA";
+	
+	private static final String LOCATION_ANCESTOR_TEST_POSTAL_CODE = "02066";
+	
+	private static final String LOCATION_ANCESTOR_TEST_STATE = "MA";
+	
 	private static final String DATE_CREATED = "2005-01-01";
 	
 	private static final String DATE_CHANGED = "2010-03-31";
@@ -756,7 +766,132 @@ public class LocationSearchQueryTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void searchForLocations_shouldReturnCorrectLocationsByAncestorUUID() {
-		StringParam ancestorLocation = new StringParam(LOCATION_ANCESTOR_TEST_UUID);
+		
+		ReferenceAndListParam ancestorLocation = new ReferenceAndListParam().addAnd(
+		    new ReferenceOrListParam().add(new ReferenceParam().setValue(LOCATION_ANCESTOR_TEST_UUID).setChain(null)));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.LOCATION_ANCESTOR_SEARCH_HANDLER,
+		    ancestorLocation);
+		
+		IBundleProvider locations = search(theParams);
+		
+		assertThat(locations, notNullValue());
+		assertThat(locations.size(), equalTo(5));
+		
+		List<Location> resultList = get(locations);
+		
+		assertThat(resultList, hasSize(equalTo(5)));
+		List<String> locationNames = resultList.stream().map(Location::getName).collect(Collectors.toList());
+		assertThat(locationNames, hasItem("Test location 4")); // element search for ("below" search should be inclusive)
+		assertThat(locationNames, hasItem("Test location 6")); // child element
+		assertThat(locationNames, hasItem("Test location 8")); // child element
+		assertThat(locationNames, hasItem("Test location 11")); // grandchild element
+		assertThat(locationNames, hasItem("Test location 12")); // great grandchild element
+	}
+	
+	@Test
+	public void searchForLocations_shouldReturnCorrectLocationsByAncestorName() {
+		
+		ReferenceAndListParam ancestorLocation = new ReferenceAndListParam().addAnd(
+		    new ReferenceOrListParam().add(new ReferenceParam().setValue(LOCATION_ANCESTOR_TEST_NAME).setChain("name")));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.LOCATION_ANCESTOR_SEARCH_HANDLER,
+		    ancestorLocation);
+		
+		IBundleProvider locations = search(theParams);
+		
+		assertThat(locations, notNullValue());
+		assertThat(locations.size(), equalTo(5));
+		
+		List<Location> resultList = get(locations);
+		
+		assertThat(resultList, hasSize(equalTo(5)));
+		List<String> locationNames = resultList.stream().map(Location::getName).collect(Collectors.toList());
+		assertThat(locationNames, hasItem("Test location 4")); // element search for ("below" search should be inclusive)
+		assertThat(locationNames, hasItem("Test location 6")); // child element
+		assertThat(locationNames, hasItem("Test location 8")); // child element
+		assertThat(locationNames, hasItem("Test location 11")); // grandchild element
+		assertThat(locationNames, hasItem("Test location 12")); // great grandchild element
+	}
+	
+	@Test
+	public void searchForLocations_shouldReturnCorrectLocationsByAncestorCity() {
+		
+		ReferenceAndListParam ancestorLocation = new ReferenceAndListParam().addAnd(new ReferenceOrListParam()
+		        .add(new ReferenceParam().setValue(LOCATION_ANCESTOR_TEST_CITY).setChain("address-city")));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.LOCATION_ANCESTOR_SEARCH_HANDLER,
+		    ancestorLocation);
+		
+		IBundleProvider locations = search(theParams);
+		
+		assertThat(locations, notNullValue());
+		assertThat(locations.size(), equalTo(5));
+		
+		List<Location> resultList = get(locations);
+		
+		assertThat(resultList, hasSize(equalTo(5)));
+		List<String> locationNames = resultList.stream().map(Location::getName).collect(Collectors.toList());
+		assertThat(locationNames, hasItem("Test location 4")); // element search for ("below" search should be inclusive)
+		assertThat(locationNames, hasItem("Test location 6")); // child element
+		assertThat(locationNames, hasItem("Test location 8")); // child element
+		assertThat(locationNames, hasItem("Test location 11")); // grandchild element
+		assertThat(locationNames, hasItem("Test location 12")); // great grandchild element
+	}
+	
+	public void searchForLocations_shouldReturnCorrectLocationsByAncestorState() {
+		
+		ReferenceAndListParam ancestorLocation = new ReferenceAndListParam().addAnd(new ReferenceOrListParam()
+		        .add(new ReferenceParam().setValue(LOCATION_ANCESTOR_TEST_STATE).setChain("address-state")));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.LOCATION_ANCESTOR_SEARCH_HANDLER,
+		    ancestorLocation);
+		
+		IBundleProvider locations = search(theParams);
+		
+		assertThat(locations, notNullValue());
+		assertThat(locations.size(), equalTo(5));
+		
+		List<Location> resultList = get(locations);
+		
+		assertThat(resultList, hasSize(equalTo(5)));
+		List<String> locationNames = resultList.stream().map(Location::getName).collect(Collectors.toList());
+		assertThat(locationNames, hasItem("Test location 4")); // element search for ("below" search should be inclusive)
+		assertThat(locationNames, hasItem("Test location 6")); // child element
+		assertThat(locationNames, hasItem("Test location 8")); // child element
+		assertThat(locationNames, hasItem("Test location 11")); // grandchild element
+		assertThat(locationNames, hasItem("Test location 12")); // great grandchild element
+	}
+	
+	public void searchForLocations_shouldReturnCorrectLocationsByAncestorCountry() {
+		
+		ReferenceAndListParam ancestorLocation = new ReferenceAndListParam().addAnd(new ReferenceOrListParam()
+		        .add(new ReferenceParam().setValue(LOCATION_ANCESTOR_TEST_COUNTRY).setChain("address-country")));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.LOCATION_ANCESTOR_SEARCH_HANDLER,
+		    ancestorLocation);
+		
+		IBundleProvider locations = search(theParams);
+		
+		assertThat(locations, notNullValue());
+		assertThat(locations.size(), equalTo(5));
+		
+		List<Location> resultList = get(locations);
+		
+		assertThat(resultList, hasSize(equalTo(5)));
+		List<String> locationNames = resultList.stream().map(Location::getName).collect(Collectors.toList());
+		assertThat(locationNames, hasItem("Test location 4")); // element search for ("below" search should be inclusive)
+		assertThat(locationNames, hasItem("Test location 6")); // child element
+		assertThat(locationNames, hasItem("Test location 8")); // child element
+		assertThat(locationNames, hasItem("Test location 11")); // grandchild element
+		assertThat(locationNames, hasItem("Test location 12")); // great grandchild element
+	}
+	
+	public void searchForLocations_shouldReturnCorrectLocationsByAncestorPostalCode() {
+		
+		ReferenceAndListParam ancestorLocation = new ReferenceAndListParam().addAnd(new ReferenceOrListParam()
+		        .add(new ReferenceParam().setValue(LOCATION_ANCESTOR_TEST_POSTAL_CODE).setChain("address-postal-code")));
+		
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.LOCATION_ANCESTOR_SEARCH_HANDLER,
 		    ancestorLocation);
 		

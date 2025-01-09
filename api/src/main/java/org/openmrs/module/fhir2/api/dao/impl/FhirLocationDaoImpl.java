@@ -9,7 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
-import static org.hibernate.criterion.Restrictions.and;
 import static org.hibernate.criterion.Restrictions.eq;
 import static org.hibernate.criterion.Restrictions.or;
 
@@ -20,11 +19,11 @@ import java.util.Optional;
 
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
-import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hibernate.Criteria;
+import org.hibernate.criterion.Criterion;
 import org.hibernate.sql.JoinType;
 import org.openmrs.Location;
 import org.openmrs.LocationAttribute;
@@ -40,7 +39,9 @@ import org.springframework.stereotype.Component;
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLocationDao {
-	
+
+	private static final int SUPPORTED_LOCATION_HIERARCHY_SEARCH_DEPTH = 9;
+
 	@Autowired
 	LocationService locationService;
 	
@@ -68,7 +69,8 @@ public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLo
 					        .forEach(param -> handleParentLocation(criteria, (ReferenceAndListParam) param.getParam()));
 					break;
 				case FhirConstants.LOCATION_ANCESTOR_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handleAncestorLocation(criteria, (StringParam) param.getParam()));
+					entry.getValue()
+					        .forEach(param -> handleAncestorLocation(criteria, (ReferenceAndListParam) param.getParam()));
 					break;
 				case FhirConstants.TAG_SEARCH_HANDLER:
 					entry.getValue().forEach(param -> handleTag(criteria, (TokenAndListParam) param.getParam()));
@@ -90,19 +92,32 @@ public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLo
 		        .list();
 	}
 	
-	private void handleAncestorLocation(Criteria criteria, StringParam ancestor) {
-		// TODO: what kind of
-		//handleLocationReference("loc", ancestor).ifPresent(loc ->
+	private void handleAncestorLocation(Criteria criteria, ReferenceAndListParam ancestor) {
+		
+		// note: bit of a hack, only handles up to 9 nested levels of locations
+		Optional<Criterion> elementCriterion = handleLocationReference(ancestor); // note: "partof:below" is inclusive of the element itself
+		Optional<Criterion> ancestor1Criterion = handleLocationReference("ancestor1", ancestor);
+		Optional<Criterion> ancestor2Criterion = handleLocationReference("ancestor2", ancestor);
+		Optional<Criterion> ancestor3Criterion = handleLocationReference("ancestor3", ancestor);
+		Optional<Criterion> ancestor4Criterion = handleLocationReference("ancestor4", ancestor);
+		Optional<Criterion> ancestor5Criterion = handleLocationReference("ancestor5", ancestor);
+		Optional<Criterion> ancestor6Criterion = handleLocationReference("ancestor6", ancestor);
+		Optional<Criterion> ancestor7Criterion = handleLocationReference("ancestor7", ancestor);
+		Optional<Criterion> ancestor8Criterion = handleLocationReference("ancestor8", ancestor);
+		Optional<Criterion> ancestor9Criterion = handleLocationReference("ancestor9", ancestor);
+		
 		criteria.createAlias("parentLocation", "ancestor1", JoinType.LEFT_OUTER_JOIN)
 		        .createAlias("ancestor1.parentLocation", "ancestor2", JoinType.LEFT_OUTER_JOIN)
 		        .createAlias("ancestor2.parentLocation", "ancestor3", JoinType.LEFT_OUTER_JOIN)
-		        .add(or(and(eq("uuid", ancestor.getValue()), eq("retired", false)),
-		            and(eq("ancestor1.uuid", ancestor.getValue()), eq("ancestor1.retired", false)),
-		            and(eq("ancestor2.uuid", ancestor.getValue()), eq("ancestor2.retired", false)),
-		            and(eq("ancestor3.uuid", ancestor.getValue()), eq("ancestor3.retired", false)))
-				// TODO add more ancestors
-				);
-		//)JoinType.INNER_JOIN;
+		        .createAlias("ancestor3.parentLocation", "ancestor4", JoinType.LEFT_OUTER_JOIN)
+		        .createAlias("ancestor4.parentLocation", "ancestor5", JoinType.LEFT_OUTER_JOIN)
+		        .createAlias("ancestor5.parentLocation", "ancestor6", JoinType.LEFT_OUTER_JOIN)
+		        .createAlias("ancestor6.parentLocation", "ancestor7", JoinType.LEFT_OUTER_JOIN)
+		        .createAlias("ancestor7.parentLocation", "ancestor8", JoinType.LEFT_OUTER_JOIN)
+		        .createAlias("ancestor8.parentLocation", "ancestor9", JoinType.LEFT_OUTER_JOIN)
+		        .add(or(toCriteriaArray(elementCriterion, ancestor1Criterion, ancestor2Criterion, ancestor3Criterion,
+		            ancestor4Criterion, ancestor5Criterion, ancestor6Criterion, ancestor7Criterion, ancestor8Criterion,
+		            ancestor9Criterion)));
 	}
 	
 	private void handleName(Criteria criteria, StringAndListParam namePattern) {
