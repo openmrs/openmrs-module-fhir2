@@ -14,6 +14,7 @@ import static org.hibernate.criterion.Restrictions.or;
 
 import javax.annotation.Nonnull;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,9 +40,9 @@ import org.springframework.stereotype.Component;
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLocationDao {
-
+	
 	private static final int SUPPORTED_LOCATION_HIERARCHY_SEARCH_DEPTH = 9;
-
+	
 	@Autowired
 	LocationService locationService;
 	
@@ -94,30 +95,21 @@ public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLo
 	
 	private void handleAncestorLocation(Criteria criteria, ReferenceAndListParam ancestor) {
 		
-		// note: bit of a hack, only handles up to 9 nested levels of locations
-		Optional<Criterion> elementCriterion = handleLocationReference(ancestor); // note: "partof:below" is inclusive of the element itself
-		Optional<Criterion> ancestor1Criterion = handleLocationReference("ancestor1", ancestor);
-		Optional<Criterion> ancestor2Criterion = handleLocationReference("ancestor2", ancestor);
-		Optional<Criterion> ancestor3Criterion = handleLocationReference("ancestor3", ancestor);
-		Optional<Criterion> ancestor4Criterion = handleLocationReference("ancestor4", ancestor);
-		Optional<Criterion> ancestor5Criterion = handleLocationReference("ancestor5", ancestor);
-		Optional<Criterion> ancestor6Criterion = handleLocationReference("ancestor6", ancestor);
-		Optional<Criterion> ancestor7Criterion = handleLocationReference("ancestor7", ancestor);
-		Optional<Criterion> ancestor8Criterion = handleLocationReference("ancestor8", ancestor);
-		Optional<Criterion> ancestor9Criterion = handleLocationReference("ancestor9", ancestor);
+		List<Criterion> elementOrAncestorEqualsReferenceCriteria = new ArrayList<>();
+		Optional<Criterion> elementEqualsReferenceCriterion = handleLocationReference(ancestor); // note: "partof:below" is inclusive of the element itself
+		elementEqualsReferenceCriterion.ifPresent(elementOrAncestorEqualsReferenceCriteria::add);
 		
-		criteria.createAlias("parentLocation", "ancestor1", JoinType.LEFT_OUTER_JOIN)
-		        .createAlias("ancestor1.parentLocation", "ancestor2", JoinType.LEFT_OUTER_JOIN)
-		        .createAlias("ancestor2.parentLocation", "ancestor3", JoinType.LEFT_OUTER_JOIN)
-		        .createAlias("ancestor3.parentLocation", "ancestor4", JoinType.LEFT_OUTER_JOIN)
-		        .createAlias("ancestor4.parentLocation", "ancestor5", JoinType.LEFT_OUTER_JOIN)
-		        .createAlias("ancestor5.parentLocation", "ancestor6", JoinType.LEFT_OUTER_JOIN)
-		        .createAlias("ancestor6.parentLocation", "ancestor7", JoinType.LEFT_OUTER_JOIN)
-		        .createAlias("ancestor7.parentLocation", "ancestor8", JoinType.LEFT_OUTER_JOIN)
-		        .createAlias("ancestor8.parentLocation", "ancestor9", JoinType.LEFT_OUTER_JOIN)
-		        .add(or(toCriteriaArray(elementCriterion, ancestor1Criterion, ancestor2Criterion, ancestor3Criterion,
-		            ancestor4Criterion, ancestor5Criterion, ancestor6Criterion, ancestor7Criterion, ancestor8Criterion,
-		            ancestor9Criterion)));
+		// we need to add a join to the parentLocation for each level of hierarchy we want to search, and add a "equals" criterion for each level
+		int depth = 1;
+		while (depth <= SUPPORTED_LOCATION_HIERARCHY_SEARCH_DEPTH) {
+			Optional<Criterion> ancestorEqualsReferenceCriterion = handleLocationReference("ancestor" + depth, ancestor);
+			ancestorEqualsReferenceCriterion.ifPresent(elementOrAncestorEqualsReferenceCriteria::add);
+			criteria.createAlias(depth == 1 ? "parentLocation" : "ancestor" + (depth - 1) + ".parentLocation",
+			    "ancestor" + depth, JoinType.LEFT_OUTER_JOIN);
+			depth++;
+		}
+		
+		criteria.add(or(elementOrAncestorEqualsReferenceCriteria.toArray(new Criterion[0])));
 	}
 	
 	private void handleName(Criteria criteria, StringAndListParam namePattern) {
