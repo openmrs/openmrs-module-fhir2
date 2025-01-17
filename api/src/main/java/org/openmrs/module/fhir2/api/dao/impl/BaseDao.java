@@ -558,11 +558,8 @@ public abstract class BaseDao {
 		});
 	}
 	
-	protected Optional<Criterion> handleLocationReference(ReferenceAndListParam locationReference) {
-		return handleLocationReference(null, locationReference);
-	}
-	
-	protected Optional<Criterion> handleLocationReference(String locationAlias, ReferenceAndListParam locationReference) {
+	protected Optional<Criterion> handleLocationReference(@Nonnull String locationAlias,
+	        ReferenceAndListParam locationReference) {
 		if (locationReference == null) {
 			return Optional.empty();
 		}
@@ -571,27 +568,18 @@ public abstract class BaseDao {
 			if (token.getChain() != null) {
 				switch (token.getChain()) {
 					case Location.SP_NAME:
-						return propertyLike(locationAlias != null ? String.format("%s.name", locationAlias) : "name",
-						    token.getValue());
+						return propertyLike(String.format("%s.name", locationAlias), token.getValue());
 					case Location.SP_ADDRESS_CITY:
-						return propertyLike(
-						    locationAlias != null ? String.format("%s.cityVillage", locationAlias) : "cityVillage",
-						    token.getValue());
+						return propertyLike(String.format("%s.cityVillage", locationAlias), token.getValue());
 					case Location.SP_ADDRESS_STATE:
-						return propertyLike(
-						    locationAlias != null ? String.format("%s.stateProvince", locationAlias) : "stateProvince",
-						    token.getValue());
+						return propertyLike(String.format("%s.stateProvince", locationAlias), token.getValue());
 					case Location.SP_ADDRESS_POSTALCODE:
-						return propertyLike(
-						    locationAlias != null ? String.format("%s.postalCode", locationAlias) : "postalCode",
-						    token.getValue());
+						return propertyLike(String.format("%s.postalCode", locationAlias), token.getValue());
 					case Location.SP_ADDRESS_COUNTRY:
-						return propertyLike(locationAlias != null ? String.format("%s.country", locationAlias) : "country",
-						    token.getValue());
+						return propertyLike(String.format("%s.country", locationAlias), token.getValue());
 				}
 			} else {
-				return Optional
-				        .of(eq(locationAlias != null ? String.format("%s.uuid", locationAlias) : "uuid", token.getValue()));
+				return Optional.of(eq(String.format("%s.uuid", locationAlias), token.getValue()));
 			}
 			
 			return Optional.empty();
