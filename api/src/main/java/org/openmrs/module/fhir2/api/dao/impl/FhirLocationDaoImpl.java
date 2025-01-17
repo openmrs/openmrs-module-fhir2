@@ -152,7 +152,7 @@ public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLo
 		if ("below".equalsIgnoreCase(locationReference.getResourceType())) {
 			List<Criterion> belowReferenceCriteria = new ArrayList<>();
 			
-			// we need to add a join to the parentLocation for each level of hierarchy we want to search, and add a "equals" criterion for each level
+			// we need to add a join to the parentLocation for each level of hierarchy we want to search, and add "equals" criterion for each level
 			int depth = 1;
 			while (depth <= SUPPORTED_LOCATION_HIERARCHY_SEARCH_DEPTH) {
 				belowReferenceCriteria.add(eq("ancestor" + depth + ".uuid", locationReference.getIdPart()));
@@ -161,7 +161,7 @@ public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLo
 				depth++;
 			}
 			
-			// or these call together--if any ancestor location uuid matches
+			// "or" these call together so that we return the location if any of the joined ancestor location uuids match
 			criteria.add(or(belowReferenceCriteria.toArray(new Criterion[0])));
 		} else {
 			// this is to support queries of the type "Location?partof=uuid" or chained search like "Location?partof:Location=Location:name=xxx"
