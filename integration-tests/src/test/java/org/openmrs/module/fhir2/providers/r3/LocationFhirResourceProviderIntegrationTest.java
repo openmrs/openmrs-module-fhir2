@@ -48,6 +48,8 @@ public class LocationFhirResourceProviderIntegrationTest extends BaseFhirR3Integ
 	
 	private static final String PARENT_LOCATION_UUID = "76cd2d30-2411-44ef-84ea-8b7473256a6a";
 	
+	private static final String LOCATION_ANCESTOR_TEST_UUID = "76cd2d30-2411-44ef-84ea-8b7473256a6a";
+	
 	private static final String JSON_CREATE_LOCATION_DOCUMENT = "org/openmrs/module/fhir2/providers/LocationWebTest_create.json";
 	
 	private static final String XML_CREATE_LOCATION_DOCUMENT = "org/openmrs/module/fhir2/providers/LocationWebTest_create.xml";
@@ -462,6 +464,7 @@ public class LocationFhirResourceProviderIntegrationTest extends BaseFhirR3Integ
 		assertThat(entries, everyItem(hasResource(instanceOf(Location.class))));
 		assertThat(entries, everyItem(hasResource(validResource())));
 		
+		// search by address and parent location
 		response = get("/Location?address-city=Kerio&partof=" + PARENT_LOCATION_UUID + "&_sort=name")
 		        .accept(FhirMediaTypes.JSON).go();
 		
@@ -483,6 +486,30 @@ public class LocationFhirResourceProviderIntegrationTest extends BaseFhirR3Integ
 		assertThat(entries, containsInRelativeOrder(hasResource(hasProperty("name", equalTo("Test location 6"))),
 		    hasResource(hasProperty("name", equalTo("Test location 8")))));
 		assertThat(entries, everyItem(hasResource(validResource())));
+		
+		// search by ancestors
+		response = get("/Location?partof:below=" + LOCATION_ANCESTOR_TEST_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		results = readBundleResponse(response);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(results.hasEntry(), is(true));
+		
+		entries = results.getEntry();
+		assertThat(entries.size(), is(4));
+		
+		assertThat(entries,
+		    containsInRelativeOrder(hasResource(hasProperty("name", equalTo("Test location 6"))),
+		        hasResource(hasProperty("name", equalTo("Test location 8"))),
+		        hasResource(hasProperty("name", equalTo("Test location 11"))),
+		        hasResource(hasProperty("name", equalTo("Test location 12")))));
+		assertThat(entries, everyItem(hasResource(validResource())));
+		
 	}
 	
 	@Test
@@ -526,6 +553,30 @@ public class LocationFhirResourceProviderIntegrationTest extends BaseFhirR3Integ
 		assertThat(entries, containsInRelativeOrder(hasResource(hasProperty("name", equalTo("Test location 6"))),
 		    hasResource(hasProperty("name", equalTo("Test location 8")))));
 		assertThat(entries, everyItem(hasResource(validResource())));
+		
+		// search by ancestors
+		response = get("/Location?partof:below=" + LOCATION_ANCESTOR_TEST_UUID).accept(FhirMediaTypes.XML).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		results = readBundleResponse(response);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(results.hasEntry(), is(true));
+		
+		entries = results.getEntry();
+		assertThat(entries.size(), is(4));
+		
+		assertThat(entries,
+		    containsInRelativeOrder(hasResource(hasProperty("name", equalTo("Test location 6"))),
+		        hasResource(hasProperty("name", equalTo("Test location 8"))),
+		        hasResource(hasProperty("name", equalTo("Test location 11"))),
+		        hasResource(hasProperty("name", equalTo("Test location 12")))));
+		assertThat(entries, everyItem(hasResource(validResource())));
+		
 	}
 	
 	@Test
@@ -540,7 +591,7 @@ public class LocationFhirResourceProviderIntegrationTest extends BaseFhirR3Integ
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
-		assertThat(result, hasProperty("total", equalTo(9)));
+		assertThat(result, hasProperty("total", equalTo(11)));
 	}
 	
 	@Test
@@ -555,7 +606,7 @@ public class LocationFhirResourceProviderIntegrationTest extends BaseFhirR3Integ
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
-		assertThat(result, hasProperty("total", equalTo(9)));
+		assertThat(result, hasProperty("total", equalTo(11)));
 	}
 	
 	@Test
