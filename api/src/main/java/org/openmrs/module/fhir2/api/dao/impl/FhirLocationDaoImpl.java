@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.Optional;
 
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.ReferenceOrListParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
@@ -67,11 +69,7 @@ public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLo
 					break;
 				case FhirConstants.LOCATION_REFERENCE_SEARCH_HANDLER:
 					entry.getValue()
-					        .forEach(param -> handleParentLocation(criteria, (ReferenceAndListParam) param.getParam()));
-					break;
-				case FhirConstants.LOCATION_ANCESTOR_SEARCH_HANDLER:
-					entry.getValue()
-					        .forEach(param -> handleAncestorLocation(criteria, (ReferenceAndListParam) param.getParam()));
+					        .forEach(param -> handleLocationReference(criteria, (ReferenceAndListParam) param.getParam()));
 					break;
 				case FhirConstants.TAG_SEARCH_HANDLER:
 					entry.getValue().forEach(param -> handleTag(criteria, (TokenAndListParam) param.getParam()));
@@ -91,25 +89,6 @@ public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLo
 		        .createAlias("location", "l", JoinType.INNER_JOIN, eq("l.id", location.getId()))
 		        .createAlias("attributeType", "lat").add(eq("lat.uuid", locationAttributeTypeUuid)).add(eq("voided", false))
 		        .list();
-	}
-	
-	private void handleAncestorLocation(Criteria criteria, ReferenceAndListParam ancestor) {
-		
-		List<Criterion> elementOrAncestorEqualsReferenceCriteria = new ArrayList<>();
-		Optional<Criterion> elementEqualsReferenceCriterion = handleLocationReference(ancestor); // note: "below" is inclusive of the element itself
-		elementEqualsReferenceCriterion.ifPresent(elementOrAncestorEqualsReferenceCriteria::add);
-		
-		// we need to add a join to the parentLocation for each level of hierarchy we want to search, and add a "equals" criterion for each level
-		int depth = 1;
-		while (depth <= SUPPORTED_LOCATION_HIERARCHY_SEARCH_DEPTH) {
-			Optional<Criterion> ancestorEqualsReferenceCriterion = handleLocationReference("ancestor" + depth, ancestor);
-			ancestorEqualsReferenceCriterion.ifPresent(elementOrAncestorEqualsReferenceCriteria::add);
-			criteria.createAlias(depth == 1 ? "parentLocation" : "ancestor" + (depth - 1) + ".parentLocation",
-			    "ancestor" + depth, JoinType.LEFT_OUTER_JOIN);
-			depth++;
-		}
-		
-		criteria.add(or(elementOrAncestorEqualsReferenceCriteria.toArray(new Criterion[0])));
 	}
 	
 	private void handleName(Criteria criteria, StringAndListParam namePattern) {
@@ -140,8 +119,56 @@ public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLo
 		}
 	}
 	
-	private void handleParentLocation(Criteria criteria, ReferenceAndListParam parent) {
-		handleLocationReference("loc", parent).ifPresent(loc -> criteria.createAlias("parentLocation", "loc").add(loc));
+	private void handleLocationReference(Criteria criteria, ReferenceAndListParam locationAndReferences) {
+		
+		if (locationAndReferences == null) {
+			return;
+		}
+		
+		List<ReferenceOrListParam> locationOrReference = locationAndReferences.getValuesAsQueryTokens();
+		
+		if (locationOrReference == null || locationOrReference.isEmpty()) {
+			return;
+		}
+		
+		if (locationOrReference.size() > 1) {
+			throw new IllegalArgumentException("Only one location reference is supported");
+		}
+		
+		List<ReferenceParam> locationReferences = locationOrReference.get(0).getValuesAsQueryTokens();
+		
+		if (locationReferences == null || locationReferences.isEmpty()) {
+			return;
+		}
+		
+		if (locationReferences.size() > 1) {
+			throw new IllegalArgumentException("Only one location reference is supported");
+		}
+		
+		ReferenceParam locationReference = locationReferences.get(0);
+		
+		// **NOTE: this is a *bug* in the current HAPI FHIR implementation, "below" should be the "queryParameterQualifier", not the resource type; likely need update this when/fix the HAPI FHIR implementation is fixed**
+		// this is to support queries of the type "Location?partof=below:uuid"
+		if ("below".equalsIgnoreCase(locationReference.getResourceType())) {
+			List<Criterion> belowReferenceCriteria = new ArrayList<>();
+			
+			// we need to add a join to the parentLocation for each level of hierarchy we want to search, and add a "equals" criterion for each level
+			int depth = 1;
+			while (depth <= SUPPORTED_LOCATION_HIERARCHY_SEARCH_DEPTH) {
+				belowReferenceCriteria.add(eq("ancestor" + depth + ".uuid", locationReference.getIdPart()));
+				criteria.createAlias(depth == 1 ? "parentLocation" : "ancestor" + (depth - 1) + ".parentLocation",
+				    "ancestor" + depth, JoinType.LEFT_OUTER_JOIN);
+				depth++;
+			}
+			
+			// or these call together--if any ancestor location uuid matches
+			criteria.add(or(belowReferenceCriteria.toArray(new Criterion[0])));
+		} else {
+			// this is to support queries of the type "Location?partof=uuid" or chained search like "Location?partof:Location=Location:name=xxx"
+			handleLocationReference("loc", locationAndReferences)
+			        .ifPresent(loc -> criteria.createAlias("parentLocation", "loc").add(loc));
+		}
+		
 	}
 	
 	@Override

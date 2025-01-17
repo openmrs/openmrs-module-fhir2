@@ -120,9 +120,6 @@ public class LocationFhirResourceProvider implements IResourceProvider {
 	        @OptionalParam(name = Location.SP_PARTOF, chainWhitelist = { "", Location.SP_NAME, Location.SP_ADDRESS_CITY,
 	                Location.SP_ADDRESS_STATE, Location.SP_ADDRESS_COUNTRY,
 	                Location.SP_ADDRESS_POSTALCODE }, targetTypes = Location.class) ReferenceAndListParam parent,
-	        @OptionalParam(name = "below", chainWhitelist = { "", Location.SP_NAME, Location.SP_ADDRESS_CITY,
-	                Location.SP_ADDRESS_STATE, Location.SP_ADDRESS_COUNTRY,
-	                Location.SP_ADDRESS_POSTALCODE }, targetTypes = Location.class) ReferenceAndListParam ancestor,
 	        @OptionalParam(name = Location.SP_RES_ID) TokenAndListParam id,
 	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated,
 	        @IncludeParam(allow = { "Location:" + Location.SP_PARTOF }) HashSet<Include> includes,
@@ -139,6 +136,6 @@ public class LocationFhirResourceProvider implements IResourceProvider {
 		}
 		
 		return (fhirLocationService.searchForLocations(new LocationSearchParams(name, city, country, postalCode, state, tag,
-		        parent, ancestor, id, lastUpdated, sort, includes, revIncludes)));
+		        parent, id, lastUpdated, sort, includes, revIncludes)));
 	}
 }

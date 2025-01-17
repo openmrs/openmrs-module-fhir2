@@ -579,7 +579,7 @@ public class LocationFhirResourceProviderIntegrationTest extends BaseFhirR4Integ
 		assertThat(entries, everyItem(hasResource(validResource())));
 		
 		// search by ancestors
-		response = get("/Location?below=" + LOCATION_ANCESTOR_TEST_UUID).accept(FhirMediaTypes.JSON).go();
+		response = get("/Location?partof:below=" + LOCATION_ANCESTOR_TEST_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
@@ -592,11 +592,10 @@ public class LocationFhirResourceProviderIntegrationTest extends BaseFhirR4Integ
 		assertThat(results.hasEntry(), is(true));
 		
 		entries = results.getEntry();
-		assertThat(entries.size(), is(5));
+		assertThat(entries.size(), is(4));
 		
 		assertThat(entries,
-		    containsInRelativeOrder(hasResource(hasProperty("name", equalTo("Test location 4"))),
-		        hasResource(hasProperty("name", equalTo("Test location 6"))),
+		    containsInRelativeOrder(hasResource(hasProperty("name", equalTo("Test location 6"))),
 		        hasResource(hasProperty("name", equalTo("Test location 8"))),
 		        hasResource(hasProperty("name", equalTo("Test location 11"))),
 		        hasResource(hasProperty("name", equalTo("Test location 12")))));
@@ -647,7 +646,7 @@ public class LocationFhirResourceProviderIntegrationTest extends BaseFhirR4Integ
 		assertThat(entries, everyItem(hasResource(validResource())));
 		
 		// search by ancestors
-		response = get("/Location?below=" + LOCATION_ANCESTOR_TEST_UUID).accept(FhirMediaTypes.XML).go();
+		response = get("/Location?partof:below=" + LOCATION_ANCESTOR_TEST_UUID).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
@@ -660,11 +659,10 @@ public class LocationFhirResourceProviderIntegrationTest extends BaseFhirR4Integ
 		assertThat(results.hasEntry(), is(true));
 		
 		entries = results.getEntry();
-		assertThat(entries.size(), is(5));
+		assertThat(entries.size(), is(4));
 		
 		assertThat(entries,
-		    containsInRelativeOrder(hasResource(hasProperty("name", equalTo("Test location 4"))),
-		        hasResource(hasProperty("name", equalTo("Test location 6"))),
+		    containsInRelativeOrder(hasResource(hasProperty("name", equalTo("Test location 6"))),
 		        hasResource(hasProperty("name", equalTo("Test location 8"))),
 		        hasResource(hasProperty("name", equalTo("Test location 11"))),
 		        hasResource(hasProperty("name", equalTo("Test location 12")))));
