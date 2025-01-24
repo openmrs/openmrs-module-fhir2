@@ -15,6 +15,7 @@ import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.
 
 import javax.annotation.Nonnull;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -119,10 +120,15 @@ public class PatientTranslatorImpl implements PatientTranslator {
 	}
 	
 	public List<ContactPoint> getPatientContactDetails(@Nonnull org.openmrs.Patient patient) {
-		return fhirPersonDao
-		        .getActiveAttributesByPersonAndAttributeTypeUuid(patient,
-		            globalPropertyService.getGlobalProperty(FhirConstants.PERSON_CONTACT_POINT_ATTRIBUTE_TYPE))
-		        .stream().map(telecomTranslator::toFhirResource).collect(Collectors.toList());
+		String personContactAttributeType = globalPropertyService
+		        .getGlobalProperty(FhirConstants.PERSON_CONTACT_POINT_ATTRIBUTE_TYPE);
+		
+		if (personContactAttributeType == null || personContactAttributeType.isEmpty()) {
+			return Collections.emptyList();
+		}
+		
+		return fhirPersonDao.getActiveAttributesByPersonAndAttributeTypeUuid(patient, personContactAttributeType).stream()
+		        .map(telecomTranslator::toFhirResource).collect(Collectors.toList());
 	}
 	
 	@Override
@@ -148,7 +154,14 @@ public class PatientTranslatorImpl implements PatientTranslator {
 		}
 		
 		for (HumanName name : patient.getName()) {
-			currentPatient.addName(nameTranslator.toOpenmrsType(name));
+			PersonName existingName = null;
+			if (name.hasId()) {
+				existingName = currentPatient.getNames().stream().filter(n -> n.getUuid().equals(name.getId())).findFirst()
+				        .orElse(null);
+			}
+			
+			PersonName pn = nameTranslator.toOpenmrsType(existingName != null ? existingName : new PersonName(), name);
+			currentPatient.addName(pn);
 		}
 		
 		if (patient.hasGender()) {

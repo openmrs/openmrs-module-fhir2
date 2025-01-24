@@ -137,6 +137,8 @@ public final class FhirConstants {
 	
 	public static final String MEDICATION = "Medication";
 	
+	public static final String GROUP = "Group";
+	
 	public static final String MEDICATION_DISPENSE = "MedicationDispense";
 	
 	public static final String MEDICATION_REQUEST = "MedicationRequest";
@@ -226,6 +228,14 @@ public final class FhirConstants {
 	public static final String GIVEN_PROPERTY = "given.property";
 	
 	public static final String FAMILY_PROPERTY = "family.property";
+	
+	public static final String GENDER_PROPERTY = "gender";
+	
+	public static final String BIRTHDATE_PROPERTY = "birthdate";
+	
+	public static final String DEATHDATE_PROPERTY = "deathDate";
+	
+	public static final String DECEASED_PROPERTY = "dead";
 	
 	public static final String CITY_PROPERTY = "city.property";
 	
@@ -358,4 +368,7 @@ public final class FhirConstants {
 	public static final String EXACT_TOTAL_SEARCH_PARAMETER = "_exactTotal";
 	
 	public static final String COUNT_QUERY_CACHE = "countQueryCache";
+	
+	public static final String INCLUDE_MEMBER_PARAM = "member";
+	
 }

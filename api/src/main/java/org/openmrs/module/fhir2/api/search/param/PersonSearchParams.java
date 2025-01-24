@@ -61,8 +61,8 @@ public class PersonSearchParams extends BaseResourceSearchParams {
 	public SearchParameterMap toSearchParameterMap() {
 		return baseSearchParameterMap()
 		        .addParameter(FhirConstants.NAME_SEARCH_HANDLER, FhirConstants.NAME_PROPERTY, getName())
-		        .addParameter(FhirConstants.GENDER_SEARCH_HANDLER, getGender())
-		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, getBirthDate())
+		        .addParameter(FhirConstants.GENDER_SEARCH_HANDLER, FhirConstants.GENDER_PROPERTY, getGender())
+		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, FhirConstants.BIRTHDATE_PROPERTY, getBirthDate())
 		        .addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.CITY_PROPERTY, getCity())
 		        .addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.STATE_PROPERTY, getState())
 		        .addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.POSTAL_CODE_PROPERTY, getPostalCode())

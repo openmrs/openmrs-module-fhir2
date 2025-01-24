@@ -11,26 +11,16 @@ package org.openmrs.module.fhir2.web.authentication;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.Mockito.when;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.openmrs.api.context.Context;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(Context.class)
 public class RequireAuthenticationInterceptorTest {
-	
-	private RequireAuthenticationInterceptor interceptor;
 	
 	private MockHttpServletRequest request;
 	
@@ -38,13 +28,8 @@ public class RequireAuthenticationInterceptorTest {
 	
 	@Before
 	public void setup() throws ServletException {
-		interceptor = new RequireAuthenticationInterceptor();
 		request = new MockHttpServletRequest();
 		response = new MockHttpServletResponse();
-		
-		PowerMockito.mockStatic(Context.class);
-		when(Context.isAuthenticated()).thenReturn(false);
-		
 	}
 	
 	@Test
@@ -53,6 +38,7 @@ public class RequireAuthenticationInterceptorTest {
 		request.setRequestURI("/.well-known");
 		
 		// replay and verify
+		RequireAuthenticationInterceptor interceptor = getInterceptorForTesting(true);
 		assertThat(interceptor.ensureUserAuthenticated(request, response), is(true));
 	}
 	
@@ -62,6 +48,7 @@ public class RequireAuthenticationInterceptorTest {
 		request.setRequestURI("/metadata");
 		
 		// replay and verify
+		RequireAuthenticationInterceptor interceptor = getInterceptorForTesting(true);
 		assertThat(interceptor.ensureUserAuthenticated(request, response), is(true));
 	}
 	
@@ -71,6 +58,7 @@ public class RequireAuthenticationInterceptorTest {
 		request.setRequestURI("/ws/fhir2/R4/Someresource");
 		
 		// replay and verify
+		RequireAuthenticationInterceptor interceptor = getInterceptorForTesting(false);
 		assertThat(interceptor.ensureUserAuthenticated(request, response), is(false));
 		assertThat(response.getErrorMessage(), is("Not authenticated"));
 		assertThat(response.getStatus(), is(HttpServletResponse.SC_UNAUTHORIZED));
@@ -80,9 +68,19 @@ public class RequireAuthenticationInterceptorTest {
 	public void ensureUserAuthenticated_shouldReturnTrueGivenUserIsAuthenticated() throws Exception {
 		// setup
 		request.setRequestURI("/ws/fhir2/R4/Someresource");
-		when(Context.isAuthenticated()).thenReturn(true);
 		
 		// replay and verify
+		RequireAuthenticationInterceptor interceptor = getInterceptorForTesting(true);
 		assertThat(interceptor.ensureUserAuthenticated(request, response), is(true));
+	}
+	
+	public RequireAuthenticationInterceptor getInterceptorForTesting(boolean isUserAuthenticated) {
+		return new RequireAuthenticationInterceptor() {
+			
+			@Override
+			protected boolean isAuthenticated() {
+				return isUserAuthenticated;
+			}
+		};
 	}
 }

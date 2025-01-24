@@ -234,7 +234,7 @@ public class FhirPatientServiceImplTest {
 		when(patientTranslator.toFhirResource(patient)).thenReturn(fhirPatient);
 		
 		IBundleProvider results = patientService.searchForPatients(new PatientSearchParams(stringAndListParam, null, null,
-		        null, null, null, null, null, null, null, null, null, null, null, null, null));
+		        null, null, null, null, null, null, null, null, null, null, null, null, null, null));
 		
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(1));
@@ -258,7 +258,7 @@ public class FhirPatientServiceImplTest {
 		when(patientTranslator.toFhirResource(patient)).thenReturn(fhirPatient);
 		
 		IBundleProvider results = patientService.searchForPatients(new PatientSearchParams(null, stringAndListParam, null,
-		        null, null, null, null, null, null, null, null, null, null, null, null, null));
+		        null, null, null, null, null, null, null, null, null, null, null, null, null, null));
 		
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(1));
@@ -275,7 +275,7 @@ public class FhirPatientServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER,
 		    stringAndListParam);
 		
-		when(globalPropertyService.getGlobalProperty(anyString(), anyInt())).thenReturn(10);
+		when(globalPropertyService.getGlobalPropertyAsInteger(anyString(), anyInt())).thenReturn(10);
 		when(dao.getSearchResults(any())).thenReturn(patients);
 		when(dao.getSearchResultsCount(any())).thenReturn(1);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
@@ -284,7 +284,7 @@ public class FhirPatientServiceImplTest {
 		when(patientTranslator.toFhirResource(patient)).thenReturn(fhirPatient);
 		
 		IBundleProvider results = patientService.searchForPatients(new PatientSearchParams(null, null, stringAndListParam,
-		        null, null, null, null, null, null, null, null, null, null, null, null, null));
+		        null, null, null, null, null, null, null, null, null, null, null, null, null, null));
 		
 		assertThat(results.getUuid(), notNullValue());
 		assertThat(results.size(), equalTo(1));
@@ -308,7 +308,7 @@ public class FhirPatientServiceImplTest {
 		when(patientTranslator.toFhirResource(patient)).thenReturn(fhirPatient);
 		
 		IBundleProvider results = patientService.searchForPatients(new PatientSearchParams(null, stringAndListParam, null,
-		        null, null, null, null, null, null, null, null, null, null, null, null, null));
+		        null, null, null, null, null, null, null, null, null, null, null, null, null, null));
 		
 		assertThat(results, notNullValue());
 		assertThat(results.size(), greaterThanOrEqualTo(1));
@@ -332,7 +332,7 @@ public class FhirPatientServiceImplTest {
 		when(patientTranslator.toFhirResource(patient)).thenReturn(fhirPatient);
 		
 		IBundleProvider results = patientService.searchForPatients(new PatientSearchParams(null, null, stringAndListParam,
-		        null, null, null, null, null, null, null, null, null, null, null, null, null));
+		        null, null, null, null, null, null, null, null, null, null, null, null, null, null));
 		
 		assertThat(results, notNullValue());
 		assertThat(results.size(), greaterThanOrEqualTo(1));
@@ -350,7 +350,7 @@ public class FhirPatientServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, patientTranslator, globalPropertyService, searchQueryInclude));
 		
 		IBundleProvider results = patientService.searchForPatients(new PatientSearchParams(stringAndListParam, null, null,
-		        null, null, null, null, null, null, null, null, null, null, null, null, null));
+		        null, null, null, null, null, null, null, null, null, null, null, null, null, null));
 		
 		assertThat(results, notNullValue());
 		assertThat(get(results), is(empty()));
@@ -368,7 +368,7 @@ public class FhirPatientServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, patientTranslator, globalPropertyService, searchQueryInclude));
 		
 		IBundleProvider results = patientService.searchForPatients(new PatientSearchParams(null, stringAndListParam, null,
-		        null, null, null, null, null, null, null, null, null, null, null, null, null));
+		        null, null, null, null, null, null, null, null, null, null, null, null, null, null));
 		
 		assertThat(results, notNullValue());
 		assertThat(get(results), is(empty()));
@@ -385,7 +385,7 @@ public class FhirPatientServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, patientTranslator, globalPropertyService, searchQueryInclude));
 		
 		IBundleProvider results = patientService.searchForPatients(new PatientSearchParams(null, null, stringAndListParam,
-		        null, null, null, null, null, null, null, null, null, null, null, null, null));
+		        null, null, null, null, null, null, null, null, null, null, null, null, null, null));
 		
 		assertThat(results, notNullValue());
 		assertThat(get(results), is(empty()));
@@ -406,7 +406,7 @@ public class FhirPatientServiceImplTest {
 		when(patientTranslator.toFhirResource(patient)).thenReturn(fhirPatient);
 		
 		IBundleProvider results = patientService.searchForPatients(new PatientSearchParams(null, null, null, null,
-		        tokenAndListParam, null, null, null, null, null, null, null, null, null, null, null));
+		        tokenAndListParam, null, null, null, null, null, null, null, null, null, null, null, null));
 		
 		assertThat(results, notNullValue());
 		assertThat(get(results), not(empty()));
@@ -423,7 +423,7 @@ public class FhirPatientServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, patientTranslator, globalPropertyService, searchQueryInclude));
 		
 		IBundleProvider results = patientService.searchForPatients(new PatientSearchParams(null, null, null, null,
-		        tokenAndListParam, null, null, null, null, null, null, null, null, null, null, null));
+		        tokenAndListParam, null, null, null, null, null, null, null, null, null, null, null, null));
 		
 		assertThat(results, notNullValue());
 		assertThat(get(results), is(empty()));
@@ -449,7 +449,7 @@ public class FhirPatientServiceImplTest {
 		when(patientTranslator.toFhirResource(patient)).thenReturn(fhirPatient);
 		
 		IBundleProvider results = patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null,
-		        dateRangeParam, null, null, null, null, null, null, null, null, null, null));
+		        dateRangeParam, null, null, null, null, null, null, null, null, null, null, null));
 		
 		assertThat(results, notNullValue());
 		assertThat(results.size(), greaterThanOrEqualTo(1));
@@ -466,7 +466,7 @@ public class FhirPatientServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, patientTranslator, globalPropertyService, searchQueryInclude));
 		
 		IBundleProvider results = patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null,
-		        dateRangeParam, null, null, null, null, null, null, null, null, null, null));
+		        dateRangeParam, null, null, null, null, null, null, null, null, null, null, null));
 		
 		assertThat(results, notNullValue());
 		assertThat(get(results), empty());
@@ -492,7 +492,7 @@ public class FhirPatientServiceImplTest {
 		when(patientTranslator.toFhirResource(patient)).thenReturn(fhirPatient);
 		
 		IBundleProvider results = patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null,
-		        null, dateRangeParam, null, null, null, null, null, null, null, null, null));
+		        null, dateRangeParam, null, null, null, null, null, null, null, null, null, null));
 		
 		assertThat(results, notNullValue());
 		assertThat(results.size(), greaterThanOrEqualTo(1));
@@ -509,7 +509,7 @@ public class FhirPatientServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, patientTranslator, globalPropertyService, searchQueryInclude));
 		
 		IBundleProvider results = patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null,
-		        null, dateRangeParam, null, null, null, null, null, null, null, null, null));
+		        null, dateRangeParam, null, null, null, null, null, null, null, null, null, null));
 		
 		assertThat(results, notNullValue());
 		assertThat(get(results), empty());
@@ -531,7 +531,7 @@ public class FhirPatientServiceImplTest {
 		when(patientTranslator.toFhirResource(patient)).thenReturn(fhirPatient);
 		
 		IBundleProvider results = patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null,
-		        null, null, null, stringAndListParam, null, null, null, null, null, null, null));
+		        null, null, null, stringAndListParam, null, null, null, null, null, null, null, null));
 		
 		assertThat(results, notNullValue());
 		assertThat(results.size(), greaterThanOrEqualTo(1));
@@ -548,7 +548,7 @@ public class FhirPatientServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, patientTranslator, globalPropertyService, searchQueryInclude));
 		
 		IBundleProvider results = patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null,
-		        null, null, null, stringAndListParam, null, null, null, null, null, null, null));
+		        null, null, null, stringAndListParam, null, null, null, null, null, null, null, null));
 		
 		assertThat(results, notNullValue());
 		assertThat(get(results), empty());
@@ -570,7 +570,7 @@ public class FhirPatientServiceImplTest {
 		when(patientTranslator.toFhirResource(patient)).thenReturn(fhirPatient);
 		
 		IBundleProvider results = patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null,
-		        null, null, null, null, stringAndListParam, null, null, null, null, null, null));
+		        null, null, null, null, stringAndListParam, null, null, null, null, null, null, null));
 		
 		assertThat(results, notNullValue());
 		assertThat(results.size(), greaterThanOrEqualTo(1));
@@ -587,7 +587,7 @@ public class FhirPatientServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, patientTranslator, globalPropertyService, searchQueryInclude));
 		
 		IBundleProvider results = patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null,
-		        null, null, null, null, stringAndListParam, null, null, null, null, null, null));
+		        null, null, null, null, stringAndListParam, null, null, null, null, null, null, null));
 		
 		assertThat(results, notNullValue());
 		assertThat(get(results), empty());
@@ -609,7 +609,7 @@ public class FhirPatientServiceImplTest {
 		when(patientTranslator.toFhirResource(patient)).thenReturn(fhirPatient);
 		
 		IBundleProvider results = patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null,
-		        null, null, null, null, null, stringAndListParam, null, null, null, null, null));
+		        null, null, null, null, null, stringAndListParam, null, null, null, null, null, null));
 		
 		assertThat(results, notNullValue());
 		assertThat(results.size(), greaterThanOrEqualTo(1));
@@ -626,7 +626,7 @@ public class FhirPatientServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, patientTranslator, globalPropertyService, searchQueryInclude));
 		
 		IBundleProvider results = patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null,
-		        null, null, null, null, null, stringAndListParam, null, null, null, null, null));
+		        null, null, null, null, null, stringAndListParam, null, null, null, null, null, null));
 		assertThat(results, notNullValue());
 		assertThat(get(results), empty());
 	}
@@ -647,7 +647,7 @@ public class FhirPatientServiceImplTest {
 		when(patientTranslator.toFhirResource(patient)).thenReturn(fhirPatient);
 		
 		IBundleProvider results = patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null,
-		        null, null, null, null, null, null, stringAndListParam, null, null, null, null));
+		        null, null, null, null, null, null, stringAndListParam, null, null, null, null, null));
 		
 		assertThat(results, notNullValue());
 		assertThat(results.size(), greaterThanOrEqualTo(1));
@@ -664,7 +664,7 @@ public class FhirPatientServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, patientTranslator, globalPropertyService, searchQueryInclude));
 		
 		IBundleProvider results = patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null,
-		        null, null, null, null, null, null, stringAndListParam, null, null, null, null));
+		        null, null, null, null, null, null, stringAndListParam, null, null, null, null, null));
 		
 		assertThat(results, notNullValue());
 		assertThat(get(results), empty());
@@ -685,7 +685,7 @@ public class FhirPatientServiceImplTest {
 		when(patientTranslator.toFhirResource(patient)).thenReturn(fhirPatient);
 		
 		IBundleProvider results = patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null,
-		        null, null, null, null, null, null, null, uuid, null, null, null));
+		        null, null, null, null, null, null, null, uuid, null, null, null, null));
 		
 		assertThat(results, notNullValue());
 		assertThat(results.size(), greaterThanOrEqualTo(1));
@@ -703,7 +703,7 @@ public class FhirPatientServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, patientTranslator, globalPropertyService, searchQueryInclude));
 		
 		IBundleProvider results = patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null,
-		        null, null, null, null, null, null, null, uuid, null, null, null));
+		        null, null, null, null, null, null, null, uuid, null, null, null, null));
 		
 		assertThat(results, notNullValue());
 		assertThat(get(results), empty());
@@ -724,7 +724,7 @@ public class FhirPatientServiceImplTest {
 		when(patientTranslator.toFhirResource(patient)).thenReturn(fhirPatient);
 		
 		IBundleProvider results = patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null,
-		        null, null, null, null, null, null, null, null, lastUpdated, null, null));
+		        null, null, null, null, null, null, null, null, null, lastUpdated, null, null));
 		
 		assertThat(results, notNullValue());
 		assertThat(results.size(), greaterThanOrEqualTo(1));
@@ -743,7 +743,7 @@ public class FhirPatientServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, patientTranslator, globalPropertyService, searchQueryInclude));
 		
 		IBundleProvider results = patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null,
-		        null, null, null, null, null, null, null, null, lastUpdated, null, null));
+		        null, null, null, null, null, null, null, null, null, lastUpdated, null, null));
 		
 		assertThat(results, notNullValue());
 		assertThat(get(results), empty());
@@ -764,7 +764,7 @@ public class FhirPatientServiceImplTest {
 		when(patientTranslator.toFhirResource(patient)).thenReturn(fhirPatient);
 		
 		IBundleProvider results = patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null,
-		        null, null, null, null, null, null, null, null, null, null, revIncludes));
+		        null, null, null, null, null, null, null, null, null, null, null, revIncludes));
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -788,7 +788,7 @@ public class FhirPatientServiceImplTest {
 		when(patientTranslator.toFhirResource(patient)).thenReturn(fhirPatient);
 		
 		IBundleProvider results = patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null,
-		        null, null, null, null, null, null, null, null, null, null, revIncludes));
+		        null, null, null, null, null, null, null, null, null, null, null, revIncludes));
 		
 		List<IBaseResource> resultList = get(results);
 		

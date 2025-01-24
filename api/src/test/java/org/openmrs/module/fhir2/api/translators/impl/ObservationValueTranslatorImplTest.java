@@ -15,11 +15,9 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.openmrs.module.fhir2.FhirConstants.RX_NORM_SYSTEM_URI;
 import static org.openmrs.module.fhir2.FhirConstants.UCUM_SYSTEM_URI;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 import java.util.Date;
 
@@ -35,29 +33,31 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Concept;
-import org.openmrs.ConceptDatatype;
 import org.openmrs.ConceptNumeric;
 import org.openmrs.Obs;
 import org.openmrs.api.ConceptService;
-import org.openmrs.api.context.Context;
-import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
-import org.powermock.core.classloader.annotations.PrepareOnlyThisForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.openmrs.module.fhir2.api.dao.FhirConceptSourceDao;
+import org.openmrs.module.fhir2.api.dao.impl.FhirConceptDaoImpl;
+import org.openmrs.module.fhir2.api.dao.impl.FhirConceptSourceDaoImpl;
+import org.openmrs.module.fhir2.api.impl.FhirConceptServiceImpl;
+import org.openmrs.module.fhir2.api.impl.FhirConceptSourceServiceImpl;
 
-@RunWith(PowerMockRunner.class)
-@PrepareOnlyThisForTest({ Context.class })
+@RunWith(MockitoJUnitRunner.class)
 public class ObservationValueTranslatorImplTest {
 	
 	private static final String CONCEPT_VALUE_UUID = "12345-abcde-54321";
 	
 	private static final String OBS_STRING = "An ingenious observation";
 	
-	@Mock
-	private ConceptTranslator conceptTranslator;
+	private ConceptTranslatorImpl conceptTranslator;
 	
 	@Mock
 	private ObservationQuantityCodingTranslatorImpl quantityCodingTranslator;
+	
+	@Mock
+	ConceptService conceptService;
 	
 	private Obs obs;
 	
@@ -65,7 +65,41 @@ public class ObservationValueTranslatorImplTest {
 	
 	@Before
 	public void setup() {
-		obsValueTranslator = new ObservationValueTranslatorImpl();
+		FhirConceptDaoImpl fhirConceptDao = new FhirConceptDaoImpl();
+		fhirConceptDao.setConceptService(conceptService);
+		FhirConceptServiceImpl fhirConceptService = new FhirConceptServiceImpl();
+		fhirConceptService.setDao(fhirConceptDao);
+		FhirConceptSourceDao fhirConceptSourceDao = new FhirConceptSourceDaoImpl();
+		FhirConceptSourceServiceImpl fhirConceptSourceService = new FhirConceptSourceServiceImpl();
+		fhirConceptSourceService.setDao(fhirConceptSourceDao);
+		conceptTranslator = new ConceptTranslatorImpl();
+		conceptTranslator.setConceptService(fhirConceptService);
+		conceptTranslator.setConceptSourceService(fhirConceptSourceService);
+		obsValueTranslator = new ObservationValueTranslatorImpl() {
+			
+			@Override
+			protected Boolean getValueBoolean(Obs obs) {
+				if (obs.getValueCoded() != null) {
+					if (obs.getValueCoded().equals(conceptService.getTrueConcept())) {
+						return true;
+					} else if (obs.getValueCoded().equals(conceptService.getFalseConcept())) {
+						return false;
+					}
+				}
+				return null;
+			}
+			
+			@Override
+			protected void setValueBoolean(Obs obs, Boolean valueBoolean) {
+				if (valueBoolean == Boolean.TRUE) {
+					obs.setValueCoded(conceptService.getTrueConcept());
+				} else if (valueBoolean == Boolean.FALSE) {
+					obs.setValueCoded(conceptService.getFalseConcept());
+				} else {
+					obs.setValueCoded(null);
+				}
+			}
+		};
 		obsValueTranslator.setConceptTranslator(conceptTranslator);
 		obsValueTranslator.setQuantityCodingTranslator(quantityCodingTranslator);
 		
@@ -78,15 +112,12 @@ public class ObservationValueTranslatorImplTest {
 		concept.setUuid(CONCEPT_VALUE_UUID);
 		obs.setValueCoded(concept);
 		
-		CodeableConcept codeableConcept = new CodeableConcept();
-		codeableConcept.setId(CONCEPT_VALUE_UUID);
-		when(conceptTranslator.toFhirResource(concept)).thenReturn(codeableConcept);
-		
 		Type result = obsValueTranslator.toFhirResource(obs);
 		
 		assertThat(result, notNullValue());
 		assertThat(result, instanceOf(CodeableConcept.class));
-		assertThat(result.getId(), equalTo(CONCEPT_VALUE_UUID));
+		CodeableConcept codeableConceptResult = (CodeableConcept) result;
+		assertThat(codeableConceptResult.getCodingFirstRep().getCode(), equalTo(CONCEPT_VALUE_UUID));
 	}
 	
 	@Test
@@ -171,20 +202,13 @@ public class ObservationValueTranslatorImplTest {
 	
 	@Test
 	public void toFhirResource_shouldConvertObsWithBooleanValueToBoolean() {
-		mockStatic(Context.class);
 		Concept trueConcept = new Concept();
 		trueConcept.setId(1046);
-		ConceptService conceptService = mock(ConceptService.class);
-		when(Context.getConceptService()).thenReturn(conceptService);
 		when(conceptService.getTrueConcept()).thenReturn(trueConcept);
-		ConceptDatatype booleanDatatype = mock(ConceptDatatype.class);
-		when(booleanDatatype.isBoolean()).thenReturn(true);
-		
 		Concept obsConcept = new Concept();
-		obsConcept.setDatatype(booleanDatatype);
 		
 		obs.setConcept(obsConcept);
-		obs.setValueBoolean(true);
+		obs.setValueCoded(conceptService.getTrueConcept());
 		
 		Type result = obsValueTranslator.toFhirResource(obs);
 		
@@ -214,11 +238,11 @@ public class ObservationValueTranslatorImplTest {
 	@Test
 	public void toOpenmrsType_shouldConvertCodeableConceptToConcept() {
 		CodeableConcept codeableConcept = new CodeableConcept();
-		codeableConcept.setId(CONCEPT_VALUE_UUID);
+		codeableConcept.addCoding(new Coding(null, CONCEPT_VALUE_UUID, CONCEPT_VALUE_UUID));
 		
 		Concept concept = new Concept();
 		concept.setUuid(CONCEPT_VALUE_UUID);
-		when(conceptTranslator.toOpenmrsType(codeableConcept)).thenReturn(concept);
+		when(conceptService.getConceptByUuid(CONCEPT_VALUE_UUID)).thenReturn(concept);
 		
 		Obs result = obsValueTranslator.toOpenmrsType(obs, codeableConcept);
 		
@@ -262,18 +286,11 @@ public class ObservationValueTranslatorImplTest {
 	
 	@Test
 	public void toOpenmrsType_shouldConvertBooleanToBooleanValue() {
-		mockStatic(Context.class);
 		Concept trueConcept = new Concept();
 		trueConcept.setId(1046);
-		ConceptService conceptService = mock(ConceptService.class);
-		when(Context.getConceptService()).thenReturn(conceptService);
 		when(conceptService.getTrueConcept()).thenReturn(trueConcept);
-		ConceptDatatype booleanDatatype = mock(ConceptDatatype.class);
-		when(booleanDatatype.isBoolean()).thenReturn(true);
 		
 		Concept obsConcept = new Concept();
-		obsConcept.setDatatype(booleanDatatype);
-		
 		obs.setConcept(obsConcept);
 		
 		BooleanType booleanType = new BooleanType();
@@ -282,7 +299,7 @@ public class ObservationValueTranslatorImplTest {
 		Obs result = obsValueTranslator.toOpenmrsType(obs, booleanType);
 		
 		assertThat(result, notNullValue());
-		assertThat(result.getValueBoolean(), is(true));
+		assertThat(result.getValueCoded(), is(conceptService.getTrueConcept()));
 	}
 	
 	@Test

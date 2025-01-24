@@ -29,6 +29,9 @@ import org.openmrs.module.fhir2.FhirConstants;
 @Slf4j
 public class FhirUtils {
 	
+	private FhirUtils() {
+	}
+	
 	public enum OpenmrsEncounterType {
 		ENCOUNTER,
 		VISIT,
@@ -145,7 +148,6 @@ public class FhirUtils {
 	 * @return localization for the given metadata, from message source, in the authenticated locale
 	 */
 	public static String getMetadataTranslation(OpenmrsMetadata metadata) {
-		
 		String className = metadata.getClass().getSimpleName();
 		String uuid = metadata.getUuid();
 		
@@ -159,7 +161,6 @@ public class FhirUtils {
 	}
 	
 	public static String getMetadataTranslation(Concept concept) {
-		
 		String className = concept.getClass().getSimpleName();
 		String uuid = concept.getUuid();
 		
@@ -184,11 +185,12 @@ public class FhirUtils {
 		String code = "ui.i18n." + shortClassName + ".name." + uuid;
 		String localization = null;
 		try {
-			localization = Context.getMessageSourceService().getMessage(code);
+			localization = Context.getMessageSourceService().getMessage(code, null, Context.getLocale());
 		}
 		catch (Exception e) {
 			log.info("Caught exception while attempting to localize code [{}]", code, e);
 		}
+		
 		if (localization == null || localization.equals(code)) {
 			return null;
 		} else {

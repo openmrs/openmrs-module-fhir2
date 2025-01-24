@@ -7,20 +7,14 @@
  * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
  * graphic logo is a trademark of OpenMRS Inc.
  */
-package org.openmrs.module.fhir2.api;
+package org.openmrs.module.fhir2.matchers;
 
-import java.util.Map;
+import org.hamcrest.Matcher;
+import org.hl7.fhir.r4.model.Patient;
 
-import org.openmrs.api.APIException;
-
-public interface FhirGlobalPropertyService {
+public class FhirMatchers {
 	
-	String getGlobalProperty(String property) throws APIException;
-	
-	int getGlobalPropertyAsInteger(String property, int defaultValue);
-	
-	String getGlobalProperty(String property, String defaultValue);
-	
-	Map<String, String> getGlobalProperties(String... properties);
-	
+	public static Matcher<Patient> isDeceased() {
+		return new IsDeceasedMatcher();
+	}
 }
