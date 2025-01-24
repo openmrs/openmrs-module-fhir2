@@ -99,7 +99,7 @@ public class LocationSearchQueryTest extends BaseModuleContextSensitiveTest {
 	private static final String LOCATION_PARENT_NAME = "Test location 5";
 	
 	private static final String LOCATION_ANCESTOR_TEST_UUID = "76cd2d30-2411-44ef-84ea-8b7473256a6a";
-
+	
 	private static final String DATE_CREATED = "2005-01-01";
 	
 	private static final String DATE_CHANGED = "2010-03-31";

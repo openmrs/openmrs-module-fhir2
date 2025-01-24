@@ -175,6 +175,8 @@ public final class FhirConstants {
 	
 	public static final String ADMINISTERING_ENCOUNTER_ROLE_PROPERTY = "fhir2.administeringEncounterRoleUuid";
 	
+	public static final String SUPPORTED_LOCATION_HIERARCHY_SEARCH_DEPTH = "fhir.supportedLocationHierarchySearchDepth";
+	
 	public static final String GLOBAL_PROPERTY_MILD = "allergy.concept.severity.mild";
 	
 	public static final String GLOBAL_PROPERTY_SEVERE = "allergy.concept.severity.severe";

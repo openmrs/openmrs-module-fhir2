@@ -34,6 +34,7 @@ import org.openmrs.LocationAttributeType;
 import org.openmrs.LocationTag;
 import org.openmrs.api.LocationService;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,10 +44,11 @@ import org.springframework.stereotype.Component;
 @Setter(AccessLevel.PACKAGE)
 public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLocationDao {
 	
-	private static final int SUPPORTED_LOCATION_HIERARCHY_SEARCH_DEPTH = 9;
-	
 	@Autowired
 	LocationService locationService;
+	
+	@Autowired
+	private FhirGlobalPropertyService globalPropertyService;
 	
 	@Override
 	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
@@ -150,11 +152,15 @@ public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLo
 		// **NOTE: this is a *bug* in the current HAPI FHIR implementation, "below" should be the "queryParameterQualifier", not the resource type; likely need update this when/fix the HAPI FHIR implementation is fixed**
 		// this is to support queries of the type "Location?partof=below:uuid"
 		if ("below".equalsIgnoreCase(locationReference.getResourceType())) {
+			
+			int searchDepth = globalPropertyService
+			        .getGlobalProperty(FhirConstants.SUPPORTED_LOCATION_HIERARCHY_SEARCH_DEPTH, 5);
+			
 			List<Criterion> belowReferenceCriteria = new ArrayList<>();
 			
 			// we need to add a join to the parentLocation for each level of hierarchy we want to search, and add "equals" criterion for each level
 			int depth = 1;
-			while (depth <= SUPPORTED_LOCATION_HIERARCHY_SEARCH_DEPTH) {
+			while (depth <= searchDepth) {
 				belowReferenceCriteria.add(eq("ancestor" + depth + ".uuid", locationReference.getIdPart()));
 				criteria.createAlias(depth == 1 ? "parentLocation" : "ancestor" + (depth - 1) + ".parentLocation",
 				    "ancestor" + depth, JoinType.LEFT_OUTER_JOIN);

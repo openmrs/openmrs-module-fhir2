@@ -175,4 +175,10 @@
 		<description>The UUID for the Location Attribute Type representing the Location Type</description>
 	</globalProperty>
 
+	<globalProperty>
+		<property>${project.parent.artifactId}.supportedLocationHierarchySearchDepth</property>
+		<description>Defines how many levels of searching to before when using a Location?partof:below={uuid} search.  Generally set this number to the number of levels in your location hierarchy.</description>
+		<defaultValue>5</defaultValue>
+	</globalProperty>
+
 </module>
