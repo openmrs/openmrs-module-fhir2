@@ -25,6 +25,7 @@ public class MockedGlobalPropertyServiceConfiguration {
 	public FhirGlobalPropertyService getFhirGlobalPropertyService() {
 		FhirGlobalPropertyService globalPropertyService = Mockito.mock(FhirGlobalPropertyService.class);
 		when(globalPropertyService.getGlobalProperty("default_locale", "en_GB")).thenReturn("en_GB");
+		when(globalPropertyService.getGlobalProperty(FhirConstants.SUPPORTED_LOCATION_HIERARCHY_SEARCH_DEPTH, 5)).thenReturn(5);
 		return globalPropertyService;
 	}
 }
