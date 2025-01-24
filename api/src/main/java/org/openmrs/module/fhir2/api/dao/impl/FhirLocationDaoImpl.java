@@ -154,7 +154,7 @@ public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLo
 		if ("below".equalsIgnoreCase(locationReference.getResourceType())) {
 			
 			int searchDepth = globalPropertyService
-			        .getGlobalProperty(FhirConstants.SUPPORTED_LOCATION_HIERARCHY_SEARCH_DEPTH, 5);
+			        .getGlobalPropertyAsInteger(FhirConstants.SUPPORTED_LOCATION_HIERARCHY_SEARCH_DEPTH, 5);
 			
 			List<Criterion> belowReferenceCriteria = new ArrayList<>();
 			
