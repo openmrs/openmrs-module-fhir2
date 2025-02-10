@@ -62,17 +62,27 @@ public class ObservationValueTranslatorImpl implements ObservationValueTranslato
 		} else if (obs.getValueDatetime() != null) {
 			return new DateTimeType(obs.getValueDatetime());
 		} else if (obs.getValueNumeric() != null) {
-			Quantity result = new Quantity(obs.getValueNumeric());
+			Double value = obs.getValueNumeric();
+			
+			Quantity result = new Quantity();
 			if (obs.getConcept() instanceof ConceptNumeric) {
 				ConceptNumeric cn = (ConceptNumeric) obs.getConcept();
+				if (cn.getAllowDecimal()) {
+					result.setValue(value);
+				} else {
+					result.setValue(value.longValue());
+				}
+				
 				result.setUnit(cn.getUnits());
 				
 				// only set the coding system if unit conforms to UCUM standard
 				Coding coding = quantityCodingTranslator.toFhirResource(cn);
-				if (coding.hasSystem() && coding.getSystem().equals(UCUM_SYSTEM_URI)) {
+				if (coding != null && coding.hasSystem() && coding.getSystem().equals(UCUM_SYSTEM_URI)) {
 					result.setCode(coding.getCode());
 					result.setSystem(coding.getSystem());
 				}
+			} else {
+				result.setValue(value);
 			}
 			
 			return result;

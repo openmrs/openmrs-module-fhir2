@@ -71,11 +71,11 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 	
 	private static final String OBS_CONCEPT_CIEL_ID = "5085";
 	
-	private static final BigDecimal OBS_CONCEPT_VALUE = BigDecimal.valueOf(115.0);
+	private static final BigDecimal OBS_CONCEPT_VALUE = BigDecimal.valueOf(115);
 	
-	private static final BigDecimal OBS_LOW_REFERENCE_RANGE = BigDecimal.valueOf(0.0);
+	private static final BigDecimal OBS_LOW_REFERENCE_RANGE = BigDecimal.valueOf(0);
 	
-	private static final BigDecimal OBS_HIGH_REFERENCE_RANGE = BigDecimal.valueOf(250.0);
+	private static final BigDecimal OBS_HIGH_REFERENCE_RANGE = BigDecimal.valueOf(250);
 	
 	private static final String OBS_PATIENT_UUID = "5946f880-b197-400b-9caa-a3c661d23041";
 	
@@ -249,7 +249,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		assertThat(observation.getContext().getReference(), endsWith("6519d653-393b-4118-9c83-a3715b82d4ac"));
 		assertThat(observation.getValue(), notNullValue());
 		assertThat(observation.getValueQuantity(), notNullValue());
-		assertThat(observation.getValueQuantity().getValue(), equalTo(BigDecimal.valueOf(156.0)));
+		assertThat(observation.getValueQuantity().getValue(), equalTo(BigDecimal.valueOf(156)));
 		assertThat(observation.getValueQuantity().getUnit(), equalTo("cm"));
 		assertThat(observation.getValueQuantity().getSystem(), equalTo(FhirConstants.UCUM_SYSTEM_URI));
 		assertThat(observation, validResource());
@@ -294,7 +294,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		assertThat(observation.getContext().getReference(), endsWith("6519d653-393b-4118-9c83-a3715b82d4ac"));
 		assertThat(observation.getValue(), notNullValue());
 		assertThat(observation.getValueQuantity(), notNullValue());
-		assertThat(observation.getValueQuantity().getValue(), equalTo(BigDecimal.valueOf(156.0)));
+		assertThat(observation.getValueQuantity().getValue(), equalTo(BigDecimal.valueOf(156)));
 		assertThat(observation.getValueQuantity().getUnit(), equalTo("cm"));
 		assertThat(observation.getValueQuantity().getSystem(), equalTo(FhirConstants.UCUM_SYSTEM_URI));
 		assertThat(observation, validResource());

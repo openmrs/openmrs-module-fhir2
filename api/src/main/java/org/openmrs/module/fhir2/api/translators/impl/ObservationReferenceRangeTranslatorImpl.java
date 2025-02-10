@@ -29,20 +29,22 @@ public class ObservationReferenceRangeTranslatorImpl implements ObservationRefer
 	@Override
 	public List<Observation.ObservationReferenceRangeComponent> toFhirResource(@Nonnull ConceptNumeric conceptNumeric) {
 		if (conceptNumeric != null) {
+			boolean allowDecimal = conceptNumeric.getAllowDecimal() != null ? conceptNumeric.getAllowDecimal() : true;
+			
 			List<Observation.ObservationReferenceRangeComponent> observationReferenceRangeComponentList = new ArrayList<>();
 			if (conceptNumeric.getHiNormal() != null || conceptNumeric.getLowNormal() != null) {
 				observationReferenceRangeComponentList.add(createObservationReferenceRange(conceptNumeric.getHiNormal(),
-				    conceptNumeric.getLowNormal(), FhirConstants.OBSERVATION_REFERENCE_NORMAL));
+				    conceptNumeric.getLowNormal(), FhirConstants.OBSERVATION_REFERENCE_NORMAL, allowDecimal));
 			}
 			
 			if (conceptNumeric.getHiCritical() != null || conceptNumeric.getLowCritical() != null) {
 				observationReferenceRangeComponentList.add(createObservationReferenceRange(conceptNumeric.getHiCritical(),
-				    conceptNumeric.getLowCritical(), FhirConstants.OBSERVATION_REFERENCE_TREATMENT));
+				    conceptNumeric.getLowCritical(), FhirConstants.OBSERVATION_REFERENCE_TREATMENT, allowDecimal));
 			}
 			
 			if (conceptNumeric.getHiAbsolute() != null || conceptNumeric.getLowAbsolute() != null) {
 				observationReferenceRangeComponentList.add(createObservationReferenceRange(conceptNumeric.getHiAbsolute(),
-				    conceptNumeric.getLowAbsolute(), FhirConstants.OBSERVATION_REFERENCE_ABSOLUTE));
+				    conceptNumeric.getLowAbsolute(), FhirConstants.OBSERVATION_REFERENCE_ABSOLUTE, allowDecimal));
 			}
 			
 			return observationReferenceRangeComponentList;
@@ -52,15 +54,23 @@ public class ObservationReferenceRangeTranslatorImpl implements ObservationRefer
 	}
 	
 	private Observation.ObservationReferenceRangeComponent createObservationReferenceRange(Double hiValue, Double lowValue,
-	        String code) {
+	        String code, boolean allowDecimal) {
 		Observation.ObservationReferenceRangeComponent component = new Observation.ObservationReferenceRangeComponent();
 		
 		if (hiValue != null) {
-			component.setHigh(new Quantity().setValue(hiValue));
+			if (allowDecimal) {
+				component.setHigh(new Quantity().setValue(hiValue));
+			} else {
+				component.setHigh(new Quantity().setValue(hiValue.longValue()));
+			}
 		}
 		
 		if (lowValue != null) {
-			component.setLow(new Quantity().setValue(lowValue));
+			if (allowDecimal) {
+				component.setLow(new Quantity().setValue(lowValue));
+			} else {
+				component.setLow(new Quantity().setValue(lowValue.longValue()));
+			}
 		}
 		
 		CodeableConcept referenceRangeType = new CodeableConcept();
