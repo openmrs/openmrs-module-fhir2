@@ -144,6 +144,21 @@ public class ObservationValueTranslatorImplTest {
 	}
 	
 	@Test
+	public void toFhirResource_shouldConvertObsWithNumericValueToIntegerQuantity() {
+		ConceptNumeric cn = new ConceptNumeric();
+		cn.setAllowDecimal(false);
+		
+		obs.setValueNumeric(130.0d);
+		obs.setConcept(cn);
+		
+		Type result = obsValueTranslator.toFhirResource(obs);
+		
+		assertThat(result, notNullValue());
+		assertThat(result, instanceOf(Quantity.class));
+		assertThat(((Quantity) result).getValue().longValueExact(), equalTo(130l));
+	}
+	
+	@Test
 	public void toFhirResource_shouldConvertObsWithNumericValueAndUnitsToQuantityWithUnits() {
 		ConceptNumeric cn = new ConceptNumeric();
 		cn.setUnits("cm");
