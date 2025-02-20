@@ -683,7 +683,7 @@
                     <artifactId>maven-release-plugin</artifactId>
                     <version>3.0.0-M7</version>
                     <configuration>
-                        <useReleaseProfile>false</useReleaseProfile>
+                        <useReleaseProfile>true</useReleaseProfile>
                         <autoVersionSubmodules>true</autoVersionSubmodules>
                         <arguments>-Prelease</arguments>
                         <tagNameFormat>@{project.version}</tagNameFormat>
