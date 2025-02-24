@@ -15,9 +15,7 @@ import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.
 
 import javax.annotation.Nonnull;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import lombok.AccessLevel;
@@ -108,9 +106,12 @@ public class PatientTranslatorImpl implements PatientTranslator {
 		for (PersonAddress address : openmrsPatient.getAddresses()) {
 			patient.addAddress(addressTranslator.toFhirResource(address));
 		}
+
+		if (!openmrsPatient.getAttributes().isEmpty()) {
+			patient.setExtension(getPersonAttributeExtensions(openmrsPatient));
+		}
 		
 		patient.setTelecom(getPatientContactDetails(openmrsPatient));
-		patient.setExtension(getPersonAttributeDetails(openmrsPatient));
 		patient.getMeta().setLastUpdated(getLastUpdated(openmrsPatient));
 		patient.getMeta().setVersionId(getVersionId(openmrsPatient));
 		
@@ -129,9 +130,15 @@ public class PatientTranslatorImpl implements PatientTranslator {
 		        .map(telecomTranslator::toFhirResource).collect(Collectors.toList());
 	}
 
-	public List<Extension> getPersonAttributeDetails(@Nonnull org.openmrs.Patient patient) {
-		//TODO
-		return null;
+	public List<Extension> getPersonAttributeExtensions(@Nonnull org.openmrs.Patient openmrsPatient) {
+		List<Extension> personAttributeExtensions = new ArrayList<>();
+		Set<PersonAttribute> personAttributes = openmrsPatient.getAttributes();
+
+		for(PersonAttribute personAttribute : personAttributes) {
+			personAttributeExtensions.add(personAttributeTranslator.toFhirResource(personAttribute));
+		}
+
+		return personAttributeExtensions;
 	}
 	
 	@Override
@@ -200,7 +207,13 @@ public class PatientTranslatorImpl implements PatientTranslator {
 		        .map(contactPoint -> (PersonAttribute) telecomTranslator.toOpenmrsType(new PersonAttribute(), contactPoint))
 		        .distinct().filter(Objects::nonNull).forEach(currentPatient::addAttribute);
 
-		//TODO: Handle personattribute from extension
+		List<Extension> patientAttributeExtensions = patient.getExtensionsByUrl(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE);
+
+		if (patientAttributeExtensions != null) {
+			for(Extension patientAttributeExtension : patientAttributeExtensions) {
+				currentPatient.addAttribute(personAttributeTranslator.toOpenmrsType(patientAttributeExtension));
+			}
+		}
 
 		return currentPatient;
 	}
