@@ -1,18 +1,23 @@
 package org.openmrs.module.fhir2.api.translators.impl;
 
 import org.hl7.fhir.r4.model.*;
+import org.openmrs.Concept;
 import org.openmrs.PersonAttribute;
 import org.openmrs.PersonAttributeType;
+import org.openmrs.api.ConceptService;
 import org.openmrs.api.LocationService;
 import org.openmrs.api.PersonService;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonAttributeTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.Optional;
 
+@Component
 public class PersonAttributeTranslatorImpl implements PersonAttributeTranslator {
 
     private static final String JAVA_STRING_FORMAT = "java.lang.String";
@@ -26,6 +31,12 @@ public class PersonAttributeTranslatorImpl implements PersonAttributeTranslator 
 
     @Autowired
     private PersonService personService;
+
+    @Autowired
+    private ConceptService conceptService;
+
+    @Autowired
+    private ConceptTranslator conceptTranslator;
 
     @Override
     public Extension toFhirResource(@Nonnull PersonAttribute personAttribute) {
@@ -62,7 +73,7 @@ public class PersonAttributeTranslatorImpl implements PersonAttributeTranslator 
 
     private Extension createValueExtension(PersonAttribute personAttribute) {
         PersonAttributeType attributeType = personAttribute.getAttributeType();
-        String extensionUrl = FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE + "#" + attributeType.getName();
+        String extensionUrl = FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE_TYPE + "#" + attributeType.getName();
         Extension extension = new Extension(new UriType(extensionUrl));
 
         setExtensionValue(extension, personAttribute);
@@ -85,7 +96,7 @@ public class PersonAttributeTranslatorImpl implements PersonAttributeTranslator 
                     handleLocationFormat(extension, value);
                     break;
                 case OPENMRS_CONCEPT_FORMAT:
-                    // TODO: Implement concept handling
+                    handleConceptFormat(extension, value);
                     break;
                 default:
                     throw new UnsupportedOperationException("Unsupported attribute format: " + format);
@@ -108,6 +119,19 @@ public class PersonAttributeTranslatorImpl implements PersonAttributeTranslator 
                 .ifPresent(location -> locationReference.setDisplay(location.getDisplayString()));
 
         extension.setValue(locationReference);
+    }
+
+    private void handleConceptFormat(Extension extension, String conceptId) {
+        if (conceptId == null) {
+            return;
+        }
+
+        Concept concept = conceptService.getConcept(conceptId);
+        if (concept != null) {
+            CodeableConcept codeableConcept = conceptTranslator.toFhirResource(concept);
+            extension.setValue(codeableConcept);
+        }
+
     }
 
     private boolean isValidPatientAttributeExtension(Extension extension) {
@@ -137,6 +161,11 @@ public class PersonAttributeTranslatorImpl implements PersonAttributeTranslator 
             } else if (extensionValue instanceof Reference) {
                 String reference = ((Reference) extensionValue).getReference();
                 personAttribute.setValue(reference.substring(reference.lastIndexOf("/") + 1));
+            } else if (extensionValue instanceof CodeableConcept) {
+                Concept concept = conceptTranslator.toOpenmrsType((CodeableConcept) extensionValue);
+                if (concept != null) {
+                    personAttribute.setValue(concept.getConceptId().toString());
+                }
             } else {
                 throw new UnsupportedOperationException("Unsupported extension value type: " +
                         extensionValue.getClass().getSimpleName());

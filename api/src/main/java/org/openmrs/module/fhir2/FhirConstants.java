@@ -100,6 +100,8 @@ public final class FhirConstants {
 
 	public static final String OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE = OPENMRS_FHIR_EXT_PREFIX + "/person-attribute";
 
+	public static final String OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE_TYPE = OPENMRS_FHIR_EXT_PREFIX + "/person-attribute-type";
+
 	public static final String OPENMRS_FHIR_EXT_PROVIDER_IDENTIFIER = OPENMRS_FHIR_EXT_PREFIX + "/provider/identifier";
 	
 	public static final String OPENMRS_FHIR_EXT_LOCATION_TAG = OPENMRS_FHIR_EXT_PREFIX + "/location-tag";
