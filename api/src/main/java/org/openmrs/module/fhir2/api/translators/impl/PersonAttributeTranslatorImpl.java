@@ -1,6 +1,12 @@
 package org.openmrs.module.fhir2.api.translators.impl;
 
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.Type;
+import org.hl7.fhir.r4.model.UriType;
 import org.openmrs.Concept;
 import org.openmrs.PersonAttribute;
 import org.openmrs.PersonAttributeType;

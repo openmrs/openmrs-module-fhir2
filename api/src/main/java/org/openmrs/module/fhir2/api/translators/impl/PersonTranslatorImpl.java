@@ -31,7 +31,14 @@ import org.openmrs.PersonAttribute;
 import org.openmrs.PersonName;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirPatientDao;
-import org.openmrs.module.fhir2.api.translators.*;
+import org.openmrs.module.fhir2.api.translators.BirthDateTranslator;
+import org.openmrs.module.fhir2.api.translators.GenderTranslator;
+import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
+import org.openmrs.module.fhir2.api.translators.PersonAddressTranslator;
+import org.openmrs.module.fhir2.api.translators.PersonAttributeTranslator;
+import org.openmrs.module.fhir2.api.translators.PersonNameTranslator;
+import org.openmrs.module.fhir2.api.translators.PersonTranslator;
+import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

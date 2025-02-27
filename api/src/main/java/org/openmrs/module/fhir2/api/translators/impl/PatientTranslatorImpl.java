@@ -15,13 +15,24 @@ import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.
 
 import javax.annotation.Nonnull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.Address;
+import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.ContactPoint;
+import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.HumanName;
+import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Patient;
 import org.openmrs.BaseOpenmrsData;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.PersonAddress;
