@@ -1,3 +1,12 @@
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public License,
+ * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+ * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+ * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ *
+ * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+ * graphic logo is a trademark of OpenMRS Inc.
+ */
 package org.openmrs.module.fhir2.api.translators.impl;
 
 import org.hl7.fhir.r4.model.BooleanType;
@@ -64,8 +73,9 @@ public class PersonAttributeTranslatorImpl implements PersonAttributeTranslator 
         }
 
         PersonAttribute personAttribute = new PersonAttribute();
-        Type extensionValue = extension.getExtensionFirstRep().getValue();
-        String attributeTypeName = extractAttributeTypeName(extension.getUrl());
+        Extension valueExtension = extension.getExtensionFirstRep();
+        Type extensionValue = valueExtension.getValue();
+        String attributeTypeName = extractAttributeTypeName(valueExtension.getUrl());
 
         personAttribute.setAttributeType(getPersonAttributeType(attributeTypeName));
         setPersonAttributeValue(personAttribute, extensionValue);
@@ -143,7 +153,7 @@ public class PersonAttributeTranslatorImpl implements PersonAttributeTranslator 
     private boolean isValidPatientAttributeExtension(Extension extension) {
         return extension != null && extension.hasUrl() &&
                 extension.getUrl().equals(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE) &&
-                extension.hasValue();
+                extension.hasExtension() && extension.getExtensionFirstRep().hasValue();
     }
 
     private String extractAttributeTypeName(String url) {
