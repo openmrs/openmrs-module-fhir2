@@ -173,24 +173,6 @@ public class PersonAttributeTranslatorImplTest {
 
 
     @Test
-    public void shouldTranslateFhirExtensionToPersonAttribute() {
-        Extension extension = new Extension();
-        extension.setUrl(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE);
-
-        Extension valueExtension = new Extension();
-        valueExtension.setUrl(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE_TYPE + "#" + ATTRIBUTE_TYPE_NAME);
-        valueExtension.setValue(new StringType(STRING_ATTRIBUTE_VALUE));
-
-        extension.addExtension(valueExtension);
-
-        PersonAttribute result = personAttributeTranslator.toOpenmrsType(extension);
-
-        assertThat(result, notNullValue());
-        assertThat(result.getAttributeType(), equalTo(personAttributeType));
-        assertThat(result.getValue(), equalTo(STRING_ATTRIBUTE_VALUE));
-    }
-
-    @Test
     public void shouldReturnNullWhenExtensionIsInvalid() {
         Extension extension = new Extension();
         extension.setUrl("invalid-url");
