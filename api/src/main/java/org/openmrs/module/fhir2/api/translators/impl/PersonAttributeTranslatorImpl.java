@@ -9,6 +9,11 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import javax.annotation.Nonnull;
+
+import java.util.Collections;
+import java.util.Optional;
+
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Extension;
@@ -27,10 +32,6 @@ import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonAttributeTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import javax.annotation.Nonnull;
-import java.util.Collections;
-import java.util.Optional;
 
 @Component
 public class PersonAttributeTranslatorImpl implements PersonAttributeTranslator {

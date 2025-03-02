@@ -9,10 +9,10 @@
  */
 package org.openmrs.module.fhir2.api.translators;
 
+import javax.annotation.Nonnull;
+
 import org.hl7.fhir.r4.model.Extension;
 import org.openmrs.PersonAttribute;
-
-import javax.annotation.Nonnull;
 
 public interface PersonAttributeTranslator extends OpenmrsFhirTranslator<org.openmrs.PersonAttribute, Extension> {
 	
