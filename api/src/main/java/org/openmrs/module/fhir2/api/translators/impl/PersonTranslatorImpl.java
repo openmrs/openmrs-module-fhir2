@@ -66,7 +66,7 @@ public class PersonTranslatorImpl implements PersonTranslator {
 	
 	@Autowired
 	private FhirPatientDao patientDao;
-
+	
 	@Autowired
 	private PersonAttributeTranslator personAttributeTranslator;
 	
@@ -98,13 +98,12 @@ public class PersonTranslatorImpl implements PersonTranslator {
 			person.addLink(new org.hl7.fhir.r4.model.Person.PersonLinkComponent()
 			        .setTarget(patientReferenceTranslator.toFhirResource(patientDao.get(openmrsPerson.getUuid()))));
 		}
-
+		
 		Set<PersonAttribute> attributeSet = openmrsPerson.getAttributes();
-
+		
 		for (PersonAttribute personAttribute : attributeSet) {
 			person.addExtension(personAttributeTranslator.toFhirResource(personAttribute));
 		}
-
 		
 		person.getMeta().setLastUpdated(getLastUpdated(openmrsPerson));
 		person.getMeta().setVersionId(getVersionId(openmrsPerson));
@@ -146,14 +145,15 @@ public class PersonTranslatorImpl implements PersonTranslator {
 		person.getTelecom().stream()
 		        .map(contactPoint -> (PersonAttribute) telecomTranslator.toOpenmrsType(new PersonAttribute(), contactPoint))
 		        .distinct().filter(Objects::nonNull).forEach(openmrsPerson::addAttribute);
-
-		if (person.hasExtension(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE)){
-			List<Extension> personAttributeExtensions = person.getExtensionsByUrl(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE);
-			for(Extension extension: personAttributeExtensions) {
+		
+		if (person.hasExtension(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE)) {
+			List<Extension> personAttributeExtensions = person
+			        .getExtensionsByUrl(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE);
+			for (Extension extension : personAttributeExtensions) {
 				openmrsPerson.addAttribute(personAttributeTranslator.toOpenmrsType(extension));
 			}
 		}
-
+		
 		return openmrsPerson;
 	}
 }

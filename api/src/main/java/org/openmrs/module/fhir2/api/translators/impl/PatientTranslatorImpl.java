@@ -78,7 +78,7 @@ public class PatientTranslatorImpl implements PatientTranslator {
 	
 	@Autowired
 	private TelecomTranslator<BaseOpenmrsData> telecomTranslator;
-
+	
 	@Autowired
 	private PersonAttributeTranslatorImpl personAttributeTranslator;
 	
@@ -117,7 +117,7 @@ public class PatientTranslatorImpl implements PatientTranslator {
 		for (PersonAddress address : openmrsPatient.getAddresses()) {
 			patient.addAddress(addressTranslator.toFhirResource(address));
 		}
-
+		
 		if (!openmrsPatient.getAttributes().isEmpty()) {
 			patient.setExtension(getPersonAttributeExtensions(openmrsPatient));
 		}
@@ -140,15 +140,15 @@ public class PatientTranslatorImpl implements PatientTranslator {
 		return fhirPersonDao.getActiveAttributesByPersonAndAttributeTypeUuid(patient, personContactAttributeType).stream()
 		        .map(telecomTranslator::toFhirResource).collect(Collectors.toList());
 	}
-
+	
 	public List<Extension> getPersonAttributeExtensions(@Nonnull org.openmrs.Patient openmrsPatient) {
 		List<Extension> personAttributeExtensions = new ArrayList<>();
 		Set<PersonAttribute> personAttributes = openmrsPatient.getAttributes();
-
-		for(PersonAttribute personAttribute : personAttributes) {
+		
+		for (PersonAttribute personAttribute : personAttributes) {
 			personAttributeExtensions.add(personAttributeTranslator.toFhirResource(personAttribute));
 		}
-
+		
 		return personAttributeExtensions;
 	}
 	
@@ -217,15 +217,16 @@ public class PatientTranslatorImpl implements PatientTranslator {
 		patient.getTelecom().stream()
 		        .map(contactPoint -> (PersonAttribute) telecomTranslator.toOpenmrsType(new PersonAttribute(), contactPoint))
 		        .distinct().filter(Objects::nonNull).forEach(currentPatient::addAttribute);
-
-		List<Extension> patientAttributeExtensions = patient.getExtensionsByUrl(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE);
-
+		
+		List<Extension> patientAttributeExtensions = patient
+		        .getExtensionsByUrl(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE);
+		
 		if (patientAttributeExtensions != null) {
-			for(Extension patientAttributeExtension : patientAttributeExtensions) {
+			for (Extension patientAttributeExtension : patientAttributeExtensions) {
 				currentPatient.addAttribute(personAttributeTranslator.toOpenmrsType(patientAttributeExtension));
 			}
 		}
-
+		
 		return currentPatient;
 	}
 }
