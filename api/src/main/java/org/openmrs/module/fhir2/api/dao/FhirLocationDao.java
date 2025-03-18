@@ -11,7 +11,9 @@ package org.openmrs.module.fhir2.api.dao;
 
 import javax.annotation.Nonnull;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.openmrs.Location;
 import org.openmrs.LocationAttribute;
@@ -30,6 +32,9 @@ public interface FhirLocationDao extends FhirDao<Location> {
 	@Authorized(PrivilegeConstants.GET_LOCATIONS)
 	List<LocationAttribute> getActiveAttributesByLocationAndAttributeTypeUuid(@Nonnull Location location,
 	        @Nonnull String locationAttributeTypeUuid);
+	
+	Map<Location, List<LocationAttribute>> getActiveAttributesByLocationsAndAttributeTypeUuid(
+	        @Nonnull Collection<Location> location, @Nonnull String locationAttributeTypeUuid);
 	
 	@Override
 	@Authorized(PrivilegeConstants.MANAGE_LOCATIONS)

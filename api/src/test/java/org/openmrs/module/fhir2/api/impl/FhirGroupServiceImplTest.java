@@ -19,6 +19,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -210,6 +211,7 @@ public class FhirGroupServiceImplTest {
 		
 		when(dao.getSearchResults(any())).thenReturn(cohorts);
 		when(translator.toFhirResource(cohort)).thenReturn(group);
+		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());

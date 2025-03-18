@@ -33,6 +33,7 @@ import com.google.common.reflect.TypeToken;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.CacheMode;
 import org.hibernate.Criteria;
 import org.hibernate.Hibernate;
@@ -68,6 +69,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @param <T> the {@link OpenmrsObject} managed by this Dao
  */
 @Transactional
+@Slf4j
 public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends BaseDao implements FhirDao<T> {
 	
 	@SuppressWarnings("UnstableApiUsage")
@@ -249,6 +251,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 			
 			results = idsCriteria.list();
 		}
+		
 		return results.stream().map(this::deproxyResult).collect(Collectors.toList());
 	}
 	

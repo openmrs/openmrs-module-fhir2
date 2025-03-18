@@ -21,6 +21,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -160,6 +161,7 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		        allergyIntoleranceDao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(translator.toFhirResource(omrsAllergy)).thenReturn(fhirAllergy);
+		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
 		
 		IBundleProvider results = service.searchForAllergies(
 		    new FhirAllergyIntoleranceSearchParams(patientParam, null, null, null, null, null, null, null, null, null));
@@ -191,6 +193,7 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		        allergyIntoleranceDao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(translator.toFhirResource(omrsAllergy)).thenReturn(fhirAllergy);
+		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
 		
 		IBundleProvider results = service.searchForAllergies(
 		    new FhirAllergyIntoleranceSearchParams(patientParam, null, null, null, null, null, null, null, null, null));
@@ -222,6 +225,7 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		        allergyIntoleranceDao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(translator.toFhirResource(omrsAllergy)).thenReturn(fhirAllergy);
+		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
 		
 		IBundleProvider results = service.searchForAllergies(
 		    new FhirAllergyIntoleranceSearchParams(patientParam, null, null, null, null, null, null, null, null, null));
@@ -253,6 +257,7 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		        allergyIntoleranceDao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(translator.toFhirResource(omrsAllergy)).thenReturn(fhirAllergy);
+		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
 		
 		IBundleProvider results = service.searchForAllergies(
 		    new FhirAllergyIntoleranceSearchParams(patientParam, null, null, null, null, null, null, null, null, null));
@@ -280,6 +285,7 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		        allergyIntoleranceDao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(translator.toFhirResource(omrsAllergy)).thenReturn(fhirAllergy);
+		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
 		
 		IBundleProvider results = service.searchForAllergies(
 		    new FhirAllergyIntoleranceSearchParams(null, category, null, null, null, null, null, null, null, null));
@@ -307,6 +313,7 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		        allergyIntoleranceDao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(translator.toFhirResource(omrsAllergy)).thenReturn(fhirAllergy);
+		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
 		
 		IBundleProvider results = service.searchForAllergies(
 		    new FhirAllergyIntoleranceSearchParams(null, null, allergen, null, null, null, null, null, null, null));
@@ -334,6 +341,7 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		        allergyIntoleranceDao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(translator.toFhirResource(omrsAllergy)).thenReturn(fhirAllergy);
+		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
 		
 		IBundleProvider results = service.searchForAllergies(
 		    new FhirAllergyIntoleranceSearchParams(null, null, null, severity, null, null, null, null, null, null));
@@ -361,6 +369,7 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		        allergyIntoleranceDao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(translator.toFhirResource(omrsAllergy)).thenReturn(fhirAllergy);
+		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
 		
 		IBundleProvider results = service.searchForAllergies(
 		    new FhirAllergyIntoleranceSearchParams(null, null, null, null, manifestation, null, null, null, null, null));
@@ -387,6 +396,7 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		        allergyIntoleranceDao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(translator.toFhirResource(omrsAllergy)).thenReturn(fhirAllergy);
+		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
 		
 		IBundleProvider results = service.searchForAllergies(
 		    new FhirAllergyIntoleranceSearchParams(null, null, null, null, null, status, null, null, null, null));
@@ -410,6 +420,7 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		        allergyIntoleranceDao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(translator.toFhirResource(omrsAllergy)).thenReturn(fhirAllergy);
+		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
 		
 		IBundleProvider results = service.searchForAllergies(
 		    new FhirAllergyIntoleranceSearchParams(null, null, null, null, null, null, uuid, null, null, null));
@@ -433,6 +444,7 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		        allergyIntoleranceDao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(translator.toFhirResource(omrsAllergy)).thenReturn(fhirAllergy);
+		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
 		
 		IBundleProvider results = service.searchForAllergies(
 		    new FhirAllergyIntoleranceSearchParams(null, null, null, null, null, null, null, lastUpdated, null, null));
@@ -456,6 +468,7 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		        allergyIntoleranceDao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.singleton(new Patient()));
 		when(translator.toFhirResource(omrsAllergy)).thenReturn(fhirAllergy);
+		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
 		
 		IBundleProvider results = service.searchForAllergies(
 		    new FhirAllergyIntoleranceSearchParams(null, null, null, null, null, null, null, null, null, includes));
@@ -479,6 +492,7 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		        allergyIntoleranceDao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(translator.toFhirResource(omrsAllergy)).thenReturn(fhirAllergy);
+		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
 		
 		IBundleProvider results = service.searchForAllergies(
 		    new FhirAllergyIntoleranceSearchParams(null, null, null, null, null, null, null, null, null, includes));

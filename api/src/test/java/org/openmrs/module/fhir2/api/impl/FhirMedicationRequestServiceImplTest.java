@@ -21,6 +21,7 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -154,6 +155,7 @@ public class FhirMedicationRequestServiceImplTest {
 		
 		when(dao.getSearchResults(any())).thenReturn(drugOrders);
 		when(medicationRequestTranslator.toFhirResource(drugOrder)).thenReturn(medicationRequest);
+		when(medicationRequestTranslator.toFhirResources(anyCollection())).thenCallRealMethod();
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(new SearchQueryBundleProvider<>(theParams,
 		        dao, medicationRequestTranslator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
@@ -185,6 +187,7 @@ public class FhirMedicationRequestServiceImplTest {
 		
 		when(dao.getSearchResults(any())).thenReturn(drugOrders);
 		when(medicationRequestTranslator.toFhirResource(drugOrder)).thenReturn(medicationRequest);
+		when(medicationRequestTranslator.toFhirResources(anyCollection())).thenCallRealMethod();
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(new SearchQueryBundleProvider<>(theParams,
 		        dao, medicationRequestTranslator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
@@ -217,6 +220,7 @@ public class FhirMedicationRequestServiceImplTest {
 		
 		when(dao.getSearchResults(any())).thenReturn(drugOrders);
 		when(medicationRequestTranslator.toFhirResource(drugOrder)).thenReturn(medicationRequest);
+		when(medicationRequestTranslator.toFhirResources(anyCollection())).thenCallRealMethod();
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(new SearchQueryBundleProvider<>(theParams,
 		        dao, medicationRequestTranslator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
@@ -245,6 +249,7 @@ public class FhirMedicationRequestServiceImplTest {
 		
 		when(dao.getSearchResults(any())).thenReturn(drugOrders);
 		when(medicationRequestTranslator.toFhirResource(drugOrder)).thenReturn(medicationRequest);
+		when(medicationRequestTranslator.toFhirResources(anyCollection())).thenCallRealMethod();
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(new SearchQueryBundleProvider<>(theParams,
 		        dao, medicationRequestTranslator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
@@ -277,6 +282,7 @@ public class FhirMedicationRequestServiceImplTest {
 		
 		when(dao.getSearchResults(any())).thenReturn(drugOrders);
 		when(medicationRequestTranslator.toFhirResource(drugOrder)).thenReturn(medicationRequest);
+		when(medicationRequestTranslator.toFhirResources(anyCollection())).thenCallRealMethod();
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(new SearchQueryBundleProvider<>(theParams,
 		        dao, medicationRequestTranslator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
@@ -300,6 +306,7 @@ public class FhirMedicationRequestServiceImplTest {
 		
 		when(dao.getSearchResults(any())).thenReturn(Collections.singletonList(drugOrder));
 		when(medicationRequestTranslator.toFhirResource(drugOrder)).thenReturn(medicationRequest);
+		when(medicationRequestTranslator.toFhirResources(anyCollection())).thenCallRealMethod();
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(new SearchQueryBundleProvider<>(theParams,
 		        dao, medicationRequestTranslator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
@@ -324,6 +331,7 @@ public class FhirMedicationRequestServiceImplTest {
 		
 		when(dao.getSearchResults(any())).thenReturn(Collections.singletonList(drugOrder));
 		when(medicationRequestTranslator.toFhirResource(drugOrder)).thenReturn(medicationRequest);
+		when(medicationRequestTranslator.toFhirResources(anyCollection())).thenCallRealMethod();
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(new SearchQueryBundleProvider<>(theParams,
 		        dao, medicationRequestTranslator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
@@ -347,6 +355,7 @@ public class FhirMedicationRequestServiceImplTest {
 		
 		when(dao.getSearchResults(any())).thenReturn(Collections.singletonList(drugOrder));
 		when(medicationRequestTranslator.toFhirResource(drugOrder)).thenReturn(medicationRequest);
+		when(medicationRequestTranslator.toFhirResources(anyCollection())).thenCallRealMethod();
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(new SearchQueryBundleProvider<>(theParams,
 		        dao, medicationRequestTranslator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
@@ -374,6 +383,7 @@ public class FhirMedicationRequestServiceImplTest {
 		
 		when(dao.getSearchResults(any())).thenReturn(Collections.singletonList(drugOrder));
 		when(medicationRequestTranslator.toFhirResource(drugOrder)).thenReturn(medicationRequest);
+		when(medicationRequestTranslator.toFhirResources(anyCollection())).thenCallRealMethod();
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(new SearchQueryBundleProvider<>(theParams,
 		        dao, medicationRequestTranslator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.singleton(new Practitioner()));
@@ -402,6 +412,7 @@ public class FhirMedicationRequestServiceImplTest {
 		
 		when(dao.getSearchResults(any())).thenReturn(Collections.singletonList(drugOrder));
 		when(medicationRequestTranslator.toFhirResource(drugOrder)).thenReturn(medicationRequest);
+		when(medicationRequestTranslator.toFhirResources(anyCollection())).thenCallRealMethod();
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(new SearchQueryBundleProvider<>(theParams,
 		        dao, medicationRequestTranslator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any()))
@@ -430,6 +441,7 @@ public class FhirMedicationRequestServiceImplTest {
 		
 		when(dao.getSearchResults(any())).thenReturn(Collections.singletonList(drugOrder));
 		when(medicationRequestTranslator.toFhirResource(drugOrder)).thenReturn(medicationRequest);
+		when(medicationRequestTranslator.toFhirResources(anyCollection())).thenCallRealMethod();
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(new SearchQueryBundleProvider<>(theParams,
 		        dao, medicationRequestTranslator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());

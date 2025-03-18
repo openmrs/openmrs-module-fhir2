@@ -9,13 +9,21 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toList;
 import static org.hibernate.criterion.Restrictions.eq;
 import static org.hibernate.criterion.Restrictions.or;
 
 import javax.annotation.Nonnull;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
@@ -91,6 +99,25 @@ public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLo
 		        .createAlias("location", "l", JoinType.INNER_JOIN, eq("l.id", location.getId()))
 		        .createAlias("attributeType", "lat").add(eq("lat.uuid", locationAttributeTypeUuid)).add(eq("voided", false))
 		        .list();
+	}
+	
+	@Override
+	public Map<Location, List<LocationAttribute>> getActiveAttributesByLocationsAndAttributeTypeUuid(
+	        @Nonnull Collection<Location> location, @Nonnull String locationAttributeTypeUuid) {
+		final CriteriaBuilder criteriaBuilder = getSessionFactory().getCurrentSession().getCriteriaBuilder();
+		final CriteriaQuery<LocationAttribute> criteria = criteriaBuilder.createQuery(LocationAttribute.class);
+		final Root<LocationAttribute> locationAttributeRoot = criteria.from(LocationAttribute.class);
+		
+		final Predicate byId = locationAttributeRoot.get("location").get("locationId")
+		        .in(location.stream().map(Location::getLocationId).collect(toList()));
+		final Predicate byAttributeType = criteriaBuilder.equal(locationAttributeRoot.get("attributeType").get("uuid"),
+		    locationAttributeTypeUuid);
+		final Predicate byVoided = criteriaBuilder.equal(locationAttributeRoot.get("voided"), false);
+		
+		criteria.where(byId, byAttributeType, byVoided);
+		
+		return getSessionFactory().getCurrentSession().createQuery(criteria).getResultList().stream()
+		        .collect(groupingBy(LocationAttribute::getLocation));
 	}
 	
 	private void handleName(Criteria criteria, StringAndListParam namePattern) {

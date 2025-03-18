@@ -9,12 +9,14 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
+import static java.util.Collections.singleton;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -77,6 +79,17 @@ public class FhirLocationDaoImplTest extends BaseFhirContextSensitiveTest {
 		    LOCATION_ATTRIBUTE_TYPE_UUID);
 		
 		assertThat(attributeList, notNullValue());
+	}
+	
+	@Test
+	public void getActiveAttributesByLocationsAndAttributeTypeUuid_shouldReturnLocationAttribute() {
+		Location location = new Location();
+		location.setUuid(LOCATION_UUID);
+		
+		Map<Location, List<LocationAttribute>> attributes = fhirLocationDao
+		        .getActiveAttributesByLocationsAndAttributeTypeUuid(singleton(location), LOCATION_ATTRIBUTE_TYPE_UUID);
+		
+		assertThat(attributes, notNullValue());
 	}
 	
 	@Test
