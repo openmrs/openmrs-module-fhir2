@@ -16,13 +16,18 @@ import static org.openmrs.module.fhir2.api.util.FhirUtils.getMetadataTranslation
 
 import javax.annotation.Nonnull;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.math.NumberUtils;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ContactPoint;
@@ -45,6 +50,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
+@Slf4j
 public class LocationTranslatorImpl implements LocationTranslator {
 	
 	@Autowired
@@ -73,76 +79,17 @@ public class LocationTranslatorImpl implements LocationTranslator {
 	 */
 	@Override
 	public Location toFhirResource(@Nonnull org.openmrs.Location openmrsLocation) {
-		if (openmrsLocation == null) {
-			return null;
-		}
-		
-		Location fhirLocation = new Location();
-		fhirLocation.setId(openmrsLocation.getUuid());
-		fhirLocation.setName(getMetadataTranslation(openmrsLocation));
-		fhirLocation.setDescription(openmrsLocation.getDescription());
-		fhirLocation.setAddress(locationAddressTranslator.toFhirResource(openmrsLocation));
-		
-		Location.LocationPositionComponent position = null;
-		if (openmrsLocation.getLatitude() != null && !openmrsLocation.getLatitude().isEmpty()) {
-			double latitude = NumberUtils.toDouble(openmrsLocation.getLatitude(), -1.0d);
-			if (latitude >= 0.0d) {
-				position = new Location.LocationPositionComponent();
-				position.setLatitude(latitude);
-			}
-		}
-		
-		if (openmrsLocation.getLongitude() != null && !openmrsLocation.getLongitude().isEmpty()) {
-			double longitude = NumberUtils.toDouble(openmrsLocation.getLongitude(), -1.0d);
-			if (longitude >= 0.0d) {
-				if (position == null) {
-					position = new Location.LocationPositionComponent();
-				}
-				position.setLongitude(longitude);
-			}
-		}
-		
-		if (position != null) {
-			fhirLocation.setPosition(position);
-		}
-		
-		if (!openmrsLocation.getRetired()) {
-			fhirLocation.setStatus(Location.LocationStatus.ACTIVE);
-		} else {
-			fhirLocation.setStatus(Location.LocationStatus.INACTIVE);
-		}
-		
-		fhirLocation.setTelecom(getLocationContactDetails(openmrsLocation));
-		
-		fhirLocation.setType(locationTypeTranslator.toFhirResource(openmrsLocation));
-		
-		if (openmrsLocation.getTags() != null) {
-			for (LocationTag tag : openmrsLocation.getTags()) {
-				fhirLocation.getMeta().addTag(FhirConstants.OPENMRS_FHIR_EXT_LOCATION_TAG, tag.getName(),
-				    tag.getDescription());
-			}
-		}
-		
-		if (openmrsLocation.getParentLocation() != null) {
-			fhirLocation.setPartOf(locationReferenceTranslator.toFhirResource(openmrsLocation.getParentLocation()));
-		}
-		
-		fhirLocation.getMeta().setLastUpdated(getLastUpdated(openmrsLocation));
-		fhirLocation.getMeta().setVersionId(getVersionId(openmrsLocation));
-		
-		return fhirLocation;
+		return toFhirResources(Collections.singletonList(openmrsLocation)).get(openmrsLocation);
 	}
 	
-	protected List<ContactPoint> getLocationContactDetails(@Nonnull org.openmrs.Location location) {
-		String locationContactPointAttributeType = propertyService
-		        .getGlobalProperty(FhirConstants.LOCATION_CONTACT_POINT_ATTRIBUTE_TYPE);
+	@Override
+	public Map<org.openmrs.Location, Location> toFhirResources(Collection<org.openmrs.Location> openmrsLocations) {
+		final Map<org.openmrs.Location, List<ContactPoint>> contactDetailsByLocation = getLocationContactDetails(
+		    openmrsLocations);
+		final LocationTranslatorContext context = new LocationTranslatorContext(contactDetailsByLocation);
 		
-		if (locationContactPointAttributeType == null || locationContactPointAttributeType.isEmpty()) {
-			return Collections.emptyList();
-		}
-		
-		return fhirLocationDao.getActiveAttributesByLocationAndAttributeTypeUuid(location, locationContactPointAttributeType)
-		        .stream().map(telecomTranslator::toFhirResource).collect(Collectors.toList());
+		return openmrsLocations.stream()
+		        .collect(Collectors.toMap(Function.identity(), location -> toFhirResource(location, context)));
 	}
 	
 	/**
@@ -217,5 +164,84 @@ public class LocationTranslatorImpl implements LocationTranslator {
 		}
 		
 		return locationReferenceTranslator.toOpenmrsType(location);
+	}
+	
+	private Map<org.openmrs.Location, List<ContactPoint>> getLocationContactDetails(
+	        Collection<org.openmrs.Location> locations) {
+		final String locationContactPointAttributeType = propertyService
+		        .getGlobalProperty(FhirConstants.LOCATION_CONTACT_POINT_ATTRIBUTE_TYPE);
+		
+		if (locationContactPointAttributeType == null || locationContactPointAttributeType.isEmpty()) {
+			return locations.stream().collect(Collectors.toMap(Function.identity(), ignored -> Collections.emptyList()));
+		}
+		
+		final Map<org.openmrs.Location, List<LocationAttribute>> contactPointAttributes = fhirLocationDao
+		        .getActiveAttributesByLocationsAndAttributeTypeUuid(locations, locationContactPointAttributeType);
+		
+		return contactPointAttributes.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey,
+		    entry -> entry.getValue().stream().map(telecomTranslator::toFhirResource).collect(Collectors.toList())));
+	}
+	
+	private Location toFhirResource(org.openmrs.Location openmrsLocation, LocationTranslatorContext context) {
+		final Location fhirLocation = new Location();
+		fhirLocation.setId(openmrsLocation.getUuid());
+		fhirLocation.setName(getMetadataTranslation(openmrsLocation));
+		fhirLocation.setDescription(openmrsLocation.getDescription());
+		fhirLocation.setAddress(locationAddressTranslator.toFhirResource(openmrsLocation));
+		
+		Location.LocationPositionComponent position = null;
+		if (openmrsLocation.getLatitude() != null && !openmrsLocation.getLatitude().isEmpty()) {
+			double latitude = NumberUtils.toDouble(openmrsLocation.getLatitude(), -1.0d);
+			if (latitude >= 0.0d) {
+				position = new Location.LocationPositionComponent();
+				position.setLatitude(latitude);
+			}
+		}
+		
+		if (openmrsLocation.getLongitude() != null && !openmrsLocation.getLongitude().isEmpty()) {
+			double longitude = NumberUtils.toDouble(openmrsLocation.getLongitude(), -1.0d);
+			if (longitude >= 0.0d) {
+				if (position == null) {
+					position = new Location.LocationPositionComponent();
+				}
+				position.setLongitude(longitude);
+			}
+		}
+		
+		if (position != null) {
+			fhirLocation.setPosition(position);
+		}
+		
+		if (!openmrsLocation.getRetired()) {
+			fhirLocation.setStatus(Location.LocationStatus.ACTIVE);
+		} else {
+			fhirLocation.setStatus(Location.LocationStatus.INACTIVE);
+		}
+		
+		fhirLocation.setTelecom(context.locationContactDetails.get(openmrsLocation));
+		
+		fhirLocation.setType(locationTypeTranslator.toFhirResource(openmrsLocation));
+		
+		if (openmrsLocation.getTags() != null) {
+			for (LocationTag tag : openmrsLocation.getTags()) {
+				fhirLocation.getMeta().addTag(FhirConstants.OPENMRS_FHIR_EXT_LOCATION_TAG, tag.getName(),
+				    tag.getDescription());
+			}
+		}
+		
+		if (openmrsLocation.getParentLocation() != null) {
+			fhirLocation.setPartOf(locationReferenceTranslator.toFhirResource(openmrsLocation.getParentLocation()));
+		}
+		
+		fhirLocation.getMeta().setLastUpdated(getLastUpdated(openmrsLocation));
+		fhirLocation.getMeta().setVersionId(getVersionId(openmrsLocation));
+		
+		return fhirLocation;
+	}
+	
+	@AllArgsConstructor
+	private static class LocationTranslatorContext {
+		
+		final Map<org.openmrs.Location, List<ContactPoint>> locationContactDetails;
 	}
 }

@@ -22,6 +22,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.Mockito.when;
 
 import java.text.ParseException;
@@ -226,6 +227,7 @@ public class FhirRelatedPersonServiceImplTest {
 		
 		when(dao.getSearchResults(any())).thenReturn(singletonList(relationship));
 		when(translator.toFhirResource(relationship)).thenReturn(relatedPerson);
+		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
@@ -250,6 +252,7 @@ public class FhirRelatedPersonServiceImplTest {
 		
 		when(dao.getSearchResults(any())).thenReturn(singletonList(relationship));
 		when(translator.toFhirResource(relationship)).thenReturn(relatedPerson);
+		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
@@ -293,6 +296,7 @@ public class FhirRelatedPersonServiceImplTest {
 		
 		when(dao.getSearchResults(any())).thenReturn(singletonList(relationship));
 		when(translator.toFhirResource(relationship)).thenReturn(relatedPerson);
+		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
@@ -340,6 +344,7 @@ public class FhirRelatedPersonServiceImplTest {
 		
 		when(dao.getSearchResults(any())).thenReturn(singletonList(relationship));
 		when(translator.toFhirResource(relationship)).thenReturn(relatedPerson);
+		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
@@ -384,6 +389,7 @@ public class FhirRelatedPersonServiceImplTest {
 		
 		when(dao.getSearchResults(any())).thenReturn(singletonList(relationship));
 		when(translator.toFhirResource(relationship)).thenReturn(relatedPerson);
+		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
@@ -428,6 +434,7 @@ public class FhirRelatedPersonServiceImplTest {
 		
 		when(dao.getSearchResults(any())).thenReturn(singletonList(relationship));
 		when(translator.toFhirResource(relationship)).thenReturn(relatedPerson);
+		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
@@ -472,6 +479,7 @@ public class FhirRelatedPersonServiceImplTest {
 		
 		when(dao.getSearchResults(any())).thenReturn(singletonList(relationship));
 		when(translator.toFhirResource(relationship)).thenReturn(relatedPerson);
+		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
@@ -516,6 +524,7 @@ public class FhirRelatedPersonServiceImplTest {
 		
 		when(dao.getSearchResults(any())).thenReturn(singletonList(relationship));
 		when(translator.toFhirResource(relationship)).thenReturn(relatedPerson);
+		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
@@ -560,6 +569,7 @@ public class FhirRelatedPersonServiceImplTest {
 		when(dao.getSearchResults(any())).thenReturn(singletonList(relationship));
 		when(dao.getSearchResultsCount(any())).thenReturn(1);
 		when(translator.toFhirResource(relationship)).thenReturn(relatedPerson);
+		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
@@ -599,6 +609,7 @@ public class FhirRelatedPersonServiceImplTest {
 		when(dao.getSearchResults(any())).thenReturn(singletonList(relationship));
 		when(dao.getSearchResultsCount(any())).thenReturn(1);
 		when(translator.toFhirResource(relationship)).thenReturn(relatedPerson);
+		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
@@ -638,6 +649,7 @@ public class FhirRelatedPersonServiceImplTest {
 		
 		when(dao.getSearchResults(any())).thenReturn(singletonList(relationship));
 		when(translator.toFhirResource(relationship)).thenReturn(relatedPerson);
+		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.singleton(new Patient()));
@@ -661,6 +673,7 @@ public class FhirRelatedPersonServiceImplTest {
 		
 		when(dao.getSearchResults(any())).thenReturn(singletonList(relationship));
 		when(translator.toFhirResource(relationship)).thenReturn(relatedPerson);
+		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());

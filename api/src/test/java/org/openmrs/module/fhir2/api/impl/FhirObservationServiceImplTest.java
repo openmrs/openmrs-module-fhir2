@@ -16,6 +16,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -138,6 +139,7 @@ public class FhirObservationServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(translator.toFhirResource(obs)).thenReturn(observation);
+		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
 		
 		ObservationSearchParams observationSearchParams = new ObservationSearchParams();
 		observationSearchParams.setPatient(patientReference);
@@ -189,6 +191,7 @@ public class FhirObservationServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(translator.toFhirResource(obs)).thenReturn(observation);
+		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
 		
 		ObservationSearchParams searchParams = new ObservationSearchParams();
 		searchParams.setPatient(referenceParam);
@@ -242,6 +245,7 @@ public class FhirObservationServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(translator.toFhirResource(obs)).thenReturn(observation);
+		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
 		
 		ObservationSearchParams searchParams = new ObservationSearchParams();
 		searchParams.setPatient(referenceParam);
@@ -287,6 +291,7 @@ public class FhirObservationServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(translator.toFhirResource(obs)).thenReturn(observation);
+		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
 		
 		ObservationSearchParams searchParams = new ObservationSearchParams();
 		searchParams.setCategory(categories);
@@ -339,6 +344,7 @@ public class FhirObservationServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(translator.toFhirResource(obs)).thenReturn(observation);
+		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
 		
 		ObservationSearchParams searchParams = new ObservationSearchParams();
 		searchParams.setPatient(referenceParam);
@@ -392,6 +398,7 @@ public class FhirObservationServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(translator.toFhirResource(obs)).thenReturn(observation);
+		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
 		
 		ObservationSearchParams searchParams = new ObservationSearchParams();
 		searchParams.setPatient(referenceParam);
@@ -437,6 +444,7 @@ public class FhirObservationServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(translator.toFhirResource(obs)).thenReturn(observation);
+		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
 		
 		ObservationSearchParams searchParams = new ObservationSearchParams();
 		searchParams.setCategory(categories);

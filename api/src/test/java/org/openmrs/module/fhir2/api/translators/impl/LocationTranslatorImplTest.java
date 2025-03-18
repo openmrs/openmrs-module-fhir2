@@ -274,28 +274,6 @@ public class LocationTranslatorImplTest {
 	}
 	
 	@Test
-	public void getLocationContactDetails_shouldWorkAsExpected() {
-		Location omrsLocation = new Location();
-		omrsLocation.setUuid(LOCATION_UUID);
-		
-		LocationAttribute locationAttribute = new LocationAttribute();
-		locationAttribute.setUuid(LOCATION_ATTRIBUTE_UUID);
-		locationAttribute.setValue(LOCATION_ATTRIBUTE_VALUE);
-		
-		LocationAttributeType attributeType = new LocationAttributeType();
-		attributeType.setUuid(LOCATION_ATTRIBUTE_TYPE_UUID);
-		attributeType.setName(LOCATION_ATTRIBUTE_TYPE_NAME);
-		locationAttribute.setAttributeType(attributeType);
-		omrsLocation.setAttribute(locationAttribute);
-		
-		List<ContactPoint> contactPoints = locationTranslator.getLocationContactDetails(omrsLocation);
-		
-		assertThat(contactPoints, notNullValue());
-		assertThat(omrsLocation.getActiveAttributes().size(), equalTo(1));
-		
-	}
-	
-	@Test
 	public void toFhirResource_shouldTranslateOpenmrsTagsToFhirLocationTags() {
 		LocationTag tag = new LocationTag(LOGIN_TAG_NAME, LOGIN_TAG_DESCRIPTION);
 		omrsLocation.addTag(tag);

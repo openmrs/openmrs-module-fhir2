@@ -22,6 +22,7 @@ import static org.hamcrest.Matchers.not;
 import static org.hl7.fhir.r4.model.Patient.SP_GIVEN;
 import static org.hl7.fhir.r4.model.Practitioner.SP_IDENTIFIER;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.Mockito.when;
 import static org.openmrs.module.fhir2.FhirConstants.CODED_SEARCH_HANDLER;
 import static org.openmrs.module.fhir2.FhirConstants.DATE_RANGE_SEARCH_HANDLER;
@@ -152,6 +153,7 @@ public class FhirServiceRequestServiceImplTest {
 		
 		when(dao.getSearchResults(any())).thenReturn(Collections.singletonList(order));
 		when(translator.toFhirResource(order)).thenReturn(fhirServiceRequest);
+		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
@@ -175,6 +177,7 @@ public class FhirServiceRequestServiceImplTest {
 		
 		when(dao.getSearchResults(any())).thenReturn(Collections.singletonList(order));
 		when(translator.toFhirResource(order)).thenReturn(fhirServiceRequest);
+		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
@@ -199,6 +202,7 @@ public class FhirServiceRequestServiceImplTest {
 		
 		when(dao.getSearchResults(any())).thenReturn(Collections.singletonList(order));
 		when(translator.toFhirResource(order)).thenReturn(fhirServiceRequest);
+		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
@@ -223,6 +227,7 @@ public class FhirServiceRequestServiceImplTest {
 		
 		when(dao.getSearchResults(any())).thenReturn(Collections.singletonList(order));
 		when(translator.toFhirResource(order)).thenReturn(fhirServiceRequest);
+		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
@@ -246,6 +251,7 @@ public class FhirServiceRequestServiceImplTest {
 		
 		when(dao.getSearchResults(any())).thenReturn(Collections.singletonList(order));
 		when(translator.toFhirResource(order)).thenReturn(fhirServiceRequest);
+		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
@@ -269,6 +275,7 @@ public class FhirServiceRequestServiceImplTest {
 		
 		when(dao.getSearchResults(any())).thenReturn(Collections.singletonList(order));
 		when(translator.toFhirResource(order)).thenReturn(fhirServiceRequest);
+		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
@@ -292,6 +299,7 @@ public class FhirServiceRequestServiceImplTest {
 		
 		when(dao.getSearchResults(any())).thenReturn(Collections.singletonList(order));
 		when(translator.toFhirResource(order)).thenReturn(fhirServiceRequest);
+		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
@@ -315,6 +323,7 @@ public class FhirServiceRequestServiceImplTest {
 		
 		when(dao.getSearchResults(any())).thenReturn(Collections.singletonList(order));
 		when(translator.toFhirResource(order)).thenReturn(fhirServiceRequest);
+		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.singleton(new Patient()));
@@ -339,6 +348,7 @@ public class FhirServiceRequestServiceImplTest {
 		
 		when(dao.getSearchResults(any())).thenReturn(Collections.singletonList(order));
 		when(translator.toFhirResource(order)).thenReturn(fhirServiceRequest);
+		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.singleton(new Patient()));
@@ -362,6 +372,7 @@ public class FhirServiceRequestServiceImplTest {
 		
 		when(dao.getSearchResults(any())).thenReturn(Collections.singletonList(order));
 		when(translator.toFhirResource(order)).thenReturn(fhirServiceRequest);
+		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());

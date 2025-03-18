@@ -16,6 +16,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -23,6 +24,7 @@ import java.util.stream.Collectors;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.openmrs.Auditable;
@@ -35,6 +37,7 @@ import org.openmrs.module.fhir2.api.translators.ToFhirTranslator;
 import org.openmrs.module.fhir2.api.util.FhirUtils;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 public class SearchQueryBundleProvider<T extends OpenmrsObject & Auditable, U extends IBaseResource> implements IBundleProvider, Serializable {
 	
 	private static final long serialVersionUID = 4L;
@@ -78,8 +81,10 @@ public class SearchQueryBundleProvider<T extends OpenmrsObject & Auditable, U ex
 		searchParameterMap.setFromIndex(fromIndex);
 		searchParameterMap.setToIndex(toIndex);
 		
-		List<U> returnedResourceList = dao.getSearchResults(searchParameterMap).stream().map(translator::toFhirResource)
-		        .filter(Objects::nonNull).collect(Collectors.toList());
+		List<T> openmrsDaos = dao.getSearchResults(searchParameterMap);
+		Map<T, U> mapping = translator.toFhirResources(openmrsDaos);
+		List<U> returnedResourceList = openmrsDaos.stream().map(mapping::get).filter(Objects::nonNull)
+		        .collect(Collectors.toList());
 		
 		Set<IBaseResource> includedResources = searchQueryInclude.getIncludedResources(returnedResourceList,
 		    this.searchParameterMap);
