@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import lombok.AccessLevel;
@@ -79,17 +78,14 @@ public class LocationTranslatorImpl implements LocationTranslator {
 	 */
 	@Override
 	public Location toFhirResource(@Nonnull org.openmrs.Location openmrsLocation) {
-		return toFhirResources(Collections.singletonList(openmrsLocation)).get(openmrsLocation);
+		return toFhirResources(Collections.singletonList(openmrsLocation)).get(0);
 	}
 	
 	@Override
-	public Map<org.openmrs.Location, Location> toFhirResources(Collection<org.openmrs.Location> openmrsLocations) {
-		final Map<org.openmrs.Location, List<ContactPoint>> contactDetailsByLocation = getLocationContactDetails(
-		    openmrsLocations);
-		final LocationTranslatorContext context = new LocationTranslatorContext(contactDetailsByLocation);
+	public List<Location> toFhirResources(Collection<org.openmrs.Location> openmrsLocations) {
+		final LocationTranslatorContext context = new LocationTranslatorContext(getLocationContactDetails(openmrsLocations));
 		
-		return openmrsLocations.stream()
-		        .collect(Collectors.toMap(Function.identity(), location -> toFhirResource(location, context)));
+		return openmrsLocations.stream().map((location) -> toFhirResource(location, context)).collect(Collectors.toList());
 	}
 	
 	/**
@@ -172,7 +168,7 @@ public class LocationTranslatorImpl implements LocationTranslator {
 		        .getGlobalProperty(FhirConstants.LOCATION_CONTACT_POINT_ATTRIBUTE_TYPE);
 		
 		if (locationContactPointAttributeType == null || locationContactPointAttributeType.isEmpty()) {
-			return locations.stream().collect(Collectors.toMap(Function.identity(), ignored -> Collections.emptyList()));
+			return Collections.emptyMap();
 		}
 		
 		final Map<org.openmrs.Location, List<LocationAttribute>> contactPointAttributes = fhirLocationDao
