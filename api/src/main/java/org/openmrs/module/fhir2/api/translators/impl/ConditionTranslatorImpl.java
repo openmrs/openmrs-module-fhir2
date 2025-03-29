@@ -19,6 +19,7 @@ import java.util.Optional;
 
 import lombok.AccessLevel;
 import lombok.Setter;
+import org.hl7.fhir.r4.model.Annotation;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Extension;
@@ -82,7 +83,13 @@ public class ConditionTranslatorImpl implements ConditionTranslator<Condition> {
 		if (condition.getEndDate() != null) {
 			fhirCondition.setAbatement(new DateTimeType().setValue(condition.getEndDate()));
 		}
-		
+
+		if (condition.getAdditionalDetail() != null) {
+			Annotation annotation = new Annotation();
+			annotation.setText(condition.getAdditionalDetail());
+			fhirCondition.addNote(annotation);
+		}
+
 		fhirCondition.setRecorder(practitionerReferenceTranslator.toFhirResource(condition.getCreator()));
 		fhirCondition.setRecordedDate(condition.getDateCreated());
 		

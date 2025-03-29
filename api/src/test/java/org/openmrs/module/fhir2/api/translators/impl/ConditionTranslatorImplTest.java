@@ -233,7 +233,15 @@ public class ConditionTranslatorImplTest {
 		assertThat(condition.hasOnsetDateTimeType(), is(true));
 		assertThat(condition.getOnsetDateTimeType().getValue(), sameDay(new Date()));
 	}
-	
+
+	@Test
+	public void shouldTranslateOpenMrsConditionAdditionalDetailToFhirType() {
+		openmrsCondition.setAdditionalDetail("Patient experiencing mild headaches.");
+		org.hl7.fhir.r4.model.Condition fhirCondition = conditionTranslator.toFhirResource(openmrsCondition);
+		assertThat(fhirCondition.getNote(), notNullValue());
+		assertThat(fhirCondition.getNote().get(0).getText(), is("Patient experiencing mild headaches."));
+	}
+
 	@Test
 	public void shouldTranslateFhirConditionOnsetToOpenMrsOnsetDate() {
 		DateTimeType theDateTime = new DateTimeType();
