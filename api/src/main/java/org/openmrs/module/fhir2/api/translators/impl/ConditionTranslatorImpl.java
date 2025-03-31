@@ -85,9 +85,7 @@ public class ConditionTranslatorImpl implements ConditionTranslator<Condition> {
 		}
 
 		if (condition.getAdditionalDetail() != null) {
-			Annotation annotation = new Annotation();
-			annotation.setText(condition.getAdditionalDetail());
-			fhirCondition.addNote(annotation);
+			fhirCondition.addNote().setText(condition.getAdditionalDetail());
 		}
 
 		fhirCondition.setRecorder(practitionerReferenceTranslator.toFhirResource(condition.getCreator()));
