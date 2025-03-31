@@ -18,6 +18,7 @@ import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import lombok.AccessLevel;
 import lombok.Setter;
@@ -146,12 +147,11 @@ public class PersonTranslatorImpl implements PersonTranslator {
 		        .map(contactPoint -> (PersonAttribute) telecomTranslator.toOpenmrsType(new PersonAttribute(), contactPoint))
 		        .distinct().filter(Objects::nonNull).forEach(openmrsPerson::addAttribute);
 		
-		if (person.hasExtension(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE)) {
-			List<Extension> personAttributeExtensions = person
-			        .getExtensionsByUrl(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE);
-			for (Extension extension : personAttributeExtensions) {
-				openmrsPerson.addAttribute(personAttributeTranslator.toOpenmrsType(extension));
-			}
+		List<Extension> personAttributeExtensions = person.getExtension().stream()
+		        .filter(extension -> extension.getUrl().contains(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE))
+		        .collect(Collectors.toList());
+		for (Extension extension : personAttributeExtensions) {
+			openmrsPerson.addAttribute(personAttributeTranslator.toOpenmrsType(extension));
 		}
 		
 		return openmrsPerson;

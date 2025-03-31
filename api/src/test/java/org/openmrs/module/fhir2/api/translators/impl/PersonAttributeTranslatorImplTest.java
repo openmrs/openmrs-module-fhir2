@@ -11,10 +11,9 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertThrows;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -54,7 +53,9 @@ public class PersonAttributeTranslatorImplTest {
 	
 	private static final String CONCEPT_ATTRIBUTE_VALUE = "1000";
 	
-	private static final String LOCATION_ATTRIBUTE_VALUE = "2000";
+	private static final Integer LOCATION_ATTRIBUTE_ID = 1;
+	
+	private static final String LOCATION_ATTRIBUTE_UUID_VALUE = "ae919697-60a2-4f72-834c-e7d9df3ecf62";
 	
 	private static final String LOCATION_NAME = "Test Location";
 	
@@ -97,17 +98,9 @@ public class PersonAttributeTranslatorImplTest {
 		Extension result = personAttributeTranslator.toFhirResource(personAttribute);
 		
 		assertThat(result, notNullValue());
-		assertThat(result.getUrl(),
-		    equalTo(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE_TYPE + "#" + ATTRIBUTE_TYPE_NAME));
+		assertThat(result.getUrl(), equalTo(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE + "#" + ATTRIBUTE_TYPE_NAME));
 		assertThat(result.getValue(), notNullValue());
 		assertThat(((StringType) result.getValue()).getValue(), equalTo(STRING_ATTRIBUTE_VALUE));
-	}
-	
-	@Test
-	public void shouldThrowExceptionWhenPersonAttributeTypeIsNull() {
-		personAttribute.setAttributeType(null);
-		
-		assertThrows(IllegalArgumentException.class, () -> personAttributeTranslator.toFhirResource(personAttribute));
 	}
 	
 	@Test
@@ -137,18 +130,20 @@ public class PersonAttributeTranslatorImplTest {
 	@Test
 	public void shouldTranslateLocationPersonAttributeToFhirExtension() {
 		personAttributeType.setFormat("org.openmrs.Location");
-		personAttribute.setValue(LOCATION_ATTRIBUTE_VALUE);
+		personAttribute.setValue(LOCATION_ATTRIBUTE_ID.toString());
 		
 		Location location = new Location();
 		location.setName(LOCATION_NAME);
-		when(locationService.getLocation(LOCATION_ATTRIBUTE_VALUE)).thenReturn(location);
+		location.setUuid(LOCATION_ATTRIBUTE_UUID_VALUE);
+		when(locationService.getLocation(LOCATION_ATTRIBUTE_ID)).thenReturn(location);
 		
 		Extension result = personAttributeTranslator.toFhirResource(personAttribute);
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getValue() instanceof Reference, is(true));
 		Reference reference = (Reference) result.getValue();
-		assertThat(reference.getReference(), equalTo("Location/" + LOCATION_ATTRIBUTE_VALUE));
+		assertThat(reference.getReference(), not("Location/" + LOCATION_ATTRIBUTE_ID));
+		assertThat(reference.getReference(), equalTo("Location/" + LOCATION_ATTRIBUTE_UUID_VALUE));
 		assertThat(reference.getDisplay(), equalTo(LOCATION_NAME));
 		assertThat(reference.getType(), equalTo("Location"));
 	}
@@ -185,13 +180,9 @@ public class PersonAttributeTranslatorImplTest {
 	@Test
 	public void shouldTranslateStringTypeExtensionToPersonAttribute() {
 		Extension extension = new Extension();
-		extension.setUrl(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE);
 		
-		Extension valueExtension = new Extension();
-		valueExtension.setUrl(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE_TYPE + "#" + ATTRIBUTE_TYPE_NAME);
-		valueExtension.setValue(new StringType(STRING_ATTRIBUTE_VALUE));
-		
-		extension.addExtension(valueExtension);
+		extension.setUrl(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE + "#" + ATTRIBUTE_TYPE_NAME);
+		extension.setValue(new StringType(STRING_ATTRIBUTE_VALUE));
 		
 		PersonAttribute result = personAttributeTranslator.toOpenmrsType(extension);
 		
@@ -203,13 +194,8 @@ public class PersonAttributeTranslatorImplTest {
 	@Test
 	public void shouldTranslateBooleanTypeExtensionToPersonAttribute() {
 		Extension extension = new Extension();
-		extension.setUrl(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE);
-		
-		Extension valueExtension = new Extension();
-		valueExtension.setUrl(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE_TYPE + "#" + ATTRIBUTE_TYPE_NAME);
-		valueExtension.setValue(new BooleanType(true));
-		
-		extension.addExtension(valueExtension);
+		extension.setUrl(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE + "#" + ATTRIBUTE_TYPE_NAME);
+		extension.setValue(new BooleanType(true));
 		
 		PersonAttribute result = personAttributeTranslator.toOpenmrsType(extension);
 		
@@ -221,37 +207,36 @@ public class PersonAttributeTranslatorImplTest {
 	@Test
 	public void shouldTranslateReferenceTypeExtensionToPersonAttribute() {
 		Extension extension = new Extension();
-		extension.setUrl(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE);
-		
-		Extension valueExtension = new Extension();
-		valueExtension.setUrl(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE_TYPE + "#" + ATTRIBUTE_TYPE_NAME);
+		extension.setUrl(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE + "#" + ATTRIBUTE_TYPE_NAME);
 		
 		Reference reference = new Reference();
-		reference.setReference("Location/" + LOCATION_ATTRIBUTE_VALUE);
-		valueExtension.setValue(reference);
+		reference.setReference("Location/" + LOCATION_ATTRIBUTE_UUID_VALUE);
+		extension.setValue(reference);
 		
-		extension.addExtension(valueExtension);
+		Location location = new Location();
+		location.setName(LOCATION_NAME);
+		location.setId(LOCATION_ATTRIBUTE_ID);
+		location.setUuid(LOCATION_ATTRIBUTE_UUID_VALUE);
+		
+		when(locationService.getLocationByUuid(LOCATION_ATTRIBUTE_UUID_VALUE)).thenReturn(location);
 		
 		PersonAttribute result = personAttributeTranslator.toOpenmrsType(extension);
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getAttributeType(), equalTo(personAttributeType));
-		assertThat(result.getValue(), equalTo(LOCATION_ATTRIBUTE_VALUE));
+		assertThat(result.getValue(), equalTo(LOCATION_ATTRIBUTE_ID.toString()));
 	}
 	
 	@Test
 	public void shouldTranslateCodeableConceptTypeExtensionToPersonAttribute() {
 		Extension extension = new Extension();
-		extension.setUrl(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE);
-		
-		Extension valueExtension = new Extension();
-		valueExtension.setUrl(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE_TYPE + "#" + ATTRIBUTE_TYPE_NAME);
+		extension.setUrl(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE + "#" + ATTRIBUTE_TYPE_NAME);
 		
 		CodeableConcept codeableConcept = new CodeableConcept();
 		codeableConcept.setText("Test");
-		valueExtension.setValue(codeableConcept);
+		extension.setValue(codeableConcept);
 		
-		extension.addExtension(valueExtension);
+		extension.addExtension(extension);
 		
 		Concept concept = new Concept();
 		concept.setConceptId(Integer.parseInt(CONCEPT_ATTRIBUTE_VALUE));
@@ -262,22 +247,6 @@ public class PersonAttributeTranslatorImplTest {
 		assertThat(result, notNullValue());
 		assertThat(result.getAttributeType(), equalTo(personAttributeType));
 		assertThat(result.getValue(), equalTo(CONCEPT_ATTRIBUTE_VALUE));
-	}
-	
-	@Test
-	public void shouldThrowExceptionWhenPersonAttributeTypeNotFound() {
-		when(personService.getPersonAttributeTypeByName(anyString())).thenReturn(null);
-		
-		Extension extension = new Extension();
-		extension.setUrl(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE);
-		
-		Extension valueExtension = new Extension();
-		valueExtension.setUrl(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE_TYPE + "#NonExistentType");
-		valueExtension.setValue(new StringType(STRING_ATTRIBUTE_VALUE));
-		
-		extension.addExtension(valueExtension);
-		
-		assertThrows(IllegalStateException.class, () -> personAttributeTranslator.toOpenmrsType(extension));
 	}
 	
 }

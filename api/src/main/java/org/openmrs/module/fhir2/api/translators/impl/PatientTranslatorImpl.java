@@ -218,8 +218,9 @@ public class PatientTranslatorImpl implements PatientTranslator {
 		        .map(contactPoint -> (PersonAttribute) telecomTranslator.toOpenmrsType(new PersonAttribute(), contactPoint))
 		        .distinct().filter(Objects::nonNull).forEach(currentPatient::addAttribute);
 		
-		List<Extension> patientAttributeExtensions = patient
-		        .getExtensionsByUrl(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE);
+		List<Extension> patientAttributeExtensions = patient.getExtension().stream()
+		        .filter(extension -> extension.getUrl().contains(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE))
+		        .collect(Collectors.toList());
 		
 		if (patientAttributeExtensions != null) {
 			for (Extension patientAttributeExtension : patientAttributeExtensions) {
