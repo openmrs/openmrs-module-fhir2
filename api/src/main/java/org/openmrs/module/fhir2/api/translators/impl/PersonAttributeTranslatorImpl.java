@@ -11,6 +11,8 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import javax.annotation.Nonnull;
 
+import java.util.Optional;
+
 import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -29,6 +31,7 @@ import org.openmrs.api.PersonService;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonAttributeTranslator;
+import org.openmrs.module.fhir2.api.util.FhirUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -180,10 +183,12 @@ public class PersonAttributeTranslatorImpl implements PersonAttributeTranslator 
 			personAttribute.setValue(((StringType) extensionValue).getValue());
 		} else if (extensionValue instanceof Reference) {
 			String reference = ((Reference) extensionValue).getReference();
-			String locationUUID = reference.substring(reference.lastIndexOf("/") + 1);
-			Location location = locationService.getLocationByUuid(locationUUID);
-			if (location != null) {
-				personAttribute.setValue(location.getId().toString());
+			Optional<String> locationUUID = FhirUtils.referenceToId(reference);
+			if (locationUUID.isPresent()) {
+				Location location = locationService.getLocationByUuid(locationUUID.get());
+				if (location != null) {
+					personAttribute.setValue(location.getId().toString());
+				}
 			}
 		} else if (extensionValue instanceof CodeableConcept) {
 			Concept concept = conceptTranslator.toOpenmrsType((CodeableConcept) extensionValue);
