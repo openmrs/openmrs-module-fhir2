@@ -34,17 +34,20 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import lombok.AccessLevel;
 import lombok.Getter;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Enumerations;
+import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.junit.Before;
 import org.junit.Test;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -871,5 +874,23 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR3Integr
 		validTypes.add(ResourceType.ProcedureRequest);
 		
 		return validTypes;
+	}
+	
+	@Test
+	public void shouldReturnPersonAttributesAsExtensions() throws Exception {
+		MockHttpServletResponse response = get("/Patient/" + PATIENT_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Patient patient = readResponse(response);
+		
+		//Filtering for extensions of PersonAttributes
+		List<Extension> personAttributeExtensions = patient.getExtension().stream()
+		        .filter(ext -> ext.getUrl().contains(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE))
+		        .collect(Collectors.toList());
+		
+		assertThat(personAttributeExtensions.size(), is(3));
 	}
 }
