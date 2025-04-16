@@ -123,7 +123,7 @@ public class ObservationTranslatorImpl implements ObservationTranslator {
 		if (observation.getValueNumeric() != null) {
 			Concept concept = observation.getConcept();
 			if (concept instanceof ConceptNumeric) {
-				obs.setReferenceRange(referenceRangeTranslator.toFhirResource((ConceptNumeric) concept));
+				obs.setReferenceRange(referenceRangeTranslator.toFhirResource(observation));
 			}
 		}
 		

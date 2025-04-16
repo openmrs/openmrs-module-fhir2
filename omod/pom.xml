@@ -37,6 +37,12 @@
 		</dependency>
 		<dependency>
 			<groupId>${project.parent.groupId}</groupId>
+			<artifactId>${project.parent.artifactId}-api-2.7</artifactId>
+			<version>${project.parent.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>${project.parent.groupId}</groupId>
 			<artifactId>${project.parent.artifactId}-test-data</artifactId>
 			<version>${project.parent.version}</version>
 			<scope>test</scope>

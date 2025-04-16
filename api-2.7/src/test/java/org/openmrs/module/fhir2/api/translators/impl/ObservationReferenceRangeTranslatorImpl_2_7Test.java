@@ -25,9 +25,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.ConceptNumeric;
 import org.openmrs.Obs;
+import org.openmrs.ObsReferenceRange;
 import org.openmrs.module.fhir2.FhirConstants;
 
-public class ObservationReferenceRangeTranslatorImplTest {
+public class ObservationReferenceRangeTranslatorImpl_2_7Test {
 	
 	private static final BigDecimal LOW_NORMAL_VALUE = BigDecimal.valueOf(1L);
 	
@@ -41,24 +42,25 @@ public class ObservationReferenceRangeTranslatorImplTest {
 	
 	private static final BigDecimal HIGH_CRITICAL_VALUE = BigDecimal.valueOf(6L);
 	
-	private static final String CONCEPT_UUID = "12345-abcdef-12345";
-	
-	private ObservationReferenceRangeTranslatorImpl observationReferenceRangeTranslator;
+	private ObservationReferenceRangeTranslatorImpl_2_7 observationReferenceRangeTranslator;
 	
 	@Before
 	public void setup() {
-		observationReferenceRangeTranslator = new ObservationReferenceRangeTranslatorImpl();
+		observationReferenceRangeTranslator = new ObservationReferenceRangeTranslatorImpl_2_7();
 	}
 	
 	@Test
 	public void toFhirType_shouldMapHighAndLowNormalObservationReferenceRangeToExpected() {
-		ConceptNumeric conceptNumeric = new ConceptNumeric();
-		conceptNumeric.setUuid(CONCEPT_UUID);
-		conceptNumeric.setLowNormal(LOW_NORMAL_VALUE.doubleValue());
-		conceptNumeric.setHiNormal(HIGH_NORMAL_VALUE.doubleValue());
+		ObsReferenceRange referenceRange = new ObsReferenceRange();
+		referenceRange.setLowNormal(LOW_NORMAL_VALUE.doubleValue());
+		referenceRange.setHiNormal(HIGH_NORMAL_VALUE.doubleValue());
+		
+		Obs obs = new Obs();
+		obs.setConcept(new ConceptNumeric());
+		obs.setReferenceRange(referenceRange);
 		
 		List<Observation.ObservationReferenceRangeComponent> result = observationReferenceRangeTranslator
-		        .toFhirResource(getObs(conceptNumeric));
+		        .toFhirResource(obs);
 		
 		assertThat(result, not(empty()));
 		
@@ -76,14 +78,16 @@ public class ObservationReferenceRangeTranslatorImplTest {
 	
 	@Test
 	public void toFhirType_shouldMapHighAndLowCriticalObservationReferenceRangeToExpected() {
-		ConceptNumeric conceptNumeric = new ConceptNumeric();
-		conceptNumeric.setUuid(CONCEPT_UUID);
+		ObsReferenceRange referenceRange = new ObsReferenceRange();
+		referenceRange.setLowCritical(LOW_CRITICAL_VALUE.doubleValue());
+		referenceRange.setHiCritical(HIGH_CRITICAL_VALUE.doubleValue());
 		
-		conceptNumeric.setLowCritical(LOW_CRITICAL_VALUE.doubleValue());
-		conceptNumeric.setHiCritical(HIGH_CRITICAL_VALUE.doubleValue());
+		Obs obs = new Obs();
+		obs.setConcept(new ConceptNumeric());
+		obs.setReferenceRange(referenceRange);
 		
 		List<Observation.ObservationReferenceRangeComponent> result = observationReferenceRangeTranslator
-		        .toFhirResource(getObs(conceptNumeric));
+		        .toFhirResource(obs);
 		
 		assertThat(result, not(empty()));
 		
@@ -102,13 +106,16 @@ public class ObservationReferenceRangeTranslatorImplTest {
 	
 	@Test
 	public void toFhirType_shouldMapHighAndLowAbsoluteObservationReferenceRangeToExpected() {
-		ConceptNumeric conceptNumeric = new ConceptNumeric();
-		conceptNumeric.setUuid(CONCEPT_UUID);
-		conceptNumeric.setLowAbsolute(LOW_ABSOLUTE_VALUE.doubleValue());
-		conceptNumeric.setHiAbsolute(HIGH_ABSOLUTE_VALUE.doubleValue());
+		ObsReferenceRange referenceRange = new ObsReferenceRange();
+		referenceRange.setLowAbsolute(LOW_ABSOLUTE_VALUE.doubleValue());
+		referenceRange.setHiAbsolute(HIGH_ABSOLUTE_VALUE.doubleValue());
+		
+		Obs obs = new Obs();
+		obs.setConcept(new ConceptNumeric());
+		obs.setReferenceRange(referenceRange);
 		
 		List<Observation.ObservationReferenceRangeComponent> result = observationReferenceRangeTranslator
-		        .toFhirResource(getObs(conceptNumeric));
+		        .toFhirResource(obs);
 		
 		assertThat(result, not(empty()));
 		
@@ -126,13 +133,16 @@ public class ObservationReferenceRangeTranslatorImplTest {
 	
 	@Test
 	public void toFhirType_shouldMapHighAndLowAbsoluteToExpectedIfLowIsNull() {
-		ConceptNumeric conceptNumeric = new ConceptNumeric();
-		conceptNumeric.setUuid(CONCEPT_UUID);
-		conceptNumeric.setLowAbsolute(null);
-		conceptNumeric.setHiAbsolute(HIGH_ABSOLUTE_VALUE.doubleValue());
+		ObsReferenceRange referenceRange = new ObsReferenceRange();
+		referenceRange.setLowAbsolute(null);
+		referenceRange.setHiAbsolute(HIGH_ABSOLUTE_VALUE.doubleValue());
+		
+		Obs obs = new Obs();
+		obs.setConcept(new ConceptNumeric());
+		obs.setReferenceRange(referenceRange);
 		
 		List<Observation.ObservationReferenceRangeComponent> result = observationReferenceRangeTranslator
-		        .toFhirResource(getObs(conceptNumeric));
+		        .toFhirResource(obs);
 		
 		assertThat(result, not(empty()));
 		assertThat(result.get(0).hasLow(), equalTo(false));
@@ -141,13 +151,16 @@ public class ObservationReferenceRangeTranslatorImplTest {
 	
 	@Test
 	public void toFhirType_shouldMapHighAndLowAbsoluteToExpectedIfHighIsNull() {
-		ConceptNumeric conceptNumeric = new ConceptNumeric();
-		conceptNumeric.setUuid(CONCEPT_UUID);
-		conceptNumeric.setLowAbsolute(LOW_ABSOLUTE_VALUE.doubleValue());
-		conceptNumeric.setHiAbsolute(null);
+		ObsReferenceRange referenceRange = new ObsReferenceRange();
+		referenceRange.setLowAbsolute(LOW_ABSOLUTE_VALUE.doubleValue());
+		referenceRange.setHiAbsolute(null);
+		
+		Obs obs = new Obs();
+		obs.setConcept(new ConceptNumeric());
+		obs.setReferenceRange(referenceRange);
 		
 		List<Observation.ObservationReferenceRangeComponent> result = observationReferenceRangeTranslator
-		        .toFhirResource(getObs(conceptNumeric));
+		        .toFhirResource(obs);
 		
 		assertThat(result, not(empty()));
 		assertThat(result.get(0).hasHigh(), equalTo(false));
@@ -156,13 +169,16 @@ public class ObservationReferenceRangeTranslatorImplTest {
 	
 	@Test
 	public void toFhirType_shouldMapHighAndLowNormalToExpectedIfLowIsNull() {
-		ConceptNumeric conceptNumeric = new ConceptNumeric();
-		conceptNumeric.setUuid(CONCEPT_UUID);
-		conceptNumeric.setLowNormal(null);
-		conceptNumeric.setHiNormal(HIGH_NORMAL_VALUE.doubleValue());
+		ObsReferenceRange referenceRange = new ObsReferenceRange();
+		referenceRange.setLowNormal(null);
+		referenceRange.setHiNormal(HIGH_NORMAL_VALUE.doubleValue());
+		
+		Obs obs = new Obs();
+		obs.setConcept(new ConceptNumeric());
+		obs.setReferenceRange(referenceRange);
 		
 		List<Observation.ObservationReferenceRangeComponent> result = observationReferenceRangeTranslator
-		        .toFhirResource(getObs(conceptNumeric));
+		        .toFhirResource(obs);
 		
 		assertThat(result, not(empty()));
 		assertThat(result.get(0).hasLow(), equalTo(false));
@@ -171,13 +187,16 @@ public class ObservationReferenceRangeTranslatorImplTest {
 	
 	@Test
 	public void toFhirType_shouldMapHighAndLowNormalToExpectedIfHighIsNull() {
-		ConceptNumeric conceptNumeric = new ConceptNumeric();
-		conceptNumeric.setUuid(CONCEPT_UUID);
-		conceptNumeric.setLowNormal(LOW_NORMAL_VALUE.doubleValue());
-		conceptNumeric.setHiNormal(null);
+		ObsReferenceRange referenceRange = new ObsReferenceRange();
+		referenceRange.setLowNormal(LOW_NORMAL_VALUE.doubleValue());
+		referenceRange.setHiNormal(null);
+		
+		Obs obs = new Obs();
+		obs.setConcept(new ConceptNumeric());
+		obs.setReferenceRange(referenceRange);
 		
 		List<Observation.ObservationReferenceRangeComponent> result = observationReferenceRangeTranslator
-		        .toFhirResource(getObs(conceptNumeric));
+		        .toFhirResource(obs);
 		
 		assertThat(result, not(empty()));
 		assertThat(result.get(0).hasHigh(), equalTo(false));
@@ -186,13 +205,16 @@ public class ObservationReferenceRangeTranslatorImplTest {
 	
 	@Test
 	public void toFhirType_shouldMapHighAndLowCriticalToExpectedIfLowIsNull() {
-		ConceptNumeric conceptNumeric = new ConceptNumeric();
-		conceptNumeric.setUuid(CONCEPT_UUID);
-		conceptNumeric.setLowCritical(null);
-		conceptNumeric.setHiCritical(HIGH_CRITICAL_VALUE.doubleValue());
+		ObsReferenceRange referenceRange = new ObsReferenceRange();
+		referenceRange.setLowCritical(null);
+		referenceRange.setHiCritical(HIGH_CRITICAL_VALUE.doubleValue());
+		
+		Obs obs = new Obs();
+		obs.setConcept(new ConceptNumeric());
+		obs.setReferenceRange(referenceRange);
 		
 		List<Observation.ObservationReferenceRangeComponent> result = observationReferenceRangeTranslator
-		        .toFhirResource(getObs(conceptNumeric));
+		        .toFhirResource(obs);
 		
 		assertThat(result, not(empty()));
 		assertThat(result.get(0).hasLow(), equalTo(false));
@@ -201,22 +223,19 @@ public class ObservationReferenceRangeTranslatorImplTest {
 	
 	@Test
 	public void toFhirType_shouldMapHighAndLowCriticalToExpectedIHighIsNull() {
-		ConceptNumeric conceptNumeric = new ConceptNumeric();
-		conceptNumeric.setUuid(CONCEPT_UUID);
-		conceptNumeric.setLowCritical(LOW_CRITICAL_VALUE.doubleValue());
-		conceptNumeric.setHiCritical(null);
+		ObsReferenceRange referenceRange = new ObsReferenceRange();
+		referenceRange.setLowCritical(LOW_CRITICAL_VALUE.doubleValue());
+		referenceRange.setHiCritical(null);
+		
+		Obs obs = new Obs();
+		obs.setConcept(new ConceptNumeric());
+		obs.setReferenceRange(referenceRange);
 		
 		List<Observation.ObservationReferenceRangeComponent> result = observationReferenceRangeTranslator
-		        .toFhirResource(getObs(conceptNumeric));
+		        .toFhirResource(obs);
 		
 		assertThat(result, not(empty()));
 		assertThat(result.get(0).hasHigh(), equalTo(false));
 		assertThat(result, hasItem(hasProperty("low", hasProperty("value", equalTo(LOW_CRITICAL_VALUE)))));
-	}
-	
-	private Obs getObs(ConceptNumeric concept) {
-		Obs obs = new Obs();
-		obs.setConcept(concept);
-		return obs;
 	}
 }

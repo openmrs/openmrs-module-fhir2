@@ -226,7 +226,7 @@ public class ObservationTranslatorImplTest {
 		List<Observation.ObservationReferenceRangeComponent> referenceRangeComponentList = new ArrayList<>();
 		referenceRangeComponentList.add(referenceRangeComponent);
 		
-		when(referenceRangeTranslator.toFhirResource(conceptNumeric)).thenReturn(referenceRangeComponentList);
+		when(referenceRangeTranslator.toFhirResource(observation)).thenReturn(referenceRangeComponentList);
 		
 		Observation result = observationTranslator.toFhirResource(observation);
 		
