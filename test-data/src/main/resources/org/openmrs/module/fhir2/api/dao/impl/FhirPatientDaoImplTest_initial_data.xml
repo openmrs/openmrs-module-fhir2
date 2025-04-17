@@ -50,4 +50,10 @@
     <cohort_member cohort_member_id="3" cohort_id="1" patient_id="6" start_date="2000-04-16" end_date="2030-04-16" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="bfd66f72-d058-4493-9e73-e021f89bd2aa"/>
     <cohort_member cohort_member_id="4" cohort_id="1" patient_id="7" start_date="2000-04-16" end_date="2030-04-16" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="c9cb5447-1195-42f5-9dd7-421bf5d6ae82"/>
     <cohort_member cohort_member_id="5" cohort_id="3" patient_id="8" start_date="2000-04-16" end_date="2030-04-16" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="7c650865-59e0-4e8e-8334-ba22ff539c08"/>
+    <person_attribute_type person_attribute_type_id="4" name="test string" format="java.lang.String" searchable="false" creator="1" date_created="2008-08-15 15:53:36.0" retired="false" uuid="3b4a243d-4508-4ecf-aa05-d1260a78e196" sort_weight="2"/>
+    <person_attribute_type person_attribute_type_id="5" name="test boolean" format="java.lang.Boolean" searchable="false" creator="1" date_created="2008-08-15 15:53:36.0" retired="false" uuid="4973eeee-f193-4504-a67e-b8132a39c42a" sort_weight="2"/>
+    <person_attribute_type person_attribute_type_id="6" name="test location" format="org.openmrs.Location" searchable="false" creator="1" date_created="2008-08-15 15:53:36.0" retired="false" uuid="560683ca-1261-441d-89e2-d11faeacd8c9" sort_weight="2"/>
+    <person_attribute person_attribute_id="4" person_id="5" value="test@openmrs.org" person_attribute_type_id="4" creator="1" date_created="2008-08-18 12:25:57.0" voided="false" uuid="fbd82a27-56ec-46b4-8660-6442e832dc3e"/>
+    <person_attribute person_attribute_id="5" person_id="5" value="true" person_attribute_type_id="5" creator="1" date_created="2008-08-18 12:25:57.0" voided="false" uuid="a55f316e-29dd-4ad5-b954-62ef93723658"/>
+    <person_attribute person_attribute_id="6" person_id="5" value="1" person_attribute_type_id="6" creator="1" date_created="2008-08-18 12:25:57.0" voided="false" uuid="ad0f530d-aebf-4284-b7c1-c103986b1c2b"/>
 </dataset>
