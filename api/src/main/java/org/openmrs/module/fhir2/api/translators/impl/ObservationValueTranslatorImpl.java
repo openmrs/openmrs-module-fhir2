@@ -99,7 +99,9 @@ public class ObservationValueTranslatorImpl implements ObservationValueTranslato
 	@Override
 	public Obs toOpenmrsType(@Nonnull Obs obs, @Nonnull Type resource) {
 		notNull(obs, "The existing Obs object should not be null");
-		notNull(resource, "The Type object should not be null");
+		if (resource == null) {
+			return null;
+		}
 		
 		if (resource instanceof CodeableConcept) {
 			obs.setValueCoded(conceptTranslator.toOpenmrsType((CodeableConcept) resource));
