@@ -20,8 +20,10 @@ import org.openmrs.util.PrivilegeConstants;
 
 public interface FhirPatientIdentifierSystemDao {
 	
+	@Authorized(PrivilegeConstants.GET_IDENTIFIER_TYPES)
 	String getUrlByPatientIdentifierType(PatientIdentifierType patientIdentifierType);
 	
+	@Authorized(PrivilegeConstants.GET_IDENTIFIER_TYPES)
 	PatientIdentifierType getPatientIdentifierTypeByUrl(String url);
 	
 	@Authorized(PrivilegeConstants.GET_IDENTIFIER_TYPES)

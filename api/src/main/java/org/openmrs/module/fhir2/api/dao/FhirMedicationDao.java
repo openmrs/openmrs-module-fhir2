@@ -11,6 +11,7 @@ package org.openmrs.module.fhir2.api.dao;
 
 import javax.annotation.Nonnull;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.openmrs.Drug;
@@ -25,14 +26,22 @@ public interface FhirMedicationDao extends FhirDao<Drug> {
 	Drug get(@Nonnull String uuid);
 	
 	@Override
+	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+	List<Drug> get(@Nonnull Collection<String> uuids);
+	
+	@Override
+	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+	List<Drug> getSearchResults(@Nonnull SearchParameterMap theParams);
+	
+	@Override
+	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+	int getSearchResultsCount(@Nonnull SearchParameterMap theParams);
+	
+	@Override
 	@Authorized(PrivilegeConstants.MANAGE_CONCEPTS)
 	Drug createOrUpdate(@Nonnull Drug newEntry);
 	
 	@Override
 	@Authorized(PrivilegeConstants.MANAGE_CONCEPTS)
 	Drug delete(@Nonnull String uuid);
-	
-	@Override
-	@Authorized(PrivilegeConstants.GET_CONCEPTS)
-	List<Drug> getSearchResults(@Nonnull SearchParameterMap theParams);
 }

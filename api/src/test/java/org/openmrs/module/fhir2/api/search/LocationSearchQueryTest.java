@@ -125,6 +125,7 @@ public class LocationSearchQueryTest extends BaseFhirContextSensitiveTest {
 	public void setup() throws Exception {
 		executeDataSet(INITIAL_XML_DATASET_PACKAGE_PATH);
 		executeDataSet(LOCATION_INITIAL_DATA_XML);
+		authenticate();
 	}
 	
 	private IBundleProvider search(SearchParameterMap theParams) {

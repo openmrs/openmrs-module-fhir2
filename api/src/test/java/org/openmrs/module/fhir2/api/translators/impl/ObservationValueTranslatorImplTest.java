@@ -327,7 +327,7 @@ public class ObservationValueTranslatorImplTest {
 		assertThat(result, notNullValue());
 		assertThat(result.getValueText(), equalTo(OBS_STRING));
 	}
-
+	
 	@Test
 	public void toOpenmrsType_shouldNotThrowExceptionIfValueIsNull() {
 		Obs result = obsValueTranslator.toOpenmrsType(obs, null);

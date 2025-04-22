@@ -28,11 +28,12 @@ public interface FhirDao<T extends OpenmrsObject & Auditable> extends Serializab
 	
 	List<T> get(@Nonnull Collection<String> uuids);
 	
+	List<T> getSearchResults(@Nonnull SearchParameterMap theParams);
+	
+	int getSearchResultsCount(@Nonnull SearchParameterMap theParams);
+	
 	T createOrUpdate(@Nonnull T newEntry);
 	
 	T delete(@Nonnull String uuid);
 	
-	int getSearchResultsCount(@Nonnull SearchParameterMap theParams);
-	
-	List<T> getSearchResults(@Nonnull SearchParameterMap theParams);
 }

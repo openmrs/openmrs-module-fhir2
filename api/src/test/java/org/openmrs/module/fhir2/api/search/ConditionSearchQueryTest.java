@@ -127,7 +127,7 @@ public class ConditionSearchQueryTest extends BaseFhirContextSensitiveTest {
 	private static final int END_INDEX = 10;
 	
 	@Autowired
-	private FhirConditionDao<Condition> dao;
+	private FhirConditionDao dao;
 	
 	@Autowired
 	private ConditionTranslator<Condition> translator;
@@ -136,7 +136,7 @@ public class ConditionSearchQueryTest extends BaseFhirContextSensitiveTest {
 	private SearchQueryInclude searchQueryInclude;
 	
 	@Autowired
-	private SearchQuery<Condition, org.hl7.fhir.r4.model.Condition, FhirConditionDao<Condition>, ConditionTranslator<Condition>, SearchQueryInclude<org.hl7.fhir.r4.model.Condition>> searchQuery;
+	private SearchQuery<Condition, org.hl7.fhir.r4.model.Condition, FhirConditionDao, ConditionTranslator<Condition>, SearchQueryInclude<org.hl7.fhir.r4.model.Condition>> searchQuery;
 	
 	@Autowired
 	ConditionService conditionService;

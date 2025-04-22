@@ -228,7 +228,7 @@ public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLo
 	}
 	
 	@Override
-	public LocationTag saveLocationTag(LocationTag tag) {
+	public LocationTag createLocationTag(LocationTag tag) {
 		return locationService.saveLocationTag(tag);
 	}
 	

@@ -74,7 +74,7 @@ public class FhirConditionServiceImplTest {
 	private static final int END_INDEX = 10;
 	
 	@Mock
-	private FhirConditionDao<Condition> dao;
+	private FhirConditionDao dao;
 	
 	@Mock
 	private ConditionTranslator<Condition> conditionTranslator;
@@ -86,7 +86,7 @@ public class FhirConditionServiceImplTest {
 	private SearchQueryInclude searchQueryInclude;
 	
 	@Mock
-	private SearchQuery<Condition, org.hl7.fhir.r4.model.Condition, FhirConditionDao<Condition>, ConditionTranslator<Condition>, SearchQueryInclude<org.hl7.fhir.r4.model.Condition>> searchQuery;
+	private SearchQuery<Condition, org.hl7.fhir.r4.model.Condition, FhirConditionDao, ConditionTranslator<Condition>, SearchQueryInclude<org.hl7.fhir.r4.model.Condition>> searchQuery;
 	
 	private FhirConditionServiceImpl conditionService;
 	

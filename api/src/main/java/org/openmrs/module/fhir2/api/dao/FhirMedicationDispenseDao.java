@@ -9,25 +9,9 @@
  */
 package org.openmrs.module.fhir2.api.dao;
 
-import javax.annotation.Nonnull;
-
-import java.util.List;
-
 import org.openmrs.Auditable;
 import org.openmrs.OpenmrsObject;
-import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 
 public interface FhirMedicationDispenseDao<T extends OpenmrsObject & Auditable> extends FhirDao<T> {
 	
-	@Override
-	T get(@Nonnull String uuid);
-	
-	@Override
-	T createOrUpdate(@Nonnull T newEntry);
-	
-	@Override
-	T delete(@Nonnull String uuid);
-	
-	@Override
-	List<T> getSearchResults(@Nonnull SearchParameterMap theParams);
 }

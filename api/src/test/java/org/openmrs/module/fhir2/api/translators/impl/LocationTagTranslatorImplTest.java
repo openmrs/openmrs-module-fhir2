@@ -51,7 +51,7 @@ public class LocationTagTranslatorImplTest {
 		tag.setDisplay(LAB_TAG_DESCRIPTION);
 		
 		when(fhirLocationDao.getLocationTagByName(tag.getCode())).thenReturn(null);
-		when(fhirLocationDao.saveLocationTag(any(LocationTag.class))).thenReturn(omrsTag);
+		when(fhirLocationDao.createLocationTag(any(LocationTag.class))).thenReturn(omrsTag);
 		LocationTag newLocationTag = locationTagTranslatorImpl.toOpenmrsType(tag);
 		assertThat(newLocationTag, notNullValue());
 		assertThat(newLocationTag.getName(), is(LAB_TAG_NAME));

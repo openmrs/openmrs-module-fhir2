@@ -107,13 +107,13 @@ public class FhirLocationDaoImplTest extends BaseFhirContextSensitiveTest {
 	}
 	
 	@Test
-	public void saveLocationTag_shouldSaveTag() {
+	public void createLocationTag_shouldCreateTag() {
 		LocationTag locationTag = new LocationTag();
 		locationTag.setUuid(LOCATION_TAG_UUID);
 		locationTag.setName(LOCATION_TAG_NAME);
 		locationService.saveLocationTag(locationTag);
 		
-		LocationTag result = fhirLocationDao.saveLocationTag(locationTag);
+		LocationTag result = fhirLocationDao.createLocationTag(locationTag);
 		
 		assertThat(result, notNullValue());
 	}

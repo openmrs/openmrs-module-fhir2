@@ -31,7 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class FhirConditionServiceImpl extends BaseFhirService<Condition, org.openmrs.Condition> implements FhirConditionService {
 	
 	@Autowired
-	private FhirConditionDao<org.openmrs.Condition> dao;
+	private FhirConditionDao dao;
 	
 	@Autowired
 	private ConditionTranslator<org.openmrs.Condition> translator;
@@ -40,7 +40,7 @@ public class FhirConditionServiceImpl extends BaseFhirService<Condition, org.ope
 	private SearchQueryInclude searchQueryInclude;
 	
 	@Autowired
-	private SearchQuery<org.openmrs.Condition, Condition, FhirConditionDao<org.openmrs.Condition>, ConditionTranslator<org.openmrs.Condition>, SearchQueryInclude<Condition>> searchQuery;
+	private SearchQuery<org.openmrs.Condition, Condition, FhirConditionDao, ConditionTranslator<org.openmrs.Condition>, SearchQueryInclude<Condition>> searchQuery;
 	
 	@Override
 	public IBundleProvider searchConditions(ConditionSearchParams conditionSearchParams) {

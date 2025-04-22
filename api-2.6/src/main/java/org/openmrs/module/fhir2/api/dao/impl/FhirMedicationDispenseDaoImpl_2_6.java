@@ -11,6 +11,7 @@ package org.openmrs.module.fhir2.api.dao.impl;
 
 import javax.annotation.Nonnull;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,6 +39,18 @@ public class FhirMedicationDispenseDaoImpl_2_6 extends BaseFhirDao<MedicationDis
 	@Authorized(PrivilegeConstants.GET_MEDICATION_DISPENSE)
 	public MedicationDispense get(@Nonnull String uuid) {
 		return super.get(uuid);
+	}
+	
+	@Override
+	@Authorized(PrivilegeConstants.GET_MEDICATION_DISPENSE)
+	public List<MedicationDispense> get(@Nonnull Collection<String> uuids) {
+		return super.get(uuids);
+	}
+	
+	@Override
+	@Authorized(PrivilegeConstants.GET_MEDICATION_DISPENSE)
+	public int getSearchResultsCount(@Nonnull SearchParameterMap theParams) {
+		return super.getSearchResultsCount(theParams);
 	}
 	
 	@Override

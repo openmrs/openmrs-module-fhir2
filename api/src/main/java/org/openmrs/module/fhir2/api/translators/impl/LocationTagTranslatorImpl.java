@@ -31,6 +31,6 @@ public class LocationTagTranslatorImpl implements LocationTagTranslator {
 	public LocationTag toOpenmrsType(@Nonnull Coding tag) {
 		LocationTag existingTag = fhirLocationDao.getLocationTagByName(tag.getCode());
 		return existingTag != null ? existingTag
-		        : fhirLocationDao.saveLocationTag(new LocationTag(tag.getCode(), tag.getDisplay()));
+		        : fhirLocationDao.createLocationTag(new LocationTag(tag.getCode(), tag.getDisplay()));
 	}
 }
