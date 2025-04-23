@@ -9,6 +9,7 @@
 
     <artifactId>fhir2-integration-tests-2.7</artifactId>
     <name>FHIR2 Integration Tests 2.7</name>
+    <packaging>pom</packaging>
 
     <dependencies>
         <dependency>
