@@ -14,6 +14,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -98,7 +99,11 @@ public class PersonAttributeTranslatorImplTest {
 		Extension result = personAttributeTranslator.toFhirResource(personAttribute);
 		
 		assertThat(result, notNullValue());
-		assertThat(result.getUrl(), equalTo(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE + "#" + ATTRIBUTE_TYPE_NAME));
+		assertTrue(result.hasUrl());
+		assertTrue(result.hasExtension());
+		assertThat(result.getUrl(), equalTo(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE));
+		assertThat(result.getExtensionFirstRep().getUrl(), equalTo(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE_TYPE));
+		assertThat(result.getExtensionFirstRep().getValue().toString(), equalTo(ATTRIBUTE_TYPE_NAME));
 		assertThat(result.getValue(), notNullValue());
 		assertThat(((StringType) result.getValue()).getValue(), equalTo(STRING_ATTRIBUTE_VALUE));
 	}
@@ -179,10 +184,14 @@ public class PersonAttributeTranslatorImplTest {
 	
 	@Test
 	public void shouldTranslateStringTypeExtensionToPersonAttribute() {
-		Extension extension = new Extension();
+		Extension personAttributeTypeExtension = new Extension();
+		personAttributeTypeExtension.setUrl(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE_TYPE);
+		personAttributeTypeExtension.setValue(new StringType(ATTRIBUTE_TYPE_NAME));
 		
-		extension.setUrl(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE + "#" + ATTRIBUTE_TYPE_NAME);
+		Extension extension = new Extension();
+		extension.setUrl(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE);
 		extension.setValue(new StringType(STRING_ATTRIBUTE_VALUE));
+		extension.addExtension(personAttributeTypeExtension);
 		
 		PersonAttribute result = personAttributeTranslator.toOpenmrsType(extension);
 		
@@ -193,9 +202,14 @@ public class PersonAttributeTranslatorImplTest {
 	
 	@Test
 	public void shouldTranslateBooleanTypeExtensionToPersonAttribute() {
+		Extension personAttributeTypeExtension = new Extension();
+		personAttributeTypeExtension.setUrl(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE_TYPE);
+		personAttributeTypeExtension.setValue(new StringType(ATTRIBUTE_TYPE_NAME));
+		
 		Extension extension = new Extension();
-		extension.setUrl(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE + "#" + ATTRIBUTE_TYPE_NAME);
+		extension.setUrl(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE);
 		extension.setValue(new BooleanType(true));
+		extension.addExtension(personAttributeTypeExtension);
 		
 		PersonAttribute result = personAttributeTranslator.toOpenmrsType(extension);
 		
@@ -206,8 +220,13 @@ public class PersonAttributeTranslatorImplTest {
 	
 	@Test
 	public void shouldTranslateReferenceTypeExtensionToPersonAttribute() {
+		Extension personAttributeTypeExtension = new Extension();
+		personAttributeTypeExtension.setUrl(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE_TYPE);
+		personAttributeTypeExtension.setValue(new StringType(ATTRIBUTE_TYPE_NAME));
+		
 		Extension extension = new Extension();
-		extension.setUrl(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE + "#" + ATTRIBUTE_TYPE_NAME);
+		extension.setUrl(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE);
+		extension.addExtension(personAttributeTypeExtension);
 		
 		Reference reference = new Reference();
 		reference.setReference("Location/" + LOCATION_ATTRIBUTE_UUID_VALUE);
@@ -229,8 +248,13 @@ public class PersonAttributeTranslatorImplTest {
 	
 	@Test
 	public void shouldTranslateCodeableConceptTypeExtensionToPersonAttribute() {
+		Extension personAttributeTypeExtension = new Extension();
+		personAttributeTypeExtension.setUrl(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE_TYPE);
+		personAttributeTypeExtension.setValue(new StringType(ATTRIBUTE_TYPE_NAME));
+		
 		Extension extension = new Extension();
-		extension.setUrl(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE + "#" + ATTRIBUTE_TYPE_NAME);
+		extension.setUrl(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE);
+		extension.addExtension(personAttributeTypeExtension);
 		
 		CodeableConcept codeableConcept = new CodeableConcept();
 		codeableConcept.setText("Test");

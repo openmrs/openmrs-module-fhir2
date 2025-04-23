@@ -629,7 +629,7 @@ public class PersonFhirResourceProviderIntegrationTest extends BaseFhirR4Integra
 		
 		//Filtering for extensions of PersonAttributes
 		List<Extension> personAttributeExtensions = person.getExtension().stream()
-		        .filter(ext -> ext.getUrl().contains(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE))
+		        .filter(ext -> ext.getUrl().equals(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE))
 		        .collect(Collectors.toList());
 		
 		assertThat(personAttributeExtensions.size(), is(2));

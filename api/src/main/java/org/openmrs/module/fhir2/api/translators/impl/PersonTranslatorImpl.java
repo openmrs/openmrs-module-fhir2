@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 
 import lombok.AccessLevel;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.HumanName;
@@ -43,6 +44,7 @@ import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class PersonTranslatorImpl implements PersonTranslator {
@@ -148,10 +150,15 @@ public class PersonTranslatorImpl implements PersonTranslator {
 		        .distinct().filter(Objects::nonNull).forEach(openmrsPerson::addAttribute);
 		
 		List<Extension> personAttributeExtensions = person.getExtension().stream()
-		        .filter(extension -> extension.getUrl().contains(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE))
+		        .filter(extension -> extension.getUrl().equals(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE))
 		        .collect(Collectors.toList());
 		for (Extension extension : personAttributeExtensions) {
-			openmrsPerson.addAttribute(personAttributeTranslator.toOpenmrsType(extension));
+			PersonAttribute personAttribute = personAttributeTranslator.toOpenmrsType(extension);
+			if (personAttribute == null) {
+				log.warn("The person has invalid PersonAttribute extension");
+			} else {
+				openmrsPerson.addAttribute(personAttribute);
+			}
 		}
 		
 		return openmrsPerson;

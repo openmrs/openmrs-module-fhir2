@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 
 import lombok.AccessLevel;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -51,6 +52,7 @@ import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class PatientTranslatorImpl implements PatientTranslator {
@@ -219,12 +221,15 @@ public class PatientTranslatorImpl implements PatientTranslator {
 		        .distinct().filter(Objects::nonNull).forEach(currentPatient::addAttribute);
 		
 		List<Extension> patientAttributeExtensions = patient.getExtension().stream()
-		        .filter(extension -> extension.getUrl().contains(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE))
+		        .filter(extension -> extension.getUrl().equals(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE))
 		        .collect(Collectors.toList());
 		
-		if (patientAttributeExtensions != null) {
-			for (Extension patientAttributeExtension : patientAttributeExtensions) {
-				currentPatient.addAttribute(personAttributeTranslator.toOpenmrsType(patientAttributeExtension));
+		for (Extension patientAttributeExtension : patientAttributeExtensions) {
+			PersonAttribute personAttribute = personAttributeTranslator.toOpenmrsType(patientAttributeExtension);
+			if (personAttribute == null) {
+				log.warn("The patient has invalid PersonAttribute extension");
+			} else {
+				currentPatient.addAttribute(personAttribute);
 			}
 		}
 		

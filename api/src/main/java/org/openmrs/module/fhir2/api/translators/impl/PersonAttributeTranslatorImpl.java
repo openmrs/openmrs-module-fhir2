@@ -85,7 +85,7 @@ public class PersonAttributeTranslatorImpl implements PersonAttributeTranslator 
 			return null;
 		}
 		
-		String attributeTypeName = extractAttributeTypeName(extension.getUrl());
+		String attributeTypeName = extractAttributeTypeName(extension.getExtensionFirstRep());
 		
 		try {
 			PersonAttributeType personAttributeType = personService.getPersonAttributeTypeByName(attributeTypeName);
@@ -107,9 +107,12 @@ public class PersonAttributeTranslatorImpl implements PersonAttributeTranslator 
 	private Extension createPersonAttributeExtension(PersonAttribute personAttribute) {
 		PersonAttributeType attributeType = personAttribute.getAttributeType();
 		
-		String extensionUrl = FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE + "#" + attributeType.getName();
+		StringType personAttributeTypeValue = new StringType(attributeType.getName());
+		Extension personAttributeTypeExtension = new Extension(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE_TYPE);
+		personAttributeTypeExtension.setValue(personAttributeTypeValue);
 		
-		Extension extension = new Extension(new UriType(extensionUrl));
+		Extension extension = new Extension(new UriType(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE));
+		extension.addExtension(personAttributeTypeExtension);
 		setExtensionValue(extension, personAttribute);
 		
 		return extension;
@@ -169,11 +172,13 @@ public class PersonAttributeTranslatorImpl implements PersonAttributeTranslator 
 	
 	private boolean isValidPatientAttributeExtension(Extension extension) {
 		return extension != null && extension.hasUrl() && extension.hasValue()
-		        && extension.getUrl().contains(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE);
+		        && extension.getUrl().equals(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE) && extension.hasExtension()
+		        && extension.getExtensionFirstRep().getUrl().equals(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE_TYPE)
+		        && extension.getExtensionFirstRep().hasValue();
 	}
 	
-	private String extractAttributeTypeName(String url) {
-		return url.substring(url.lastIndexOf("#") + 1);
+	private String extractAttributeTypeName(Extension extension) {
+		return extension.getValue().toString();
 	}
 	
 	private void setPersonAttributeValue(PersonAttribute personAttribute, Type extensionValue) {
