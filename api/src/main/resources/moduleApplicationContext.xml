@@ -19,6 +19,16 @@
 
     <context:annotation-config />
 
+    <bean class="org.springframework.context.support.PropertySourcesPlaceholderConfigurer">
+        <property name="ignoreUnresolvablePlaceholders" value="true" />
+        <property name="locations">
+            <list>
+                <value>classpath:fhir.properties</value>
+            </list>
+        </property>
+    </bean>
+
+
     <bean name="restfulClientFactoryR3" class="ca.uhn.fhir.rest.client.apache.ApacheRestfulClientFactory">
         <property name="fhirContext" ref="fhirR3"/>
     </bean>
