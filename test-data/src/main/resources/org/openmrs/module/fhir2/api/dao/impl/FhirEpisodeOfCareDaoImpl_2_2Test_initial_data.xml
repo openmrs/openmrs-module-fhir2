@@ -1,6 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!--
-
     This Source Code Form is subject to the terms of the Mozilla Public License,
     v. 2.0. If a copy of the MPL was not distributed with this file, You can
     obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
@@ -8,7 +7,6 @@
 
     Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
     graphic logo is a trademark of OpenMRS Inc.
-
 -->
 <dataset>
 	<concept concept_id="1738" retired="false" datatype_id="1" class_id="1" is_set="false" creator="1" date_created="2005-01-01 00:00:00.0" uuid="588a31bb-7923-4ef8-a6fc-b8f2ae5d1344"/>

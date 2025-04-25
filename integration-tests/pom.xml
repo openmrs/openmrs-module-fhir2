@@ -10,7 +10,6 @@
     <artifactId>fhir2-integration-tests</artifactId>
     <name>FHIR2 Integration Tests</name>
     <description>Integration Tests for the FHIR2 Module</description>
-    <packaging>pom</packaging>
 
     <dependencies>
         <dependency>
@@ -40,10 +39,6 @@
             <artifactId>${project.parent.artifactId}-test-data</artifactId>
             <version>${project.parent.version}</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
@@ -78,6 +73,17 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-install-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
             </plugin>
             <plugin>
                 <groupId>org.jacoco</groupId>
