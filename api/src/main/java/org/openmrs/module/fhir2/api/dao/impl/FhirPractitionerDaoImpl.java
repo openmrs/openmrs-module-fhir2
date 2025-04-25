@@ -17,8 +17,6 @@ import java.util.List;
 import java.util.Optional;
 
 import ca.uhn.fhir.rest.param.TokenAndListParam;
-import lombok.AccessLevel;
-import lombok.Setter;
 import org.hibernate.Criteria;
 import org.hibernate.sql.JoinType;
 import org.openmrs.Provider;
@@ -27,7 +25,6 @@ import org.openmrs.module.fhir2.api.dao.FhirPractitionerDao;
 import org.springframework.stereotype.Component;
 
 @Component
-@Setter(AccessLevel.PACKAGE)
 public class FhirPractitionerDaoImpl extends BasePractitionerDao<Provider> implements FhirPractitionerDao {
 	
 	@Override

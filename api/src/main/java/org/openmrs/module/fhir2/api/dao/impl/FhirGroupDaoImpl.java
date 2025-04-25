@@ -18,8 +18,6 @@ import java.util.List;
 import java.util.Optional;
 
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
-import lombok.AccessLevel;
-import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Criterion;
@@ -32,7 +30,6 @@ import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.stereotype.Component;
 
 @Component
-@Setter(AccessLevel.PACKAGE)
 public class FhirGroupDaoImpl extends BaseFhirDao<Cohort> implements FhirGroupDao {
 	
 	private static final String NAMES_ALIAS = "ps.names";

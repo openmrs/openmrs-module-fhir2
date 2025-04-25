@@ -17,12 +17,12 @@
     <licenses>
         <license>
             <name>OpenMRS Public License</name>
-            <url>https://openmrs.org/wiki/License</url>
+            <url>https://openmrs.org/license</url>
         </license>
     </licenses>
 
     <organization>
-        <name>OpenMRS LLC.</name>
+        <name>OpenMRS</name>
         <url>https://openmrs.org</url>
     </organization>
 
@@ -115,6 +115,16 @@
                 <artifactId>openmrs-api</artifactId>
                 <version>${openmrsPlatformVersion}</version>
                 <scope>provided</scope>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.fasterxml.jackson.core</groupId>
+                        <artifactId>jackson-core</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.fasterxml.jackson.core</groupId>
+                        <artifactId>jackson-annotations</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.openmrs.web</groupId>
@@ -227,6 +237,10 @@
                     <exclusion>
                         <groupId>com.fasterxml.jackson.core</groupId>
                         <artifactId>jackson-databind</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.fasterxml.jackson.datatype</groupId>
+                        <artifactId>jackson-datatype-jsr310</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -383,6 +397,12 @@
                 <groupId>com.github.java-json-tools</groupId>
                 <artifactId>json-patch</artifactId>
                 <version>1.13</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.fasterxml.jackson.core</groupId>
+                        <artifactId>jackson-databind</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>com.github.dnault</groupId>
@@ -399,7 +419,14 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
-                <version>2.11.2</version>
+                <version>2.18.3</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.datatype</groupId>
+                <artifactId>jackson-datatype-jsr310</artifactId>
+                <version>2.18.3</version>
+                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>org.thymeleaf</groupId>
@@ -605,12 +632,12 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-clean-plugin</artifactId>
-                    <version>3.2.0</version>
+                    <version>3.4.1</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.10.1</version>
+                    <version>3.14.0</version>
                     <configuration>
                         <annotationProcessorPaths>
                             <path>
@@ -623,13 +650,27 @@
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>3.3.1</version>
+                    <executions>
+                        <execution>
+                            <id>attach-sources</id>
+                            <phase>verify</phase>
+                            <goals>
+                                <goal>jar</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-deploy-plugin</artifactId>
-                    <version>3.1.0</version>
+                    <version>3.1.4</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-install-plugin</artifactId>
-                    <version>2.5.2</version>
+                    <version>3.1.4</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -639,12 +680,12 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-failsafe-plugin</artifactId>
-                    <version>3.0.0-M8</version>
+                    <version>3.5.3</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.0.0-M8</version>
+                    <version>3.5.3</version>
                     <configuration>
                         <excludes>
                             <exclude>**/*IntegrationTest</exclude>
@@ -670,7 +711,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
-                    <version>3.3.0</version>
+                    <version>3.4.2</version>
                     <executions>
                         <execution>
                             <goals>
@@ -682,7 +723,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-release-plugin</artifactId>
-                    <version>3.0.0-M7</version>
+                    <version>3.1.1</version>
                     <configuration>
                         <useReleaseProfile>true</useReleaseProfile>
                         <autoVersionSubmodules>true</autoVersionSubmodules>
@@ -716,7 +757,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-dependency-plugin</artifactId>
-                    <version>3.5.0</version>
+                    <version>3.8.1</version>
                     <executions>
                         <execution>
                             <id>Expand resources</id>
@@ -739,7 +780,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
-                    <version>3.2.1</version>
+                    <version>3.5.0</version>
                     <executions>
                         <execution>
                             <id>enforce-no-snapshots</id>
@@ -763,7 +804,7 @@
                             <configuration>
                                 <rules>
                                     <requireMavenVersion>
-                                        <version>[3.3.9,)</version>
+                                        <version>[3.6.3,)</version>
                                     </requireMavenVersion>
                                 </rules>
                             </configuration>
@@ -910,15 +951,6 @@
     </properties>
 
     <profiles>
-        <profile>
-            <id>release</id>
-            <modules>
-                <module>api</module>
-                <module>api-2.5</module>
-                <module>api-2.6</module>
-                <module>omod</module>
-            </modules>
-        </profile>
         <profile>
             <id>integration-test</id>
             <build>

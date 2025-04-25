@@ -9,14 +9,11 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
-import lombok.AccessLevel;
-import lombok.Setter;
 import org.openmrs.PatientProgram;
 import org.openmrs.module.fhir2.api.dao.FhirEpisodeOfCareDao;
 import org.springframework.stereotype.Component;
 
 @Component
-@Setter(AccessLevel.PACKAGE)
 public class FhirEpisodeOfCareDaoImpl extends BaseFhirDao<PatientProgram> implements FhirEpisodeOfCareDao {
 	
 }

@@ -35,10 +35,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-@Setter(AccessLevel.PROTECTED)
 public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implements FhirAllergyIntoleranceDao {
 	
-	@Autowired
+	@Setter(value = AccessLevel.PACKAGE, onMethod = @__(@Autowired))
 	private FhirGlobalPropertyService globalPropertyService;
 	
 	@Override

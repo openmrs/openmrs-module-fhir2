@@ -57,18 +57,13 @@ public class FhirPatientDaoImplTest extends BaseFhirContextSensitiveTest {
 	
 	private FhirPatientDaoImpl dao;
 	
-	private FhirGroupDaoImpl groupDao;
-	
 	@Autowired
 	private SessionFactory sessionFactory;
 	
 	@Before
 	public void setup() throws Exception {
-		groupDao = new FhirGroupDaoImpl();
-		groupDao.setSessionFactory(sessionFactory);
 		dao = new FhirPatientDaoImpl();
 		dao.setSessionFactory(sessionFactory);
-		dao.setGroupDao(groupDao);
 		for (String search_data : PATIENT_SEARCH_DATA_FILES) {
 			executeDataSet(search_data);
 		}

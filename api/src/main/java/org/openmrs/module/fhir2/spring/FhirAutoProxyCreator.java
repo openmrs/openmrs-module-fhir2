@@ -13,6 +13,7 @@ import org.openmrs.module.fhir2.api.dao.FhirDao;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator;
 import org.springframework.beans.BeansException;
+import org.springframework.lang.NonNull;
 
 /**
  * This is a Spring Auto-proxy creator that matches beans that implement the FhirDao marker
@@ -24,8 +25,8 @@ import org.springframework.beans.BeansException;
 public class FhirAutoProxyCreator extends AbstractAutoProxyCreator {
 	
 	@Override
-	protected Object[] getAdvicesAndAdvisorsForBean(Class<?> beanClass, String beanName, TargetSource customTargetSource)
-	        throws BeansException {
+	protected Object[] getAdvicesAndAdvisorsForBean(@NonNull Class<?> beanClass, @NonNull String beanName,
+	        TargetSource customTargetSource) throws BeansException {
 		if (FhirDao.class.isAssignableFrom(beanClass)) {
 			return PROXY_WITHOUT_ADDITIONAL_INTERCEPTORS;
 		}

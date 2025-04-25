@@ -30,11 +30,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
-@Setter(AccessLevel.PACKAGE)
 public class FhirContactPointMapDaoImpl implements FhirContactPointMapDao {
 	
-	@Autowired
-	@Qualifier("sessionFactory")
+	@Setter(value = AccessLevel.PACKAGE, onMethod = @__({ @Autowired, @Qualifier("sessionFactory") }))
 	private SessionFactory sessionFactory;
 	
 	@Override

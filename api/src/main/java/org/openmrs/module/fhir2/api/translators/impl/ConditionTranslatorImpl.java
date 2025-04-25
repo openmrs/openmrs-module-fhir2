@@ -82,11 +82,11 @@ public class ConditionTranslatorImpl implements ConditionTranslator<Condition> {
 		if (condition.getEndDate() != null) {
 			fhirCondition.setAbatement(new DateTimeType().setValue(condition.getEndDate()));
 		}
-
+		
 		if (condition.getAdditionalDetail() != null) {
 			fhirCondition.addNote().setText(condition.getAdditionalDetail());
 		}
-
+		
 		fhirCondition.setRecorder(practitionerReferenceTranslator.toFhirResource(condition.getCreator()));
 		fhirCondition.setRecordedDate(condition.getDateCreated());
 		
@@ -124,11 +124,11 @@ public class ConditionTranslatorImpl implements ConditionTranslator<Condition> {
 		extension.ifPresent(value -> conditionCodedOrText.setNonCoded(String.valueOf(value.getValue())));
 		conditionCodedOrText.setCoded(conceptTranslator.toOpenmrsType(codeableConcept));
 		existingCondition.setCondition(conditionCodedOrText);
-
+		
 		if (condition.hasNote()) {
 			existingCondition.setAdditionalDetail(condition.getNoteFirstRep().getText());
 		}
-
+		
 		if (condition.hasOnsetDateTimeType()) {
 			existingCondition.setOnsetDate(condition.getOnsetDateTimeType().getValue());
 		} else if (condition.hasOnsetPeriod()) {

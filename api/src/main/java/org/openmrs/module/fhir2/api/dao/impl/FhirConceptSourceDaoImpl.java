@@ -32,11 +32,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
-@Setter(AccessLevel.PACKAGE)
 public class FhirConceptSourceDaoImpl implements FhirConceptSourceDao {
 	
-	@Autowired
-	@Qualifier("sessionFactory")
+	@Setter(value = AccessLevel.PACKAGE, onMethod = @__({ @Autowired, @Qualifier("sessionFactory") }))
 	private SessionFactory sessionFactory;
 	
 	@Override

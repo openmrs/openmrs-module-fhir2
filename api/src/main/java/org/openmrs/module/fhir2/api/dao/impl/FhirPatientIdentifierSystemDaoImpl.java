@@ -17,7 +17,6 @@ import java.util.Optional;
 
 import lombok.AccessLevel;
 import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Projections;
@@ -29,12 +28,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
-@Slf4j
-@Setter(AccessLevel.PUBLIC)
 public class FhirPatientIdentifierSystemDaoImpl implements FhirPatientIdentifierSystemDao {
 	
-	@Autowired
-	@Qualifier("sessionFactory")
+	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @__({ @Autowired, @Qualifier("sessionFactory") }))
 	private SessionFactory sessionFactory;
 	
 	@Override

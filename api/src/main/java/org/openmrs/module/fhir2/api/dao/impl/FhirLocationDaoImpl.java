@@ -49,13 +49,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-@Setter(AccessLevel.PACKAGE)
 public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLocationDao {
 	
-	@Autowired
+	@Setter(value = AccessLevel.PACKAGE, onMethod = @__(@Autowired))
 	LocationService locationService;
 	
-	@Autowired
+	@Setter(value = AccessLevel.PACKAGE, onMethod = @__(@Autowired))
 	private FhirGlobalPropertyService globalPropertyService;
 	
 	@Override

@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Optional;
 
 import ca.uhn.fhir.rest.param.StringAndListParam;
+import com.google.common.annotations.VisibleForTesting;
+import lombok.AccessLevel;
 import lombok.Setter;
 import org.hibernate.Criteria;
 import org.hibernate.transform.DistinctRootEntityResultTransformer;
@@ -37,10 +39,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-@Setter
 public class FhirConceptDaoImpl extends BaseFhirDao<Concept> implements FhirConceptDao {
 	
-	@Autowired
+	@Setter(value = AccessLevel.PUBLIC, onMethod = @__({ @Autowired, @VisibleForTesting }))
 	private ConceptService conceptService;
 	
 	@Override

@@ -14,15 +14,12 @@ import static org.hibernate.criterion.Restrictions.eq;
 import java.util.Optional;
 
 import ca.uhn.fhir.rest.param.TokenAndListParam;
-import lombok.AccessLevel;
-import lombok.Setter;
 import org.hibernate.Criteria;
 import org.openmrs.User;
 import org.openmrs.module.fhir2.api.dao.FhirUserDao;
 import org.springframework.stereotype.Component;
 
 @Component
-@Setter(AccessLevel.PACKAGE)
 public class FhirUserDaoImpl extends BasePractitionerDao<User> implements FhirUserDao {
 	
 	@Override
