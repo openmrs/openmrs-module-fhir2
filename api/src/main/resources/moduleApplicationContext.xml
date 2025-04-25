@@ -11,26 +11,13 @@
 <beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns="http://www.springframework.org/schema/beans"
        xmlns:context="http://www.springframework.org/schema/context"
-       xmlns:tx="http://www.springframework.org/schema/tx"
        xsi:schemaLocation="
         http://www.springframework.org/schema/beans
         https://www.springframework.org/schema/beans/spring-beans.xsd
         http://www.springframework.org/schema/context
-        https://www.springframework.org/schema/context/spring-context.xsd
-        http://www.springframework.org/schema/tx
-        https://www.springframework.org/schema/tx/spring-tx.xsd">
+        https://www.springframework.org/schema/context/spring-context.xsd">
 
     <context:annotation-config />
-    <tx:annotation-driven />
-
-    <bean class="org.springframework.context.support.PropertySourcesPlaceholderConfigurer">
-        <property name="ignoreUnresolvablePlaceholders" value="true" />
-        <property name="locations">
-            <list>
-                <value>classpath:fhir.properties</value>
-            </list>
-        </property>
-    </bean>
 
     <bean name="restfulClientFactoryR3" class="ca.uhn.fhir.rest.client.apache.ApacheRestfulClientFactory">
         <property name="fhirContext" ref="fhirR3"/>
@@ -59,8 +46,6 @@
         <property name="interceptorNames">
             <list>
                 <value>authorizationInterceptor</value>
-                <value>requiredDataInterceptor</value>
-                <value>loggingInterceptor</value>
                 <value>cacheInterceptor</value>
             </list>
         </property>
