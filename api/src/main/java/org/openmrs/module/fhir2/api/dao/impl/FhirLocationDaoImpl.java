@@ -52,7 +52,7 @@ import org.springframework.stereotype.Component;
 public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLocationDao {
 	
 	@Setter(value = AccessLevel.PACKAGE, onMethod = @__(@Autowired))
-	LocationService locationService;
+	private LocationService locationService;
 	
 	@Setter(value = AccessLevel.PACKAGE, onMethod = @__(@Autowired))
 	private FhirGlobalPropertyService globalPropertyService;

@@ -28,6 +28,7 @@ import org.openmrs.module.fhir2.model.FhirContactPointMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class FhirContactPointMapDaoImpl implements FhirContactPointMapDao {
@@ -36,6 +37,7 @@ public class FhirContactPointMapDaoImpl implements FhirContactPointMapDao {
 	private SessionFactory sessionFactory;
 	
 	@Override
+	@Transactional(readOnly = true)
 	public Optional<FhirContactPointMap> getFhirContactPointMapByUuid(String uuid) {
 		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(FhirContactPointMap.class);
 		criteria.add(Restrictions.eq("uuid", uuid));
@@ -43,6 +45,7 @@ public class FhirContactPointMapDaoImpl implements FhirContactPointMapDao {
 	}
 	
 	@Override
+	@Transactional(readOnly = true)
 	public Optional<FhirContactPointMap> getFhirContactPointMapForPersonAttributeType(
 	        @Nonnull PersonAttributeType attributeType) {
 		if (attributeType == null) {
@@ -55,6 +58,7 @@ public class FhirContactPointMapDaoImpl implements FhirContactPointMapDao {
 	}
 	
 	@Override
+	@Transactional(readOnly = true)
 	public Optional<FhirContactPointMap> getFhirContactPointMapForAttributeType(
 	        @Nonnull BaseAttributeType<?> attributeType) {
 		if (attributeType == null) {
@@ -85,6 +89,7 @@ public class FhirContactPointMapDaoImpl implements FhirContactPointMapDao {
 	}
 	
 	@Override
+	@Transactional
 	public FhirContactPointMap saveFhirContactPointMap(@Nonnull FhirContactPointMap contactPointMap) {
 		FhirContactPointMap existingContactPointMap = (FhirContactPointMap) sessionFactory.getCurrentSession().createQuery(
 		    "from FhirContactPointMap fcp where fcp.attributeTypeDomain = :attribute_type_domain and fcp.attributeTypeId = :attribute_type_id")

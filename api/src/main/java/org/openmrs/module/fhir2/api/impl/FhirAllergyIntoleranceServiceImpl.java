@@ -23,10 +23,8 @@ import org.openmrs.module.fhir2.api.search.param.FhirAllergyIntoleranceSearchPar
 import org.openmrs.module.fhir2.api.translators.AllergyIntoleranceTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
-@Transactional
 @Getter(AccessLevel.PROTECTED)
 public class FhirAllergyIntoleranceServiceImpl extends BaseFhirService<AllergyIntolerance, Allergy> implements FhirAllergyIntoleranceService {
 	
@@ -43,7 +41,6 @@ public class FhirAllergyIntoleranceServiceImpl extends BaseFhirService<AllergyIn
 	private SearchQuery<org.openmrs.Allergy, AllergyIntolerance, FhirAllergyIntoleranceDao, AllergyIntoleranceTranslator, SearchQueryInclude<AllergyIntolerance>> searchQuery;
 	
 	@Override
-	@Transactional(readOnly = true)
 	public IBundleProvider searchForAllergies(FhirAllergyIntoleranceSearchParams allergyIntoleranceSearchParams) {
 		return searchQuery.getQueryResults(allergyIntoleranceSearchParams.toSearchParameterMap(), dao, translator,
 		    searchQueryInclude);
