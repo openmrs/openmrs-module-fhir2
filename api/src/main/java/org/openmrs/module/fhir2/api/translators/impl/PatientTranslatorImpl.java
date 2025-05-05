@@ -15,22 +15,18 @@ import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.
 
 import javax.annotation.Nonnull;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import lombok.AccessLevel;
 import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.DateTimeType;
-import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
@@ -52,7 +48,6 @@ import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-@Slf4j
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class PatientTranslatorImpl implements PatientTranslator {
@@ -80,9 +75,6 @@ public class PatientTranslatorImpl implements PatientTranslator {
 	
 	@Autowired
 	private TelecomTranslator<BaseOpenmrsData> telecomTranslator;
-	
-	@Autowired
-	private PersonAttributeTranslatorImpl personAttributeTranslator;
 	
 	@Override
 	public Patient toFhirResource(@Nonnull org.openmrs.Patient openmrsPatient) {
@@ -120,10 +112,6 @@ public class PatientTranslatorImpl implements PatientTranslator {
 			patient.addAddress(addressTranslator.toFhirResource(address));
 		}
 		
-		if (!openmrsPatient.getAttributes().isEmpty()) {
-			patient.setExtension(getPersonAttributeExtensions(openmrsPatient));
-		}
-		
 		patient.setTelecom(getPatientContactDetails(openmrsPatient));
 		patient.getMeta().setLastUpdated(getLastUpdated(openmrsPatient));
 		patient.getMeta().setVersionId(getVersionId(openmrsPatient));
@@ -141,17 +129,6 @@ public class PatientTranslatorImpl implements PatientTranslator {
 		
 		return fhirPersonDao.getActiveAttributesByPersonAndAttributeTypeUuid(patient, personContactAttributeType).stream()
 		        .map(telecomTranslator::toFhirResource).collect(Collectors.toList());
-	}
-	
-	public List<Extension> getPersonAttributeExtensions(@Nonnull org.openmrs.Patient openmrsPatient) {
-		List<Extension> personAttributeExtensions = new ArrayList<>();
-		Set<PersonAttribute> personAttributes = openmrsPatient.getAttributes();
-		
-		for (PersonAttribute personAttribute : personAttributes) {
-			personAttributeExtensions.add(personAttributeTranslator.toFhirResource(personAttribute));
-		}
-		
-		return personAttributeExtensions;
 	}
 	
 	@Override
@@ -219,19 +196,6 @@ public class PatientTranslatorImpl implements PatientTranslator {
 		patient.getTelecom().stream()
 		        .map(contactPoint -> (PersonAttribute) telecomTranslator.toOpenmrsType(new PersonAttribute(), contactPoint))
 		        .distinct().filter(Objects::nonNull).forEach(currentPatient::addAttribute);
-		
-		List<Extension> patientAttributeExtensions = patient.getExtension().stream()
-		        .filter(extension -> extension.getUrl().equals(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE))
-		        .collect(Collectors.toList());
-		
-		for (Extension patientAttributeExtension : patientAttributeExtensions) {
-			PersonAttribute personAttribute = personAttributeTranslator.toOpenmrsType(patientAttributeExtension);
-			if (personAttribute == null) {
-				log.warn("The patient has invalid PersonAttribute extension");
-			} else {
-				currentPatient.addAttribute(personAttribute);
-			}
-		}
 		
 		return currentPatient;
 	}
