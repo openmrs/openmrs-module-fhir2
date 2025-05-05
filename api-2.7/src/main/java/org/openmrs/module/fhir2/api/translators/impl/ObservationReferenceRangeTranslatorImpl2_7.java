@@ -31,7 +31,7 @@ import org.springframework.stereotype.Component;
 @Component
 @OpenmrsProfile(openmrsPlatformVersion = "2.7.* - 2.*")
 @Setter(AccessLevel.PACKAGE)
-public class ObservationReferenceRangeTranslatorImpl_2_7 implements ObservationReferenceRangeTranslator {
+public class ObservationReferenceRangeTranslatorImpl2_7 implements ObservationReferenceRangeTranslator {
 	
 	@Override
 	public List<Observation.ObservationReferenceRangeComponent> toFhirResource(@Nonnull Obs obs) {

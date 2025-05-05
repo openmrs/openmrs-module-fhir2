@@ -12,10 +12,7 @@ package org.openmrs.module.fhir2.providers.r3;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -44,6 +41,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.FhirConstants;
@@ -89,7 +87,7 @@ public class MedicationDispenseFhirResourceProviderTest {
 		
 		when(fhirMedicationDispenseService.get(MEDICATION_DISPENSE_UUID)).thenReturn(medicationDispense);
 		
-		when(fhirMedicationDispenseService.searchMedicationDispenses(any()))
+		when(fhirMedicationDispenseService.searchMedicationDispenses(ArgumentMatchers.any()))
 		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(medicationDispense), 10, 1));
 		
 		idParam = null;
@@ -127,19 +125,19 @@ public class MedicationDispenseFhirResourceProviderTest {
 	
 	@Test
 	public void createMedicationDispense_shouldCreateMedicationDispense() {
-		when(fhirMedicationDispenseService.create(any(org.hl7.fhir.r4.model.MedicationDispense.class)))
+		when(fhirMedicationDispenseService.create(ArgumentMatchers.any(org.hl7.fhir.r4.model.MedicationDispense.class)))
 		        .thenReturn(medicationDispense);
 		MethodOutcome result = resourceProvider.createMedicationDispense(
 		    (MedicationDispense) VersionConvertorFactory_30_40.convertResource(medicationDispense));
 		assertThat(result, notNullValue());
-		assertThat(result.getCreated(), is(true));
+		assertThat(result.getCreated(), equalTo(true));
 		assertThat(result.getResource().getIdElement().getIdPart(), equalTo(medicationDispense.getId()));
 	}
 	
 	@Test
 	public void updateMedicationDispense_shouldUpdateMedicationDispense() {
-		when(fhirMedicationDispenseService.update(eq(MEDICATION_DISPENSE_UUID),
-		    any(org.hl7.fhir.r4.model.MedicationDispense.class))).thenReturn(medicationDispense);
+		when(fhirMedicationDispenseService.update(ArgumentMatchers.eq(MEDICATION_DISPENSE_UUID),
+		    ArgumentMatchers.any(org.hl7.fhir.r4.model.MedicationDispense.class))).thenReturn(medicationDispense);
 		
 		MethodOutcome result = resourceProvider.updateMedicationDispense(new IdType().setValue(MEDICATION_DISPENSE_UUID),
 		    (MedicationDispense) VersionConvertorFactory_30_40.convertResource(medicationDispense));
@@ -151,8 +149,8 @@ public class MedicationDispenseFhirResourceProviderTest {
 	
 	@Test(expected = InvalidRequestException.class)
 	public void updateMedicationDispense_shouldThrowInvalidRequestForUuidMismatch() {
-		when(fhirMedicationDispenseService.update(eq(WRONG_MEDICATION_DISPENSE_UUID),
-		    any(org.hl7.fhir.r4.model.MedicationDispense.class))).thenThrow(InvalidRequestException.class);
+		when(fhirMedicationDispenseService.update(ArgumentMatchers.eq(WRONG_MEDICATION_DISPENSE_UUID),
+		    ArgumentMatchers.any(org.hl7.fhir.r4.model.MedicationDispense.class))).thenThrow(InvalidRequestException.class);
 		
 		resourceProvider.updateMedicationDispense(new IdType().setValue(WRONG_MEDICATION_DISPENSE_UUID),
 		    (MedicationDispense) VersionConvertorFactory_30_40.convertResource(medicationDispense));
@@ -162,8 +160,8 @@ public class MedicationDispenseFhirResourceProviderTest {
 	public void updateMedicationDispense_shouldThrowInvalidRequestForMissingId() {
 		MedicationDispense noIdMedicationDispense = new MedicationDispense();
 		
-		when(fhirMedicationDispenseService.update(eq(MEDICATION_DISPENSE_UUID),
-		    any(org.hl7.fhir.r4.model.MedicationDispense.class))).thenThrow(InvalidRequestException.class);
+		when(fhirMedicationDispenseService.update(ArgumentMatchers.eq(MEDICATION_DISPENSE_UUID),
+		    ArgumentMatchers.any(org.hl7.fhir.r4.model.MedicationDispense.class))).thenThrow(InvalidRequestException.class);
 		
 		resourceProvider.updateMedicationDispense(new IdType().setValue(MEDICATION_DISPENSE_UUID), noIdMedicationDispense);
 	}
@@ -173,8 +171,9 @@ public class MedicationDispenseFhirResourceProviderTest {
 		MedicationDispense wrongMedicationDispense = new MedicationDispense();
 		wrongMedicationDispense.setId(WRONG_MEDICATION_DISPENSE_UUID);
 		
-		when(fhirMedicationDispenseService.update(eq(WRONG_MEDICATION_DISPENSE_UUID),
-		    any(org.hl7.fhir.r4.model.MedicationDispense.class))).thenThrow(MethodNotAllowedException.class);
+		when(fhirMedicationDispenseService.update(ArgumentMatchers.eq(WRONG_MEDICATION_DISPENSE_UUID),
+		    ArgumentMatchers.any(org.hl7.fhir.r4.model.MedicationDispense.class)))
+		            .thenThrow(MethodNotAllowedException.class);
 		
 		resourceProvider.updateMedicationDispense(new IdType().setValue(WRONG_MEDICATION_DISPENSE_UUID),
 		    wrongMedicationDispense);
@@ -322,7 +321,7 @@ public class MedicationDispenseFhirResourceProviderTest {
 		    encounterParam, medicationRequestParam, lastUpdatedParam, includeParam, sortParam);
 		List<IBaseResource> resources = getResources(results, 1, 5);
 		assertThat(results, notNullValue());
-		assertThat(resources, hasSize(equalTo(1)));
+		assertThat(resources, hasSize(1));
 		assertThat(resources.get(0), notNullValue());
 		assertThat(resources.get(0).fhirType(), equalTo(FhirConstants.MEDICATION_DISPENSE));
 		assertThat(resources.get(0).getIdElement().getIdPart(), equalTo(MEDICATION_DISPENSE_UUID));

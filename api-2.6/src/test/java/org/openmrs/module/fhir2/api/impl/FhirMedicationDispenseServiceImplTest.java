@@ -49,13 +49,12 @@ import org.openmrs.module.fhir2.api.dao.FhirMedicationDispenseDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.SearchQueryBundleProvider;
 import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
-import org.openmrs.module.fhir2.api.search.SearchQueryInclude_2_6;
 import org.openmrs.module.fhir2.api.search.param.MedicationDispenseSearchParams;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.MedicationDispenseTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
-public class FhirMedicationDispenseServiceImpl_2_6Test {
+public class FhirMedicationDispenseServiceImplTest {
 	
 	private static final Integer MEDICATION_DISPENSE_ID = 123;
 	
@@ -73,12 +72,12 @@ public class FhirMedicationDispenseServiceImpl_2_6Test {
 	private FhirGlobalPropertyService globalPropertyService;
 	
 	@Mock
-	private SearchQueryInclude_2_6 searchQueryInclude;
+	private SearchQueryInclude<org.hl7.fhir.r4.model.MedicationDispense> searchQueryInclude;
 	
 	@Mock
 	private SearchQuery<MedicationDispense, org.hl7.fhir.r4.model.MedicationDispense, FhirMedicationDispenseDao<MedicationDispense>, MedicationDispenseTranslator<MedicationDispense>, SearchQueryInclude<org.hl7.fhir.r4.model.MedicationDispense>> searchQuery;
 	
-	private FhirMedicationDispenseServiceImpl_2_6 dispenseService;
+	private FhirMedicationDispenseServiceImpl dispenseService;
 	
 	private MedicationDispense openmrsDispense;
 	
@@ -86,7 +85,7 @@ public class FhirMedicationDispenseServiceImpl_2_6Test {
 	
 	@Before
 	public void setup() {
-		dispenseService = new FhirMedicationDispenseServiceImpl_2_6() {
+		dispenseService = new FhirMedicationDispenseServiceImpl() {
 			
 			@Override
 			protected void validateObject(MedicationDispense object) {

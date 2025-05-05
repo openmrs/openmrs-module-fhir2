@@ -99,7 +99,6 @@ public class MedicationDispenseFhirResourceProviderIntegrationTest extends BaseF
 		
 		assertThat(medicationDispense, notNullValue());
 		assertThat(medicationDispense.getIdElement().getIdPart(), equalTo(EXISTING_DISPENSE_UUID));
-		System.out.println(response.getContentAsString());
 		assertThat(medicationDispense, validResource());
 	}
 	

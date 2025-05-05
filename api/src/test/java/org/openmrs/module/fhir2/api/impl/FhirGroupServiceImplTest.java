@@ -70,7 +70,7 @@ public class FhirGroupServiceImplTest {
 	private FhirGlobalPropertyService globalPropertyService;
 	
 	@Mock
-	private SearchQueryInclude<org.hl7.fhir.r4.model.Group> searchQueryInclude;
+	private SearchQueryInclude<Group> searchQueryInclude;
 	
 	@Mock
 	private SearchQuery<Cohort, org.hl7.fhir.r4.model.Group, FhirGroupDao, GroupTranslator, SearchQueryInclude<org.hl7.fhir.r4.model.Group>> searchQuery;

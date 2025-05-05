@@ -21,6 +21,20 @@
             <artifactId>${project.parent.artifactId}-omod</artifactId>
             <version>${project.parent.version}</version>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>${project.parent.groupId}</groupId>
+                    <artifactId>${project.parent.artifactId}-api-2.5</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>${project.parent.groupId}</groupId>
+                    <artifactId>${project.parent.artifactId}-api-2.6</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>${project.parent.groupId}</groupId>
+                    <artifactId>${project.parent.artifactId}-api-2.7</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.openmrs.web</groupId>
@@ -55,6 +69,14 @@
         <dependency>
             <groupId>ca.uhn.hapi.fhir</groupId>
             <artifactId>hapi-fhir-validation-resources-dstu3</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
         </dependency>
     </dependencies>
 

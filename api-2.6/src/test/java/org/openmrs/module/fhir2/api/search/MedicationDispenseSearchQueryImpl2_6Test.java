@@ -43,7 +43,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
-public class MedicationDispenseSearchQueryImpl_2_6Test extends BaseModuleContextSensitiveTest {
+public class MedicationDispenseSearchQueryImpl2_6Test extends BaseModuleContextSensitiveTest {
 	
 	@Autowired
 	private FhirMedicationDispenseDao<MedicationDispense> dao;
@@ -52,7 +52,7 @@ public class MedicationDispenseSearchQueryImpl_2_6Test extends BaseModuleContext
 	private MedicationDispenseTranslator<MedicationDispense> translator;
 	
 	@Autowired
-	private SearchQueryInclude_2_6 searchQueryInclude;
+	private SearchQueryInclude<org.hl7.fhir.r4.model.MedicationDispense> searchQueryInclude;
 	
 	@Autowired
 	private SearchQuery<MedicationDispense, org.hl7.fhir.r4.model.MedicationDispense, FhirMedicationDispenseDao<MedicationDispense>, MedicationDispenseTranslator<MedicationDispense>, SearchQueryInclude<org.hl7.fhir.r4.model.MedicationDispense>> searchQuery;

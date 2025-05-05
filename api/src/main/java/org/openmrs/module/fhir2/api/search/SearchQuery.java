@@ -11,6 +11,7 @@ package org.openmrs.module.fhir2.api.search;
 
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
+import lombok.Setter;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.openmrs.Auditable;
 import org.openmrs.OpenmrsObject;
@@ -31,7 +32,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class SearchQuery<T extends OpenmrsObject & Auditable, U extends IBaseResource, O extends FhirDao<T>, V extends OpenmrsFhirTranslator<T, U>, W extends SearchQueryInclude<U>> {
 	
-	@Autowired
+	@Setter(onMethod_ = @Autowired)
 	private FhirGlobalPropertyService globalPropertyService;
 	
 	/**
@@ -53,6 +54,7 @@ public class SearchQuery<T extends OpenmrsObject & Auditable, U extends IBaseRes
 			result.setPreferredPageSize(result.size());
 			return result;
 		}
+		
 		return new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude);
 	}
 }

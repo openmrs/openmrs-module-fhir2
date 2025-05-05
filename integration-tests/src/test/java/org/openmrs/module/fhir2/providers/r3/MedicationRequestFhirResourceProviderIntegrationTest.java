@@ -125,7 +125,6 @@ public class MedicationRequestFhirResourceProviderIntegrationTest extends BaseFh
 		Bundle results = readBundleResponse(response);
 		
 		assertThat(results, notNullValue());
-		System.out.println(results.getIdElement());
 		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(results.hasEntry(), is(true));
 		

@@ -29,7 +29,7 @@ import org.springframework.stereotype.Component;
 @Component
 @OpenmrsProfile(openmrsPlatformVersion = "2.5.* - 2.*")
 @Setter(AccessLevel.PACKAGE)
-public class LocationTypeTranslatorImpl_2_5 implements LocationTypeTranslator {
+public class LocationTypeTranslatorImpl2_5 implements LocationTypeTranslator {
 	
 	@Autowired
 	private ConceptTranslator conceptTranslator;

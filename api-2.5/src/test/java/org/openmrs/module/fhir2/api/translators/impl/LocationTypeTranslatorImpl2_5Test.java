@@ -29,7 +29,7 @@ import org.openmrs.Location;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
-public class LocationTypeTranslatorImpl25Test {
+public class LocationTypeTranslatorImpl2_5Test {
 	
 	private static final String TYPE_CONCEPT_UUID = "91df3897-1066-46a1-a403-714b737af00b";
 	
@@ -40,12 +40,12 @@ public class LocationTypeTranslatorImpl25Test {
 	
 	private Location omrsLocation;
 	
-	private LocationTypeTranslatorImpl_2_5 locationTypeTranslator;
+	private LocationTypeTranslatorImpl2_5 locationTypeTranslator;
 	
 	@Before
 	public void setup() {
 		omrsLocation = new Location();
-		locationTypeTranslator = new LocationTypeTranslatorImpl_2_5();
+		locationTypeTranslator = new LocationTypeTranslatorImpl2_5();
 		locationTypeTranslator.setConceptTranslator(conceptTranslator);
 	}
 	

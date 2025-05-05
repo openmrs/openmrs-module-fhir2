@@ -7,7 +7,7 @@
  * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
  * graphic logo is a trademark of OpenMRS Inc.
  */
-package org.openmrs.module.fhir2.providers.r3;
+package org.openmrs.module.fhir2.providers.r4;
 
 import static lombok.AccessLevel.PACKAGE;
 
@@ -21,14 +21,17 @@ import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
+import ca.uhn.fhir.rest.annotation.Patch;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Sort;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
@@ -37,28 +40,25 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.Setter;
 import org.apache.commons.collections.CollectionUtils;
-import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40;
-import org.hl7.fhir.dstu3.model.Encounter;
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.MedicationDispense;
-import org.hl7.fhir.dstu3.model.MedicationRequest;
-import org.hl7.fhir.dstu3.model.OperationOutcome;
-import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.MedicationDispense;
+import org.hl7.fhir.r4.model.MedicationRequest;
+import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.Patient;
 import org.openmrs.module.fhir2.api.FhirMedicationDispenseService;
-import org.openmrs.module.fhir2.api.annotations.R3Provider;
-import org.openmrs.module.fhir2.api.search.SearchQueryBundleProviderR3Wrapper;
+import org.openmrs.module.fhir2.api.annotations.R4Provider;
 import org.openmrs.module.fhir2.api.search.param.MedicationDispenseSearchParams;
 import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-@Component("medicationDispenseFhirR3ResourceProvider")
-@R3Provider
-@Setter(PACKAGE)
+@Component("medicationDispenseFhirR4ResourceProvider")
+@R4Provider
 public class MedicationDispenseFhirResourceProvider implements IResourceProvider {
 	
-	@Autowired
+	@Setter(value = PACKAGE, onMethod_ = @Autowired)
 	private FhirMedicationDispenseService fhirMedicationDispenseService;
 	
 	@Override
@@ -67,20 +67,18 @@ public class MedicationDispenseFhirResourceProvider implements IResourceProvider
 	}
 	
 	@Read
-	@SuppressWarnings("unused")
 	public MedicationDispense getMedicationDispenseByUuid(@IdParam @Nonnull IdType id) {
-		org.hl7.fhir.r4.model.MedicationDispense r4Obj = fhirMedicationDispenseService.get(id.getIdPart());
-		if (r4Obj == null) {
+		MedicationDispense medicationDispense = fhirMedicationDispenseService.get(id.getIdPart());
+		if (medicationDispense == null) {
 			throw new ResourceNotFoundException("Could not find medicationDispense with Id " + id.getIdPart());
 		}
-		return (MedicationDispense) VersionConvertorFactory_30_40.convertResource(r4Obj);
+		return medicationDispense;
 	}
 	
 	@Create
 	public MethodOutcome createMedicationDispense(@ResourceParam MedicationDispense mDispense) {
-		org.hl7.fhir.r4.model.MedicationDispense r4Obj = fhirMedicationDispenseService
-		        .create((org.hl7.fhir.r4.model.MedicationDispense) VersionConvertorFactory_30_40.convertResource(mDispense));
-		return FhirProviderUtils.buildCreate(VersionConvertorFactory_30_40.convertResource(r4Obj));
+		MedicationDispense medicationDispense = fhirMedicationDispenseService.create(mDispense);
+		return FhirProviderUtils.buildCreate(medicationDispense);
 	}
 	
 	@Update
@@ -89,19 +87,30 @@ public class MedicationDispenseFhirResourceProvider implements IResourceProvider
 			throw new InvalidRequestException("id must be specified to update resource");
 		}
 		mDispense.setId(id.getIdPart());
-		org.hl7.fhir.r4.model.MedicationDispense r4Obj = fhirMedicationDispenseService.update(id.getIdPart(),
-		    (org.hl7.fhir.r4.model.MedicationDispense) VersionConvertorFactory_30_40.convertResource(mDispense));
-		return FhirProviderUtils.buildUpdate(r4Obj);
+		MedicationDispense medicationDispense = fhirMedicationDispenseService.update(id.getIdPart(), mDispense);
+		return FhirProviderUtils.buildUpdate(medicationDispense);
+	}
+	
+	@Patch
+	public MethodOutcome patchMedicationDispense(@IdParam IdType id, PatchTypeEnum patchType, @ResourceParam String body,
+	        RequestDetails requestDetails) {
+		if (id == null || id.getIdPart() == null) {
+			throw new InvalidRequestException("id must be specified to update MedicationDispense resource");
+		}
+		
+		MedicationDispense medicationDispense = fhirMedicationDispenseService.patch(id.getIdPart(), patchType, body,
+		    requestDetails);
+		
+		return FhirProviderUtils.buildPatch(medicationDispense);
 	}
 	
 	@Delete
 	public OperationOutcome deleteMedicationDispense(@IdParam IdType id) {
 		fhirMedicationDispenseService.delete(id.getIdPart());
-		return FhirProviderUtils.buildDeleteR3();
+		return FhirProviderUtils.buildDeleteR4();
 	}
 	
 	@Search
-	@SuppressWarnings("unused")
 	public IBundleProvider searchForMedicationDispenses(
 	        @OptionalParam(name = MedicationDispense.SP_RES_ID) TokenAndListParam id,
 	        @OptionalParam(name = MedicationDispense.SP_PATIENT, chainWhitelist = { "", Patient.SP_IDENTIFIER,
@@ -131,6 +140,6 @@ public class MedicationDispenseFhirResourceProvider implements IResourceProvider
 		params.setIncludes(CollectionUtils.isEmpty(includes) ? null : includes);
 		params.setSort(sort);
 		
-		return new SearchQueryBundleProviderR3Wrapper(fhirMedicationDispenseService.searchMedicationDispenses(params));
+		return fhirMedicationDispenseService.searchMedicationDispenses(params);
 	}
 }

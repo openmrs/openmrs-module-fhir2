@@ -732,7 +732,7 @@ public class TaskSearchQueryTest extends BaseFhirContextSensitiveTest {
 		List<IBaseResource> resultList = results.getResources(START_INDEX, END_INDEX);
 		
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(5)); // included resource added as part of result list
+		assertThat(resultList, hasSize(5)); // included resource added as part of result list
 		assertThat(((Task) resultList.iterator().next()).getIdElement().getIdPart(), equalTo(TASK_REFF_UUID));
 		
 		Task returnedTask = (Task) resultList.iterator().next();

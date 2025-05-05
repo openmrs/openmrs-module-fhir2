@@ -44,7 +44,7 @@ import org.springframework.stereotype.Component;
 @Setter(AccessLevel.PACKAGE)
 @Component
 @OpenmrsProfile(openmrsPlatformVersion = "2.6.* - 2.*")
-public class MedicationDispenseTranslatorImpl_2_6 implements MedicationDispenseTranslator<MedicationDispense> {
+public class MedicationDispenseTranslatorImpl implements MedicationDispenseTranslator<MedicationDispense> {
 	
 	@Autowired
 	private PatientReferenceTranslator patientReferenceTranslator;

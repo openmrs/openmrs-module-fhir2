@@ -41,7 +41,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
-public class MedicationRequestSearchQueryImpl_2_6Test extends BaseModuleContextSensitiveTest {
+public class MedicationRequestSearchQueryImpl2_6Test extends BaseModuleContextSensitiveTest {
 	
 	public static final String PATIENT_UUID = "da7f524f-27ce-4bb2-86d6-6d1d05312bd5"; // patient 2 in test dataset
 	

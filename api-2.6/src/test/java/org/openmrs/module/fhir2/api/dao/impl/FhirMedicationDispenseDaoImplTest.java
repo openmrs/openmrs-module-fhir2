@@ -39,7 +39,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
-public class FhirMedicationDispenseDaoImpl_2_6Test extends BaseModuleContextSensitiveTest {
+public class FhirMedicationDispenseDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	public static final String EXISTING_DISPENSE_UUID = "1bcb299c-b687-11ec-8065-0242ac110002";
 	
@@ -63,11 +63,11 @@ public class FhirMedicationDispenseDaoImpl_2_6Test extends BaseModuleContextSens
 	@Qualifier("sessionFactory")
 	private SessionFactory sessionFactory;
 	
-	private FhirMedicationDispenseDaoImpl_2_6 dao;
+	private FhirMedicationDispenseDaoImpl dao;
 	
 	@Before
 	public void setUp() {
-		dao = new FhirMedicationDispenseDaoImpl_2_6();
+		dao = new FhirMedicationDispenseDaoImpl();
 		dao.setSessionFactory(sessionFactory);
 		executeDataSet("org/openmrs/api/include/MedicationDispenseServiceTest-initialData.xml");
 		updateSearchIndex();

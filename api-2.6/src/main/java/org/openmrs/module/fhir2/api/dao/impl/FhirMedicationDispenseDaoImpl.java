@@ -11,65 +11,20 @@ package org.openmrs.module.fhir2.api.dao.impl;
 
 import javax.annotation.Nonnull;
 
-import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
-import lombok.AccessLevel;
-import lombok.Setter;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Criterion;
 import org.openmrs.MedicationDispense;
-import org.openmrs.annotation.Authorized;
-import org.openmrs.annotation.OpenmrsProfile;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirMedicationDispenseDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
-import org.openmrs.util.PrivilegeConstants;
 import org.springframework.stereotype.Component;
 
 @Component
-@Setter(AccessLevel.PROTECTED)
-@OpenmrsProfile(openmrsPlatformVersion = "2.6.* - 2.*")
-public class FhirMedicationDispenseDaoImpl_2_6 extends BaseFhirDao<MedicationDispense> implements FhirMedicationDispenseDao<MedicationDispense> {
-	
-	@Override
-	@Authorized(PrivilegeConstants.GET_MEDICATION_DISPENSE)
-	public MedicationDispense get(@Nonnull String uuid) {
-		return super.get(uuid);
-	}
-	
-	@Override
-	@Authorized(PrivilegeConstants.GET_MEDICATION_DISPENSE)
-	public List<MedicationDispense> get(@Nonnull Collection<String> uuids) {
-		return super.get(uuids);
-	}
-	
-	@Override
-	@Authorized(PrivilegeConstants.GET_MEDICATION_DISPENSE)
-	public int getSearchResultsCount(@Nonnull SearchParameterMap theParams) {
-		return super.getSearchResultsCount(theParams);
-	}
-	
-	@Override
-	@Authorized(PrivilegeConstants.EDIT_MEDICATION_DISPENSE)
-	public MedicationDispense createOrUpdate(@Nonnull MedicationDispense newEntry) {
-		return super.createOrUpdate(newEntry);
-	}
-	
-	@Override
-	@Authorized(PrivilegeConstants.DELETE_MEDICATION_DISPENSE)
-	public MedicationDispense delete(@Nonnull String uuid) {
-		return super.delete(uuid);
-	}
-	
-	@Override
-	@Authorized(PrivilegeConstants.GET_MEDICATION_DISPENSE)
-	public List<MedicationDispense> getSearchResults(@Nonnull SearchParameterMap theParams) {
-		return super.getSearchResults(theParams);
-	}
+public class FhirMedicationDispenseDaoImpl extends BaseFhirDao<MedicationDispense> implements FhirMedicationDispenseDao<MedicationDispense> {
 	
 	@Override
 	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {

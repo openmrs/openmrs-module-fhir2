@@ -34,9 +34,9 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -530,7 +530,7 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirR4ResourceProvid
 		verifyUri("/Patient?_revinclude=Observation:patient");
 		
 		verify(patientService).searchForPatients(patientSearchParamsCaptor.capture());
-		HashSet<Include> revIncludesParam = patientSearchParamsCaptor.getValue().getRevIncludes();
+		Set<Include> revIncludesParam = patientSearchParamsCaptor.getValue().getRevIncludes();
 		
 		assertThat(revIncludesParam, notNullValue());
 		assertThat(revIncludesParam.size(), equalTo(1));
@@ -543,7 +543,7 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirR4ResourceProvid
 		verifyUri("/Patient?_revinclude=AllergyIntolerance:patient");
 		
 		verify(patientService).searchForPatients(patientSearchParamsCaptor.capture());
-		HashSet<Include> revIncludesParam = patientSearchParamsCaptor.getValue().getRevIncludes();
+		Set<Include> revIncludesParam = patientSearchParamsCaptor.getValue().getRevIncludes();
 		
 		assertThat(revIncludesParam, notNullValue());
 		assertThat(revIncludesParam.size(), equalTo(1));
@@ -556,7 +556,7 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirR4ResourceProvid
 		verifyUri("/Patient?_revinclude=DiagnosticReport:patient");
 		
 		verify(patientService).searchForPatients(patientSearchParamsCaptor.capture());
-		HashSet<Include> revIncludesParam = patientSearchParamsCaptor.getValue().getRevIncludes();
+		Set<Include> revIncludesParam = patientSearchParamsCaptor.getValue().getRevIncludes();
 		
 		assertThat(revIncludesParam, notNullValue());
 		assertThat(revIncludesParam.size(), equalTo(1));
@@ -569,7 +569,7 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirR4ResourceProvid
 		verifyUri("/Patient?_revinclude=Encounter:patient");
 		
 		verify(patientService).searchForPatients(patientSearchParamsCaptor.capture());
-		HashSet<Include> revIncludesParam = patientSearchParamsCaptor.getValue().getRevIncludes();
+		Set<Include> revIncludesParam = patientSearchParamsCaptor.getValue().getRevIncludes();
 		
 		assertThat(revIncludesParam, notNullValue());
 		assertThat(revIncludesParam.size(), equalTo(1));
@@ -582,7 +582,7 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirR4ResourceProvid
 		verifyUri("/Patient?_revinclude=MedicationRequest:patient");
 		
 		verify(patientService).searchForPatients(patientSearchParamsCaptor.capture());
-		HashSet<Include> revIncludesParam = patientSearchParamsCaptor.getValue().getRevIncludes();
+		Set<Include> revIncludesParam = patientSearchParamsCaptor.getValue().getRevIncludes();
 		
 		assertThat(revIncludesParam, notNullValue());
 		assertThat(revIncludesParam.size(), equalTo(1));
@@ -595,7 +595,7 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirR4ResourceProvid
 		verifyUri("/Patient?_revinclude=ServiceRequest:patient");
 		
 		verify(patientService).searchForPatients(patientSearchParamsCaptor.capture());
-		HashSet<Include> revIncludesParam = patientSearchParamsCaptor.getValue().getRevIncludes();
+		Set<Include> revIncludesParam = patientSearchParamsCaptor.getValue().getRevIncludes();
 		
 		assertThat(revIncludesParam, notNullValue());
 		assertThat(revIncludesParam.size(), equalTo(1));
@@ -608,7 +608,7 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirR4ResourceProvid
 		verifyUri("/Patient?_revinclude=Observation:patient&_revinclude=AllergyIntolerance:patient");
 		
 		verify(patientService).searchForPatients(patientSearchParamsCaptor.capture());
-		HashSet<Include> revIncludesParam = patientSearchParamsCaptor.getValue().getRevIncludes();
+		Set<Include> revIncludesParam = patientSearchParamsCaptor.getValue().getRevIncludes();
 		
 		assertThat(revIncludesParam, notNullValue());
 		assertThat(revIncludesParam.size(), equalTo(2));
@@ -625,7 +625,7 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirR4ResourceProvid
 		verifyUri("/Patient?_revinclude=MedicationRequest:patient&_revinclude:iterative=MedicationDispense:prescription");
 		
 		verify(patientService).searchForPatients(patientSearchParamsCaptor.capture());
-		HashSet<Include> revIncludesParam = patientSearchParamsCaptor.getValue().getRevIncludes();
+		Set<Include> revIncludesParam = patientSearchParamsCaptor.getValue().getRevIncludes();
 		
 		assertThat(revIncludesParam, notNullValue());
 		assertThat(revIncludesParam.size(), equalTo(2));

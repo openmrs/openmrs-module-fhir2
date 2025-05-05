@@ -30,8 +30,8 @@ import javax.servlet.ServletException;
 import java.io.InputStream;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -355,7 +355,7 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirR3ResourceProvide
 		verifyUri("/Person?_include=Person:patient");
 		
 		verify(personService).searchForPeople(personSearchParamsCaptor.capture());
-		HashSet<Include> includes = personSearchParamsCaptor.getValue().getIncludes();
+		Set<Include> includes = personSearchParamsCaptor.getValue().getIncludes();
 		
 		assertThat(includes, notNullValue());
 		assertThat(includes.size(), equalTo(1));
@@ -368,7 +368,7 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirR3ResourceProvide
 		verifyUri("/Person?_include=Person:link:Patient");
 		
 		verify(personService).searchForPeople(personSearchParamsCaptor.capture());
-		HashSet<Include> includes = personSearchParamsCaptor.getValue().getIncludes();
+		Set<Include> includes = personSearchParamsCaptor.getValue().getIncludes();
 		
 		assertThat(includes, notNullValue());
 		assertThat(includes.size(), equalTo(1));

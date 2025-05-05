@@ -59,7 +59,7 @@ import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
-public class MedicationDispenseTranslatorImpl_2_6Test {
+public class MedicationDispenseTranslatorImplTest {
 	
 	public static final String MEDICATION_DISPENSE_UUID = "43578769-f1a4-46af-b08b-d9fe8a07066f";
 	
@@ -108,7 +108,7 @@ public class MedicationDispenseTranslatorImpl_2_6Test {
 	
 	private Date dateCreated;
 	
-	private MedicationDispenseTranslatorImpl_2_6 translator;
+	private MedicationDispenseTranslatorImpl translator;
 	
 	@Before
 	public void setup() {
@@ -140,7 +140,7 @@ public class MedicationDispenseTranslatorImpl_2_6Test {
 		medicationRequestTranslator.setMedicationRequestDispenseRequestComponentTranslator(dispenseRequestTranslator);
 		medicationRequestTranslator.setMedicationRequestPriorityTranslator(medicationRequestPriorityTranslator);
 		
-		translator = new MedicationDispenseTranslatorImpl_2_6();
+		translator = new MedicationDispenseTranslatorImpl();
 		translator.setPatientReferenceTranslator(patientReferenceTranslator);
 		translator.setEncounterReferenceTranslator(encounterReferenceTranslator);
 		translator.setMedicationRequestReferenceTranslator(medicationRequestReferenceTranslator);

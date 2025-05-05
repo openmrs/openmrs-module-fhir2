@@ -83,7 +83,7 @@ public class FhirConditionServiceImplTest {
 	private FhirGlobalPropertyService globalPropertyService;
 	
 	@Mock
-	private SearchQueryInclude searchQueryInclude;
+	private SearchQueryInclude<org.hl7.fhir.r4.model.Condition> searchQueryInclude;
 	
 	@Mock
 	private SearchQuery<Condition, org.hl7.fhir.r4.model.Condition, FhirConditionDao, ConditionTranslator<Condition>, SearchQueryInclude<org.hl7.fhir.r4.model.Condition>> searchQuery;

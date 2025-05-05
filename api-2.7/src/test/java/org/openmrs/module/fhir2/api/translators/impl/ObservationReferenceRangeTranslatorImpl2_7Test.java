@@ -28,7 +28,7 @@ import org.openmrs.Obs;
 import org.openmrs.ObsReferenceRange;
 import org.openmrs.module.fhir2.FhirConstants;
 
-public class ObservationReferenceRangeTranslatorImpl_2_7Test {
+public class ObservationReferenceRangeTranslatorImpl2_7Test {
 	
 	private static final BigDecimal LOW_NORMAL_VALUE = BigDecimal.valueOf(1L);
 	
@@ -42,11 +42,11 @@ public class ObservationReferenceRangeTranslatorImpl_2_7Test {
 	
 	private static final BigDecimal HIGH_CRITICAL_VALUE = BigDecimal.valueOf(6L);
 	
-	private ObservationReferenceRangeTranslatorImpl_2_7 observationReferenceRangeTranslator;
+	private ObservationReferenceRangeTranslatorImpl2_7 observationReferenceRangeTranslator;
 	
 	@Before
 	public void setup() {
-		observationReferenceRangeTranslator = new ObservationReferenceRangeTranslatorImpl_2_7();
+		observationReferenceRangeTranslator = new ObservationReferenceRangeTranslatorImpl2_7();
 	}
 	
 	@Test

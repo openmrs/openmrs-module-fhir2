@@ -9,14 +9,14 @@
  */
 package org.openmrs.module.fhir2.api.search;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.iterableWithSize;
 import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.notNullValue;
 
 import java.util.HashSet;
 import java.util.List;
@@ -26,44 +26,49 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.MedicationDispense;
 import org.hl7.fhir.r4.model.MedicationRequest;
-import org.hl7.fhir.r4.model.Practitioner;
 import org.junit.Before;
 import org.junit.Test;
-import org.openmrs.Provider;
+import org.openmrs.Drug;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
-import org.openmrs.module.fhir2.api.dao.FhirPractitionerDao;
+import org.openmrs.module.fhir2.api.dao.FhirMedicationDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
-import org.openmrs.module.fhir2.api.translators.PractitionerTranslator;
+import org.openmrs.module.fhir2.api.translators.MedicationTranslator;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
-public class PractitionerSearchQueryImpl_2_6Test extends BaseModuleContextSensitiveTest {
+public class MedicationSearchQueryImpl2_6Test extends BaseModuleContextSensitiveTest {
 	
-	private static final String PRACTITIONER_UUID = "f9badd80-ab76-11e2-9e96-0800200c9a66";
-	
-	private static final String PRACTITIONER_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirPractitionerDaoImplTest_initial_data.xml";
+	private static final String MEDICATION_REVINCLUDE_UUID = "05ec820a-d297-44e3-be6e-698531d9dd3f"; // from standard test dataset
 	
 	private static final int START_INDEX = 0;
 	
 	private static final int END_INDEX = 10;
 	
 	@Autowired
-	private FhirPractitionerDao dao;
+	private FhirMedicationDao dao;
 	
 	@Autowired
-	private PractitionerTranslator<Provider> translator;
+	private MedicationTranslator translator;
 	
 	@Autowired
-	private SearchQueryInclude<Practitioner> searchQueryInclude;
+	private SearchQueryInclude<Medication> searchQueryInclude;
 	
 	@Autowired
-	private SearchQuery<Provider, Practitioner, FhirPractitionerDao, PractitionerTranslator<Provider>, SearchQueryInclude<Practitioner>> searchQuery;
+	private SearchQuery<Drug, Medication, FhirMedicationDao, MedicationTranslator, SearchQueryInclude<Medication>> searchQuery;
+	
+	@Before
+	public void setup() throws Exception {
+		executeDataSet("org/openmrs/api/include/MedicationDispenseServiceTest-initialData.xml");
+		updateSearchIndex();
+	}
 	
 	private List<IBaseResource> get(IBundleProvider results) {
 		return results.getResources(START_INDEX, END_INDEX);
@@ -73,18 +78,11 @@ public class PractitionerSearchQueryImpl_2_6Test extends BaseModuleContextSensit
 		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}
 	
-	@Before
-	public void setup() {
-		executeDataSet(PRACTITIONER_INITIAL_DATA_XML);
-		executeDataSet("org/openmrs/api/include/MedicationDispenseServiceTest-initialData.xml");
-		updateSearchIndex();
-	}
-	
 	@Test
-	public void searchForPractitioners_shouldReverseIncludeMedicationRequestsAndAssociatedMedicationDispensesWithReturnedResults() {
-		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(PRACTITIONER_UUID));
+	public void searchForMedications_shouldAddMedicationRequestsToReturnedResults() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(MEDICATION_REVINCLUDE_UUID));
 		HashSet<Include> revIncludes = new HashSet<>();
-		revIncludes.add(new Include("MedicationRequest:requester"));
+		revIncludes.add(new Include("MedicationRequest:medication"));
 		revIncludes.add(new Include("MedicationDispense:prescription", true));
 		
 		SearchParameterMap theParams = new SearchParameterMap()
@@ -93,16 +91,20 @@ public class PractitionerSearchQueryImpl_2_6Test extends BaseModuleContextSensit
 		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(1));
+		
+		List<IBaseResource> resultList = results.getResources(START_INDEX, END_INDEX);
+		
+		assertThat(results, Matchers.notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList, hasSize(equalTo(11))); // included resources added as part of result list
-		assertThat(resultList.stream().filter(result -> result instanceof Practitioner).collect(Collectors.toList()),
-		    is(iterableWithSize(1))); // the actual matched provider
+		assertThat(resultList, hasSize(Matchers.equalTo(6))); // included resources added as part of result list
+		assertThat(resultList.stream().filter(result -> result instanceof Medication).collect(Collectors.toList()),
+		    is(iterableWithSize(1))); // the actual matched medication
 		assertThat(resultList.stream().filter(result -> result instanceof MedicationRequest).collect(Collectors.toList()),
-		    is(iterableWithSize(8))); // 10 requests that reference that prescriber
+		    is(iterableWithSize(4))); // 5 requests that reference that medication
 		assertThat(resultList.stream().filter(result -> result instanceof MedicationDispense).collect(Collectors.toList()),
-		    is(iterableWithSize(2))); // 2 dispense that references the above requests;
+		    is(iterableWithSize(1))); // 1 dispense that references the above requests
+		
 	}
 }
