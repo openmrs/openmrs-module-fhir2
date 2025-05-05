@@ -18,11 +18,13 @@ import org.hibernate.Criteria;
 import org.openmrs.User;
 import org.openmrs.module.fhir2.api.dao.FhirUserDao;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class FhirUserDaoImpl extends BasePractitionerDao<User> implements FhirUserDao {
 	
 	@Override
+	@Transactional(readOnly = true)
 	public User getUserByUserName(String username) {
 		return (User) getSessionFactory().getCurrentSession().createCriteria(User.class).add(eq("username", username))
 		        .uniqueResult();

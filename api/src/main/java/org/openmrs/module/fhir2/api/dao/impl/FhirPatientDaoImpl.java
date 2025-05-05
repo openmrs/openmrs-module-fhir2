@@ -43,23 +43,27 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirPatientDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPatientDao {
 	
 	@Override
+	@Transactional(readOnly = true)
 	public Patient getPatientById(@Nonnull Integer id) {
 		return (Patient) getSessionFactory().getCurrentSession().createCriteria(Patient.class).add(eq("patientId", id))
 		        .uniqueResult();
 	}
 	
 	@Override
+	@Transactional(readOnly = true)
 	@SuppressWarnings("unchecked")
 	public List<Patient> getPatientsByIds(@Nonnull Collection<Integer> ids) {
 		return getSessionFactory().getCurrentSession().createCriteria(Patient.class).add(in("id", ids)).list();
 	}
 	
 	@Override
+	@Transactional(readOnly = true)
 	@SuppressWarnings("unchecked")
 	public PatientIdentifierType getPatientIdentifierTypeByNameOrUuid(String name, String uuid) {
 		List<PatientIdentifierType> identifierTypes = (List<PatientIdentifierType>) getSessionFactory().getCurrentSession()
