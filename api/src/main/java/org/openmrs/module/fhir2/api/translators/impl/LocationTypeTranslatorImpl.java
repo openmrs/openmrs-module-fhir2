@@ -67,8 +67,12 @@ public class LocationTypeTranslatorImpl implements LocationTypeTranslator {
 					
 					CodeableConcept type = conceptTranslator
 					        .toFhirResource(conceptDao.get(typeAttribute.getValue().toString()));
-					
-					return Collections.singletonList(type);
+
+					if (type != null) {
+						return Collections.singletonList(type);
+					} else {
+						return Collections.emptyList();
+					}
 				}
 			}
 		}

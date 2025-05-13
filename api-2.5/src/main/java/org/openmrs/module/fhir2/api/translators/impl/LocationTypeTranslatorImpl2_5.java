@@ -27,7 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-@OpenmrsProfile(openmrsPlatformVersion = "2.5.* - 2.*")
+@OpenmrsProfile(openmrsPlatformVersion = "2.5.* - 9.*")
 @Setter(AccessLevel.PACKAGE)
 public class LocationTypeTranslatorImpl2_5 implements LocationTypeTranslator {
 	
@@ -41,8 +41,12 @@ public class LocationTypeTranslatorImpl2_5 implements LocationTypeTranslator {
 		if (location.getType() != null) {
 			type = conceptTranslator.toFhirResource(location.getType());
 		}
-		
-		return Collections.singletonList(type);
+
+		if (type != null) {
+			return Collections.singletonList(type);
+		} else {
+			return Collections.emptyList();
+		}
 	}
 	
 	@Override
