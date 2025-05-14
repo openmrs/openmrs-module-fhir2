@@ -38,6 +38,7 @@ import org.openmrs.api.LocationService;
 import org.openmrs.api.PersonService;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
+import org.openmrs.module.fhir2.api.translators.LocationReferenceTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PersonAttributeTranslatorImplTest {
@@ -71,6 +72,9 @@ public class PersonAttributeTranslatorImplTest {
 	
 	@Mock
 	private ConceptTranslator conceptTranslator;
+	
+	@Mock
+	private LocationReferenceTranslator locationReferenceTranslator;
 	
 	@InjectMocks
 	private PersonAttributeTranslatorImpl personAttributeTranslator;
@@ -147,8 +151,14 @@ public class PersonAttributeTranslatorImplTest {
 		Location location = new Location();
 		location.setName(LOCATION_NAME);
 		location.setUuid(LOCATION_ATTRIBUTE_UUID_VALUE);
-		when(locationService.getLocation(LOCATION_ATTRIBUTE_ID)).thenReturn(location);
 		
+		Reference locationReference = new Reference();
+		locationReference.setReference("Location/" + LOCATION_ATTRIBUTE_UUID_VALUE);
+		locationReference.setType(FhirConstants.LOCATION);
+		locationReference.setDisplay(LOCATION_NAME);
+		
+		when(locationService.getLocation(LOCATION_ATTRIBUTE_ID)).thenReturn(location);
+		when(locationReferenceTranslator.toFhirResource(location)).thenReturn(locationReference);
 		Extension result = personAttributeTranslator.toFhirResource(personAttribute);
 		Extension valueExtension = result.getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE_VALUE);
 		

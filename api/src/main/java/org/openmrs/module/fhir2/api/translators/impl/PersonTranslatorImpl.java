@@ -154,9 +154,7 @@ public class PersonTranslatorImpl implements PersonTranslator {
 		        .collect(Collectors.toList());
 		for (Extension extension : personAttributeExtensions) {
 			PersonAttribute personAttribute = personAttributeTranslator.toOpenmrsType(extension);
-			if (personAttribute == null) {
-				log.warn("The person has invalid PersonAttribute extension");
-			} else {
+			if (personAttribute != null) {
 				openmrsPerson.addAttribute(personAttribute);
 			}
 		}

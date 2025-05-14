@@ -169,6 +169,28 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR3Integr
 	}
 	
 	@Test
+	public void shouldReturnPersonAttributesAsExtensions() throws Exception {
+		MockHttpServletResponse response = get("/Patient/" + PATIENT_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Patient patient = readResponse(response);
+		
+		assertThat(patient.hasExtension(), is(true));
+		assertThat(patient,
+		    hasProperty("extension", hasProperty("url", equalTo(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE))));
+		
+		//Filtering for extensions of PersonAttributes
+		List<Extension> personAttributeExtensions = patient.getExtension().stream()
+		        .filter(ext -> ext.getUrl().equals(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE))
+		        .collect(Collectors.toList());
+		
+		assertThat(personAttributeExtensions, hasSize(3));
+	}
+	
+	@Test
 	public void shouldCreateNewPatientAsJson() throws Exception {
 		// read JSON record
 		String jsonPatient;
@@ -874,23 +896,5 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR3Integr
 		validTypes.add(ResourceType.ProcedureRequest);
 		
 		return validTypes;
-	}
-	
-	@Test
-	public void shouldReturnPersonAttributesAsExtensions() throws Exception {
-		MockHttpServletResponse response = get("/Patient/" + PATIENT_UUID).accept(FhirMediaTypes.JSON).go();
-		
-		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
-		assertThat(response.getContentAsString(), notNullValue());
-		
-		Patient patient = readResponse(response);
-		
-		//Filtering for extensions of PersonAttributes
-		List<Extension> personAttributeExtensions = patient.getExtension().stream()
-		        .filter(ext -> ext.getUrl().equals(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE))
-		        .collect(Collectors.toList());
-		
-		assertThat(personAttributeExtensions.size(), is(3));
 	}
 }

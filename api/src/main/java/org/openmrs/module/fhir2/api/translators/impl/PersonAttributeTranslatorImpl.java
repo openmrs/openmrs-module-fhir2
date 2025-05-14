@@ -31,6 +31,7 @@ import org.openmrs.api.LocationService;
 import org.openmrs.api.PersonService;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
+import org.openmrs.module.fhir2.api.translators.LocationReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonAttributeTranslator;
 import org.openmrs.module.fhir2.api.util.FhirUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,8 +49,6 @@ public class PersonAttributeTranslatorImpl implements PersonAttributeTranslator 
 	
 	private static final String OPENMRS_CONCEPT_FORMAT = "org.openmrs.Concept";
 	
-	private static final String LOCATION_TYPE = "Location";
-	
 	@Autowired
 	private LocationService locationService;
 	
@@ -61,6 +60,9 @@ public class PersonAttributeTranslatorImpl implements PersonAttributeTranslator 
 	
 	@Autowired
 	private ConceptTranslator conceptTranslator;
+	
+	@Autowired
+	private LocationReferenceTranslator locationReferenceTranslator;
 	
 	@Override
 	public Extension toFhirResource(@Nonnull PersonAttribute personAttribute) {
@@ -95,9 +97,7 @@ public class PersonAttributeTranslatorImpl implements PersonAttributeTranslator 
 				personAttribute.setAttributeType(personAttributeType);
 			}
 		}
-		catch (Exception e) {
-			log.warn("Error encountered while setting person attribute type for name: {}", attributeTypeName);
-		}
+		catch (Exception ignored) {}
 		
 		Extension valueExtension = personAttributeExtension
 		        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE_VALUE);
@@ -157,10 +157,7 @@ public class PersonAttributeTranslatorImpl implements PersonAttributeTranslator 
 		Location openmrsLocation = locationService.getLocation(Integer.parseInt(locationId));
 		
 		if (openmrsLocation != null) {
-			String locationUUID = openmrsLocation.getUuid();
-			Reference locationReference = new Reference().setType(LOCATION_TYPE)
-			        .setReference(LOCATION_TYPE + "/" + locationUUID);
-			locationReference.setDisplay(openmrsLocation.getDisplayString());
+			Reference locationReference = locationReferenceTranslator.toFhirResource(openmrsLocation);
 			valueExtension.setValue(locationReference);
 		}
 	}

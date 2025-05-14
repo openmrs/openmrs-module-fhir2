@@ -17,6 +17,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.equalToIgnoringCase;
 import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -116,6 +117,28 @@ public class PersonFhirResourceProviderIntegrationTest extends BaseFhirR3Integra
 		assertThat(response, isNotFound());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
+	}
+	
+	@Test
+	public void shouldReturnPersonAttributesAsExtensions() throws Exception {
+		MockHttpServletResponse response = get("/Person/" + PERSON_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Person person = readResponse(response);
+		
+		assertThat(person.hasExtension(), is(true));
+		assertThat(person,
+		    hasProperty("extension", hasProperty("url", equalTo(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE))));
+		
+		//Filtering for extensions of PersonAttributes
+		List<Extension> personAttributeExtensions = person.getExtension().stream()
+		        .filter(ext -> ext.getUrl().equals(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE))
+		        .collect(Collectors.toList());
+		
+		assertThat(personAttributeExtensions, hasSize(2));
 	}
 	
 	@Test
@@ -537,23 +560,5 @@ public class PersonFhirResourceProviderIntegrationTest extends BaseFhirR3Integra
 		
 		assertThat(response, isOk());
 		assertThat(response, statusEquals(HttpStatus.OK));
-	}
-	
-	@Test
-	public void shouldReturnPersonAttributesAsExtensions() throws Exception {
-		MockHttpServletResponse response = get("/Person/" + PERSON_UUID).accept(FhirMediaTypes.JSON).go();
-		
-		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
-		assertThat(response.getContentAsString(), notNullValue());
-		
-		Person person = readResponse(response);
-		
-		//Filtering for extensions of PersonAttributes
-		List<Extension> personAttributeExtensions = person.getExtension().stream()
-		        .filter(ext -> ext.getUrl().equals(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE))
-		        .collect(Collectors.toList());
-		
-		assertThat(personAttributeExtensions.size(), is(2));
 	}
 }
