@@ -136,8 +136,18 @@ public class PersonFhirResourceProviderIntegrationTest extends BaseFhirR4Integra
 		Person person = readResponse(response);
 		
 		assertThat(person.hasExtension(), is(true));
-		assertThat(person,
-		    hasProperty("extension", hasProperty("url", equalTo(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE))));
+		assertThat(person, hasProperty("extension"));
+		
+		Extension personAttributeExtension = person.getExtension().get(0);
+		
+		assertThat(personAttributeExtension, hasProperty("url"));
+		assertThat(personAttributeExtension.getUrl(), equalTo(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE));
+		assertThat(personAttributeExtension, hasProperty("extension"));
+		assertThat(personAttributeExtension.getExtension(), hasSize(2));
+		assertThat(personAttributeExtension.getExtensionsByUrl(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE_TYPE),
+		    notNullValue());
+		assertThat(personAttributeExtension.getExtensionsByUrl(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE_VALUE),
+		    notNullValue());
 		
 		//Filtering for extensions of PersonAttributes
 		List<Extension> personAttributeExtensions = person.getExtension().stream()

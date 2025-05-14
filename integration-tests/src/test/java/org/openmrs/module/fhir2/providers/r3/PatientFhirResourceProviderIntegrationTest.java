@@ -179,8 +179,18 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR3Integr
 		Patient patient = readResponse(response);
 		
 		assertThat(patient.hasExtension(), is(true));
-		assertThat(patient,
-		    hasProperty("extension", hasProperty("url", equalTo(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE))));
+		assertThat(patient, hasProperty("extension"));
+		
+		Extension personAttributeExtension = patient.getExtension().get(0);
+		
+		assertThat(personAttributeExtension, hasProperty("url"));
+		assertThat(personAttributeExtension.getUrl(), equalTo(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE));
+		assertThat(personAttributeExtension, hasProperty("extension"));
+		assertThat(personAttributeExtension.getExtension(), hasSize(2));
+		assertThat(personAttributeExtension.getExtensionsByUrl(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE_TYPE),
+		    notNullValue());
+		assertThat(personAttributeExtension.getExtensionsByUrl(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE_VALUE),
+		    notNullValue());
 		
 		//Filtering for extensions of PersonAttributes
 		List<Extension> personAttributeExtensions = patient.getExtension().stream()
