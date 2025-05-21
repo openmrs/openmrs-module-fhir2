@@ -123,9 +123,10 @@ public class PersonAttributeTranslatorImplTest {
 		personAttribute.setValue(STRING_ATTRIBUTE_VALUE);
 		
 		Extension result = personAttributeTranslator.toFhirResource(personAttribute);
-		Extension valueExtension = result.getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE_VALUE);
-		
 		assertThat(result, notNullValue());
+		
+		Extension valueExtension = result.getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE_VALUE);
+		assertThat(valueExtension, notNullValue());
 		assertThat(valueExtension.getValue() instanceof StringType, is(true));
 		assertThat(((StringType) valueExtension.getValue()).getValue(), equalTo(STRING_ATTRIBUTE_VALUE));
 	}
@@ -136,9 +137,10 @@ public class PersonAttributeTranslatorImplTest {
 		personAttribute.setValue(BOOLEAN_ATTRIBUTE_VALUE);
 		
 		Extension result = personAttributeTranslator.toFhirResource(personAttribute);
-		Extension valueExtension = result.getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE_VALUE);
-		
 		assertThat(result, notNullValue());
+		
+		Extension valueExtension = result.getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE_VALUE);
+		assertThat(valueExtension, notNullValue());
 		assertThat(valueExtension.getValue() instanceof BooleanType, is(true));
 		assertThat(((BooleanType) valueExtension.getValue()).getValue(), is(true));
 	}
@@ -159,10 +161,12 @@ public class PersonAttributeTranslatorImplTest {
 		
 		when(locationService.getLocation(LOCATION_ATTRIBUTE_ID)).thenReturn(location);
 		when(locationReferenceTranslator.toFhirResource(location)).thenReturn(locationReference);
-		Extension result = personAttributeTranslator.toFhirResource(personAttribute);
-		Extension valueExtension = result.getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE_VALUE);
 		
+		Extension result = personAttributeTranslator.toFhirResource(personAttribute);
 		assertThat(result, notNullValue());
+		
+		Extension valueExtension = result.getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE_VALUE);
+		assertThat(valueExtension, notNullValue());
 		assertThat(valueExtension.getValue() instanceof Reference, is(true));
 		Reference reference = (Reference) valueExtension.getValue();
 		assertThat(reference.getReference(), not("Location/" + LOCATION_ATTRIBUTE_ID));
@@ -181,14 +185,39 @@ public class PersonAttributeTranslatorImplTest {
 		when(conceptService.getConcept(CONCEPT_ATTRIBUTE_VALUE)).thenReturn(concept);
 		
 		CodeableConcept codeableConcept = new CodeableConcept();
+		codeableConcept.setText("ConceptText");
 		when(conceptTranslator.toFhirResource(concept)).thenReturn(codeableConcept);
 		
 		Extension result = personAttributeTranslator.toFhirResource(personAttribute);
-		Extension valueExtension = result.getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE_VALUE);
-		
 		assertThat(result, notNullValue());
+		
+		Extension valueExtension = result.getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE_VALUE);
+		assertThat(valueExtension, notNullValue());
+		
 		assertThat(valueExtension.getValue() instanceof CodeableConcept, is(true));
 		verify(conceptTranslator).toFhirResource(concept);
+	}
+	
+	@Test
+	public void shouldReturnNullWhenPersonAttributeIsNotSupported() {
+		personAttributeType.setFormat("invalid-format");
+		Extension result = personAttributeTranslator.toFhirResource(personAttribute);
+		
+		assertThat(result, equalTo(null));
+	}
+	
+	@Test
+	public void shouldReturnNullWhenPersonAttributeIsNull() {
+		Extension result = personAttributeTranslator.toFhirResource(null);
+		
+		assertThat(result, equalTo(null));
+	}
+	
+	@Test
+	public void shouldReturnNullWhenExtensionIsNull() {
+		PersonAttribute result = personAttributeTranslator.toOpenmrsType(null);
+		
+		assertThat(result, equalTo(null));
 	}
 	
 	@Test
@@ -197,6 +226,26 @@ public class PersonAttributeTranslatorImplTest {
 		extension.setUrl("invalid-url");
 		
 		PersonAttribute result = personAttributeTranslator.toOpenmrsType(extension);
+		
+		assertThat(result, equalTo(null));
+	}
+	
+	@Test
+	public void shouldReturnNullWhenLocationTypePersonAttributeHasNulLValue() {
+		personAttributeType.setFormat("org.openmrs.Location");
+		personAttribute.setValue(null);
+		
+		Extension result = personAttributeTranslator.toFhirResource(personAttribute);
+		
+		assertThat(result, equalTo(null));
+	}
+	
+	@Test
+	public void shouldReturnNullWhenConceptTypePersonAttributeHasNulLValue() {
+		personAttributeType.setFormat("org.openmrs.Concept");
+		personAttribute.setValue(null);
+		
+		Extension result = personAttributeTranslator.toFhirResource(personAttribute);
 		
 		assertThat(result, equalTo(null));
 	}

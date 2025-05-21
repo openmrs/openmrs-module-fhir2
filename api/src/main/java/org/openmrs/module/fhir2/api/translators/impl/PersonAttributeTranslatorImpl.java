@@ -117,8 +117,11 @@ public class PersonAttributeTranslatorImpl implements PersonAttributeTranslator 
 		personAttributeTypeExtension.setValue(personAttributeTypeValue);
 		
 		//Value Extension
-		Extension valueExtension = new Extension(new UriType(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE_VALUE));
-		setValueExtension(valueExtension, personAttribute);
+		Extension valueExtension = createValueExtension(personAttribute);
+		
+		if (valueExtension == null) {
+			return null;
+		}
 		
 		//Person Attribute Extension
 		Extension personAttributeExtension = new Extension(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE);
@@ -126,7 +129,8 @@ public class PersonAttributeTranslatorImpl implements PersonAttributeTranslator 
 		return personAttributeExtension;
 	}
 	
-	private void setValueExtension(Extension valueExtension, PersonAttribute personAttribute) {
+	private Extension createValueExtension(PersonAttribute personAttribute) {
+		Extension valueExtension = new Extension(new UriType(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE_VALUE));
 		String format = personAttribute.getAttributeType().getFormat();
 		String value = personAttribute.getValue();
 		
@@ -138,41 +142,53 @@ public class PersonAttributeTranslatorImpl implements PersonAttributeTranslator 
 				valueExtension.setValue(new BooleanType(value));
 				break;
 			case OPENMRS_LOCATION_FORMAT:
-				handleLocationFormat(valueExtension, value);
+				Reference locationRef = buildLocationReference(value);
+				if (locationRef != null) {
+					valueExtension.setValue(locationRef);
+				}
 				break;
 			case OPENMRS_CONCEPT_FORMAT:
-				handleConceptFormat(valueExtension, value);
+				CodeableConcept conceptCC = buildCondeableConcept(value); // Method returns CC or null
+				if (conceptCC != null) {
+					valueExtension.setValue(conceptCC);
+				}
 				break;
 			default:
 				log.warn("extension has unsupported patient attribute type format: {}", format);
-				valueExtension.setValue(null);
 		}
+		if (!valueExtension.hasValue()) {
+			log.warn("Could not create a FHIR value for attribute '{}' with format '{}'", personAttribute.getUuid(), format); // Or some other identifier
+			return null;
+		}
+		
+		return valueExtension;
 	}
 	
-	private void handleLocationFormat(Extension valueExtension, String locationId) {
+	private Reference buildLocationReference(String locationId) {
 		if (locationId == null) {
-			return;
+			return null;
 		}
 		
 		Location openmrsLocation = locationService.getLocation(Integer.parseInt(locationId));
 		
 		if (openmrsLocation != null) {
-			Reference locationReference = locationReferenceTranslator.toFhirResource(openmrsLocation);
-			valueExtension.setValue(locationReference);
+			return locationReferenceTranslator.toFhirResource(openmrsLocation);
 		}
+		
+		return null;
 	}
 	
-	private void handleConceptFormat(Extension valueExtension, String conceptId) {
+	private CodeableConcept buildCondeableConcept(String conceptId) {
 		if (conceptId == null) {
-			return;
+			return null;
 		}
 		
 		Concept concept = conceptService.getConcept(conceptId);
 		if (concept != null) {
-			CodeableConcept codeableConcept = conceptTranslator.toFhirResource(concept);
-			valueExtension.setValue(codeableConcept);
+			return conceptTranslator.toFhirResource(concept);
 		}
 		
+		return null;
 	}
 	
 	private boolean isValidPatientAttributeExtension(Extension extension) {
