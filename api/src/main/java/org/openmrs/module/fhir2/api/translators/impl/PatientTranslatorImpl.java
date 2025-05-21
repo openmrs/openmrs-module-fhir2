@@ -119,9 +119,14 @@ public class PatientTranslatorImpl implements PatientTranslator {
 		for (PersonAddress address : openmrsPatient.getAddresses()) {
 			patient.addAddress(addressTranslator.toFhirResource(address));
 		}
-		
-		if (!openmrsPatient.getAttributes().isEmpty()) {
-			patient.setExtension(getPersonAttributeExtensions(openmrsPatient));
+
+		Set<PersonAttribute> attributeSet = openmrsPatient.getAttributes();
+
+		for (PersonAttribute personAttribute: attributeSet) {
+			Extension personAttributeExtension = personAttributeTranslator.toFhirResource(personAttribute);
+			if(personAttributeExtension != null) {
+				patient.addExtension(personAttributeExtension);
+			}
 		}
 		
 		patient.setTelecom(getPatientContactDetails(openmrsPatient));
@@ -143,17 +148,7 @@ public class PatientTranslatorImpl implements PatientTranslator {
 		        .map(telecomTranslator::toFhirResource).collect(Collectors.toList());
 	}
 	
-	public List<Extension> getPersonAttributeExtensions(@Nonnull org.openmrs.Patient openmrsPatient) {
-		List<Extension> personAttributeExtensions = new ArrayList<>();
-		Set<PersonAttribute> personAttributes = openmrsPatient.getAttributes();
-		
-		for (PersonAttribute personAttribute : personAttributes) {
-			personAttributeExtensions.add(personAttributeTranslator.toFhirResource(personAttribute));
-		}
-		
-		return personAttributeExtensions;
-	}
-	
+
 	@Override
 	public org.openmrs.Patient toOpenmrsType(@Nonnull Patient fhirPatient) {
 		notNull(fhirPatient, "The Patient object should not be null");

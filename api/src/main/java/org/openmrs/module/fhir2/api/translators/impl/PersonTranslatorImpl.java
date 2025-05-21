@@ -105,7 +105,10 @@ public class PersonTranslatorImpl implements PersonTranslator {
 		Set<PersonAttribute> attributeSet = openmrsPerson.getAttributes();
 		
 		for (PersonAttribute personAttribute : attributeSet) {
-			person.addExtension(personAttributeTranslator.toFhirResource(personAttribute));
+			Extension personAttributeExtension = personAttributeTranslator.toFhirResource(personAttribute);
+			if(personAttributeExtension != null) {
+				person.addExtension(personAttributeExtension);
+			}
 		}
 		
 		person.getMeta().setLastUpdated(getLastUpdated(openmrsPerson));
