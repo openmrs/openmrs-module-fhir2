@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -25,7 +26,6 @@ import org.hl7.fhir.r4.model.MedicationDispense;
 import org.openmrs.annotation.OpenmrsProfile;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirMedicationDispenseService;
-import org.openmrs.module.fhir2.api.FhirPatientService;
 import org.openmrs.module.fhir2.api.search.param.MedicationDispenseSearchParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -34,12 +34,9 @@ import org.springframework.stereotype.Component;
 @NoArgsConstructor
 @OpenmrsProfile(openmrsPlatformVersion = "2.6.* - 9.*")
 public class SearchQueryIncludeImpl2_6<U extends IBaseResource> extends SearchQueryIncludeImpl<U> {
-	
-	@Setter(onMethod_ = @Autowired)
-	private FhirPatientService patientService;
-	
-	@Setter(onMethod_ = @Autowired)
-	private FhirMedicationDispenseService medicationDispenseService;
+
+	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
+	protected FhirMedicationDispenseService medicationDispenseService;
 	
 	@Override
 	protected IBundleProvider handleRevIncludeParam(Set<Include> includeSet, Set<Include> revIncludeSet,
