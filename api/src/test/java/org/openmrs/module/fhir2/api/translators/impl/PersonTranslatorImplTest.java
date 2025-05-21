@@ -33,6 +33,7 @@ import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.Before;
@@ -54,6 +55,7 @@ import org.openmrs.module.fhir2.api.translators.BirthDateTranslator;
 import org.openmrs.module.fhir2.api.translators.GenderTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonAddressTranslator;
+import org.openmrs.module.fhir2.api.translators.PersonAttributeTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonNameTranslator;
 import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
 
@@ -108,6 +110,9 @@ public class PersonTranslatorImplTest {
 	
 	private PersonTranslatorImpl personTranslator;
 	
+	@Mock
+	private PersonAttributeTranslator personAttributeTranslator;
+	
 	private Person personMock;
 	
 	@Before
@@ -120,6 +125,7 @@ public class PersonTranslatorImplTest {
 		personTranslator.setPatientDao(patientDao);
 		personTranslator.setPatientReferenceTranslator(patientReferenceTranslator);
 		personTranslator.setBirthDateTranslator(birthDateTranslator);
+		personTranslator.setPersonAttributeTranslator(personAttributeTranslator);
 	}
 	
 	@Before
@@ -141,6 +147,47 @@ public class PersonTranslatorImplTest {
 		Person person = new Person();
 		org.hl7.fhir.r4.model.Person result = personTranslator.toFhirResource(person);
 		assertThat(result, notNullValue());
+	}
+	
+	@Test
+	public void shouldTranslateOpenmrsPersonWithPersonAttributeToFhirPerson() {
+		org.openmrs.Person person = new org.openmrs.Person();
+		PersonAttributeType personAttributeType = new PersonAttributeType();
+		personAttributeType.setFormat("java.lang.String");
+		
+		PersonAttribute personAttribute = new PersonAttribute();
+		personAttribute.setUuid(PERSON_ATTRIBUTE_UUID);
+		personAttribute.setValue("RANDOM_VALUE");
+		personAttribute.setAttributeType(personAttributeType);
+		person.addAttribute(personAttribute);
+		
+		when(personAttributeTranslator.toFhirResource(personAttribute)).thenReturn(new Extension());
+		
+		org.hl7.fhir.r4.model.Person result = personTranslator.toFhirResource(person);
+		assertThat(result, notNullValue());
+		assertThat(result.getExtension(), notNullValue());
+		assertThat(result.getExtension(), hasSize(1));
+	}
+	
+	@Test
+	public void shouldTranslateOpenmrsPersonWithInvalidPersonAttributeToFhirPerson() {
+		org.openmrs.Person person = new org.openmrs.Person();
+		PersonAttributeType personAttributeType = new PersonAttributeType();
+		personAttributeType.setFormat("Unsupported_type");
+		
+		PersonAttribute personAttribute = new PersonAttribute();
+		personAttribute.setUuid(PERSON_ATTRIBUTE_UUID);
+		personAttribute.setValue("RANDOM_VALUE");
+		personAttribute.setAttributeType(personAttributeType);
+		
+		person.addAttribute(personAttribute);
+		
+		when(personAttributeTranslator.toFhirResource(personAttribute)).thenReturn(null);
+		
+		org.hl7.fhir.r4.model.Person result = personTranslator.toFhirResource(person);
+		assertThat(result, notNullValue());
+		assertThat(result.getExtension(), notNullValue());
+		assertThat(result.getExtension(), hasSize(0));
 	}
 	
 	@Test

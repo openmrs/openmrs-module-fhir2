@@ -15,7 +15,6 @@ import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.
 
 import javax.annotation.Nonnull;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -47,6 +46,7 @@ import org.openmrs.module.fhir2.api.translators.GenderTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientIdentifierTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonAddressTranslator;
+import org.openmrs.module.fhir2.api.translators.PersonAttributeTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonNameTranslator;
 import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,7 +82,7 @@ public class PatientTranslatorImpl implements PatientTranslator {
 	private TelecomTranslator<BaseOpenmrsData> telecomTranslator;
 	
 	@Autowired
-	private PersonAttributeTranslatorImpl personAttributeTranslator;
+	private PersonAttributeTranslator personAttributeTranslator;
 	
 	@Override
 	public Patient toFhirResource(@Nonnull org.openmrs.Patient openmrsPatient) {
@@ -119,12 +119,12 @@ public class PatientTranslatorImpl implements PatientTranslator {
 		for (PersonAddress address : openmrsPatient.getAddresses()) {
 			patient.addAddress(addressTranslator.toFhirResource(address));
 		}
-
+		
 		Set<PersonAttribute> attributeSet = openmrsPatient.getAttributes();
-
-		for (PersonAttribute personAttribute: attributeSet) {
+		
+		for (PersonAttribute personAttribute : attributeSet) {
 			Extension personAttributeExtension = personAttributeTranslator.toFhirResource(personAttribute);
-			if(personAttributeExtension != null) {
+			if (personAttributeExtension != null) {
 				patient.addExtension(personAttributeExtension);
 			}
 		}
@@ -148,7 +148,6 @@ public class PatientTranslatorImpl implements PatientTranslator {
 		        .map(telecomTranslator::toFhirResource).collect(Collectors.toList());
 	}
 	
-
 	@Override
 	public org.openmrs.Patient toOpenmrsType(@Nonnull Patient fhirPatient) {
 		notNull(fhirPatient, "The Patient object should not be null");
