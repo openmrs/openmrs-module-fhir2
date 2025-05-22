@@ -49,6 +49,8 @@ public class PersonAttributeTranslatorImplTest {
 	
 	private static final String ATTRIBUTE_TYPE_NAME = "Contact";
 	
+	private static final String NOT_IN_SYSTEM_ATTRIBUTE_TYPE_NAME = "Contact";
+	
 	private static final String STRING_ATTRIBUTE_VALUE = "254723723456";
 	
 	private static final String BOOLEAN_ATTRIBUTE_VALUE = "true";
@@ -91,6 +93,7 @@ public class PersonAttributeTranslatorImplTest {
 		personAttributeType.setFormat("java.lang.String");
 		
 		personAttribute = new PersonAttribute();
+		
 		personAttribute.setUuid(PERSON_ATTRIBUTE_UUID);
 		personAttribute.setAttributeType(personAttributeType);
 		personAttribute.setValue(STRING_ATTRIBUTE_VALUE);
@@ -270,6 +273,28 @@ public class PersonAttributeTranslatorImplTest {
 		assertThat(result, notNullValue());
 		assertThat(result.getAttributeType(), equalTo(personAttributeType));
 		assertThat(result.getValue(), equalTo(STRING_ATTRIBUTE_VALUE));
+	}
+	
+	@Test
+	public void shouldNotTranslateExtensionWithoutPersonAttributeTypeInSystemToPersonAttribute() {
+		Extension personAttributeTypeExtension = new Extension();
+		personAttributeTypeExtension.setUrl(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE_TYPE);
+		personAttributeTypeExtension.setValue(new StringType(NOT_IN_SYSTEM_ATTRIBUTE_TYPE_NAME));
+		
+		Extension personAttributeValueExtension = new Extension();
+		personAttributeValueExtension.setUrl(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE_VALUE);
+		personAttributeValueExtension.setValue(new StringType(STRING_ATTRIBUTE_VALUE));
+		
+		when(personService.getPersonAttributeTypeByName(NOT_IN_SYSTEM_ATTRIBUTE_TYPE_NAME)).thenReturn(null);
+		
+		Extension extension = new Extension();
+		extension.setUrl(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE);
+		extension.addExtension(personAttributeTypeExtension);
+		extension.addExtension(personAttributeValueExtension);
+		
+		PersonAttribute result = personAttributeTranslator.toOpenmrsType(extension);
+		
+		assertThat(result, equalTo(null));
 	}
 	
 	@Test

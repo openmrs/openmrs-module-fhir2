@@ -95,6 +95,9 @@ public class PersonAttributeTranslatorImpl implements PersonAttributeTranslator 
 			PersonAttributeType personAttributeType = personService.getPersonAttributeTypeByName(attributeTypeName);
 			if (personAttributeType != null) {
 				personAttribute.setAttributeType(personAttributeType);
+			} else {
+				//PersonAttribute should not be created without an attribute type.
+				return null;
 			}
 		}
 		catch (Exception ignored) {}
@@ -103,6 +106,9 @@ public class PersonAttributeTranslatorImpl implements PersonAttributeTranslator 
 		        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE_VALUE);
 		if (valueExtension.hasValue()) {
 			setPersonAttributeValue(personAttribute, valueExtension.getValue());
+		} else {
+			//PersonAttribute should not be created without a value.
+			return null;
 		}
 		
 		return personAttribute;
