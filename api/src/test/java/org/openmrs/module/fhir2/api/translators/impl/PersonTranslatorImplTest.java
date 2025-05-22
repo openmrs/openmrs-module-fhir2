@@ -36,6 +36,7 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -364,6 +365,59 @@ public class PersonTranslatorImplTest {
 		Person result = personTranslator.toOpenmrsType(person);
 		
 		assertThat(result, notNullValue());
+	}
+	
+	@Test
+	public void shouldTranslateFhirPersonWithPersonAttributeExtensionToOpenmrsPerson() {
+		org.hl7.fhir.r4.model.Person person = new org.hl7.fhir.r4.model.Person();
+		Extension personAttributeTypeExtension = new Extension();
+		personAttributeTypeExtension.setUrl(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE_TYPE);
+		personAttributeTypeExtension.setValue(new StringType("ATTRIBUTE_TYPE_NAME"));
+		
+		Extension personAttributeValueExtension = new Extension();
+		personAttributeValueExtension.setUrl(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE_VALUE);
+		personAttributeValueExtension.setValue(new StringType("STRING_ATTRIBUTE_VALUE"));
+		
+		Extension extension = new Extension();
+		extension.setUrl(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE);
+		extension.addExtension(personAttributeTypeExtension);
+		extension.addExtension(personAttributeValueExtension);
+		
+		person.addExtension(extension);
+		
+		PersonAttributeType personAttributeType = new PersonAttributeType();
+		personAttributeType.setFormat("java.lang.String");
+		
+		PersonAttribute personAttribute = new PersonAttribute();
+		personAttribute.setUuid(PERSON_ATTRIBUTE_UUID);
+		personAttribute.setValue("RANDOM_VALUE");
+		personAttribute.setAttributeType(personAttributeType);
+		
+		when(personAttributeTranslator.toOpenmrsType(extension)).thenReturn(personAttribute);
+		
+		org.openmrs.Person result = personTranslator.toOpenmrsType(person);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getAttributes(), notNullValue());
+		assertThat(result.getAttributes(), hasSize(1));
+	}
+	
+	@Test
+	public void shouldTranslateFhirPersonWithInvalidPersonAttributeExtensionToOpenmrsPerson() {
+		org.hl7.fhir.r4.model.Person person = new org.hl7.fhir.r4.model.Person();
+		
+		Extension extension = new Extension();
+		extension.setUrl(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE);
+		
+		person.addExtension(extension);
+		
+		when(personAttributeTranslator.toOpenmrsType(extension)).thenReturn(null);
+		
+		org.openmrs.Person result = personTranslator.toOpenmrsType(person);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getAttributes(), notNullValue());
+		assertThat(result.getAttributes(), hasSize(0));
 	}
 	
 	@Test
