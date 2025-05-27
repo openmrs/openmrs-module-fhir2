@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static lombok.AccessLevel.PROTECTED;
 import static org.openmrs.module.fhir2.api.util.FhirUtils.getMetadataTranslation;
 
 import javax.annotation.Nonnull;
@@ -17,7 +18,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -29,10 +30,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-@Setter(AccessLevel.PACKAGE)
 public class VisitTypeTranslatorImpl implements VisitTypeTranslator<VisitType> {
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private VisitService visitService;
 	
 	@Override

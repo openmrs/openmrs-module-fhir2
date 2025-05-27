@@ -35,9 +35,11 @@ public class FhirDiagnosticReportServiceImpl extends BaseFhirService<DiagnosticR
 	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
 	private DiagnosticReportTranslator translator;
 	
+	@Getter(value = AccessLevel.PROTECTED)
 	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
 	private SearchQueryInclude<DiagnosticReport> searchQueryInclude;
 	
+	@Getter(value = AccessLevel.PROTECTED)
 	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
 	private SearchQuery<FhirDiagnosticReport, DiagnosticReport, FhirDiagnosticReportDao, DiagnosticReportTranslator, SearchQueryInclude<DiagnosticReport>> searchQuery;
 	

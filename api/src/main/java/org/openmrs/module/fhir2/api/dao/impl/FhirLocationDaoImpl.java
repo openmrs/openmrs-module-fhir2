@@ -11,6 +11,7 @@ package org.openmrs.module.fhir2.api.dao.impl;
 
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
+import static lombok.AccessLevel.PROTECTED;
 import static org.hibernate.criterion.Restrictions.eq;
 import static org.hibernate.criterion.Restrictions.or;
 
@@ -31,7 +32,7 @@ import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
-import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Criterion;
@@ -51,10 +52,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLocationDao {
 	
-	@Setter(value = AccessLevel.PACKAGE, onMethod = @__(@Autowired))
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private LocationService locationService;
 	
-	@Setter(value = AccessLevel.PACKAGE, onMethod = @__(@Autowired))
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private FhirGlobalPropertyService globalPropertyService;
 	
 	@Override

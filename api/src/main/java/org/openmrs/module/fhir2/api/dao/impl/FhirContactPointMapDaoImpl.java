@@ -14,6 +14,7 @@ import javax.annotation.Nonnull;
 import java.util.Optional;
 
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.Criteria;
@@ -33,7 +34,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 public class FhirContactPointMapDaoImpl implements FhirContactPointMapDao {
 	
-	@Setter(value = AccessLevel.PACKAGE, onMethod = @__({ @Autowired, @Qualifier("sessionFactory") }))
+	@Getter(value = AccessLevel.PROTECTED)
+	@Setter(value = AccessLevel.PROTECTED, onMethod = @__({ @Autowired, @Qualifier("sessionFactory") }))
 	private SessionFactory sessionFactory;
 	
 	@Override

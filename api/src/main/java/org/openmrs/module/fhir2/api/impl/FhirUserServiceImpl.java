@@ -9,8 +9,9 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
+import static lombok.AccessLevel.PROTECTED;
+
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Practitioner;
@@ -27,18 +28,20 @@ import org.springframework.stereotype.Component;
 @Component
 public class FhirUserServiceImpl extends BaseFhirService<Practitioner, User> implements FhirUserService {
 	
-	@Getter(value = AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
+	@Getter(value = PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private FhirUserDao dao;
 	
-	@Getter(value = AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
+	@Getter(value = PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private PractitionerTranslator<User> translator;
 	
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
+	@Getter(value = PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private SearchQueryInclude<Practitioner> searchQueryInclude;
 	
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
+	@Getter(value = PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private SearchQuery<User, Practitioner, FhirUserDao, PractitionerTranslator<User>, SearchQueryInclude<Practitioner>> searchQuery;
 	
 	@Override

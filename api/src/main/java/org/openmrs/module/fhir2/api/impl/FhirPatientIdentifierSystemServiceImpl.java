@@ -14,6 +14,7 @@ import javax.annotation.Nonnull;
 import java.util.Optional;
 
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.module.fhir2.api.FhirPatientIdentifierSystemService;
@@ -23,10 +24,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-@Setter(AccessLevel.PACKAGE)
 public class FhirPatientIdentifierSystemServiceImpl implements FhirPatientIdentifierSystemService {
 	
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
+	@Getter(value = AccessLevel.PROTECTED)
+	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
 	private FhirPatientIdentifierSystemDao dao;
 	
 	@Override

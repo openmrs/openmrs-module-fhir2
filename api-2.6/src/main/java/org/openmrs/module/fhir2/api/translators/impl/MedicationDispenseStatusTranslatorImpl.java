@@ -10,11 +10,13 @@
 
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static lombok.AccessLevel.PROTECTED;
+
 import javax.annotation.Nonnull;
 
 import java.util.Optional;
 
-import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.MedicationDispense;
@@ -27,15 +29,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-@Setter(AccessLevel.PACKAGE)
 public class MedicationDispenseStatusTranslatorImpl implements MedicationDispenseStatusTranslator {
 	
 	public static final String CONCEPT_SOURCE_URI = "http://terminology.hl7.org/CodeSystem/medicationdispense-status";
 	
-	@Autowired
+	@Getter(value = PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	FhirConceptSourceService conceptSourceService;
 	
-	@Autowired
+	@Getter(value = PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	FhirConceptService conceptService;
 	
 	@Override

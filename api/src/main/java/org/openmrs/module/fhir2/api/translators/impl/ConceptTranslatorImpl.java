@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static lombok.AccessLevel.PROTECTED;
+
 import javax.annotation.Nonnull;
 
 import java.util.HashMap;
@@ -16,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -34,13 +36,14 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-@Setter(AccessLevel.PACKAGE)
 public class ConceptTranslatorImpl implements ConceptTranslator {
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private FhirConceptService conceptService;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private FhirConceptSourceService conceptSourceService;
 	
 	@Override

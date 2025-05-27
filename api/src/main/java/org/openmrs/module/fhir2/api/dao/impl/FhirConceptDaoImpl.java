@@ -24,6 +24,7 @@ import java.util.Optional;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.Criteria;
 import org.hibernate.transform.DistinctRootEntityResultTransformer;
@@ -42,6 +43,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 public class FhirConceptDaoImpl extends BaseFhirDao<Concept> implements FhirConceptDao {
 	
+	@Getter(value = AccessLevel.PROTECTED)
 	@Setter(value = AccessLevel.PUBLIC, onMethod = @__({ @Autowired, @VisibleForTesting }))
 	private ConceptService conceptService;
 	

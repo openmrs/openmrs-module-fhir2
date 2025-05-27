@@ -9,14 +9,17 @@
  */
 package org.openmrs.module.fhir2.api.mappings;
 
+import static lombok.AccessLevel.PROTECTED;
+import static org.hibernate.criterion.Projections.property;
 import static org.hibernate.criterion.Restrictions.eq;
 
 import javax.annotation.Nonnull;
 
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.HibernateException;
 import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Projections;
 import org.openmrs.module.fhir2.model.FhirEncounterClassMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -26,16 +29,16 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 public class EncounterClassMap {
-	
-	@Autowired
-	@Qualifier("sessionFactory")
+
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod = @__({ @Autowired, @Qualifier("sessionFactory") }))
 	private SessionFactory sessionFactory;
 	
 	public String getFhirClass(@Nonnull String locationUuid) {
 		try {
 			return (String) sessionFactory.getCurrentSession().createCriteria(FhirEncounterClassMap.class)
 			        .createAlias("location", "l").add(eq("l.uuid", locationUuid))
-			        .setProjection(Projections.property("encounterClass")).uniqueResult();
+			        .setProjection(property("encounterClass")).uniqueResult();
 		}
 		catch (HibernateException e) {
 			log.error("Exception caught while trying to load encounter type for location '{}'", locationUuid);

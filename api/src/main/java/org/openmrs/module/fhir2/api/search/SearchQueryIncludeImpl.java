@@ -25,6 +25,7 @@ import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.apache.commons.collections.CollectionUtils;
@@ -70,35 +71,45 @@ import org.springframework.stereotype.Component;
 @OpenmrsProfile(openmrsPlatformVersion = "2.* - 2.5.*")
 public class SearchQueryIncludeImpl<U extends IBaseResource> implements SearchQueryInclude<U> {
 	
+	@Getter(AccessLevel.PROTECTED)
 	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
-	protected FhirLocationService locationService;
-
+	private FhirLocationService locationService;
+	
+	@Getter(AccessLevel.PROTECTED)
 	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
-	protected FhirObservationService observationService;
-
+	private FhirObservationService observationService;
+	
+	@Getter(AccessLevel.PROTECTED)
 	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
-	protected FhirEncounterService encounterService;
-
+	private FhirEncounterService encounterService;
+	
+	@Getter(AccessLevel.PROTECTED)
 	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
-	protected FhirPatientService patientService;
-
+	private FhirPatientService patientService;
+	
+	@Getter(AccessLevel.PROTECTED)
 	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
-	protected FhirPractitionerService practitionerService;
-
+	private FhirPractitionerService practitionerService;
+	
+	@Getter(AccessLevel.PROTECTED)
 	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
-	protected FhirMedicationService medicationService;
-
+	private FhirMedicationService medicationService;
+	
+	@Getter(AccessLevel.PROTECTED)
 	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
-	protected FhirDiagnosticReportService diagnosticReportService;
-
+	private FhirDiagnosticReportService diagnosticReportService;
+	
+	@Getter(AccessLevel.PROTECTED)
 	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
-	protected FhirMedicationRequestService medicationRequestService;
-
+	private FhirMedicationRequestService medicationRequestService;
+	
+	@Getter(AccessLevel.PROTECTED)
 	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
-	protected FhirServiceRequestService serviceRequestService;
-
+	private FhirServiceRequestService serviceRequestService;
+	
+	@Getter(AccessLevel.PROTECTED)
 	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
-	protected FhirAllergyIntoleranceService allergyIntoleranceService;
+	private FhirAllergyIntoleranceService allergyIntoleranceService;
 	
 	@SuppressWarnings("unchecked")
 	@Override

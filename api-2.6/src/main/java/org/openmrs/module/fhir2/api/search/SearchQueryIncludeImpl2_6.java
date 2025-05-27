@@ -19,6 +19,7 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -34,9 +35,10 @@ import org.springframework.stereotype.Component;
 @NoArgsConstructor
 @OpenmrsProfile(openmrsPlatformVersion = "2.6.* - 9.*")
 public class SearchQueryIncludeImpl2_6<U extends IBaseResource> extends SearchQueryIncludeImpl<U> {
-
+	
+	@Getter(AccessLevel.PROTECTED)
 	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
-	protected FhirMedicationDispenseService medicationDispenseService;
+	private FhirMedicationDispenseService medicationDispenseService;
 	
 	@Override
 	protected IBundleProvider handleRevIncludeParam(Set<Include> includeSet, Set<Include> revIncludeSet,
@@ -56,7 +58,7 @@ public class SearchQueryIncludeImpl2_6<U extends IBaseResource> extends SearchQu
 				        .map(resource -> getIdFromReference(((MedicationDispense) resource).getSubject()))
 				        .filter(Objects::nonNull).collect(Collectors.toSet());
 				
-				return new LinkedHashSet<>(patientService.get(uniquePatientUUIDs));
+				return new LinkedHashSet<>(getPatientService().get(uniquePatientUUIDs));
 		}
 		
 		return super.handlePatientInclude(resourceList, paramType);

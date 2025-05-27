@@ -14,6 +14,7 @@ import java.util.Optional;
 
 import com.google.common.annotations.VisibleForTesting;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import org.openmrs.Concept;
 import org.openmrs.ConceptMap;
@@ -27,6 +28,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class FhirConceptServiceImpl implements FhirConceptService {
 	
+	@Getter(value = AccessLevel.PROTECTED)
 	@Setter(value = AccessLevel.PUBLIC, onMethod_ = { @Autowired, @VisibleForTesting })
 	private FhirConceptDao dao;
 	

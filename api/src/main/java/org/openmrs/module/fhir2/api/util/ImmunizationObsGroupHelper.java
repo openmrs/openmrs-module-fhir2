@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.api.util;
 
+import static lombok.AccessLevel.PROTECTED;
 import static org.openmrs.module.fhir2.FhirConstants.ADMINISTERING_ENCOUNTER_ROLE_PROPERTY;
 import static org.openmrs.module.fhir2.FhirConstants.IMMUNIZATIONS_ENCOUNTER_TYPE_PROPERTY;
 import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.IMMUNIZATION_CONCEPTS;
@@ -27,6 +28,7 @@ import java.util.stream.Collectors;
 
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.BaseOpenmrsObject;
@@ -43,19 +45,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-@Setter
 public class ImmunizationObsGroupHelper {
 	
-	@Autowired
+	@Getter(value = PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private ConceptService conceptService;
 	
-	@Autowired
+	@Getter(value = PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private ObsService obsService;
 	
-	@Autowired
+	@Getter(value = PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private EncounterService encounterService;
 	
-	@Autowired
+	@Getter(value = PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private FhirGlobalPropertyService globalPropertyService;
 	
 	public static UnprocessableEntityException createImmunizationRequestValidationError(@Nonnull String errMsg) {

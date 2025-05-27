@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.providers.r4;
 
 import static lombok.AccessLevel.PACKAGE;
+import static lombok.AccessLevel.PROTECTED;
 
 import javax.annotation.Nonnull;
 
@@ -28,6 +29,7 @@ import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Group;
@@ -43,13 +45,14 @@ import org.springframework.stereotype.Component;
 
 @Component("GroupFhirR4ResourceProvider")
 @R4Provider
-@Setter(PACKAGE)
 public class GroupFhirResourceProvider implements IResourceProvider {
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PACKAGE, onMethod_ = @Autowired)
 	private FhirGroupService groupService;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PACKAGE, onMethod_ = @Autowired)
 	private FhirGroupMemberService groupMemberService;
 	
 	@Override

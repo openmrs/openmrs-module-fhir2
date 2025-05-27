@@ -13,8 +13,6 @@ import static org.apache.commons.lang3.Validate.notNull;
 
 import javax.annotation.Nonnull;
 
-import lombok.AccessLevel;
-import lombok.Setter;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Type;
@@ -23,7 +21,6 @@ import org.openmrs.module.fhir2.api.translators.ObservationEffectiveDatetimeTran
 import org.springframework.stereotype.Component;
 
 @Component
-@Setter(AccessLevel.PACKAGE)
 public class ObservationEffectiveDatetimeTranslatorImpl implements ObservationEffectiveDatetimeTranslator {
 	
 	@Override

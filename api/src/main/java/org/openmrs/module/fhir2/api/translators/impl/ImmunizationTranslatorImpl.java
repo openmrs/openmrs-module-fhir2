@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static lombok.AccessLevel.PROTECTED;
 import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getLastUpdated;
 import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getVersionId;
 import static org.openmrs.module.fhir2.api.util.ImmunizationObsGroupHelper.createImmunizationRequestValidationError;
@@ -25,7 +26,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import com.google.common.collect.ImmutableSet;
-import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.Coding;
@@ -57,7 +58,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-@Setter(AccessLevel.PACKAGE)
 public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 	
 	public static final String IMMUNIZATION_GROUPING_CONCEPT = "CIEL:1421";
@@ -87,28 +87,36 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 		CIEL_165907 = conceptIterator.next();
 	}
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private ConceptService conceptService;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private ImmunizationObsGroupHelper helper;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private PatientReferenceTranslator patientReferenceTranslator;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private EncounterReferenceTranslator<Visit> visitReferenceTranslator;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private ConceptTranslator conceptTranslator;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private LocationReferenceTranslator locationReferenceTranslator;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private PractitionerReferenceTranslator<Provider> practitionerReferenceTranslator;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private ObservationValueTranslator observationValueTranslator;
 	
 	@Override

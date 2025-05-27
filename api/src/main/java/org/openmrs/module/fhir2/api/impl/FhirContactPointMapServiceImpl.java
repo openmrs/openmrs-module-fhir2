@@ -12,6 +12,7 @@ package org.openmrs.module.fhir2.api.impl;
 import java.util.Optional;
 
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import org.openmrs.PersonAttributeType;
 import org.openmrs.attribute.BaseAttributeType;
@@ -24,6 +25,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class FhirContactPointMapServiceImpl implements FhirContactPointMapService {
 	
+	@Getter(value = AccessLevel.PROTECTED)
 	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
 	private FhirContactPointMapDao dao;
 	

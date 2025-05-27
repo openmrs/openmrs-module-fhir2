@@ -42,9 +42,11 @@ public class FhirServiceRequestServiceImpl extends BaseFhirService<ServiceReques
 	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
 	private ServiceRequestTranslator<TestOrder> translator;
 	
+	@Getter(value = AccessLevel.PROTECTED)
 	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
 	private SearchQueryInclude<ServiceRequest> searchQueryInclude;
 	
+	@Getter(value = AccessLevel.PROTECTED)
 	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
 	private SearchQuery<TestOrder, ServiceRequest, FhirServiceRequestDao<TestOrder>, ServiceRequestTranslator<TestOrder>, SearchQueryInclude<ServiceRequest>> searchQuery;
 	

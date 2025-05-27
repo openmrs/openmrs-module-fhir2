@@ -60,7 +60,6 @@ import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
 
 @Component
-@Setter(AccessLevel.PUBLIC)
 public class FhirRestServlet extends RestfulServer implements ModuleLifecycleListener {
 	
 	private static final long serialVersionUID = 2L;
