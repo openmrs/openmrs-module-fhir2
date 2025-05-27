@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static lombok.AccessLevel.PROTECTED;
 import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getLastUpdated;
 import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getVersionId;
 
@@ -19,7 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -39,13 +40,14 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-@Setter(AccessLevel.PACKAGE)
 public class ValueSetTranslatorImpl implements ValueSetTranslator {
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private FhirConceptSourceService conceptSourceService;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private ValueSetReferenceTranslator valueSetReferenceTranslator;
 	
 	@Override

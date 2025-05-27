@@ -44,9 +44,11 @@ public class FhirObservationServiceImpl extends BaseFhirService<Observation, org
 	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
 	private ObservationTranslator translator;
 	
+	@Getter(value = AccessLevel.PROTECTED)
 	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
 	private SearchQueryInclude<Observation> searchQueryInclude;
 	
+	@Getter(value = AccessLevel.PROTECTED)
 	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
 	private SearchQuery<Obs, Observation, FhirObservationDao, ObservationTranslator, SearchQueryInclude<Observation>> searchQuery;
 	

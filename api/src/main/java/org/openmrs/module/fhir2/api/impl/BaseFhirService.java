@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
+import static lombok.AccessLevel.PROTECTED;
+
 import javax.annotation.Nonnull;
 
 import java.util.Collection;
@@ -24,8 +26,8 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import com.google.common.reflect.TypeToken;
-import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.Setter;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.openmrs.Auditable;
 import org.openmrs.OpenmrsObject;
@@ -52,9 +54,8 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 	
 	protected final Class<? super T> resourceClass;
 	
-	@Autowired
-	@Qualifier("fhirR4")
-	@Getter(AccessLevel.PROTECTED)
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @__({ @Autowired, @Qualifier("fhirR4") }))
 	private FhirContext fhirContext;
 	
 	protected BaseFhirService() {

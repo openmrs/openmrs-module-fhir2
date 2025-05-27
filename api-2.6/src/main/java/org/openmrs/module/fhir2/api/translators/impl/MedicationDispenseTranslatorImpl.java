@@ -16,6 +16,7 @@ import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.
 import javax.annotation.Nonnull;
 
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Extension;
@@ -41,33 +42,40 @@ import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-@Setter(AccessLevel.PACKAGE)
 @Component
 @OpenmrsProfile(openmrsPlatformVersion = "2.6.* - 2.*")
 public class MedicationDispenseTranslatorImpl implements MedicationDispenseTranslator<MedicationDispense> {
 	
-	@Autowired
+	@Getter(value = AccessLevel.PROTECTED)
+	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
 	private PatientReferenceTranslator patientReferenceTranslator;
 	
-	@Autowired
+	@Getter(value = AccessLevel.PROTECTED)
+	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
 	private EncounterReferenceTranslator<Encounter> encounterReferenceTranslator;
 	
-	@Autowired
+	@Getter(value = AccessLevel.PROTECTED)
+	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
 	private MedicationRequestReferenceTranslator medicationRequestReferenceTranslator;
 	
-	@Autowired
+	@Getter(value = AccessLevel.PROTECTED)
+	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
 	private MedicationRequestTranslator medicationRequestTranslator;
 	
-	@Autowired
+	@Getter(value = AccessLevel.PROTECTED)
+	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
 	private ConceptTranslator conceptTranslator;
 	
-	@Autowired
+	@Getter(value = AccessLevel.PROTECTED)
+	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
 	private LocationReferenceTranslator locationReferenceTranslator;
 	
-	@Autowired
+	@Getter(value = AccessLevel.PROTECTED)
+	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
 	private PractitionerReferenceTranslator<Provider> practitionerReferenceTranslator;
 	
-	@Autowired
+	@Getter(value = AccessLevel.PROTECTED)
+	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
 	private MedicationDispenseStatusTranslator medicationDispenseStatusTranslator;
 	
 	@Override

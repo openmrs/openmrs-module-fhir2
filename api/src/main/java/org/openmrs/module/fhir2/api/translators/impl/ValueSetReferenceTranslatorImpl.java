@@ -13,15 +13,12 @@ import static org.openmrs.module.fhir2.api.translators.impl.ReferenceHandlingTra
 
 import javax.annotation.Nonnull;
 
-import lombok.AccessLevel;
-import lombok.Setter;
 import org.hl7.fhir.r4.model.Reference;
 import org.openmrs.Concept;
 import org.openmrs.module.fhir2.api.translators.ValueSetReferenceTranslator;
 import org.springframework.stereotype.Component;
 
 @Component
-@Setter(AccessLevel.PACKAGE)
 public class ValueSetReferenceTranslatorImpl implements ValueSetReferenceTranslator {
 	
 	@Override

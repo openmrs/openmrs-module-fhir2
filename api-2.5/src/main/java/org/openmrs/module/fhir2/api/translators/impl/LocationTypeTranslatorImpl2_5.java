@@ -17,6 +17,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.openmrs.Location;
@@ -28,10 +29,10 @@ import org.springframework.stereotype.Component;
 
 @Component
 @OpenmrsProfile(openmrsPlatformVersion = "2.5.* - 9.*")
-@Setter(AccessLevel.PACKAGE)
 public class LocationTypeTranslatorImpl2_5 implements LocationTypeTranslator {
 	
-	@Autowired
+	@Getter(value = AccessLevel.PROTECTED)
+	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
 	private ConceptTranslator conceptTranslator;
 	
 	@Override
@@ -41,7 +42,7 @@ public class LocationTypeTranslatorImpl2_5 implements LocationTypeTranslator {
 		if (location.getType() != null) {
 			type = conceptTranslator.toFhirResource(location.getType());
 		}
-
+		
 		if (type != null) {
 			return Collections.singletonList(type);
 		} else {

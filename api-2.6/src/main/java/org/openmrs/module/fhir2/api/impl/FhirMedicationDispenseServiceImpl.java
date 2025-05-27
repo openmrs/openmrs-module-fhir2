@@ -9,7 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
-import static lombok.AccessLevel.PACKAGE;
 import static lombok.AccessLevel.PROTECTED;
 
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -31,17 +30,19 @@ import org.springframework.stereotype.Component;
 public class FhirMedicationDispenseServiceImpl extends BaseFhirService<MedicationDispense, org.openmrs.MedicationDispense> implements FhirMedicationDispenseService {
 	
 	@Getter(PROTECTED)
-	@Setter(value = PACKAGE, onMethod_ = @Autowired)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private FhirMedicationDispenseDao<org.openmrs.MedicationDispense> dao;
 	
 	@Getter(PROTECTED)
-	@Setter(value = PACKAGE, onMethod_ = @Autowired)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private MedicationDispenseTranslator<org.openmrs.MedicationDispense> translator;
 	
-	@Setter(value = PACKAGE, onMethod_ = @Autowired)
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private SearchQueryInclude<MedicationDispense> searchQueryInclude;
 	
-	@Setter(value = PACKAGE, onMethod_ = @Autowired)
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private SearchQuery<org.openmrs.MedicationDispense, MedicationDispense, FhirMedicationDispenseDao<org.openmrs.MedicationDispense>, MedicationDispenseTranslator<org.openmrs.MedicationDispense>, SearchQueryInclude<MedicationDispense>> searchQuery;
 	
 	@Override

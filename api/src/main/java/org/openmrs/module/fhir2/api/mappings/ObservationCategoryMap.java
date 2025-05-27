@@ -9,11 +9,12 @@
  */
 package org.openmrs.module.fhir2.api.mappings;
 
+import static lombok.AccessLevel.PROTECTED;
 import static org.hibernate.criterion.Restrictions.eq;
 
 import javax.annotation.Nonnull;
 
-import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.HibernateException;
@@ -27,10 +28,10 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Slf4j
-@Setter(AccessLevel.PUBLIC)
 public class ObservationCategoryMap {
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	@Qualifier("sessionFactory")
 	private SessionFactory sessionFactory;
 	

@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static lombok.AccessLevel.PROTECTED;
 import static org.apache.commons.lang3.Validate.notNull;
 import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getLastUpdated;
 import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getVersionId;
@@ -20,7 +21,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.r4.model.Address;
@@ -46,31 +47,38 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-@Setter(AccessLevel.PACKAGE)
 public class PersonTranslatorImpl implements PersonTranslator {
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private PersonNameTranslator nameTranslator;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private GenderTranslator genderTranslator;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private BirthDateTranslator birthDateTranslator;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private PersonAddressTranslator addressTranslator;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private TelecomTranslator<BaseOpenmrsData> telecomTranslator;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private PatientReferenceTranslator patientReferenceTranslator;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private FhirPatientDao patientDao;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private PersonAttributeTranslator personAttributeTranslator;
 	
 	@Override
@@ -106,7 +114,7 @@ public class PersonTranslatorImpl implements PersonTranslator {
 		
 		for (PersonAttribute personAttribute : attributeSet) {
 			Extension personAttributeExtension = personAttributeTranslator.toFhirResource(personAttribute);
-			if(personAttributeExtension != null) {
+			if (personAttributeExtension != null) {
 				person.addExtension(personAttributeExtension);
 			}
 		}
@@ -155,6 +163,7 @@ public class PersonTranslatorImpl implements PersonTranslator {
 		List<Extension> personAttributeExtensions = person.getExtension().stream()
 		        .filter(extension -> extension.getUrl().equals(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE))
 		        .collect(Collectors.toList());
+
 		for (Extension extension : personAttributeExtensions) {
 			PersonAttribute personAttribute = personAttributeTranslator.toOpenmrsType(extension);
 			if (personAttribute != null) {

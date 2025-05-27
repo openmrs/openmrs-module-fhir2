@@ -52,15 +52,19 @@ public class FhirEncounterServiceImpl extends BaseFhirService<Encounter, org.ope
 	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
 	private EncounterTranslator<org.openmrs.Encounter> translator;
 	
+	@Getter(value = AccessLevel.PROTECTED)
 	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
 	private SearchQueryInclude<Encounter> searchQueryInclude;
 	
+	@Getter(value = AccessLevel.PROTECTED)
 	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
 	private FhirGlobalPropertyService globalPropertyService;
 	
+	@Getter(value = AccessLevel.PROTECTED)
 	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
 	private SearchQuery<org.openmrs.Encounter, Encounter, FhirEncounterDao, EncounterTranslator<org.openmrs.Encounter>, SearchQueryInclude<Encounter>> searchQuery;
 	
+	@Getter(value = AccessLevel.PROTECTED)
 	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
 	private FhirVisitService visitService;
 	

@@ -15,22 +15,15 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
 import ca.uhn.fhir.rest.server.IServerAddressStrategy;
-import lombok.AccessLevel;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.util.FhirGlobalPropertyHolder;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
-@Slf4j
-@Setter(AccessLevel.PACKAGE)
 public class OpenmrsFhirAddressStrategy implements IServerAddressStrategy {
 	
 	@Override
-	@Transactional(readOnly = true)
 	public String determineServerBase(ServletContext context, HttpServletRequest request) {
 		String gpPrefix = FhirGlobalPropertyHolder.getGlobalProperty(FhirConstants.GLOBAL_PROPERTY_URI_PREFIX);
 		

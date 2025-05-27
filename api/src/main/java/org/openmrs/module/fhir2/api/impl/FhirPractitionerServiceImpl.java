@@ -47,18 +47,23 @@ public class FhirPractitionerServiceImpl extends BaseFhirService<Practitioner, P
 	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
 	private PractitionerTranslator<Provider> translator;
 	
+	@Getter(value = AccessLevel.PROTECTED)
 	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
 	private SearchQueryInclude<Practitioner> searchQueryInclude;
 	
+	@Getter(value = AccessLevel.PROTECTED)
 	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
 	private FhirGlobalPropertyService globalPropertyService;
 	
+	@Getter(value = AccessLevel.PROTECTED)
 	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
 	private SearchQuery<Provider, Practitioner, FhirPractitionerDao, PractitionerTranslator<Provider>, SearchQueryInclude<Practitioner>> searchQuery;
 	
+	@Getter(value = AccessLevel.PROTECTED)
 	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
 	private SearchQuery<User, Practitioner, FhirUserDao, PractitionerTranslator<User>, SearchQueryInclude<Practitioner>> userSearchQuery;
 	
+	@Getter(value = AccessLevel.PROTECTED)
 	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
 	private FhirUserService userService;
 	

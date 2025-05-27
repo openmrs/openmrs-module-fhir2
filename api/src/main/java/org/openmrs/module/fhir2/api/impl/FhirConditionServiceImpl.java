@@ -27,17 +27,19 @@ import org.springframework.stereotype.Component;
 public class FhirConditionServiceImpl extends BaseFhirService<Condition, org.openmrs.Condition> implements FhirConditionService {
 	
 	@Getter(AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
+	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
 	private FhirConditionDao dao;
 	
 	@Getter(AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
+	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
 	private ConditionTranslator<org.openmrs.Condition> translator;
 	
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
-	private SearchQueryInclude searchQueryInclude;
+	@Getter(value = AccessLevel.PROTECTED)
+	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
+	private SearchQueryInclude<Condition> searchQueryInclude;
 	
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
+	@Getter(value = AccessLevel.PROTECTED)
+	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
 	private SearchQuery<org.openmrs.Condition, Condition, FhirConditionDao, ConditionTranslator<org.openmrs.Condition>, SearchQueryInclude<Condition>> searchQuery;
 	
 	@Override

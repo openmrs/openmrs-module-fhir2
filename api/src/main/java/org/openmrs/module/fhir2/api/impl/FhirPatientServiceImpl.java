@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
+import static lombok.AccessLevel.PROTECTED;
+
 import javax.annotation.Nonnull;
 
 import java.util.Collection;
@@ -20,7 +22,6 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
@@ -43,21 +44,24 @@ import org.springframework.stereotype.Component;
 @Component
 public class FhirPatientServiceImpl extends BaseFhirService<Patient, org.openmrs.Patient> implements FhirPatientService {
 	
-	@Getter(value = AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
+	@Getter(value = PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private FhirPatientDao dao;
 	
-	@Getter(value = AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
+	@Getter(value = PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private PatientTranslator translator;
 	
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
+	@Getter(value = PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private FhirPatientIdentifierSystemDao systemDao;
 	
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
+	@Getter(value = PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private SearchQueryInclude<Patient> searchQueryInclude;
 	
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
+	@Getter(value = PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private SearchQuery<org.openmrs.Patient, Patient, FhirPatientDao, PatientTranslator, SearchQueryInclude<Patient>> searchQuery;
 	
 	@Override

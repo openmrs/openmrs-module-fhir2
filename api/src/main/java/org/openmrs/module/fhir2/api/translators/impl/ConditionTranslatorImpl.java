@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static lombok.AccessLevel.PROTECTED;
 import static org.apache.commons.lang3.Validate.notNull;
 import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getLastUpdated;
 import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getVersionId;
@@ -17,7 +18,7 @@ import javax.annotation.Nonnull;
 
 import java.util.Optional;
 
-import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.DateTimeType;
@@ -38,23 +39,27 @@ import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-@Setter(AccessLevel.PACKAGE)
 @Component
 public class ConditionTranslatorImpl implements ConditionTranslator<Condition> {
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private PatientReferenceTranslator patientReferenceTranslator;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private ConditionClinicalStatusTranslator<ConditionClinicalStatus> clinicalStatusTranslator;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private ConditionVerificationStatusTranslator<ConditionVerificationStatus> verificationStatusTranslator;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private PractitionerReferenceTranslator<User> practitionerReferenceTranslator;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private ConceptTranslator conceptTranslator;
 	
 	@Override

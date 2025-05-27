@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static lombok.AccessLevel.PROTECTED;
+
 import javax.annotation.Nonnull;
 
 import java.util.Collections;
@@ -16,7 +18,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.openmrs.Concept;
@@ -35,19 +37,22 @@ import org.springframework.stereotype.Component;
 
 @Component
 @OpenmrsProfile(openmrsPlatformVersion = "2.* - 2.4.*")
-@Setter(AccessLevel.PACKAGE)
 public class LocationTypeTranslatorImpl implements LocationTypeTranslator {
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private FhirConceptDao conceptDao;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private FhirLocationDao locationDao;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private ConceptTranslator conceptTranslator;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private FhirGlobalPropertyService globalPropertyService;
 	
 	@Override
@@ -67,7 +72,7 @@ public class LocationTypeTranslatorImpl implements LocationTypeTranslator {
 					
 					CodeableConcept type = conceptTranslator
 					        .toFhirResource(conceptDao.get(typeAttribute.getValue().toString()));
-
+					
 					if (type != null) {
 						return Collections.singletonList(type);
 					} else {

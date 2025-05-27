@@ -19,6 +19,7 @@ import java.util.Optional;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Criterion;
@@ -37,7 +38,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implements FhirAllergyIntoleranceDao {
 	
-	@Setter(value = AccessLevel.PACKAGE, onMethod = @__(@Autowired))
+	@Getter(value = AccessLevel.PROTECTED)
+	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
 	private FhirGlobalPropertyService globalPropertyService;
 	
 	@Override

@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static lombok.AccessLevel.PROTECTED;
 import static org.apache.commons.lang3.Validate.notNull;
 import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getLastUpdated;
 import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getVersionId;
@@ -17,7 +18,7 @@ import javax.annotation.Nonnull;
 
 import java.util.Set;
 
-import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.r4.model.Group;
@@ -30,10 +31,10 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-@Setter(AccessLevel.MODULE)
 public class GroupTranslatorImpl extends BaseGroupTranslator implements GroupTranslator {
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private GroupMemberTranslator groupMemberTranslator;
 	
 	@Override

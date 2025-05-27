@@ -10,11 +10,13 @@
 package org.openmrs.module.fhir2.providers.r3;
 
 import static lombok.AccessLevel.PACKAGE;
+import static lombok.AccessLevel.PROTECTED;
 
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40;
 import org.hl7.fhir.dstu3.model.EpisodeOfCare;
@@ -27,10 +29,10 @@ import org.springframework.stereotype.Component;
 
 @Component("episodeOfCareFhirR3ResourceProvider")
 @R3Provider
-@Setter(PACKAGE)
 public class EpisodeOfCareFhirResourceProvider implements IResourceProvider {
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PACKAGE, onMethod_ = @Autowired)
 	private FhirEpisodeOfCareService episodeOfCareService;
 	
 	@Override

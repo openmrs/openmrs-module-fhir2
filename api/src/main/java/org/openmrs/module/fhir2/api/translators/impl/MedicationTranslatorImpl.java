@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static lombok.AccessLevel.PROTECTED;
 import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getLastUpdated;
 import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getVersionId;
 
@@ -18,7 +19,7 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 
-import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Medication;
@@ -32,12 +33,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-@Setter(AccessLevel.PACKAGE)
 public class MedicationTranslatorImpl implements MedicationTranslator {
 	
 	public static final String DRUG_NAME_EXTENSION = "drugName";
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private ConceptTranslator conceptTranslator;
 	
 	@Override

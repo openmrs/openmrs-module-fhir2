@@ -9,13 +9,14 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
+import static lombok.AccessLevel.PROTECTED;
 import static org.hibernate.criterion.Restrictions.eq;
 
 import javax.annotation.Nonnull;
 
 import java.util.Optional;
 
-import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
@@ -31,7 +32,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 public class FhirPatientIdentifierSystemDaoImpl implements FhirPatientIdentifierSystemDao {
 	
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @__({ @Autowired, @Qualifier("sessionFactory") }))
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @__({ @Autowired, @Qualifier("sessionFactory") }))
 	private SessionFactory sessionFactory;
 	
 	@Override

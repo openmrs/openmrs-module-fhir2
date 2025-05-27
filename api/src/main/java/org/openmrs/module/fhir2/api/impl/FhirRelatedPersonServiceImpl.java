@@ -9,8 +9,9 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
+import static lombok.AccessLevel.PROTECTED;
+
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.RelatedPerson;
@@ -27,18 +28,20 @@ import org.springframework.stereotype.Component;
 @Component
 public class FhirRelatedPersonServiceImpl extends BaseFhirService<RelatedPerson, Relationship> implements FhirRelatedPersonService {
 	
-	@Getter(value = AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
+	@Getter(value = PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private FhirRelatedPersonDao dao;
 	
-	@Getter(value = AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
+	@Getter(value = PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private RelatedPersonTranslator translator;
 	
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
+	@Getter(value = PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private SearchQueryInclude<RelatedPerson> searchQueryInclude;
 	
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
+	@Getter(value = PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private SearchQuery<Relationship, RelatedPerson, FhirRelatedPersonDao, RelatedPersonTranslator, SearchQueryInclude<RelatedPerson>> searchQuery;
 	
 	@Override

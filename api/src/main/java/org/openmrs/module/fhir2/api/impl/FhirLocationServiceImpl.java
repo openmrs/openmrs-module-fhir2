@@ -35,11 +35,23 @@ public class FhirLocationServiceImpl extends BaseFhirService<Location, org.openm
 	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
 	private LocationTranslator translator;
 	
+	@Getter(value = AccessLevel.PROTECTED)
 	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
 	private SearchQuery<org.openmrs.Location, Location, FhirLocationDao, LocationTranslator, SearchQueryInclude<Location>> searchQuery;
 	
+	@Getter(value = AccessLevel.PROTECTED)
 	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
 	private SearchQueryInclude<Location> searchQueryInclude;
+	
+	@Override
+	public org.openmrs.Location get(Integer id) {
+		return dao.get(id);
+	}
+	
+	@Override
+	public org.openmrs.Location getByUuid(String uuid) {
+		return dao.get(uuid);
+	}
 	
 	@Override
 	@Transactional(readOnly = true)

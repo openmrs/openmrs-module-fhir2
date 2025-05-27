@@ -29,6 +29,7 @@ import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Criteria;
@@ -51,10 +52,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObservationDao {
 	
-	@Setter(value = AccessLevel.PACKAGE, onMethod = @__(@Autowired))
+	@Getter(AccessLevel.PROTECTED)
+	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
 	private ObservationCategoryMap categoryMap;
 	
-	@Setter(value = AccessLevel.PACKAGE, onMethod = @__(@Autowired))
+	@Getter(AccessLevel.PROTECTED)
+	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
 	private FhirEncounterDao encounterDao;
 	
 	@Override

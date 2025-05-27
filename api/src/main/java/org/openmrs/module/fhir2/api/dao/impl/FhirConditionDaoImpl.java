@@ -31,13 +31,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class FhirConditionDaoImpl extends BaseFhirDao<Condition> implements FhirConditionDao {
 	
-	private ConditionClinicalStatus convertStatus(String status) {
-		if ("active".equalsIgnoreCase(status)) {
-			return ConditionClinicalStatus.ACTIVE;
-		}
-		return ConditionClinicalStatus.INACTIVE;
-	}
-	
 	@Override
 	public boolean hasDistinctResults() {
 		return false;
@@ -70,6 +63,13 @@ public class FhirConditionDaoImpl extends BaseFhirDao<Condition> implements Fhir
 					break;
 			}
 		});
+	}
+	
+	private ConditionClinicalStatus convertStatus(String status) {
+		if ("active".equalsIgnoreCase(status)) {
+			return ConditionClinicalStatus.ACTIVE;
+		}
+		return ConditionClinicalStatus.INACTIVE;
 	}
 	
 	private void handleCode(Criteria criteria, TokenAndListParam code) {

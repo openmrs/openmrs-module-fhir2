@@ -20,8 +20,13 @@ import org.openmrs.ConceptSource;
 import org.openmrs.annotation.Authorized;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.util.PrivilegeConstants;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface FhirConceptDao extends FhirDao<Concept> {
+	
+	@Transactional(readOnly = true)
+	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+	Concept get(@Nonnull Integer id);
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_CONCEPTS)

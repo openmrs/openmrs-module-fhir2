@@ -9,11 +9,12 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static lombok.AccessLevel.PROTECTED;
 import static org.openmrs.module.fhir2.api.util.GeneralUtils.isVoidedOrRetired;
 
 import javax.annotation.Nonnull;
 
-import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.openmrs.BaseOpenmrsData;
@@ -34,22 +35,26 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-@Setter(AccessLevel.PACKAGE)
 public class TelecomTranslatorImpl implements TelecomTranslator<BaseOpenmrsData> {
 	
-	@Autowired
+	@Getter(value = PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private PersonService personService;
 	
-	@Autowired
+	@Getter(value = PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private LocationService locationService;
 	
-	@Autowired
+	@Getter(value = PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private ProviderService providerService;
 	
-	@Autowired
+	@Getter(value = PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private FhirContactPointMapService fhirContactPointMapService;
 	
-	@Autowired
+	@Getter(value = PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private FhirGlobalPropertyService globalPropertyService;
 	
 	@Override

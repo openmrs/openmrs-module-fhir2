@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Optional;
 
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
@@ -34,7 +35,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 public class FhirConceptSourceDaoImpl implements FhirConceptSourceDao {
 	
-	@Setter(value = AccessLevel.PACKAGE, onMethod = @__({ @Autowired, @Qualifier("sessionFactory") }))
+	@Getter(value = AccessLevel.PROTECTED)
+	@Setter(value = AccessLevel.PROTECTED, onMethod = @__({ @Autowired, @Qualifier("sessionFactory") }))
 	private SessionFactory sessionFactory;
 	
 	@Override

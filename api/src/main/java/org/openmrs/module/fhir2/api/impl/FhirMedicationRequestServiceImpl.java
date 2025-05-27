@@ -35,9 +35,11 @@ public class FhirMedicationRequestServiceImpl extends BaseFhirService<Medication
 	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
 	private MedicationRequestTranslator translator;
 	
+	@Getter(value = AccessLevel.PROTECTED)
 	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
 	private SearchQueryInclude<MedicationRequest> searchQueryInclude;
 	
+	@Getter(value = AccessLevel.PROTECTED)
 	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
 	private SearchQuery<DrugOrder, MedicationRequest, FhirMedicationRequestDao, MedicationRequestTranslator, SearchQueryInclude<MedicationRequest>> searchQuery;
 	

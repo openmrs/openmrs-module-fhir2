@@ -33,10 +33,10 @@ import org.openmrs.Concept;
 import org.openmrs.Location;
 import org.openmrs.PersonAttribute;
 import org.openmrs.PersonAttributeType;
-import org.openmrs.api.ConceptService;
-import org.openmrs.api.LocationService;
 import org.openmrs.api.PersonService;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.FhirConceptService;
+import org.openmrs.module.fhir2.api.FhirLocationService;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.LocationReferenceTranslator;
 
@@ -64,13 +64,13 @@ public class PersonAttributeTranslatorImplTest {
 	private static final String LOCATION_NAME = "Test Location";
 	
 	@Mock
-	private LocationService locationService;
+	private FhirLocationService locationService;
 	
 	@Mock
 	private PersonService personService;
 	
 	@Mock
-	private ConceptService conceptService;
+	private FhirConceptService conceptService;
 	
 	@Mock
 	private ConceptTranslator conceptTranslator;
@@ -162,7 +162,7 @@ public class PersonAttributeTranslatorImplTest {
 		locationReference.setType(FhirConstants.LOCATION);
 		locationReference.setDisplay(LOCATION_NAME);
 		
-		when(locationService.getLocation(LOCATION_ATTRIBUTE_ID)).thenReturn(location);
+		when(locationService.get(LOCATION_ATTRIBUTE_ID)).thenReturn(location);
 		when(locationReferenceTranslator.toFhirResource(location)).thenReturn(locationReference);
 		
 		Extension result = personAttributeTranslator.toFhirResource(personAttribute);
@@ -185,7 +185,7 @@ public class PersonAttributeTranslatorImplTest {
 		
 		Concept concept = new Concept();
 		concept.setConceptId(Integer.parseInt(CONCEPT_ATTRIBUTE_VALUE));
-		when(conceptService.getConcept(CONCEPT_ATTRIBUTE_VALUE)).thenReturn(concept);
+		when(conceptService.get(CONCEPT_ATTRIBUTE_VALUE)).thenReturn(concept);
 		
 		CodeableConcept codeableConcept = new CodeableConcept();
 		codeableConcept.setText("ConceptText");
@@ -342,7 +342,7 @@ public class PersonAttributeTranslatorImplTest {
 		location.setId(LOCATION_ATTRIBUTE_ID);
 		location.setUuid(LOCATION_ATTRIBUTE_UUID_VALUE);
 		
-		when(locationService.getLocationByUuid(LOCATION_ATTRIBUTE_UUID_VALUE)).thenReturn(location);
+		when(locationService.getByUuid(LOCATION_ATTRIBUTE_UUID_VALUE)).thenReturn(location);
 		
 		PersonAttribute result = personAttributeTranslator.toOpenmrsType(extension);
 		

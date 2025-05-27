@@ -30,17 +30,19 @@ import org.springframework.stereotype.Component;
 public class FhirGroupServiceImpl extends BaseFhirService<Group, Cohort> implements FhirGroupService {
 	
 	@Getter(value = AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
+	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
 	private FhirGroupDao dao;
 	
 	@Getter(value = AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
+	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
 	private GroupTranslator translator;
 	
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
+	@Getter(value = AccessLevel.PROTECTED)
+	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
 	private SearchQueryInclude<Group> searchQueryInclude;
 	
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
+	@Getter(value = AccessLevel.PROTECTED)
+	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
 	private SearchQuery<org.openmrs.Cohort, Group, FhirGroupDao, GroupTranslator, SearchQueryInclude<Group>> searchQuery;
 	
 	@Override

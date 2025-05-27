@@ -9,11 +9,16 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static lombok.AccessLevel.PROTECTED;
+import static org.openmrs.module.fhir2.api.util.FhirUtils.referenceToId;
+import static org.openmrs.module.fhir2.api.util.FhirUtils.referenceToType;
+
 import javax.annotation.Nonnull;
 
 import java.util.Arrays;
-import java.util.Optional;
 
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -26,14 +31,13 @@ import org.openmrs.Concept;
 import org.openmrs.Location;
 import org.openmrs.PersonAttribute;
 import org.openmrs.PersonAttributeType;
-import org.openmrs.api.ConceptService;
-import org.openmrs.api.LocationService;
 import org.openmrs.api.PersonService;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.FhirConceptService;
+import org.openmrs.module.fhir2.api.FhirLocationService;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.LocationReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonAttributeTranslator;
-import org.openmrs.module.fhir2.api.util.FhirUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -49,19 +53,24 @@ public class PersonAttributeTranslatorImpl implements PersonAttributeTranslator 
 	
 	private static final String OPENMRS_CONCEPT_FORMAT = "org.openmrs.Concept";
 	
-	@Autowired
-	private LocationService locationService;
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
+	private FhirLocationService locationService;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private PersonService personService;
 	
-	@Autowired
-	private ConceptService conceptService;
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
+	private FhirConceptService conceptService;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private ConceptTranslator conceptTranslator;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private LocationReferenceTranslator locationReferenceTranslator;
 	
 	@Override
@@ -107,7 +116,7 @@ public class PersonAttributeTranslatorImpl implements PersonAttributeTranslator 
 		if (valueExtension.hasValue()) {
 			setPersonAttributeValue(personAttribute, valueExtension.getValue());
 		} else {
-			//PersonAttribute should not be created without a value.
+			// PersonAttribute should not be created without a value.
 			return null;
 		}
 		
@@ -117,25 +126,25 @@ public class PersonAttributeTranslatorImpl implements PersonAttributeTranslator 
 	private Extension createPersonAttributeExtension(PersonAttribute personAttribute) {
 		PersonAttributeType attributeType = personAttribute.getAttributeType();
 		
-		//Type Extension
+		// Type Extension
 		StringType personAttributeTypeValue = new StringType(attributeType.getName());
 		Extension personAttributeTypeExtension = new Extension(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE_TYPE);
 		personAttributeTypeExtension.setValue(personAttributeTypeValue);
 		
-		//Value Extension
+		// Value Extension
 		Extension valueExtension = createValueExtension(personAttribute);
 		
 		if (valueExtension == null) {
 			return null;
 		}
 		
-		//Person Attribute Extension
+		// Person Attribute Extension
 		Extension personAttributeExtension = new Extension(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE);
 		personAttributeExtension.setExtension(Arrays.asList(personAttributeTypeExtension, valueExtension));
 		return personAttributeExtension;
 	}
 	
-	private Extension createValueExtension(PersonAttribute personAttribute) {
+	protected Extension createValueExtension(PersonAttribute personAttribute) {
 		Extension valueExtension = new Extension(new UriType(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE_VALUE));
 		String format = personAttribute.getAttributeType().getFormat();
 		String value = personAttribute.getValue();
@@ -154,7 +163,7 @@ public class PersonAttributeTranslatorImpl implements PersonAttributeTranslator 
 				}
 				break;
 			case OPENMRS_CONCEPT_FORMAT:
-				CodeableConcept conceptCC = buildCondeableConcept(value); // Method returns CC or null
+				CodeableConcept conceptCC = buildCodeableConcept(value); // Method returns CC or null
 				if (conceptCC != null) {
 					valueExtension.setValue(conceptCC);
 				}
@@ -170,12 +179,18 @@ public class PersonAttributeTranslatorImpl implements PersonAttributeTranslator 
 		return valueExtension;
 	}
 	
-	private Reference buildLocationReference(String locationId) {
+	protected Reference buildLocationReference(String locationId) {
 		if (locationId == null) {
 			return null;
 		}
 		
-		Location openmrsLocation = locationService.getLocation(Integer.parseInt(locationId));
+		Location openmrsLocation;
+		try {
+			openmrsLocation = locationService.get(Integer.parseInt(locationId));
+		}
+		catch (NumberFormatException e) {
+			return null;
+		}
 		
 		if (openmrsLocation != null) {
 			return locationReferenceTranslator.toFhirResource(openmrsLocation);
@@ -184,12 +199,12 @@ public class PersonAttributeTranslatorImpl implements PersonAttributeTranslator 
 		return null;
 	}
 	
-	private CodeableConcept buildCondeableConcept(String conceptId) {
+	protected CodeableConcept buildCodeableConcept(String conceptId) {
 		if (conceptId == null) {
 			return null;
 		}
 		
-		Concept concept = conceptService.getConcept(conceptId);
+		Concept concept = conceptService.get(conceptId);
 		if (concept != null) {
 			return conceptTranslator.toFhirResource(concept);
 		}
@@ -197,7 +212,7 @@ public class PersonAttributeTranslatorImpl implements PersonAttributeTranslator 
 		return null;
 	}
 	
-	private boolean isValidPatientAttributeExtension(Extension extension) {
+	protected boolean isValidPatientAttributeExtension(Extension extension) {
 		return extension != null && extension.hasUrl()
 		        && extension.getUrl().equals(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE) && extension.hasExtension()
 		        && extension.getExtension().size() == 2
@@ -207,24 +222,34 @@ public class PersonAttributeTranslatorImpl implements PersonAttributeTranslator 
 		        && extension.getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE_VALUE).hasValue();
 	}
 	
-	private String extractAttributeTypeName(Extension personAttributeExtension) {
+	protected String extractAttributeTypeName(Extension personAttributeExtension) {
 		return personAttributeExtension.getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE_TYPE).getValue()
 		        .toString();
 	}
 	
-	private void setPersonAttributeValue(PersonAttribute personAttribute, Type extensionValue) {
+	protected void setPersonAttributeValue(PersonAttribute personAttribute, Type extensionValue) {
 		if (extensionValue instanceof BooleanType) {
 			personAttribute.setValue(((BooleanType) extensionValue).getValueAsString());
 		} else if (extensionValue instanceof StringType) {
 			personAttribute.setValue(((StringType) extensionValue).getValue());
 		} else if (extensionValue instanceof Reference) {
-			String reference = ((Reference) extensionValue).getReference();
-			Optional<String> locationUUID = FhirUtils.referenceToId(reference);
-			if (locationUUID.isPresent()) {
-				Location location = locationService.getLocationByUuid(locationUUID.get());
-				if (location != null) {
-					personAttribute.setValue(location.getId().toString());
-				}
+			final String reference = ((Reference) extensionValue).getReference();
+			
+			if (reference != null) {
+				referenceToId(reference).ifPresent((uuid) -> {
+					referenceToType(reference).ifPresent((type) -> {
+						switch (type) {
+							case FhirConstants.LOCATION:
+								Location location = locationService.getByUuid(uuid);
+								if (location != null) {
+									personAttribute.setValue(location.getId().toString());
+								}
+								break;
+							default:
+								log.warn("Don't know how to handle a reference of type {}", type);
+						}
+					});
+				});
 			}
 		} else if (extensionValue instanceof CodeableConcept) {
 			Concept concept = conceptTranslator.toOpenmrsType((CodeableConcept) extensionValue);

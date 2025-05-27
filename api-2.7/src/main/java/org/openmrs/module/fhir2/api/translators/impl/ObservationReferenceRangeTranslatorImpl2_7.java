@@ -14,8 +14,6 @@ import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 
-import lombok.AccessLevel;
-import lombok.Setter;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Observation;
@@ -30,7 +28,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 @OpenmrsProfile(openmrsPlatformVersion = "2.7.* - 2.*")
-@Setter(AccessLevel.PACKAGE)
 public class ObservationReferenceRangeTranslatorImpl2_7 implements ObservationReferenceRangeTranslator {
 	
 	@Override

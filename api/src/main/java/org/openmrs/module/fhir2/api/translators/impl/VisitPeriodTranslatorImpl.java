@@ -11,15 +11,12 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import javax.annotation.Nonnull;
 
-import lombok.AccessLevel;
-import lombok.Setter;
 import org.hl7.fhir.r4.model.Period;
 import org.openmrs.Visit;
 import org.openmrs.module.fhir2.api.translators.EncounterPeriodTranslator;
 import org.springframework.stereotype.Component;
 
 @Component
-@Setter(AccessLevel.PACKAGE)
 public class VisitPeriodTranslatorImpl implements EncounterPeriodTranslator<Visit> {
 	
 	@Override
