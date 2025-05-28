@@ -25,6 +25,9 @@ import org.openmrs.util.PrivilegeConstants;
 
 public interface FhirLocationDao extends FhirDao<Location> {
 	
+	@Authorized(PrivilegeConstants.GET_LOCATIONS)
+	Location get(@Nonnull Integer id);
+	
 	@Override
 	@Authorized(PrivilegeConstants.GET_LOCATIONS)
 	Location get(@Nonnull String uuid);

@@ -17,6 +17,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.equalToIgnoringCase;
 import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -30,16 +31,19 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import lombok.AccessLevel;
 import lombok.Getter;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Enumerations;
+import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Person;
 import org.junit.Before;
 import org.junit.Test;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -113,6 +117,38 @@ public class PersonFhirResourceProviderIntegrationTest extends BaseFhirR3Integra
 		assertThat(response, isNotFound());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
+	}
+	
+	@Test
+	public void shouldReturnPersonAttributesAsExtensions() throws Exception {
+		MockHttpServletResponse response = get("/Person/" + PERSON_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Person person = readResponse(response);
+		
+		assertThat(person.hasExtension(), is(true));
+		assertThat(person, hasProperty("extension"));
+		
+		Extension personAttributeExtension = person.getExtension().get(0);
+		
+		assertThat(personAttributeExtension, hasProperty("url"));
+		assertThat(personAttributeExtension.getUrl(), equalTo(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE));
+		assertThat(personAttributeExtension, hasProperty("extension"));
+		assertThat(personAttributeExtension.getExtension(), hasSize(2));
+		assertThat(personAttributeExtension.getExtensionsByUrl(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE_TYPE),
+		    notNullValue());
+		assertThat(personAttributeExtension.getExtensionsByUrl(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE_VALUE),
+		    notNullValue());
+		
+		//Filtering for extensions of PersonAttributes
+		List<Extension> personAttributeExtensions = person.getExtension().stream()
+		        .filter(ext -> ext.getUrl().equals(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE))
+		        .collect(Collectors.toList());
+		
+		assertThat(personAttributeExtensions, hasSize(2));
 	}
 	
 	@Test

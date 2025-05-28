@@ -29,7 +29,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 public class EncounterClassMap {
-
+	
 	@Getter(PROTECTED)
 	@Setter(value = PROTECTED, onMethod = @__({ @Autowired, @Qualifier("sessionFactory") }))
 	private SessionFactory sessionFactory;
@@ -37,8 +37,8 @@ public class EncounterClassMap {
 	public String getFhirClass(@Nonnull String locationUuid) {
 		try {
 			return (String) sessionFactory.getCurrentSession().createCriteria(FhirEncounterClassMap.class)
-			        .createAlias("location", "l").add(eq("l.uuid", locationUuid))
-			        .setProjection(property("encounterClass")).uniqueResult();
+			        .createAlias("location", "l").add(eq("l.uuid", locationUuid)).setProjection(property("encounterClass"))
+			        .uniqueResult();
 		}
 		catch (HibernateException e) {
 			log.error("Exception caught while trying to load encounter type for location '{}'", locationUuid);

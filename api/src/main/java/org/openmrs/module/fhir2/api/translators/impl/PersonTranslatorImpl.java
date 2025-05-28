@@ -16,28 +16,36 @@ import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.
 
 import javax.annotation.Nonnull;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.r4.model.Address;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.HumanName;
 import org.openmrs.BaseOpenmrsData;
 import org.openmrs.Person;
 import org.openmrs.PersonAddress;
 import org.openmrs.PersonAttribute;
 import org.openmrs.PersonName;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirPatientDao;
 import org.openmrs.module.fhir2.api.translators.BirthDateTranslator;
 import org.openmrs.module.fhir2.api.translators.GenderTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonAddressTranslator;
+import org.openmrs.module.fhir2.api.translators.PersonAttributeTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonNameTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonTranslator;
 import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 public class PersonTranslatorImpl implements PersonTranslator {
 	
@@ -69,6 +77,10 @@ public class PersonTranslatorImpl implements PersonTranslator {
 	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private FhirPatientDao patientDao;
 	
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
+	private PersonAttributeTranslator personAttributeTranslator;
+	
 	@Override
 	public org.hl7.fhir.r4.model.Person toFhirResource(@Nonnull Person openmrsPerson) {
 		notNull(openmrsPerson, "The Openmrs Person object should not be null");
@@ -96,6 +108,15 @@ public class PersonTranslatorImpl implements PersonTranslator {
 		if (openmrsPerson.getIsPatient()) {
 			person.addLink(new org.hl7.fhir.r4.model.Person.PersonLinkComponent()
 			        .setTarget(patientReferenceTranslator.toFhirResource(patientDao.get(openmrsPerson.getUuid()))));
+		}
+		
+		Set<PersonAttribute> attributeSet = openmrsPerson.getAttributes();
+		
+		for (PersonAttribute personAttribute : attributeSet) {
+			Extension personAttributeExtension = personAttributeTranslator.toFhirResource(personAttribute);
+			if (personAttributeExtension != null) {
+				person.addExtension(personAttributeExtension);
+			}
 		}
 		
 		person.getMeta().setLastUpdated(getLastUpdated(openmrsPerson));
@@ -138,6 +159,17 @@ public class PersonTranslatorImpl implements PersonTranslator {
 		person.getTelecom().stream()
 		        .map(contactPoint -> (PersonAttribute) telecomTranslator.toOpenmrsType(new PersonAttribute(), contactPoint))
 		        .distinct().filter(Objects::nonNull).forEach(openmrsPerson::addAttribute);
+		
+		List<Extension> personAttributeExtensions = person.getExtension().stream()
+		        .filter(extension -> extension.getUrl().equals(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE))
+		        .collect(Collectors.toList());
+
+		for (Extension extension : personAttributeExtensions) {
+			PersonAttribute personAttribute = personAttributeTranslator.toOpenmrsType(extension);
+			if (personAttribute != null) {
+				openmrsPerson.addAttribute(personAttribute);
+			}
+		}
 		
 		return openmrsPerson;
 	}

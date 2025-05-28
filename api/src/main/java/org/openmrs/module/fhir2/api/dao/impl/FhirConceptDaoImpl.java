@@ -49,6 +49,12 @@ public class FhirConceptDaoImpl extends BaseFhirDao<Concept> implements FhirConc
 	
 	@Override
 	@Transactional(readOnly = true)
+	public Concept get(@Nonnull Integer id) {
+		return conceptService.getConcept(id);
+	}
+	
+	@Override
+	@Transactional(readOnly = true)
 	public Concept get(@Nonnull String uuid) {
 		return conceptService.getConceptByUuid(uuid);
 	}

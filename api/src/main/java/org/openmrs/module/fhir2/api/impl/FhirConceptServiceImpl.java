@@ -33,6 +33,11 @@ public class FhirConceptServiceImpl implements FhirConceptService {
 	private FhirConceptDao dao;
 	
 	@Override
+	public Concept get(Integer id) {
+		return dao.get(id);
+	}
+	
+	@Override
 	public Concept get(String uuid) {
 		return dao.get(uuid);
 	}

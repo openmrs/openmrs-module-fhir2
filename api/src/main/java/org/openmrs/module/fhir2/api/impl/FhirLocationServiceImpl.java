@@ -44,6 +44,16 @@ public class FhirLocationServiceImpl extends BaseFhirService<Location, org.openm
 	private SearchQueryInclude<Location> searchQueryInclude;
 	
 	@Override
+	public org.openmrs.Location get(Integer id) {
+		return dao.get(id);
+	}
+	
+	@Override
+	public org.openmrs.Location getByUuid(String uuid) {
+		return dao.get(uuid);
+	}
+	
+	@Override
 	@Transactional(readOnly = true)
 	public IBundleProvider searchForLocations(LocationSearchParams locationSearchParams) {
 		return searchQuery.getQueryResults(locationSearchParams.toSearchParameterMap(), dao, translator, searchQueryInclude);

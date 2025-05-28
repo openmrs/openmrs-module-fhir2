@@ -61,6 +61,11 @@ public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLo
 	private FhirGlobalPropertyService globalPropertyService;
 	
 	@Override
+	public Location get(@Nonnull Integer id) {
+		return locationService.getLocation(id);
+	}
+	
+	@Override
 	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
