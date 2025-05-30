@@ -163,7 +163,7 @@ public class PersonTranslatorImpl implements PersonTranslator {
 		List<Extension> personAttributeExtensions = person.getExtension().stream()
 		        .filter(extension -> extension.getUrl().equals(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE))
 		        .collect(Collectors.toList());
-
+		
 		for (Extension extension : personAttributeExtensions) {
 			PersonAttribute personAttribute = personAttributeTranslator.toOpenmrsType(extension);
 			if (personAttribute != null) {
