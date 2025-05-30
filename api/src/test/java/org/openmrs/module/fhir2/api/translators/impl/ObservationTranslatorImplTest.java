@@ -26,7 +26,9 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.exparity.hamcrest.date.DateMatchers;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -245,7 +247,9 @@ public class ObservationTranslatorImplTest {
 		observation.setConcept(concept);
 		CodeableConcept codeableConcept = new CodeableConcept();
 		codeableConcept.setId(CONCEPT_UUID);
-		when(conceptTranslator.toFhirResource(concept)).thenReturn(codeableConcept);
+		Map<Concept, CodeableConcept> conceptMap = new HashMap<>();
+		conceptMap.put(concept, codeableConcept);
+		when(conceptTranslator.toFhirResourcesMap(any())).thenReturn(conceptMap);
 		
 		Observation result = observationTranslator.toFhirResource(observation);
 		
