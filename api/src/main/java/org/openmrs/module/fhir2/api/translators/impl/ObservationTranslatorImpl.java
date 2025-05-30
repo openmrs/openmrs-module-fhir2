@@ -17,12 +17,19 @@ import static org.openmrs.module.fhir2.api.translators.impl.ReferenceHandlingTra
 
 import javax.annotation.Nonnull;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.proxy.HibernateProxy;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Reference;
 import org.openmrs.Concept;
@@ -97,60 +104,14 @@ public class ObservationTranslatorImpl implements ObservationTranslator {
 	
 	@Override
 	public Observation toFhirResource(@Nonnull Obs observation) {
-		notNull(observation, "The Obs object should not be null");
+		return toFhirResources(Collections.singletonList(observation)).get(0);
+	}
+	
+	@Override
+	public List<Observation> toFhirResources(Collection<Obs> openmrsObservations) {
+		ObservationTranslatorContext context = new ObservationTranslatorContext(openmrsObservations);
 		
-		Observation obs = new Observation();
-		obs.setId(observation.getUuid());
-		obs.setStatus(observationStatusTranslator.toFhirResource(observation));
-		
-		obs.setEncounter(encounterReferenceTranslator.toFhirResource(observation.getEncounter()));
-		
-		Person obsPerson = observation.getPerson();
-		if (obsPerson != null) {
-			if (obsPerson instanceof HibernateProxy) {
-				obsPerson = HibernateUtil.getRealObjectFromProxy(obsPerson);
-			}
-			
-			if (obsPerson instanceof Patient) {
-				obs.setSubject(patientReferenceTranslator.toFhirResource((Patient) obsPerson));
-			}
-		}
-		
-		obs.setCode(conceptTranslator.toFhirResource(observation.getConcept()));
-		obs.addCategory(categoryTranslator.toFhirResource(observation.getConcept()));
-		
-		if (observation.isObsGrouping()) {
-			for (Obs groupObs : observation.getGroupMembers()) {
-				if (!groupObs.getVoided()) {
-					obs.addHasMember(observationReferenceTranslator.toFhirResource(groupObs));
-				}
-			}
-		}
-		
-		obs.setValue(observationValueTranslator.toFhirResource(observation));
-		
-		obs.addInterpretation(interpretationTranslator.toFhirResource(observation));
-		
-		if (observation.getValueNumeric() != null) {
-			Concept concept = observation.getConcept();
-			if (concept instanceof ConceptNumeric) {
-				obs.setReferenceRange(referenceRangeTranslator.toFhirResource(observation));
-			}
-		}
-		
-		if (observation.getValueText() != null && StringUtils.equals(observation.getComment(), "org.openmrs.Location")) {
-			obs.addExtension(FhirConstants.OPENMRS_FHIR_EXT_OBS_LOCATION_VALUE,
-			    createLocationReferenceByUuid(observation.getValueText()));
-		}
-		
-		obs.setIssued(observation.getDateCreated());
-		obs.setEffective(datetimeTranslator.toFhirResource(observation));
-		obs.addBasedOn(basedOnReferenceTranslator.toFhirResource(observation.getOrder()));
-		
-		obs.getMeta().setLastUpdated(getLastUpdated(observation));
-		obs.getMeta().setVersionId(getVersionId(observation));
-		
-		return obs;
+		return openmrsObservations.stream().map(obs -> toFhirResource(obs, context)).collect(Collectors.toList());
 	}
 	
 	@Override
@@ -188,5 +149,73 @@ public class ObservationTranslatorImpl implements ObservationTranslator {
 		}
 		
 		return existingObs;
+	}
+	
+	private Observation toFhirResource(Obs observation, @Nonnull ObservationTranslatorContext context) {
+		notNull(observation, "The Obs object should not be null");
+		
+		Observation obs = new Observation();
+		obs.setId(observation.getUuid());
+		obs.setStatus(observationStatusTranslator.toFhirResource(observation));
+		
+		obs.setEncounter(encounterReferenceTranslator.toFhirResource(observation.getEncounter()));
+		
+		Person obsPerson = observation.getPerson();
+		if (obsPerson != null) {
+			if (obsPerson instanceof HibernateProxy) {
+				obsPerson = HibernateUtil.getRealObjectFromProxy(obsPerson);
+			}
+			
+			if (obsPerson instanceof Patient) {
+				obs.setSubject(patientReferenceTranslator.toFhirResource((Patient) obsPerson));
+			}
+		}
+		
+		obs.setCode(context.conceptToCodeableConceptMap.get(observation.getConcept()));
+		obs.addCategory(categoryTranslator.toFhirResource(observation.getConcept()));
+		
+		if (observation.isObsGrouping()) {
+			for (Obs groupObs : observation.getGroupMembers()) {
+				if (!groupObs.getVoided()) {
+					obs.addHasMember(observationReferenceTranslator.toFhirResource(groupObs));
+				}
+			}
+		}
+		
+		obs.setValue(observationValueTranslator.toFhirResource(observation));
+		obs.addInterpretation(interpretationTranslator.toFhirResource(observation));
+		
+		if (observation.getValueNumeric() != null) {
+			Concept concept = observation.getConcept();
+			if (concept instanceof ConceptNumeric) {
+				obs.setReferenceRange(referenceRangeTranslator.toFhirResource(observation));
+			}
+		}
+		
+		if (observation.getValueText() != null && StringUtils.equals(observation.getComment(), "org.openmrs.Location")) {
+			obs.addExtension(FhirConstants.OPENMRS_FHIR_EXT_OBS_LOCATION_VALUE,
+			    createLocationReferenceByUuid(observation.getValueText()));
+		}
+		
+		obs.setIssued(observation.getDateCreated());
+		obs.setEffective(datetimeTranslator.toFhirResource(observation));
+		
+		obs.addBasedOn(basedOnReferenceTranslator.toFhirResource(observation.getOrder()));
+		
+		obs.getMeta().setLastUpdated(getLastUpdated(observation));
+		obs.getMeta().setVersionId(getVersionId(observation));
+		
+		return obs;
+	}
+	
+	private class ObservationTranslatorContext {
+		
+		Map<Concept, CodeableConcept> conceptToCodeableConceptMap;
+		
+		ObservationTranslatorContext(Collection<Obs> observations) {
+			List<Concept> obsConcepts = observations.stream().map(Obs::getConcept).filter(Objects::nonNull).distinct()
+			        .collect(Collectors.toList());
+			this.conceptToCodeableConceptMap = conceptTranslator.toFhirResourcesMap(obsConcepts);
+		}
 	}
 }

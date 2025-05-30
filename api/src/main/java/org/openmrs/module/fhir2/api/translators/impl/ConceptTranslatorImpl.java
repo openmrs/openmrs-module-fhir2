@@ -9,14 +9,19 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static java.util.stream.Collectors.toMap;
 import static lombok.AccessLevel.PROTECTED;
 
 import javax.annotation.Nonnull;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -28,9 +33,13 @@ import org.openmrs.ConceptMap;
 import org.openmrs.ConceptMapType;
 import org.openmrs.ConceptReferenceTerm;
 import org.openmrs.ConceptSource;
+import org.openmrs.Duration;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirConceptService;
 import org.openmrs.module.fhir2.api.FhirConceptSourceService;
+import org.openmrs.module.fhir2.api.context.ConceptTranslatorContext;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
+import org.openmrs.module.fhir2.model.FhirConceptSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -48,45 +57,22 @@ public class ConceptTranslatorImpl implements ConceptTranslator {
 	
 	@Override
 	public CodeableConcept toFhirResource(@Nonnull Concept concept) {
-		if (concept == null) {
-			return null;
-		}
+		return toFhirResources(Collections.singletonList(concept)).get(0);
+	}
+	
+	@Override
+	public List<CodeableConcept> toFhirResources(Collection<Concept> openmrsConcepts) {
+		ConceptTranslatorContext context = getConceptTranslatorContext();
 		
-		CodeableConcept codeableConcept = new CodeableConcept();
-		codeableConcept.setText(concept.getDisplayString());
-		addConceptCoding(codeableConcept.addCoding(), null, concept.getUuid(), concept);
-		//map of <systemUrl ,<mapType , code>> ie { "http://loinc.org” : { "SAME-AS" : "108-5", "NARROWER-THAN": "108-8" }}
-		Map<String, Map<String, String>> systemUrlToCodeMap = new HashMap<>();
-		for (ConceptMap mapping : concept.getConceptMappings()) {
-			if (mapping.getConceptMapType() != null) {
-				ConceptMapType mapType = mapping.getConceptMapType();
-				boolean sameAs = mapType.getUuid() != null && mapType.getUuid().equals(ConceptMapType.SAME_AS_MAP_TYPE_UUID);
-				sameAs = sameAs || (mapType.getName() != null && mapType.getName().equalsIgnoreCase("SAME-AS"));
-				ConceptReferenceTerm crt = mapping.getConceptReferenceTerm();
-				String sourceUrl = conceptSourceService.getUrlForConceptSource(crt.getConceptSource());
-				if (sourceUrl != null) {
-					if (sameAs) {
-						addSystemToCodeMap(systemUrlToCodeMap, sourceUrl, "SAME-AS", crt.getCode());
-					} else {
-						addSystemToCodeMap(systemUrlToCodeMap, sourceUrl, mapType.getName(), crt.getCode());
-					}
-				}
-			}
-		}
+		return openmrsConcepts.stream().map(concept -> toFhirResource(concept, context)).collect(Collectors.toList());
+	}
+	
+	@Override
+	public Map<Concept, CodeableConcept> toFhirResourcesMap(Collection<Concept> openmrsConcepts) {
+		ConceptTranslatorContext context = getConceptTranslatorContext();
 		
-		for (String systemUrl : systemUrlToCodeMap.keySet()) {
-			Map<String, String> mapTypeToCodeMap = systemUrlToCodeMap.get(systemUrl);
-			if (mapTypeToCodeMap != null) {
-				if (mapTypeToCodeMap.size() == 1) {
-					for (String mapType : mapTypeToCodeMap.keySet()) {
-						addConceptCoding(codeableConcept.addCoding(), systemUrl, mapTypeToCodeMap.get(mapType), concept);
-					}
-				} else if (mapTypeToCodeMap.size() > 1 && mapTypeToCodeMap.containsKey("SAME-AS")) {
-					addConceptCoding(codeableConcept.addCoding(), systemUrl, mapTypeToCodeMap.get("SAME-AS"), concept);
-				}
-			}
-		}
-		return codeableConcept;
+		return openmrsConcepts.stream().distinct()
+		        .collect(toMap(Function.identity(), concept -> toFhirResource(concept, context)));
 	}
 	
 	@Override
@@ -126,6 +112,62 @@ public class ConceptTranslatorImpl implements ConceptTranslator {
 		return null;
 	}
 	
+	@Override
+	public ConceptTranslatorContext getConceptTranslatorContext() {
+		Map<String, FhirConceptSource> conceptSourceUuidToFhirConceptSourceMap = conceptSourceService.getFhirConceptSources()
+		        .stream().filter(cs -> cs.getConceptSource() != null)
+		        .collect(Collectors.toMap(cs -> cs.getConceptSource().getUuid(), Function.identity()));
+		
+		return new ConceptTranslatorContext(conceptSourceUuidToFhirConceptSourceMap);
+	}
+	
+	private CodeableConcept toFhirResource(Concept concept, @Nonnull ConceptTranslatorContext context) {
+		if (concept == null) {
+			return null;
+		}
+		
+		CodeableConcept codeableConcept = new CodeableConcept();
+		codeableConcept.setText(concept.getDisplayString());
+		addConceptCoding(codeableConcept.addCoding(), null, concept.getUuid(), concept);
+		
+		//map of <systemUrl ,<mapType , code>> ie { "http://loinc.org” : { "SAME-AS" : "108-5", "NARROWER-THAN": "108-8" }}
+		Map<String, Map<String, String>> systemUrlToCodeMap = new HashMap<>();
+		
+		for (ConceptMap mapping : concept.getConceptMappings()) {
+			if (mapping.getConceptMapType() != null) {
+				ConceptMapType mapType = mapping.getConceptMapType();
+				boolean sameAs = mapType.getUuid() != null && ConceptMapType.SAME_AS_MAP_TYPE_UUID.equals(mapType.getUuid());
+				sameAs = sameAs || (mapType.getName() != null && "SAME-AS".equalsIgnoreCase(mapType.getName()));
+				
+				ConceptReferenceTerm crt = mapping.getConceptReferenceTerm();
+				String sourceUrl = getSourceUrl(crt.getConceptSource(), context);
+				
+				if (sourceUrl != null) {
+					if (sameAs) {
+						addSystemToCodeMap(systemUrlToCodeMap, sourceUrl, "SAME-AS", crt.getCode());
+					} else {
+						addSystemToCodeMap(systemUrlToCodeMap, sourceUrl, mapType.getName(), crt.getCode());
+					}
+				}
+			}
+		}
+		
+		for (String systemUrl : systemUrlToCodeMap.keySet()) {
+			Map<String, String> mapTypeToCodeMap = systemUrlToCodeMap.get(systemUrl);
+			if (mapTypeToCodeMap != null) {
+				if (mapTypeToCodeMap.size() == 1) {
+					for (String mapType : mapTypeToCodeMap.keySet()) {
+						addConceptCoding(codeableConcept.addCoding(), systemUrl, mapTypeToCodeMap.get(mapType), concept);
+					}
+				} else if (mapTypeToCodeMap.size() > 1 && mapTypeToCodeMap.containsKey("SAME-AS")) {
+					addConceptCoding(codeableConcept.addCoding(), systemUrl, mapTypeToCodeMap.get("SAME-AS"), concept);
+				}
+			}
+		}
+		
+		return codeableConcept;
+	}
+	
 	private void addConceptCoding(Coding coding, String system, String code, Concept concept) {
 		coding.setSystem(system);
 		coding.setCode(code);
@@ -163,5 +205,22 @@ public class ConceptTranslatorImpl implements ConceptTranslator {
 				}
 			}
 		});
+	}
+	
+	private String getSourceUrl(ConceptSource conceptSource, ConceptTranslatorContext context) {
+		String sourceUrl = null;
+		if (conceptSource != null) {
+			FhirConceptSource fhirConceptSource = context.getFhirConceptSourcesByConceptSourceUuid()
+			        .get(conceptSource.getUuid());
+			if (fhirConceptSource != null && fhirConceptSource.getUrl() != null) {
+				sourceUrl = fhirConceptSource.getUrl();
+			} else {
+				sourceUrl = Duration.SNOMED_CT_CONCEPT_SOURCE_HL7_CODE.equals(conceptSource.getHl7Code())
+				        ? FhirConstants.SNOMED_SYSTEM_URI
+				        : null;
+			}
+		}
+		
+		return sourceUrl;
 	}
 }
