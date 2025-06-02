@@ -9,8 +9,12 @@
  */
 package org.openmrs.module.fhir2.api.translators;
 
+import static java.util.stream.Collectors.toMap;
+
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -29,5 +33,16 @@ public interface OpenmrsFhirTranslator<T, U> extends ToFhirTranslator<T, U>, ToO
 	 */
 	default List<U> toFhirResources(Collection<T> data) {
 		return data.stream().distinct().map(this::toFhirResource).collect(Collectors.toList());
+	}
+	
+	/**
+	 * Maps OpenMRS data elements to FHIR resource map.
+	 *
+	 * @param data the collection of OpenMRS data elements to translate
+	 * @return the mapping of OpenMRS data element to corresponding FHIR resource map
+	 * @since 2.6.0
+	 */
+	default Map<T, U> toFhirResourcesMap(Collection<T> data) {
+		return data.stream().distinct().collect(toMap(Function.identity(), this::toFhirResource));
 	}
 }
