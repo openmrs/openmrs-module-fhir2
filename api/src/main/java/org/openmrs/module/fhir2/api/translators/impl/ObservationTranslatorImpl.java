@@ -44,6 +44,7 @@ import org.openmrs.module.fhir2.api.translators.ObservationStatusTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationValueTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
+import org.openmrs.module.fhir2.api.util.ObsGroupHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -84,6 +85,9 @@ public class ObservationTranslatorImpl implements ObservationTranslator {
 	@Autowired
 	private ObservationEffectiveDatetimeTranslator datetimeTranslator;
 	
+	@Autowired
+	private ObsGroupHelper obsGroupHelper;
+	
 	@Override
 	public Observation toFhirResource(@Nonnull Obs observation) {
 		notNull(observation, "The Obs object should not be null");
@@ -115,8 +119,9 @@ public class ObservationTranslatorImpl implements ObservationTranslator {
 				}
 			}
 		}
-		
-		obs.setValue(observationValueTranslator.toFhirResource(observation));
+		if (!obs.hasHasMember()) {
+			obs.setValue(observationValueTranslator.toFhirResource(observation));
+		}
 		
 		obs.addInterpretation(interpretationTranslator.toFhirResource(observation));
 		
@@ -161,10 +166,17 @@ public class ObservationTranslatorImpl implements ObservationTranslator {
 		existingObs.setConcept(conceptTranslator.toOpenmrsType(observation.getCode()));
 		
 		for (Reference reference : observation.getHasMember()) {
-			existingObs.addGroupMember(observationReferenceTranslator.toOpenmrsType(reference));
+			Obs childObservation = observationReferenceTranslator.toOpenmrsType(reference);
+			if (childObservation.getObsGroup() == null) {
+				obsGroupHelper.voidAndAddToGroupNewObservation(existingObs, childObservation);
+			} else {
+				existingObs.addGroupMember(childObservation);
+			}
 		}
 		
-		observationValueTranslator.toOpenmrsType(existingObs, observation.getValue());
+		if (observation.hasValue()) {
+			observationValueTranslator.toOpenmrsType(existingObs, observation.getValue());
+		}
 		
 		if (!observation.getInterpretation().isEmpty()) {
 			interpretationTranslator.toOpenmrsType(existingObs, observation.getInterpretation().get(0));

@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import ca.uhn.fhir.context.FhirContext;
 import lombok.AccessLevel;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.Bundle;
@@ -289,8 +290,14 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR4In
 		// create obs
 		MockHttpServletResponse response = post("/Observation").accept(FhirMediaTypes.JSON).jsonContent(jsonObs).go();
 
-		// verify created correctly
+//		 verify created correctly
 		assertThat(response, isCreated());
+
+		String stringContent = response.getContentAsString();
+		Observation obs = FhirContext.forR4().newJsonParser().parseResource(Observation.class, stringContent);
+		MockHttpServletResponse childResponse = get("/Observation/"+obs.getHasMember().get(0).getReference().substring(12))
+				.accept(FhirMediaTypes.JSON).go();
+		assertThat(childResponse, isOk());
 	}
 	
 	@Test
