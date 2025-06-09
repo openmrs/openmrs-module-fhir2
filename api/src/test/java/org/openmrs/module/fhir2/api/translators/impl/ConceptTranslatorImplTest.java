@@ -23,8 +23,10 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -110,13 +112,13 @@ public class ConceptTranslatorImplTest {
 		fhirLoinc.setConceptSource(loinc);
 		fhirLoinc.setUrl(FhirTestConstants.LOINC_SYSTEM_URL);
 		when(conceptSourceService.getConceptSourceByUrl(FhirTestConstants.LOINC_SYSTEM_URL)).thenReturn(Optional.of(loinc));
-		when(conceptSourceService.getUrlForConceptSource(loinc)).thenReturn(FhirTestConstants.LOINC_SYSTEM_URL);
 		
-		FhirConceptSource fhirCiel = new FhirConceptSource();
+		fhirCiel = new FhirConceptSource();
 		fhirCiel.setConceptSource(ciel);
 		fhirCiel.setUrl(FhirTestConstants.CIEL_SYSTEM_URN);
 		when(conceptSourceService.getConceptSourceByUrl(FhirTestConstants.CIEL_SYSTEM_URN)).thenReturn(Optional.of(ciel));
-		when(conceptSourceService.getUrlForConceptSource(ciel)).thenReturn(FhirTestConstants.CIEL_SYSTEM_URN);
+		
+		when(conceptSourceService.getFhirConceptSources()).thenReturn(Arrays.asList(fhirLoinc, fhirCiel));
 	}
 	
 	@Test
@@ -427,5 +429,18 @@ public class ConceptTranslatorImplTest {
 		m.setConcept(concept);
 		m.setConceptReferenceTerm(new ConceptReferenceTerm(conceptSource, code, code));
 		concept.addConceptMapping(m);
+	}
+	
+	@Test
+	public void shouldTranslateConceptListToConceptCodeableMap() {
+		Map<Concept, CodeableConcept> result = conceptTranslator.toFhirResourcesMap(Collections.singletonList(concept));
+		CodeableConcept codeableConcept = result.get(concept);
+		assertThat(result, notNullValue());
+		assertThat(result.size(), equalTo(1));
+		assertThat(codeableConcept, notNullValue());
+		assertThat(codeableConcept.getCoding(), not(empty()));
+		assertThat(codeableConcept.getCoding().get(0).getSystem(), nullValue());
+		assertThat(codeableConcept.getCoding().get(0).getCode(), equalTo(CONCEPT_UUID));
+		assertThat(codeableConcept.getCoding().get(0).getDisplay(), equalTo(CONCEPT_NAME));
 	}
 }
