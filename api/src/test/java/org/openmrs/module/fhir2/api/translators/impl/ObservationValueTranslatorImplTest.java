@@ -38,11 +38,9 @@ import org.openmrs.Concept;
 import org.openmrs.ConceptNumeric;
 import org.openmrs.Obs;
 import org.openmrs.api.ConceptService;
-import org.openmrs.module.fhir2.api.dao.FhirConceptSourceDao;
+import org.openmrs.module.fhir2.api.FhirConceptSourceService;
 import org.openmrs.module.fhir2.api.dao.impl.FhirConceptDaoImpl;
-import org.openmrs.module.fhir2.api.dao.impl.FhirConceptSourceDaoImpl;
 import org.openmrs.module.fhir2.api.impl.FhirConceptServiceImpl;
-import org.openmrs.module.fhir2.api.impl.FhirConceptSourceServiceImpl;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ObservationValueTranslatorImplTest {
@@ -59,6 +57,9 @@ public class ObservationValueTranslatorImplTest {
 	@Mock
 	ConceptService conceptService;
 	
+	@Mock
+	FhirConceptSourceService fhirConceptSourceService;
+	
 	private Obs obs;
 	
 	private ObservationValueTranslatorImpl obsValueTranslator;
@@ -69,9 +70,6 @@ public class ObservationValueTranslatorImplTest {
 		fhirConceptDao.setConceptService(conceptService);
 		FhirConceptServiceImpl fhirConceptService = new FhirConceptServiceImpl();
 		fhirConceptService.setDao(fhirConceptDao);
-		FhirConceptSourceDao fhirConceptSourceDao = new FhirConceptSourceDaoImpl();
-		FhirConceptSourceServiceImpl fhirConceptSourceService = new FhirConceptSourceServiceImpl();
-		fhirConceptSourceService.setDao(fhirConceptSourceDao);
 		conceptTranslator = new ConceptTranslatorImpl();
 		conceptTranslator.setConceptService(fhirConceptService);
 		conceptTranslator.setConceptSourceService(fhirConceptSourceService);
