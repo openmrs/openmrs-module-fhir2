@@ -204,7 +204,7 @@ public class PersonAttributeTranslatorImpl implements PersonAttributeTranslator 
 			return null;
 		}
 		
-		Concept concept = conceptService.get(conceptId);
+		Concept concept = conceptService.get(Integer.parseInt(conceptId));
 		if (concept != null) {
 			return conceptTranslator.toFhirResource(concept);
 		}

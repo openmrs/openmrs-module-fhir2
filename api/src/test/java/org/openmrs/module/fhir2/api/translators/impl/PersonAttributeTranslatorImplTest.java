@@ -185,7 +185,7 @@ public class PersonAttributeTranslatorImplTest {
 		
 		Concept concept = new Concept();
 		concept.setConceptId(Integer.parseInt(CONCEPT_ATTRIBUTE_VALUE));
-		when(conceptService.get(CONCEPT_ATTRIBUTE_VALUE)).thenReturn(concept);
+		when(conceptService.get(Integer.parseInt(CONCEPT_ATTRIBUTE_VALUE))).thenReturn(concept);
 		
 		CodeableConcept codeableConcept = new CodeableConcept();
 		codeableConcept.setText("ConceptText");
