@@ -380,4 +380,17 @@ public class PersonAttributeTranslatorImplTest {
 		assertThat(result.getValue(), equalTo(CONCEPT_ATTRIBUTE_VALUE));
 	}
 	
+	@Test
+	public void shouldReturnNullWhenPersonAttributeIsVoided() {
+		personAttribute.setVoided(true);
+		Extension result = personAttributeTranslator.toFhirResource(personAttribute);
+		assertThat(result, equalTo(null));
+	}
+	
+	@Test
+	public void shouldReturnNullWhenConceptIdIsNotAnInteger() {
+		CodeableConcept result = personAttributeTranslator.buildCodeableConcept("notAnInt");
+		assertThat(result, equalTo(null));
+	}
+	
 }
