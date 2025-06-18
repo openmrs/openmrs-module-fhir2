@@ -75,7 +75,7 @@ public class PersonAttributeTranslatorImpl implements PersonAttributeTranslator 
 	
 	@Override
 	public Extension toFhirResource(@Nonnull PersonAttribute personAttribute) {
-		if (personAttribute == null || personAttribute.getAttributeType() == null) {
+		if (personAttribute == null || personAttribute.getVoided() || personAttribute.getAttributeType() == null) {
 			return null;
 		}
 		
@@ -200,16 +200,14 @@ public class PersonAttributeTranslatorImpl implements PersonAttributeTranslator 
 	}
 	
 	protected CodeableConcept buildCodeableConcept(String conceptId) {
-		if (conceptId == null) {
+		try {
+			int conceptValue = Integer.parseInt(conceptId);
+			Concept concept = conceptService.get(conceptValue);
+			return concept != null ? conceptTranslator.toFhirResource(concept) : null;
+		}
+		catch (NumberFormatException e) {
 			return null;
 		}
-		
-		Concept concept = conceptService.get(Integer.parseInt(conceptId));
-		if (concept != null) {
-			return conceptTranslator.toFhirResource(concept);
-		}
-		
-		return null;
 	}
 	
 	protected boolean isValidPatientAttributeExtension(Extension extension) {
