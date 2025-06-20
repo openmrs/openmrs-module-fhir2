@@ -200,14 +200,23 @@ public class PersonAttributeTranslatorImpl implements PersonAttributeTranslator 
 	}
 	
 	protected CodeableConcept buildCodeableConcept(String conceptId) {
+		if (conceptId == null) {
+			return null;
+		}
+		
+		Concept concept;
 		try {
-			int conceptValue = Integer.parseInt(conceptId);
-			Concept concept = conceptService.get(conceptValue);
-			return concept != null ? conceptTranslator.toFhirResource(concept) : null;
+			concept = conceptService.get(Integer.parseInt(conceptId));
 		}
 		catch (NumberFormatException e) {
 			return null;
 		}
+		
+		if (concept != null) {
+			return conceptTranslator.toFhirResource(concept);
+		}
+		
+		return null;
 	}
 	
 	protected boolean isValidPatientAttributeExtension(Extension extension) {
