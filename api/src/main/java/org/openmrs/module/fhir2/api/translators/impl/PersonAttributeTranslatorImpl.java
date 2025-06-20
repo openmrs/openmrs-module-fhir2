@@ -75,7 +75,7 @@ public class PersonAttributeTranslatorImpl implements PersonAttributeTranslator 
 	
 	@Override
 	public Extension toFhirResource(@Nonnull PersonAttribute personAttribute) {
-		if (personAttribute == null || personAttribute.getAttributeType() == null) {
+		if (personAttribute == null || personAttribute.getVoided() || personAttribute.getAttributeType() == null) {
 			return null;
 		}
 		
@@ -204,7 +204,14 @@ public class PersonAttributeTranslatorImpl implements PersonAttributeTranslator 
 			return null;
 		}
 		
-		Concept concept = conceptService.get(conceptId);
+		Concept concept;
+		try {
+			concept = conceptService.get(Integer.parseInt(conceptId));
+		}
+		catch (NumberFormatException e) {
+			return null;
+		}
+		
 		if (concept != null) {
 			return conceptTranslator.toFhirResource(concept);
 		}
