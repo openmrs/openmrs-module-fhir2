@@ -255,6 +255,7 @@ public class ServiceRequestSearchQueryTest extends BaseFhirContextSensitiveTest 
 		            hasProperty("coding",
 		                hasItem(allOf(hasProperty("code", equalTo(TEST_ORDER_LOINC_CODE)),
 		                    hasProperty("system", equalTo(FhirTestConstants.LOINC_SYSTEM_URL)))))),
+		        
 		        hasProperty("code", hasProperty("coding", hasItem(allOf(hasProperty("code", equalTo(TEST_ORDER_CIEL_CODE)),
 		            hasProperty("system", equalTo(FhirTestConstants.CIEL_SYSTEM_URN)))))))));
 	}
