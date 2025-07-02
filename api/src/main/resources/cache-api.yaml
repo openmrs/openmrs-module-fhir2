@@ -1,0 +1,5 @@
+caches:
+  fhir2ConceptToCodeableConcept:
+    configuration: "entity"
+  fhir2GetFhirConceptSources:
+    configuration: "entity"

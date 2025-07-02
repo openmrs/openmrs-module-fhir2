@@ -24,17 +24,17 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirConceptSourceService;
 import org.openmrs.module.fhir2.api.dao.FhirConceptSourceDao;
 import org.openmrs.module.fhir2.model.FhirConceptSource;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 
-@Component
 public class FhirConceptSourceServiceImpl implements FhirConceptSourceService {
 	
 	@Getter(value = AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PUBLIC, onMethod_ = { @Autowired, @VisibleForTesting })
+	@Setter(value = AccessLevel.PUBLIC, onMethod_ = { @VisibleForTesting })
 	private FhirConceptSourceDao dao;
 	
 	@Override
+	@Cacheable(value = "fhir2GetFhirConceptSources")
 	public Collection<FhirConceptSource> getFhirConceptSources() {
 		return dao.getFhirConceptSources();
 	}
@@ -81,7 +81,16 @@ public class FhirConceptSourceServiceImpl implements FhirConceptSourceService {
 	}
 	
 	@Override
+	@CacheEvict(value = "fhir2GetFhirConceptSources", allEntries = true)
 	public FhirConceptSource saveFhirConceptSource(@Nonnull FhirConceptSource fhirConceptSource) {
 		return dao.saveFhirConceptSource(fhirConceptSource);
+	}
+
+	@Override
+	public void onStartup() {
+	}
+
+	@Override
+	public void onShutdown() {
 	}
 }

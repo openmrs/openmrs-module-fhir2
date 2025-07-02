@@ -46,6 +46,7 @@ import org.hl7.fhir.r4.model.ServiceRequest;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.TestOrder;
+import org.openmrs.api.cache.CacheConfig;
 import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.FhirTestConstants;
@@ -121,6 +122,9 @@ public class ServiceRequestSearchQueryTest extends BaseFhirContextSensitiveTest 
 	private static final int END_INDEX = 10;
 	
 	@Autowired
+	CacheConfig cacheConfig;
+	
+	@Autowired
 	private FhirServiceRequestDao<TestOrder> dao;
 	
 	@Autowired
@@ -134,6 +138,8 @@ public class ServiceRequestSearchQueryTest extends BaseFhirContextSensitiveTest 
 	
 	@Before
 	public void setup() throws Exception {
+		// Needed until TRUNK-6299 in place
+		cacheConfig.cacheManager().getCacheNames().forEach(name -> cacheConfig.cacheManager().getCache(name).clear());
 		executeDataSet(TEST_ORDER_INITIAL_DATA);
 	}
 	
@@ -255,6 +261,7 @@ public class ServiceRequestSearchQueryTest extends BaseFhirContextSensitiveTest 
 		            hasProperty("coding",
 		                hasItem(allOf(hasProperty("code", equalTo(TEST_ORDER_LOINC_CODE)),
 		                    hasProperty("system", equalTo(FhirTestConstants.LOINC_SYSTEM_URL)))))),
+		        
 		        hasProperty("code", hasProperty("coding", hasItem(allOf(hasProperty("code", equalTo(TEST_ORDER_CIEL_CODE)),
 		            hasProperty("system", equalTo(FhirTestConstants.CIEL_SYSTEM_URN)))))))));
 	}

@@ -110,13 +110,12 @@ public class ConceptTranslatorImplTest {
 		fhirLoinc.setConceptSource(loinc);
 		fhirLoinc.setUrl(FhirTestConstants.LOINC_SYSTEM_URL);
 		when(conceptSourceService.getConceptSourceByUrl(FhirTestConstants.LOINC_SYSTEM_URL)).thenReturn(Optional.of(loinc));
-		when(conceptSourceService.getUrlForConceptSource(loinc)).thenReturn(FhirTestConstants.LOINC_SYSTEM_URL);
 		
-		FhirConceptSource fhirCiel = new FhirConceptSource();
+		fhirCiel = new FhirConceptSource();
 		fhirCiel.setConceptSource(ciel);
 		fhirCiel.setUrl(FhirTestConstants.CIEL_SYSTEM_URN);
 		when(conceptSourceService.getConceptSourceByUrl(FhirTestConstants.CIEL_SYSTEM_URN)).thenReturn(Optional.of(ciel));
-		when(conceptSourceService.getUrlForConceptSource(ciel)).thenReturn(FhirTestConstants.CIEL_SYSTEM_URN);
+		when(conceptSourceService.getFhirConceptSources()).thenReturn(Arrays.asList(fhirLoinc, fhirCiel));
 	}
 	
 	@Test
