@@ -188,4 +188,12 @@ public class ConceptTranslatorImpl implements ConceptTranslator {
 		
 		return sourceUrl;
 	}
+
+	@Override
+	public void onStartup() {
+	}
+
+	@Override
+	public void onShutdown() {
+	}
 }
