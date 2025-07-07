@@ -12,6 +12,7 @@ package org.openmrs.module.fhir2.api.impl;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.hl7.fhir.r4.model.Patient.SP_IDENTIFIER;
 import static org.openmrs.module.fhir2.FhirConstants.ENCOUNTER;
 import static org.openmrs.module.fhir2.FhirConstants.PATIENT;
@@ -20,11 +21,14 @@ import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslat
 import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.CIEL_1418;
 import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.CIEL_1419;
 import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.CIEL_1420;
+import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.CIEL_161011;
 import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.CIEL_165907;
 import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.CIEL_984;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -34,6 +38,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
@@ -142,6 +147,35 @@ public class FhirImmunizationServiceImplTest extends BaseFhirContextSensitiveTes
 		assertThat(members.get(CIEL_1420).getValueText(), is("FOO1234"));
 		assertThat(members.get(CIEL_165907).getValueDatetime(),
 		    equalTo(new DateTimeType("2022-07-31T18:30:00.000Z").getValue()));
+	}
+	
+	@Test
+	public void saveImmunization_shouldSaveImmunizationWithNoteField() throws Exception {
+		FhirContext ctx = FhirContext.forR4();
+		IParser parser = ctx.newJsonParser();
+		String json = IOUtils.toString(
+		    Objects.requireNonNull(
+		        getClass().getResourceAsStream("/org/openmrs/module/fhir2/providers/immunization-note.json")),
+		    StandardCharsets.UTF_8);
+		Immunization newImmunization = parser.parseResource(Immunization.class, json);
+		Immunization savedImmunization = service.create(newImmunization);
+		Obs obs = obsService.getObsByUuid(savedImmunization.getId());
+		Map<String, Obs> members = helper.getObsMembersMap(obs);
+		assertThat(members.get(CIEL_161011).getValueText(), is("This is a test immunization note."));
+		assertThat(savedImmunization.getNoteFirstRep().getText(), is("This is a test immunization note."));
+	}
+	
+	@Test
+	public void saveImmunization_shouldNotFailIfNoteConceptMissing() throws Exception {
+		FhirContext ctx = FhirContext.forR4();
+		IParser parser = ctx.newJsonParser();
+		String json = IOUtils.toString(
+		    Objects.requireNonNull(getClass()
+		            .getResourceAsStream("/org/openmrs/module/fhir2/providers/immunization-note-missing-concept.json")),
+		    StandardCharsets.UTF_8);
+		Immunization newImmunization = parser.parseResource(Immunization.class, json);
+		Immunization savedImmunization = service.create(newImmunization);
+		assertThat(savedImmunization, notNullValue());
 	}
 	
 	@Test
