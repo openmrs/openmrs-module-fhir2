@@ -382,29 +382,27 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 		} else {
 			openmrsImmunization.removeGroupMember(members.get(CIEL_165907));
 		}
-
-        if (fhirImmunization.hasNote() && fhirImmunization.getNoteFirstRep().hasText()) {
-            {
-                Obs obs = members.get(CIEL_161011);
-                if (obs == null) {
-                    obs = helper.addNewObs(openmrsImmunization, CIEL_161011);
-                    members.put(CIEL_161011, obs);
-                    obs.setValueText(fhirImmunization.getNoteFirstRep().getText());
-                } else if (obs.getId() == null) {
-                    obs.setValueText(fhirImmunization.getNoteFirstRep().getText());
-                } else {
-                    String newValue = fhirImmunization.getNoteFirstRep().getText();
-                    String prevValue = obs.getValueText();
-
-                    if (!newValue.equals(prevValue)) {
-                        obs = helper.replaceObs(openmrsImmunization, obs);
-                        obs.setValueText(newValue);
-                    }
-                }
-            }
-        } else {
-            openmrsImmunization.removeGroupMember(members.get(CIEL_161011));
-        }
+		
+		Concept noteConcept = helper.conceptOrNull(CIEL_161011);
+		if (noteConcept != null && fhirImmunization.hasNote() && fhirImmunization.getNoteFirstRep().hasText()) {
+			Obs obs = members.get(CIEL_161011);
+			if (obs == null) {
+				obs = helper.addNewObs(openmrsImmunization, CIEL_161011);
+				members.put(CIEL_161011, obs);
+				obs.setValueText(fhirImmunization.getNoteFirstRep().getText());
+			} else if (obs.getId() == null) {
+				obs.setValueText(fhirImmunization.getNoteFirstRep().getText());
+			} else {
+				String newValue = fhirImmunization.getNoteFirstRep().getText();
+				String prevValue = obs.getValueText();
+				if (!newValue.equals(prevValue)) {
+					obs = helper.replaceObs(openmrsImmunization, obs);
+					obs.setValueText(newValue);
+				}
+			}
+		} else {
+			openmrsImmunization.removeGroupMember(members.get(CIEL_161011));
+		}
 		
 		return openmrsImmunization;
 	}
@@ -467,13 +465,13 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 				immunization.setExpirationDate(obs.getValueDate());
 			}
 		}
-
-        {
-            Obs obs = members.get(CIEL_161011);
-            if (obs != null) {
-                immunization.addNote().setText(obs.getValueText());
-            }
-        }
+		
+		{
+			Obs obs = members.get(CIEL_161011);
+			if (obs != null) {
+				immunization.addNote().setText(obs.getValueText());
+			}
+		}
 		
 		immunization.getMeta().setLastUpdated(getLastUpdated(openmrsImmunization));
 		immunization.getMeta().setVersionId(getVersionId(openmrsImmunization));

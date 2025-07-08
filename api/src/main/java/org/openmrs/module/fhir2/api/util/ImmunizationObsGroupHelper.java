@@ -89,7 +89,14 @@ public class ImmunizationObsGroupHelper {
 		                + "', but no administering encounter role is defined for this instance."));
 	}
 	
+	public Concept conceptOrNull(String refTerm) {
+		return getConceptFromMapping(refTerm).orElse(null);
+	}
+	
 	public Concept concept(String refTerm) {
+		if ("CIEL:161011".equals(refTerm)) {
+			return conceptOrNull(refTerm);
+		}
 		return getConceptFromMapping(refTerm).orElseThrow(
 		    () -> createImmunizationRequestSetupError("The Immunization resource requires a concept mapped to '" + refTerm
 		            + "', however either multiple concepts are mapped to that term or not concepts are mapped to that term."));
