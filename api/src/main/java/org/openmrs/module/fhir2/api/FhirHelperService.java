@@ -9,18 +9,9 @@
  */
 package org.openmrs.module.fhir2.api;
 
-import java.util.Map;
-
-import org.openmrs.api.APIException;
-
-public interface FhirGlobalPropertyService extends FhirHelperService {
-	
-	String getGlobalProperty(String property) throws APIException;
-	
-	int getGlobalPropertyAsInteger(String property, int defaultValue);
-	
-	String getGlobalProperty(String property, String defaultValue);
-	
-	Map<String, String> getGlobalProperties(String... properties);
-	
-}
+/**
+ * Marker interface for services related to FHIR that do not implement the {@link FhirService}
+ * interface. This is mostly used for services related to additional tables managed by the FHIR2
+ * module to supply metadata.
+ */
+public interface FhirHelperService {}

@@ -66,10 +66,10 @@ public abstract class BaseFhirIntegrationTest<T extends IResourceProvider, U ext
 	private IParser xmlParser;
 	
 	private FhirRestServlet servlet;
-
+	
 	@Autowired
 	CacheConfig cacheConfig;
-
+	
 	@Autowired
 	private ConfigurableApplicationContext ctx;
 	
@@ -93,7 +93,7 @@ public abstract class BaseFhirIntegrationTest<T extends IResourceProvider, U ext
 	public void setup() throws Exception {
 		// Needed until TRUNK-6299 in place
 		cacheConfig.cacheManager().getCacheNames().forEach(name -> cacheConfig.cacheManager().getCache(name).clear());
-
+		
 		FhirGlobalPropertyHolder.reset();
 		jsonParser = getFhirContext().newJsonParser();
 		xmlParser = getFhirContext().newXmlParser();

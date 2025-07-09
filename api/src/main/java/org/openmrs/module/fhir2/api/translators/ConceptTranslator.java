@@ -13,9 +13,8 @@ import javax.annotation.Nonnull;
 
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.openmrs.Concept;
-import org.openmrs.api.OpenmrsService;
 
-public interface ConceptTranslator extends OpenmrsFhirTranslator<Concept, CodeableConcept>, OpenmrsService {
+public interface ConceptTranslator extends OpenmrsFhirTranslator<Concept, CodeableConcept> {
 	
 	/**
 	 * Maps a {@link Concept} to a {@link CodeableConcept}

@@ -22,6 +22,7 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.mappings.ObservationCategoryMap;
 import org.openmrs.module.fhir2.api.translators.ObservationCategoryTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -32,6 +33,7 @@ public class ObservationCategoryTranslatorImpl implements ObservationCategoryTra
 	private ObservationCategoryMap categoryMap;
 	
 	@Override
+	@Cacheable(value = "fhir2ObservationCategoryToCodeableConcept")
 	public CodeableConcept toFhirResource(@Nonnull Concept concept) {
 		if (concept == null || concept.getConceptClass() == null) {
 			return null;
