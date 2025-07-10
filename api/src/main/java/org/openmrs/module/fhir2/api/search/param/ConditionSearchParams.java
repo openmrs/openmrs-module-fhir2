@@ -39,11 +39,13 @@ public class ConditionSearchParams extends BaseResourceSearchParams {
 	private QuantityAndListParam onsetAge;
 	
 	private DateRangeParam recordedDate;
-	
+
+	private TokenAndListParam tag;
+
 	@Builder
 	public ConditionSearchParams(ReferenceAndListParam patientParam, TokenAndListParam code,
 	    TokenAndListParam clinicalStatus, DateRangeParam onsetDate, QuantityAndListParam onsetAge,
-	    DateRangeParam recordedDate, TokenAndListParam id, DateRangeParam lastUpdated, SortSpec sort,
+	    DateRangeParam recordedDate, TokenAndListParam tag, TokenAndListParam id, DateRangeParam lastUpdated, SortSpec sort,
 	    HashSet<Include> includes) {
 		
 		super(id, lastUpdated, sort, includes, null);
@@ -54,6 +56,7 @@ public class ConditionSearchParams extends BaseResourceSearchParams {
 		this.onsetDate = onsetDate;
 		this.onsetAge = onsetAge;
 		this.recordedDate = recordedDate;
+		this.tag = tag;
 	}
 	
 	@Override
