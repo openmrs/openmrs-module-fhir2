@@ -16,6 +16,7 @@ import static org.hamcrest.Matchers.not;
 import static org.hl7.fhir.r4.model.Patient.SP_IDENTIFIER;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.openmrs.module.fhir2.FhirConstants.ENCOUNTER;
 import static org.openmrs.module.fhir2.FhirConstants.PATIENT;
 import static org.openmrs.module.fhir2.FhirConstants.PRACTITIONER;
@@ -59,7 +60,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 public class FhirImmunizationServiceImplTest extends BaseFhirContextSensitiveTest {
-	
+
+	private static final String FREETEXT_COMMENT_CONCEPT_CODE = "161011";
+
+	private static final String FREETEXT_COMMENT_CONCEPT_SOURCE = "CIEL";
+
 	private static final String IMMUNIZATIONS_METADATA_XML = "org/openmrs/module/fhir2/Immunization_metadata.xml";
 	
 	private static final String IMMUNIZATIONS_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/services/impl/FhirImmunizationService_initial_data.xml";
@@ -174,9 +179,8 @@ public class FhirImmunizationServiceImplTest extends BaseFhirContextSensitiveTes
 	@Test
 	public void saveImmunization_shouldNotFailIfNoteConceptIsMissingAndNoteProvided() throws Exception {
 		// Remove the note concept since @Before loads it
-		if (conceptService.getConceptByMapping("161011", "CIEL") != null) {
-			conceptService.purgeConcept(conceptService.getConceptByMapping("161011", "CIEL"));
-		}
+		conceptService.purgeConcept(conceptService.getConceptByMapping(FREETEXT_COMMENT_CONCEPT_CODE, FREETEXT_COMMENT_CONCEPT_SOURCE));
+		assertNull(conceptService.getConceptByMapping(FREETEXT_COMMENT_CONCEPT_CODE, FREETEXT_COMMENT_CONCEPT_SOURCE));
 		
 		FhirContext ctx = FhirContext.forR4();
 		IParser parser = ctx.newJsonParser();
@@ -258,9 +262,9 @@ public class FhirImmunizationServiceImplTest extends BaseFhirContextSensitiveTes
 	@Test
 	public void updateImmunization_shouldNotFailIfNoteConceptIsMissingButNoteIsProvided() throws Exception {
 		// Remove the note concept since @Before loads it
-		if (conceptService.getConceptByMapping("161011", "CIEL") != null) {
-			conceptService.purgeConcept(conceptService.getConceptByMapping("161011", "CIEL"));
-		}
+		conceptService.purgeConcept(conceptService.getConceptByMapping(FREETEXT_COMMENT_CONCEPT_CODE, FREETEXT_COMMENT_CONCEPT_SOURCE));
+		assertNull(conceptService.getConceptByMapping(FREETEXT_COMMENT_CONCEPT_CODE, FREETEXT_COMMENT_CONCEPT_SOURCE));
+
 		FhirContext ctx = FhirContext.forR4();
 		IParser parser = ctx.newJsonParser();
 		String createJson = IOUtils.toString(

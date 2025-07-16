@@ -61,6 +61,8 @@ import org.springframework.stereotype.Component;
 public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 	
 	public static final String IMMUNIZATION_GROUPING_CONCEPT = "CIEL:1421";
+
+	public static final String IMMUNIZATION_FREE_TEXT_COMMENT_CONCEPT = "CIEL:161011";
 	
 	public static final Set<String> IMMUNIZATION_CONCEPTS = ImmutableSet.of("CIEL:984", "CIEL:1410", "CIEL:1418",
 	    "CIEL:1419", "CIEL:1420", "CIEL:165907", "CIEL:161011");

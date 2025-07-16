@@ -13,6 +13,7 @@ import static lombok.AccessLevel.PROTECTED;
 import static org.openmrs.module.fhir2.FhirConstants.ADMINISTERING_ENCOUNTER_ROLE_PROPERTY;
 import static org.openmrs.module.fhir2.FhirConstants.IMMUNIZATIONS_ENCOUNTER_TYPE_PROPERTY;
 import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.IMMUNIZATION_CONCEPTS;
+import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.IMMUNIZATION_FREE_TEXT_COMMENT_CONCEPT;
 import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.IMMUNIZATION_GROUPING_CONCEPT;
 import static org.openmrs.module.fhir2.api.util.FhirUtils.createExceptionErrorOperationOutcome;
 
@@ -94,7 +95,7 @@ public class ImmunizationObsGroupHelper {
 	}
 	
 	public Concept concept(String refTerm) {
-		if ("CIEL:161011".equals(refTerm)) {
+		if (IMMUNIZATION_FREE_TEXT_COMMENT_CONCEPT.equals(refTerm)) {
 			return conceptOrNull(refTerm);
 		}
 		return getConceptFromMapping(refTerm).orElseThrow(
