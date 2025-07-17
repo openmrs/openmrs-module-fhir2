@@ -49,6 +49,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Condition;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.FhirDiagnosisService;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirConditionDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
@@ -89,6 +90,9 @@ public class FhirConditionServiceImplTest {
 	private SearchQuery<Condition, org.hl7.fhir.r4.model.Condition, FhirConditionDao, ConditionTranslator<Condition>, SearchQueryInclude<org.hl7.fhir.r4.model.Condition>> searchQuery;
 	
 	private FhirConditionServiceImpl conditionService;
+	
+	@Mock
+	private FhirDiagnosisService diagnosisService;
 	
 	private Condition openmrsCondition;
 	
@@ -132,6 +136,7 @@ public class FhirConditionServiceImplTest {
 	
 	@Test
 	public void shouldThrowExceptionWhenGetMissingUuid() {
+		when(diagnosisService.get(WRONG_CONDITION_UUID)).thenThrow(ResourceNotFoundException.class);
 		assertThrows(ResourceNotFoundException.class, () -> conditionService.get(WRONG_CONDITION_UUID));
 	}
 	
@@ -240,6 +245,9 @@ public class FhirConditionServiceImplTest {
 		
 		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(CONDITION_UUID));
 		
+		TokenAndListParam tag = new TokenAndListParam()
+		        .addAnd(new TokenOrListParam().add(FhirConstants.OPENMRS_FHIR_EXT_CONDITION_TAG, "condition"));
+		
 		DateRangeParam lastUpdated = new DateRangeParam().setLowerBound(LAST_UPDATED_DATE).setUpperBound(LAST_UPDATED_DATE);
 		
 		SortSpec sort = new SortSpec("sort param");
@@ -265,7 +273,7 @@ public class FhirConditionServiceImplTest {
 		when(conditionTranslator.toFhirResources(anyCollection())).thenCallRealMethod();
 		
 		IBundleProvider result = conditionService.searchConditions(new ConditionSearchParams(patientReference, codeList,
-		        clinicalList, onsetDate, onsetAge, recordDate, uuid, lastUpdated, sort, includes));
+		        clinicalList, onsetDate, onsetAge, recordDate, tag, uuid, lastUpdated, sort, includes));
 		
 		List<IBaseResource> resultList = get(result);
 		
