@@ -147,14 +147,16 @@ public class FhirUtils {
 		}
 	}
 
-	public static Optional<OpenmrsConditionType> getOpenmrsConditionType(Condition condition) {
-		if(condition.hasCategory() && condition.getCategory().get(0).hasCoding()
-		&& condition.getCategoryFirstRep().getCodingFirstRep().equals("encounter-diagnosis")) {
-			return Optional.of(OpenmrsConditionType.DIAGNOSIS);
-		} else {
-			return Optional.of(OpenmrsConditionType.CONDITION);
-		}
-	}
+       public static Optional<OpenmrsConditionType> getOpenmrsConditionType(Condition condition) {
+               if (condition.hasCategory() && condition.getCategoryFirstRep().hasCoding()) {
+                       String code = condition.getCategoryFirstRep().getCodingFirstRep().getCode();
+                       if ("encounter-diagnosis".equals(code)) {
+                               return Optional.of(OpenmrsConditionType.DIAGNOSIS);
+                       }
+               }
+
+               return Optional.of(OpenmrsConditionType.CONDITION);
+       }
 	
 	/**
 	 * Provides implementation-defined localizations for OpenMRS Metadata. This should be used in any
