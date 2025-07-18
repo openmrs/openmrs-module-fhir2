@@ -110,6 +110,8 @@ public class FhirConditionServiceImplTest {
 		conditionService.setTranslator(conditionTranslator);
 		conditionService.setSearchQuery(searchQuery);
 		conditionService.setSearchQueryInclude(searchQueryInclude);
+		conditionService.setDiagnosisService(diagnosisService);
+		conditionService.setGlobalPropertyService(globalPropertyService);
 		
 		openmrsCondition = new Condition();
 		openmrsCondition.setUuid(CONDITION_UUID);

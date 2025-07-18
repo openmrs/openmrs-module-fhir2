@@ -9,14 +9,15 @@
  */
 package org.openmrs.module.fhir2.api.dao;
 
+import javax.annotation.Nonnull;
+
+import java.util.Collection;
+import java.util.List;
+
 import org.openmrs.Diagnosis;
 import org.openmrs.annotation.Authorized;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.util.PrivilegeConstants;
-
-import javax.annotation.Nonnull;
-import java.util.Collection;
-import java.util.List;
 
 public interface FhirDiagnosisDao extends FhirDao<Diagnosis> {
 	
@@ -37,7 +38,7 @@ public interface FhirDiagnosisDao extends FhirDao<Diagnosis> {
 	int getSearchResultsCount(@Nonnull SearchParameterMap theParams);
 	
 	@Override
-	@Authorized({ PrivilegeConstants.EDIT_DIAGNOSES})
+	@Authorized({ PrivilegeConstants.EDIT_DIAGNOSES })
 	Diagnosis createOrUpdate(@Nonnull Diagnosis newDiagnosis);
 	
 	@Override

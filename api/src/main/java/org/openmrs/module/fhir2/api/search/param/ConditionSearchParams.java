@@ -39,9 +39,9 @@ public class ConditionSearchParams extends BaseResourceSearchParams {
 	private QuantityAndListParam onsetAge;
 	
 	private DateRangeParam recordedDate;
-
+	
 	private TokenAndListParam tag;
-
+	
 	@Builder
 	public ConditionSearchParams(ReferenceAndListParam patientParam, TokenAndListParam code,
 	    TokenAndListParam clinicalStatus, DateRangeParam onsetDate, QuantityAndListParam onsetAge,

@@ -114,7 +114,7 @@ public final class FhirConstants {
 	        + "/patient/identifier#location";
 	
 	public static final String OPENMRS_FHIR_EXT_ENCOUNTER_TAG = OPENMRS_FHIR_EXT_PREFIX + "/encounter-tag";
-
+	
 	public static final String OPENMRS_FHIR_EXT_CONDITION_TAG = OPENMRS_FHIR_EXT_PREFIX + "/condition-tag";
 	
 	public static final String OPENMRS_FHIR_EXT_OBSERVATION_REFERENCE_RANGE = OPENMRS_FHIR_EXT_PREFIX

@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
+import static lombok.AccessLevel.PROTECTED;
+
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import lombok.Getter;
 import lombok.Setter;
@@ -22,8 +24,6 @@ import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.DiagnosisTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import static lombok.AccessLevel.PROTECTED;
 
 @Component
 public class FhirDiagnosisServiceImpl extends BaseFhirService<Condition, Diagnosis> implements FhirDiagnosisService {

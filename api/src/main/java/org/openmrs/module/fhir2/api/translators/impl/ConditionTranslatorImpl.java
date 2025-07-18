@@ -94,7 +94,7 @@ public class ConditionTranslatorImpl implements ConditionTranslator<Condition> {
 		
 		fhirCondition.setRecorder(practitionerReferenceTranslator.toFhirResource(condition.getCreator()));
 		fhirCondition.setRecordedDate(condition.getDateCreated());
-
+		
 		fhirCondition.getMeta().addTag(FhirConstants.OPENMRS_FHIR_EXT_CONDITION_TAG, "condition", "Condition");
 		fhirCondition.getMeta().setLastUpdated(getLastUpdated(condition));
 		fhirCondition.getMeta().setVersionId(getVersionId(condition));

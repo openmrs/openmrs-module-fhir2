@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
-import org.aspectj.apache.bcel.classfile.Module;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.OperationOutcome;
@@ -39,7 +38,7 @@ public class FhirUtils {
 		VISIT,
 		AMBIGUOUS
 	}
-
+	
 	public enum OpenmrsConditionType {
 		CONDITION,
 		DIAGNOSIS
@@ -146,17 +145,17 @@ public class FhirUtils {
 			return Optional.of(OpenmrsEncounterType.AMBIGUOUS);
 		}
 	}
-
-       public static Optional<OpenmrsConditionType> getOpenmrsConditionType(Condition condition) {
-               if (condition.hasCategory() && condition.getCategoryFirstRep().hasCoding()) {
-                       String code = condition.getCategoryFirstRep().getCodingFirstRep().getCode();
-                       if ("encounter-diagnosis".equals(code)) {
-                               return Optional.of(OpenmrsConditionType.DIAGNOSIS);
-                       }
-               }
-
-               return Optional.of(OpenmrsConditionType.CONDITION);
-       }
+	
+	public static Optional<OpenmrsConditionType> getOpenmrsConditionType(Condition condition) {
+		if (condition.hasCategory() && condition.getCategoryFirstRep().hasCoding()) {
+			String code = condition.getCategoryFirstRep().getCodingFirstRep().getCode();
+			if ("encounter-diagnosis".equals(code)) {
+				return Optional.of(OpenmrsConditionType.DIAGNOSIS);
+			}
+		}
+		
+		return Optional.of(OpenmrsConditionType.CONDITION);
+	}
 	
 	/**
 	 * Provides implementation-defined localizations for OpenMRS Metadata. This should be used in any
