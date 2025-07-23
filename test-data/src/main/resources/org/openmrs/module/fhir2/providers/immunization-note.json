@@ -1,0 +1,45 @@
+{
+  "resourceType": "Immunization",
+  "status": "completed",
+  "vaccineCode": {
+    "coding": [
+      {
+        "code": "15f83cd6-64e9-4e06-a5f9-364d3b14a43d",
+        "display": "Aspirin as a vaccine"
+      }
+    ]
+  },
+  "patient": {
+    "reference": "Patient/a7e04421-525f-442f-8138-05b619d16def",
+    "type": "Patient"
+  },
+  "encounter": {
+    "reference": "Encounter/7d8c1980-6b78-11e0-93c3-18a905e044dc",
+    "type": "Encounter"
+  },
+  "occurrenceDateTime": "2020-07-08T18:30:00.000Z",
+  "manufacturer": {
+    "display": "Acme"
+  },
+  "lotNumber": "FOO1234",
+  "expirationDate": "2022-07-31T18:30:00.000Z",
+  "performer": [
+    {
+      "actor": {
+        "reference": "Practitioner/f9badd80-ab76-11e2-9e96-0800200c9a66",
+        "type": "Practitioner"
+      }
+    }
+  ],
+  "protocolApplied": [
+    {
+      "doseNumberPositiveInt": 2,
+      "series": "Dose 2"
+    }
+  ],
+  "note": [
+    {
+      "text": "This is a test immunization note."
+    }
+  ]
+}

@@ -13,6 +13,7 @@ import static lombok.AccessLevel.PROTECTED;
 import static org.openmrs.module.fhir2.FhirConstants.ADMINISTERING_ENCOUNTER_ROLE_PROPERTY;
 import static org.openmrs.module.fhir2.FhirConstants.IMMUNIZATIONS_ENCOUNTER_TYPE_PROPERTY;
 import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.IMMUNIZATION_CONCEPTS;
+import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.IMMUNIZATION_FREE_TEXT_COMMENT_CONCEPT;
 import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.IMMUNIZATION_GROUPING_CONCEPT;
 import static org.openmrs.module.fhir2.api.util.FhirUtils.createExceptionErrorOperationOutcome;
 
@@ -89,7 +90,14 @@ public class ImmunizationObsGroupHelper {
 		                + "', but no administering encounter role is defined for this instance."));
 	}
 	
+	public Concept conceptOrNull(String refTerm) {
+		return getConceptFromMapping(refTerm).orElse(null);
+	}
+	
 	public Concept concept(String refTerm) {
+		if (IMMUNIZATION_FREE_TEXT_COMMENT_CONCEPT.equals(refTerm)) {
+			return conceptOrNull(refTerm);
+		}
 		return getConceptFromMapping(refTerm).orElseThrow(
 		    () -> createImmunizationRequestSetupError("The Immunization resource requires a concept mapped to '" + refTerm
 		            + "', however either multiple concepts are mapped to that term or not concepts are mapped to that term."));
