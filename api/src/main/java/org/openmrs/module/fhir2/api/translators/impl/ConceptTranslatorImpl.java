@@ -36,17 +36,20 @@ import org.openmrs.module.fhir2.api.FhirConceptService;
 import org.openmrs.module.fhir2.api.FhirConceptSourceService;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.model.FhirConceptSource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Component;
 
+@Component
 @Slf4j
 public class ConceptTranslatorImpl implements ConceptTranslator {
 	
 	@Getter(PROTECTED)
-	@Setter(PUBLIC)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private FhirConceptService conceptService;
 	
 	@Getter(PROTECTED)
-	@Setter(PUBLIC)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private FhirConceptSourceService conceptSourceService;
 	
 	@Override
@@ -187,13 +190,5 @@ public class ConceptTranslatorImpl implements ConceptTranslator {
 		}
 		
 		return sourceUrl;
-	}
-	
-	@Override
-	public void onStartup() {
-	}
-	
-	@Override
-	public void onShutdown() {
 	}
 }

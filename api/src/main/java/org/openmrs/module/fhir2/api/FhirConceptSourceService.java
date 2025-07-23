@@ -15,10 +15,9 @@ import java.util.Collection;
 import java.util.Optional;
 
 import org.openmrs.ConceptSource;
-import org.openmrs.api.OpenmrsService;
 import org.openmrs.module.fhir2.model.FhirConceptSource;
 
-public interface FhirConceptSourceService extends OpenmrsService {
+public interface FhirConceptSourceService extends FhirHelperService {
 	
 	Collection<FhirConceptSource> getFhirConceptSources();
 	

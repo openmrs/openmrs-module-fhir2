@@ -21,6 +21,8 @@ import org.openmrs.module.fhir2.api.FhirPatientIdentifierSystemService;
 import org.openmrs.module.fhir2.api.dao.FhirPatientIdentifierSystemDao;
 import org.openmrs.module.fhir2.model.FhirPatientIdentifierSystem;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -31,17 +33,20 @@ public class FhirPatientIdentifierSystemServiceImpl implements FhirPatientIdenti
 	private FhirPatientIdentifierSystemDao dao;
 	
 	@Override
+	@Cacheable("fhir2GetFhirUrlForIdentifier")
 	public String getUrlByPatientIdentifierType(@Nonnull PatientIdentifierType patientIdentifierType) {
 		return dao.getUrlByPatientIdentifierType(patientIdentifierType);
 	}
 	
 	@Override
+	@Cacheable("fhir2GetFhirPatientIdentifierSystem")
 	public Optional<FhirPatientIdentifierSystem> getFhirPatientIdentifierSystem(
 	        @Nonnull PatientIdentifierType patientIdentifierType) {
 		return dao.getFhirPatientIdentifierSystem(patientIdentifierType);
 	}
 	
 	@Override
+	@CacheEvict(value = { "fhir2GetFhirUrlForIdentifier", "fhir2GetFhirPatientIdentifierSystem" }, allEntries = true)
 	public FhirPatientIdentifierSystem saveFhirPatientIdentifierSystem(
 	        @Nonnull FhirPatientIdentifierSystem fhirPatientIdentifierSystem) {
 		return dao.saveFhirPatientIdentifierSystem(fhirPatientIdentifierSystem);

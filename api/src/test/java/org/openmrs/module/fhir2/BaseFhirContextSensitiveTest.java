@@ -18,10 +18,10 @@ import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = { TestFhirSpringConfiguration.class }, inheritLocations = false)
 public abstract class BaseFhirContextSensitiveTest extends BaseModuleContextSensitiveTest {
-
+	
 	@Autowired
 	CacheConfig cacheConfig;
-
+	
 	@Before
 	public void setupBaseFhirContextSensitive() {
 		// Needed until TRUNK-6299 in place
