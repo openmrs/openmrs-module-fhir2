@@ -193,4 +193,37 @@ public class DiagnosisTranslatorImplTest {
 		assertThat(result.getEncounter(), sameInstance(encounter));
 		assertThat(result.getCreator(), sameInstance(user));
 	}
+	
+	@Test
+	public void toOpenmrsType_shouldSetCertaintyToProvisionalForInvalidExtension() {
+		Condition condition = new Condition();
+		condition.addExtension(
+		    new Extension("http://openmrs.org/fhir/StructureDefinition/diagnosis-certainty", new StringType("INVALID")));
+		
+		Diagnosis result = translator.toOpenmrsType(condition);
+		
+		assertThat(result.getCertainty(), equalTo(ConditionVerificationStatus.PROVISIONAL));
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldDefaultCertaintyWhenVerificationStatusUnknown() {
+		Condition condition = new Condition();
+		condition.setVerificationStatus(new CodeableConcept().addCoding(
+		    new Coding().setSystem("http://terminology.hl7.org/CodeSystem/condition-ver-status").setCode("unknown")));
+		
+		Diagnosis result = translator.toOpenmrsType(condition);
+		
+		assertThat(result.getCertainty(), equalTo(ConditionVerificationStatus.PROVISIONAL));
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldIgnoreRankExtensionIfNotInteger() {
+		Condition condition = new Condition();
+		condition.addExtension(
+		    new Extension("http://openmrs.org/fhir/StructureDefinition/diagnosis-rank", new StringType("not-int")));
+		
+		Diagnosis result = translator.toOpenmrsType(condition);
+		
+		assertThat(result.getRank(), equalTo(null));
+	}
 }

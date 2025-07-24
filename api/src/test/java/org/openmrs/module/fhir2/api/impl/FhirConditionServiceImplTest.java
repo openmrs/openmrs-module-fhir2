@@ -16,6 +16,7 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
@@ -162,6 +163,11 @@ public class FhirConditionServiceImplTest {
 		assertThat(result, notNullValue());
 		assertThat(result.getId(), notNullValue());
 		assertThat(result.getId(), equalTo(CONDITION_UUID));
+	}
+	
+	@Test
+	public void create_shouldThrowExceptionWhenConditionIsNull() {
+		assertThrows(InvalidRequestException.class, () -> conditionService.create(null));
 	}
 	
 	@Test
@@ -367,6 +373,20 @@ public class FhirConditionServiceImplTest {
 	}
 	
 	@Test
+	public void searchConditions_shouldReturnDiagnosisBundleWhenOnlyDiagnosisMatches() {
+		TokenAndListParam tag = new TokenAndListParam()
+		        .addAnd(new TokenOrListParam().add(FhirConstants.OPENMRS_FHIR_EXT_CONDITION_TAG, "diagnosis"));
+		
+		IBundleProvider diagBundle = new SimpleBundleProvider();
+		when(diagnosisService.searchDiagnoses(any())).thenReturn(diagBundle);
+		
+		IBundleProvider result = conditionService.searchConditions(
+		    new ConditionSearchParams(null, null, null, null, null, null, tag, null, null, null, new HashSet<>()));
+		
+		assertThat(result, sameInstance(diagBundle));
+	}
+	
+	@Test
 	public void searchConditions_shouldReturnTwoBundleProviderWhenBothMatch() {
 		TokenAndListParam tag = new TokenAndListParam()
 		        .addAnd(new TokenOrListParam().add(FhirConstants.OPENMRS_FHIR_EXT_CONDITION_TAG, "diagnosis"))
@@ -381,6 +401,30 @@ public class FhirConditionServiceImplTest {
 		    new ConditionSearchParams(null, null, null, null, null, null, tag, null, null, null, new HashSet<>()));
 		
 		assertThat(result instanceof TwoSearchQueryBundleProvider, equalTo(true));
+	}
+	
+	@Test
+	public void searchConditions_shouldReturnConditionBundleWhenOnlyConditionMatches() {
+		TokenAndListParam tag = new TokenAndListParam()
+		        .addAnd(new TokenOrListParam().add(FhirConstants.OPENMRS_FHIR_EXT_CONDITION_TAG, "condition"));
+		
+		IBundleProvider condBundle = new SimpleBundleProvider();
+		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(condBundle);
+		
+		IBundleProvider result = conditionService.searchConditions(
+		    new ConditionSearchParams(null, null, null, null, null, null, tag, null, null, null, new HashSet<>()));
+		
+		assertThat(result, sameInstance(condBundle));
+	}
+	
+	@Test
+	public void searchConditions_shouldReturnEmptyBundleWhenNoMatches() {
+		TokenAndListParam tag = new TokenAndListParam();
+		
+		IBundleProvider result = conditionService.searchConditions(
+		    new ConditionSearchParams(null, null, null, null, null, null, tag, null, null, null, new HashSet<>()));
+		
+		assertThat(result.getResources(0, 1), empty());
 	}
 	
 }

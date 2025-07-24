@@ -124,4 +124,30 @@ public class FhirUtilsTest {
 		assertThat(uuid.length(), equalTo(36));
 	}
 	
+	@Test
+	public void getReferenceType_shouldUseReferenceWhenTypeMissing() {
+		org.hl7.fhir.r4.model.Reference reference = new org.hl7.fhir.r4.model.Reference();
+		reference.setReference("Patient/1234");
+		
+		Optional<String> result = FhirUtils.getReferenceType(reference);
+		
+		assertThat(result.isPresent(), equalTo(true));
+		assertThat(result.get(), equalTo("Patient"));
+	}
+	
+	@Test
+	public void referenceToId_shouldExtractIdFromRelativeReference() {
+		Optional<String> result = FhirUtils.referenceToId("Observation/xyz");
+		
+		assertThat(result.isPresent(), equalTo(true));
+		assertThat(result.get(), equalTo("xyz"));
+	}
+	
+	@Test
+	public void referenceToType_shouldReturnEmptyForInvalidReference() {
+		Optional<String> result = FhirUtils.referenceToType("not-a-reference");
+		
+		assertThat(result.isPresent(), equalTo(false));
+	}
+	
 }

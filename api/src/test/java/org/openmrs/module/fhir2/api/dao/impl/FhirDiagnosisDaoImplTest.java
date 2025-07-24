@@ -14,6 +14,8 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.ReferenceOrListParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -87,6 +89,44 @@ public class FhirDiagnosisDaoImplTest extends BaseFhirContextSensitiveTest {
 		codeParam.addAnd(new TokenOrListParam().add(new TokenParam("test")));
 		
 		SearchParameterMap params = new SearchParameterMap().addParameter(FhirConstants.CODED_SEARCH_HANDLER, codeParam);
+		
+		dao.setupSearchParams(criteria, params);
+		
+		assertThat(criteria, notNullValue());
+	}
+	
+	@Test
+	public void setupSearchParams_shouldSkipDiagnosisCodeWhenParamNull() {
+		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Diagnosis.class);
+		SearchParameterMap params = new SearchParameterMap().addParameter(FhirConstants.CODED_SEARCH_HANDLER, null);
+		
+		dao.setupSearchParams(criteria, params);
+		
+		assertThat(criteria, notNullValue());
+	}
+	
+	@Test
+	public void setupSearchParams_shouldHandlePatientReferenceParam() {
+		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Diagnosis.class);
+		ReferenceAndListParam patientParam = new ReferenceAndListParam();
+		patientParam.addValue(new ReferenceOrListParam().add(new ReferenceParam("123")));
+		
+		SearchParameterMap params = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    patientParam);
+		
+		dao.setupSearchParams(criteria, params);
+		
+		assertThat(criteria, notNullValue());
+	}
+	
+	@Test
+	public void setupSearchParams_shouldHandleEncounterReferenceParam() {
+		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Diagnosis.class);
+		ReferenceAndListParam encounterParam = new ReferenceAndListParam();
+		encounterParam.addValue(new ReferenceOrListParam().add(new ReferenceParam("3")));
+		
+		SearchParameterMap params = new SearchParameterMap().addParameter(FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER,
+		    encounterParam);
 		
 		dao.setupSearchParams(criteria, params);
 		
