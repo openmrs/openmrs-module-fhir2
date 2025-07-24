@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
+import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Reference;
@@ -36,6 +37,11 @@ public class FhirUtils {
 		ENCOUNTER,
 		VISIT,
 		AMBIGUOUS
+	}
+	
+	public enum OpenmrsConditionType {
+		CONDITION,
+		DIAGNOSIS
 	}
 	
 	// see https://www.hl7.org/fhir/references.html#literal
@@ -138,6 +144,17 @@ public class FhirUtils {
 		} else {
 			return Optional.of(OpenmrsEncounterType.AMBIGUOUS);
 		}
+	}
+	
+	public static Optional<OpenmrsConditionType> getOpenmrsConditionType(Condition condition) {
+		if (condition.hasCategory() && condition.getCategoryFirstRep().hasCoding()) {
+			String code = condition.getCategoryFirstRep().getCodingFirstRep().getCode();
+			if ("encounter-diagnosis".equals(code)) {
+				return Optional.of(OpenmrsConditionType.DIAGNOSIS);
+			}
+		}
+		
+		return Optional.of(OpenmrsConditionType.CONDITION);
 	}
 	
 	/**
