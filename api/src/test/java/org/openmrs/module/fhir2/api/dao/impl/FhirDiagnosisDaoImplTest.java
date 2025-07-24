@@ -24,7 +24,6 @@ import org.junit.Test;
 import org.openmrs.Diagnosis;
 import org.openmrs.Encounter;
 import org.openmrs.api.EncounterService;
-import org.openmrs.api.PatientService;
 import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
@@ -38,9 +37,6 @@ public class FhirDiagnosisDaoImplTest extends BaseFhirContextSensitiveTest {
 	@Autowired
 	@Qualifier("sessionFactory")
 	private SessionFactory sessionFactory;
-	
-	@Autowired
-	private PatientService patientService;
 	
 	@Autowired
 	private EncounterService encounterService;

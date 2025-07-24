@@ -64,8 +64,6 @@ import org.openmrs.module.fhir2.api.translators.ConditionTranslator;
 @RunWith(MockitoJUnitRunner.class)
 public class FhirConditionServiceImplTest {
 	
-	private static final Integer CONDITION_ID = 123;
-	
 	private static final String CONDITION_UUID = "43578769-f1a4-46af-b08b-d9fe8a07066f";
 	
 	private static final String WRONG_CONDITION_UUID = "90378769-f1a4-46af-b08b-d9fe8a09034j";
