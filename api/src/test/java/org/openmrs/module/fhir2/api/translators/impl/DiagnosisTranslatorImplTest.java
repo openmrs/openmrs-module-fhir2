@@ -15,11 +15,14 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
 
+import java.util.Date;
+
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IntegerType;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,6 +33,7 @@ import org.openmrs.ConditionVerificationStatus;
 import org.openmrs.Diagnosis;
 import org.openmrs.Encounter;
 import org.openmrs.User;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
@@ -92,5 +96,45 @@ public class DiagnosisTranslatorImplTest {
 		
 		Diagnosis result = translator.toOpenmrsType(condition);
 		assertThat(result.getCertainty(), equalTo(ConditionVerificationStatus.PROVISIONAL));
+	}
+	
+	@Test
+	public void toFhirResource_shouldIncludeNonCodedExtensionAndOnsetDate() {
+		Diagnosis diagnosis = new Diagnosis();
+		diagnosis.setUuid("diag-uuid");
+		diagnosis.setVoided(false);
+		diagnosis.setDiagnosis(new org.openmrs.CodedOrFreeText());
+		diagnosis.getDiagnosis().setNonCoded("Other");
+		Encounter encounter = new Encounter();
+		encounter.setEncounterDatetime(new Date());
+		diagnosis.setEncounter(encounter);
+		
+		Reference encounterReference = new Reference();
+		when(encounterReferenceTranslator.toFhirResource(encounter)).thenReturn(encounterReference);
+		
+		Condition result = translator.toFhirResource(diagnosis);
+		
+		Extension ext = result.getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_NON_CODED_CONDITION);
+		assertThat(ext, notNullValue());
+		assertThat(((StringType) ext.getValue()).getValue(), equalTo("Other"));
+		assertThat(result.getOnset(), notNullValue());
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldMapRankAndCertaintyExtensions() {
+		Condition condition = new Condition();
+		condition.setId("diag-uuid");
+		condition.addExtension(
+		    new Extension("http://openmrs.org/fhir/StructureDefinition/diagnosis-rank", new IntegerType(2)));
+		condition.addExtension(
+		    new Extension("http://openmrs.org/fhir/StructureDefinition/diagnosis-certainty", new StringType("CONFIRMED")));
+		condition.setClinicalStatus(new CodeableConcept().addCoding(
+		    new Coding().setSystem("http://terminology.hl7.org/CodeSystem/condition-clinical").setCode("inactive")));
+		
+		Diagnosis result = translator.toOpenmrsType(condition);
+		
+		assertThat(result.getRank(), equalTo(2));
+		assertThat(result.getCertainty(), equalTo(ConditionVerificationStatus.CONFIRMED));
+		assertThat(result.getVoided(), equalTo(true));
 	}
 }

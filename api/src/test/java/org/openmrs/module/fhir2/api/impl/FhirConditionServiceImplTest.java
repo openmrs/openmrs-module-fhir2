@@ -317,4 +317,31 @@ public class FhirConditionServiceImplTest {
 		assertThat(result, equalTo(expected));
 	}
 	
+	@Test
+	public void shouldSearchExplicitlyFor_shouldReturnTrueForNullParam() {
+		boolean result = conditionService.shouldSearchExplicitlyFor(null, "condition");
+		
+		assertThat(result, equalTo(true));
+	}
+	
+	@Test
+	public void shouldSearchExplicitlyFor_shouldReturnTrueWhenTagMatches() {
+		TokenAndListParam tag = new TokenAndListParam()
+		        .addAnd(new TokenOrListParam().add(FhirConstants.OPENMRS_FHIR_EXT_CONDITION_TAG, "condition"));
+		
+		boolean result = conditionService.shouldSearchExplicitlyFor(tag, "condition");
+		
+		assertThat(result, equalTo(true));
+	}
+	
+	@Test
+	public void shouldSearchExplicitlyFor_shouldReturnFalseWhenTagDoesNotMatch() {
+		TokenAndListParam tag = new TokenAndListParam()
+		        .addAnd(new TokenOrListParam().add(FhirConstants.OPENMRS_FHIR_EXT_CONDITION_TAG, "diagnosis"));
+		
+		boolean result = conditionService.shouldSearchExplicitlyFor(tag, "condition");
+		
+		assertThat(result, equalTo(false));
+	}
+	
 }

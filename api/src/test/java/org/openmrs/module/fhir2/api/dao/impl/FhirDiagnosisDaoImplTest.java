@@ -15,6 +15,8 @@ import static org.hamcrest.Matchers.notNullValue;
 
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
 import org.junit.Before;
@@ -79,6 +81,19 @@ public class FhirDiagnosisDaoImplTest extends BaseFhirContextSensitiveTest {
 		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, new ReferenceAndListParam())
 		        .addParameter(FhirConstants.CODED_SEARCH_HANDLER, new TokenAndListParam());
 		dao.setupSearchParams(criteria, params);
+		assertThat(criteria, notNullValue());
+	}
+	
+	@Test
+	public void setupSearchParams_shouldHandleDiagnosisCodeParam() {
+		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Diagnosis.class);
+		TokenAndListParam codeParam = new TokenAndListParam();
+		codeParam.addAnd(new TokenOrListParam().add(new TokenParam("test")));
+		
+		SearchParameterMap params = new SearchParameterMap().addParameter(FhirConstants.CODED_SEARCH_HANDLER, codeParam);
+		
+		dao.setupSearchParams(criteria, params);
+		
 		assertThat(criteria, notNullValue());
 	}
 }
