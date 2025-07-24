@@ -12,6 +12,7 @@ package org.openmrs.module.fhir2.api.translators.impl;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.sameInstance;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
 
@@ -32,6 +33,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.ConditionVerificationStatus;
 import org.openmrs.Diagnosis;
 import org.openmrs.Encounter;
+import org.openmrs.Patient;
 import org.openmrs.User;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
@@ -136,5 +138,59 @@ public class DiagnosisTranslatorImplTest {
 		assertThat(result.getRank(), equalTo(2));
 		assertThat(result.getCertainty(), equalTo(ConditionVerificationStatus.CONFIRMED));
 		assertThat(result.getVoided(), equalTo(true));
+	}
+	
+	@Test
+	public void toFhirResource_shouldSetPatientEncounterAndClinicalStatus() {
+		Diagnosis diagnosis = new Diagnosis();
+		diagnosis.setUuid("diag-uuid");
+		diagnosis.setVoided(true);
+		Patient patient = new Patient();
+		patient.setUuid("patient-uuid");
+		diagnosis.setPatient(patient);
+		Encounter encounter = new Encounter();
+		encounter.setUuid("enc-uuid");
+		diagnosis.setEncounter(encounter);
+		User creator = new User();
+		diagnosis.setCreator(creator);
+		
+		Reference patientReference = new Reference("Patient/patient-uuid");
+		when(patientReferenceTranslator.toFhirResource(patient)).thenReturn(patientReference);
+		Reference encounterRef = new Reference("Encounter/enc-uuid");
+		when(encounterReferenceTranslator.toFhirResource(encounter)).thenReturn(encounterRef);
+		Reference practitionerRef = new Reference("Practitioner/prac-uuid");
+		when(practitionerReferenceTranslator.toFhirResource(creator)).thenReturn(practitionerRef);
+		
+		Condition result = translator.toFhirResource(diagnosis);
+		
+		assertThat(result.getClinicalStatus().getCodingFirstRep().getCode(), equalTo("inactive"));
+		assertThat(result.getSubject().getReference(), equalTo("Patient/patient-uuid"));
+		assertThat(result.getEncounter().getReference(), equalTo("Encounter/enc-uuid"));
+		assertThat(result.getRecorder(), sameInstance(practitionerRef));
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldSetPatientEncounterAndCreator() {
+		Condition condition = new Condition();
+		condition.setId("diag-uuid");
+		Reference patientRef = new Reference("Patient/patient-uuid");
+		condition.setSubject(patientRef);
+		Reference encounterRef = new Reference("Encounter/enc-uuid");
+		condition.setEncounter(encounterRef);
+		Reference practitionerRef = new Reference("Practitioner/prac-uuid");
+		condition.setRecorder(practitionerRef);
+		
+		Patient patient = new Patient();
+		when(patientReferenceTranslator.toOpenmrsType(patientRef)).thenReturn(patient);
+		Encounter encounter = new Encounter();
+		when(encounterReferenceTranslator.toOpenmrsType(encounterRef)).thenReturn(encounter);
+		User user = new User();
+		when(practitionerReferenceTranslator.toOpenmrsType(practitionerRef)).thenReturn(user);
+		
+		Diagnosis result = translator.toOpenmrsType(condition);
+		
+		assertThat(result.getPatient(), sameInstance(patient));
+		assertThat(result.getEncounter(), sameInstance(encounter));
+		assertThat(result.getCreator(), sameInstance(user));
 	}
 }

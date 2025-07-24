@@ -19,6 +19,7 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.junit.Test;
 import org.openmrs.module.fhir2.FhirConstants;
 
@@ -106,6 +107,21 @@ public class FhirUtilsTest {
 		Optional<FhirUtils.OpenmrsEncounterType> result = FhirUtils.getOpenmrsEncounterType(encounter);
 		
 		assertThat(result.isPresent(), equalTo(false));
+	}
+	
+	@Test
+	public void createExceptionErrorOperationOutcome_shouldSetDiagnostics() {
+		OperationOutcome outcome = FhirUtils.createExceptionErrorOperationOutcome("error");
+		
+		assertThat(outcome.getIssueFirstRep().getSeverity(), equalTo(OperationOutcome.IssueSeverity.ERROR));
+		assertThat(outcome.getIssueFirstRep().getDiagnostics(), equalTo("error"));
+	}
+	
+	@Test
+	public void newUuid_shouldReturnValidUuid() {
+		String uuid = FhirUtils.newUuid();
+		
+		assertThat(uuid.length(), equalTo(36));
 	}
 	
 }

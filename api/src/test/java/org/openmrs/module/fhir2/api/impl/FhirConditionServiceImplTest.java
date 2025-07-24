@@ -19,6 +19,7 @@ import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -38,6 +39,7 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -57,6 +59,7 @@ import org.openmrs.module.fhir2.api.dao.FhirConditionDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.SearchQueryBundleProvider;
 import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
+import org.openmrs.module.fhir2.api.search.TwoSearchQueryBundleProvider;
 import org.openmrs.module.fhir2.api.search.param.ConditionSearchParams;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.ConditionTranslator;
@@ -340,6 +343,44 @@ public class FhirConditionServiceImplTest {
 		boolean result = conditionService.shouldSearchExplicitlyFor(tag, "condition");
 		
 		assertThat(result, equalTo(false));
+	}
+	
+	@Test
+	public void get_shouldReturnDiagnosisWhenConditionNotFound() {
+		when(dao.get(CONDITION_UUID)).thenReturn(null);
+		org.hl7.fhir.r4.model.Condition diagnosis = new org.hl7.fhir.r4.model.Condition();
+		diagnosis.setId(CONDITION_UUID);
+		when(diagnosisService.get(CONDITION_UUID)).thenReturn(diagnosis);
+		
+		org.hl7.fhir.r4.model.Condition result = conditionService.get(CONDITION_UUID);
+		
+		assertThat(result, equalTo(diagnosis));
+	}
+	
+	@Test
+	public void delete_shouldDelegateToDiagnosisServiceWhenConditionMissing() {
+		when(dao.delete(CONDITION_UUID)).thenReturn(null);
+		
+		conditionService.delete(CONDITION_UUID);
+		
+		verify(diagnosisService).delete(CONDITION_UUID);
+	}
+	
+	@Test
+	public void searchConditions_shouldReturnTwoBundleProviderWhenBothMatch() {
+		TokenAndListParam tag = new TokenAndListParam()
+		        .addAnd(new TokenOrListParam().add(FhirConstants.OPENMRS_FHIR_EXT_CONDITION_TAG, "diagnosis"))
+		        .addAnd(new TokenOrListParam().add(FhirConstants.OPENMRS_FHIR_EXT_CONDITION_TAG, "condition"));
+		
+		IBundleProvider diagBundle = new SimpleBundleProvider();
+		IBundleProvider condBundle = new SimpleBundleProvider();
+		when(diagnosisService.searchDiagnoses(any())).thenReturn(diagBundle);
+		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(condBundle);
+		
+		IBundleProvider result = conditionService.searchConditions(
+		    new ConditionSearchParams(null, null, null, null, null, null, tag, null, null, null, new HashSet<>()));
+		
+		assertThat(result instanceof TwoSearchQueryBundleProvider, equalTo(true));
 	}
 	
 }
