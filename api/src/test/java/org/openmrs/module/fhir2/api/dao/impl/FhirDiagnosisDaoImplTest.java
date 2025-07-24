@@ -13,6 +13,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
+import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
@@ -21,6 +24,8 @@ import org.openmrs.Encounter;
 import org.openmrs.api.EncounterService;
 import org.openmrs.api.PatientService;
 import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
+import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -60,5 +65,20 @@ public class FhirDiagnosisDaoImplTest extends BaseFhirContextSensitiveTest {
 		Diagnosis result = dao.get(DIAGNOSIS_UUID);
 		assertThat(result, notNullValue());
 		assertThat(result.getUuid(), equalTo(DIAGNOSIS_UUID));
+	}
+	
+	@Test
+	public void hasDistinctResults_shouldReturnFalse() {
+		assertThat(dao.hasDistinctResults(), equalTo(false));
+	}
+	
+	@Test
+	public void setupSearchParams_shouldHandleEmptyParams() {
+		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Diagnosis.class);
+		SearchParameterMap params = new SearchParameterMap()
+		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, new ReferenceAndListParam())
+		        .addParameter(FhirConstants.CODED_SEARCH_HANDLER, new TokenAndListParam());
+		dao.setupSearchParams(criteria, params);
+		assertThat(criteria, notNullValue());
 	}
 }

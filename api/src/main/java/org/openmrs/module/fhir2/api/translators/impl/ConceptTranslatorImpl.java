@@ -10,7 +10,6 @@
 package org.openmrs.module.fhir2.api.translators.impl;
 
 import static lombok.AccessLevel.PROTECTED;
-import static lombok.AccessLevel.PUBLIC;
 
 import javax.annotation.Nonnull;
 

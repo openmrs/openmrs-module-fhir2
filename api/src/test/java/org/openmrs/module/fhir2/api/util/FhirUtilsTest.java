@@ -44,4 +44,28 @@ public class FhirUtilsTest {
 		assertThat(result.isPresent(), equalTo(true));
 		assertThat(result.get(), equalTo(FhirUtils.OpenmrsConditionType.CONDITION));
 	}
+	
+	@Test
+	public void referenceToType_shouldExtractType() {
+		Optional<String> result = FhirUtils.referenceToType("Patient/123");
+		assertThat(result.isPresent(), equalTo(true));
+		assertThat(result.get(), equalTo("Patient"));
+	}
+	
+	@Test
+	public void referenceToId_shouldExtractId() {
+		Optional<String> result = FhirUtils.referenceToId("http://example.com/Condition/abc/_history/1");
+		assertThat(result.isPresent(), equalTo(true));
+		assertThat(result.get(), equalTo("abc"));
+	}
+	
+	@Test
+	public void getReferenceType_shouldPreferTypeField() {
+		org.hl7.fhir.r4.model.Reference reference = new org.hl7.fhir.r4.model.Reference();
+		reference.setType("Observation");
+		Optional<String> result = FhirUtils.getReferenceType(reference);
+		assertThat(result.isPresent(), equalTo(true));
+		assertThat(result.get(), equalTo("Observation"));
+	}
+	
 }

@@ -41,6 +41,8 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.Before;
 import org.junit.Test;
@@ -283,4 +285,36 @@ public class FhirConditionServiceImplTest {
 		assertThat(resultList, not(empty()));
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 	}
+	
+	@Test
+	public void create_shouldDelegateToDiagnosisServiceForDiagnosis() {
+		org.hl7.fhir.r4.model.Condition condition = new org.hl7.fhir.r4.model.Condition();
+		CodeableConcept category = new CodeableConcept();
+		category.addCoding(
+		    new Coding("http://terminology.hl7.org/CodeSystem/condition-category", "encounter-diagnosis", null));
+		condition.addCategory(category);
+		
+		org.hl7.fhir.r4.model.Condition expected = new org.hl7.fhir.r4.model.Condition();
+		when(diagnosisService.create(condition)).thenReturn(expected);
+		
+		org.hl7.fhir.r4.model.Condition result = conditionService.create(condition);
+		assertThat(result, equalTo(expected));
+	}
+	
+	@Test
+	public void update_shouldDelegateToDiagnosisServiceForDiagnosis() {
+		org.hl7.fhir.r4.model.Condition condition = new org.hl7.fhir.r4.model.Condition();
+		condition.setId(CONDITION_UUID);
+		CodeableConcept category = new CodeableConcept();
+		category.addCoding(
+		    new Coding("http://terminology.hl7.org/CodeSystem/condition-category", "encounter-diagnosis", null));
+		condition.addCategory(category);
+		
+		org.hl7.fhir.r4.model.Condition expected = new org.hl7.fhir.r4.model.Condition();
+		when(diagnosisService.update(CONDITION_UUID, condition)).thenReturn(expected);
+		
+		org.hl7.fhir.r4.model.Condition result = conditionService.update(CONDITION_UUID, condition);
+		assertThat(result, equalTo(expected));
+	}
+	
 }
