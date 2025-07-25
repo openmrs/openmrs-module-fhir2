@@ -154,7 +154,7 @@ public class PersonFhirResourceProviderIntegrationTest extends BaseFhirR4Integra
 		        .filter(ext -> ext.getUrl().equals(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE))
 		        .collect(Collectors.toList());
 		
-		assertThat(personAttributeExtensions, hasSize(2));
+		assertThat(personAttributeExtensions, hasSize(4));
 	}
 	
 	@Test

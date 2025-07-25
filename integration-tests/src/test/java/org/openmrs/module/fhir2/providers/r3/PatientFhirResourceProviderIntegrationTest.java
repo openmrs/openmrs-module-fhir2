@@ -197,7 +197,7 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR3Integr
 		        .filter(ext -> ext.getUrl().equals(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE))
 		        .collect(Collectors.toList());
 		
-		assertThat(personAttributeExtensions, hasSize(3));
+		assertThat(personAttributeExtensions, hasSize(4));
 	}
 	
 	@Test

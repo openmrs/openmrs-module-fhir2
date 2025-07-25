@@ -9,6 +9,8 @@
     graphic logo is a trademark of OpenMRS Inc.
 -->
 <dataset>
+    <concept concept_id="1" retired="false" class_id="1" is_set="false" creator="1" date_created="2005-01-01 00:00:00.0" version="" uuid="790e6c1e-1e89-43a7-92d7-4aa22b1f961a"/>
+    <concept_name concept_id="1" name="Test Concept" locale="en_GB" creator="1" date_created="2005-01-01 00:00:00.0" concept_name_id="1" concept_name_type="FULLY_SPECIFIED" locale_preferred="1" voided="false" uuid="80dc810e-68fe-4bef-80d3-786722c53766"/>
     <person person_id="2" gender="M" birthdate="1999-12-20" dead="false" creator="1" date_created="2005-01-01 00:00:00.0" voided="false"  uuid="61b38324-e2fd-4feb-95b7-9e9a2a4400df"/>
     <person person_id="3" gender="M" birthdate="2000-11-18" dead="false" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" void_reason="there is no reason" uuid="5c521595-4e12-46b0-8248-b8f2d3697766"/>
     <person person_id="4" gender="M" birthdate="1993-04-02" dead="false" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="256ccf6d-6b41-455c-9be2-51ff4386ae76"/>
@@ -22,7 +24,10 @@
     <person_address person_address_id="7" preferred="true" person_id="7" city_village="Peabody" state_province="MA" postal_code="01960" country="FakeAB" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="da593572-67b7-11ea-bc55-0242ac130003"/>
     <person_attribute_type person_attribute_type_id="2" name="email" format="java.lang.String" searchable="false" creator="1" date_created="2008-08-15 15:53:36.0" retired="false" uuid="5a8c170b-178a-4b8f-908e-279b67854d84" sort_weight="2"/>
     <person_attribute_type person_attribute_type_id="3" name="test patient" format="java.lang.Boolean" searchable="false" creator="1" date_created="2008-08-15 15:53:36.0" retired="false" uuid="e34d1404-5633-4e5b-9db3-930f31086557" sort_weight="2"/>
+    <person_attribute_type person_attribute_type_id="8" name="test location" format="org.openmrs.Location" searchable="false" creator="1" date_created="2008-08-15 15:53:36.0" retired="false" uuid="95a7a38f-9bea-4f7a-9428-775762ee13e4" sort_weight="2"/>
+    <person_attribute_type person_attribute_type_id="9" name="test concept" format="org.openmrs.Concept" searchable="false" creator="1" date_created="2008-08-15 15:53:36.0" retired="false" uuid="1a39a18b-184d-4a5c-9641-e1f7a4a717e5" sort_weight="2"/>
     <person_attribute person_attribute_id="2" person_id="3" value="test@openmrs.org" person_attribute_type_id="2" creator="1" date_created="2008-08-18 12:25:57.0" voided="false" uuid="9cc62c8d-5817-4c21-8205-266c5ff344db"/>
     <person_attribute person_attribute_id="3" person_id="3" value="true" person_attribute_type_id="3" creator="1" date_created="2008-08-18 12:25:57.0" voided="false" uuid="bcced38f-dad5-4c71-a436-8a486e4288d9"/>
-
+    <person_attribute person_attribute_id="8" person_id="3" value="1" person_attribute_type_id="8" creator="1" date_created="2008-08-18 12:25:57.0" voided="false" uuid="4b2f7474-29e7-4205-ae48-0b5f67bf7895"/>
+    <person_attribute person_attribute_id="9" person_id="3" value="1" person_attribute_type_id="9" creator="1" date_created="2008-08-18 12:25:57.0" voided="false" uuid="f830bf48-af63-495a-897e-a779e229d503"/>
 </dataset>
