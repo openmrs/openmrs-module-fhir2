@@ -80,6 +80,8 @@ public final class FhirConstants {
 	
 	public static final String VISIT_TYPE_SYSTEM_URI = OPENMRS_CODE_SYSTEM_PREFIX + "/visit-type";
 	
+	public static final String OPENMRS_FHIR_EXIT_IMMUNIZATION_NEXT_DOSE_DATE = "http://hl7.eu/fhir/StructureDefinition/immunization-nextDoseDate";
+	
 	public static final String OPENMRS_FHIR_EXT_PREFIX = OPENMRS_FHIR_PREFIX + "/ext";
 	
 	public static final String OPENMRS_FHIR_EXT_OBS_LOCATION_VALUE = OPENMRS_FHIR_EXT_PREFIX + "/obs-location-value";

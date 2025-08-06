@@ -13,6 +13,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.hl7.fhir.r4.model.Patient.SP_IDENTIFIER;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -26,6 +27,7 @@ import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslat
 import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.CIEL_161011;
 import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.CIEL_165907;
 import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.CIEL_984;
+import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.LOINC_45354_8;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -64,11 +66,17 @@ public class FhirImmunizationServiceImplTest extends BaseFhirContextSensitiveTes
 	
 	private static final String FREETEXT_COMMENT_CONCEPT_SOURCE = "CIEL";
 	
+	private static final String NEXT_DOSE_DATE_CONCEPT_CODE = "45354-8";
+	
+	private static final String NEXT_DOSE_DATE_CONCEPT_SOURCE = "LOINC";
+	
 	private static final String IMMUNIZATIONS_METADATA_XML = "org/openmrs/module/fhir2/Immunization_metadata.xml";
 	
 	private static final String IMMUNIZATIONS_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/services/impl/FhirImmunizationService_initial_data.xml";
 	
 	private static final String PRACTITIONER_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirPractitionerDaoImplTest_initial_data.xml";
+
+	private static final String IMMUNIZATION_NEXT_DOSE_DATE = "/org/openmrs/module/fhir2/providers/immunization-next-dose-date.json";
 	
 	@Autowired
 	private FhirImmunizationServiceImpl service;
@@ -198,6 +206,56 @@ public class FhirImmunizationServiceImplTest extends BaseFhirContextSensitiveTes
 	}
 	
 	@Test
+	public void saveImmunization_shouldSaveImmunizationWithNextDoseDateExtension() throws Exception {
+		FhirContext ctx = FhirContext.forR4();
+		IParser parser = ctx.newJsonParser();
+		String json = IOUtils.toString(Objects.requireNonNull(getClass().getResourceAsStream(IMMUNIZATION_NEXT_DOSE_DATE)), StandardCharsets.UTF_8);
+		Immunization newImmunization = parser.parseResource(Immunization.class, json);
+		Immunization savedImmunization = service.create(newImmunization);
+
+		Obs obs = obsService.getObsByUuid(savedImmunization.getId());
+		Map<String, Obs> members = helper.getObsMembersMap(obs);
+		
+		assertThat(members.get(LOINC_45354_8), notNullValue());
+		assertThat(members.get(LOINC_45354_8).getValueDatetime(), notNullValue());
+		assertThat(members.get(LOINC_45354_8).getValueDatetime().getTime(),
+		    is(new DateTimeType("2024-04-15T10:30:00Z").getValue().getTime()));
+		
+		assertThat(savedImmunization.hasExtension(), is(true));
+		assertThat(savedImmunization.getExtension().size(), is(1));
+		
+		org.hl7.fhir.r4.model.Extension extension = savedImmunization
+		        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXIT_IMMUNIZATION_NEXT_DOSE_DATE);
+		assertThat(extension, notNullValue());
+		assertThat(extension.getValue(), notNullValue());
+		assertThat(extension.getValue() instanceof DateTimeType, is(true));
+		
+		DateTimeType dateTimeValue = (DateTimeType) extension.getValue();
+		assertThat(dateTimeValue.getValue(), notNullValue());
+		assertThat(dateTimeValue.getValue().getTime(), is(new DateTimeType("2024-04-15T10:30:00Z").getValue().getTime()));
+	}
+	
+	@Test
+	public void saveImmunization_shouldNotFailIfNextDoseDateConceptIsMissingAndExtensionProvided() throws Exception {
+		// Remove the next dose date concept since @Before loads it
+		conceptService.purgeConcept(
+		    conceptService.getConceptByMapping(NEXT_DOSE_DATE_CONCEPT_CODE, NEXT_DOSE_DATE_CONCEPT_SOURCE));
+		assertNull(conceptService.getConceptByMapping(NEXT_DOSE_DATE_CONCEPT_CODE, NEXT_DOSE_DATE_CONCEPT_SOURCE));
+		
+		FhirContext ctx = FhirContext.forR4();
+		IParser parser = ctx.newJsonParser();
+		String json = IOUtils.toString(Objects.requireNonNull(getClass().getResourceAsStream(IMMUNIZATION_NEXT_DOSE_DATE)), StandardCharsets.UTF_8);
+		Immunization newImmunization = parser.parseResource(Immunization.class, json);
+		Immunization savedImmunization = service.create(newImmunization);
+
+		Obs obs = obsService.getObsByUuid(savedImmunization.getId());
+		Map<String, Obs> members = helper.getObsMembersMap(obs);
+		
+		assertNull(members.get(LOINC_45354_8));
+		assertThat(savedImmunization.hasExtension(), is(false));
+	}
+	
+	@Test
 	public void updateImmunization_shouldUpdateImmunizationAccordingly() {
 		// setup
 		FhirContext ctx = FhirContext.forR4();
@@ -277,6 +335,44 @@ public class FhirImmunizationServiceImplTest extends BaseFhirContextSensitiveTes
 		created.addNote().setText("This is an UPDATED immunization note.");
 		Immunization updated = service.update(created.getId(), created);
 		assertTrue(updated.getNote().isEmpty() || updated.getNoteFirstRep().getText() == null);
+	}
+	
+	@Test
+	public void updateImmunization_shouldUpdateNextDoseDateExtensionWhenConceptIsAvailable() throws Exception {
+		FhirContext ctx = FhirContext.forR4();
+		IParser parser = ctx.newJsonParser();
+		String json = IOUtils.toString(Objects.requireNonNull(getClass().getResourceAsStream(IMMUNIZATION_NEXT_DOSE_DATE)), StandardCharsets.UTF_8);
+		Immunization created = service.create(parser.parseResource(Immunization.class, json));
+		assertThat(created.hasExtension(), is(true));
+		assertThat(created.getExtension().size(), is(1));
+		
+		Immunization immunizationToBeUpdated = service.get(created.getId());
+		immunizationToBeUpdated.getExtension().clear();
+		org.hl7.fhir.r4.model.Extension newExtension = new org.hl7.fhir.r4.model.Extension();
+		newExtension.setUrl(FhirConstants.OPENMRS_FHIR_EXIT_IMMUNIZATION_NEXT_DOSE_DATE);
+		newExtension.setValue(new DateTimeType("2024-07-15T10:30:00Z"));
+		immunizationToBeUpdated.addExtension(newExtension);
+		
+		Immunization updated = service.update(created.getId(), immunizationToBeUpdated);
+		assertThat(updated.hasExtension(), is(true));
+		assertThat(updated.getExtension().size(), is(1));
+		
+		org.hl7.fhir.r4.model.Extension extension = updated
+		        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXIT_IMMUNIZATION_NEXT_DOSE_DATE);
+		assertThat(extension, notNullValue());
+		assertThat(extension.getValue(), notNullValue());
+		assertThat(extension.getValue() instanceof DateTimeType, is(true));
+		
+		DateTimeType dateTimeValue = (DateTimeType) extension.getValue();
+		assertThat(dateTimeValue.getValue(), notNullValue());
+		assertThat(dateTimeValue.getValue().getTime(), is(new DateTimeType("2024-07-15T10:30:00Z").getValue().getTime()));
+		
+		Obs obs = obsService.getObsByUuid(updated.getId());
+		Map<String, Obs> members = helper.getObsMembersMap(obs);
+		assertThat(members.get(LOINC_45354_8), notNullValue());
+		assertThat(members.get(LOINC_45354_8).getValueDatetime(), notNullValue());
+		assertThat(members.get(LOINC_45354_8).getValueDatetime().getTime(),
+		    is(new DateTimeType("2024-07-15T10:30:00Z").getValue().getTime()));
 	}
 	
 	@Test
