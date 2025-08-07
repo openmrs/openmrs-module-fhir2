@@ -30,6 +30,8 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Immunization;
 import org.hl7.fhir.r4.model.Immunization.ImmunizationPerformerComponent;
 import org.hl7.fhir.r4.model.Immunization.ImmunizationProtocolAppliedComponent;
@@ -46,6 +48,7 @@ import org.openmrs.Patient;
 import org.openmrs.Provider;
 import org.openmrs.Visit;
 import org.openmrs.api.ConceptService;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.ImmunizationTranslator;
@@ -64,8 +67,10 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 	
 	public static final String IMMUNIZATION_FREE_TEXT_COMMENT_CONCEPT = "CIEL:161011";
 	
+	public static final String IMMUNIZATION_NEXT_DOSE_DATE_LOINC_CODE = "LOINC:45354-8";
+	
 	public static final Set<String> IMMUNIZATION_CONCEPTS = ImmutableSet.of("CIEL:984", "CIEL:1410", "CIEL:1418",
-	    "CIEL:1419", "CIEL:1420", "CIEL:165907", "CIEL:161011");
+	    "CIEL:1419", "CIEL:1420", "CIEL:165907", "CIEL:161011", "LOINC:45354-8");
 	
 	public static final String CIEL_984;
 	
@@ -81,6 +86,8 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 	
 	public static final String CIEL_161011;
 	
+	public static final String LOINC_45354_8;
+	
 	static {
 		final Iterator<String> conceptIterator = IMMUNIZATION_CONCEPTS.iterator();
 		CIEL_984 = conceptIterator.next();
@@ -90,6 +97,7 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 		CIEL_1420 = conceptIterator.next();
 		CIEL_165907 = conceptIterator.next();
 		CIEL_161011 = conceptIterator.next();
+		LOINC_45354_8 = conceptIterator.next();
 	}
 	
 	@Getter(PROTECTED)
@@ -406,6 +414,35 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 			openmrsImmunization.removeGroupMember(members.get(CIEL_161011));
 		}
 		
+		Concept nextDoseDateConcept = helper.conceptOrNull(LOINC_45354_8);
+		if (nextDoseDateConcept != null
+		        && fhirImmunization.hasExtension(FhirConstants.OPENMRS_FHIR_EXIT_IMMUNIZATION_NEXT_DOSE_DATE)) {
+			Extension extension = fhirImmunization
+			        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXIT_IMMUNIZATION_NEXT_DOSE_DATE);
+			if (extension != null && extension.hasValue() && extension.getValue() instanceof DateTimeType) {
+				DateTimeType dateTimeValue = (DateTimeType) extension.getValue();
+				Date nextDoseDate = dateTimeValue.getValue();
+				
+				Obs obs = members.get(LOINC_45354_8);
+				if (obs == null) {
+					obs = helper.addNewObs(openmrsImmunization, LOINC_45354_8);
+					members.put(LOINC_45354_8, obs);
+					obs.setValueDatetime(nextDoseDate);
+				} else if (obs.getId() == null) {
+					obs.setValueDatetime(nextDoseDate);
+				} else {
+					Date prevValue = obs.getValueDatetime();
+					
+					if (!nextDoseDate.equals(prevValue)) {
+						obs = helper.replaceObs(openmrsImmunization, obs);
+						obs.setValueDatetime(nextDoseDate);
+					}
+				}
+			}
+		} else {
+			openmrsImmunization.removeGroupMember(members.get(LOINC_45354_8));
+		}
+		
 		return openmrsImmunization;
 	}
 	
@@ -472,6 +509,14 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 			Obs obs = members.get(CIEL_161011);
 			if (obs != null) {
 				immunization.addNote().setText(obs.getValueText());
+			}
+		}
+		
+		{
+			Obs obs = members.get(LOINC_45354_8);
+			if (obs != null && obs.getValueDatetime() != null) {
+				immunization.addExtension(new Extension().setUrl(FhirConstants.OPENMRS_FHIR_EXIT_IMMUNIZATION_NEXT_DOSE_DATE)
+				        .setValue(new DateTimeType(obs.getValueDatetime())));
 			}
 		}
 		
