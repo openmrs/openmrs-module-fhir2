@@ -49,4 +49,6 @@
     <bean id="fhirUcumService" class="org.fhir.ucum.UcumEssenceService">
         <constructor-arg name="stream" value="classpath:ucum-fhir-essence.xml" />
     </bean>
+
+    <bean class="org.openmrs.module.fhir2.spring.FhirAutoProxyCreator" />
 </beans>
