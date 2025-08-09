@@ -16,9 +16,11 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -38,9 +40,12 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.Before;
 import org.junit.Test;
@@ -49,19 +54,19 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Condition;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.FhirDiagnosisService;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirConditionDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.SearchQueryBundleProvider;
 import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
+import org.openmrs.module.fhir2.api.search.TwoSearchQueryBundleProvider;
 import org.openmrs.module.fhir2.api.search.param.ConditionSearchParams;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.ConditionTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FhirConditionServiceImplTest {
-	
-	private static final Integer CONDITION_ID = 123;
 	
 	private static final String CONDITION_UUID = "43578769-f1a4-46af-b08b-d9fe8a07066f";
 	
@@ -90,6 +95,9 @@ public class FhirConditionServiceImplTest {
 	
 	private FhirConditionServiceImpl conditionService;
 	
+	@Mock
+	private FhirDiagnosisService diagnosisService;
+	
 	private Condition openmrsCondition;
 	
 	private org.hl7.fhir.r4.model.Condition fhirCondition;
@@ -106,6 +114,8 @@ public class FhirConditionServiceImplTest {
 		conditionService.setTranslator(conditionTranslator);
 		conditionService.setSearchQuery(searchQuery);
 		conditionService.setSearchQueryInclude(searchQueryInclude);
+		conditionService.setDiagnosisService(diagnosisService);
+		conditionService.setGlobalPropertyService(globalPropertyService);
 		
 		openmrsCondition = new Condition();
 		openmrsCondition.setUuid(CONDITION_UUID);
@@ -132,6 +142,7 @@ public class FhirConditionServiceImplTest {
 	
 	@Test
 	public void shouldThrowExceptionWhenGetMissingUuid() {
+		when(diagnosisService.get(WRONG_CONDITION_UUID)).thenThrow(ResourceNotFoundException.class);
 		assertThrows(ResourceNotFoundException.class, () -> conditionService.get(WRONG_CONDITION_UUID));
 	}
 	
@@ -152,6 +163,11 @@ public class FhirConditionServiceImplTest {
 		assertThat(result, notNullValue());
 		assertThat(result.getId(), notNullValue());
 		assertThat(result.getId(), equalTo(CONDITION_UUID));
+	}
+	
+	@Test
+	public void create_shouldThrowExceptionWhenConditionIsNull() {
+		assertThrows(InvalidRequestException.class, () -> conditionService.create(null));
 	}
 	
 	@Test
@@ -240,6 +256,9 @@ public class FhirConditionServiceImplTest {
 		
 		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(CONDITION_UUID));
 		
+		TokenAndListParam tag = new TokenAndListParam()
+		        .addAnd(new TokenOrListParam().add(FhirConstants.OPENMRS_FHIR_EXT_CONDITION_TAG, "condition"));
+		
 		DateRangeParam lastUpdated = new DateRangeParam().setLowerBound(LAST_UPDATED_DATE).setUpperBound(LAST_UPDATED_DATE);
 		
 		SortSpec sort = new SortSpec("sort param");
@@ -265,7 +284,7 @@ public class FhirConditionServiceImplTest {
 		when(conditionTranslator.toFhirResources(anyCollection())).thenCallRealMethod();
 		
 		IBundleProvider result = conditionService.searchConditions(new ConditionSearchParams(patientReference, codeList,
-		        clinicalList, onsetDate, onsetAge, recordDate, uuid, lastUpdated, sort, includes));
+		        clinicalList, onsetDate, onsetAge, recordDate, tag, uuid, lastUpdated, sort, includes));
 		
 		List<IBaseResource> resultList = get(result);
 		
@@ -273,4 +292,139 @@ public class FhirConditionServiceImplTest {
 		assertThat(resultList, not(empty()));
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 	}
+	
+	@Test
+	public void create_shouldDelegateToDiagnosisServiceForDiagnosis() {
+		org.hl7.fhir.r4.model.Condition condition = new org.hl7.fhir.r4.model.Condition();
+		CodeableConcept category = new CodeableConcept();
+		category.addCoding(
+		    new Coding("http://terminology.hl7.org/CodeSystem/condition-category", "encounter-diagnosis", null));
+		condition.addCategory(category);
+		
+		org.hl7.fhir.r4.model.Condition expected = new org.hl7.fhir.r4.model.Condition();
+		when(diagnosisService.create(condition)).thenReturn(expected);
+		
+		org.hl7.fhir.r4.model.Condition result = conditionService.create(condition);
+		assertThat(result, equalTo(expected));
+	}
+	
+	@Test
+	public void update_shouldDelegateToDiagnosisServiceForDiagnosis() {
+		org.hl7.fhir.r4.model.Condition condition = new org.hl7.fhir.r4.model.Condition();
+		condition.setId(CONDITION_UUID);
+		CodeableConcept category = new CodeableConcept();
+		category.addCoding(
+		    new Coding("http://terminology.hl7.org/CodeSystem/condition-category", "encounter-diagnosis", null));
+		condition.addCategory(category);
+		
+		org.hl7.fhir.r4.model.Condition expected = new org.hl7.fhir.r4.model.Condition();
+		when(diagnosisService.update(CONDITION_UUID, condition)).thenReturn(expected);
+		
+		org.hl7.fhir.r4.model.Condition result = conditionService.update(CONDITION_UUID, condition);
+		assertThat(result, equalTo(expected));
+	}
+	
+	@Test
+	public void shouldSearchExplicitlyFor_shouldReturnTrueForNullParam() {
+		boolean result = conditionService.shouldSearchExplicitlyFor(null, "condition");
+		
+		assertThat(result, equalTo(true));
+	}
+	
+	@Test
+	public void shouldSearchExplicitlyFor_shouldReturnTrueWhenTagMatches() {
+		TokenAndListParam tag = new TokenAndListParam()
+		        .addAnd(new TokenOrListParam().add(FhirConstants.OPENMRS_FHIR_EXT_CONDITION_TAG, "condition"));
+		
+		boolean result = conditionService.shouldSearchExplicitlyFor(tag, "condition");
+		
+		assertThat(result, equalTo(true));
+	}
+	
+	@Test
+	public void shouldSearchExplicitlyFor_shouldReturnFalseWhenTagDoesNotMatch() {
+		TokenAndListParam tag = new TokenAndListParam()
+		        .addAnd(new TokenOrListParam().add(FhirConstants.OPENMRS_FHIR_EXT_CONDITION_TAG, "diagnosis"));
+		
+		boolean result = conditionService.shouldSearchExplicitlyFor(tag, "condition");
+		
+		assertThat(result, equalTo(false));
+	}
+	
+	@Test
+	public void get_shouldReturnDiagnosisWhenConditionNotFound() {
+		when(dao.get(CONDITION_UUID)).thenReturn(null);
+		org.hl7.fhir.r4.model.Condition diagnosis = new org.hl7.fhir.r4.model.Condition();
+		diagnosis.setId(CONDITION_UUID);
+		when(diagnosisService.get(CONDITION_UUID)).thenReturn(diagnosis);
+		
+		org.hl7.fhir.r4.model.Condition result = conditionService.get(CONDITION_UUID);
+		
+		assertThat(result, equalTo(diagnosis));
+	}
+	
+	@Test
+	public void delete_shouldDelegateToDiagnosisServiceWhenConditionMissing() {
+		when(dao.delete(CONDITION_UUID)).thenReturn(null);
+		
+		conditionService.delete(CONDITION_UUID);
+		
+		verify(diagnosisService).delete(CONDITION_UUID);
+	}
+	
+	@Test
+	public void searchConditions_shouldReturnDiagnosisBundleWhenOnlyDiagnosisMatches() {
+		TokenAndListParam tag = new TokenAndListParam()
+		        .addAnd(new TokenOrListParam().add(FhirConstants.OPENMRS_FHIR_EXT_CONDITION_TAG, "diagnosis"));
+		
+		IBundleProvider diagBundle = new SimpleBundleProvider();
+		when(diagnosisService.searchDiagnoses(any())).thenReturn(diagBundle);
+		
+		IBundleProvider result = conditionService.searchConditions(
+		    new ConditionSearchParams(null, null, null, null, null, null, tag, null, null, null, new HashSet<>()));
+		
+		assertThat(result, sameInstance(diagBundle));
+	}
+	
+	@Test
+	public void searchConditions_shouldReturnTwoBundleProviderWhenBothMatch() {
+		TokenAndListParam tag = new TokenAndListParam()
+		        .addAnd(new TokenOrListParam().add(FhirConstants.OPENMRS_FHIR_EXT_CONDITION_TAG, "diagnosis"))
+		        .addAnd(new TokenOrListParam().add(FhirConstants.OPENMRS_FHIR_EXT_CONDITION_TAG, "condition"));
+		
+		IBundleProvider diagBundle = new SimpleBundleProvider();
+		IBundleProvider condBundle = new SimpleBundleProvider();
+		when(diagnosisService.searchDiagnoses(any())).thenReturn(diagBundle);
+		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(condBundle);
+		
+		IBundleProvider result = conditionService.searchConditions(
+		    new ConditionSearchParams(null, null, null, null, null, null, tag, null, null, null, new HashSet<>()));
+		
+		assertThat(result instanceof TwoSearchQueryBundleProvider, equalTo(true));
+	}
+	
+	@Test
+	public void searchConditions_shouldReturnConditionBundleWhenOnlyConditionMatches() {
+		TokenAndListParam tag = new TokenAndListParam()
+		        .addAnd(new TokenOrListParam().add(FhirConstants.OPENMRS_FHIR_EXT_CONDITION_TAG, "condition"));
+		
+		IBundleProvider condBundle = new SimpleBundleProvider();
+		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(condBundle);
+		
+		IBundleProvider result = conditionService.searchConditions(
+		    new ConditionSearchParams(null, null, null, null, null, null, tag, null, null, null, new HashSet<>()));
+		
+		assertThat(result, sameInstance(condBundle));
+	}
+	
+	@Test
+	public void searchConditions_shouldReturnEmptyBundleWhenNoMatches() {
+		TokenAndListParam tag = new TokenAndListParam();
+		
+		IBundleProvider result = conditionService.searchConditions(
+		    new ConditionSearchParams(null, null, null, null, null, null, tag, null, null, null, new HashSet<>()));
+		
+		assertThat(result.getResources(0, 1), empty());
+	}
+	
 }
