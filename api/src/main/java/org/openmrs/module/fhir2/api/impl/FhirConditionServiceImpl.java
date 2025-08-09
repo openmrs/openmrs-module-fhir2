@@ -94,9 +94,7 @@ public class FhirConditionServiceImpl extends BaseFhirService<Condition, org.ope
 		
 		if (result.equals(FhirUtils.OpenmrsConditionType.CONDITION)) {
 			return super.create(condition);
-		}
-		
-		if (result.equals(FhirUtils.OpenmrsConditionType.DIAGNOSIS)) {
+		} else if (result.equals(FhirUtils.OpenmrsConditionType.DIAGNOSIS)) {
 			return diagnosisService.create(condition);
 		}
 		
