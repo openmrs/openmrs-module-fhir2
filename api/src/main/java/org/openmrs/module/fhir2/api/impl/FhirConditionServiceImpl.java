@@ -67,7 +67,6 @@ public class FhirConditionServiceImpl extends BaseFhirService<Condition, org.ope
 	
 	@Override
 	public Condition get(@Nonnull String uuid) {
-		
 		Condition result;
 		try {
 			result = super.get(uuid);
