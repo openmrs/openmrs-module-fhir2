@@ -26,8 +26,8 @@ import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslat
 import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.CIEL_1420;
 import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.CIEL_161011;
 import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.CIEL_165907;
+import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.CIEL_170000;
 import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.CIEL_984;
-import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.LOINC_45354_8;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -64,18 +64,16 @@ public class FhirImmunizationServiceImplTest extends BaseFhirContextSensitiveTes
 	
 	private static final String FREETEXT_COMMENT_CONCEPT_CODE = "161011";
 	
-	private static final String FREETEXT_COMMENT_CONCEPT_SOURCE = "CIEL";
+	private static final String CIEL_CONCEPT_SOURCE = "CIEL";
 	
-	private static final String NEXT_DOSE_DATE_CONCEPT_CODE = "45354-8";
-	
-	private static final String NEXT_DOSE_DATE_CONCEPT_SOURCE = "LOINC";
+	private static final String NEXT_DOSE_DATE_CONCEPT_CODE = "170000";
 	
 	private static final String IMMUNIZATIONS_METADATA_XML = "org/openmrs/module/fhir2/Immunization_metadata.xml";
 	
 	private static final String IMMUNIZATIONS_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/services/impl/FhirImmunizationService_initial_data.xml";
 	
 	private static final String PRACTITIONER_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirPractitionerDaoImplTest_initial_data.xml";
-
+	
 	private static final String IMMUNIZATION_NEXT_DOSE_DATE = "/org/openmrs/module/fhir2/providers/immunization-next-dose-date.json";
 	
 	@Autowired
@@ -186,9 +184,8 @@ public class FhirImmunizationServiceImplTest extends BaseFhirContextSensitiveTes
 	@Test
 	public void saveImmunization_shouldNotFailIfNoteConceptIsMissingAndNoteProvided() throws Exception {
 		// Remove the note concept since @Before loads it
-		conceptService.purgeConcept(
-		    conceptService.getConceptByMapping(FREETEXT_COMMENT_CONCEPT_CODE, FREETEXT_COMMENT_CONCEPT_SOURCE));
-		assertNull(conceptService.getConceptByMapping(FREETEXT_COMMENT_CONCEPT_CODE, FREETEXT_COMMENT_CONCEPT_SOURCE));
+		conceptService.purgeConcept(conceptService.getConceptByMapping(FREETEXT_COMMENT_CONCEPT_CODE, CIEL_CONCEPT_SOURCE));
+		assertNull(conceptService.getConceptByMapping(FREETEXT_COMMENT_CONCEPT_CODE, CIEL_CONCEPT_SOURCE));
 		
 		FhirContext ctx = FhirContext.forR4();
 		IParser parser = ctx.newJsonParser();
@@ -209,16 +206,17 @@ public class FhirImmunizationServiceImplTest extends BaseFhirContextSensitiveTes
 	public void saveImmunization_shouldSaveImmunizationWithNextDoseDateExtension() throws Exception {
 		FhirContext ctx = FhirContext.forR4();
 		IParser parser = ctx.newJsonParser();
-		String json = IOUtils.toString(Objects.requireNonNull(getClass().getResourceAsStream(IMMUNIZATION_NEXT_DOSE_DATE)), StandardCharsets.UTF_8);
+		String json = IOUtils.toString(Objects.requireNonNull(getClass().getResourceAsStream(IMMUNIZATION_NEXT_DOSE_DATE)),
+		    StandardCharsets.UTF_8);
 		Immunization newImmunization = parser.parseResource(Immunization.class, json);
 		Immunization savedImmunization = service.create(newImmunization);
-
+		
 		Obs obs = obsService.getObsByUuid(savedImmunization.getId());
 		Map<String, Obs> members = helper.getObsMembersMap(obs);
 		
-		assertThat(members.get(LOINC_45354_8), notNullValue());
-		assertThat(members.get(LOINC_45354_8).getValueDatetime(), notNullValue());
-		assertThat(members.get(LOINC_45354_8).getValueDatetime().getTime(),
+		assertThat(members.get(CIEL_170000), notNullValue());
+		assertThat(members.get(CIEL_170000).getValueDatetime(), notNullValue());
+		assertThat(members.get(CIEL_170000).getValueDatetime().getTime(),
 		    is(new DateTimeType("2024-04-15T10:30:00Z").getValue().getTime()));
 		
 		assertThat(savedImmunization.hasExtension(), is(true));
@@ -238,20 +236,20 @@ public class FhirImmunizationServiceImplTest extends BaseFhirContextSensitiveTes
 	@Test
 	public void saveImmunization_shouldNotFailIfNextDoseDateConceptIsMissingAndExtensionProvided() throws Exception {
 		// Remove the next dose date concept since @Before loads it
-		conceptService.purgeConcept(
-		    conceptService.getConceptByMapping(NEXT_DOSE_DATE_CONCEPT_CODE, NEXT_DOSE_DATE_CONCEPT_SOURCE));
-		assertNull(conceptService.getConceptByMapping(NEXT_DOSE_DATE_CONCEPT_CODE, NEXT_DOSE_DATE_CONCEPT_SOURCE));
+		conceptService.purgeConcept(conceptService.getConceptByMapping(NEXT_DOSE_DATE_CONCEPT_CODE, CIEL_CONCEPT_SOURCE));
+		assertNull(conceptService.getConceptByMapping(NEXT_DOSE_DATE_CONCEPT_CODE, CIEL_CONCEPT_SOURCE));
 		
 		FhirContext ctx = FhirContext.forR4();
 		IParser parser = ctx.newJsonParser();
-		String json = IOUtils.toString(Objects.requireNonNull(getClass().getResourceAsStream(IMMUNIZATION_NEXT_DOSE_DATE)), StandardCharsets.UTF_8);
+		String json = IOUtils.toString(Objects.requireNonNull(getClass().getResourceAsStream(IMMUNIZATION_NEXT_DOSE_DATE)),
+		    StandardCharsets.UTF_8);
 		Immunization newImmunization = parser.parseResource(Immunization.class, json);
 		Immunization savedImmunization = service.create(newImmunization);
-
+		
 		Obs obs = obsService.getObsByUuid(savedImmunization.getId());
 		Map<String, Obs> members = helper.getObsMembersMap(obs);
 		
-		assertNull(members.get(LOINC_45354_8));
+		assertNull(members.get(CIEL_170000));
 		assertThat(savedImmunization.hasExtension(), is(false));
 	}
 	
@@ -320,9 +318,8 @@ public class FhirImmunizationServiceImplTest extends BaseFhirContextSensitiveTes
 	@Test
 	public void updateImmunization_shouldNotFailIfNoteConceptIsMissingButNoteIsProvided() throws Exception {
 		// Remove the note concept since @Before loads it
-		conceptService.purgeConcept(
-		    conceptService.getConceptByMapping(FREETEXT_COMMENT_CONCEPT_CODE, FREETEXT_COMMENT_CONCEPT_SOURCE));
-		assertNull(conceptService.getConceptByMapping(FREETEXT_COMMENT_CONCEPT_CODE, FREETEXT_COMMENT_CONCEPT_SOURCE));
+		conceptService.purgeConcept(conceptService.getConceptByMapping(FREETEXT_COMMENT_CONCEPT_CODE, CIEL_CONCEPT_SOURCE));
+		assertNull(conceptService.getConceptByMapping(FREETEXT_COMMENT_CONCEPT_CODE, CIEL_CONCEPT_SOURCE));
 		
 		FhirContext ctx = FhirContext.forR4();
 		IParser parser = ctx.newJsonParser();
@@ -341,7 +338,8 @@ public class FhirImmunizationServiceImplTest extends BaseFhirContextSensitiveTes
 	public void updateImmunization_shouldUpdateNextDoseDateExtensionWhenConceptIsAvailable() throws Exception {
 		FhirContext ctx = FhirContext.forR4();
 		IParser parser = ctx.newJsonParser();
-		String json = IOUtils.toString(Objects.requireNonNull(getClass().getResourceAsStream(IMMUNIZATION_NEXT_DOSE_DATE)), StandardCharsets.UTF_8);
+		String json = IOUtils.toString(Objects.requireNonNull(getClass().getResourceAsStream(IMMUNIZATION_NEXT_DOSE_DATE)),
+		    StandardCharsets.UTF_8);
 		Immunization created = service.create(parser.parseResource(Immunization.class, json));
 		assertThat(created.hasExtension(), is(true));
 		assertThat(created.getExtension().size(), is(1));
@@ -369,9 +367,9 @@ public class FhirImmunizationServiceImplTest extends BaseFhirContextSensitiveTes
 		
 		Obs obs = obsService.getObsByUuid(updated.getId());
 		Map<String, Obs> members = helper.getObsMembersMap(obs);
-		assertThat(members.get(LOINC_45354_8), notNullValue());
-		assertThat(members.get(LOINC_45354_8).getValueDatetime(), notNullValue());
-		assertThat(members.get(LOINC_45354_8).getValueDatetime().getTime(),
+		assertThat(members.get(CIEL_170000), notNullValue());
+		assertThat(members.get(CIEL_170000).getValueDatetime(), notNullValue());
+		assertThat(members.get(CIEL_170000).getValueDatetime().getTime(),
 		    is(new DateTimeType("2024-07-15T10:30:00Z").getValue().getTime()));
 	}
 	

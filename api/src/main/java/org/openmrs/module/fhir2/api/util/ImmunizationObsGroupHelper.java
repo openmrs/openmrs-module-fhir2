@@ -15,7 +15,7 @@ import static org.openmrs.module.fhir2.FhirConstants.IMMUNIZATIONS_ENCOUNTER_TYP
 import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.IMMUNIZATION_CONCEPTS;
 import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.IMMUNIZATION_FREE_TEXT_COMMENT_CONCEPT;
 import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.IMMUNIZATION_GROUPING_CONCEPT;
-import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.IMMUNIZATION_NEXT_DOSE_DATE_LOINC_CODE;
+import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.IMMUNIZATION_NEXT_DOSE_DATE_CONCEPT_CODE;
 import static org.openmrs.module.fhir2.api.util.FhirUtils.createExceptionErrorOperationOutcome;
 
 import javax.annotation.Nonnull;
@@ -99,14 +99,14 @@ public class ImmunizationObsGroupHelper {
 	
 	public Concept concept(String refTerm) {
 		Set<String> directRefTerms = new HashSet<>(
-		        Arrays.asList(IMMUNIZATION_FREE_TEXT_COMMENT_CONCEPT, IMMUNIZATION_NEXT_DOSE_DATE_LOINC_CODE));
+		        Arrays.asList(IMMUNIZATION_FREE_TEXT_COMMENT_CONCEPT, IMMUNIZATION_NEXT_DOSE_DATE_CONCEPT_CODE));
 		if (directRefTerms.contains(refTerm)) {
 			return conceptOrNull(refTerm);
 		}
-
+		
 		return getConceptFromMapping(refTerm).orElseThrow(
-				() -> createImmunizationRequestSetupError("The Immunization resource requires a concept mapped to '" + refTerm
-						+ "', however either multiple concepts are mapped to that term or not concepts are mapped to that term."));
+		    () -> createImmunizationRequestSetupError("The Immunization resource requires a concept mapped to '" + refTerm
+		            + "', however either multiple concepts are mapped to that term or not concepts are mapped to that term."));
 	}
 	
 	public Obs newImmunizationObsGroup() {

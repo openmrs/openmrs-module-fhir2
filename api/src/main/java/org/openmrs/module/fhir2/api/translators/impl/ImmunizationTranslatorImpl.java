@@ -67,10 +67,10 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 	
 	public static final String IMMUNIZATION_FREE_TEXT_COMMENT_CONCEPT = "CIEL:161011";
 	
-	public static final String IMMUNIZATION_NEXT_DOSE_DATE_LOINC_CODE = "LOINC:45354-8";
+	public static final String IMMUNIZATION_NEXT_DOSE_DATE_CONCEPT_CODE = "CIEL:170000";
 	
 	public static final Set<String> IMMUNIZATION_CONCEPTS = ImmutableSet.of("CIEL:984", "CIEL:1410", "CIEL:1418",
-	    "CIEL:1419", "CIEL:1420", "CIEL:165907", "CIEL:161011", "LOINC:45354-8");
+	    "CIEL:1419", "CIEL:1420", "CIEL:165907", "CIEL:161011", "CIEL:170000");
 	
 	public static final String CIEL_984;
 	
@@ -86,7 +86,7 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 	
 	public static final String CIEL_161011;
 	
-	public static final String LOINC_45354_8;
+	public static final String CIEL_170000;
 	
 	static {
 		final Iterator<String> conceptIterator = IMMUNIZATION_CONCEPTS.iterator();
@@ -97,7 +97,7 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 		CIEL_1420 = conceptIterator.next();
 		CIEL_165907 = conceptIterator.next();
 		CIEL_161011 = conceptIterator.next();
-		LOINC_45354_8 = conceptIterator.next();
+		CIEL_170000 = conceptIterator.next();
 	}
 	
 	@Getter(PROTECTED)
@@ -414,7 +414,7 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 			openmrsImmunization.removeGroupMember(members.get(CIEL_161011));
 		}
 		
-		Concept nextDoseDateConcept = helper.conceptOrNull(LOINC_45354_8);
+		Concept nextDoseDateConcept = helper.conceptOrNull(CIEL_170000);
 		if (nextDoseDateConcept != null
 		        && fhirImmunization.hasExtension(FhirConstants.OPENMRS_FHIR_EXIT_IMMUNIZATION_NEXT_DOSE_DATE)) {
 			Extension extension = fhirImmunization
@@ -423,10 +423,10 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 				DateTimeType dateTimeValue = (DateTimeType) extension.getValue();
 				Date nextDoseDate = dateTimeValue.getValue();
 				
-				Obs obs = members.get(LOINC_45354_8);
+				Obs obs = members.get(CIEL_170000);
 				if (obs == null) {
-					obs = helper.addNewObs(openmrsImmunization, LOINC_45354_8);
-					members.put(LOINC_45354_8, obs);
+					obs = helper.addNewObs(openmrsImmunization, CIEL_170000);
+					members.put(CIEL_170000, obs);
 					obs.setValueDatetime(nextDoseDate);
 				} else if (obs.getId() == null) {
 					obs.setValueDatetime(nextDoseDate);
@@ -440,7 +440,7 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 				}
 			}
 		} else {
-			openmrsImmunization.removeGroupMember(members.get(LOINC_45354_8));
+			openmrsImmunization.removeGroupMember(members.get(CIEL_170000));
 		}
 		
 		return openmrsImmunization;
@@ -513,7 +513,7 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 		}
 		
 		{
-			Obs obs = members.get(LOINC_45354_8);
+			Obs obs = members.get(CIEL_170000);
 			if (obs != null && obs.getValueDatetime() != null) {
 				immunization.addExtension(new Extension().setUrl(FhirConstants.OPENMRS_FHIR_EXIT_IMMUNIZATION_NEXT_DOSE_DATE)
 				        .setValue(new DateTimeType(obs.getValueDatetime())));
