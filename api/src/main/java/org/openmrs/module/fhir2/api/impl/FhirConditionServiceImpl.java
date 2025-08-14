@@ -80,7 +80,6 @@ public class FhirConditionServiceImpl extends BaseFhirService<Condition, org.ope
 	
 	@Override
 	public Condition create(@Nonnull Condition condition) {
-		
 		if (condition == null) {
 			throw new InvalidRequestException("Condition cannot be null");
 		}
