@@ -114,7 +114,7 @@ public class ConditionFhirResourceProvider implements IResourceProvider {
 	        @OptionalParam(name = Condition.SP_ONSET_DATE) DateRangeParam onsetDate,
 	        @OptionalParam(name = Condition.SP_ONSET_AGE) QuantityAndListParam onsetAge,
 	        @OptionalParam(name = Condition.SP_ASSERTED_DATE) DateRangeParam recordedDate,
-	        @OptionalParam(name = "_tag") TokenAndListParam tag,
+	        @OptionalParam(name = Condition.SP_CATEGORY) TokenAndListParam category,
 	        @OptionalParam(name = Condition.SP_RES_ID) TokenAndListParam id,
 	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated, @Sort SortSpec sort,
 	        @IncludeParam(allow = { "Condition:" + Condition.SP_PATIENT }) HashSet<Include> includes) {
@@ -128,6 +128,6 @@ public class ConditionFhirResourceProvider implements IResourceProvider {
 		
 		return new SearchQueryBundleProviderR3Wrapper(
 		        conditionService.searchConditions(new ConditionSearchParams(patientParam, code, clinicalStatus, onsetDate,
-		                onsetAge, recordedDate, tag, id, lastUpdated, sort, includes)));
+		                onsetAge, recordedDate, category, id, lastUpdated, sort, includes)));
 	}
 }

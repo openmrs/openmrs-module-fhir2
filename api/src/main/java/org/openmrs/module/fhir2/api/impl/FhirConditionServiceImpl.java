@@ -87,7 +87,8 @@ public class FhirConditionServiceImpl extends BaseFhirService<Condition, org.ope
 		FhirUtils.OpenmrsConditionType result = FhirUtils.getOpenmrsConditionType(condition).orElse(null);
 		
 		if (result == null) {
-			throw new InvalidRequestException("Invalid type of request");
+			throw new InvalidRequestException(
+			        "Condition.category provided must be one of problem-list-item or encounter-diagnosis");
 		}
 		
 		if (result.equals(FhirUtils.OpenmrsConditionType.CONDITION)) {
@@ -112,19 +113,12 @@ public class FhirConditionServiceImpl extends BaseFhirService<Condition, org.ope
 		
 		FhirUtils.OpenmrsConditionType result = FhirUtils.getOpenmrsConditionType(condition).orElse(null);
 		
-		if (result == null) {
-			throw new InvalidRequestException("Invalid type of request");
-		}
-		
-		if (result.equals(FhirUtils.OpenmrsConditionType.CONDITION)) {
-			return super.update(uuid, condition);
-		}
-		
 		if (result.equals(FhirUtils.OpenmrsConditionType.DIAGNOSIS)) {
-			return diagnosisService.update(uuid, condition);
+			return diagnosisService.create(condition);
+		} else {
+			return super.create(condition);
 		}
 		
-		throw new InvalidRequestException("Invalid type of request");
 	}
 	
 	@Override
@@ -148,11 +142,13 @@ public class FhirConditionServiceImpl extends BaseFhirService<Condition, org.ope
 		IBundleProvider diagnosisBundle = null;
 		IBundleProvider conditionBundle = null;
 		
-		if (shouldSearchExplicitlyFor(conditionSearchParams.getTag(), "diagnosis")) {
+		if (shouldSearchExplicitlyFor(conditionSearchParams.getCategory(),
+		    FhirConstants.CONDITION_CATEGORY_CODE_DIAGNOSIS)) {
 			diagnosisBundle = diagnosisService.searchDiagnoses(theParams);
 		}
 		
-		if (shouldSearchExplicitlyFor(conditionSearchParams.getTag(), "condition")) {
+		if (shouldSearchExplicitlyFor(conditionSearchParams.getCategory(),
+		    FhirConstants.CONDITION_CATEGORY_CODE_CONDITION)) {
 			conditionBundle = searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 		}
 		
@@ -173,9 +169,9 @@ public class FhirConditionServiceImpl extends BaseFhirService<Condition, org.ope
 			return true;
 		}
 		
-		return tokenAndListParam.getValuesAsQueryTokens().stream()
-		        .anyMatch(tokenOrListParam -> tokenOrListParam.doesCodingListMatch(Collections
-		                .singletonList(new InternalCodingDt(FhirConstants.OPENMRS_FHIR_EXT_CONDITION_TAG, valueToCheck))));
+		return tokenAndListParam.getValuesAsQueryTokens().stream().anyMatch(
+		    tokenOrListParam -> tokenOrListParam.doesCodingListMatch(
+		        Collections.singletonList(new InternalCodingDt(FhirConstants.CONDITION_CATEGORY_SYSTEM_URI, valueToCheck))));
 	}
 	
 }

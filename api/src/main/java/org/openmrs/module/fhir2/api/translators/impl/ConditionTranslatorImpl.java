@@ -95,7 +95,11 @@ public class ConditionTranslatorImpl implements ConditionTranslator<Condition> {
 		fhirCondition.setRecorder(practitionerReferenceTranslator.toFhirResource(condition.getCreator()));
 		fhirCondition.setRecordedDate(condition.getDateCreated());
 		
-		fhirCondition.getMeta().addTag(FhirConstants.OPENMRS_FHIR_EXT_CONDITION_TAG, "condition", "Condition");
+		CodeableConcept category = new CodeableConcept();
+		category.addCoding().setSystem(FhirConstants.CONDITION_CATEGORY_SYSTEM_URI)
+		        .setCode(FhirConstants.CONDITION_CATEGORY_CODE_CONDITION).setDisplay("Problem List Item");
+		fhirCondition.addCategory(category);
+		
 		fhirCondition.getMeta().setLastUpdated(getLastUpdated(condition));
 		fhirCondition.getMeta().setVersionId(getVersionId(condition));
 		

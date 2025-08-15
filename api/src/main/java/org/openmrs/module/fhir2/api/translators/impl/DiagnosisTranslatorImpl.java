@@ -22,7 +22,6 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.StringType;
@@ -59,21 +58,20 @@ public class DiagnosisTranslatorImpl implements DiagnosisTranslator {
 	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private ConceptTranslator conceptTranslator;
 	
-	// FHIR Extension URLs for OpenMRS-specific diagnosis fields
-	private static final String DIAGNOSIS_RANK_EXTENSION = "http://openmrs.org/fhir/StructureDefinition/diagnosis-rank";
-	
-	private static final String DIAGNOSIS_CERTAINTY_EXTENSION = "http://openmrs.org/fhir/StructureDefinition/diagnosis-certainty";
-	
 	@Override
 	public org.hl7.fhir.r4.model.Condition toFhirResource(@Nonnull Diagnosis diagnosis) {
 		notNull(diagnosis, "The OpenMRS Diagnosis object should not be null");
+		
+		if (diagnosis.getVoided()) {
+			return null;
+		}
 		
 		org.hl7.fhir.r4.model.Condition fhirCondition = new org.hl7.fhir.r4.model.Condition();
 		fhirCondition.setId(diagnosis.getUuid());
 		
 		CodeableConcept category = new CodeableConcept();
-		category.addCoding(new Coding().setSystem("http://terminology.hl7.org/CodeSystem/condition-category")
-		        .setCode("encounter-diagnosis").setDisplay("Encounter Diagnosis"));
+		category.addCoding().setSystem(FhirConstants.CONDITION_CATEGORY_SYSTEM_URI)
+		        .setCode(FhirConstants.CONDITION_CATEGORY_CODE_DIAGNOSIS).setDisplay("Encounter Diagnosis");
 		fhirCondition.addCategory(category);
 		
 		// Set patient reference
@@ -101,39 +99,30 @@ public class DiagnosisTranslatorImpl implements DiagnosisTranslator {
 			}
 		}
 		
-		// Set clinical status based on diagnosis voided status
+		// Set clinical status as unknown
 		CodeableConcept clinicalStatus = new CodeableConcept();
-		if (diagnosis.getVoided()) {
-			clinicalStatus.addCoding(new Coding().setSystem("http://terminology.hl7.org/CodeSystem/condition-clinical")
-			        .setCode("inactive").setDisplay("Inactive"));
-		} else {
-			clinicalStatus.addCoding(new Coding().setSystem("http://terminology.hl7.org/CodeSystem/condition-clinical")
-			        .setCode("active").setDisplay("Active"));
-		}
-		fhirCondition.setClinicalStatus(clinicalStatus);
+		clinicalStatus.addCoding(
+		    new Coding().setSystem(FhirConstants.CONDITION_CLINICAL_SYSTEM_URI).setCode("unknown").setDisplay("Unknown"));
 		
 		// Set verification status based on certainty
 		CodeableConcept verificationStatus = new CodeableConcept();
 		if (diagnosis.getCertainty() != null) {
 			switch (diagnosis.getCertainty()) {
 				case CONFIRMED:
-					verificationStatus
-					        .addCoding(new Coding().setSystem("http://terminology.hl7.org/CodeSystem/condition-ver-status")
-					                .setCode("confirmed").setDisplay("Confirmed"));
+					verificationStatus.addCoding(new Coding().setSystem(FhirConstants.CONDITION_VER_STATUS_SYSTEM_URI)
+					        .setCode("confirmed").setDisplay("Confirmed"));
 					break;
 				case PROVISIONAL:
-					verificationStatus
-					        .addCoding(new Coding().setSystem("http://terminology.hl7.org/CodeSystem/condition-ver-status")
-					                .setCode("provisional").setDisplay("Provisional"));
+					verificationStatus.addCoding(new Coding().setSystem(FhirConstants.CONDITION_VER_STATUS_SYSTEM_URI)
+					        .setCode("provisional").setDisplay("Provisional"));
 					break;
 				default:
-					verificationStatus
-					        .addCoding(new Coding().setSystem("http://terminology.hl7.org/CodeSystem/condition-ver-status")
-					                .setCode("unconfirmed").setDisplay("Unconfirmed"));
+					verificationStatus.addCoding(new Coding().setSystem(FhirConstants.CONDITION_VER_STATUS_SYSTEM_URI)
+					        .setCode("unconfirmed").setDisplay("Unconfirmed"));
 					break;
 			}
 		} else {
-			verificationStatus.addCoding(new Coding().setSystem("http://terminology.hl7.org/CodeSystem/condition-ver-status")
+			verificationStatus.addCoding(new Coding().setSystem(FhirConstants.CONDITION_VER_STATUS_SYSTEM_URI)
 			        .setCode("unconfirmed").setDisplay("Unconfirmed"));
 		}
 		fhirCondition.setVerificationStatus(verificationStatus);
@@ -141,21 +130,14 @@ public class DiagnosisTranslatorImpl implements DiagnosisTranslator {
 		// Add diagnosis-specific extensions
 		if (diagnosis.getRank() != null) {
 			Extension rankExtension = new Extension();
-			rankExtension.setUrl(DIAGNOSIS_RANK_EXTENSION);
+			rankExtension.setUrl(FhirConstants.DIAGNOSIS_RANK_EXTENSION);
 			rankExtension.setValue(new IntegerType(diagnosis.getRank()));
 			fhirCondition.addExtension(rankExtension);
 		}
 		
-		if (diagnosis.getCertainty() != null) {
-			Extension certaintyExtension = new Extension();
-			certaintyExtension.setUrl(DIAGNOSIS_CERTAINTY_EXTENSION);
-			certaintyExtension.setValue(new StringType(diagnosis.getCertainty().toString()));
-			fhirCondition.addExtension(certaintyExtension);
-		}
-		
-		// Set onset date from encounter date if available
+		// Set recorded date from encounter date if available
 		if (diagnosis.getEncounter() != null && diagnosis.getEncounter().getEncounterDatetime() != null) {
-			fhirCondition.setOnset(new DateTimeType().setValue(diagnosis.getEncounter().getEncounterDatetime()));
+			fhirCondition.setRecordedDate(diagnosis.getEncounter().getEncounterDatetime());
 		}
 		
 		// Set recorder and recorded date
@@ -163,7 +145,6 @@ public class DiagnosisTranslatorImpl implements DiagnosisTranslator {
 		fhirCondition.setRecordedDate(diagnosis.getDateCreated());
 		
 		// Set metadata
-		fhirCondition.getMeta().addTag(FhirConstants.OPENMRS_FHIR_EXT_CONDITION_TAG, "diagnosis", "Diagnosis");
 		fhirCondition.getMeta().setLastUpdated(getLastUpdated(diagnosis));
 		fhirCondition.getMeta().setVersionId(getVersionId(diagnosis));
 		
@@ -196,7 +177,7 @@ public class DiagnosisTranslatorImpl implements DiagnosisTranslator {
 		
 		// Set encounter
 		if (condition.hasEncounter()) {
-			Encounter encounter = (Encounter) encounterReferenceTranslator.toOpenmrsType(condition.getEncounter());
+			Encounter encounter = encounterReferenceTranslator.toOpenmrsType(condition.getEncounter());
 			if (encounter != null) {
 				existingDiagnosis.setEncounter(encounter);
 			}
@@ -215,19 +196,8 @@ public class DiagnosisTranslatorImpl implements DiagnosisTranslator {
 			existingDiagnosis.setDiagnosis(diagnosisCodedOrText);
 		}
 		
-		// Set certainty from verification status or extension
-		Optional<Extension> certaintyExtension = Optional
-		        .ofNullable(condition.getExtensionByUrl(DIAGNOSIS_CERTAINTY_EXTENSION));
-		if (certaintyExtension.isPresent()) {
-			String certaintyValue = String.valueOf(certaintyExtension.get().getValue());
-			try {
-				existingDiagnosis.setCertainty(ConditionVerificationStatus.valueOf(certaintyValue));
-			}
-			catch (IllegalArgumentException e) {
-				// Default to PROVISIONAL if invalid value
-				existingDiagnosis.setCertainty(ConditionVerificationStatus.PROVISIONAL);
-			}
-		} else if (condition.hasVerificationStatus()) {
+		// Set certainty from verification status
+		if (condition.hasVerificationStatus()) {
 			// Map from FHIR verification status to OpenMRS certainty
 			String verificationCode = condition.getVerificationStatus().getCodingFirstRep().getCode();
 			switch (verificationCode) {
@@ -235,8 +205,6 @@ public class DiagnosisTranslatorImpl implements DiagnosisTranslator {
 					existingDiagnosis.setCertainty(ConditionVerificationStatus.CONFIRMED);
 					break;
 				case "provisional":
-					existingDiagnosis.setCertainty(ConditionVerificationStatus.PROVISIONAL);
-					break;
 				default:
 					existingDiagnosis.setCertainty(ConditionVerificationStatus.PROVISIONAL);
 					break;
@@ -244,7 +212,8 @@ public class DiagnosisTranslatorImpl implements DiagnosisTranslator {
 		}
 		
 		// Set rank from extension
-		Optional<Extension> rankExtension = Optional.ofNullable(condition.getExtensionByUrl(DIAGNOSIS_RANK_EXTENSION));
+		Optional<Extension> rankExtension = Optional
+		        .ofNullable(condition.getExtensionByUrl(FhirConstants.DIAGNOSIS_RANK_EXTENSION));
 		rankExtension.ifPresent(ext -> {
 			if (ext.getValue() instanceof IntegerType) {
 				existingDiagnosis.setRank(((IntegerType) ext.getValue()).getValue());

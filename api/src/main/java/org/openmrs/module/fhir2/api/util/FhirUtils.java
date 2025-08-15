@@ -146,11 +146,27 @@ public class FhirUtils {
 		}
 	}
 	
+	/*
+	 * Determines the condition type based on the given category:
+	 * 1. "encounter-diagnosis" → Diagnosis
+	 * 2. "problem-list-item" → Condition
+	 * 3. Any other category → returns empty
+	 *
+	 * Special case:
+	 * - If category is empty, returns Condition.
+	 *
+	 * @param condition The condition object to evaluate.
+	 * @return The condition type: "Diagnosis", "Condition", or empty.
+	 */
 	public static Optional<OpenmrsConditionType> getOpenmrsConditionType(Condition condition) {
 		if (condition.hasCategory() && condition.getCategoryFirstRep().hasCoding()) {
 			String code = condition.getCategoryFirstRep().getCodingFirstRep().getCode();
-			if ("encounter-diagnosis".equals(code)) {
+			if (FhirConstants.CONDITION_CATEGORY_CODE_DIAGNOSIS.equals(code)) {
 				return Optional.of(OpenmrsConditionType.DIAGNOSIS);
+			} else if (FhirConstants.CONDITION_CATEGORY_CODE_CONDITION.equals(code)) {
+				return Optional.of(OpenmrsConditionType.CONDITION);
+			} else {
+				return Optional.empty();
 			}
 		}
 		
