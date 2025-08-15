@@ -44,8 +44,5 @@
     <extension url="http://openmrs.org/fhir/StructureDefinition/diagnosis-rank">
         <valueInteger value="1"/>
     </extension>
-    <extension url="http://openmrs.org/fhir/StructureDefinition/diagnosis-certainty">
-        <valueString value="CONFIRMED"/>
-    </extension>
     <recordedDate value="2014-11-25T22:17:00+11:00"/>
 </Condition>

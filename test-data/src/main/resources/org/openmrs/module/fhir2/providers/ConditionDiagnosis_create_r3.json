@@ -37,10 +37,6 @@
     {
       "url": "http://openmrs.org/fhir/StructureDefinition/diagnosis-rank",
       "valueInteger": 1
-    },
-    {
-      "url": "http://openmrs.org/fhir/StructureDefinition/diagnosis-certainty",
-      "valueString": "CONFIRMED"
     }
   ],
   "onsetDateTime": "2014-11-25T22:17:00+11:00"
