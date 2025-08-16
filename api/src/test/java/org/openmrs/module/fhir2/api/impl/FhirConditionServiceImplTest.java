@@ -256,8 +256,8 @@ public class FhirConditionServiceImplTest {
 		
 		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(CONDITION_UUID));
 		
-		TokenAndListParam tag = new TokenAndListParam()
-		        .addAnd(new TokenOrListParam().add(FhirConstants.OPENMRS_FHIR_EXT_CONDITION_TAG, "condition"));
+		TokenAndListParam category = new TokenAndListParam().addAnd(new TokenOrListParam()
+		        .add(FhirConstants.CONDITION_CATEGORY_SYSTEM_URI, FhirConstants.CONDITION_CATEGORY_CODE_CONDITION));
 		
 		DateRangeParam lastUpdated = new DateRangeParam().setLowerBound(LAST_UPDATED_DATE).setUpperBound(LAST_UPDATED_DATE);
 		
@@ -284,7 +284,7 @@ public class FhirConditionServiceImplTest {
 		when(conditionTranslator.toFhirResources(anyCollection())).thenCallRealMethod();
 		
 		IBundleProvider result = conditionService.searchConditions(new ConditionSearchParams(patientReference, codeList,
-		        clinicalList, onsetDate, onsetAge, recordDate, tag, uuid, lastUpdated, sort, includes));
+		        clinicalList, onsetDate, onsetAge, recordDate, category, uuid, lastUpdated, sort, includes));
 		
 		List<IBaseResource> resultList = get(result);
 		
@@ -298,7 +298,7 @@ public class FhirConditionServiceImplTest {
 		org.hl7.fhir.r4.model.Condition condition = new org.hl7.fhir.r4.model.Condition();
 		CodeableConcept category = new CodeableConcept();
 		category.addCoding(
-		    new Coding("http://terminology.hl7.org/CodeSystem/condition-category", "encounter-diagnosis", null));
+		    new Coding(FhirConstants.CONDITION_CATEGORY_SYSTEM_URI, FhirConstants.CONDITION_CATEGORY_CODE_DIAGNOSIS, null));
 		condition.addCategory(category);
 		
 		org.hl7.fhir.r4.model.Condition expected = new org.hl7.fhir.r4.model.Condition();
@@ -314,39 +314,40 @@ public class FhirConditionServiceImplTest {
 		condition.setId(CONDITION_UUID);
 		CodeableConcept category = new CodeableConcept();
 		category.addCoding(
-		    new Coding("http://terminology.hl7.org/CodeSystem/condition-category", "encounter-diagnosis", null));
+		    new Coding(FhirConstants.CONDITION_CATEGORY_SYSTEM_URI, FhirConstants.CONDITION_CATEGORY_CODE_DIAGNOSIS, null));
 		condition.addCategory(category);
 		
 		org.hl7.fhir.r4.model.Condition expected = new org.hl7.fhir.r4.model.Condition();
 		when(diagnosisService.update(CONDITION_UUID, condition)).thenReturn(expected);
-		
 		org.hl7.fhir.r4.model.Condition result = conditionService.update(CONDITION_UUID, condition);
 		assertThat(result, equalTo(expected));
 	}
 	
 	@Test
 	public void shouldSearchExplicitlyFor_shouldReturnTrueForNullParam() {
-		boolean result = conditionService.shouldSearchExplicitlyFor(null, "condition");
+		boolean result = conditionService.shouldSearchExplicitlyFor(null, FhirConstants.CONDITION_CATEGORY_CODE_CONDITION);
 		
 		assertThat(result, equalTo(true));
 	}
 	
 	@Test
 	public void shouldSearchExplicitlyFor_shouldReturnTrueWhenTagMatches() {
-		TokenAndListParam tag = new TokenAndListParam()
-		        .addAnd(new TokenOrListParam().add(FhirConstants.OPENMRS_FHIR_EXT_CONDITION_TAG, "condition"));
+		TokenAndListParam category = new TokenAndListParam().addAnd(new TokenOrListParam()
+		        .add(FhirConstants.CONDITION_CATEGORY_SYSTEM_URI, FhirConstants.CONDITION_CATEGORY_CODE_CONDITION));
 		
-		boolean result = conditionService.shouldSearchExplicitlyFor(tag, "condition");
+		boolean result = conditionService.shouldSearchExplicitlyFor(category,
+		    FhirConstants.CONDITION_CATEGORY_CODE_CONDITION);
 		
 		assertThat(result, equalTo(true));
 	}
 	
 	@Test
 	public void shouldSearchExplicitlyFor_shouldReturnFalseWhenTagDoesNotMatch() {
-		TokenAndListParam tag = new TokenAndListParam()
-		        .addAnd(new TokenOrListParam().add(FhirConstants.OPENMRS_FHIR_EXT_CONDITION_TAG, "diagnosis"));
+		TokenAndListParam category = new TokenAndListParam().addAnd(new TokenOrListParam()
+		        .add(FhirConstants.CONDITION_CATEGORY_SYSTEM_URI, FhirConstants.CONDITION_CATEGORY_CODE_DIAGNOSIS));
 		
-		boolean result = conditionService.shouldSearchExplicitlyFor(tag, "condition");
+		boolean result = conditionService.shouldSearchExplicitlyFor(category,
+		    FhirConstants.CONDITION_CATEGORY_CODE_CONDITION);
 		
 		assertThat(result, equalTo(false));
 	}
@@ -374,23 +375,25 @@ public class FhirConditionServiceImplTest {
 	
 	@Test
 	public void searchConditions_shouldReturnDiagnosisBundleWhenOnlyDiagnosisMatches() {
-		TokenAndListParam tag = new TokenAndListParam()
-		        .addAnd(new TokenOrListParam().add(FhirConstants.OPENMRS_FHIR_EXT_CONDITION_TAG, "diagnosis"));
+		TokenAndListParam category = new TokenAndListParam().addAnd(new TokenOrListParam()
+		        .add(FhirConstants.CONDITION_CATEGORY_SYSTEM_URI, FhirConstants.CONDITION_CATEGORY_CODE_DIAGNOSIS));
 		
 		IBundleProvider diagBundle = new SimpleBundleProvider();
 		when(diagnosisService.searchDiagnoses(any())).thenReturn(diagBundle);
 		
 		IBundleProvider result = conditionService.searchConditions(
-		    new ConditionSearchParams(null, null, null, null, null, null, tag, null, null, null, new HashSet<>()));
+		    new ConditionSearchParams(null, null, null, null, null, null, category, null, null, null, new HashSet<>()));
 		
 		assertThat(result, sameInstance(diagBundle));
 	}
 	
 	@Test
 	public void searchConditions_shouldReturnTwoBundleProviderWhenBothMatch() {
-		TokenAndListParam tag = new TokenAndListParam()
-		        .addAnd(new TokenOrListParam().add(FhirConstants.OPENMRS_FHIR_EXT_CONDITION_TAG, "diagnosis"))
-		        .addAnd(new TokenOrListParam().add(FhirConstants.OPENMRS_FHIR_EXT_CONDITION_TAG, "condition"));
+		TokenAndListParam category = new TokenAndListParam()
+		        .addAnd(new TokenOrListParam().add(FhirConstants.CONDITION_CATEGORY_SYSTEM_URI,
+		            FhirConstants.CONDITION_CATEGORY_CODE_DIAGNOSIS))
+		        .addAnd(new TokenOrListParam().add(FhirConstants.CONDITION_CATEGORY_SYSTEM_URI,
+		            FhirConstants.CONDITION_CATEGORY_CODE_CONDITION));
 		
 		IBundleProvider diagBundle = new SimpleBundleProvider();
 		IBundleProvider condBundle = new SimpleBundleProvider();
@@ -398,31 +401,31 @@ public class FhirConditionServiceImplTest {
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(condBundle);
 		
 		IBundleProvider result = conditionService.searchConditions(
-		    new ConditionSearchParams(null, null, null, null, null, null, tag, null, null, null, new HashSet<>()));
+		    new ConditionSearchParams(null, null, null, null, null, null, category, null, null, null, new HashSet<>()));
 		
 		assertThat(result instanceof TwoSearchQueryBundleProvider, equalTo(true));
 	}
 	
 	@Test
 	public void searchConditions_shouldReturnConditionBundleWhenOnlyConditionMatches() {
-		TokenAndListParam tag = new TokenAndListParam()
-		        .addAnd(new TokenOrListParam().add(FhirConstants.OPENMRS_FHIR_EXT_CONDITION_TAG, "condition"));
+		TokenAndListParam category = new TokenAndListParam().addAnd(new TokenOrListParam()
+		        .add(FhirConstants.CONDITION_CATEGORY_SYSTEM_URI, FhirConstants.CONDITION_CATEGORY_CODE_CONDITION));
 		
 		IBundleProvider condBundle = new SimpleBundleProvider();
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(condBundle);
 		
 		IBundleProvider result = conditionService.searchConditions(
-		    new ConditionSearchParams(null, null, null, null, null, null, tag, null, null, null, new HashSet<>()));
+		    new ConditionSearchParams(null, null, null, null, null, null, category, null, null, null, new HashSet<>()));
 		
 		assertThat(result, sameInstance(condBundle));
 	}
 	
 	@Test
 	public void searchConditions_shouldReturnEmptyBundleWhenNoMatches() {
-		TokenAndListParam tag = new TokenAndListParam();
+		TokenAndListParam category = new TokenAndListParam();
 		
 		IBundleProvider result = conditionService.searchConditions(
-		    new ConditionSearchParams(null, null, null, null, null, null, tag, null, null, null, new HashSet<>()));
+		    new ConditionSearchParams(null, null, null, null, null, null, category, null, null, null, new HashSet<>()));
 		
 		assertThat(result.getResources(0, 1), empty());
 	}

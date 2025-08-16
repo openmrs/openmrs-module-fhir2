@@ -170,8 +170,8 @@ public class ConditionFhirResourceProviderTest extends BaseFhirProvenanceResourc
 		
 		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(CONDITION_UUID));
 		
-		TokenAndListParam tag = new TokenAndListParam()
-		        .addAnd(new TokenOrListParam().add(FhirConstants.OPENMRS_FHIR_EXT_CONDITION_TAG, "condition"));
+		TokenAndListParam category = new TokenAndListParam().addAnd(new TokenOrListParam()
+		        .add(FhirConstants.CONDITION_CATEGORY_SYSTEM_URI, FhirConstants.CONDITION_CATEGORY_CODE_CONDITION));
 		
 		DateRangeParam lastUpdated = new DateRangeParam().setLowerBound(LAST_UPDATED_DATE).setUpperBound(LAST_UPDATED_DATE);
 		
@@ -180,11 +180,11 @@ public class ConditionFhirResourceProviderTest extends BaseFhirProvenanceResourc
 		HashSet<Include> includes = new HashSet<>();
 		
 		when(conditionService.searchConditions(new ConditionSearchParams(patientReference, codeList, clinicalList, onsetDate,
-		        onsetAge, recordDate, tag, uuid, lastUpdated, sort, null)))
+		        onsetAge, recordDate, category, uuid, lastUpdated, sort, null)))
 		                .thenReturn(new MockIBundleProvider<>(Collections.singletonList(condition), 10, 1));
 		
 		IBundleProvider result = resourceProvider.searchConditions(patientReference, subjectReference, codeList,
-		    clinicalList, onsetDate, onsetAge, recordDate, tag, uuid, lastUpdated, sort, includes);
+		    clinicalList, onsetDate, onsetAge, recordDate, category, uuid, lastUpdated, sort, includes);
 		
 		List<IBaseResource> resultList = get(result);
 		
@@ -211,8 +211,8 @@ public class ConditionFhirResourceProviderTest extends BaseFhirProvenanceResourc
 		
 		DateRangeParam recordDate = new DateRangeParam().setLowerBound("gt2020-05-01").setUpperBound("lt2021-05-01");
 		
-		TokenAndListParam tag = new TokenAndListParam()
-		        .addAnd(new TokenOrListParam().add(FhirConstants.OPENMRS_FHIR_EXT_CONDITION_TAG, "condition"));
+		TokenAndListParam category = new TokenAndListParam().addAnd(new TokenOrListParam()
+		        .add(FhirConstants.CONDITION_CATEGORY_SYSTEM_URI, FhirConstants.CONDITION_CATEGORY_CODE_CONDITION));
 		
 		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(CONDITION_UUID));
 		
@@ -223,11 +223,11 @@ public class ConditionFhirResourceProviderTest extends BaseFhirProvenanceResourc
 		HashSet<Include> includes = new HashSet<>();
 		
 		when(conditionService.searchConditions(new ConditionSearchParams(subjectReference, codeList, clinicalList, onsetDate,
-		        onsetAge, recordDate, tag, uuid, lastUpdated, sort, null)))
+		        onsetAge, recordDate, category, uuid, lastUpdated, sort, null)))
 		                .thenReturn(new MockIBundleProvider<>(Collections.singletonList(condition), 10, 1));
 		
 		IBundleProvider result = resourceProvider.searchConditions(subjectReference, subjectReference, codeList,
-		    clinicalList, onsetDate, onsetAge, recordDate, tag, uuid, lastUpdated, sort, includes);
+		    clinicalList, onsetDate, onsetAge, recordDate, category, uuid, lastUpdated, sort, includes);
 		
 		List<IBaseResource> resultList = get(result);
 		
@@ -257,8 +257,8 @@ public class ConditionFhirResourceProviderTest extends BaseFhirProvenanceResourc
 		
 		DateRangeParam recordDate = new DateRangeParam().setLowerBound("gt2020-05-01").setUpperBound("lt2021-05-01");
 		
-		TokenAndListParam tag = new TokenAndListParam()
-		        .addAnd(new TokenOrListParam().add(FhirConstants.OPENMRS_FHIR_EXT_CONDITION_TAG, "encounter-diagnosis"));
+		TokenAndListParam category = new TokenAndListParam().addAnd(new TokenOrListParam()
+		        .add(FhirConstants.CONDITION_CATEGORY_SYSTEM_URI, FhirConstants.CONDITION_CATEGORY_CODE_CONDITION));
 		
 		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(CONDITION_UUID));
 		
@@ -269,11 +269,11 @@ public class ConditionFhirResourceProviderTest extends BaseFhirProvenanceResourc
 		HashSet<Include> includes = new HashSet<>();
 		
 		when(conditionService.searchConditions(new ConditionSearchParams(patientReference, codeList, clinicalList, onsetDate,
-		        onsetAge, recordDate, tag, uuid, lastUpdated, sort, null)))
+		        onsetAge, recordDate, category, uuid, lastUpdated, sort, null)))
 		                .thenReturn(new MockIBundleProvider<>(Collections.singletonList(condition), 10, 1));
 		
 		IBundleProvider result = resourceProvider.searchConditions(patientReference, subjectReference, codeList,
-		    clinicalList, onsetDate, onsetAge, recordDate, tag, uuid, lastUpdated, sort, includes);
+		    clinicalList, onsetDate, onsetAge, recordDate, category, uuid, lastUpdated, sort, includes);
 		
 		List<IBaseResource> resultList = get(result);
 		
@@ -300,8 +300,8 @@ public class ConditionFhirResourceProviderTest extends BaseFhirProvenanceResourc
 		
 		DateRangeParam recordDate = new DateRangeParam().setLowerBound("gt2020-05-01").setUpperBound("lt2021-05-01");
 		
-		TokenAndListParam tag = new TokenAndListParam()
-		        .addAnd(new TokenOrListParam().add(FhirConstants.OPENMRS_FHIR_EXT_CONDITION_TAG, "encounter-diagnosis"));
+		TokenAndListParam category = new TokenAndListParam().addAnd(new TokenOrListParam()
+		        .add(FhirConstants.CONDITION_CATEGORY_SYSTEM_URI, FhirConstants.CONDITION_CATEGORY_CODE_DIAGNOSIS));
 		
 		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(CONDITION_UUID));
 		
@@ -312,11 +312,11 @@ public class ConditionFhirResourceProviderTest extends BaseFhirProvenanceResourc
 		HashSet<Include> includes = new HashSet<>();
 		
 		when(conditionService.searchConditions(new ConditionSearchParams(subjectReference, codeList, clinicalList, onsetDate,
-		        onsetAge, recordDate, tag, uuid, lastUpdated, sort, null)))
+		        onsetAge, recordDate, category, uuid, lastUpdated, sort, null)))
 		                .thenReturn(new MockIBundleProvider<>(Collections.singletonList(condition), 10, 1));
 		
 		IBundleProvider result = resourceProvider.searchConditions(subjectReference, subjectReference, codeList,
-		    clinicalList, onsetDate, onsetAge, recordDate, tag, uuid, lastUpdated, sort, includes);
+		    clinicalList, onsetDate, onsetAge, recordDate, category, uuid, lastUpdated, sort, includes);
 		
 		List<IBaseResource> resultList = get(result);
 		

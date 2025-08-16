@@ -22,6 +22,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.StringType;
@@ -59,14 +60,14 @@ public class DiagnosisTranslatorImpl implements DiagnosisTranslator {
 	private ConceptTranslator conceptTranslator;
 	
 	@Override
-	public org.hl7.fhir.r4.model.Condition toFhirResource(@Nonnull Diagnosis diagnosis) {
+	public Condition toFhirResource(@Nonnull Diagnosis diagnosis) {
 		notNull(diagnosis, "The OpenMRS Diagnosis object should not be null");
 		
 		if (diagnosis.getVoided()) {
 			return null;
 		}
 		
-		org.hl7.fhir.r4.model.Condition fhirCondition = new org.hl7.fhir.r4.model.Condition();
+		Condition fhirCondition = new Condition();
 		fhirCondition.setId(diagnosis.getUuid());
 		
 		CodeableConcept category = new CodeableConcept();
@@ -103,6 +104,7 @@ public class DiagnosisTranslatorImpl implements DiagnosisTranslator {
 		CodeableConcept clinicalStatus = new CodeableConcept();
 		clinicalStatus.addCoding(
 		    new Coding().setSystem(FhirConstants.CONDITION_CLINICAL_SYSTEM_URI).setCode("unknown").setDisplay("Unknown"));
+		fhirCondition.setClinicalStatus(clinicalStatus);
 		
 		// Set verification status based on certainty
 		CodeableConcept verificationStatus = new CodeableConcept();
@@ -130,7 +132,7 @@ public class DiagnosisTranslatorImpl implements DiagnosisTranslator {
 		// Add diagnosis-specific extensions
 		if (diagnosis.getRank() != null) {
 			Extension rankExtension = new Extension();
-			rankExtension.setUrl(FhirConstants.DIAGNOSIS_RANK_EXTENSION);
+			rankExtension.setUrl(FhirConstants.DIAGNOSIS_RANK_EXTENSION_URI);
 			rankExtension.setValue(new IntegerType(diagnosis.getRank()));
 			fhirCondition.addExtension(rankExtension);
 		}
@@ -142,7 +144,6 @@ public class DiagnosisTranslatorImpl implements DiagnosisTranslator {
 		
 		// Set recorder and recorded date
 		fhirCondition.setRecorder(practitionerReferenceTranslator.toFhirResource(diagnosis.getCreator()));
-		fhirCondition.setRecordedDate(diagnosis.getDateCreated());
 		
 		// Set metadata
 		fhirCondition.getMeta().setLastUpdated(getLastUpdated(diagnosis));
@@ -152,14 +153,13 @@ public class DiagnosisTranslatorImpl implements DiagnosisTranslator {
 	}
 	
 	@Override
-	public Diagnosis toOpenmrsType(@Nonnull org.hl7.fhir.r4.model.Condition condition) {
+	public Diagnosis toOpenmrsType(@Nonnull Condition condition) {
 		notNull(condition, "The FHIR Condition object should not be null");
 		return this.toOpenmrsType(new Diagnosis(), condition);
 	}
 	
 	@Override
-	public Diagnosis toOpenmrsType(@Nonnull Diagnosis existingDiagnosis,
-	        @Nonnull org.hl7.fhir.r4.model.Condition condition) {
+	public Diagnosis toOpenmrsType(@Nonnull Diagnosis existingDiagnosis, @Nonnull Condition condition) {
 		notNull(existingDiagnosis, "The existing OpenMRS Diagnosis object should not be null");
 		notNull(condition, "The FHIR Condition object should not be null");
 		
@@ -213,7 +213,7 @@ public class DiagnosisTranslatorImpl implements DiagnosisTranslator {
 		
 		// Set rank from extension
 		Optional<Extension> rankExtension = Optional
-		        .ofNullable(condition.getExtensionByUrl(FhirConstants.DIAGNOSIS_RANK_EXTENSION));
+		        .ofNullable(condition.getExtensionByUrl(FhirConstants.DIAGNOSIS_RANK_EXTENSION_URI));
 		rankExtension.ifPresent(ext -> {
 			if (ext.getValue() instanceof IntegerType) {
 				existingDiagnosis.setRank(((IntegerType) ext.getValue()).getValue());

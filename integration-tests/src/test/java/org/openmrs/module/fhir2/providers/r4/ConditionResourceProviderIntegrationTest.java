@@ -171,7 +171,7 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR4Integrat
 	}
 	
 	@Test
-	public void shouldCreateNewPatientAsJson() throws Exception {
+	public void shouldCreateNewConditionAsJson() throws Exception {
 		String jsonCondition;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_CREATE_CONDITION_DOCUMENT)) {
 			assertThat(is, notNullValue());
@@ -265,7 +265,9 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR4Integrat
 		
 		assertThat(condition, notNullValue());
 		assertThat(condition.getCategoryFirstRep().getCodingFirstRep().getCode(), equalTo("encounter-diagnosis"));
-		assertThat(condition.getMeta().getTag().stream().anyMatch(t -> "diagnosis".equals(t.getCode())), is(true));
+		assertThat(condition.getIdElement().getIdPart(), notNullValue());
+		assertThat(condition.getClinicalStatus(), notNullValue());
+		assertThat(condition.getClinicalStatus().getCodingFirstRep().getCode(), equalTo("unknown"));
 		
 		response = get("/Condition/" + condition.getIdElement().getIdPart()).accept(FhirMediaTypes.JSON).go();
 		
@@ -274,6 +276,43 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR4Integrat
 		Condition newCondition = readResponse(response);
 		
 		assertThat(newCondition.getId(), equalTo(condition.getId()));
+	}
+	
+	@Test
+	public void shouldSearchDiagnosisWithCategoryParameter() throws Exception {
+		String jsonDiagnosis;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_CREATE_DIAGNOSIS_DOCUMENT)) {
+			assertThat(is, notNullValue());
+			jsonDiagnosis = inputStreamToString(is, UTF_8);
+			assertThat(jsonDiagnosis, notNullValue());
+		}
+		
+		MockHttpServletResponse response = post("/Condition").accept(FhirMediaTypes.JSON).jsonContent(jsonDiagnosis).go();
+		
+		assertThat(response, isCreated());
+		assertThat(response.getHeader("Location"), containsString("/Condition/"));
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		
+		Condition condition = readResponse(response);
+		
+		assertThat(condition, notNullValue());
+		assertThat(condition.getCategoryFirstRep().getCodingFirstRep().getCode(), equalTo("encounter-diagnosis"));
+		assertThat(condition.getIdElement().getIdPart(), notNullValue());
+		assertThat(condition.getClinicalStatus(), notNullValue());
+		assertThat(condition.getClinicalStatus().getCodingFirstRep().getCode(), equalTo("unknown"));
+		
+		response = get("/Condition?category=http://terminology.hl7.org/CodeSystem/condition-category|encounter-diagnosis")
+		        .accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		
+		Bundle responseBundle = readBundleResponse(response);
+		assertThat(responseBundle.getEntry(), notNullValue());
+		assertThat(responseBundle.getEntry().get(0).getResource(), notNullValue());
+		
+		Condition newCondition = (Condition) responseBundle.getEntryFirstRep().getResource();
+		
+		assertThat(newCondition.getIdElement().getIdPart(), equalTo(condition.getIdElement().getIdPart()));
 	}
 	
 	@Test
@@ -295,7 +334,9 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR4Integrat
 		
 		assertThat(condition, notNullValue());
 		assertThat(condition.getCategoryFirstRep().getCodingFirstRep().getCode(), equalTo("encounter-diagnosis"));
-		assertThat(condition.getMeta().getTag().stream().anyMatch(t -> "diagnosis".equals(t.getCode())), is(true));
+		assertThat(condition.getIdElement().getIdPart(), notNullValue());
+		assertThat(condition.getClinicalStatus(), notNullValue());
+		assertThat(condition.getClinicalStatus().getCodingFirstRep().getCode(), equalTo("unknown"));
 		
 		response = get("/Condition/" + condition.getIdElement().getIdPart()).accept(FhirMediaTypes.JSON).go();
 		

@@ -44,7 +44,7 @@
   },
   "extension": [
     {
-      "url": "http://openmrs.org/fhir/StructureDefinition/diagnosis-rank",
+      "url": "http://fhir.openmrs.org/R4/StructureDefinition/diagnosis-rank",
       "valueInteger": 1
     }
   ],

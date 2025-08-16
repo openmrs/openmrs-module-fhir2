@@ -383,7 +383,7 @@ public final class FhirConstants {
 	
 	public static final String CONDITION_CATEGORY_CODE_DIAGNOSIS = "encounter-diagnosis";
 	
-	public static final String DIAGNOSIS_RANK_EXTENSION = "\"http://fhir.openmrs.org/R4/StructureDefinition/diagnosis-rank";
+	public static final String DIAGNOSIS_RANK_EXTENSION_URI = "http://fhir.openmrs.org/R4/StructureDefinition/diagnosis-rank";
 	
 	public static final String CONDITION_CLINICAL_SYSTEM_URI = HL7_FHIR_CODE_SYSTEM_PREFIX + "/condition-clinical";
 	

@@ -34,7 +34,7 @@
             <code value="confirmed"/>
         </coding>
     </verificationStatus>
-    <extension url="http://openmrs.org/fhir/StructureDefinition/diagnosis-rank">
+    <extension url="http://fhir.openmrs.org/R4/StructureDefinition/diagnosis-rank">
         <valueInteger value="1"/>
     </extension>
     <onsetDateTime value="2014-11-25T22:17:00+11:00"/>

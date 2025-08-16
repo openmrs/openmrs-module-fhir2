@@ -30,7 +30,7 @@ public class FhirUtilsTest {
 		Condition condition = new Condition();
 		CodeableConcept category = new CodeableConcept();
 		category.addCoding(
-		    new Coding("http://terminology.hl7.org/CodeSystem/condition-category", "encounter-diagnosis", null));
+		    new Coding(FhirConstants.CONDITION_CATEGORY_SYSTEM_URI, FhirConstants.CONDITION_CATEGORY_CODE_DIAGNOSIS, null));
 		condition.addCategory(category);
 		
 		Optional<FhirUtils.OpenmrsConditionType> result = FhirUtils.getOpenmrsConditionType(condition);
@@ -42,6 +42,20 @@ public class FhirUtilsTest {
 	@Test
 	public void getOpenmrsConditionType_shouldDefaultToCondition() {
 		Condition condition = new Condition();
+		
+		Optional<FhirUtils.OpenmrsConditionType> result = FhirUtils.getOpenmrsConditionType(condition);
+		
+		assertThat(result.isPresent(), equalTo(true));
+		assertThat(result.get(), equalTo(FhirUtils.OpenmrsConditionType.CONDITION));
+	}
+	
+	@Test
+	public void getOpenmrsConditionType_shouldIdentifyCondition() {
+		Condition condition = new Condition();
+		CodeableConcept category = new CodeableConcept();
+		category.addCoding(
+		    new Coding(FhirConstants.CONDITION_CATEGORY_SYSTEM_URI, FhirConstants.CONDITION_CATEGORY_CODE_CONDITION, null));
+		condition.addCategory(category);
 		
 		Optional<FhirUtils.OpenmrsConditionType> result = FhirUtils.getOpenmrsConditionType(condition);
 		

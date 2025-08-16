@@ -69,7 +69,7 @@ public class DiagnosisTranslatorImplTest {
 	}
 	
 	@Test
-	public void toFhirResource_shouldAddRankAndCertaintyExtensions() {
+	public void toFhirResource_shouldAddRankExtensionAndSetCertainty() {
 		Diagnosis diagnosis = new Diagnosis();
 		diagnosis.setUuid("diag-uuid");
 		diagnosis.setRank(1);
@@ -78,22 +78,19 @@ public class DiagnosisTranslatorImplTest {
 		
 		Condition result = translator.toFhirResource(diagnosis);
 		
-		Extension rank = result.getExtensionByUrl("http://openmrs.org/fhir/StructureDefinition/diagnosis-rank");
+		Extension rank = result.getExtensionByUrl(FhirConstants.DIAGNOSIS_RANK_EXTENSION_URI);
 		assertThat(rank, notNullValue());
 		assertThat(((IntegerType) rank.getValue()).getValue(), equalTo(1));
 		
-		Extension certainty = result.getExtensionByUrl("http://openmrs.org/fhir/StructureDefinition/diagnosis-certainty");
-		assertThat(certainty, notNullValue());
-		assertThat(((StringType) certainty.getValue()).asStringValue(),
-		    equalTo(ConditionVerificationStatus.CONFIRMED.toString()));
+		assertThat(result.getVerificationStatus(), notNullValue());
+		assertThat(result.getVerificationStatus().getCodingFirstRep().getCode(), equalTo("confirmed"));
 	}
 	
 	@Test
 	public void toOpenmrsType_shouldMapVerificationStatusToCertainty() {
 		Condition condition = new Condition();
 		CodeableConcept verification = new CodeableConcept();
-		verification.addCoding(
-		    new Coding().setSystem("http://terminology.hl7.org/CodeSystem/condition-ver-status").setCode("provisional"));
+		verification.addCoding(new Coding().setSystem(FhirConstants.CONDITION_VER_STATUS_SYSTEM_URI).setCode("provisional"));
 		condition.setVerificationStatus(verification);
 		
 		Diagnosis result = translator.toOpenmrsType(condition);
@@ -101,7 +98,7 @@ public class DiagnosisTranslatorImplTest {
 	}
 	
 	@Test
-	public void toFhirResource_shouldIncludeNonCodedExtensionAndOnsetDate() {
+	public void toFhirResource_shouldIncludeNonCodedExtensionAndRecordedDate() {
 		Diagnosis diagnosis = new Diagnosis();
 		diagnosis.setUuid("diag-uuid");
 		diagnosis.setVoided(false);
@@ -119,17 +116,20 @@ public class DiagnosisTranslatorImplTest {
 		Extension ext = result.getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_NON_CODED_CONDITION);
 		assertThat(ext, notNullValue());
 		assertThat(((StringType) ext.getValue()).getValue(), equalTo("Other"));
-		assertThat(result.getOnset(), notNullValue());
+		assertThat(result.getRecordedDate(), notNullValue());
 	}
 	
 	@Test
-	public void toOpenmrsType_shouldMapRankAndCertaintyExtensions() {
+	public void toOpenmrsType_shouldMapRankAndCertaintyAndSetAsVoidedIfClinicalStatusIsInactive() {
 		Condition condition = new Condition();
 		condition.setId("diag-uuid");
-		condition.addExtension(
-		    new Extension("http://openmrs.org/fhir/StructureDefinition/diagnosis-rank", new IntegerType(2)));
-		condition.addExtension(
-		    new Extension("http://openmrs.org/fhir/StructureDefinition/diagnosis-certainty", new StringType("CONFIRMED")));
+		condition.addExtension(new Extension(FhirConstants.DIAGNOSIS_RANK_EXTENSION_URI, new IntegerType(2)));
+		
+		CodeableConcept verificationStatus = new CodeableConcept();
+		verificationStatus.addCoding(new Coding().setSystem(FhirConstants.CONDITION_VER_STATUS_SYSTEM_URI)
+		        .setCode("confirmed").setDisplay("Confirmed"));
+		condition.setVerificationStatus(verificationStatus);
+		
 		condition.setClinicalStatus(new CodeableConcept().addCoding(
 		    new Coding().setSystem("http://terminology.hl7.org/CodeSystem/condition-clinical").setCode("inactive")));
 		
@@ -141,10 +141,9 @@ public class DiagnosisTranslatorImplTest {
 	}
 	
 	@Test
-	public void toFhirResource_shouldSetPatientEncounterAndClinicalStatus() {
+	public void toFhirResource_shouldSetPatientEncounter() {
 		Diagnosis diagnosis = new Diagnosis();
 		diagnosis.setUuid("diag-uuid");
-		diagnosis.setVoided(true);
 		Patient patient = new Patient();
 		patient.setUuid("patient-uuid");
 		diagnosis.setPatient(patient);
@@ -163,10 +162,20 @@ public class DiagnosisTranslatorImplTest {
 		
 		Condition result = translator.toFhirResource(diagnosis);
 		
-		assertThat(result.getClinicalStatus().getCodingFirstRep().getCode(), equalTo("inactive"));
 		assertThat(result.getSubject().getReference(), equalTo("Patient/patient-uuid"));
 		assertThat(result.getEncounter().getReference(), equalTo("Encounter/enc-uuid"));
 		assertThat(result.getRecorder(), sameInstance(practitionerRef));
+	}
+	
+	@Test
+	public void toFhirResource_voidedDiagnosisShouldNotBeReturned() {
+		Diagnosis diagnosis = new Diagnosis();
+		diagnosis.setUuid("diag-uuid");
+		diagnosis.setVoided(true);
+		
+		Condition result = translator.toFhirResource(diagnosis);
+		
+		assertThat(result, equalTo(null));
 	}
 	
 	@Test
@@ -195,10 +204,12 @@ public class DiagnosisTranslatorImplTest {
 	}
 	
 	@Test
-	public void toOpenmrsType_shouldSetCertaintyToProvisionalForInvalidExtension() {
+	public void toOpenmrsType_shouldSetCertaintyToProvisional() {
 		Condition condition = new Condition();
-		condition.addExtension(
-		    new Extension("http://openmrs.org/fhir/StructureDefinition/diagnosis-certainty", new StringType("INVALID")));
+		CodeableConcept verificationStatus = new CodeableConcept();
+		verificationStatus.addCoding(new Coding().setSystem(FhirConstants.CONDITION_VER_STATUS_SYSTEM_URI)
+		        .setCode("provisional").setDisplay("Provisional"));
+		condition.setVerificationStatus(verificationStatus);
 		
 		Diagnosis result = translator.toOpenmrsType(condition);
 		

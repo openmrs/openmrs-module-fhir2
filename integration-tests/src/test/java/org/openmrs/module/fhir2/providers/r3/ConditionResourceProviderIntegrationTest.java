@@ -255,12 +255,15 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR3Integrat
 		assertThat(response, isCreated());
 		assertThat(response.getHeader("Location"), containsString("/Condition/"));
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), notNullValue());
 		
 		Condition condition = readResponse(response);
 		
 		assertThat(condition, notNullValue());
 		assertThat(condition.getCategoryFirstRep().getCodingFirstRep().getCode(), equalTo("encounter-diagnosis"));
-		assertThat(condition.getMeta().getTag().stream().anyMatch(t -> "diagnosis".equals(t.getCode())), is(true));
+		assertThat(condition.getIdElement().getIdPart(), notNullValue());
+		assertThat(condition.getClinicalStatus(), notNullValue());
+		assertThat(condition.getClinicalStatus().toCode(), equalTo("unknown"));
 		
 		response = get("/Condition/" + condition.getIdElement().getIdPart()).accept(FhirMediaTypes.JSON).go();
 		
@@ -290,7 +293,9 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR3Integrat
 		
 		assertThat(condition, notNullValue());
 		assertThat(condition.getCategoryFirstRep().getCodingFirstRep().getCode(), equalTo("encounter-diagnosis"));
-		assertThat(condition.getMeta().getTag().stream().anyMatch(t -> "diagnosis".equals(t.getCode())), is(true));
+		assertThat(condition.getIdElement().getIdPart(), notNullValue());
+		assertThat(condition.getClinicalStatus(), notNullValue());
+		assertThat(condition.getClinicalStatus().toCode(), equalTo("unknown"));
 		
 		response = get("/Condition/" + condition.getIdElement().getIdPart()).accept(FhirMediaTypes.JSON).go();
 		
