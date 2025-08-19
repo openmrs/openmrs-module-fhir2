@@ -11,11 +11,10 @@ package org.openmrs.module.fhir2.api.impl;
 
 import javax.annotation.Nonnull;
 
-import java.util.Collections;
-
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.param.InternalCodingDt;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -162,16 +161,25 @@ public class FhirConditionServiceImpl extends BaseFhirService<Condition, org.ope
 	}
 	
 	/**
-	 * @return true if the given tokenAndListParam contains the matching OpenMRS condition type tag.
+	 * @return true if category param is provided with correct system and code. Also returns true if
+	 *         nothing is provided.
 	 */
 	protected boolean shouldSearchExplicitlyFor(TokenAndListParam tokenAndListParam, @Nonnull String valueToCheck) {
 		if (tokenAndListParam == null || tokenAndListParam.size() == 0 || valueToCheck.isEmpty()) {
 			return true;
 		}
 		
-		return tokenAndListParam.getValuesAsQueryTokens().stream().anyMatch(
-		    tokenOrListParam -> tokenOrListParam.doesCodingListMatch(
-		        Collections.singletonList(new InternalCodingDt(FhirConstants.CONDITION_CATEGORY_SYSTEM_URI, valueToCheck))));
+		for (TokenOrListParam orList : tokenAndListParam.getValuesAsQueryTokens()) {
+			for (TokenParam tp : orList.getValuesAsQueryTokens()) {
+				String sys = tp.getSystem();
+				String code = tp.getValue();
+				if (sys != null && !sys.isEmpty() && FhirConstants.CONDITION_CATEGORY_SYSTEM_URI.equals(sys)
+				        && valueToCheck.equals(code)) {
+					return true;
+				}
+			}
+		}
+		
+		return false;
 	}
-	
 }

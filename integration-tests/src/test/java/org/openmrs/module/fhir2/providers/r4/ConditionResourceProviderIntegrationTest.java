@@ -17,6 +17,7 @@ import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
@@ -308,6 +309,7 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR4Integrat
 		
 		Bundle responseBundle = readBundleResponse(response);
 		assertThat(responseBundle.getEntry(), notNullValue());
+		assertThat(responseBundle.getEntry(), hasSize(1));
 		assertThat(responseBundle.getEntry().get(0).getResource(), notNullValue());
 		
 		Condition newCondition = (Condition) responseBundle.getEntryFirstRep().getResource();
