@@ -74,12 +74,9 @@
     <concept_reference_map concept_id="70015" concept_map_id="11015" concept_map_type_id="2" concept_reference_term_id="12015" creator="1" date_created="2024-01-01 00:00:00.0" uuid="ciel-161011-map-uuid"/>
     <concept_name concept_id="70015" concept_name_id="70015" concept_name_type="FULLY_SPECIFIED" creator="1" date_created="2024-01-01 00:00:00.0" locale="en" locale_preferred="true" name="Free text comment" uuid="ciel-161011-name-uuid" voided="false"/>
 
-    <!-- LOINC source -->
-    <concept_reference_source concept_source_id="60001" creator="1" date_created="2024-01-01 00:00:00.0" name="LOINC" description="Logical Observation Identifiers Names and Codes" retired="false" uuid="88e98cff-fbcf-42bf-a074-0ab798555767"/>
-
-    <!-- LOINC:45354-8 Date next dose -->
-    <concept changed_by="1" class_id="5" concept_id="70016" creator="1" datatype_id="8" date_changed="2024-01-01 00:00:00.0" date_created="2024-01-01 00:00:00.0" is_set="false" retired="false" uuid="45354-8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
-    <concept_reference_term code="45354-8" concept_reference_term_id="12016" concept_source_id="60001" creator="1" date_created="2024-01-01 00:00:00.0" name="" retired="false" uuid="loinc-45354-8-term-uuid"/>
-    <concept_reference_map concept_id="70016" concept_map_id="11016" concept_map_type_id="2" concept_reference_term_id="12016" creator="1" date_created="2024-01-01 00:00:00.0" uuid="loinc-45354-8-map-uuid"/>
-    <concept_name concept_id="70016" concept_name_id="70016" concept_name_type="FULLY_SPECIFIED" creator="1" date_created="2024-01-01 00:00:00.0" locale="en" locale_preferred="true" name="Date next dose" uuid="loinc-45354-8-name-uuid" voided="false"/>
+    <!-- CIEL:170000 Date next dose -->
+    <concept changed_by="1" class_id="5" concept_id="70016" creator="1" datatype_id="8" date_changed="2024-01-01 00:00:00.0" date_created="2024-01-01 00:00:00.0" is_set="false" retired="false" uuid="8a02df1c-fb60-4c5f-8b20-3cdc8687e198"/>
+    <concept_reference_term code="170000" concept_reference_term_id="12016" concept_source_id="60000" creator="1" date_created="2024-01-01 00:00:00.0" name="" retired="false" uuid="ciel-170000-term-uuid"/>
+    <concept_reference_map concept_id="70016" concept_map_id="11016" concept_map_type_id="2" concept_reference_term_id="12016" creator="1" date_created="2024-01-01 00:00:00.0" uuid="ciel-170000-map-uuid"/>
+    <concept_name concept_id="70016" concept_name_id="70016" concept_name_type="FULLY_SPECIFIED" creator="1" date_created="2024-01-01 00:00:00.0" locale="en" locale_preferred="true" name="Date next dose" uuid="ciel-170000-name-uuid" voided="false"/>
 </dataset>
