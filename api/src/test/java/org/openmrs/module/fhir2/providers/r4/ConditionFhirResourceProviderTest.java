@@ -170,6 +170,9 @@ public class ConditionFhirResourceProviderTest extends BaseFhirProvenanceResourc
 		
 		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(CONDITION_UUID));
 		
+		TokenAndListParam category = new TokenAndListParam().addAnd(new TokenOrListParam()
+		        .add(FhirConstants.CONDITION_CATEGORY_SYSTEM_URI, FhirConstants.CONDITION_CATEGORY_CODE_CONDITION));
+		
 		DateRangeParam lastUpdated = new DateRangeParam().setLowerBound(LAST_UPDATED_DATE).setUpperBound(LAST_UPDATED_DATE);
 		
 		SortSpec sort = new SortSpec("sort param");
@@ -177,11 +180,11 @@ public class ConditionFhirResourceProviderTest extends BaseFhirProvenanceResourc
 		HashSet<Include> includes = new HashSet<>();
 		
 		when(conditionService.searchConditions(new ConditionSearchParams(patientReference, codeList, clinicalList, onsetDate,
-		        onsetAge, recordDate, uuid, lastUpdated, sort, null)))
+		        onsetAge, recordDate, category, uuid, lastUpdated, sort, null)))
 		                .thenReturn(new MockIBundleProvider<>(Collections.singletonList(condition), 10, 1));
 		
 		IBundleProvider result = resourceProvider.searchConditions(patientReference, subjectReference, codeList,
-		    clinicalList, onsetDate, onsetAge, recordDate, uuid, lastUpdated, sort, includes);
+		    clinicalList, onsetDate, onsetAge, recordDate, category, uuid, lastUpdated, sort, includes);
 		
 		List<IBaseResource> resultList = get(result);
 		
@@ -208,6 +211,9 @@ public class ConditionFhirResourceProviderTest extends BaseFhirProvenanceResourc
 		
 		DateRangeParam recordDate = new DateRangeParam().setLowerBound("gt2020-05-01").setUpperBound("lt2021-05-01");
 		
+		TokenAndListParam category = new TokenAndListParam().addAnd(new TokenOrListParam()
+		        .add(FhirConstants.CONDITION_CATEGORY_SYSTEM_URI, FhirConstants.CONDITION_CATEGORY_CODE_CONDITION));
+		
 		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(CONDITION_UUID));
 		
 		DateRangeParam lastUpdated = new DateRangeParam().setLowerBound(LAST_UPDATED_DATE).setUpperBound(LAST_UPDATED_DATE);
@@ -217,11 +223,100 @@ public class ConditionFhirResourceProviderTest extends BaseFhirProvenanceResourc
 		HashSet<Include> includes = new HashSet<>();
 		
 		when(conditionService.searchConditions(new ConditionSearchParams(subjectReference, codeList, clinicalList, onsetDate,
-		        onsetAge, recordDate, uuid, lastUpdated, sort, null)))
+		        onsetAge, recordDate, category, uuid, lastUpdated, sort, null)))
 		                .thenReturn(new MockIBundleProvider<>(Collections.singletonList(condition), 10, 1));
 		
 		IBundleProvider result = resourceProvider.searchConditions(subjectReference, subjectReference, codeList,
-		    clinicalList, onsetDate, onsetAge, recordDate, uuid, lastUpdated, sort, includes);
+		    clinicalList, onsetDate, onsetAge, recordDate, category, uuid, lastUpdated, sort, includes);
+		
+		List<IBaseResource> resultList = get(result);
+		
+		assertThat(result, notNullValue());
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
+		assertThat(resultList.iterator().next().fhirType(), equalTo(FhirConstants.CONDITION));
+	}
+	
+	@Test
+	public void searchDiagnoses_shouldReturnDiagnosisReturnedByService() {
+		ReferenceAndListParam patientReference = new ReferenceAndListParam();
+		patientReference.addValue(new ReferenceOrListParam().add(new ReferenceParam(Patient.SP_GIVEN, "patient name")));
+		
+		ReferenceAndListParam subjectReference = new ReferenceAndListParam();
+		subjectReference.addValue(new ReferenceOrListParam().add(new ReferenceParam(Patient.SP_GIVEN, "subject name")));
+		
+		TokenAndListParam codeList = new TokenAndListParam();
+		codeList.addValue(new TokenOrListParam().add(new TokenParam("test code")));
+		
+		TokenAndListParam clinicalList = new TokenAndListParam();
+		clinicalList.addValue(new TokenOrListParam().add(new TokenParam("test clinical")));
+		
+		DateRangeParam onsetDate = new DateRangeParam().setLowerBound("gt2020-05-01").setUpperBound("lt2021-05-01");
+		
+		QuantityAndListParam onsetAge = new QuantityAndListParam();
+		onsetAge.addValue(new QuantityOrListParam().add(new QuantityParam(12)));
+		
+		DateRangeParam recordDate = new DateRangeParam().setLowerBound("gt2020-05-01").setUpperBound("lt2021-05-01");
+		
+		TokenAndListParam category = new TokenAndListParam().addAnd(new TokenOrListParam()
+		        .add(FhirConstants.CONDITION_CATEGORY_SYSTEM_URI, FhirConstants.CONDITION_CATEGORY_CODE_CONDITION));
+		
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(CONDITION_UUID));
+		
+		DateRangeParam lastUpdated = new DateRangeParam().setLowerBound(LAST_UPDATED_DATE).setUpperBound(LAST_UPDATED_DATE);
+		
+		SortSpec sort = new SortSpec("sort param");
+		
+		HashSet<Include> includes = new HashSet<>();
+		
+		when(conditionService.searchConditions(new ConditionSearchParams(patientReference, codeList, clinicalList, onsetDate,
+		        onsetAge, recordDate, category, uuid, lastUpdated, sort, null)))
+		                .thenReturn(new MockIBundleProvider<>(Collections.singletonList(condition), 10, 1));
+		
+		IBundleProvider result = resourceProvider.searchConditions(patientReference, subjectReference, codeList,
+		    clinicalList, onsetDate, onsetAge, recordDate, category, uuid, lastUpdated, sort, includes);
+		
+		List<IBaseResource> resultList = get(result);
+		
+		assertThat(result, notNullValue());
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
+		assertThat(resultList.iterator().next().fhirType(), equalTo(FhirConstants.CONDITION));
+	}
+	
+	@Test
+	public void searchDiagnoses_shouldReturnDiagnosisReturnedByServiceWhenPatientIsNull() {
+		ReferenceAndListParam subjectReference = new ReferenceAndListParam();
+		subjectReference.addValue(new ReferenceOrListParam().add(new ReferenceParam(Patient.SP_GIVEN, "subject name")));
+		
+		TokenAndListParam codeList = new TokenAndListParam();
+		codeList.addValue(new TokenOrListParam().add(new TokenParam("test code")));
+		
+		TokenAndListParam clinicalList = new TokenAndListParam();
+		clinicalList.addValue(new TokenOrListParam().add(new TokenParam("test clinical")));
+		
+		DateRangeParam onsetDate = new DateRangeParam().setLowerBound("gt2020-05-01").setUpperBound("lt2021-05-01");
+		
+		QuantityAndListParam onsetAge = new QuantityAndListParam();
+		onsetAge.addValue(new QuantityOrListParam().add(new QuantityParam(12)));
+		
+		DateRangeParam recordDate = new DateRangeParam().setLowerBound("gt2020-05-01").setUpperBound("lt2021-05-01");
+		
+		TokenAndListParam category = new TokenAndListParam().addAnd(new TokenOrListParam()
+		        .add(FhirConstants.CONDITION_CATEGORY_SYSTEM_URI, FhirConstants.CONDITION_CATEGORY_CODE_DIAGNOSIS));
+		
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(CONDITION_UUID));
+		
+		DateRangeParam lastUpdated = new DateRangeParam().setLowerBound(LAST_UPDATED_DATE).setUpperBound(LAST_UPDATED_DATE);
+		
+		SortSpec sort = new SortSpec("sort param");
+		
+		HashSet<Include> includes = new HashSet<>();
+		
+		when(conditionService.searchConditions(new ConditionSearchParams(subjectReference, codeList, clinicalList, onsetDate,
+		        onsetAge, recordDate, category, uuid, lastUpdated, sort, null)))
+		                .thenReturn(new MockIBundleProvider<>(Collections.singletonList(condition), 10, 1));
+		
+		IBundleProvider result = resourceProvider.searchConditions(subjectReference, subjectReference, codeList,
+		    clinicalList, onsetDate, onsetAge, recordDate, category, uuid, lastUpdated, sort, includes);
 		
 		List<IBaseResource> resultList = get(result);
 		
