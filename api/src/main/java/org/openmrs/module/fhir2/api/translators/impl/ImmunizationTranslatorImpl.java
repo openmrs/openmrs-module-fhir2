@@ -416,9 +416,9 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 		
 		Concept nextDoseDateConcept = helper.conceptOrNull(CIEL_170000);
 		if (nextDoseDateConcept != null
-		        && fhirImmunization.hasExtension(FhirConstants.OPENMRS_FHIR_EXIT_IMMUNIZATION_NEXT_DOSE_DATE)) {
+		        && fhirImmunization.hasExtension(FhirConstants.OPENMRS_FHIR_EXT_IMMUNIZATION_NEXT_DOSE_DATE)) {
 			Extension extension = fhirImmunization
-			        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXIT_IMMUNIZATION_NEXT_DOSE_DATE);
+			        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_IMMUNIZATION_NEXT_DOSE_DATE);
 			if (extension != null && extension.hasValue() && extension.getValue() instanceof DateTimeType) {
 				DateTimeType dateTimeValue = (DateTimeType) extension.getValue();
 				Date nextDoseDate = dateTimeValue.getValue();
@@ -515,7 +515,7 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 		{
 			Obs obs = members.get(CIEL_170000);
 			if (obs != null && obs.getValueDatetime() != null) {
-				immunization.addExtension(new Extension().setUrl(FhirConstants.OPENMRS_FHIR_EXIT_IMMUNIZATION_NEXT_DOSE_DATE)
+				immunization.addExtension(new Extension().setUrl(FhirConstants.OPENMRS_FHIR_EXT_IMMUNIZATION_NEXT_DOSE_DATE)
 				        .setValue(new DateTimeType(obs.getValueDatetime())));
 			}
 		}
