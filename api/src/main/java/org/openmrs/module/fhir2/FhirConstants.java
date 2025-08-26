@@ -379,4 +379,16 @@ public final class FhirConstants {
 	
 	public static final String INCLUDE_MEMBER_PARAM = "member";
 	
+	public static final String CONDITION_CATEGORY_SYSTEM_URI = HL7_FHIR_CODE_SYSTEM_PREFIX + "/condition-category";
+	
+	public static final String CONDITION_CATEGORY_CODE_CONDITION = "problem-list-item";
+	
+	public static final String CONDITION_CATEGORY_CODE_DIAGNOSIS = "encounter-diagnosis";
+	
+	public static final String DIAGNOSIS_RANK_EXTENSION_URI = "http://fhir.openmrs.org/R4/StructureDefinition/diagnosis-rank";
+	
+	public static final String CONDITION_CLINICAL_SYSTEM_URI = HL7_FHIR_CODE_SYSTEM_PREFIX + "/condition-clinical";
+	
+	public static final String CONDITION_VER_STATUS_SYSTEM_URI = HL7_FHIR_CODE_SYSTEM_PREFIX + "/condition-ver-status";
+	
 }
