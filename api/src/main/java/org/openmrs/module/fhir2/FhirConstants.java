@@ -123,7 +123,7 @@ public final class FhirConstants {
 	public static final String OPENMRS_FHIR_EXT_RECORDED = OPENMRS_FHIR_EXT_PREFIX + "/medicationdispense/recorded";
 	
 	public static final String OPENMRS_FHIR_EXT_MEDICATION_REQUEST_FULFILLER_STATUS = OPENMRS_FHIR_EXT_PREFIX
-	        + "/medicationrequest/fullfillerstatus";
+	        + "/medicationrequest/fulfillerstatus";
 	
 	public static final String OPENMRS_FHIR_DEFAULT_PAGE_SIZE = "fhir2.paging.default";
 	
