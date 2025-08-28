@@ -289,7 +289,7 @@ public final class FhirConstants {
 	
 	public static final String TASK_CODE_SEARCH_HANDLER = "task.code.search.handler";
 	
-	public static final String FULFILLER_STATUS_SEARCH_HANDLER = "fullfillerStatus.search.handler";
+	public static final String FULFILLER_STATUS_SEARCH_HANDLER = "fulfillerStatus.search.handler";
 	
 	public static final String BASED_ON_REFERENCE_SEARCH_HANDLER = "based.on.reference.search.handler";
 	

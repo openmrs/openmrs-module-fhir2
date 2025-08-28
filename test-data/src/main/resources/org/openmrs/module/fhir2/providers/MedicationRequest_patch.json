@@ -1,7 +1,7 @@
 {
   "extension": [
     {
-      "url": "http://fhir.openmrs.org/ext/medicationrequest/fullfillerstatus",
+      "url": "http://fhir.openmrs.org/ext/medicationrequest/fulfillerstatus",
       "valueCode": "COMPLETED"
     }
   ]
