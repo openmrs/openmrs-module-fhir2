@@ -133,7 +133,7 @@ public class ConditionSearchQueryTest extends BaseFhirContextSensitiveTest {
 	private ConditionTranslator<Condition> translator;
 	
 	@Autowired
-	private SearchQueryInclude searchQueryInclude;
+	private SearchQueryInclude<org.hl7.fhir.r4.model.Condition> searchQueryInclude;
 	
 	@Autowired
 	private SearchQuery<Condition, org.hl7.fhir.r4.model.Condition, FhirConditionDao, ConditionTranslator<Condition>, SearchQueryInclude<org.hl7.fhir.r4.model.Condition>> searchQuery;

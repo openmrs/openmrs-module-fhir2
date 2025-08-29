@@ -114,8 +114,8 @@ public class SearchQueryIncludeImpl<U extends IBaseResource> implements SearchQu
 	@SuppressWarnings("unchecked")
 	@Override
 	public Set<IBaseResource> getIncludedResources(List<U> resourceList, SearchParameterMap theParams) {
-		List<PropParam<?>> includeParamList = theParams.getParameters(FhirConstants.INCLUDE_SEARCH_HANDLER);
-		List<PropParam<?>> revIncludeParamList = theParams.getParameters(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER);
+		List<PropParam<Object>> includeParamList = theParams.getParameters(FhirConstants.INCLUDE_SEARCH_HANDLER);
+		List<PropParam<Object>> revIncludeParamList = theParams.getParameters(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER);
 		
 		Set<Include> includeSet = new LinkedHashSet<>();
 		Set<Include> revIncludeSet = new LinkedHashSet<>();
