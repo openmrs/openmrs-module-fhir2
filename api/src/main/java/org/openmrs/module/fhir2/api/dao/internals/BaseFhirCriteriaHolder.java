@@ -26,19 +26,16 @@ import java.util.function.Function;
 
 import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public abstract class BaseFhirCriteriaHolder<V, U> {
 	
-	@Getter
-	@NonNull
+	@Getter(onMethod = @__({ @Nonnull }))
 	private final CriteriaBuilder criteriaBuilder;
 	
-	@Getter
-	@NonNull
-	Root<V> root;
+	@Getter(onMethod = @__({ @Nonnull }))
+	private final Root<V> root;
 	
 	@Getter(AccessLevel.PROTECTED)
 	private final Map<String, Join<?, ?>> aliases = new LinkedHashMap<>();

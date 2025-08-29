@@ -25,24 +25,24 @@ import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.GroupTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
-@Transactional
-@Setter(AccessLevel.PACKAGE)
-@Getter(AccessLevel.PROTECTED)
 public class FhirGroupServiceImpl extends BaseFhirService<Group, Cohort> implements FhirGroupService {
 	
-	@Autowired
+	@Getter(value = AccessLevel.PROTECTED)
+	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
 	private FhirGroupDao dao;
 	
-	@Autowired
+	@Getter(value = AccessLevel.PROTECTED)
+	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
 	private GroupTranslator translator;
 	
-	@Autowired
+	@Getter(value = AccessLevel.PROTECTED)
+	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
 	private SearchQueryInclude<Group> searchQueryInclude;
 	
-	@Autowired
+	@Getter(value = AccessLevel.PROTECTED)
+	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
 	private SearchQuery<org.openmrs.Cohort, Group, FhirGroupDao, GroupTranslator, SearchQueryInclude<Group>> searchQuery;
 	
 	@Override

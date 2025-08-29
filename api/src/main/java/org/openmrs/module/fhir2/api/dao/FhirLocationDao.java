@@ -11,7 +11,9 @@ package org.openmrs.module.fhir2.api.dao;
 
 import javax.annotation.Nonnull;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.openmrs.Location;
 import org.openmrs.LocationAttribute;
@@ -23,13 +25,38 @@ import org.openmrs.util.PrivilegeConstants;
 
 public interface FhirLocationDao extends FhirDao<Location> {
 	
+	@Authorized(PrivilegeConstants.GET_LOCATIONS)
+	Location get(@Nonnull Integer id);
+	
 	@Override
 	@Authorized(PrivilegeConstants.GET_LOCATIONS)
 	Location get(@Nonnull String uuid);
 	
+	@Override
+	@Authorized(PrivilegeConstants.GET_LOCATIONS)
+	List<Location> get(@Nonnull Collection<String> uuids);
+	
 	@Authorized(PrivilegeConstants.GET_LOCATIONS)
 	List<LocationAttribute> getActiveAttributesByLocationAndAttributeTypeUuid(@Nonnull Location location,
 	        @Nonnull String locationAttributeTypeUuid);
+	
+	@Authorized(PrivilegeConstants.GET_LOCATIONS)
+	Map<Location, List<LocationAttribute>> getActiveAttributesByLocationsAndAttributeTypeUuid(
+	        @Nonnull Collection<Location> location, @Nonnull String locationAttributeTypeUuid);
+	
+	@Authorized({ PrivilegeConstants.GET_LOCATIONS })
+	LocationAttributeType getLocationAttributeTypeByUuid(@Nonnull String uuid);
+	
+	@Authorized({ PrivilegeConstants.GET_LOCATIONS })
+	LocationTag getLocationTagByName(@Nonnull String tag);
+	
+	@Override
+	@Authorized(PrivilegeConstants.GET_LOCATIONS)
+	List<Location> getSearchResults(@Nonnull SearchParameterMap theParams);
+	
+	@Override
+	@Authorized(PrivilegeConstants.GET_LOCATIONS)
+	int getSearchResultsCount(@Nonnull SearchParameterMap theParams);
 	
 	@Override
 	@Authorized(PrivilegeConstants.MANAGE_LOCATIONS)
@@ -39,16 +66,7 @@ public interface FhirLocationDao extends FhirDao<Location> {
 	@Authorized(PrivilegeConstants.MANAGE_LOCATIONS)
 	Location delete(@Nonnull String uuid);
 	
-	@Override
-	@Authorized(PrivilegeConstants.GET_LOCATIONS)
-	List<Location> getSearchResults(@Nonnull SearchParameterMap theParams);
-	
-	@Authorized({ PrivilegeConstants.GET_LOCATIONS })
-	LocationTag getLocationTagByName(@Nonnull String tag);
-	
 	@Authorized({ PrivilegeConstants.MANAGE_LOCATION_TAGS })
-	LocationTag saveLocationTag(@Nonnull LocationTag tag);
+	LocationTag createLocationTag(@Nonnull LocationTag tag);
 	
-	@Authorized({ PrivilegeConstants.GET_LOCATIONS })
-	LocationAttributeType getLocationAttributeTypeByUuid(@Nonnull String uuid);
 }

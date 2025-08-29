@@ -19,9 +19,7 @@ import java.util.Optional;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
-import lombok.AccessLevel;
 import lombok.NonNull;
-import lombok.Setter;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirDiagnosticReportDao;
@@ -31,7 +29,6 @@ import org.openmrs.module.fhir2.model.FhirDiagnosticReport;
 import org.springframework.stereotype.Component;
 
 @Component
-@Setter(AccessLevel.PACKAGE)
 public class FhirDiagnosticReportDaoImpl extends BaseFhirDao<FhirDiagnosticReport> implements FhirDiagnosticReportDao {
 	
 	@Override

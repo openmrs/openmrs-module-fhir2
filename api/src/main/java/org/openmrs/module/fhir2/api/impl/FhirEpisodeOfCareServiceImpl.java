@@ -9,7 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
-import lombok.AccessLevel;
+import static lombok.AccessLevel.PROTECTED;
+
 import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.EpisodeOfCare;
@@ -19,17 +20,15 @@ import org.openmrs.module.fhir2.api.dao.FhirEpisodeOfCareDao;
 import org.openmrs.module.fhir2.api.translators.EpisodeOfCareTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
-@Transactional
-@Setter(AccessLevel.PACKAGE)
-@Getter(AccessLevel.PROTECTED)
 public class FhirEpisodeOfCareServiceImpl extends BaseFhirService<EpisodeOfCare, PatientProgram> implements FhirEpisodeOfCareService {
 	
-	@Autowired
+	@Getter(value = PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private FhirEpisodeOfCareDao dao;
 	
-	@Autowired
+	@Getter(value = PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private EpisodeOfCareTranslator translator;
 }

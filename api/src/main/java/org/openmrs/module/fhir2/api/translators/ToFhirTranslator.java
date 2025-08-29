@@ -26,4 +26,5 @@ public interface ToFhirTranslator<T, U> extends FhirTranslator {
 	 * @return the corresponding FHIR resource
 	 */
 	U toFhirResource(@Nonnull T data);
+	
 }

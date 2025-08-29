@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static lombok.AccessLevel.PROTECTED;
 import static org.apache.commons.lang3.Validate.notNull;
 
 import javax.annotation.Nonnull;
@@ -16,7 +17,7 @@ import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.List;
 
-import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -31,13 +32,14 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-@Setter(AccessLevel.PACKAGE)
 public class EpisodeOfCareTranslatorImpl implements EpisodeOfCareTranslator {
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private PatientReferenceTranslator patientReferenceTranslator;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private ConceptTranslator conceptTranslator;
 	
 	@Override

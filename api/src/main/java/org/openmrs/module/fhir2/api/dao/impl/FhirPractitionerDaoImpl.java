@@ -10,17 +10,11 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import javax.annotation.Nonnull;
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 
 import java.util.List;
 import java.util.Optional;
 
 import ca.uhn.fhir.rest.param.TokenAndListParam;
-import lombok.AccessLevel;
-import lombok.Setter;
 import org.openmrs.Provider;
 import org.openmrs.ProviderAttribute;
 import org.openmrs.module.fhir2.api.dao.FhirPractitionerDao;
@@ -28,7 +22,6 @@ import org.openmrs.module.fhir2.api.dao.internals.OpenmrsFhirCriteriaContext;
 import org.springframework.stereotype.Component;
 
 @Component
-@Setter(AccessLevel.PACKAGE)
 public class FhirPractitionerDaoImpl extends BasePractitionerDao<Provider> implements FhirPractitionerDao {
 	
 	@Override
@@ -48,7 +41,8 @@ public class FhirPractitionerDaoImpl extends BasePractitionerDao<Provider> imple
 	@Override
 	public List<ProviderAttribute> getActiveAttributesByPractitionerAndAttributeTypeUuid(@Nonnull Provider provider,
 	        @Nonnull String providerAttributeTypeUuid) {
-		OpenmrsFhirCriteriaContext<ProviderAttribute, ProviderAttribute> criteriaContext = openmrsFhirCriteriaContext();
+		OpenmrsFhirCriteriaContext<ProviderAttribute, ProviderAttribute> criteriaContext = createCriteriaContext(
+		    ProviderAttribute.class);
 		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot());
 		
 		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().and(
@@ -59,14 +53,5 @@ public class FhirPractitionerDaoImpl extends BasePractitionerDao<Provider> imple
 		    criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("voided"), false)));
 		
 		return criteriaContext.getEntityManager().createQuery(criteriaContext.finalizeQuery()).getResultList();
-	}
-	
-	protected OpenmrsFhirCriteriaContext<ProviderAttribute, ProviderAttribute> openmrsFhirCriteriaContext() {
-		EntityManager em = sessionFactory.getCurrentSession();
-		CriteriaBuilder cb = em.getCriteriaBuilder();
-		CriteriaQuery<ProviderAttribute> cq = cb.createQuery(ProviderAttribute.class);
-		Root<ProviderAttribute> root = cq.from(ProviderAttribute.class);
-		
-		return new OpenmrsFhirCriteriaContext<>(em, cb, cq, root);
 	}
 }

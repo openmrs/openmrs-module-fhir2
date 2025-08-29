@@ -13,19 +13,20 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.fail;
+import static org.openmrs.util.PrivilegeConstants.GET_VISITS;
 
-import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.Visit;
-import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
-import org.openmrs.test.BaseModuleContextSensitiveTest;
+import org.openmrs.api.APIAuthenticationException;
+import org.openmrs.api.context.Context;
+import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
+import org.openmrs.module.fhir2.api.dao.FhirVisitDao;
+import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.test.context.ContextConfiguration;
 
-@ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
-public class FhirVisitDaoImplTest extends BaseModuleContextSensitiveTest {
+public class FhirVisitDaoImplTest extends BaseFhirContextSensitiveTest {
 	
 	private static final String VISIT_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirVisitDaoImplTest_initial_data.xml";
 	
@@ -34,15 +35,13 @@ public class FhirVisitDaoImplTest extends BaseModuleContextSensitiveTest {
 	private static final String BAD_VISIT_UUID = "65a7fd46-xx56-4526-89de-93842c8078d11";
 	
 	@Autowired
-	@Qualifier("sessionFactory")
-	private SessionFactory sessionFactory;
+	private ObjectFactory<FhirVisitDao> daoFactory;
 	
-	private FhirVisitDaoImpl dao;
+	private FhirVisitDao dao;
 	
 	@Before
 	public void setup() throws Exception {
-		dao = new FhirVisitDaoImpl();
-		dao.setSessionFactory(sessionFactory);
+		dao = daoFactory.getObject();
 		executeDataSet(VISIT_INITIAL_DATA_XML);
 	}
 	
@@ -59,5 +58,26 @@ public class FhirVisitDaoImplTest extends BaseModuleContextSensitiveTest {
 		Visit visit = dao.get(BAD_VISIT_UUID);
 		
 		assertThat(visit, nullValue());
+	}
+	
+	@Test
+	public void get_shouldRequireGetVisitPrivilege() {
+		Context.logout();
+		
+		try {
+			dao.get(VISIT_UUID);
+			fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
+		}
+		catch (APIAuthenticationException ignored) {
+			// this is the happy path
+		}
+		
+		try {
+			Context.addProxyPrivilege(GET_VISITS);
+			assertThat(dao.get(VISIT_UUID), notNullValue());
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_VISITS);
+		}
 	}
 }

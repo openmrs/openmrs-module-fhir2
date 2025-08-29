@@ -10,7 +10,7 @@
 package org.openmrs.module.fhir2.api.search.param;
 
 import java.io.Serializable;
-import java.util.HashSet;
+import java.util.Set;
 
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.SortSpec;
@@ -37,9 +37,9 @@ public abstract class BaseResourceSearchParams implements Serializable {
 	
 	protected SortSpec sort;
 	
-	protected HashSet<Include> includes;
+	protected Set<Include> includes;
 	
-	protected HashSet<Include> revIncludes;
+	protected Set<Include> revIncludes;
 	
 	protected final SearchParameterMap baseSearchParameterMap() {
 		return new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, getId())

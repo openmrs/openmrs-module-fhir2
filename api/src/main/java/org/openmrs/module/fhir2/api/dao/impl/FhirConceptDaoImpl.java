@@ -19,7 +19,9 @@ import java.util.List;
 import java.util.Optional;
 
 import ca.uhn.fhir.rest.param.StringAndListParam;
+import com.google.common.annotations.VisibleForTesting;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.transform.DistinctRootEntityResultTransformer;
 import org.openmrs.Concept;
@@ -33,20 +35,29 @@ import org.openmrs.module.fhir2.api.dao.internals.OpenmrsFhirCriteriaContext;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
-@Setter(AccessLevel.PACKAGE)
 public class FhirConceptDaoImpl extends BaseFhirDao<Concept> implements FhirConceptDao {
 	
-	@Autowired
+	@Getter(value = AccessLevel.PROTECTED)
+	@Setter(value = AccessLevel.PUBLIC, onMethod = @__({ @Autowired, @VisibleForTesting }))
 	private ConceptService conceptService;
 	
 	@Override
+	@Transactional(readOnly = true)
+	public Concept get(@Nonnull Integer id) {
+		return conceptService.getConcept(id);
+	}
+	
+	@Override
+	@Transactional(readOnly = true)
 	public Concept get(@Nonnull String uuid) {
 		return conceptService.getConceptByUuid(uuid);
 	}
 	
 	@Override
+	@Transactional(readOnly = true)
 	public Optional<Concept> getConceptWithSameAsMappingInSource(@Nonnull ConceptSource conceptSource,
 	        @Nonnull String mappingCode) {
 		if (conceptSource == null || mappingCode == null) {
@@ -74,7 +85,6 @@ public class FhirConceptDaoImpl extends BaseFhirDao<Concept> implements FhirConc
 	}
 	
 	@Override
-	@SuppressWarnings("unchecked")
 	public List<Concept> getConceptsWithAnyMappingInSource(@Nonnull ConceptSource conceptSource,
 	        @Nonnull String mappingCode) {
 		if (conceptSource == null || mappingCode == null) {

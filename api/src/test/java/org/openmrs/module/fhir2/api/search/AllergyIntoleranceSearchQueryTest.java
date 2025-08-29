@@ -23,12 +23,9 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.not;
-import static org.mockito.Mockito.when;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import ca.uhn.fhir.model.api.Include;
@@ -48,18 +45,16 @@ import org.hl7.fhir.r4.model.Patient;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.Allergy;
+import org.openmrs.api.AdministrationService;
+import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.openmrs.module.fhir2.FhirConstants;
-import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
-import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirAllergyIntoleranceDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.AllergyIntoleranceTranslator;
-import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
+import org.springframework.beans.factory.annotation.Qualifier;
 
-@ContextConfiguration(classes = { TestFhirSpringConfiguration.class }, inheritLocations = false)
-public class AllergyIntoleranceSearchQueryTest extends BaseModuleContextSensitiveTest {
+public class AllergyIntoleranceSearchQueryTest extends BaseFhirContextSensitiveTest {
 	
 	private static final String ALLERGY_INTOLERANCE_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirAllergyIntoleranceDaoImplTest_initial_data.xml";
 	
@@ -121,8 +116,6 @@ public class AllergyIntoleranceSearchQueryTest extends BaseModuleContextSensitiv
 	
 	private static final int END_INDEX = 10;
 	
-	private static final Map<String, String> SEVERITY_CONCEPT_UUIDS = new HashMap<>();
-	
 	@Autowired
 	private FhirAllergyIntoleranceDao allergyDao;
 	
@@ -136,27 +129,16 @@ public class AllergyIntoleranceSearchQueryTest extends BaseModuleContextSensitiv
 	private SearchQuery<Allergy, AllergyIntolerance, FhirAllergyIntoleranceDao, AllergyIntoleranceTranslator, SearchQueryInclude<AllergyIntolerance>> searchQuery;
 	
 	@Autowired
-	private FhirGlobalPropertyService globalPropertyService;
+	@Qualifier("adminService")
+	private AdministrationService administrationService;
 	
 	@Before
 	public void setup() throws Exception {
 		executeDataSet(ALLERGY_INTOLERANCE_INITIAL_DATA_XML);
-	}
-	
-	@Before
-	public void setupMocks() {
-		initSeverityData();
-		
-		when(globalPropertyService.getGlobalProperties(FhirConstants.GLOBAL_PROPERTY_MILD,
-		    FhirConstants.GLOBAL_PROPERTY_MODERATE, FhirConstants.GLOBAL_PROPERTY_SEVERE,
-		    FhirConstants.GLOBAL_PROPERTY_OTHER)).thenReturn(SEVERITY_CONCEPT_UUIDS);
-	}
-	
-	private void initSeverityData() {
-		SEVERITY_CONCEPT_UUIDS.put(FhirConstants.GLOBAL_PROPERTY_MILD, SEVERITY_MILD_CONCEPT_UUID);
-		SEVERITY_CONCEPT_UUIDS.put(FhirConstants.GLOBAL_PROPERTY_MODERATE, SEVERITY_MODERATE_CONCEPT_UUID);
-		SEVERITY_CONCEPT_UUIDS.put(FhirConstants.GLOBAL_PROPERTY_SEVERE, SEVERITY_SEVERE_CONCEPT_UUID);
-		SEVERITY_CONCEPT_UUIDS.put(FhirConstants.GLOBAL_PROPERTY_OTHER, SEVERITY_NULL_CONCEPT_UUID);
+		administrationService.setGlobalProperty(FhirConstants.GLOBAL_PROPERTY_MILD, SEVERITY_MILD_CONCEPT_UUID);
+		administrationService.setGlobalProperty(FhirConstants.GLOBAL_PROPERTY_MODERATE, SEVERITY_MODERATE_CONCEPT_UUID);
+		administrationService.setGlobalProperty(FhirConstants.GLOBAL_PROPERTY_SEVERE, SEVERITY_SEVERE_CONCEPT_UUID);
+		administrationService.setGlobalProperty(FhirConstants.GLOBAL_PROPERTY_OTHER, SEVERITY_NULL_CONCEPT_UUID);
 	}
 	
 	private List<IBaseResource> get(IBundleProvider results) {

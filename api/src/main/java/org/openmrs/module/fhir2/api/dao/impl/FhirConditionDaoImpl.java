@@ -14,60 +14,23 @@ import javax.persistence.criteria.From;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
-import java.util.List;
 import java.util.Optional;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QuantityAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
-import lombok.AccessLevel;
 import lombok.NonNull;
-import lombok.Setter;
 import org.openmrs.Condition;
 import org.openmrs.ConditionClinicalStatus;
-import org.openmrs.annotation.Authorized;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirConditionDao;
 import org.openmrs.module.fhir2.api.dao.internals.OpenmrsFhirCriteriaContext;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
-import org.openmrs.util.PrivilegeConstants;
 import org.springframework.stereotype.Component;
 
 @Component
-@Setter(AccessLevel.PROTECTED)
-public class FhirConditionDaoImpl extends BaseFhirDao<Condition> implements FhirConditionDao<Condition> {
-	
-	@Override
-	@Authorized(PrivilegeConstants.GET_CONDITIONS)
-	public Condition get(@Nonnull String uuid) {
-		return super.get(uuid);
-	}
-	
-	@Override
-	@Authorized(PrivilegeConstants.EDIT_CONDITIONS)
-	public Condition createOrUpdate(@Nonnull Condition newEntry) {
-		return super.createOrUpdate(newEntry);
-	}
-	
-	@Override
-	@Authorized(PrivilegeConstants.DELETE_CONDITIONS)
-	public Condition delete(@Nonnull String uuid) {
-		return super.delete(uuid);
-	}
-	
-	@Override
-	@Authorized(PrivilegeConstants.GET_CONDITIONS)
-	public List<Condition> getSearchResults(@Nonnull SearchParameterMap theParams) {
-		return super.getSearchResults(theParams);
-	}
-	
-	private ConditionClinicalStatus convertStatus(String status) {
-		if ("active".equalsIgnoreCase(status)) {
-			return ConditionClinicalStatus.ACTIVE;
-		}
-		return ConditionClinicalStatus.INACTIVE;
-	}
+public class FhirConditionDaoImpl extends BaseFhirDao<Condition> implements FhirConditionDao {
 	
 	@Override
 	public boolean hasDistinctResults() {
@@ -120,6 +83,13 @@ public class FhirConditionDaoImpl extends BaseFhirDao<Condition> implements Fhir
 		    tokenParam -> Optional.of(criteriaContext.getCriteriaBuilder()
 		            .equal(criteriaContext.getRoot().get("clinicalStatus"), convertStatus(tokenParam.getValue()))))
 		                    .ifPresent(criteriaContext::addPredicate);
+	}
+	
+	private ConditionClinicalStatus convertStatus(String status) {
+		if ("active".equalsIgnoreCase(status)) {
+			return ConditionClinicalStatus.ACTIVE;
+		}
+		return ConditionClinicalStatus.INACTIVE;
 	}
 	
 	private <U> void handleOnsetAge(OpenmrsFhirCriteriaContext<Condition, U> criteriaContext,

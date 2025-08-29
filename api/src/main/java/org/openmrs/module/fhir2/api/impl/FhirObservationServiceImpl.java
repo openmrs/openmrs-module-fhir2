@@ -32,35 +32,33 @@ import org.openmrs.module.fhir2.api.translators.OpenmrsFhirTranslator;
 import org.openmrs.module.fhir2.api.translators.UpdatableOpenmrsTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
-@Transactional
-@Getter(AccessLevel.PROTECTED)
-@Setter(AccessLevel.PACKAGE)
 public class FhirObservationServiceImpl extends BaseFhirService<Observation, org.openmrs.Obs> implements FhirObservationService {
 	
-	@Autowired
+	@Getter(value = AccessLevel.PROTECTED)
+	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
 	private FhirObservationDao dao;
 	
-	@Autowired
+	@Getter(value = AccessLevel.PROTECTED)
+	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
 	private ObservationTranslator translator;
 	
-	@Autowired
+	@Getter(value = AccessLevel.PROTECTED)
+	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
 	private SearchQueryInclude<Observation> searchQueryInclude;
 	
-	@Autowired
+	@Getter(value = AccessLevel.PROTECTED)
+	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
 	private SearchQuery<Obs, Observation, FhirObservationDao, ObservationTranslator, SearchQueryInclude<Observation>> searchQuery;
 	
 	@Override
-	@Transactional(readOnly = true)
 	public IBundleProvider searchForObservations(ObservationSearchParams observationSearchParams) {
 		return searchQuery.getQueryResults(observationSearchParams.toSearchParameterMap(), dao, translator,
 		    searchQueryInclude);
 	}
 	
 	@Override
-	@Transactional(readOnly = true)
 	public IBundleProvider getLastnObservations(NumberParam max, ObservationSearchParams observationSearchParams) {
 		
 		SearchParameterMap theParams = observationSearchParams.toSearchParameterMap()
@@ -71,7 +69,6 @@ public class FhirObservationServiceImpl extends BaseFhirService<Observation, org
 	}
 	
 	@Override
-	@Transactional(readOnly = true)
 	public IBundleProvider getLastnEncountersObservations(NumberParam max, ObservationSearchParams observationSearchParams) {
 		
 		SearchParameterMap theParams = observationSearchParams.toSearchParameterMap()
@@ -82,6 +79,7 @@ public class FhirObservationServiceImpl extends BaseFhirService<Observation, org
 	}
 	
 	@Override
+	@SuppressWarnings("unchecked")
 	protected Observation applyUpdate(org.openmrs.Obs existingObject, Observation updatedResource) {
 		OpenmrsFhirTranslator<Obs, Observation> translator = getTranslator();
 		

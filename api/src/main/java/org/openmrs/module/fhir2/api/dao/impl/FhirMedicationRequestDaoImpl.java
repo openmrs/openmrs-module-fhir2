@@ -20,8 +20,6 @@ import java.util.stream.Collectors;
 
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
-import lombok.AccessLevel;
-import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.openmrs.DrugOrder;
@@ -34,7 +32,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
-@Setter(AccessLevel.PACKAGE)
 public class FhirMedicationRequestDaoImpl extends BaseFhirDao<DrugOrder> implements FhirMedicationRequestDao {
 	
 	@Override
@@ -50,7 +47,7 @@ public class FhirMedicationRequestDaoImpl extends BaseFhirDao<DrugOrder> impleme
 	public List<DrugOrder> get(@Nonnull Collection<String> uuids) {
 		List<DrugOrder> results = super.get(uuids);
 		if (results == null) {
-			return results;
+			return null;
 		} else {
 			return results.stream()
 			        .filter(order -> order.getAction() == null || order.getAction() != Order.Action.DISCONTINUE)

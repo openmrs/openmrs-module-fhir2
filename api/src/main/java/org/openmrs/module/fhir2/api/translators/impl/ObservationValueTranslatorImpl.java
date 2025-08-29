@@ -9,12 +9,13 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static lombok.AccessLevel.PROTECTED;
 import static org.apache.commons.lang3.Validate.notNull;
 import static org.openmrs.module.fhir2.FhirConstants.UCUM_SYSTEM_URI;
 
 import javax.annotation.Nonnull;
 
-import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -33,13 +34,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-@Setter(AccessLevel.PACKAGE)
 public class ObservationValueTranslatorImpl implements ObservationValueTranslator {
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private ConceptTranslator conceptTranslator;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private ObservationQuantityCodingTranslatorImpl quantityCodingTranslator;
 	
 	@Override
@@ -50,8 +52,9 @@ public class ObservationValueTranslatorImpl implements ObservationValueTranslato
 		
 		// IMPORTANT boolean values are stored as a coded value, so for this to
 		// work, we must check for a boolean value before a general coded value
-		if (obs.getValueBoolean() != null) {
-			return new BooleanType(obs.getValueBoolean());
+		Boolean valueBoolean = getValueBoolean(obs);
+		if (valueBoolean != null) {
+			return new BooleanType(valueBoolean);
 		} else if (obs.getValueCoded() != null) {
 			return conceptTranslator.toFhirResource(obs.getValueCoded());
 		} else if (obs.getValueDrug() != null) {
@@ -61,17 +64,27 @@ public class ObservationValueTranslatorImpl implements ObservationValueTranslato
 		} else if (obs.getValueDatetime() != null) {
 			return new DateTimeType(obs.getValueDatetime());
 		} else if (obs.getValueNumeric() != null) {
-			Quantity result = new Quantity(obs.getValueNumeric());
+			Double value = obs.getValueNumeric();
+			
+			Quantity result = new Quantity();
 			if (obs.getConcept() instanceof ConceptNumeric) {
 				ConceptNumeric cn = (ConceptNumeric) obs.getConcept();
+				if (cn.getAllowDecimal()) {
+					result.setValue(value);
+				} else {
+					result.setValue(value.longValue());
+				}
+				
 				result.setUnit(cn.getUnits());
 				
 				// only set the coding system if unit conforms to UCUM standard
 				Coding coding = quantityCodingTranslator.toFhirResource(cn);
-				if (coding.hasSystem() && coding.getSystem().equals(UCUM_SYSTEM_URI)) {
+				if (coding != null && coding.hasSystem() && coding.getSystem().equals(UCUM_SYSTEM_URI)) {
 					result.setCode(coding.getCode());
 					result.setSystem(coding.getSystem());
 				}
+			} else {
+				result.setValue(value);
 			}
 			
 			return result;
@@ -88,7 +101,9 @@ public class ObservationValueTranslatorImpl implements ObservationValueTranslato
 	@Override
 	public Obs toOpenmrsType(@Nonnull Obs obs, @Nonnull Type resource) {
 		notNull(obs, "The existing Obs object should not be null");
-		notNull(resource, "The Type object should not be null");
+		if (resource == null) {
+			return null;
+		}
 		
 		if (resource instanceof CodeableConcept) {
 			obs.setValueCoded(conceptTranslator.toOpenmrsType((CodeableConcept) resource));
@@ -99,11 +114,25 @@ public class ObservationValueTranslatorImpl implements ObservationValueTranslato
 		} else if (resource instanceof Quantity) {
 			obs.setValueNumeric(((Quantity) resource).getValue().doubleValue());
 		} else if (resource instanceof BooleanType) {
-			obs.setValueBoolean(((BooleanType) resource).getValue());
+			setValueBoolean(obs, ((BooleanType) resource).getValue());
 		} else if (resource instanceof StringType) {
 			obs.setValueText(((StringType) resource).getValue());
 		}
 		
 		return obs;
+	}
+	
+	/**
+	 * @return the valueBoolean of the given obs
+	 */
+	protected Boolean getValueBoolean(Obs obs) {
+		return obs.getValueBoolean();
+	}
+	
+	/**
+	 * sets the valueBoolean property of the given obs to the given value
+	 */
+	protected void setValueBoolean(Obs obs, Boolean valueBoolean) {
+		obs.setValueBoolean(valueBoolean);
 	}
 }

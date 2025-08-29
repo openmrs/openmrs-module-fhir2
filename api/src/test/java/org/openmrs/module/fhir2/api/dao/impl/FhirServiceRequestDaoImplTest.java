@@ -20,14 +20,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.OrderType;
 import org.openmrs.TestOrder;
-import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
-import org.openmrs.test.BaseModuleContextSensitiveTest;
+import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.test.context.ContextConfiguration;
 
-@ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
-public class FhirServiceRequestDaoImplTest extends BaseModuleContextSensitiveTest {
+public class FhirServiceRequestDaoImplTest extends BaseFhirContextSensitiveTest {
 	
 	private static final String TEST_ORDER_UUID = "7d96f25c-4949-4f72-9931-d808fbc226de";
 	

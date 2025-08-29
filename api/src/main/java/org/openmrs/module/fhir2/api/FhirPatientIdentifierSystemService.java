@@ -16,7 +16,7 @@ import java.util.Optional;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.module.fhir2.model.FhirPatientIdentifierSystem;
 
-public interface FhirPatientIdentifierSystemService {
+public interface FhirPatientIdentifierSystemService extends FhirHelperService {
 	
 	String getUrlByPatientIdentifierType(PatientIdentifierType patientIdentifierType);
 	

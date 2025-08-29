@@ -11,6 +11,7 @@ package org.openmrs.module.fhir2.api.dao;
 
 import javax.annotation.Nonnull;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.openmrs.User;
@@ -20,22 +21,30 @@ import org.openmrs.util.PrivilegeConstants;
 
 public interface FhirUserDao extends FhirDao<User> {
 	
-	@Authorized(PrivilegeConstants.GET_USERS)
 	@Override
+	@Authorized(PrivilegeConstants.GET_USERS)
 	User get(@Nonnull String uuid);
+	
+	@Override
+	@Authorized(PrivilegeConstants.GET_USERS)
+	List<User> get(@Nonnull Collection<String> uuids);
 	
 	@Authorized(PrivilegeConstants.GET_USERS)
 	User getUserByUserName(String clientName);
 	
-	@Authorized({ PrivilegeConstants.ADD_USERS, PrivilegeConstants.EDIT_USERS })
 	@Override
+	@Authorized(PrivilegeConstants.GET_USERS)
+	List<User> getSearchResults(@Nonnull SearchParameterMap theParams);
+	
+	@Override
+	@Authorized(PrivilegeConstants.GET_USERS)
+	int getSearchResultsCount(@Nonnull SearchParameterMap theParams);
+	
+	@Override
+	@Authorized({ PrivilegeConstants.ADD_USERS, PrivilegeConstants.EDIT_USERS })
 	User createOrUpdate(@Nonnull User newEntry);
 	
+	@Override
 	@Authorized(PrivilegeConstants.DELETE_USERS)
-	@Override
 	User delete(@Nonnull String uuid);
-	
-	@Authorized(PrivilegeConstants.GET_USERS)
-	@Override
-	List<User> getSearchResults(@Nonnull SearchParameterMap theParams);
 }

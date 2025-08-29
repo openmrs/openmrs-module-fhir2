@@ -9,31 +9,28 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
+import static java.util.Collections.singleton;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
-import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Map;
 
-import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
 import org.openmrs.Location;
 import org.openmrs.LocationAttribute;
 import org.openmrs.LocationAttributeType;
 import org.openmrs.LocationTag;
 import org.openmrs.api.LocationService;
-import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
-import org.openmrs.test.BaseModuleContextSensitiveTest;
+import org.openmrs.customdatatype.datatype.FreeTextDatatype;
+import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
+import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.test.context.ContextConfiguration;
 
-@ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
-public class FhirLocationDaoImplTest extends BaseModuleContextSensitiveTest {
+public class FhirLocationDaoImplTest extends BaseFhirContextSensitiveTest {
 	
 	private static final String LOCATION_UUID = "c0938432-1691-11df-97a5-7038c432";
 	
@@ -47,20 +44,14 @@ public class FhirLocationDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String LOCATION_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirLocationDaoImplTest_initial_data.xml";
 	
-	private FhirLocationDaoImpl fhirLocationDao;
+	@Autowired
+	private FhirLocationDao fhirLocationDao;
 	
 	@Autowired
-	@Qualifier("sessionFactory")
-	private SessionFactory sessionFactory;
-	
-	@Mock
-	private LocationService locationService;
+	LocationService locationService;
 	
 	@Before
 	public void setup() throws Exception {
-		fhirLocationDao = new FhirLocationDaoImpl();
-		fhirLocationDao.setLocationService(locationService);
-		fhirLocationDao.setSessionFactory(sessionFactory);
 		executeDataSet(LOCATION_INITIAL_DATA_XML);
 	}
 	
@@ -91,11 +82,23 @@ public class FhirLocationDaoImplTest extends BaseModuleContextSensitiveTest {
 	}
 	
 	@Test
+	public void getActiveAttributesByLocationsAndAttributeTypeUuid_shouldReturnLocationAttribute() {
+		Location location = new Location();
+		location.setUuid(LOCATION_UUID);
+		
+		Map<Location, List<LocationAttribute>> attributes = fhirLocationDao
+		        .getActiveAttributesByLocationsAndAttributeTypeUuid(singleton(location), LOCATION_ATTRIBUTE_TYPE_UUID);
+		
+		assertThat(attributes, notNullValue());
+	}
+	
+	@Test
 	public void getLocationAttributeTypeByUuid_shouldReturnAttributeType() {
 		LocationAttributeType locationAttributeType = new LocationAttributeType();
 		locationAttributeType.setUuid(LOCATION_ATTRIBUTE_TYPE_UUID);
-		
-		when(locationService.getLocationAttributeTypeByUuid(LOCATION_ATTRIBUTE_TYPE_UUID)).thenReturn(locationAttributeType);
+		locationAttributeType.setName("Some Attribute");
+		locationAttributeType.setDatatypeClassname(FreeTextDatatype.class.getName());
+		locationService.saveLocationAttributeType(locationAttributeType);
 		
 		LocationAttributeType result = fhirLocationDao.getLocationAttributeTypeByUuid(LOCATION_ATTRIBUTE_TYPE_UUID);
 		
@@ -104,14 +107,13 @@ public class FhirLocationDaoImplTest extends BaseModuleContextSensitiveTest {
 	}
 	
 	@Test
-	public void saveLocationTag_shouldSaveTag() {
+	public void createLocationTag_shouldCreateTag() {
 		LocationTag locationTag = new LocationTag();
 		locationTag.setUuid(LOCATION_TAG_UUID);
 		locationTag.setName(LOCATION_TAG_NAME);
+		locationService.saveLocationTag(locationTag);
 		
-		when(locationService.saveLocationTag(locationTag)).thenReturn(locationTag);
-		
-		LocationTag result = fhirLocationDao.saveLocationTag(locationTag);
+		LocationTag result = fhirLocationDao.createLocationTag(locationTag);
 		
 		assertThat(result, notNullValue());
 	}
@@ -121,8 +123,7 @@ public class FhirLocationDaoImplTest extends BaseModuleContextSensitiveTest {
 		LocationTag locationTag = new LocationTag();
 		locationTag.setUuid(LOCATION_TAG_UUID);
 		locationTag.setName(LOCATION_TAG_NAME);
-		
-		when(locationService.getLocationTagByName(LOCATION_TAG_NAME)).thenReturn(locationTag);
+		locationService.saveLocationTag(locationTag);
 		
 		LocationTag result = fhirLocationDao.getLocationTagByName(LOCATION_TAG_NAME);
 		

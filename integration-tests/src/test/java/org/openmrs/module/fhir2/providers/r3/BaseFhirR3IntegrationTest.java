@@ -26,7 +26,6 @@ import org.hl7.fhir.dstu3.model.DomainResource;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.openmrs.module.fhir2.BaseFhirIntegrationTest;
 import org.openmrs.module.fhir2.web.servlet.FhirR3RestServlet;
 import org.openmrs.module.fhir2.web.servlet.FhirRestServlet;
@@ -90,15 +89,15 @@ public abstract class BaseFhirR3IntegrationTest<T extends IResourceProvider, U e
 		return (OperationOutcome) super.readOperationOutcome(response);
 	}
 	
-	public static Matcher<Bundle.BundleEntryComponent> hasResource(Matcher<? extends IDomainResource> matcher) {
+	public static Matcher<Bundle.BundleEntryComponent> hasResource(Matcher<?> matcher) {
 		return new HasResourceMatcher(matcher);
 	}
 	
 	private static class HasResourceMatcher extends TypeSafeMatcher<Bundle.BundleEntryComponent> {
 		
-		private final Matcher<? extends IDomainResource> matcher;
+		private final Matcher<?> matcher;
 		
-		public HasResourceMatcher(Matcher<? extends IDomainResource> matcher) {
+		public HasResourceMatcher(Matcher<?> matcher) {
 			this.matcher = matcher;
 		}
 		

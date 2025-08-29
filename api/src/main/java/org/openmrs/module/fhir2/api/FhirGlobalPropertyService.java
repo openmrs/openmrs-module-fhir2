@@ -13,7 +13,7 @@ import java.util.Map;
 
 import org.openmrs.api.APIException;
 
-public interface FhirGlobalPropertyService {
+public interface FhirGlobalPropertyService extends FhirHelperService {
 	
 	String getGlobalProperty(String property) throws APIException;
 	

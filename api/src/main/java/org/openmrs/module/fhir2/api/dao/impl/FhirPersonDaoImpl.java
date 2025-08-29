@@ -19,8 +19,6 @@ import java.util.stream.Stream;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
-import lombok.AccessLevel;
-import lombok.Setter;
 import org.openmrs.Person;
 import org.openmrs.PersonAttribute;
 import org.openmrs.module.fhir2.FhirConstants;
@@ -30,7 +28,6 @@ import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.stereotype.Component;
 
 @Component
-@Setter(AccessLevel.PACKAGE)
 public class FhirPersonDaoImpl extends BasePersonDao<Person> implements FhirPersonDao {
 	
 	@Override
@@ -58,8 +55,10 @@ public class FhirPersonDaoImpl extends BasePersonDao<Person> implements FhirPers
 					entry.getValue().forEach(param -> handleNames(criteriaContext, entry.getValue()));
 					break;
 				case FhirConstants.GENDER_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handleGender(criteriaContext, getPersonProperty(criteriaContext),
-					    "gender", (TokenAndListParam) param.getParam()).ifPresent(criteriaContext::addPredicate));
+					entry.getValue()
+					        .forEach(param -> handleGender(criteriaContext, getPersonProperty(criteriaContext),
+					            FhirConstants.GENDER_PROPERTY, (TokenAndListParam) param.getParam())
+					                    .ifPresent(criteriaContext::addPredicate));
 					break;
 				case FhirConstants.DATE_RANGE_SEARCH_HANDLER:
 					entry.getValue().forEach(

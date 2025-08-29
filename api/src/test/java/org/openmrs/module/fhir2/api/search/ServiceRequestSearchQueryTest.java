@@ -46,18 +46,16 @@ import org.hl7.fhir.r4.model.ServiceRequest;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.TestOrder;
+import org.openmrs.api.cache.CacheConfig;
+import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.FhirTestConstants;
-import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.module.fhir2.api.dao.FhirServiceRequestDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.ServiceRequestTranslator;
-import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
 
-@ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
-public class ServiceRequestSearchQueryTest extends BaseModuleContextSensitiveTest {
+public class ServiceRequestSearchQueryTest extends BaseFhirContextSensitiveTest {
 	
 	private static final String TEST_ORDER_INITIAL_DATA = "org/openmrs/module/fhir2/api/dao/impl/FhirServiceRequestTest_initial_data.xml";
 	
@@ -124,6 +122,9 @@ public class ServiceRequestSearchQueryTest extends BaseModuleContextSensitiveTes
 	private static final int END_INDEX = 10;
 	
 	@Autowired
+	CacheConfig cacheConfig;
+	
+	@Autowired
 	private FhirServiceRequestDao<TestOrder> dao;
 	
 	@Autowired
@@ -137,6 +138,8 @@ public class ServiceRequestSearchQueryTest extends BaseModuleContextSensitiveTes
 	
 	@Before
 	public void setup() throws Exception {
+		// Needed until TRUNK-6299 in place
+		cacheConfig.cacheManager().getCacheNames().forEach(name -> cacheConfig.cacheManager().getCache(name).clear());
 		executeDataSet(TEST_ORDER_INITIAL_DATA);
 	}
 	
@@ -258,6 +261,7 @@ public class ServiceRequestSearchQueryTest extends BaseModuleContextSensitiveTes
 		            hasProperty("coding",
 		                hasItem(allOf(hasProperty("code", equalTo(TEST_ORDER_LOINC_CODE)),
 		                    hasProperty("system", equalTo(FhirTestConstants.LOINC_SYSTEM_URL)))))),
+		        
 		        hasProperty("code", hasProperty("coding", hasItem(allOf(hasProperty("code", equalTo(TEST_ORDER_CIEL_CODE)),
 		            hasProperty("system", equalTo(FhirTestConstants.CIEL_SYSTEM_URN)))))))));
 	}

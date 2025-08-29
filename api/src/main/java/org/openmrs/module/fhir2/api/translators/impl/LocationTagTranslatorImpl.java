@@ -9,9 +9,11 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static lombok.AccessLevel.PROTECTED;
+
 import javax.annotation.Nonnull;
 
-import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Coding;
 import org.openmrs.LocationTag;
@@ -21,16 +23,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-@Setter(AccessLevel.PACKAGE)
 public class LocationTagTranslatorImpl implements LocationTagTranslator {
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private FhirLocationDao fhirLocationDao;
 	
 	@Override
 	public LocationTag toOpenmrsType(@Nonnull Coding tag) {
 		LocationTag existingTag = fhirLocationDao.getLocationTagByName(tag.getCode());
 		return existingTag != null ? existingTag
-		        : fhirLocationDao.saveLocationTag(new LocationTag(tag.getCode(), tag.getDisplay()));
+		        : fhirLocationDao.createLocationTag(new LocationTag(tag.getCode(), tag.getDisplay()));
 	}
 }

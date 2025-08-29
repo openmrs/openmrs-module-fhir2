@@ -22,25 +22,25 @@ import org.openmrs.module.fhir2.api.search.param.ConditionSearchParams;
 import org.openmrs.module.fhir2.api.translators.ConditionTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
-@Transactional
-@Setter(AccessLevel.PACKAGE)
-@Getter(AccessLevel.PROTECTED)
 public class FhirConditionServiceImpl extends BaseFhirService<Condition, org.openmrs.Condition> implements FhirConditionService {
 	
-	@Autowired
-	private FhirConditionDao<org.openmrs.Condition> dao;
+	@Getter(AccessLevel.PROTECTED)
+	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
+	private FhirConditionDao dao;
 	
-	@Autowired
+	@Getter(AccessLevel.PROTECTED)
+	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
 	private ConditionTranslator<org.openmrs.Condition> translator;
 	
-	@Autowired
-	private SearchQueryInclude searchQueryInclude;
+	@Getter(value = AccessLevel.PROTECTED)
+	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
+	private SearchQueryInclude<Condition> searchQueryInclude;
 	
-	@Autowired
-	private SearchQuery<org.openmrs.Condition, Condition, FhirConditionDao<org.openmrs.Condition>, ConditionTranslator<org.openmrs.Condition>, SearchQueryInclude<Condition>> searchQuery;
+	@Getter(value = AccessLevel.PROTECTED)
+	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
+	private SearchQuery<org.openmrs.Condition, Condition, FhirConditionDao, ConditionTranslator<org.openmrs.Condition>, SearchQueryInclude<Condition>> searchQuery;
 	
 	@Override
 	public IBundleProvider searchConditions(ConditionSearchParams conditionSearchParams) {

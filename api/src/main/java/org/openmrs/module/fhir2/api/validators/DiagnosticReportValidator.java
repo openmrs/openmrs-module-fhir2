@@ -11,6 +11,7 @@ package org.openmrs.module.fhir2.api.validators;
 
 import org.openmrs.annotation.Handler;
 import org.openmrs.module.fhir2.model.FhirDiagnosticReport;
+import org.springframework.lang.NonNull;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
@@ -18,12 +19,12 @@ import org.springframework.validation.Validator;
 public class DiagnosticReportValidator implements Validator {
 	
 	@Override
-	public boolean supports(Class<?> clazz) {
+	public boolean supports(@NonNull Class<?> clazz) {
 		return FhirDiagnosticReport.class.isAssignableFrom(clazz);
 	}
 	
 	@Override
-	public void validate(Object target, Errors errors) {
+	public void validate(@NonNull Object target, @NonNull Errors errors) {
 		if (!(target instanceof FhirDiagnosticReport)) {
 			return;
 		}

@@ -11,6 +11,7 @@ package org.openmrs.module.fhir2.api.search;
 
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
+import lombok.Setter;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.openmrs.Auditable;
 import org.openmrs.OpenmrsObject;
@@ -18,7 +19,7 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
-import org.openmrs.module.fhir2.api.translators.ToFhirTranslator;
+import org.openmrs.module.fhir2.api.translators.OpenmrsFhirTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -29,9 +30,9 @@ import org.springframework.stereotype.Component;
  * @param <T> FHIR generic translator Class
  */
 @Component
-public class SearchQuery<T extends OpenmrsObject & Auditable, U extends IBaseResource, O extends FhirDao<T>, V extends ToFhirTranslator<T, U>, W extends SearchQueryInclude<U>> {
+public class SearchQuery<T extends OpenmrsObject & Auditable, U extends IBaseResource, O extends FhirDao<T>, V extends OpenmrsFhirTranslator<T, U>, W extends SearchQueryInclude<U>> {
 	
-	@Autowired
+	@Setter(onMethod_ = @Autowired)
 	private FhirGlobalPropertyService globalPropertyService;
 	
 	/**
@@ -53,6 +54,7 @@ public class SearchQuery<T extends OpenmrsObject & Auditable, U extends IBaseRes
 			result.setPreferredPageSize(result.size());
 			return result;
 		}
+		
 		return new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude);
 	}
 }

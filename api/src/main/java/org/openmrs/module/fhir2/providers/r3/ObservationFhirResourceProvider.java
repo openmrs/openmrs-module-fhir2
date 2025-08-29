@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.providers.r3;
 
 import static lombok.AccessLevel.PACKAGE;
+import static lombok.AccessLevel.PROTECTED;
 
 import javax.annotation.Nonnull;
 
@@ -39,6 +40,7 @@ import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.collections.CollectionUtils;
 import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40;
@@ -59,10 +61,10 @@ import org.springframework.stereotype.Component;
 
 @Component("observationFhirR3ResourceProvider")
 @R3Provider
-@Setter(PACKAGE)
 public class ObservationFhirResourceProvider implements IResourceProvider {
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PACKAGE, onMethod_ = @Autowired)
 	private FhirObservationService observationService;
 	
 	@Override

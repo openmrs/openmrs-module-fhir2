@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Optional;
 
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.SessionFactory;
 import org.openmrs.ConceptSource;
@@ -38,11 +39,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
-@Setter(AccessLevel.PACKAGE)
 public class FhirConceptSourceDaoImpl implements FhirConceptSourceDao {
 	
-	@Autowired
-	@Qualifier("sessionFactory")
+	@Getter(value = AccessLevel.PROTECTED)
+	@Setter(value = AccessLevel.PROTECTED, onMethod = @__({ @Autowired, @Qualifier("sessionFactory") }))
 	private SessionFactory sessionFactory;
 	
 	@Override
@@ -55,6 +55,7 @@ public class FhirConceptSourceDaoImpl implements FhirConceptSourceDao {
 	}
 	
 	@Override
+	@Transactional(readOnly = true)
 	public Optional<FhirConceptSource> getFhirConceptSourceByUrl(@Nonnull String url) {
 		OpenmrsFhirCriteriaContext<FhirConceptSource, FhirConceptSource> criteriaContext = openmrsFhirCriteriaContext();
 		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot());
@@ -73,6 +74,7 @@ public class FhirConceptSourceDaoImpl implements FhirConceptSourceDao {
 	}
 	
 	@Override
+	@Transactional(readOnly = true)
 	public Optional<FhirConceptSource> getFhirConceptSourceByConceptSourceName(@Nonnull String sourceName) {
 		
 		OpenmrsFhirCriteriaContext<FhirConceptSource, FhirConceptSource> criteriaContext = openmrsFhirCriteriaContext();
@@ -95,6 +97,7 @@ public class FhirConceptSourceDaoImpl implements FhirConceptSourceDao {
 	}
 	
 	@Override
+	@Transactional(readOnly = true)
 	public Optional<FhirConceptSource> getFhirConceptSourceByConceptSource(@Nonnull ConceptSource conceptSource) {
 		EntityManager em = sessionFactory.getCurrentSession();
 		CriteriaBuilder cb = em.getCriteriaBuilder();
@@ -113,6 +116,7 @@ public class FhirConceptSourceDaoImpl implements FhirConceptSourceDao {
 	}
 	
 	@Override
+	@Transactional(readOnly = true)
 	public Optional<ConceptSource> getConceptSourceByHl7Code(@Nonnull String hl7Code) {
 		EntityManager entityManager = sessionFactory.getCurrentSession();
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
@@ -139,6 +143,7 @@ public class FhirConceptSourceDaoImpl implements FhirConceptSourceDao {
 	}
 	
 	@Override
+	@Transactional
 	public FhirConceptSource saveFhirConceptSource(@Nonnull FhirConceptSource fhirConceptSource) {
 		sessionFactory.getCurrentSession().saveOrUpdate(fhirConceptSource);
 		return fhirConceptSource;

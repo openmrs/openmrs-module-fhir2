@@ -11,6 +11,9 @@ package org.openmrs.module.fhir2.api.translators;
 
 import javax.annotation.Nonnull;
 
+import java.util.Collection;
+import java.util.List;
+
 import org.hl7.fhir.r4.model.Location;
 
 public interface LocationTranslator extends OpenmrsFhirUpdatableTranslator<org.openmrs.Location, Location> {
@@ -23,6 +26,15 @@ public interface LocationTranslator extends OpenmrsFhirUpdatableTranslator<org.o
 	 */
 	@Override
 	Location toFhirResource(@Nonnull org.openmrs.Location openmrsLocation);
+	
+	/**
+	 * Maps a collection of {@link org.openmrs.Location}s to a {@link org.hl7.fhir.r4.model.Location}
+	 *
+	 * @param openmrsLocations the collection of locations to translate
+	 * @return the mapping of OpenMRS location to corresponding FHIR location resource
+	 */
+	@Override
+	List<Location> toFhirResources(Collection<org.openmrs.Location> openmrsLocations);
 	
 	/**
 	 * Maps a {@link org.hl7.fhir.r4.model.Location} to an {@link org.openmrs.Location}

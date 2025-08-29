@@ -164,13 +164,12 @@ public abstract class BaseDao {
 	
 	private static final BigDecimal APPROX_RANGE = new BigDecimal("0.1");
 	
-	@Autowired
+	@Getter(value = AccessLevel.PROTECTED)
+	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
 	private LocalDateTimeFactory localDateTimeFactory;
 	
-	@Autowired
-	@Getter(AccessLevel.PUBLIC)
-	@Setter(AccessLevel.PUBLIC)
-	@Qualifier("sessionFactory")
+	@Getter(AccessLevel.PROTECTED)
+	@Setter(value = AccessLevel.PROTECTED, onMethod_ = { @Autowired, @Qualifier("sessionFactory") })
 	protected SessionFactory sessionFactory;
 	
 	/**
@@ -585,14 +584,14 @@ public abstract class BaseDao {
 		});
 	}
 	
-	protected <T, U> Optional<Predicate> handleLocationReference(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
-	        @Nonnull From<?, ?> locationAlias, ReferenceAndListParam locationReference) {
+	protected <T, U> Optional<Predicate> handleLocationReference(@Nonnull OpenmrsFhirCriteriaContext<T, U> criteriaContext,
+	        @Nonnull From<?, ?> locationAlias, ReferenceAndListParam locationReferences) {
 		
-		if (locationReference == null) {
+		if (locationReferences == null) {
 			return Optional.empty();
 		}
 		
-		return handleAndListParam(criteriaContext.getCriteriaBuilder(), locationReference, token -> {
+		return handleAndListParam(criteriaContext.getCriteriaBuilder(), locationReferences, token -> {
 			if (token.getChain() != null) {
 				switch (token.getChain()) {
 					case Location.SP_NAME:
@@ -1251,10 +1250,10 @@ public abstract class BaseDao {
 				offset = temporalAmount.get(temporalUnit) / 2;
 			}
 			
-			LocalDateTime lowerBoundDateTime = LocalDateTime.from(localDateTime).minus(Duration.of(offset, temporalUnit));
+			LocalDateTime lowerBoundDateTime = localDateTime.minus(Duration.of(offset, temporalUnit));
 			Date lowerBound = Date.from(lowerBoundDateTime.atZone(ZoneId.systemDefault()).toInstant());
 			
-			LocalDateTime upperBoundDateTime = LocalDateTime.from(localDateTime).plus(offset, temporalUnit);
+			LocalDateTime upperBoundDateTime = localDateTime.plus(offset, temporalUnit);
 			Date upperBound = Date.from(upperBoundDateTime.atZone(ZoneId.systemDefault()).toInstant());
 			
 			if (prefix == ParamPrefixEnum.EQUAL) {

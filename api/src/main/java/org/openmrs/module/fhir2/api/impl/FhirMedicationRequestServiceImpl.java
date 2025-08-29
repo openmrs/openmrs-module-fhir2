@@ -25,20 +25,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-@Setter(AccessLevel.PACKAGE)
-@Getter(AccessLevel.PROTECTED)
 public class FhirMedicationRequestServiceImpl extends BaseFhirService<MedicationRequest, org.openmrs.DrugOrder> implements FhirMedicationRequestService {
 	
-	@Autowired
-	private MedicationRequestTranslator translator;
-	
-	@Autowired
+	@Getter(value = AccessLevel.PROTECTED)
+	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
 	private FhirMedicationRequestDao dao;
 	
-	@Autowired
+	@Getter(value = AccessLevel.PROTECTED)
+	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
+	private MedicationRequestTranslator translator;
+	
+	@Getter(value = AccessLevel.PROTECTED)
+	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
 	private SearchQueryInclude<MedicationRequest> searchQueryInclude;
 	
-	@Autowired
+	@Getter(value = AccessLevel.PROTECTED)
+	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
 	private SearchQuery<DrugOrder, MedicationRequest, FhirMedicationRequestDao, MedicationRequestTranslator, SearchQueryInclude<MedicationRequest>> searchQuery;
 	
 	@Override

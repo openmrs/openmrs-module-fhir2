@@ -14,8 +14,6 @@ import javax.persistence.criteria.From;
 import javax.persistence.criteria.Join;
 
 import ca.uhn.fhir.rest.param.TokenAndListParam;
-import lombok.AccessLevel;
-import lombok.Setter;
 import org.openmrs.Drug;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirMedicationDao;
@@ -24,7 +22,6 @@ import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.stereotype.Component;
 
 @Component
-@Setter(AccessLevel.PACKAGE)
 public class FhirMedicationDaoImpl extends BaseFhirDao<Drug> implements FhirMedicationDao {
 	
 	@Override

@@ -13,6 +13,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.exparity.hamcrest.date.DateMatchers.sameDay;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.either;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.hasItems;
@@ -38,9 +39,12 @@ import java.util.Set;
 import lombok.AccessLevel;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Location;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.junit.Before;
 import org.junit.Test;
@@ -408,6 +412,105 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 		    hasItems(hasProperty("location", hasProperty("reference", equalTo("Location/" + LOCATION_UUID))))))));
 		assertThat(entries, everyItem(hasResource(hasProperty("location",
 		    hasItems(hasProperty("location", hasProperty("display", equalTo("Unknown Location"))))))));
+	}
+	
+	@Test
+	public void shouldAddPatientsWithReturnedEncounters() throws Exception {
+		String uri = "/Encounter?_include=Encounter:patient";
+		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle results = readBundleResponse(response);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(results.hasEntry(), is(true));
+		
+		List<Bundle.BundleEntryComponent> entries = results.getEntry();
+		
+		assertThat(entries.isEmpty(), not(true));
+		assertThat(entries, everyItem(hasProperty("fullUrl", either(startsWith("http://localhost/ws/fhir2/R4/Encounter"))
+		        .or(startsWith("http://localhost/ws/fhir2/R4/Patient")))));
+		assertThat(entries, everyItem(hasResource(either(instanceOf(Encounter.class)).or(instanceOf(Patient.class)))));
+		assertThat(entries, everyItem(hasResource(validResource())));
+	}
+	
+	@Test
+	public void shouldAddLocationsWithReturnedEncounters() throws Exception {
+		String uri = "/Encounter?_include=Encounter:location";
+		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle results = readBundleResponse(response);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(results.hasEntry(), is(true));
+		
+		List<Bundle.BundleEntryComponent> entries = results.getEntry();
+		
+		assertThat(entries.isEmpty(), not(true));
+		assertThat(entries, everyItem(hasProperty("fullUrl", either(startsWith("http://localhost/ws/fhir2/R4/Encounter"))
+		        .or(startsWith("http://localhost/ws/fhir2/R4/Location")))));
+		assertThat(entries, everyItem(hasResource(either(instanceOf(Encounter.class)).or(instanceOf(Location.class)))));
+		assertThat(entries, everyItem(hasResource(validResource())));
+	}
+	
+	@Test
+	public void shouldAddObservationsWithReturnedEncounters() throws Exception {
+		String uri = "/Encounter?_revinclude=Observation:encounter";
+		
+		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle results = readBundleResponse(response);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(results.hasEntry(), is(true));
+		
+		List<Bundle.BundleEntryComponent> entries = results.getEntry();
+		
+		assertThat(entries.isEmpty(), not(true));
+		assertThat(entries, everyItem(hasProperty("fullUrl", either(startsWith("http://localhost/ws/fhir2/R4/Encounter"))
+		        .or(startsWith("http://localhost/ws/fhir2/R4/Observation")))));
+		assertThat(entries, everyItem(hasResource(either(instanceOf(Encounter.class)).or(instanceOf(Observation.class)))));
+		assertThat(entries, everyItem(hasResource(validResource())));
+	}
+	
+	@Test
+	public void shouldAddDiagnosticReportsWithReturnedEncounters() throws Exception {
+		String uri = "/Encounter?_revinclude=DiagnosticReport:encounter";
+		
+		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle results = readBundleResponse(response);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(results.hasEntry(), is(true));
+		
+		List<Bundle.BundleEntryComponent> entries = results.getEntry();
+		
+		assertThat(entries.isEmpty(), not(true));
+		assertThat(entries, everyItem(hasProperty("fullUrl", either(startsWith("http://localhost/ws/fhir2/R4/Encounter"))
+		        .or(startsWith("http://localhost/ws/fhir2/R4/DiagnosticReport")))));
+		assertThat(entries,
+		    everyItem(hasResource(either(instanceOf(Encounter.class)).or(instanceOf(DiagnosticReport.class)))));
+		assertThat(entries, everyItem(hasResource(validResource())));
 	}
 	
 	@Test
@@ -1041,16 +1144,6 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 		    everyItem(hasResource(hasProperty("resourceType", in(getEncounterWithMedicationRequestsValidResourceTypes())))));
 	}
 	
-	private Set<ResourceType> getEncounterWithMedicationRequestsValidResourceTypes() {
-		Set<ResourceType> validTypes = new HashSet<>();
-		
-		validTypes.add(ResourceType.Encounter);
-		validTypes.add(ResourceType.MedicationRequest);
-		validTypes.add(ResourceType.MedicationDispense);
-		
-		return validTypes;
-	}
-	
 	@Test
 	public void shouldReturnAnEtagHeaderWhenRetrievingAnExistingEncounter() throws Exception {
 		MockHttpServletResponse response = get("/Encounter/" + ENCOUNTER_UUID).accept(FhirMediaTypes.JSON).go();
@@ -1081,9 +1174,21 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 		
 		String etagValue = response.getHeader("etag");
 		
+		assertThat(etagValue, notNullValue());
+		
 		response = get("/Encounter/" + ENCOUNTER_UUID).accept(FhirMediaTypes.JSON).ifNoneMatchHeader(etagValue).go();
 		
 		assertThat(response, isOk());
 		assertThat(response, statusEquals(HttpStatus.NOT_MODIFIED));
+	}
+	
+	private Set<ResourceType> getEncounterWithMedicationRequestsValidResourceTypes() {
+		Set<ResourceType> validTypes = new HashSet<>();
+		
+		validTypes.add(ResourceType.Encounter);
+		validTypes.add(ResourceType.MedicationRequest);
+		validTypes.add(ResourceType.MedicationDispense);
+		
+		return validTypes;
 	}
 }

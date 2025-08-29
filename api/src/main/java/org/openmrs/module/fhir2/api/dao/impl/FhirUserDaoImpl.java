@@ -12,18 +12,17 @@ package org.openmrs.module.fhir2.api.dao.impl;
 import java.util.Optional;
 
 import ca.uhn.fhir.rest.param.TokenAndListParam;
-import lombok.AccessLevel;
-import lombok.Setter;
 import org.openmrs.User;
 import org.openmrs.module.fhir2.api.dao.FhirUserDao;
 import org.openmrs.module.fhir2.api.dao.internals.OpenmrsFhirCriteriaContext;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
-@Setter(AccessLevel.PACKAGE)
 public class FhirUserDaoImpl extends BasePractitionerDao<User> implements FhirUserDao {
 	
 	@Override
+	@Transactional(readOnly = true)
 	public User getUserByUserName(String username) {
 		OpenmrsFhirCriteriaContext<User, User> criteriaContext = createCriteriaContext(User.class);
 		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot())

@@ -21,16 +21,12 @@ import java.util.Optional;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
-import lombok.AccessLevel;
-import lombok.NonNull;
-import lombok.Setter;
 import org.openmrs.Visit;
 import org.openmrs.module.fhir2.api.dao.FhirVisitDao;
 import org.openmrs.module.fhir2.api.dao.internals.OpenmrsFhirCriteriaContext;
 import org.springframework.stereotype.Component;
 
 @Component
-@Setter(AccessLevel.PACKAGE)
 public class FhirVisitDaoImpl extends BaseEncounterDao<Visit> implements FhirVisitDao {
 	
 	@Override
@@ -56,7 +52,7 @@ public class FhirVisitDaoImpl extends BaseEncounterDao<Visit> implements FhirVis
 	}
 	
 	@Override
-	protected <V, U> Path<?> paramToProp(@Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext, @NonNull String param) {
+	protected <V, U> Path<?> paramToProp(@Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext, @Nonnull String param) {
 		switch (param) {
 			case SP_DATE:
 				return criteriaContext.getRoot().get("startDatetime");

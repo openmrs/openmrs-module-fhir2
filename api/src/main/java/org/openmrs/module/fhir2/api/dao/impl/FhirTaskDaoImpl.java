@@ -21,9 +21,6 @@ import java.util.Optional;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
 import org.openmrs.api.db.DAOException;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirTaskDao;
@@ -33,8 +30,6 @@ import org.openmrs.module.fhir2.model.FhirTask;
 import org.springframework.stereotype.Component;
 
 @Component
-@Getter(AccessLevel.PACKAGE)
-@Setter(AccessLevel.PACKAGE)
 public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDao {
 	
 	@Override

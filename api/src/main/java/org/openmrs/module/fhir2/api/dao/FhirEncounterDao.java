@@ -11,6 +11,7 @@ package org.openmrs.module.fhir2.api.dao;
 
 import javax.annotation.Nonnull;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.openmrs.Encounter;
@@ -25,12 +26,8 @@ public interface FhirEncounterDao extends FhirDao<Encounter> {
 	Encounter get(@Nonnull String uuid);
 	
 	@Override
-	@Authorized({ PrivilegeConstants.ADD_ENCOUNTERS, PrivilegeConstants.EDIT_ENCOUNTERS })
-	Encounter createOrUpdate(@Nonnull Encounter newEntry);
-	
-	@Override
-	@Authorized(PrivilegeConstants.DELETE_ENCOUNTERS)
-	Encounter delete(@Nonnull String uuid);
+	@Authorized(PrivilegeConstants.GET_ENCOUNTERS)
+	List<Encounter> get(@Nonnull Collection<String> uuids);
 	
 	@Authorized(PrivilegeConstants.GET_ENCOUNTERS)
 	List<String> getSearchResultUuids(@Nonnull SearchParameterMap theParams);
@@ -38,4 +35,16 @@ public interface FhirEncounterDao extends FhirDao<Encounter> {
 	@Override
 	@Authorized(PrivilegeConstants.GET_ENCOUNTERS)
 	List<Encounter> getSearchResults(@Nonnull SearchParameterMap theParams);
+	
+	@Override
+	@Authorized(PrivilegeConstants.GET_ENCOUNTERS)
+	int getSearchResultsCount(@Nonnull SearchParameterMap theParams);
+	
+	@Override
+	@Authorized({ PrivilegeConstants.ADD_ENCOUNTERS, PrivilegeConstants.EDIT_ENCOUNTERS })
+	Encounter createOrUpdate(@Nonnull Encounter newEntry);
+	
+	@Override
+	@Authorized(PrivilegeConstants.DELETE_ENCOUNTERS)
+	Encounter delete(@Nonnull String uuid);
 }

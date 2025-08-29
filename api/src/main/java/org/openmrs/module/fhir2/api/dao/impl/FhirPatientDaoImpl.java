@@ -13,24 +13,27 @@ import static org.hl7.fhir.r4.model.Patient.SP_DEATH_DATE;
 
 import javax.annotation.Nonnull;
 import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.Set;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.HasAndListParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
-import lombok.AccessLevel;
 import lombok.NonNull;
-import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
+import org.openmrs.CohortMembership;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.module.fhir2.FhirConstants;
@@ -38,12 +41,13 @@ import org.openmrs.module.fhir2.api.dao.FhirPatientDao;
 import org.openmrs.module.fhir2.api.dao.internals.OpenmrsFhirCriteriaContext;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
-@Setter(AccessLevel.PACKAGE)
 public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPatientDao {
 	
 	@Override
+	@Transactional(readOnly = true)
 	public Patient getPatientById(@Nonnull Integer id) {
 		OpenmrsFhirCriteriaContext<Patient, Patient> criteriaContext = createCriteriaContext(Patient.class);
 		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot())
@@ -107,8 +111,10 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 					handleNames(criteriaContext, entry.getValue());
 					break;
 				case FhirConstants.GENDER_SEARCH_HANDLER:
-					entry.getValue().forEach(p -> handleGender(criteriaContext, getPersonProperty(criteriaContext),
-					    p.getPropertyName(), (TokenAndListParam) p.getParam()).ifPresent(criteriaContext::addPredicate));
+					entry.getValue()
+					        .forEach(p -> handleGender(criteriaContext, getPersonProperty(criteriaContext),
+					            FhirConstants.GENDER_PROPERTY, (TokenAndListParam) p.getParam())
+					                    .ifPresent(criteriaContext::addPredicate));
 					break;
 				case FhirConstants.IDENTIFIER_SEARCH_HANDLER:
 					entry.getValue().forEach(
@@ -130,8 +136,60 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 				case FhirConstants.COMMON_SEARCH_HANDLER:
 					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(criteriaContext::addPredicate);
 					break;
+				case FhirConstants.HAS_SEARCH_HANDLER:
+					entry.getValue()
+					        .forEach(param -> handleHasAndListParam(criteriaContext, (HasAndListParam) param.getParam()));
+					break;
 			}
 		});
+	}
+	
+	protected <U> void handleHasAndListParam(OpenmrsFhirCriteriaContext<Patient, U> criteriaContext,
+	        HasAndListParam hasAndListParam) {
+		if (hasAndListParam != null) {
+			List<String> groupIds = new ArrayList<>();
+			hasAndListParam.getValuesAsQueryTokens().forEach(hasOrListParam -> {
+				hasOrListParam.getValuesAsQueryTokens().forEach(hasParam -> {
+					if (hasParam != null) {
+						String paramValue = hasParam.getParameterValue();
+						switch (hasParam.getTargetResourceType()) {
+							case FhirConstants.GROUP:
+								switch (hasParam.getReferenceFieldName()) {
+									case FhirConstants.INCLUDE_MEMBER_PARAM:
+										switch (hasParam.getParameterName()) {
+											case "id":
+												groupIds.add(paramValue);
+										}
+										break;
+								}
+								break;
+						}
+					}
+				});
+			});
+			
+			if (!groupIds.isEmpty()) {
+				verifyPatientInGroups(criteriaContext, groupIds);
+			}
+		}
+	}
+	
+	private <U> void verifyPatientInGroups(OpenmrsFhirCriteriaContext<Patient, U> criteriaContext, List<String> groupIds) {
+		Set<Integer> patientIds = new HashSet<>();
+		groupIds.forEach(groupId -> patientIds.addAll(getGroupMemberIds(groupId)));
+		
+		criteriaContext.addPredicate(criteriaContext.getRoot().get("patientId").in(patientIds));
+	}
+	
+	private List<Integer> getGroupMemberIds(String groupId) {
+		OpenmrsFhirCriteriaContext<CohortMembership, Integer> criteriaContext = createCriteriaContext(CohortMembership.class,
+		    Integer.class);
+		CriteriaBuilder cb = criteriaContext.getCriteriaBuilder();
+		
+		criteriaContext.addPredicate(cb.equal(criteriaContext.getRoot().get("cohort").get("uuid"), groupId));
+		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot().get("patientId"));
+		
+		return criteriaContext.getEntityManager().createQuery(criteriaContext.finalizeQuery()).getResultList();
 	}
 	
 	private <U> void handlePatientQuery(OpenmrsFhirCriteriaContext<Patient, U> criteriaContext,

@@ -30,7 +30,9 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import lombok.NonNull;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.Observation;
 import org.openmrs.Concept;
@@ -41,18 +43,26 @@ import org.openmrs.module.fhir2.api.dao.FhirEncounterDao;
 import org.openmrs.module.fhir2.api.dao.FhirObservationDao;
 import org.openmrs.module.fhir2.api.dao.internals.OpenmrsFhirCriteriaContext;
 import org.openmrs.module.fhir2.api.dao.internals.OpenmrsFhirCriteriaSubquery;
+import org.openmrs.module.fhir2.api.mappings.ObservationCategoryMap;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.model.FhirObservationCategoryMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObservationDao {
 	
-	@Autowired
+	@Getter(AccessLevel.PROTECTED)
+	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
+	private ObservationCategoryMap categoryMap;
+	
+	@Getter(AccessLevel.PROTECTED)
+	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
 	private FhirEncounterDao encounterDao;
 	
 	@Override
+	@Transactional(readOnly = true)
 	public List<Obs> getSearchResults(@Nonnull SearchParameterMap theParams) {
 		if (!theParams.getParameters(FhirConstants.LASTN_OBSERVATION_SEARCH_HANDLER).isEmpty()) {
 			OpenmrsFhirCriteriaContext<Obs, Obs> criteriaContext = createCriteriaContext(Obs.class);
@@ -118,6 +128,7 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 	}
 	
 	@Override
+	@Transactional(readOnly = true)
 	public int getSearchResultsCount(@Nonnull SearchParameterMap theParams) {
 		if (!theParams.getParameters(FhirConstants.LASTN_OBSERVATION_SEARCH_HANDLER).isEmpty()) {
 			OpenmrsFhirCriteriaContext<Obs, Obs> criteriaContext = createCriteriaContext(Obs.class);
@@ -290,7 +301,7 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 	
 	@Override
 	protected <V, U> Path<?> paramToProp(@Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext,
-	        @NonNull String paramName) {
+	        @Nonnull String paramName) {
 		if (Observation.SP_DATE.equals(paramName)) {
 			return criteriaContext.getRoot().get("obsDatetime");
 		}
@@ -299,7 +310,7 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 	}
 	
 	@Override
-	protected Obs deproxyResult(Obs result) {
+	protected Obs deproxyResult(@Nonnull Obs result) {
 		Obs obs = super.deproxyResult(result);
 		obs.setConcept(deproxyObject(obs.getConcept()));
 		return obs;

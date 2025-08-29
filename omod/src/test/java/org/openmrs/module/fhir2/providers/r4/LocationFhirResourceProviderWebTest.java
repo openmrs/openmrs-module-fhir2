@@ -32,8 +32,8 @@ import javax.servlet.ServletException;
 import java.io.InputStream;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -321,7 +321,7 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR4ResourceProvi
 		
 		verify(locationService).searchForLocations(locationSearchParamsCaptor.capture());
 		
-		HashSet<Include> include = locationSearchParamsCaptor.getValue().getIncludes();
+		Set<Include> include = locationSearchParamsCaptor.getValue().getIncludes();
 		
 		assertThat(include, notNullValue());
 		assertThat(include.size(), equalTo(1));
@@ -335,7 +335,7 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR4ResourceProvi
 		
 		verify(locationService).searchForLocations(locationSearchParamsCaptor.capture());
 		
-		HashSet<Include> revInclude = locationSearchParamsCaptor.getValue().getRevIncludes();
+		Set<Include> revInclude = locationSearchParamsCaptor.getValue().getRevIncludes();
 		
 		assertThat(revInclude, notNullValue());
 		assertThat(revInclude.size(), equalTo(1));
@@ -349,7 +349,7 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR4ResourceProvi
 		
 		verify(locationService).searchForLocations(locationSearchParamsCaptor.capture());
 		
-		HashSet<Include> revInclude = locationSearchParamsCaptor.getValue().getRevIncludes();
+		Set<Include> revInclude = locationSearchParamsCaptor.getValue().getRevIncludes();
 		
 		assertThat(revInclude, notNullValue());
 		assertThat(revInclude.size(), equalTo(1));
@@ -363,7 +363,7 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR4ResourceProvi
 		
 		verify(locationService).searchForLocations(locationSearchParamsCaptor.capture());
 		
-		HashSet<Include> revInclude = locationSearchParamsCaptor.getValue().getRevIncludes();
+		Set<Include> revInclude = locationSearchParamsCaptor.getValue().getRevIncludes();
 		
 		assertThat(revInclude, notNullValue());
 		assertThat(revInclude.size(), equalTo(2));

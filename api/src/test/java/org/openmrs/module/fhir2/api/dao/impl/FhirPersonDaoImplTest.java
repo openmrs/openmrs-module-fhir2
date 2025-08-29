@@ -23,14 +23,11 @@ import org.junit.Test;
 import org.openmrs.Person;
 import org.openmrs.PersonAttribute;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
-import org.openmrs.test.BaseModuleContextSensitiveTest;
+import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.test.context.ContextConfiguration;
 
-@ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
-public class FhirPersonDaoImplTest extends BaseModuleContextSensitiveTest {
+public class FhirPersonDaoImplTest extends BaseFhirContextSensitiveTest {
 	
 	private static final String PERSON_UUID = "61b38324-e2fd-4feb-95b7-9e9a2a4400df";
 	

@@ -22,24 +22,24 @@ import org.openmrs.module.fhir2.api.search.param.PersonSearchParams;
 import org.openmrs.module.fhir2.api.translators.PersonTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
-@Transactional
-@Getter(AccessLevel.PROTECTED)
-@Setter(AccessLevel.PACKAGE)
 public class FhirPersonServiceImpl extends BaseFhirService<Person, org.openmrs.Person> implements FhirPersonService {
 	
-	@Autowired
+	@Getter(value = AccessLevel.PROTECTED)
+	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
 	private FhirPersonDao dao;
 	
-	@Autowired
+	@Getter(value = AccessLevel.PROTECTED)
+	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
 	private PersonTranslator translator;
 	
-	@Autowired
+	@Getter(value = AccessLevel.PROTECTED)
+	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
 	private SearchQueryInclude<Person> searchQueryInclude;
 	
-	@Autowired
+	@Getter(value = AccessLevel.PROTECTED)
+	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
 	private SearchQuery<org.openmrs.Person, Person, FhirPersonDao, PersonTranslator, SearchQueryInclude<Person>> searchQuery;
 	
 	@Override

@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
+import static lombok.AccessLevel.PROTECTED;
+
 import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
@@ -18,9 +20,8 @@ import javax.persistence.criteria.Root;
 
 import java.util.Optional;
 
-import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
 import org.hibernate.SessionFactory;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.module.fhir2.api.dao.FhirPatientIdentifierSystemDao;
@@ -29,17 +30,17 @@ import org.openmrs.module.fhir2.model.FhirPatientIdentifierSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
-@Slf4j
-@Setter(AccessLevel.PUBLIC)
 public class FhirPatientIdentifierSystemDaoImpl implements FhirPatientIdentifierSystemDao {
 	
-	@Autowired
-	@Qualifier("sessionFactory")
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @__({ @Autowired, @Qualifier("sessionFactory") }))
 	private SessionFactory sessionFactory;
 	
 	@Override
+	@Transactional(readOnly = true)
 	public String getUrlByPatientIdentifierType(PatientIdentifierType patientIdentifierType) {
 		EntityManager em = sessionFactory.getCurrentSession();
 		CriteriaBuilder cb = em.getCriteriaBuilder();
@@ -58,6 +59,7 @@ public class FhirPatientIdentifierSystemDaoImpl implements FhirPatientIdentifier
 	}
 	
 	@Override
+	@Transactional(readOnly = true)
 	public PatientIdentifierType getPatientIdentifierTypeByUrl(String url) {
 		EntityManager em = sessionFactory.getCurrentSession();
 		CriteriaBuilder cb = em.getCriteriaBuilder();
@@ -76,6 +78,7 @@ public class FhirPatientIdentifierSystemDaoImpl implements FhirPatientIdentifier
 	}
 	
 	@Override
+	@Transactional(readOnly = true)
 	public Optional<FhirPatientIdentifierSystem> getFhirPatientIdentifierSystem(
 	        @Nonnull PatientIdentifierType patientIdentifierType) {
 		OpenmrsFhirCriteriaContext<FhirPatientIdentifierSystem, FhirPatientIdentifierSystem> criteriaContext = openmrsFhirCriteriaContext();
@@ -87,6 +90,7 @@ public class FhirPatientIdentifierSystemDaoImpl implements FhirPatientIdentifier
 	}
 	
 	@Override
+	@Transactional
 	public FhirPatientIdentifierSystem saveFhirPatientIdentifierSystem(
 	        @Nonnull FhirPatientIdentifierSystem fhirPatientIdentifierSystem) {
 		sessionFactory.getCurrentSession().saveOrUpdate(fhirPatientIdentifierSystem);

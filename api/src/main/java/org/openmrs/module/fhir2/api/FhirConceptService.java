@@ -17,6 +17,8 @@ import org.openmrs.ConceptSource;
 
 public interface FhirConceptService {
 	
+	Concept get(Integer id);
+	
 	Concept get(String uuid);
 	
 	Optional<Concept> getConceptWithSameAsMappingInSource(ConceptSource conceptSource, String mappingCode);

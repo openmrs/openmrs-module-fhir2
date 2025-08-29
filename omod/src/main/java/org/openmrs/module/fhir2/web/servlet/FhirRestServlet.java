@@ -11,6 +11,11 @@ package org.openmrs.module.fhir2.web.servlet;
 
 import static org.openmrs.module.fhir2.FhirConstants.FHIR2_MODULE_ID;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -46,6 +51,7 @@ import org.openmrs.module.fhir2.web.util.DisableCacheInterceptor;
 import org.openmrs.module.fhir2.web.util.NarrativeUtils;
 import org.openmrs.module.fhir2.web.util.SummaryInterceptor;
 import org.openmrs.module.fhir2.web.util.SupportMergePatchInterceptor;
+import org.openmrs.util.OpenmrsClassLoader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -54,7 +60,6 @@ import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
 
 @Component
-@Setter(AccessLevel.PUBLIC)
 public class FhirRestServlet extends RestfulServer implements ModuleLifecycleListener {
 	
 	private static final long serialVersionUID = 2L;
@@ -179,6 +184,12 @@ public class FhirRestServlet extends RestfulServer implements ModuleLifecycleLis
 	protected String getRequestPath(String requestFullPath, String servletContextPath, String servletPath) {
 		return requestFullPath
 		        .substring(escapedLength(servletContextPath) + escapedLength(servletPath) + escapedLength("/fhir2Servlet"));
+	}
+	
+	@Override
+	protected void service(HttpServletRequest theReq, HttpServletResponse theResp) throws ServletException, IOException {
+		Thread.currentThread().setContextClassLoader(OpenmrsClassLoader.getInstance());
+		super.service(theReq, theResp);
 	}
 	
 	@Override

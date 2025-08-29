@@ -16,7 +16,6 @@ import static org.hamcrest.Matchers.nullValue;
 
 import java.util.Date;
 
-import junit.framework.TestCase;
 import org.hl7.fhir.r4.model.Period;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,7 +25,7 @@ import org.openmrs.Encounter;
 import org.openmrs.module.fhir2.api.translators.EncounterPeriodTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
-public class EncounterPeriodTranslatorImplTest extends TestCase {
+public class EncounterPeriodTranslatorImplTest {
 	
 	private EncounterPeriodTranslator<Encounter> encounterPeriodTranslator;
 	

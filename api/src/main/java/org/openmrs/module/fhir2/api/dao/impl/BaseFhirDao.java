@@ -32,6 +32,9 @@ import java.util.stream.Stream;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import com.google.common.reflect.TypeToken;
+import lombok.extern.slf4j.Slf4j;
+import org.hibernate.CacheMode;
+import org.hibernate.Criteria;
 import org.hibernate.Hibernate;
 import org.hibernate.metamodel.spi.MetamodelImplementor;
 import org.hibernate.proxy.HibernateProxy;
@@ -61,6 +64,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @param <T> the {@link OpenmrsObject} managed by this Dao
  */
 @Transactional
+@Slf4j
 public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends BaseDao implements FhirDao<T> {
 	
 	@SuppressWarnings("UnstableApiUsage")
@@ -72,7 +76,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	
 	private final boolean isImmutable;
 	
-	@SuppressWarnings({ "UnstableApiUsage" })
+	@SuppressWarnings("UnstableApiUsage")
 	protected BaseFhirDao() {
 		this.isRetireable = Retireable.class.isAssignableFrom(typeToken.getRawType());
 		this.isVoidable = Voidable.class.isAssignableFrom(typeToken.getRawType());
@@ -120,6 +124,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	}
 	
 	@Override
+	@Transactional
 	public T createOrUpdate(@Nonnull T newEntry) {
 		sessionFactory.getCurrentSession().saveOrUpdate(newEntry);
 		
@@ -127,6 +132,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	}
 	
 	@Override
+	@Transactional
 	public T delete(@Nonnull String uuid) {
 		T existing = get(uuid);
 		
@@ -243,8 +249,21 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	 *
 	 * @return See the above explanation
 	 */
-	public boolean hasDistinctResults() {
+	protected boolean hasDistinctResults() {
 		return true;
+	}
+	
+	protected void applyExactTotal(SearchParameterMap theParams, Criteria criteria) {
+		List<PropParam<Boolean>> exactTotal = theParams.getParameters(EXACT_TOTAL_SEARCH_PARAMETER);
+		if (!exactTotal.isEmpty()) {
+			PropParam<Boolean> propParam = exactTotal.get(0);
+			if (propParam.getParam()) {
+				criteria.setCacheMode(CacheMode.REFRESH);
+			}
+		} else {
+			criteria.setCacheable(true);
+			criteria.setCacheRegion(COUNT_QUERY_CACHE);
+		}
 	}
 	
 	@Override
@@ -366,12 +385,11 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	
 	protected <V, U> void applyExactTotal(@Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext,
 	        SearchParameterMap theParams) {
-		List<PropParam<?>> exactTotal = theParams.getParameters(EXACT_TOTAL_SEARCH_PARAMETER);
+		List<PropParam<Boolean>> exactTotal = theParams.getParameters(EXACT_TOTAL_SEARCH_PARAMETER);
 		
 		EntityManager manager = criteriaContext.getEntityManager();
 		if (!exactTotal.isEmpty()) {
-			@SuppressWarnings("unchecked")
-			PropParam<Boolean> propParam = (PropParam<Boolean>) exactTotal.get(0);
+			PropParam<Boolean> propParam = exactTotal.get(0);
 			if (propParam.getParam()) {
 				manager.setProperty("javax.persistence.cache.retrieveMode", CacheRetrieveMode.BYPASS);
 			}
@@ -381,7 +399,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 		}
 	}
 	
-	@SuppressWarnings({ "UnstableApiUsage" })
+	@SuppressWarnings("UnstableApiUsage")
 	protected <V, U> String getIdPropertyName(@Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext) {
 		return ((MetamodelImplementor) criteriaContext.getEntityManager().getEntityManagerFactory().getMetamodel())
 		        .entityPersister(typeToken.getRawType()).getIdentifierPropertyName();

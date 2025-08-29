@@ -9,9 +9,11 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static lombok.AccessLevel.PROTECTED;
+
 import javax.annotation.Nonnull;
 
-import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -22,11 +24,11 @@ import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.util.OpenmrsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 
-@Setter(AccessLevel.PACKAGE)
 public abstract class BaseCodingTranslator implements CodingTranslator {
 	
-	@Autowired
-	protected ConceptTranslator conceptTranslator;
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
+	private ConceptTranslator conceptTranslator;
 	
 	/**
 	 * Base implementation of conversion between a FHIR Coding interface and OpenMRS Concept

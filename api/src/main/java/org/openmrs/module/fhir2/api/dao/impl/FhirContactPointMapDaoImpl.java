@@ -18,6 +18,7 @@ import javax.persistence.criteria.Root;
 import java.util.Optional;
 
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.SessionFactory;
@@ -31,16 +32,17 @@ import org.openmrs.module.fhir2.model.FhirContactPointMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
-@Setter(AccessLevel.PACKAGE)
 public class FhirContactPointMapDaoImpl implements FhirContactPointMapDao {
 	
-	@Autowired
-	@Qualifier("sessionFactory")
+	@Getter(value = AccessLevel.PROTECTED)
+	@Setter(value = AccessLevel.PROTECTED, onMethod = @__({ @Autowired, @Qualifier("sessionFactory") }))
 	private SessionFactory sessionFactory;
 	
 	@Override
+	@Transactional(readOnly = true)
 	public Optional<FhirContactPointMap> getFhirContactPointMapByUuid(String uuid) {
 		OpenmrsFhirCriteriaContext<FhirContactPointMap, FhirContactPointMap> criteriaContext = openmrsFhirCriteriaContext();
 		criteriaContext
@@ -51,6 +53,7 @@ public class FhirContactPointMapDaoImpl implements FhirContactPointMapDao {
 	}
 	
 	@Override
+	@Transactional(readOnly = true)
 	public Optional<FhirContactPointMap> getFhirContactPointMapForPersonAttributeType(
 	        @Nonnull PersonAttributeType attributeType) {
 		if (attributeType == null) {
@@ -67,6 +70,7 @@ public class FhirContactPointMapDaoImpl implements FhirContactPointMapDao {
 	}
 	
 	@Override
+	@Transactional(readOnly = true)
 	public Optional<FhirContactPointMap> getFhirContactPointMapForAttributeType(
 	        @Nonnull BaseAttributeType<?> attributeType) {
 		if (attributeType == null) {
@@ -100,6 +104,7 @@ public class FhirContactPointMapDaoImpl implements FhirContactPointMapDao {
 	}
 	
 	@Override
+	@Transactional
 	public FhirContactPointMap saveFhirContactPointMap(@Nonnull FhirContactPointMap contactPointMap) {
 		OpenmrsFhirCriteriaContext<FhirContactPointMap, FhirContactPointMap> criteriaContext = openmrsFhirCriteriaContext();
 		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot());

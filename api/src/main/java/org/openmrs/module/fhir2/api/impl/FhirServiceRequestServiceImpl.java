@@ -30,24 +30,24 @@ import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.ServiceRequestTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
-@Transactional
-@Getter(AccessLevel.PROTECTED)
-@Setter(AccessLevel.PACKAGE)
 public class FhirServiceRequestServiceImpl extends BaseFhirService<ServiceRequest, TestOrder> implements FhirServiceRequestService {
 	
-	@Autowired
-	private ServiceRequestTranslator<TestOrder> translator;
-	
-	@Autowired
+	@Getter(value = AccessLevel.PROTECTED)
+	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
 	private FhirServiceRequestDao<TestOrder> dao;
 	
-	@Autowired
+	@Getter(value = AccessLevel.PROTECTED)
+	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
+	private ServiceRequestTranslator<TestOrder> translator;
+	
+	@Getter(value = AccessLevel.PROTECTED)
+	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
 	private SearchQueryInclude<ServiceRequest> searchQueryInclude;
 	
-	@Autowired
+	@Getter(value = AccessLevel.PROTECTED)
+	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
 	private SearchQuery<TestOrder, ServiceRequest, FhirServiceRequestDao<TestOrder>, ServiceRequestTranslator<TestOrder>, SearchQueryInclude<ServiceRequest>> searchQuery;
 	
 	@Override

@@ -1,0 +1,39 @@
+{
+  "resourceType": "Immunization",
+  "id": "immunization-with-next-dose-date",
+  "status": "completed",
+  "vaccineCode": {
+    "coding": [
+      {
+        "code": "15f83cd6-64e9-4e06-a5f9-364d3b14a43d",
+        "display": "Aspirin as a vaccine"
+      }
+    ]
+  },
+  "patient": {
+    "reference": "Patient/a7e04421-525f-442f-8138-05b619d16def"
+  },
+  "encounter": {
+    "reference": "Encounter/7d8c1980-6b78-11e0-93c3-18a905e044dc"
+  },
+  "occurrenceDateTime": "2024-01-15T10:30:00Z",
+  "performer": [
+    {
+      "actor": {
+        "reference": "Practitioner/f9badd80-ab76-11e2-9e96-0800200c9a66",
+        "type": "Practitioner"
+      }
+    }
+  ],
+  "extension": [
+    {
+      "url": "http://hl7.eu/fhir/StructureDefinition/immunization-nextDoseDate",
+      "valueDateTime": "2024-04-15T10:30:00Z"
+    }
+  ],
+  "note": [
+    {
+      "text": "Patient should return for next dose in 3 months"
+    }
+  ]
+}

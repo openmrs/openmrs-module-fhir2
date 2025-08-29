@@ -18,6 +18,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -73,7 +74,7 @@ public class FhirConditionServiceImplTest {
 	private static final int END_INDEX = 10;
 	
 	@Mock
-	private FhirConditionDao<Condition> dao;
+	private FhirConditionDao dao;
 	
 	@Mock
 	private ConditionTranslator<Condition> conditionTranslator;
@@ -82,10 +83,10 @@ public class FhirConditionServiceImplTest {
 	private FhirGlobalPropertyService globalPropertyService;
 	
 	@Mock
-	private SearchQueryInclude searchQueryInclude;
+	private SearchQueryInclude<org.hl7.fhir.r4.model.Condition> searchQueryInclude;
 	
 	@Mock
-	private SearchQuery<Condition, org.hl7.fhir.r4.model.Condition, FhirConditionDao<Condition>, ConditionTranslator<Condition>, SearchQueryInclude<org.hl7.fhir.r4.model.Condition>> searchQuery;
+	private SearchQuery<Condition, org.hl7.fhir.r4.model.Condition, FhirConditionDao, ConditionTranslator<Condition>, SearchQueryInclude<org.hl7.fhir.r4.model.Condition>> searchQuery;
 	
 	private FhirConditionServiceImpl conditionService;
 	
@@ -261,6 +262,7 @@ public class FhirConditionServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, conditionTranslator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(conditionTranslator.toFhirResource(openmrsCondition)).thenReturn(fhirCondition);
+		when(conditionTranslator.toFhirResources(anyCollection())).thenCallRealMethod();
 		
 		IBundleProvider result = conditionService.searchConditions(new ConditionSearchParams(patientReference, codeList,
 		        clinicalList, onsetDate, onsetAge, recordDate, uuid, lastUpdated, sort, includes));

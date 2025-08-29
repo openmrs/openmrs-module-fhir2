@@ -170,7 +170,7 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 						}
 					}
 					if (!handled) {
-						log.warn("_has parameter not supported: " + hasParam.getQueryParameterQualifier());
+						log.warn("_has parameter not supported: {}", hasParam.getQueryParameterQualifier());
 					}
 					
 				}
