@@ -9,16 +9,18 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static lombok.AccessLevel.PROTECTED;
 import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getLastUpdated;
 import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getVersionId;
 
 import javax.annotation.Nonnull;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.ContactPoint;
@@ -44,28 +46,34 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-@Setter(AccessLevel.PACKAGE)
 public class PractitionerTranslatorProviderImpl implements PractitionerTranslator<Provider> {
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private PersonNameTranslator nameTranslator;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private PersonAddressTranslator addressTranslator;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private GenderTranslator genderTranslator;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private BirthDateTranslator birthDateTranslator;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private TelecomTranslator<BaseOpenmrsData> telecomTranslator;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private FhirPractitionerDao fhirPractitionerDao;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private FhirGlobalPropertyService globalPropertyService;
 	
 	@Override
@@ -148,10 +156,16 @@ public class PractitionerTranslatorProviderImpl implements PractitionerTranslato
 	}
 	
 	public List<ContactPoint> getProviderContactDetails(@Nonnull Provider provider) {
+		String providerContactPointAttributeType = globalPropertyService
+		        .getGlobalProperty(FhirConstants.PROVIDER_CONTACT_POINT_ATTRIBUTE_TYPE);
+		
+		if (providerContactPointAttributeType == null || providerContactPointAttributeType.isEmpty()) {
+			return Collections.emptyList();
+		}
+		
 		return fhirPractitionerDao
-		        .getActiveAttributesByPractitionerAndAttributeTypeUuid(provider,
-		            globalPropertyService.getGlobalProperty(FhirConstants.PROVIDER_CONTACT_POINT_ATTRIBUTE_TYPE))
-		        .stream().map(telecomTranslator::toFhirResource).collect(Collectors.toList());
+		        .getActiveAttributesByPractitionerAndAttributeTypeUuid(provider, providerContactPointAttributeType).stream()
+		        .map(telecomTranslator::toFhirResource).collect(Collectors.toList());
 	}
 	
 	@Override

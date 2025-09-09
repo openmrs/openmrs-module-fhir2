@@ -13,7 +13,7 @@ import javax.annotation.Nonnull;
 
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 
-public interface FhirGroupMemberService {
+public interface FhirGroupMemberService extends FhirHelperService {
 	
 	IBundleProvider getGroupMembers(@Nonnull String groupUuid);
 }

@@ -24,8 +24,6 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
-import lombok.AccessLevel;
-import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Criterion;
@@ -38,17 +36,13 @@ import org.openmrs.module.fhir2.api.dao.FhirEncounterDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.util.LastnResult;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
-@Setter(AccessLevel.PACKAGE)
 public class FhirEncounterDaoImpl extends BaseEncounterDao<Encounter> implements FhirEncounterDao {
 	
 	@Override
-	public boolean hasDistinctResults() {
-		return false;
-	}
-	
-	@Override
+	@Transactional(readOnly = true)
 	public List<String> getSearchResultUuids(@Nonnull SearchParameterMap theParams) {
 		if (!theParams.getParameters(FhirConstants.LASTN_ENCOUNTERS_SEARCH_HANDLER).isEmpty()) {
 			Criteria criteria = getSessionFactory().getCurrentSession().createCriteria(Encounter.class);
@@ -79,7 +73,12 @@ public class FhirEncounterDaoImpl extends BaseEncounterDao<Encounter> implements
 		return results.stream().distinct().collect(Collectors.toList());
 	}
 	
-	private int getMaxParameter(SearchParameterMap theParams) {
+	@Override
+	public boolean hasDistinctResults() {
+		return false;
+	}
+	
+	protected int getMaxParameter(SearchParameterMap theParams) {
 		return ((NumberParam) theParams.getParameters(FhirConstants.MAX_SEARCH_HANDLER).get(0).getParam()).getValue()
 		        .intValue();
 	}

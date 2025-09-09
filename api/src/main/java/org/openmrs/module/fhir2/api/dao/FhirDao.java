@@ -22,17 +22,18 @@ import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 /**
  * Base interface for all FHIR DAO objects
  */
-public interface FhirDao<T extends OpenmrsObject & Auditable> extends Serializable {
+public interface FhirDao<T extends OpenmrsObject & Auditable> extends FhirDaoAop, Serializable {
 	
 	T get(@Nonnull String uuid);
 	
 	List<T> get(@Nonnull Collection<String> uuids);
 	
+	List<T> getSearchResults(@Nonnull SearchParameterMap theParams);
+	
+	int getSearchResultsCount(@Nonnull SearchParameterMap theParams);
+	
 	T createOrUpdate(@Nonnull T newEntry);
 	
 	T delete(@Nonnull String uuid);
 	
-	int getSearchResultsCount(@Nonnull SearchParameterMap theParams);
-	
-	List<T> getSearchResults(@Nonnull SearchParameterMap theParams);
 }

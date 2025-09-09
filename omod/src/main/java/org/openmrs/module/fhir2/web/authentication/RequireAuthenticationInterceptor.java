@@ -25,7 +25,7 @@ public class RequireAuthenticationInterceptor {
 	@Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_PROCESSED)
 	public boolean ensureUserAuthenticated(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		if (!(request.getRequestURI().contains("/.well-known") || request.getRequestURI().endsWith("/metadata"))
-		        && !Context.isAuthenticated()) {
+		        && !isAuthenticated()) {
 			// This sends 401 error if not authenticated
 			response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Not authenticated");
 			return false;
@@ -33,4 +33,7 @@ public class RequireAuthenticationInterceptor {
 		return true;
 	}
 	
+	protected boolean isAuthenticated() {
+		return Context.isAuthenticated();
+	}
 }

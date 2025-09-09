@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static lombok.AccessLevel.PROTECTED;
 import static org.apache.commons.lang3.Validate.notNull;
 import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getLastUpdated;
 import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getVersionId;
@@ -20,7 +21,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Encounter;
 import org.openmrs.EncounterProvider;
@@ -38,25 +39,30 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-@Setter(AccessLevel.PACKAGE)
 public class EncounterTranslatorImpl extends BaseEncounterTranslator implements EncounterTranslator<org.openmrs.Encounter> {
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private EncounterParticipantTranslator participantTranslator;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private EncounterLocationTranslator encounterLocationTranslator;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private PatientReferenceTranslator patientReferenceTranslator;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private EncounterReferenceTranslator<Visit> visitReferenceTranlator;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private EncounterTypeTranslator<EncounterType> encounterTypeTranslator;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private EncounterPeriodTranslator<org.openmrs.Encounter> encounterPeriodTranslator;
 	
 	@Override
@@ -123,10 +129,10 @@ public class EncounterTranslatorImpl extends BaseEncounterTranslator implements 
 			existingProviders = new LinkedHashSet<>(encounter.getParticipant().size());
 		}
 		
-		existingProviders.addAll(encounter
-		        .getParticipant().stream().map(encounterParticipantComponent -> participantTranslator
-		                .toOpenmrsType(new EncounterProvider(), encounterParticipantComponent))
-		        .collect(Collectors.toCollection(LinkedHashSet::new)));
+		existingProviders.addAll(encounter.getParticipant().stream()
+		        .map(encounterParticipantComponent -> participantTranslator.toOpenmrsType(new EncounterProvider(),
+		            encounterParticipantComponent))
+		        .peek(ep -> ep.setEncounter(existingEncounter)).collect(Collectors.toCollection(LinkedHashSet::new)));
 		
 		existingEncounter.setEncounterProviders(existingProviders);
 		

@@ -9,9 +9,11 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static lombok.AccessLevel.PROTECTED;
 import static org.apache.commons.lang3.Validate.notNull;
 import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getLastUpdated;
 import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getVersionId;
+import static org.openmrs.module.fhir2.api.translators.impl.ReferenceHandlingTranslator.createOrderReference;
 
 import javax.annotation.Nonnull;
 
@@ -24,7 +26,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
-import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Reference;
@@ -46,29 +48,34 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-@Setter(AccessLevel.PACKAGE)
-public class ServiceRequestTranslatorImpl extends BaseReferenceHandlingTranslator implements ServiceRequestTranslator<TestOrder> {
+public class ServiceRequestTranslatorImpl implements ServiceRequestTranslator<TestOrder> {
 	
 	private static final int START_INDEX = 0;
 	
-	private static final int END_INDEX = 10;
+	private static final int END_INDEX = 1;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private FhirTaskService taskService;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private ConceptTranslator conceptTranslator;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private PatientReferenceTranslator patientReferenceTranslator;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private EncounterReferenceTranslator<Encounter> encounterReferenceTranslator;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private PractitionerReferenceTranslator<Provider> providerReferenceTranslator;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private OrderIdentifierTranslator orderIdentifierTranslator;
 	
 	@Override
@@ -96,13 +103,19 @@ public class ServiceRequestTranslatorImpl extends BaseReferenceHandlingTranslato
 		serviceRequest
 		        .setOccurrence(new Period().setStart(order.getEffectiveStartDate()).setEnd(order.getEffectiveStopDate()));
 		
-		if (order.getPreviousOrder() != null
-		        && (order.getAction() == Order.Action.DISCONTINUE || order.getAction() == Order.Action.REVISE)) {
-			serviceRequest.setReplaces((Collections.singletonList(createOrderReference(order.getPreviousOrder())
-			        .setIdentifier(orderIdentifierTranslator.toFhirResource(order.getPreviousOrder())))));
-		} else if (order.getPreviousOrder() != null && order.getAction() == Order.Action.RENEW) {
-			serviceRequest.setBasedOn(Collections.singletonList(createOrderReference(order.getPreviousOrder())
-			        .setIdentifier(orderIdentifierTranslator.toFhirResource(order.getPreviousOrder()))));
+		if (order.getPreviousOrder() != null) {
+			Reference orderReference = createOrderReference(order.getPreviousOrder(), orderIdentifierTranslator);
+			if (orderReference != null) {
+				switch (order.getAction()) {
+					case DISCONTINUE:
+					case REVISE:
+						serviceRequest.setReplaces(Collections.singletonList(orderReference));
+						break;
+					case RENEW:
+						serviceRequest.setBasedOn(Collections.singletonList(orderReference));
+						break;
+				}
+			}
 		}
 		
 		serviceRequest.getMeta().setLastUpdated(getLastUpdated(order));

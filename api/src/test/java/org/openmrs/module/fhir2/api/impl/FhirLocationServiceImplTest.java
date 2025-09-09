@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
+import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
@@ -47,8 +48,6 @@ import org.openmrs.module.fhir2.api.translators.LocationTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FhirLocationServiceImplTest {
-	
-	private static final Integer LOCATION_ID = 123;
 	
 	private static final String LOCATION_UUID = "a1758922-b132-4ead-8ebe-5e2b4eaf43a1";
 	
@@ -154,7 +153,7 @@ public class FhirLocationServiceImplTest {
 		        locationDao, locationTranslator, globalPropertyService, searchQueryInclude));
 		
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
-		when(locationTranslator.toFhirResource(location)).thenReturn(fhirLocation);
+		when(locationTranslator.toFhirResources(singletonList(location))).thenReturn(singletonList(fhirLocation));
 		when(locationDao.getSearchResults(any())).thenReturn(locations);
 		
 		IBundleProvider results = fhirLocationService.searchForLocations(

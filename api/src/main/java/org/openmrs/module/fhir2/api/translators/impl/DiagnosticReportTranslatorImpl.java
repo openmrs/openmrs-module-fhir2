@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static lombok.AccessLevel.PROTECTED;
 import static org.apache.commons.lang3.Validate.notNull;
 import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getLastUpdated;
 import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getVersionId;
@@ -18,7 +19,7 @@ import javax.annotation.Nonnull;
 import java.util.Date;
 import java.util.stream.Collectors;
 
-import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.openmrs.Concept;
@@ -36,19 +37,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-@Setter(AccessLevel.PACKAGE)
 public class DiagnosticReportTranslatorImpl implements DiagnosticReportTranslator {
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private EncounterReferenceTranslator<Encounter> encounterReferenceTranslator;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private PatientReferenceTranslator patientReferenceTranslator;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private ObservationReferenceTranslator observationReferenceTranslator;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private ConceptTranslator conceptTranslator;
 	
 	@Override
@@ -60,8 +64,13 @@ public class DiagnosticReportTranslatorImpl implements DiagnosticReportTranslato
 		diagnosticReport.setId(fhirDiagnosticReport.getUuid());
 		
 		if (fhirDiagnosticReport.getStatus() != null) {
-			diagnosticReport
-			        .setStatus(DiagnosticReport.DiagnosticReportStatus.valueOf(fhirDiagnosticReport.getStatus().toString()));
+			try {
+				diagnosticReport.setStatus(
+				    DiagnosticReport.DiagnosticReportStatus.valueOf(fhirDiagnosticReport.getStatus().toString()));
+			}
+			catch (IllegalArgumentException e) {
+				diagnosticReport.setStatus(DiagnosticReport.DiagnosticReportStatus.UNKNOWN);
+			}
 		} else {
 			diagnosticReport.setStatus(DiagnosticReport.DiagnosticReportStatus.UNKNOWN);
 		}

@@ -22,18 +22,30 @@ import org.openmrs.util.PrivilegeConstants;
 
 public interface FhirPatientDao extends FhirDao<Patient> {
 	
+	@Override
+	@Authorized(PrivilegeConstants.GET_PATIENTS)
+	Patient get(@Nonnull String uuid);
+	
+	@Override
+	@Authorized(PrivilegeConstants.GET_PATIENTS)
+	List<Patient> get(@Nonnull Collection<String> uuids);
+	
 	@Authorized(PrivilegeConstants.GET_PATIENTS)
 	Patient getPatientById(@Nonnull Integer id);
 	
 	@Authorized(PrivilegeConstants.GET_PATIENTS)
 	List<Patient> getPatientsByIds(@Nonnull Collection<Integer> ids);
 	
-	@Override
-	@Authorized(PrivilegeConstants.GET_PATIENTS)
-	Patient get(@Nonnull String uuid);
-	
 	@Authorized(PrivilegeConstants.GET_PATIENT_IDENTIFIERS)
 	PatientIdentifierType getPatientIdentifierTypeByNameOrUuid(String name, String uuid);
+	
+	@Override
+	@Authorized(PrivilegeConstants.GET_PATIENTS)
+	List<Patient> getSearchResults(@Nonnull SearchParameterMap theParams);
+	
+	@Override
+	@Authorized(PrivilegeConstants.GET_PATIENTS)
+	int getSearchResultsCount(@Nonnull SearchParameterMap theParams);
 	
 	@Override
 	@Authorized({ PrivilegeConstants.ADD_PATIENTS, PrivilegeConstants.EDIT_PATIENTS })
@@ -42,8 +54,4 @@ public interface FhirPatientDao extends FhirDao<Patient> {
 	@Override
 	@Authorized(PrivilegeConstants.DELETE_PATIENTS)
 	Patient delete(@Nonnull String uuid);
-	
-	@Override
-	@Authorized(PrivilegeConstants.GET_PATIENTS)
-	List<Patient> getSearchResults(@Nonnull SearchParameterMap theParams);
 }

@@ -11,6 +11,7 @@ package org.openmrs.module.fhir2.api.dao;
 
 import javax.annotation.Nonnull;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.openmrs.Person;
@@ -25,9 +26,21 @@ public interface FhirPersonDao extends FhirDao<Person> {
 	@Authorized(PrivilegeConstants.GET_PERSONS)
 	Person get(@Nonnull String uuid);
 	
+	@Override
+	@Authorized(PrivilegeConstants.GET_PERSONS)
+	List<Person> get(@Nonnull Collection<String> uuids);
+	
 	@Authorized(PrivilegeConstants.GET_PERSONS)
 	List<PersonAttribute> getActiveAttributesByPersonAndAttributeTypeUuid(@Nonnull Person person,
 	        @Nonnull String personAttributeTypeUuid);
+	
+	@Override
+	@Authorized(PrivilegeConstants.GET_PERSONS)
+	List<Person> getSearchResults(@Nonnull SearchParameterMap theParams);
+	
+	@Override
+	@Authorized(PrivilegeConstants.GET_PERSONS)
+	int getSearchResultsCount(@Nonnull SearchParameterMap theParams);
 	
 	@Override
 	@Authorized({ PrivilegeConstants.ADD_PERSONS, PrivilegeConstants.EDIT_PERSONS })
@@ -36,8 +49,4 @@ public interface FhirPersonDao extends FhirDao<Person> {
 	@Override
 	@Authorized(PrivilegeConstants.DELETE_PERSONS)
 	Person delete(@Nonnull String uuid);
-	
-	@Override
-	@Authorized(PrivilegeConstants.GET_PERSONS)
-	List<Person> getSearchResults(@Nonnull SearchParameterMap theParams);
 }

@@ -9,8 +9,12 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static lombok.AccessLevel.PROTECTED;
+
 import javax.annotation.Nonnull;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.hl7.fhir.r4.model.Coding;
 import org.openmrs.Concept;
 import org.openmrs.ConceptMap;
@@ -30,7 +34,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class MedicationQuantityCodingTranslatorImpl extends BaseCodingTranslator {
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private FhirConceptSourceService conceptSourceService;
 	
 	@Override
@@ -70,9 +75,5 @@ public class MedicationQuantityCodingTranslatorImpl extends BaseCodingTranslator
 		coding.setCode(code);
 		coding.setDisplay(concept.getDisplayString());
 		return coding;
-	}
-	
-	public void setConceptSourceService(FhirConceptSourceService conceptSourceService) {
-		this.conceptSourceService = conceptSourceService;
 	}
 }

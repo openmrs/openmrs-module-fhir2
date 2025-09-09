@@ -32,6 +32,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -276,7 +277,7 @@ public class ObservationFhirResourceProviderTest extends BaseFhirR3ProvenanceRes
 		assertThat(resultList.get(0).fhirType(), equalTo(FhirConstants.OBSERVATION));
 		assertThat(resultList.get(0).getIdElement().getIdPart(), equalTo(OBSERVATION_UUID));
 		
-		HashSet<Include> includesParam = searchParamsCaptor.getValue().getIncludes();
+		Set<Include> includesParam = searchParamsCaptor.getValue().getIncludes();
 		assertThat(includesParam, nullValue());
 	}
 	

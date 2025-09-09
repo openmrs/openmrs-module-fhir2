@@ -20,12 +20,16 @@ import static org.mockito.Mockito.when;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.openmrs.GlobalProperty;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
+import org.openmrs.module.fhir2.api.util.FhirGlobalPropertyHolder;
 
 // we intentionally have unnecessary stubbings for this class when testing the X-Forwarded headers
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -44,12 +48,22 @@ public class OpenmrsFhirAddressStrategyTest {
 	
 	@Before
 	public void setup() {
-		fhirAddressStrategy = new OpenmrsFhirAddressStrategy(globalPropertyService, null);
+		fhirAddressStrategy = new OpenmrsFhirAddressStrategy();
+		// avoid trying to do an actual lookup by pre-caching an empty string
+		new FhirGlobalPropertyHolder()
+		        .globalPropertyChanged(new GlobalProperty(FhirConstants.GLOBAL_PROPERTY_URI_PREFIX, ""));
+	}
+	
+	@After
+	public void after() {
+		FhirGlobalPropertyHolder.reset();
+		;
 	}
 	
 	@Test
 	public void shouldDetermineServerBaseFromGlobalProperty() {
-		fhirAddressStrategy.setGpPrefix("http://my.openmrs.org/ws/fhir2/");
+		new FhirGlobalPropertyHolder().globalPropertyChanged(
+		    new GlobalProperty(FhirConstants.GLOBAL_PROPERTY_URI_PREFIX, "http://my.openmrs.org/ws/fhir2/"));
 		when(httpServletRequest.getContextPath()).thenReturn("/");
 		when(httpServletRequest.getRequestURI()).thenReturn("/ws/fhir2/R4");
 		
@@ -60,7 +74,8 @@ public class OpenmrsFhirAddressStrategyTest {
 	
 	@Test
 	public void shouldDetermineServerBaseFromGlobalPropertyWithoutTrailingSlash() {
-		fhirAddressStrategy.setGpPrefix("http://my.openmrs.org/ws/fhir2");
+		new FhirGlobalPropertyHolder().globalPropertyChanged(
+		    new GlobalProperty(FhirConstants.GLOBAL_PROPERTY_URI_PREFIX, "http://my.openmrs.org/ws/fhir2"));
 		when(httpServletRequest.getContextPath()).thenReturn("/");
 		when(httpServletRequest.getRequestURI()).thenReturn("/ws/fhir2/R4");
 		

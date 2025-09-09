@@ -9,14 +9,17 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static lombok.AccessLevel.PROTECTED;
+
 import javax.annotation.Nonnull;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -26,29 +29,36 @@ import org.openmrs.ConceptMap;
 import org.openmrs.ConceptMapType;
 import org.openmrs.ConceptReferenceTerm;
 import org.openmrs.ConceptSource;
+import org.openmrs.Duration;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirConceptService;
 import org.openmrs.module.fhir2.api.FhirConceptSourceService;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
+import org.openmrs.module.fhir2.model.FhirConceptSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
-@Slf4j
 @Component
-@Setter(AccessLevel.PACKAGE)
+@Slf4j
 public class ConceptTranslatorImpl implements ConceptTranslator {
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private FhirConceptService conceptService;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private FhirConceptSourceService conceptSourceService;
 	
 	@Override
+	@Cacheable(value = "fhir2ConceptToCodeableConcept")
 	public CodeableConcept toFhirResource(@Nonnull Concept concept) {
 		if (concept == null) {
 			return null;
 		}
 		
+		Collection<FhirConceptSource> allFhirConceptSources = conceptSourceService.getFhirConceptSources();
 		CodeableConcept codeableConcept = new CodeableConcept();
 		codeableConcept.setText(concept.getDisplayString());
 		addConceptCoding(codeableConcept.addCoding(), null, concept.getUuid(), concept);
@@ -60,7 +70,7 @@ public class ConceptTranslatorImpl implements ConceptTranslator {
 				boolean sameAs = mapType.getUuid() != null && mapType.getUuid().equals(ConceptMapType.SAME_AS_MAP_TYPE_UUID);
 				sameAs = sameAs || (mapType.getName() != null && mapType.getName().equalsIgnoreCase("SAME-AS"));
 				ConceptReferenceTerm crt = mapping.getConceptReferenceTerm();
-				String sourceUrl = conceptSourceService.getUrlForConceptSource(crt.getConceptSource());
+				String sourceUrl = getSourceUrl(crt.getConceptSource(), allFhirConceptSources);
 				if (sourceUrl != null) {
 					if (sameAs) {
 						addSystemToCodeMap(systemUrlToCodeMap, sourceUrl, "SAME-AS", crt.getCode());
@@ -160,5 +170,24 @@ public class ConceptTranslatorImpl implements ConceptTranslator {
 				}
 			}
 		});
+	}
+	
+	private String getSourceUrl(ConceptSource conceptSource, Collection<FhirConceptSource> fhirConceptSources) {
+		String sourceUrl = null;
+		if (conceptSource != null) {
+			FhirConceptSource fhirConceptSource = fhirConceptSources.stream().filter(fcs -> fcs.getConceptSource() != null)
+			        .filter(fcs -> fcs.getConceptSource().getUuid().equals(conceptSource.getUuid())).findFirst()
+			        .orElse(null);
+			
+			if (fhirConceptSource != null && fhirConceptSource.getUrl() != null) {
+				sourceUrl = fhirConceptSource.getUrl();
+			} else {
+				sourceUrl = Duration.SNOMED_CT_CONCEPT_SOURCE_HL7_CODE.equals(conceptSource.getHl7Code())
+				        ? FhirConstants.SNOMED_SYSTEM_URI
+				        : null;
+			}
+		}
+		
+		return sourceUrl;
 	}
 }

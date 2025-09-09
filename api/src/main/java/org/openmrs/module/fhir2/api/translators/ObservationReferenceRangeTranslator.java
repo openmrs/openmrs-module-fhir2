@@ -14,10 +14,10 @@ import javax.annotation.Nonnull;
 import java.util.List;
 
 import org.hl7.fhir.r4.model.Observation;
-import org.openmrs.ConceptNumeric;
+import org.openmrs.Obs;
 
-public interface ObservationReferenceRangeTranslator extends ToFhirTranslator<ConceptNumeric, List<Observation.ObservationReferenceRangeComponent>> {
+public interface ObservationReferenceRangeTranslator extends ToFhirTranslator<Obs, List<Observation.ObservationReferenceRangeComponent>> {
 	
 	@Override
-	List<Observation.ObservationReferenceRangeComponent> toFhirResource(@Nonnull ConceptNumeric concept);
+	List<Observation.ObservationReferenceRangeComponent> toFhirResource(@Nonnull Obs obs);
 }

@@ -12,7 +12,9 @@ package org.openmrs.module.fhir2.api.impl;
 import java.util.List;
 import java.util.Optional;
 
+import com.google.common.annotations.VisibleForTesting;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import org.openmrs.Concept;
 import org.openmrs.ConceptMap;
@@ -22,30 +24,30 @@ import org.openmrs.module.fhir2.api.FhirConceptService;
 import org.openmrs.module.fhir2.api.dao.FhirConceptDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
-@Transactional
-@Setter(AccessLevel.PACKAGE)
 public class FhirConceptServiceImpl implements FhirConceptService {
 	
-	@Autowired
+	@Getter(value = AccessLevel.PROTECTED)
+	@Setter(value = AccessLevel.PUBLIC, onMethod_ = { @Autowired, @VisibleForTesting })
 	private FhirConceptDao dao;
 	
 	@Override
-	@Transactional(readOnly = true)
+	public Concept get(Integer id) {
+		return dao.get(id);
+	}
+	
+	@Override
 	public Concept get(String uuid) {
 		return dao.get(uuid);
 	}
 	
 	@Override
-	@Transactional(readOnly = true)
 	public Optional<Concept> getConceptWithSameAsMappingInSource(ConceptSource conceptSource, String mappingCode) {
 		return dao.getConceptWithSameAsMappingInSource(conceptSource, mappingCode);
 	}
 	
 	@Override
-	@Transactional(readOnly = true)
 	public Optional<String> getSameAsMappingForConceptInSource(ConceptSource source, Concept concept) {
 		if (source != null && concept != null) {
 			for (ConceptMap mapping : concept.getConceptMappings()) {
@@ -65,7 +67,6 @@ public class FhirConceptServiceImpl implements FhirConceptService {
 	}
 	
 	@Override
-	@Transactional(readOnly = true)
 	public List<Concept> getConceptsWithAnyMappingInSource(ConceptSource conceptSource, String mappingCode) {
 		return dao.getConceptsWithAnyMappingInSource(conceptSource, mappingCode);
 	}

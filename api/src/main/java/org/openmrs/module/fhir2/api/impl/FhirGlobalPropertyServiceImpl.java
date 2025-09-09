@@ -11,49 +11,31 @@ package org.openmrs.module.fhir2.api.impl;
 
 import java.util.Map;
 
-import lombok.AccessLevel;
-import lombok.Setter;
 import org.openmrs.api.APIException;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
-import org.openmrs.module.fhir2.api.dao.FhirGlobalPropertyDao;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.openmrs.module.fhir2.api.util.FhirGlobalPropertyHolder;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
-@Transactional
-@Setter(AccessLevel.PACKAGE)
 public class FhirGlobalPropertyServiceImpl implements FhirGlobalPropertyService {
 	
-	@Autowired
-	private FhirGlobalPropertyDao dao;
-	
 	@Override
-	@Transactional(readOnly = true)
 	public String getGlobalProperty(String property) throws APIException {
-		return dao.getGlobalProperty(property);
+		return FhirGlobalPropertyHolder.getGlobalProperty(property);
 	}
 	
 	@Override
-	@Transactional(readOnly = true)
-	public Integer getGlobalProperty(String property, Integer defaultValue) {
-		try {
-			return Integer.valueOf(getGlobalProperty(property, String.valueOf(defaultValue)));
-		}
-		catch (NumberFormatException e) {
-			return defaultValue;
-		}
+	public int getGlobalPropertyAsInteger(String property, int defaultValue) {
+		return FhirGlobalPropertyHolder.getGlobalPropertyAsInteger(property, defaultValue);
 	}
 	
 	@Override
-	@Transactional(readOnly = true)
 	public String getGlobalProperty(String property, String defaultValue) {
-		return this.getGlobalProperty(property) == null ? defaultValue : this.getGlobalProperty(property);
+		return FhirGlobalPropertyHolder.getGlobalProperty(property, defaultValue);
 	}
 	
 	@Override
-	@Transactional(readOnly = true)
 	public Map<String, String> getGlobalProperties(String... properties) {
-		return dao.getGlobalProperties(properties);
+		return FhirGlobalPropertyHolder.getGlobalProperties(properties);
 	}
 }

@@ -421,7 +421,6 @@ public class MedicationFhirResourceProviderIntegrationTest extends BaseFhirR4Int
 		
 		assertThat(medication, notNullValue());
 		assertThat(medication.getIdElement().getIdPart(), equalTo(MEDICATION_UUID));
-		System.out.println(medication.getIngredientFirstRep().getItemCodeableConcept().getCodingFirstRep().getCode());
 		assertThat(medication, validResource());
 		assertThat(medication.getIngredientFirstRep().getItemCodeableConcept().getCodingFirstRep().getCode(),
 		    equalTo("5086AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"));

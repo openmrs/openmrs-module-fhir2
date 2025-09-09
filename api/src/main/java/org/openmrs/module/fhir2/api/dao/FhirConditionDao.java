@@ -11,23 +11,38 @@ package org.openmrs.module.fhir2.api.dao;
 
 import javax.annotation.Nonnull;
 
+import java.util.Collection;
 import java.util.List;
 
-import org.openmrs.Auditable;
-import org.openmrs.OpenmrsObject;
+import org.openmrs.Condition;
+import org.openmrs.annotation.Authorized;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
+import org.openmrs.util.PrivilegeConstants;
 
-public interface FhirConditionDao<T extends OpenmrsObject & Auditable> extends FhirDao<T> {
+public interface FhirConditionDao extends FhirDao<Condition> {
 	
 	@Override
-	T get(@Nonnull String uuid);
+	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+	Condition get(@Nonnull String uuid);
 	
 	@Override
-	T createOrUpdate(@Nonnull T newEntry);
+	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+	List<Condition> get(@Nonnull Collection<String> uuids);
 	
 	@Override
-	T delete(@Nonnull String uuid);
+	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+	List<Condition> getSearchResults(@Nonnull SearchParameterMap theParams);
 	
 	@Override
-	List<T> getSearchResults(@Nonnull SearchParameterMap theParams);
+	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+	int getSearchResultsCount(@Nonnull SearchParameterMap theParams);
+	
+	@Override
+	@Authorized(PrivilegeConstants.EDIT_CONDITIONS)
+	Condition createOrUpdate(@Nonnull Condition newCondition);
+	
+	@Override
+	@Authorized(PrivilegeConstants.DELETE_CONDITIONS)
+	Condition delete(@Nonnull String uuid);
+	
 }

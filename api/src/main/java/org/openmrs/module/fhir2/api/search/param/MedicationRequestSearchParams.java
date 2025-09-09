@@ -9,7 +9,7 @@
  */
 package org.openmrs.module.fhir2.api.search.param;
 
-import java.util.HashSet;
+import java.util.Set;
 
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -44,7 +44,7 @@ public class MedicationRequestSearchParams extends BaseResourceSearchParams {
 	public MedicationRequestSearchParams(ReferenceAndListParam patientReference, ReferenceAndListParam encounterReference,
 	    TokenAndListParam code, ReferenceAndListParam participantReference, ReferenceAndListParam medicationReference,
 	    TokenAndListParam id, TokenAndListParam status, TokenAndListParam fulfillerStatus, DateRangeParam lastUpdated,
-	    HashSet<Include> includes, HashSet<Include> revIncludes) {
+	    Set<Include> includes, Set<Include> revIncludes) {
 		
 		super(id, lastUpdated, null, includes, revIncludes);
 		

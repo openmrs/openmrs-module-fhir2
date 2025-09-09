@@ -9,19 +9,33 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toList;
+import static lombok.AccessLevel.PROTECTED;
 import static org.hibernate.criterion.Restrictions.eq;
+import static org.hibernate.criterion.Restrictions.or;
 
 import javax.annotation.Nonnull;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.ReferenceOrListParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
-import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.Criteria;
+import org.hibernate.criterion.Criterion;
 import org.hibernate.sql.JoinType;
 import org.openmrs.Location;
 import org.openmrs.LocationAttribute;
@@ -29,17 +43,27 @@ import org.openmrs.LocationAttributeType;
 import org.openmrs.LocationTag;
 import org.openmrs.api.LocationService;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-@Setter(AccessLevel.PACKAGE)
 public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLocationDao {
 	
-	@Autowired
-	LocationService locationService;
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
+	private LocationService locationService;
+	
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
+	private FhirGlobalPropertyService globalPropertyService;
+	
+	@Override
+	public Location get(@Nonnull Integer id) {
+		return locationService.getLocation(id);
+	}
 	
 	@Override
 	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
@@ -62,7 +86,7 @@ public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLo
 					break;
 				case FhirConstants.LOCATION_REFERENCE_SEARCH_HANDLER:
 					entry.getValue()
-					        .forEach(param -> handleParentLocation(criteria, (ReferenceAndListParam) param.getParam()));
+					        .forEach(param -> handleLocationReference(criteria, (ReferenceAndListParam) param.getParam()));
 					break;
 				case FhirConstants.TAG_SEARCH_HANDLER:
 					entry.getValue().forEach(param -> handleTag(criteria, (TokenAndListParam) param.getParam()));
@@ -82,6 +106,25 @@ public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLo
 		        .createAlias("location", "l", JoinType.INNER_JOIN, eq("l.id", location.getId()))
 		        .createAlias("attributeType", "lat").add(eq("lat.uuid", locationAttributeTypeUuid)).add(eq("voided", false))
 		        .list();
+	}
+	
+	@Override
+	public Map<Location, List<LocationAttribute>> getActiveAttributesByLocationsAndAttributeTypeUuid(
+	        @Nonnull Collection<Location> location, @Nonnull String locationAttributeTypeUuid) {
+		final CriteriaBuilder criteriaBuilder = getSessionFactory().getCurrentSession().getCriteriaBuilder();
+		final CriteriaQuery<LocationAttribute> criteria = criteriaBuilder.createQuery(LocationAttribute.class);
+		final Root<LocationAttribute> locationAttributeRoot = criteria.from(LocationAttribute.class);
+		
+		final Predicate byId = locationAttributeRoot.get("location").get("locationId")
+		        .in(location.stream().map(Location::getLocationId).collect(toList()));
+		final Predicate byAttributeType = criteriaBuilder.equal(locationAttributeRoot.get("attributeType").get("uuid"),
+		    locationAttributeTypeUuid);
+		final Predicate byVoided = criteriaBuilder.equal(locationAttributeRoot.get("voided"), false);
+		
+		criteria.where(byId, byAttributeType, byVoided);
+		
+		return getSessionFactory().getCurrentSession().createQuery(criteria).getResultList().stream()
+		        .collect(groupingBy(LocationAttribute::getLocation));
 	}
 	
 	private void handleName(Criteria criteria, StringAndListParam namePattern) {
@@ -112,8 +155,60 @@ public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLo
 		}
 	}
 	
-	private void handleParentLocation(Criteria criteria, ReferenceAndListParam parent) {
-		handleLocationReference("loc", parent).ifPresent(loc -> criteria.createAlias("parentLocation", "loc").add(loc));
+	private void handleLocationReference(Criteria criteria, ReferenceAndListParam locationAndReferences) {
+		
+		if (locationAndReferences == null) {
+			return;
+		}
+		
+		List<ReferenceOrListParam> locationOrReference = locationAndReferences.getValuesAsQueryTokens();
+		
+		if (locationOrReference == null || locationOrReference.isEmpty()) {
+			return;
+		}
+		
+		if (locationOrReference.size() > 1) {
+			throw new IllegalArgumentException("Only one location reference is supported");
+		}
+		
+		List<ReferenceParam> locationReferences = locationOrReference.get(0).getValuesAsQueryTokens();
+		
+		if (locationReferences == null || locationReferences.isEmpty()) {
+			return;
+		}
+		
+		if (locationReferences.size() > 1) {
+			throw new IllegalArgumentException("Only one location reference is supported");
+		}
+		
+		ReferenceParam locationReference = locationReferences.get(0);
+		
+		// **NOTE: this is a *bug* in the current HAPI FHIR implementation, "below" should be the "queryParameterQualifier", not the resource type; likely need update this when/fix the HAPI FHIR implementation is fixed**
+		// this is to support queries of the type "Location?partof=below:uuid"
+		if ("below".equalsIgnoreCase(locationReference.getResourceType())) {
+			
+			int searchDepth = globalPropertyService
+			        .getGlobalPropertyAsInteger(FhirConstants.SUPPORTED_LOCATION_HIERARCHY_SEARCH_DEPTH, 5);
+			
+			List<Criterion> belowReferenceCriteria = new ArrayList<>();
+			
+			// we need to add a join to the parentLocation for each level of hierarchy we want to search, and add "equals" criterion for each level
+			int depth = 1;
+			while (depth <= searchDepth) {
+				belowReferenceCriteria.add(eq("ancestor" + depth + ".uuid", locationReference.getIdPart()));
+				criteria.createAlias(depth == 1 ? "parentLocation" : "ancestor" + (depth - 1) + ".parentLocation",
+				    "ancestor" + depth, JoinType.LEFT_OUTER_JOIN);
+				depth++;
+			}
+			
+			// "or" these call together so that we return the location if any of the joined ancestor location uuids match
+			criteria.add(or(belowReferenceCriteria.toArray(new Criterion[0])));
+		} else {
+			// this is to support queries of the type "Location?partof=uuid" or chained search like "Location?partof:Location=Location:name=xxx"
+			handleLocationReference("loc", locationAndReferences)
+			        .ifPresent(loc -> criteria.createAlias("parentLocation", "loc").add(loc));
+		}
+		
 	}
 	
 	@Override
@@ -140,7 +235,7 @@ public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLo
 	}
 	
 	@Override
-	public LocationTag saveLocationTag(LocationTag tag) {
+	public LocationTag createLocationTag(LocationTag tag) {
 		return locationService.saveLocationTag(tag);
 	}
 	

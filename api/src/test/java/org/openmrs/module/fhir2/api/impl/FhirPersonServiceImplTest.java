@@ -20,6 +20,7 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.Mockito.when;
 
 import java.text.ParseException;
@@ -185,6 +186,7 @@ public class FhirPersonServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, personTranslator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(personTranslator.toFhirResource(person)).thenReturn(fhirPerson);
+		when(personTranslator.toFhirResources(anyCollection())).thenCallRealMethod();
 		
 		IBundleProvider results = personService.searchForPeople(
 		    new PersonSearchParams(stringAndListParam, null, null, null, null, null, null, null, null, null, null));
@@ -209,6 +211,7 @@ public class FhirPersonServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, personTranslator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(personTranslator.toFhirResource(person)).thenReturn(fhirPerson);
+		when(personTranslator.toFhirResources(anyCollection())).thenCallRealMethod();
 		
 		IBundleProvider results = personService.searchForPeople(
 		    new PersonSearchParams(stringAndListParam, null, null, null, null, null, null, null, null, null, null));
@@ -252,6 +255,7 @@ public class FhirPersonServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, personTranslator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(personTranslator.toFhirResource(person)).thenReturn(fhirPerson);
+		when(personTranslator.toFhirResources(anyCollection())).thenCallRealMethod();
 		
 		IBundleProvider results = personService.searchForPeople(
 		    new PersonSearchParams(null, tokenAndListParam, null, null, null, null, null, null, null, null, null));
@@ -298,6 +302,7 @@ public class FhirPersonServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, personTranslator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(personTranslator.toFhirResource(person)).thenReturn(fhirPerson);
+		when(personTranslator.toFhirResources(anyCollection())).thenCallRealMethod();
 		
 		IBundleProvider results = personService.searchForPeople(
 		    new PersonSearchParams(null, null, dateRangeParam, null, null, null, null, null, null, null, null));
@@ -342,6 +347,7 @@ public class FhirPersonServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, personTranslator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(personTranslator.toFhirResource(person)).thenReturn(fhirPerson);
+		when(personTranslator.toFhirResources(anyCollection())).thenCallRealMethod();
 		
 		IBundleProvider results = personService.searchForPeople(
 		    new PersonSearchParams(null, null, null, stringAndListParam, null, null, null, null, null, null, null));
@@ -386,6 +392,7 @@ public class FhirPersonServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, personTranslator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(personTranslator.toFhirResource(person)).thenReturn(fhirPerson);
+		when(personTranslator.toFhirResources(anyCollection())).thenCallRealMethod();
 		
 		IBundleProvider results = personService.searchForPeople(
 		    new PersonSearchParams(null, null, null, null, stringAndListParam, null, null, null, null, null, null));
@@ -430,6 +437,7 @@ public class FhirPersonServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, personTranslator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(personTranslator.toFhirResource(person)).thenReturn(fhirPerson);
+		when(personTranslator.toFhirResources(anyCollection())).thenCallRealMethod();
 		
 		IBundleProvider results = personService.searchForPeople(
 		    new PersonSearchParams(null, null, null, null, null, stringAndListParam, null, null, null, null, null));
@@ -474,6 +482,7 @@ public class FhirPersonServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, personTranslator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(personTranslator.toFhirResource(person)).thenReturn(fhirPerson);
+		when(personTranslator.toFhirResources(anyCollection())).thenCallRealMethod();
 		
 		IBundleProvider results = personService.searchForPeople(
 		    new PersonSearchParams(null, null, null, null, null, null, stringAndListParam, null, null, null, null));
@@ -518,6 +527,7 @@ public class FhirPersonServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, personTranslator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(personTranslator.toFhirResource(person)).thenReturn(fhirPerson);
+		when(personTranslator.toFhirResources(anyCollection())).thenCallRealMethod();
 		
 		IBundleProvider results = personService
 		        .searchForPeople(new PersonSearchParams(null, null, null, null, null, null, null, uuid, null, null, null));
@@ -557,6 +567,7 @@ public class FhirPersonServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, personTranslator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(personTranslator.toFhirResource(person)).thenReturn(fhirPerson);
+		when(personTranslator.toFhirResources(anyCollection())).thenCallRealMethod();
 		
 		IBundleProvider results = personService.searchForPeople(
 		    new PersonSearchParams(null, null, null, null, null, null, null, null, lastUpdated, null, null));
@@ -596,6 +607,7 @@ public class FhirPersonServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, personTranslator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.singleton(new Patient()));
 		when(personTranslator.toFhirResource(person)).thenReturn(fhirPerson);
+		when(personTranslator.toFhirResources(anyCollection())).thenCallRealMethod();
 		
 		IBundleProvider results = personService.searchForPeople(
 		    new PersonSearchParams(null, null, null, null, null, null, null, null, null, null, includes));
@@ -619,6 +631,7 @@ public class FhirPersonServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, personTranslator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(personTranslator.toFhirResource(person)).thenReturn(fhirPerson);
+		when(personTranslator.toFhirResources(anyCollection())).thenCallRealMethod();
 		
 		IBundleProvider results = personService.searchForPeople(
 		    new PersonSearchParams(null, null, null, null, null, null, null, null, null, null, includes));

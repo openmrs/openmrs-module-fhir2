@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static lombok.AccessLevel.PROTECTED;
+
 import javax.annotation.Nonnull;
 
 import java.util.Collections;
@@ -16,7 +18,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.openmrs.Concept;
@@ -35,19 +37,22 @@ import org.springframework.stereotype.Component;
 
 @Component
 @OpenmrsProfile(openmrsPlatformVersion = "2.* - 2.4.*")
-@Setter(AccessLevel.PACKAGE)
 public class LocationTypeTranslatorImpl implements LocationTypeTranslator {
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private FhirConceptDao conceptDao;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private FhirLocationDao locationDao;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private ConceptTranslator conceptTranslator;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private FhirGlobalPropertyService globalPropertyService;
 	
 	@Override
@@ -68,7 +73,11 @@ public class LocationTypeTranslatorImpl implements LocationTypeTranslator {
 					CodeableConcept type = conceptTranslator
 					        .toFhirResource(conceptDao.get(typeAttribute.getValue().toString()));
 					
-					return Collections.singletonList(type);
+					if (type != null) {
+						return Collections.singletonList(type);
+					} else {
+						return Collections.emptyList();
+					}
 				}
 			}
 		}
@@ -78,8 +87,12 @@ public class LocationTypeTranslatorImpl implements LocationTypeTranslator {
 	
 	@Override
 	public Location toOpenmrsType(@Nonnull Location location, @Nonnull List<CodeableConcept> types) {
-		LocationAttributeType typeAttributeType = locationDao.getLocationAttributeTypeByUuid(
-		    globalPropertyService.getGlobalProperty(FhirConstants.LOCATION_TYPE_ATTRIBUTE_TYPE));
+		LocationAttributeType typeAttributeType = null;
+		
+		String locationAttributeType = globalPropertyService.getGlobalProperty(FhirConstants.LOCATION_TYPE_ATTRIBUTE_TYPE);
+		if (locationAttributeType != null && !locationAttributeType.isEmpty()) {
+			typeAttributeType = locationDao.getLocationAttributeTypeByUuid(locationAttributeType);
+		}
 		
 		if (typeAttributeType != null) {
 			Optional<Concept> typeConcept = types.stream().filter(Objects::nonNull).filter(CodeableConcept::hasCoding)

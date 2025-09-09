@@ -82,8 +82,8 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 					Set<String> values = new HashSet<>();
 					hasOrListParam.getValuesAsQueryTokens().forEach(orParam -> values.add(orParam.getParameterValue()));
 					
-					log.debug("Handling hasParam = " + hasParam.getQueryParameterQualifier());
-					log.debug("With value in " + values);
+					log.debug("Handling hasParam = {}", hasParam.getQueryParameterQualifier());
+					log.debug("With value in {}", values);
 					
 					boolean handled = false;
 					
@@ -150,7 +150,7 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 						}
 					}
 					if (!handled) {
-						log.warn("_has parameter not supported: " + hasParam.getQueryParameterQualifier());
+						log.warn("_has parameter not supported: {}", hasParam.getQueryParameterQualifier());
 					}
 					
 				}

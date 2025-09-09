@@ -18,10 +18,12 @@ import org.openmrs.annotation.Authorized;
 import org.openmrs.module.fhir2.model.FhirPatientIdentifierSystem;
 import org.openmrs.util.PrivilegeConstants;
 
-public interface FhirPatientIdentifierSystemDao {
+public interface FhirPatientIdentifierSystemDao extends FhirDaoAop {
 	
+	@Authorized(PrivilegeConstants.GET_IDENTIFIER_TYPES)
 	String getUrlByPatientIdentifierType(PatientIdentifierType patientIdentifierType);
 	
+	@Authorized(PrivilegeConstants.GET_IDENTIFIER_TYPES)
 	PatientIdentifierType getPatientIdentifierTypeByUrl(String url);
 	
 	@Authorized(PrivilegeConstants.GET_IDENTIFIER_TYPES)

@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
+import static lombok.AccessLevel.PROTECTED;
+
 import javax.annotation.Nonnull;
 
 import java.util.Collection;
@@ -24,8 +26,8 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import com.google.common.reflect.TypeToken;
-import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.Setter;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.openmrs.Auditable;
 import org.openmrs.OpenmrsObject;
@@ -40,17 +42,20 @@ import org.openmrs.module.fhir2.api.util.FhirUtils;
 import org.openmrs.module.fhir2.api.util.JsonPatchUtils;
 import org.openmrs.module.fhir2.api.util.XmlPatchUtils;
 import org.openmrs.validator.ValidateUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 @SuppressWarnings("UnstableApiUsage")
 public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsObject & Auditable> implements FhirService<T> {
 	
+	protected final Logger log = LoggerFactory.getLogger(getClass());
+	
 	protected final Class<? super T> resourceClass;
 	
-	@Autowired
-	@Qualifier("fhirR4")
-	@Getter(AccessLevel.PROTECTED)
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @__({ @Autowired, @Qualifier("fhirR4") }))
 	private FhirContext fhirContext;
 	
 	protected BaseFhirService() {
@@ -94,6 +99,7 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 		U openmrsObj = getTranslator().toOpenmrsType(newResource);
 		
 		validateObject(openmrsObj);
+		
 		if (openmrsObj.getUuid() == null) {
 			openmrsObj.setUuid(FhirUtils.newUuid());
 		}
@@ -242,6 +248,7 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 			ValidateUtil.validate(object);
 		}
 		catch (ValidationException e) {
+			log.error("Error occurred while validating {} object", resourceClass.getSimpleName(), e);
 			throw new UnprocessableEntityException(e.getMessage(), e);
 		}
 	}

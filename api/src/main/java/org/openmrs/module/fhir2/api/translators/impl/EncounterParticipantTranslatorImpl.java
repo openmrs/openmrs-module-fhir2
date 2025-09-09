@@ -9,25 +9,41 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static lombok.AccessLevel.PROTECTED;
 import static org.apache.commons.lang3.Validate.notNull;
+import static org.openmrs.module.fhir2.api.translators.impl.ReferenceHandlingTranslator.createPractitionerReference;
+import static org.openmrs.module.fhir2.api.translators.impl.ReferenceHandlingTranslator.getReferenceId;
 
 import javax.annotation.Nonnull;
 
-import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Encounter;
 import org.openmrs.EncounterProvider;
+import org.openmrs.EncounterRole;
+import org.openmrs.api.EncounterService;
+import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirPractitionerDao;
 import org.openmrs.module.fhir2.api.translators.EncounterParticipantTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-@Setter(AccessLevel.PACKAGE)
-public class EncounterParticipantTranslatorImpl extends BaseReferenceHandlingTranslator implements EncounterParticipantTranslator {
+public class EncounterParticipantTranslatorImpl implements EncounterParticipantTranslator {
 	
-	@Autowired
+	private static final String DEFAULT_ENCOUNTER_ROLE_UUID_PROPERTY = "fhir2.encounterParticipantComponentUuid";
+	
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private FhirPractitionerDao practitionerDao;
+	
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
+	private EncounterService encounterService;
+	
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
+	private FhirGlobalPropertyService globalPropertyService;
 	
 	@Override
 	public Encounter.EncounterParticipantComponent toFhirResource(@Nonnull EncounterProvider encounterProvider) {
@@ -49,6 +65,26 @@ public class EncounterParticipantTranslatorImpl extends BaseReferenceHandlingTra
 		getReferenceId(encounterParticipantComponent.getIndividual())
 		        .map(practitionerUuid -> practitionerDao.get(practitionerUuid)).ifPresent(encounterProvider::setProvider);
 		
+		if (encounterProvider.getEncounterRole() == null) {
+			encounterProvider.setEncounterRole(getDefaultEncounterRole());
+		}
+		
 		return encounterProvider;
+	}
+	
+	protected EncounterRole getDefaultEncounterRole() {
+		String defaultEncounterRoleUuid = globalPropertyService.getGlobalProperty(DEFAULT_ENCOUNTER_ROLE_UUID_PROPERTY);
+		
+		String encounterRoleUuid = (defaultEncounterRoleUuid != null && !defaultEncounterRoleUuid.isEmpty())
+		        ? defaultEncounterRoleUuid
+		        : EncounterRole.UNKNOWN_ENCOUNTER_ROLE_UUID;
+		
+		EncounterRole role = encounterService.getEncounterRoleByUuid(encounterRoleUuid);
+		
+		if (role == null) {
+			throw new IllegalStateException("Default encounter role not found: " + encounterRoleUuid);
+		}
+		
+		return role;
 	}
 }

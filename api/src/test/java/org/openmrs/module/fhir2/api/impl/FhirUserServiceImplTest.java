@@ -18,6 +18,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.Mockito.when;
 import static org.openmrs.module.fhir2.FhirConstants.ADDRESS_SEARCH_HANDLER;
 import static org.openmrs.module.fhir2.FhirConstants.CITY_PROPERTY;
@@ -160,6 +161,7 @@ public class FhirUserServiceImplTest {
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(translator.toFhirResource(user)).thenReturn(practitioner);
+		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		
 		IBundleProvider results = userService.searchForUsers(theParams);
@@ -197,6 +199,7 @@ public class FhirUserServiceImplTest {
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(translator.toFhirResource(user)).thenReturn(practitioner);
+		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		
 		IBundleProvider results = userService.searchForUsers(theParams);
@@ -234,6 +237,7 @@ public class FhirUserServiceImplTest {
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(translator.toFhirResource(user)).thenReturn(practitioner);
+		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		
 		IBundleProvider results = userService.searchForUsers(theParams);
@@ -271,6 +275,7 @@ public class FhirUserServiceImplTest {
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(translator.toFhirResource(user)).thenReturn(practitioner);
+		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		
 		IBundleProvider results = userService.searchForUsers(theParams);
@@ -309,6 +314,7 @@ public class FhirUserServiceImplTest {
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(translator.toFhirResource(user)).thenReturn(practitioner);
+		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		
 		IBundleProvider results = userService.searchForUsers(theParams);
@@ -347,6 +353,7 @@ public class FhirUserServiceImplTest {
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(translator.toFhirResource(user)).thenReturn(practitioner);
+		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		
 		IBundleProvider results = userService.searchForUsers(theParams);
@@ -385,6 +392,7 @@ public class FhirUserServiceImplTest {
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(translator.toFhirResource(user)).thenReturn(practitioner);
+		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		
 		IBundleProvider results = userService.searchForUsers(theParams);
@@ -426,6 +434,7 @@ public class FhirUserServiceImplTest {
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(translator.toFhirResource(user)).thenReturn(practitioner);
+		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
 		
 		IBundleProvider results = userService.searchForUsers(theParams);
 		
@@ -467,6 +476,7 @@ public class FhirUserServiceImplTest {
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(translator.toFhirResource(user)).thenReturn(practitioner);
+		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
 		
 		IBundleProvider results = userService.searchForUsers(theParams);
 		

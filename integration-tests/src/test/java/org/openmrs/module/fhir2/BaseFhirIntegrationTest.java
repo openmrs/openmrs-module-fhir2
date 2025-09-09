@@ -41,6 +41,8 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.junit.Before;
+import org.openmrs.api.cache.CacheConfig;
+import org.openmrs.module.fhir2.api.util.FhirGlobalPropertyHolder;
 import org.openmrs.module.fhir2.web.servlet.FhirRestServlet;
 import org.openmrs.web.test.BaseModuleWebContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,6 +68,9 @@ public abstract class BaseFhirIntegrationTest<T extends IResourceProvider, U ext
 	private FhirRestServlet servlet;
 	
 	@Autowired
+	CacheConfig cacheConfig;
+	
+	@Autowired
 	private ConfigurableApplicationContext ctx;
 	
 	// This must be implemented by subclasses
@@ -86,6 +91,10 @@ public abstract class BaseFhirIntegrationTest<T extends IResourceProvider, U ext
 	
 	@Before
 	public void setup() throws Exception {
+		// Needed until TRUNK-6299 in place
+		cacheConfig.cacheManager().getCacheNames().forEach(name -> cacheConfig.cacheManager().getCache(name).clear());
+		
+		FhirGlobalPropertyHolder.reset();
 		jsonParser = getFhirContext().newJsonParser();
 		xmlParser = getFhirContext().newXmlParser();
 		

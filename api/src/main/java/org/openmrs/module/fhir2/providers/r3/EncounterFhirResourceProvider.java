@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.providers.r3;
 
 import static lombok.AccessLevel.PACKAGE;
+import static lombok.AccessLevel.PROTECTED;
 import static org.openmrs.module.fhir2.FhirConstants.OPENMRS_FHIR_EXT_ENCOUNTER_TAG;
 
 import javax.annotation.Nonnull;
@@ -43,6 +44,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.collections.CollectionUtils;
 import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40;
@@ -69,10 +71,10 @@ import org.springframework.stereotype.Component;
 
 @Component("encounterFhirR3ResourceProvider")
 @R3Provider
-@Setter(PACKAGE)
 public class EncounterFhirResourceProvider implements IResourceProvider {
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PACKAGE, onMethod_ = @Autowired)
 	private FhirEncounterService encounterService;
 	
 	@Override

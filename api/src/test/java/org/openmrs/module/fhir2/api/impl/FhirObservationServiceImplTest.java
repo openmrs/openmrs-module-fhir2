@@ -16,6 +16,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -131,13 +132,14 @@ public class FhirObservationServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap();
 		theParams.addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientReference);
 		
-		when(globalPropertyService.getGlobalProperty(anyString(), anyInt())).thenReturn(10);
+		when(globalPropertyService.getGlobalPropertyAsInteger(anyString(), anyInt())).thenReturn(10);
 		when(dao.getSearchResults(any())).thenReturn(Collections.singletonList(obs));
 		when(dao.getSearchResultsCount(any())).thenReturn(1);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(translator.toFhirResource(obs)).thenReturn(observation);
+		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
 		
 		ObservationSearchParams observationSearchParams = new ObservationSearchParams();
 		observationSearchParams.setPatient(patientReference);
@@ -182,13 +184,14 @@ public class FhirObservationServiceImplTest {
 		        .addParameter(FhirConstants.MAX_SEARCH_HANDLER, max)
 		        .addParameter(FhirConstants.LASTN_OBSERVATION_SEARCH_HANDLER, new StringParam());
 		
-		when(globalPropertyService.getGlobalProperty(anyString(), anyInt())).thenReturn(10);
+		when(globalPropertyService.getGlobalPropertyAsInteger(anyString(), anyInt())).thenReturn(10);
 		when(dao.getSearchResults(any())).thenReturn(Collections.singletonList(obs));
 		when(dao.getSearchResultsCount(any())).thenReturn(1);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(translator.toFhirResource(obs)).thenReturn(observation);
+		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
 		
 		ObservationSearchParams searchParams = new ObservationSearchParams();
 		searchParams.setPatient(referenceParam);
@@ -235,13 +238,14 @@ public class FhirObservationServiceImplTest {
 		        .addParameter(FhirConstants.MAX_SEARCH_HANDLER, max)
 		        .addParameter(FhirConstants.LASTN_OBSERVATION_SEARCH_HANDLER, new StringParam());
 		
-		when(globalPropertyService.getGlobalProperty(anyString(), anyInt())).thenReturn(10);
+		when(globalPropertyService.getGlobalPropertyAsInteger(anyString(), anyInt())).thenReturn(10);
 		when(dao.getSearchResults(any())).thenReturn(Collections.singletonList(obs));
 		when(dao.getSearchResultsCount(any())).thenReturn(1);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(translator.toFhirResource(obs)).thenReturn(observation);
+		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
 		
 		ObservationSearchParams searchParams = new ObservationSearchParams();
 		searchParams.setPatient(referenceParam);
@@ -280,13 +284,14 @@ public class FhirObservationServiceImplTest {
 		        .addParameter(FhirConstants.MAX_SEARCH_HANDLER, max)
 		        .addParameter(FhirConstants.LASTN_OBSERVATION_SEARCH_HANDLER, new StringParam());
 		
-		when(globalPropertyService.getGlobalProperty(anyString(), anyInt())).thenReturn(10);
+		when(globalPropertyService.getGlobalPropertyAsInteger(anyString(), anyInt())).thenReturn(10);
 		when(dao.getSearchResults(any())).thenReturn(Collections.singletonList(obs));
 		when(dao.getSearchResultsCount(any())).thenReturn(1);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(translator.toFhirResource(obs)).thenReturn(observation);
+		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
 		
 		ObservationSearchParams searchParams = new ObservationSearchParams();
 		searchParams.setCategory(categories);
@@ -332,13 +337,14 @@ public class FhirObservationServiceImplTest {
 		        .addParameter(FhirConstants.MAX_SEARCH_HANDLER, max)
 		        .addParameter(FhirConstants.LASTN_OBSERVATION_SEARCH_HANDLER, new StringParam());
 		
-		when(globalPropertyService.getGlobalProperty(anyString(), anyInt())).thenReturn(10);
+		when(globalPropertyService.getGlobalPropertyAsInteger(anyString(), anyInt())).thenReturn(10);
 		when(dao.getSearchResults(any())).thenReturn(Collections.singletonList(obs));
 		when(dao.getSearchResultsCount(any())).thenReturn(1);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(translator.toFhirResource(obs)).thenReturn(observation);
+		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
 		
 		ObservationSearchParams searchParams = new ObservationSearchParams();
 		searchParams.setPatient(referenceParam);
@@ -385,13 +391,14 @@ public class FhirObservationServiceImplTest {
 		        .addParameter(FhirConstants.MAX_SEARCH_HANDLER, max)
 		        .addParameter(FhirConstants.LASTN_OBSERVATION_SEARCH_HANDLER, new StringParam());
 		
-		when(globalPropertyService.getGlobalProperty(anyString(), anyInt())).thenReturn(10);
+		when(globalPropertyService.getGlobalPropertyAsInteger(anyString(), anyInt())).thenReturn(10);
 		when(dao.getSearchResults(any())).thenReturn(Collections.singletonList(obs));
 		when(dao.getSearchResultsCount(any())).thenReturn(1);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(translator.toFhirResource(obs)).thenReturn(observation);
+		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
 		
 		ObservationSearchParams searchParams = new ObservationSearchParams();
 		searchParams.setPatient(referenceParam);
@@ -430,13 +437,14 @@ public class FhirObservationServiceImplTest {
 		        .addParameter(FhirConstants.MAX_SEARCH_HANDLER, max)
 		        .addParameter(FhirConstants.LASTN_OBSERVATION_SEARCH_HANDLER, new StringParam());
 		
-		when(globalPropertyService.getGlobalProperty(anyString(), anyInt())).thenReturn(10);
+		when(globalPropertyService.getGlobalPropertyAsInteger(anyString(), anyInt())).thenReturn(10);
 		when(dao.getSearchResults(any())).thenReturn(Collections.singletonList(obs));
 		when(dao.getSearchResultsCount(any())).thenReturn(1);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(translator.toFhirResource(obs)).thenReturn(observation);
+		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
 		
 		ObservationSearchParams searchParams = new ObservationSearchParams();
 		searchParams.setCategory(categories);

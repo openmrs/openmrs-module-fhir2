@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Optional;
 
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
@@ -32,11 +33,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
-@Setter(AccessLevel.PACKAGE)
 public class FhirConceptSourceDaoImpl implements FhirConceptSourceDao {
 	
-	@Autowired
-	@Qualifier("sessionFactory")
+	@Getter(value = AccessLevel.PROTECTED)
+	@Setter(value = AccessLevel.PROTECTED, onMethod = @__({ @Autowired, @Qualifier("sessionFactory") }))
 	private SessionFactory sessionFactory;
 	
 	@Override
@@ -47,6 +47,7 @@ public class FhirConceptSourceDaoImpl implements FhirConceptSourceDao {
 	}
 	
 	@Override
+	@Transactional(readOnly = true)
 	public Optional<FhirConceptSource> getFhirConceptSourceByUrl(@Nonnull String url) {
 		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(FhirConceptSource.class);
 		criteria.add(eq("url", url)).add(eq("retired", false));
@@ -54,6 +55,7 @@ public class FhirConceptSourceDaoImpl implements FhirConceptSourceDao {
 	}
 	
 	@Override
+	@Transactional(readOnly = true)
 	public Optional<FhirConceptSource> getFhirConceptSourceByConceptSourceName(@Nonnull String sourceName) {
 		return Optional
 		        .ofNullable((FhirConceptSource) sessionFactory.getCurrentSession().createCriteria(FhirConceptSource.class)
@@ -62,6 +64,7 @@ public class FhirConceptSourceDaoImpl implements FhirConceptSourceDao {
 	}
 	
 	@Override
+	@Transactional(readOnly = true)
 	public Optional<FhirConceptSource> getFhirConceptSourceByConceptSource(@Nonnull ConceptSource conceptSource) {
 		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(FhirConceptSource.class);
 		criteria.add(eq("conceptSource", conceptSource));
@@ -69,6 +72,7 @@ public class FhirConceptSourceDaoImpl implements FhirConceptSourceDao {
 	}
 	
 	@Override
+	@Transactional(readOnly = true)
 	public Optional<ConceptSource> getConceptSourceByHl7Code(@Nonnull String hl7Code) {
 		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(ConceptSource.class);
 		if (Context.getAdministrationService().isDatabaseStringComparisonCaseSensitive()) {
@@ -87,6 +91,7 @@ public class FhirConceptSourceDaoImpl implements FhirConceptSourceDao {
 	}
 	
 	@Override
+	@Transactional
 	public FhirConceptSource saveFhirConceptSource(@Nonnull FhirConceptSource fhirConceptSource) {
 		sessionFactory.getCurrentSession().saveOrUpdate(fhirConceptSource);
 		return fhirConceptSource;

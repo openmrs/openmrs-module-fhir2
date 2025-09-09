@@ -21,6 +21,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -149,6 +150,7 @@ public class FhirMedicationServiceImplTest {
 		        medicationDao, medicationTranslator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(medicationTranslator.toFhirResource(drug)).thenReturn(medication);
+		when(medicationTranslator.toFhirResources(anyCollection())).thenCallRealMethod();
 		
 		IBundleProvider result = fhirMedicationService
 		        .searchForMedications(new MedicationSearchParams(code, null, null, null, null, null));
@@ -176,6 +178,7 @@ public class FhirMedicationServiceImplTest {
 		        medicationDao, medicationTranslator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(medicationTranslator.toFhirResource(drug)).thenReturn(medication);
+		when(medicationTranslator.toFhirResources(anyCollection())).thenCallRealMethod();
 		
 		IBundleProvider result = fhirMedicationService
 		        .searchForMedications(new MedicationSearchParams(null, dosageForm, null, null, null, null));
@@ -202,6 +205,7 @@ public class FhirMedicationServiceImplTest {
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(new SearchQueryBundleProvider<>(theParams,
 		        medicationDao, medicationTranslator, globalPropertyService, searchQueryInclude));
 		when(medicationTranslator.toFhirResource(drug)).thenReturn(medication);
+		when(medicationTranslator.toFhirResources(anyCollection())).thenCallRealMethod();
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		
 		IBundleProvider result = fhirMedicationService
@@ -226,6 +230,7 @@ public class FhirMedicationServiceImplTest {
 		        medicationDao, medicationTranslator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(medicationTranslator.toFhirResource(drug)).thenReturn(medication);
+		when(medicationTranslator.toFhirResources(anyCollection())).thenCallRealMethod();
 		
 		IBundleProvider result = fhirMedicationService
 		        .searchForMedications(new MedicationSearchParams(null, null, null, uuid, null, null));
@@ -249,6 +254,7 @@ public class FhirMedicationServiceImplTest {
 		        medicationDao, medicationTranslator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(medicationTranslator.toFhirResource(drug)).thenReturn(medication);
+		when(medicationTranslator.toFhirResources(anyCollection())).thenCallRealMethod();
 		
 		IBundleProvider result = fhirMedicationService
 		        .searchForMedications(new MedicationSearchParams(null, null, null, null, lastUpdated, null));
@@ -274,6 +280,7 @@ public class FhirMedicationServiceImplTest {
 		when(searchQueryInclude.getIncludedResources(any(), any()))
 		        .thenReturn(Collections.singleton(new MedicationRequest()));
 		when(medicationTranslator.toFhirResource(drug)).thenReturn(medication);
+		when(medicationTranslator.toFhirResources(anyCollection())).thenCallRealMethod();
 		
 		IBundleProvider results = fhirMedicationService
 		        .searchForMedications(new MedicationSearchParams(null, null, null, null, null, revIncludes));
@@ -298,6 +305,7 @@ public class FhirMedicationServiceImplTest {
 		        medicationDao, medicationTranslator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(medicationTranslator.toFhirResource(drug)).thenReturn(medication);
+		when(medicationTranslator.toFhirResources(anyCollection())).thenCallRealMethod();
 		
 		IBundleProvider results = fhirMedicationService
 		        .searchForMedications(new MedicationSearchParams(null, null, null, null, null, revIncludes));

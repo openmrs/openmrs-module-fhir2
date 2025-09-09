@@ -9,16 +9,21 @@
  */
 package org.openmrs.module.fhir2.api.util;
 
+import static lombok.AccessLevel.PROTECTED;
 import static org.openmrs.module.fhir2.FhirConstants.ADMINISTERING_ENCOUNTER_ROLE_PROPERTY;
 import static org.openmrs.module.fhir2.FhirConstants.IMMUNIZATIONS_ENCOUNTER_TYPE_PROPERTY;
 import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.IMMUNIZATION_CONCEPTS;
+import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.IMMUNIZATION_FREE_TEXT_COMMENT_CONCEPT;
 import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.IMMUNIZATION_GROUPING_CONCEPT;
+import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.IMMUNIZATION_NEXT_DOSE_DATE_CONCEPT_CODE;
 import static org.openmrs.module.fhir2.api.util.FhirUtils.createExceptionErrorOperationOutcome;
 
 import javax.annotation.Nonnull;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -27,6 +32,7 @@ import java.util.stream.Collectors;
 
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.BaseOpenmrsObject;
@@ -43,19 +49,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-@Setter
 public class ImmunizationObsGroupHelper {
 	
-	@Autowired
+	@Getter(value = PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private ConceptService conceptService;
 	
-	@Autowired
+	@Getter(value = PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private ObsService obsService;
 	
-	@Autowired
+	@Getter(value = PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private EncounterService encounterService;
 	
-	@Autowired
+	@Getter(value = PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private FhirGlobalPropertyService globalPropertyService;
 	
 	public static UnprocessableEntityException createImmunizationRequestValidationError(@Nonnull String errMsg) {
@@ -84,7 +93,17 @@ public class ImmunizationObsGroupHelper {
 		                + "', but no administering encounter role is defined for this instance."));
 	}
 	
+	public Concept conceptOrNull(String refTerm) {
+		return getConceptFromMapping(refTerm).orElse(null);
+	}
+	
 	public Concept concept(String refTerm) {
+		Set<String> directRefTerms = new HashSet<>(
+		        Arrays.asList(IMMUNIZATION_FREE_TEXT_COMMENT_CONCEPT, IMMUNIZATION_NEXT_DOSE_DATE_CONCEPT_CODE));
+		if (directRefTerms.contains(refTerm)) {
+			return conceptOrNull(refTerm);
+		}
+		
 		return getConceptFromMapping(refTerm).orElseThrow(
 		    () -> createImmunizationRequestSetupError("The Immunization resource requires a concept mapped to '" + refTerm
 		            + "', however either multiple concepts are mapped to that term or not concepts are mapped to that term."));

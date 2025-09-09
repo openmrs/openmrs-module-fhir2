@@ -34,8 +34,8 @@ import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.SortSpec;
@@ -218,10 +218,10 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR4ResourcePr
 		SortSpec sort = searchParamsCaptor.getValue().getSort();
 		assertThat(sort, nullValue());
 		
-		HashSet<Include> includes = searchParamsCaptor.getValue().getIncludes();
+		Set<Include> includes = searchParamsCaptor.getValue().getIncludes();
 		assertThat(includes, nullValue());
 		
-		HashSet<Include> revIncludes = searchParamsCaptor.getValue().getRevIncludes();
+		Set<Include> revIncludes = searchParamsCaptor.getValue().getRevIncludes();
 		assertThat(revIncludes, nullValue());
 	}
 	
@@ -692,7 +692,7 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR4ResourcePr
 		verifyUri("/Observation?_include=Observation:encounter");
 		verify(observationService).searchForObservations(searchParamsCaptor.capture());
 		
-		HashSet<Include> includes = searchParamsCaptor.getValue().getIncludes();
+		Set<Include> includes = searchParamsCaptor.getValue().getIncludes();
 		
 		assertThat(includes, notNullValue());
 		assertThat(includes.size(), equalTo(1));
@@ -705,7 +705,7 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR4ResourcePr
 		verifyUri("/Observation?_include=Observation:patient");
 		verify(observationService).searchForObservations(searchParamsCaptor.capture());
 		
-		HashSet<Include> includes = searchParamsCaptor.getValue().getIncludes();
+		Set<Include> includes = searchParamsCaptor.getValue().getIncludes();
 		
 		assertThat(includes, notNullValue());
 		assertThat(includes.size(), equalTo(1));
@@ -718,7 +718,7 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR4ResourcePr
 		verifyUri("/Observation?_include=Observation:has-member");
 		verify(observationService).searchForObservations(searchParamsCaptor.capture());
 		
-		HashSet<Include> includes = searchParamsCaptor.getValue().getIncludes();
+		Set<Include> includes = searchParamsCaptor.getValue().getIncludes();
 		
 		assertThat(includes, notNullValue());
 		assertThat(includes.size(), equalTo(1));
@@ -731,7 +731,7 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR4ResourcePr
 		verifyUri("/Observation?_include=Observation:has-member&_include=Observation:encounter");
 		verify(observationService).searchForObservations(searchParamsCaptor.capture());
 		
-		HashSet<Include> includes = searchParamsCaptor.getValue().getIncludes();
+		Set<Include> includes = searchParamsCaptor.getValue().getIncludes();
 		
 		assertThat(includes, notNullValue());
 		assertThat(includes.size(), equalTo(2));
@@ -747,7 +747,7 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR4ResourcePr
 		verifyUri("/Observation?_revinclude=Observation:has-member");
 		verify(observationService).searchForObservations(searchParamsCaptor.capture());
 		
-		HashSet<Include> revIncludes = searchParamsCaptor.getValue().getRevIncludes();
+		Set<Include> revIncludes = searchParamsCaptor.getValue().getRevIncludes();
 		
 		assertThat(revIncludes, notNullValue());
 		assertThat(revIncludes.size(), equalTo(1));
@@ -760,7 +760,7 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR4ResourcePr
 		verifyUri("/Observation?_revinclude=DiagnosticReport:result");
 		verify(observationService).searchForObservations(searchParamsCaptor.capture());
 		
-		HashSet<Include> revIncludes = searchParamsCaptor.getValue().getRevIncludes();
+		Set<Include> revIncludes = searchParamsCaptor.getValue().getRevIncludes();
 		
 		assertThat(revIncludes, notNullValue());
 		assertThat(revIncludes.size(), equalTo(1));
@@ -773,7 +773,7 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR4ResourcePr
 		verifyUri("/Observation?_revinclude=Observation:has-member&_revinclude=DiagnosticReport:result");
 		verify(observationService).searchForObservations(searchParamsCaptor.capture());
 		
-		HashSet<Include> revIncludes = searchParamsCaptor.getValue().getRevIncludes();
+		Set<Include> revIncludes = searchParamsCaptor.getValue().getRevIncludes();
 		
 		assertThat(revIncludes, notNullValue());
 		assertThat(revIncludes.size(), equalTo(2));

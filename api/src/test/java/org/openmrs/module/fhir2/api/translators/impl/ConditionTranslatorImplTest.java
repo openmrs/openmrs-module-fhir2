@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.Date;
 
 import org.hamcrest.Matchers;
+import org.hl7.fhir.r4.model.Annotation;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Condition;
@@ -232,6 +233,24 @@ public class ConditionTranslatorImplTest {
 		assertThat(condition, notNullValue());
 		assertThat(condition.hasOnsetDateTimeType(), is(true));
 		assertThat(condition.getOnsetDateTimeType().getValue(), sameDay(new Date()));
+	}
+	
+	@Test
+	public void shouldTranslateOpenMrsConditionAdditionalDetailToFhirType() {
+		openmrsCondition.setAdditionalDetail("Patient experiencing mild headaches.");
+		org.hl7.fhir.r4.model.Condition fhirCondition = conditionTranslator.toFhirResource(openmrsCondition);
+		assertThat(fhirCondition.getNote(), notNullValue());
+		assertThat(fhirCondition.getNote().get(0).getText(), is("Patient experiencing mild headaches."));
+	}
+	
+	@Test
+	public void shouldTranslateFhirConditionNoteToOpenMrsConditionAdditionalDetail() {
+		Annotation annotation = new Annotation();
+		annotation.setText("Patient experiencing mild symptoms.");
+		fhirCondition.addNote(annotation);
+		openmrsCondition = conditionTranslator.toOpenmrsType(fhirCondition);
+		assertThat(openmrsCondition, notNullValue());
+		assertThat(openmrsCondition.getAdditionalDetail(), is("Patient experiencing mild symptoms."));
 	}
 	
 	@Test

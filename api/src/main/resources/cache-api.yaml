@@ -1,0 +1,11 @@
+caches:
+  fhir2ConceptToCodeableConcept:
+    configuration: "entity"
+  fhir2ObservationCategoryToCodeableConcept:
+    configuration: "entity"
+  fhir2GetFhirConceptSources:
+    configuration: "entity"
+  fhir2GetFhirUrlForIdentifier:
+    configuration: "entity"
+  fhir2GetFhirPatientIdentifierSystem:
+    configuration: "entity"

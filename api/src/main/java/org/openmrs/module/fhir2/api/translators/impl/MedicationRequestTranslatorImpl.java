@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static lombok.AccessLevel.PROTECTED;
 import static org.apache.commons.lang3.Validate.notNull;
 import static org.openmrs.module.fhir2.FhirConstants.OPENMRS_FHIR_EXT_MEDICATION_REQUEST_FULFILLER_STATUS;
 import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getLastUpdated;
@@ -18,7 +19,7 @@ import javax.annotation.Nonnull;
 
 import java.util.Collections;
 
-import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.Annotation;
@@ -38,6 +39,7 @@ import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.MedicationReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.MedicationRequestDispenseRequestComponentTranslator;
 import org.openmrs.module.fhir2.api.translators.MedicationRequestPriorityTranslator;
+import org.openmrs.module.fhir2.api.translators.MedicationRequestReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.MedicationRequestStatusTranslator;
 import org.openmrs.module.fhir2.api.translators.MedicationRequestTranslator;
 import org.openmrs.module.fhir2.api.translators.OrderIdentifierTranslator;
@@ -47,37 +49,50 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-@Setter(AccessLevel.PACKAGE)
-public class MedicationRequestTranslatorImpl extends BaseReferenceHandlingTranslator implements MedicationRequestTranslator {
+public class MedicationRequestTranslatorImpl implements MedicationRequestTranslator {
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private MedicationRequestStatusTranslator statusTranslator;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private PractitionerReferenceTranslator<Provider> practitionerReferenceTranslator;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private MedicationRequestPriorityTranslator medicationRequestPriorityTranslator;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
+	private MedicationRequestReferenceTranslator medicationRequestReferenceTranslator;
+	
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private MedicationReferenceTranslator medicationReferenceTranslator;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private EncounterReferenceTranslator<Encounter> encounterReferenceTranslator;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private PatientReferenceTranslator patientReferenceTranslator;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private ConceptTranslator conceptTranslator;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private DosageTranslator dosageTranslator;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private OrderIdentifierTranslator orderIdentifierTranslator;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private MedicationRequestDispenseRequestComponentTranslator medicationRequestDispenseRequestComponentTranslator;
 	
 	@Override
@@ -115,11 +130,13 @@ public class MedicationRequestTranslatorImpl extends BaseReferenceHandlingTransl
 		
 		if (drugOrder.getPreviousOrder() != null
 		        && (drugOrder.getAction() == Order.Action.DISCONTINUE || drugOrder.getAction() == Order.Action.REVISE)) {
-			medicationRequest.setPriorPrescription(createOrderReference(drugOrder.getPreviousOrder())
-			        .setIdentifier(orderIdentifierTranslator.toFhirResource(drugOrder.getPreviousOrder())));
+			medicationRequest.setPriorPrescription(
+			    medicationRequestReferenceTranslator.toFhirResource((DrugOrder) drugOrder.getPreviousOrder())
+			            .setIdentifier(orderIdentifierTranslator.toFhirResource(drugOrder.getPreviousOrder())));
 		} else if (drugOrder.getPreviousOrder() != null && drugOrder.getAction() == Order.Action.RENEW) {
-			medicationRequest.setBasedOn(Collections.singletonList(createOrderReference(drugOrder.getPreviousOrder())
-			        .setIdentifier(orderIdentifierTranslator.toFhirResource(drugOrder.getPreviousOrder()))));
+			medicationRequest.setBasedOn(Collections.singletonList(
+			    medicationRequestReferenceTranslator.toFhirResource((DrugOrder) drugOrder.getPreviousOrder())
+			            .setIdentifier(orderIdentifierTranslator.toFhirResource(drugOrder.getPreviousOrder()))));
 		}
 		
 		if (drugOrder.getFulfillerStatus() != null) {

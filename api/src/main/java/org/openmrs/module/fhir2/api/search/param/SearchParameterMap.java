@@ -52,7 +52,7 @@ public class SearchParameterMap implements Serializable {
 	 * @param param Parameter to be added
 	 * @return {@link org.openmrs.module.fhir2.api.search.param.SearchParameterMap}
 	 */
-	public SearchParameterMap addParameter(@Nonnull String key, @Nonnull Serializable param) {
+	public SearchParameterMap addParameter(@Nonnull String key, @Nonnull Object param) {
 		return addParameter(key, null, param);
 	}
 	
@@ -64,7 +64,7 @@ public class SearchParameterMap implements Serializable {
 	 * @param param Parameter to be added
 	 * @return {@link org.openmrs.module.fhir2.api.search.param.SearchParameterMap}
 	 */
-	public SearchParameterMap addParameter(@Nonnull String key, String propertyName, @Nonnull Serializable param) {
+	public SearchParameterMap addParameter(@Nonnull String key, String propertyName, @Nonnull Object param) {
 		if (key == null || param == null) {
 			return this;
 		}

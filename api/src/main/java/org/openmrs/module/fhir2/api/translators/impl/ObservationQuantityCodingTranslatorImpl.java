@@ -9,13 +9,14 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static lombok.AccessLevel.PROTECTED;
 import static org.openmrs.module.fhir2.FhirConstants.UCUM_SYSTEM_URI;
 
 import javax.annotation.Nonnull;
 
 import java.util.List;
 
-import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import org.fhir.ucum.UcumEssenceService;
 import org.fhir.ucum.UcumService;
@@ -32,10 +33,10 @@ import org.springframework.stereotype.Component;
  * fall back to the concept UUID and a null system.
  */
 @Component
-@Setter(AccessLevel.PACKAGE)
 public class ObservationQuantityCodingTranslatorImpl extends BaseCodingTranslator {
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private List<UcumEssenceService> ucumServices;
 	
 	/**
@@ -62,7 +63,7 @@ public class ObservationQuantityCodingTranslatorImpl extends BaseCodingTranslato
 		
 		// attempt to fall back to the concept uuid with a null coding concept
 		if (coding == null) {
-			coding = getCodingForSystem(conceptTranslator.toFhirResource(concept), null);
+			coding = getCodingForSystem(getConceptTranslator().toFhirResource(concept), null);
 		}
 		
 		return coding;

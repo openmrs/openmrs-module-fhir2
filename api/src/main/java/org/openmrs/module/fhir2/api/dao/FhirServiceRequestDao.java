@@ -11,6 +11,7 @@ package org.openmrs.module.fhir2.api.dao;
 
 import javax.annotation.Nonnull;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.openmrs.Auditable;
@@ -26,14 +27,22 @@ public interface FhirServiceRequestDao<T extends OpenmrsObject & Auditable> exte
 	T get(@Nonnull String uuid);
 	
 	@Override
+	@Authorized(PrivilegeConstants.GET_ORDERS)
+	List<T> get(@Nonnull Collection<String> uuids);
+	
+	@Override
+	@Authorized(PrivilegeConstants.GET_ORDERS)
+	List<T> getSearchResults(@Nonnull SearchParameterMap theParams);
+	
+	@Override
+	@Authorized(PrivilegeConstants.GET_ORDERS)
+	int getSearchResultsCount(@Nonnull SearchParameterMap theParams);
+	
+	@Override
 	@Authorized({ PrivilegeConstants.ADD_ORDERS, PrivilegeConstants.EDIT_ORDERS })
 	T createOrUpdate(@Nonnull T newEntry);
 	
 	@Override
 	@Authorized(PrivilegeConstants.DELETE_ORDERS)
 	T delete(@Nonnull String uuid);
-	
-	@Override
-	@Authorized(PrivilegeConstants.GET_ORDERS)
-	List<T> getSearchResults(@Nonnull SearchParameterMap theParams);
 }

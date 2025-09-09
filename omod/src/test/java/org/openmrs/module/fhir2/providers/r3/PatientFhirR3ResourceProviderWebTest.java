@@ -33,8 +33,8 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -502,7 +502,7 @@ public class PatientFhirR3ResourceProviderWebTest extends BaseFhirR3ResourceProv
 		verifyUri("/Patient?_revinclude=Observation:patient");
 		
 		verify(patientService).searchForPatients(patientSearchParamsCaptor.capture());
-		HashSet<Include> revIncludesParam = patientSearchParamsCaptor.getValue().getRevIncludes();
+		Set<Include> revIncludesParam = patientSearchParamsCaptor.getValue().getRevIncludes();
 		
 		assertThat(revIncludesParam, notNullValue());
 		assertThat(revIncludesParam.size(), equalTo(1));
@@ -515,7 +515,7 @@ public class PatientFhirR3ResourceProviderWebTest extends BaseFhirR3ResourceProv
 		verifyUri("/Patient?_revinclude=AllergyIntolerance:patient");
 		
 		verify(patientService).searchForPatients(patientSearchParamsCaptor.capture());
-		HashSet<Include> revIncludesParam = patientSearchParamsCaptor.getValue().getRevIncludes();
+		Set<Include> revIncludesParam = patientSearchParamsCaptor.getValue().getRevIncludes();
 		
 		assertThat(revIncludesParam, notNullValue());
 		assertThat(revIncludesParam.size(), equalTo(1));
@@ -528,7 +528,7 @@ public class PatientFhirR3ResourceProviderWebTest extends BaseFhirR3ResourceProv
 		verifyUri("/Patient?_revinclude=DiagnosticReport:patient");
 		
 		verify(patientService).searchForPatients(patientSearchParamsCaptor.capture());
-		HashSet<Include> revIncludesParam = patientSearchParamsCaptor.getValue().getRevIncludes();
+		Set<Include> revIncludesParam = patientSearchParamsCaptor.getValue().getRevIncludes();
 		
 		assertThat(revIncludesParam, notNullValue());
 		assertThat(revIncludesParam.size(), equalTo(1));
@@ -541,7 +541,7 @@ public class PatientFhirR3ResourceProviderWebTest extends BaseFhirR3ResourceProv
 		verifyUri("/Patient?_revinclude=Encounter:patient");
 		
 		verify(patientService).searchForPatients(patientSearchParamsCaptor.capture());
-		HashSet<Include> revIncludesParam = patientSearchParamsCaptor.getValue().getRevIncludes();
+		Set<Include> revIncludesParam = patientSearchParamsCaptor.getValue().getRevIncludes();
 		
 		assertThat(revIncludesParam, notNullValue());
 		assertThat(revIncludesParam.size(), equalTo(1));
@@ -554,7 +554,7 @@ public class PatientFhirR3ResourceProviderWebTest extends BaseFhirR3ResourceProv
 		verifyUri("/Patient?_revinclude=MedicationRequest:patient");
 		
 		verify(patientService).searchForPatients(patientSearchParamsCaptor.capture());
-		HashSet<Include> revIncludesParam = patientSearchParamsCaptor.getValue().getRevIncludes();
+		Set<Include> revIncludesParam = patientSearchParamsCaptor.getValue().getRevIncludes();
 		
 		assertThat(revIncludesParam, notNullValue());
 		assertThat(revIncludesParam.size(), equalTo(1));
@@ -567,7 +567,7 @@ public class PatientFhirR3ResourceProviderWebTest extends BaseFhirR3ResourceProv
 		verifyUri("/Patient?_revinclude=ProcedureRequest:patient");
 		
 		verify(patientService).searchForPatients(patientSearchParamsCaptor.capture());
-		HashSet<Include> revIncludesParam = patientSearchParamsCaptor.getValue().getRevIncludes();
+		Set<Include> revIncludesParam = patientSearchParamsCaptor.getValue().getRevIncludes();
 		
 		assertThat(revIncludesParam, notNullValue());
 		assertThat(revIncludesParam.size(), equalTo(1));
@@ -580,7 +580,7 @@ public class PatientFhirR3ResourceProviderWebTest extends BaseFhirR3ResourceProv
 		verifyUri("/Patient?_revinclude=Observation:patient&_revinclude=AllergyIntolerance:patient");
 		
 		verify(patientService).searchForPatients(patientSearchParamsCaptor.capture());
-		HashSet<Include> revIncludesParam = patientSearchParamsCaptor.getValue().getRevIncludes();
+		Set<Include> revIncludesParam = patientSearchParamsCaptor.getValue().getRevIncludes();
 		
 		assertThat(revIncludesParam, notNullValue());
 		assertThat(revIncludesParam.size(), equalTo(2));

@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
+import static lombok.AccessLevel.PROTECTED;
+
 import javax.annotation.Nonnull;
 
 import java.util.Collection;
@@ -20,7 +22,6 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
@@ -39,27 +40,28 @@ import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.PatientTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
-@Transactional
-@Setter(AccessLevel.PACKAGE)
-@Getter(AccessLevel.PROTECTED)
 public class FhirPatientServiceImpl extends BaseFhirService<Patient, org.openmrs.Patient> implements FhirPatientService {
 	
-	@Autowired
-	private PatientTranslator translator;
-	
-	@Autowired
+	@Getter(value = PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private FhirPatientDao dao;
 	
-	@Autowired
+	@Getter(value = PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
+	private PatientTranslator translator;
+	
+	@Getter(value = PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private FhirPatientIdentifierSystemDao systemDao;
 	
-	@Autowired
+	@Getter(value = PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private SearchQueryInclude<Patient> searchQueryInclude;
 	
-	@Autowired
+	@Getter(value = PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private SearchQuery<org.openmrs.Patient, Patient, FhirPatientDao, PatientTranslator, SearchQueryInclude<Patient>> searchQuery;
 	
 	@Override
@@ -74,7 +76,6 @@ public class FhirPatientServiceImpl extends BaseFhirService<Patient, org.openmrs
 	}
 	
 	@Override
-	@Transactional(readOnly = true)
 	public PatientIdentifierType getPatientIdentifierTypeByIdentifier(Identifier identifier) {
 		if (identifier.hasSystem()) {
 			return systemDao.getPatientIdentifierTypeByUrl(identifier.getSystem());
@@ -86,19 +87,16 @@ public class FhirPatientServiceImpl extends BaseFhirService<Patient, org.openmrs
 	}
 	
 	@Override
-	@Transactional(readOnly = true)
 	public IBundleProvider searchForPatients(PatientSearchParams patientSearchParams) {
 		return searchQuery.getQueryResults(patientSearchParams.toSearchParameterMap(), dao, translator, searchQueryInclude);
 	}
 	
 	@Override
-	@Transactional(readOnly = true)
 	public IBundleProvider searchForPatients(OpenmrsPatientSearchParams patientSearchParams) {
 		return searchQuery.getQueryResults(patientSearchParams.toSearchParameterMap(), dao, translator, searchQueryInclude);
 	}
 	
 	@Override
-	@Transactional(readOnly = true)
 	public IBundleProvider getPatientEverything(TokenParam patientId) {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.EVERYTHING_SEARCH_HANDLER, "")
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY,
@@ -109,7 +107,6 @@ public class FhirPatientServiceImpl extends BaseFhirService<Patient, org.openmrs
 	}
 	
 	@Override
-	@Transactional(readOnly = true)
 	public IBundleProvider getPatientEverything() {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.EVERYTHING_SEARCH_HANDLER, "");
 		

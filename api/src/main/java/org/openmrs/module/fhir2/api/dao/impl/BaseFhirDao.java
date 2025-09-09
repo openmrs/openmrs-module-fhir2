@@ -33,6 +33,7 @@ import com.google.common.reflect.TypeToken;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.CacheMode;
 import org.hibernate.Criteria;
 import org.hibernate.Hibernate;
@@ -68,6 +69,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @param <T> the {@link OpenmrsObject} managed by this Dao
  */
 @Transactional
+@Slf4j
 public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends BaseDao implements FhirDao<T> {
 	
 	@SuppressWarnings("UnstableApiUsage")
@@ -79,10 +81,8 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	
 	private final boolean isImmutable;
 	
-	@Autowired
 	@Getter(AccessLevel.PUBLIC)
-	@Setter(AccessLevel.PUBLIC)
-	@Qualifier("sessionFactory")
+	@Setter(value = AccessLevel.PROTECTED, onMethod = @__({ @Autowired, @Qualifier("sessionFactory") }))
 	private SessionFactory sessionFactory;
 	
 	@SuppressWarnings("UnstableApiUsage")
@@ -130,6 +130,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	}
 	
 	@Override
+	@Transactional
 	public T createOrUpdate(@Nonnull T newEntry) {
 		sessionFactory.getCurrentSession().saveOrUpdate(newEntry);
 		
@@ -137,6 +138,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	}
 	
 	@Override
+	@Transactional
 	public T delete(@Nonnull String uuid) {
 		T existing = get(uuid);
 		
@@ -169,18 +171,8 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 		return criteria;
 	}
 	
-	/**
-	 * Override to return false if the getSearchResults may return duplicate items that need to be
-	 * removed from the results. Note that it has performance implications as it requires "select
-	 * distinct" and 2 queries instead of 1 for getting the results.
-	 * 
-	 * @return See the above explanation
-	 */
-	public boolean hasDistinctResults() {
-		return true;
-	}
-	
 	@Override
+	@Transactional(readOnly = true)
 	public int getSearchResultsCount(@Nonnull SearchParameterMap theParams) {
 		Criteria criteria = getSearchResultCriteria(theParams);
 		
@@ -193,22 +185,9 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 		}
 	}
 	
-	protected void applyExactTotal(SearchParameterMap theParams, Criteria criteria) {
-		
-		List<PropParam<?>> exactTotal = theParams.getParameters(EXACT_TOTAL_SEARCH_PARAMETER);
-		if (!exactTotal.isEmpty()) {
-			PropParam<Boolean> propParam = (PropParam<Boolean>) exactTotal.get(0);
-			if (propParam.getParam()) {
-				criteria.setCacheMode(CacheMode.REFRESH);
-			}
-		} else {
-			criteria.setCacheable(true);
-			criteria.setCacheRegion(COUNT_QUERY_CACHE);
-		}
-	}
-	
 	@SuppressWarnings("unchecked")
 	@Override
+	@Transactional(readOnly = true)
 	public List<T> getSearchResults(@Nonnull SearchParameterMap theParams) {
 		Criteria criteria = getSearchResultCriteria(theParams);
 		
@@ -249,7 +228,32 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 			
 			results = idsCriteria.list();
 		}
+		
 		return results.stream().map(this::deproxyResult).collect(Collectors.toList());
+	}
+	
+	/**
+	 * Override to return false if the getSearchResults may return duplicate items that need to be
+	 * removed from the results. Note that it has performance implications as it requires "select
+	 * distinct" and 2 queries instead of 1 for getting the results.
+	 *
+	 * @return See the above explanation
+	 */
+	protected boolean hasDistinctResults() {
+		return true;
+	}
+	
+	protected void applyExactTotal(SearchParameterMap theParams, Criteria criteria) {
+		List<PropParam<?>> exactTotal = theParams.getParameters(EXACT_TOTAL_SEARCH_PARAMETER);
+		if (!exactTotal.isEmpty()) {
+			PropParam<Boolean> propParam = (PropParam<Boolean>) exactTotal.get(0);
+			if (propParam.getParam()) {
+				criteria.setCacheMode(CacheMode.REFRESH);
+			}
+		} else {
+			criteria.setCacheable(true);
+			criteria.setCacheRegion(COUNT_QUERY_CACHE);
+		}
 	}
 	
 	@Override

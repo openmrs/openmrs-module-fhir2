@@ -131,7 +131,6 @@ public class MedicationRequestFhirResourceProviderWebTest extends BaseFhirR4Reso
 		verify(fhirMedicationRequestService)
 		        .searchForMedicationRequests(medicationRequestSearchParamsArgumentCaptor.capture());
 		
-		System.out.println("value:" + medicationRequestSearchParamsArgumentCaptor.getValue());
 		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue(), notNullValue());
 		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getId().getValuesAsQueryTokens(), not(empty()));
 		assertThat(medicationRequestSearchParamsArgumentCaptor.getValue().getId().getValuesAsQueryTokens().get(0)

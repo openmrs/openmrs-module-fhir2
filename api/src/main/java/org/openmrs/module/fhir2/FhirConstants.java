@@ -80,6 +80,8 @@ public final class FhirConstants {
 	
 	public static final String VISIT_TYPE_SYSTEM_URI = OPENMRS_CODE_SYSTEM_PREFIX + "/visit-type";
 	
+	public static final String OPENMRS_FHIR_EXT_IMMUNIZATION_NEXT_DOSE_DATE = "http://hl7.eu/fhir/StructureDefinition/immunization-nextDoseDate";
+	
 	public static final String OPENMRS_FHIR_EXT_PREFIX = OPENMRS_FHIR_PREFIX + "/ext";
 	
 	public static final String OPENMRS_FHIR_EXT_OBS_LOCATION_VALUE = OPENMRS_FHIR_EXT_PREFIX + "/obs-location-value";
@@ -98,6 +100,12 @@ public final class FhirConstants {
 	
 	public static final String OPENMRS_FHIR_EXT_USER_IDENTIFIER = OPENMRS_FHIR_EXT_PREFIX + "/user/identifier";
 	
+	public static final String OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE = OPENMRS_FHIR_EXT_PREFIX + "/person-attribute";
+	
+	public static final String OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE_TYPE = OPENMRS_FHIR_EXT_PREFIX + "/person-attribute-type";
+	
+	public static final String OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE_VALUE = OPENMRS_FHIR_EXT_PREFIX + "/person-attribute-value";
+	
 	public static final String OPENMRS_FHIR_EXT_PROVIDER_IDENTIFIER = OPENMRS_FHIR_EXT_PREFIX + "/provider/identifier";
 	
 	public static final String OPENMRS_FHIR_EXT_LOCATION_TAG = OPENMRS_FHIR_EXT_PREFIX + "/location-tag";
@@ -115,7 +123,7 @@ public final class FhirConstants {
 	public static final String OPENMRS_FHIR_EXT_RECORDED = OPENMRS_FHIR_EXT_PREFIX + "/medicationdispense/recorded";
 	
 	public static final String OPENMRS_FHIR_EXT_MEDICATION_REQUEST_FULFILLER_STATUS = OPENMRS_FHIR_EXT_PREFIX
-	        + "/medicationrequest/fullfillerstatus";
+	        + "/medicationrequest/fulfillerstatus";
 	
 	public static final String OPENMRS_FHIR_DEFAULT_PAGE_SIZE = "fhir2.paging.default";
 	
@@ -136,6 +144,8 @@ public final class FhirConstants {
 	public static final String LOCATION = "Location";
 	
 	public static final String MEDICATION = "Medication";
+	
+	public static final String GROUP = "Group";
 	
 	public static final String MEDICATION_DISPENSE = "MedicationDispense";
 	
@@ -174,6 +184,8 @@ public final class FhirConstants {
 	public static final String IMMUNIZATIONS_ENCOUNTER_TYPE_PROPERTY = "fhir2.immunizationsEncounterTypeUuid";
 	
 	public static final String ADMINISTERING_ENCOUNTER_ROLE_PROPERTY = "fhir2.administeringEncounterRoleUuid";
+	
+	public static final String SUPPORTED_LOCATION_HIERARCHY_SEARCH_DEPTH = "fhir.supportedLocationHierarchySearchDepth";
 	
 	public static final String GLOBAL_PROPERTY_MILD = "allergy.concept.severity.mild";
 	
@@ -225,6 +237,14 @@ public final class FhirConstants {
 	
 	public static final String FAMILY_PROPERTY = "family.property";
 	
+	public static final String GENDER_PROPERTY = "gender";
+	
+	public static final String BIRTHDATE_PROPERTY = "birthdate";
+	
+	public static final String DEATHDATE_PROPERTY = "deathDate";
+	
+	public static final String DECEASED_PROPERTY = "dead";
+	
 	public static final String CITY_PROPERTY = "city.property";
 	
 	public static final String COUNTRY_PROPERTY = "country.property";
@@ -269,7 +289,7 @@ public final class FhirConstants {
 	
 	public static final String TASK_CODE_SEARCH_HANDLER = "task.code.search.handler";
 	
-	public static final String FULFILLER_STATUS_SEARCH_HANDLER = "fullfillerStatus.search.handler";
+	public static final String FULFILLER_STATUS_SEARCH_HANDLER = "fulfillerStatus.search.handler";
 	
 	public static final String BASED_ON_REFERENCE_SEARCH_HANDLER = "based.on.reference.search.handler";
 	
@@ -356,4 +376,7 @@ public final class FhirConstants {
 	public static final String EXACT_TOTAL_SEARCH_PARAMETER = "_exactTotal";
 	
 	public static final String COUNT_QUERY_CACHE = "countQueryCache";
+	
+	public static final String INCLUDE_MEMBER_PARAM = "member";
+	
 }

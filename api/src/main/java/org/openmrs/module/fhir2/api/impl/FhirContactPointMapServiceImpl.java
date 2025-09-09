@@ -12,6 +12,7 @@ package org.openmrs.module.fhir2.api.impl;
 import java.util.Optional;
 
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import org.openmrs.PersonAttributeType;
 import org.openmrs.attribute.BaseAttributeType;
@@ -20,14 +21,12 @@ import org.openmrs.module.fhir2.api.dao.FhirContactPointMapDao;
 import org.openmrs.module.fhir2.model.FhirContactPointMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
-@Transactional
-@Setter(AccessLevel.PACKAGE)
 public class FhirContactPointMapServiceImpl implements FhirContactPointMapService {
 	
-	@Autowired
+	@Getter(value = AccessLevel.PROTECTED)
+	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
 	private FhirContactPointMapDao dao;
 	
 	@Override
@@ -35,13 +34,11 @@ public class FhirContactPointMapServiceImpl implements FhirContactPointMapServic
 		return dao.getFhirContactPointMapByUuid(uuid);
 	}
 	
-	@Transactional(readOnly = true)
 	@Override
 	public Optional<FhirContactPointMap> getFhirContactPointMapForPersonAttributeType(PersonAttributeType attributeType) {
 		return dao.getFhirContactPointMapForPersonAttributeType(attributeType);
 	}
 	
-	@Transactional(readOnly = true)
 	@Override
 	public Optional<FhirContactPointMap> getFhirContactPointMapForAttributeType(BaseAttributeType<?> attributeType) {
 		return dao.getFhirContactPointMapForAttributeType(attributeType);

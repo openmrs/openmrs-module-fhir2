@@ -9,15 +9,17 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static lombok.AccessLevel.PROTECTED;
 import static org.apache.commons.lang3.Validate.notNull;
 import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getLastUpdated;
 import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getVersionId;
+import static org.openmrs.module.fhir2.api.translators.impl.ReferenceHandlingTranslator.createLocationReferenceByUuid;
 
 import javax.annotation.Nonnull;
 
 import java.util.function.Supplier;
 
-import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.proxy.HibernateProxy;
@@ -47,40 +49,50 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-@Setter(AccessLevel.PACKAGE)
-public class ObservationTranslatorImpl extends BaseReferenceHandlingTranslator implements ObservationTranslator {
+public class ObservationTranslatorImpl implements ObservationTranslator {
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private ObservationStatusTranslator observationStatusTranslator;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private ObservationReferenceTranslator observationReferenceTranslator;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private ObservationValueTranslator observationValueTranslator;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private ConceptTranslator conceptTranslator;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private ObservationCategoryTranslator categoryTranslator;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private EncounterReferenceTranslator<Encounter> encounterReferenceTranslator;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private PatientReferenceTranslator patientReferenceTranslator;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private ObservationInterpretationTranslator interpretationTranslator;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private ObservationReferenceRangeTranslator referenceRangeTranslator;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private ObservationBasedOnReferenceTranslator basedOnReferenceTranslator;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private ObservationEffectiveDatetimeTranslator datetimeTranslator;
 	
 	@Override
@@ -122,7 +134,7 @@ public class ObservationTranslatorImpl extends BaseReferenceHandlingTranslator i
 		if (observation.getValueNumeric() != null) {
 			Concept concept = observation.getConcept();
 			if (concept instanceof ConceptNumeric) {
-				obs.setReferenceRange(referenceRangeTranslator.toFhirResource((ConceptNumeric) concept));
+				obs.setReferenceRange(referenceRangeTranslator.toFhirResource(observation));
 			}
 		}
 		
@@ -165,7 +177,7 @@ public class ObservationTranslatorImpl extends BaseReferenceHandlingTranslator i
 		
 		observationValueTranslator.toOpenmrsType(existingObs, observation.getValue());
 		
-		if (observation.getInterpretation().size() > 0) {
+		if (!observation.getInterpretation().isEmpty()) {
 			interpretationTranslator.toOpenmrsType(existingObs, observation.getInterpretation().get(0));
 		}
 		

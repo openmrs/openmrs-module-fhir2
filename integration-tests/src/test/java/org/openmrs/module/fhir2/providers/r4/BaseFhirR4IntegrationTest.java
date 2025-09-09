@@ -22,7 +22,6 @@ import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeDiagnosingMatcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Observation;
@@ -35,7 +34,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 
 public abstract class BaseFhirR4IntegrationTest<T extends IResourceProvider, U extends DomainResource> extends BaseFhirIntegrationTest<T, U> {
 	
-	private static final FhirContext FHIR_CONTEXT = FhirContext.forR4();
+	private static final FhirContext FHIR_CONTEXT = FhirContext.forR4Cached();
 	
 	@Override
 	public String getServletName() {
@@ -96,15 +95,15 @@ public abstract class BaseFhirR4IntegrationTest<T extends IResourceProvider, U e
 		return (OperationOutcome) super.readOperationOutcome(response);
 	}
 	
-	public static Matcher<Bundle.BundleEntryComponent> hasResource(Matcher<? extends IDomainResource> matcher) {
+	public static Matcher<Bundle.BundleEntryComponent> hasResource(Matcher<?> matcher) {
 		return new HasResourceMatcher(matcher);
 	}
 	
 	private static class HasResourceMatcher extends TypeSafeMatcher<Bundle.BundleEntryComponent> {
 		
-		private final Matcher<? extends IDomainResource> matcher;
+		private final Matcher<?> matcher;
 		
-		public HasResourceMatcher(Matcher<? extends IDomainResource> matcher) {
+		public HasResourceMatcher(Matcher<?> matcher) {
 			this.matcher = matcher;
 		}
 		

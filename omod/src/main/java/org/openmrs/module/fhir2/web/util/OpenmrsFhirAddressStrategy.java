@@ -11,81 +11,21 @@ package org.openmrs.module.fhir2.web.util;
 
 import static org.openmrs.module.fhir2.web.util.FhirVersionUtils.FhirVersion.UNKNOWN;
 
-import javax.annotation.PreDestroy;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
 import ca.uhn.fhir.rest.server.IServerAddressStrategy;
-import lombok.AccessLevel;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
-import org.openmrs.GlobalProperty;
-import org.openmrs.api.AdministrationService;
-import org.openmrs.api.GlobalPropertyListener;
 import org.openmrs.module.fhir2.FhirConstants;
-import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.openmrs.module.fhir2.api.util.FhirGlobalPropertyHolder;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
-@Slf4j
-@Setter(AccessLevel.PACKAGE)
 public class OpenmrsFhirAddressStrategy implements IServerAddressStrategy {
 	
-	private volatile String gpPrefix;
-	
-	private final AdministrationService administrationService;
-	
-	private GlobalPropertyListener globalPropertyListener = new GlobalPropertyListener() {
-		
-		@Override
-		public boolean supportsPropertyName(String propertyName) {
-			return FhirConstants.GLOBAL_PROPERTY_URI_PREFIX.equals(propertyName);
-		}
-		
-		@Override
-		public void globalPropertyChanged(GlobalProperty newValue) {
-			synchronized (OpenmrsFhirAddressStrategy.this) {
-				gpPrefix = newValue.getPropertyValue();
-			}
-		}
-		
-		@Override
-		public void globalPropertyDeleted(String propertyName) {
-			synchronized (OpenmrsFhirAddressStrategy.this) {
-				gpPrefix = null;
-			}
-		}
-	};
-	
-	@Autowired
-	public OpenmrsFhirAddressStrategy(FhirGlobalPropertyService globalPropertyService,
-	    @Qualifier("adminService") AdministrationService administrationService) {
-		this.administrationService = administrationService;
-		if (administrationService != null) {
-			administrationService.addGlobalPropertyListener(globalPropertyListener);
-		}
-		
-		try {
-			this.gpPrefix = globalPropertyService.getGlobalProperty(FhirConstants.GLOBAL_PROPERTY_URI_PREFIX);
-		}
-		catch (Exception e) {
-			log.error("An error occurred while trying to read the {} property", FhirConstants.GLOBAL_PROPERTY_URI_PREFIX, e);
-			this.gpPrefix = null;
-		}
-	}
-	
 	@Override
-	@Transactional(readOnly = true)
 	public String determineServerBase(ServletContext context, HttpServletRequest request) {
-		String gpPrefix;
-		
-		synchronized (this) {
-			gpPrefix = this.gpPrefix;
-		}
+		String gpPrefix = FhirGlobalPropertyHolder.getGlobalProperty(FhirConstants.GLOBAL_PROPERTY_URI_PREFIX);
 		
 		if (StringUtils.isNotBlank(gpPrefix)) {
 			StringBuilder gpUrl = new StringBuilder().append(gpPrefix);
@@ -128,22 +68,5 @@ public class OpenmrsFhirAddressStrategy implements IServerAddressStrategy {
 		
 		return scheme + "://" + host + port + StringUtils.defaultString(request.getContextPath()) + "/ws/fhir2/"
 		        + (fhirVersion == UNKNOWN ? "" : fhirVersion.toString());
-	}
-	
-	public void setGpPrefix(String gpPrefix) {
-		if (StringUtils.isNotBlank(gpPrefix)) {
-			if (gpPrefix.endsWith("/")) {
-				gpPrefix = gpPrefix.substring(0, gpPrefix.length() - 1);
-			}
-		}
-		
-		this.gpPrefix = gpPrefix;
-	}
-	
-	@PreDestroy
-	public void preDestroy() {
-		if (administrationService != null) {
-			administrationService.removeGlobalPropertyListener(globalPropertyListener);
-		}
 	}
 }
