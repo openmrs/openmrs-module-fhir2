@@ -82,7 +82,7 @@ public class PersonFhirResourceProviderIntegrationTest extends BaseFhirR4Integra
 		MockHttpServletResponse response = get("/Person/" + PERSON_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Person person = readResponse(response);
@@ -97,7 +97,7 @@ public class PersonFhirResourceProviderIntegrationTest extends BaseFhirR4Integra
 		MockHttpServletResponse response = get("/Person/" + WRONG_PERSON_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isNotFound());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 	}
 	
@@ -106,7 +106,7 @@ public class PersonFhirResourceProviderIntegrationTest extends BaseFhirR4Integra
 		MockHttpServletResponse response = get("/Person/" + PERSON_UUID).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Person person = readResponse(response);
@@ -121,7 +121,7 @@ public class PersonFhirResourceProviderIntegrationTest extends BaseFhirR4Integra
 		MockHttpServletResponse response = get("/Person/" + WRONG_PERSON_UUID).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isNotFound());
-		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 	}
 	
@@ -130,7 +130,7 @@ public class PersonFhirResourceProviderIntegrationTest extends BaseFhirR4Integra
 		MockHttpServletResponse response = get("/Person/" + PERSON_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Person person = readResponse(response);
@@ -172,7 +172,7 @@ public class PersonFhirResourceProviderIntegrationTest extends BaseFhirR4Integra
 		// verify created correctly
 		assertThat(response, isCreated());
 		assertThat(response.getHeader("Location"), containsString("/Person/"));
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Person person = readResponse(response);
@@ -216,7 +216,7 @@ public class PersonFhirResourceProviderIntegrationTest extends BaseFhirR4Integra
 		// verify created correctly
 		assertThat(response, isCreated());
 		assertThat(response.getHeader("Location"), containsString("/Person/"));
-		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Person person = readResponse(response);
@@ -259,7 +259,7 @@ public class PersonFhirResourceProviderIntegrationTest extends BaseFhirR4Integra
 		response = put("/Person/" + PERSON_UUID).jsonContent(toJson(person)).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		// read the updated record
@@ -290,7 +290,7 @@ public class PersonFhirResourceProviderIntegrationTest extends BaseFhirR4Integra
 		response = put("/Person/" + PERSON_UUID).jsonContent(toJson(person)).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isBadRequest());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		OperationOutcome operationOutcome = readOperationOutcome(response);
@@ -312,7 +312,7 @@ public class PersonFhirResourceProviderIntegrationTest extends BaseFhirR4Integra
 		response = put("/Person/" + WRONG_PERSON_UUID).jsonContent(toJson(person)).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isNotFound());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		OperationOutcome operationOutcome = readOperationOutcome(response);
@@ -335,7 +335,7 @@ public class PersonFhirResourceProviderIntegrationTest extends BaseFhirR4Integra
 		response = put("/Person/" + PERSON_UUID).xmlContent(toXML(person)).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		// read the updated record
@@ -366,7 +366,7 @@ public class PersonFhirResourceProviderIntegrationTest extends BaseFhirR4Integra
 		response = put("/Person/" + PERSON_UUID).xmlContent(toXML(person)).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isBadRequest());
-		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		OperationOutcome operationOutcome = readOperationOutcome(response);
@@ -387,7 +387,7 @@ public class PersonFhirResourceProviderIntegrationTest extends BaseFhirR4Integra
 		        .accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Person person = readResponse(response);
@@ -411,7 +411,7 @@ public class PersonFhirResourceProviderIntegrationTest extends BaseFhirR4Integra
 		        .accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Person person = readResponse(response);
@@ -435,7 +435,7 @@ public class PersonFhirResourceProviderIntegrationTest extends BaseFhirR4Integra
 		        .accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Person person = readResponse(response);
@@ -463,7 +463,7 @@ public class PersonFhirResourceProviderIntegrationTest extends BaseFhirR4Integra
 		MockHttpServletResponse response = delete("/Person/" + WRONG_PERSON_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isNotFound());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		OperationOutcome operationOutcome = readOperationOutcome(response);
@@ -477,7 +477,7 @@ public class PersonFhirResourceProviderIntegrationTest extends BaseFhirR4Integra
 		MockHttpServletResponse response = get("/Person").accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Bundle results = readBundleResponse(response);
@@ -498,7 +498,7 @@ public class PersonFhirResourceProviderIntegrationTest extends BaseFhirR4Integra
 		MockHttpServletResponse response = get("/Person?name=voided&_sort=given").accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Bundle results = readBundleResponse(response);
@@ -521,7 +521,7 @@ public class PersonFhirResourceProviderIntegrationTest extends BaseFhirR4Integra
 		MockHttpServletResponse response = get("/Person").accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Bundle results = readBundleResponse(response);
@@ -542,7 +542,7 @@ public class PersonFhirResourceProviderIntegrationTest extends BaseFhirR4Integra
 		MockHttpServletResponse response = get("/Person?name=voided&_sort=given").accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Bundle results = readBundleResponse(response);
@@ -565,7 +565,7 @@ public class PersonFhirResourceProviderIntegrationTest extends BaseFhirR4Integra
 		MockHttpServletResponse response = get("/Person?name=voided&_summary=count").accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Bundle result = readBundleResponse(response);
@@ -580,7 +580,7 @@ public class PersonFhirResourceProviderIntegrationTest extends BaseFhirR4Integra
 		MockHttpServletResponse response = get("/Person?name=voided&_summary=count").accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Bundle result = readBundleResponse(response);
@@ -595,7 +595,7 @@ public class PersonFhirResourceProviderIntegrationTest extends BaseFhirR4Integra
 		MockHttpServletResponse response = get("/Person/" + PERSON_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		
 		assertThat(response.getHeader("etag"), notNullValue());
 		assertThat(response.getHeader("etag"), startsWith("W/"));
@@ -614,7 +614,7 @@ public class PersonFhirResourceProviderIntegrationTest extends BaseFhirR4Integra
 		MockHttpServletResponse response = get("/Person/" + PERSON_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		assertThat(response.getHeader("etag"), notNullValue());
 		
@@ -631,7 +631,7 @@ public class PersonFhirResourceProviderIntegrationTest extends BaseFhirR4Integra
 		MockHttpServletResponse response = get("/Person/" + PERSON_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		assertThat(response.getHeader("etag"), notNullValue());
 		

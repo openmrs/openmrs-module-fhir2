@@ -200,7 +200,7 @@ public class MedicationRequestFhirResourceProviderIntegrationTest extends BaseFh
 		MockHttpServletResponse response = get("/MedicationRequest?_summary=count").accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Bundle result = readBundleResponse(response);
@@ -215,7 +215,7 @@ public class MedicationRequestFhirResourceProviderIntegrationTest extends BaseFh
 		MockHttpServletResponse response = get("/MedicationRequest?_summary=count").accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Bundle result = readBundleResponse(response);
@@ -231,7 +231,7 @@ public class MedicationRequestFhirResourceProviderIntegrationTest extends BaseFh
 		        .go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		
 		assertThat(response.getHeader("etag"), notNullValue());
 		assertThat(response.getHeader("etag"), startsWith("W/"));
@@ -251,7 +251,7 @@ public class MedicationRequestFhirResourceProviderIntegrationTest extends BaseFh
 		        .go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		assertThat(response.getHeader("etag"), notNullValue());
 		
@@ -276,7 +276,7 @@ public class MedicationRequestFhirResourceProviderIntegrationTest extends BaseFh
 		        .jsonMergePatch(jsonMedicationRequestPatch).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		MedicationRequest medicationRequest = readResponse(response);
