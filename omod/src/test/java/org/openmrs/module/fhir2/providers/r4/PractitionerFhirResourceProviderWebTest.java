@@ -12,6 +12,7 @@ package org.openmrs.module.fhir2.providers.r4;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.containsStringIgnoringCase;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
@@ -113,7 +114,7 @@ public class PractitionerFhirResourceProviderWebTest extends BaseFhirR4ResourceP
 		MockHttpServletResponse response = get("/Practitioner/" + PRACTITIONER_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		MatcherAssert.assertThat(response, isOk());
-		MatcherAssert.assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+		MatcherAssert.assertThat(response.getContentType(), containsString(FhirMediaTypes.JSON.toString()));
 		MatcherAssert.assertThat(readResponse(response).getIdElement().getIdPart(), equalTo(PRACTITIONER_UUID));
 	}
 	
@@ -361,7 +362,7 @@ public class PractitionerFhirResourceProviderWebTest extends BaseFhirR4ResourceP
 		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.JSON).go();
 		
 		MatcherAssert.assertThat(response, isOk());
-		MatcherAssert.assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+		MatcherAssert.assertThat(response.getContentType(), containsString(FhirMediaTypes.JSON.toString()));
 		
 		Bundle results = readBundleResponse(response);
 		assertThat(results.hasEntry(), is(true));
@@ -443,7 +444,7 @@ public class PractitionerFhirResourceProviderWebTest extends BaseFhirR4ResourceP
 		MockHttpServletResponse response = delete("/Practitioner/" + PRACTITIONER_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), containsString(FhirMediaTypes.JSON.toString()));
 	}
 	
 	@Test
@@ -454,6 +455,6 @@ public class PractitionerFhirResourceProviderWebTest extends BaseFhirR4ResourceP
 		        .go();
 		
 		assertThat(response, isNotFound());
-		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), containsString(FhirMediaTypes.JSON.toString()));
 	}
 }

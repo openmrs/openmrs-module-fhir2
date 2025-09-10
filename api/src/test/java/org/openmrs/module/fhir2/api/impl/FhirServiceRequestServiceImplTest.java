@@ -23,6 +23,7 @@ import static org.hl7.fhir.r4.model.Patient.SP_GIVEN;
 import static org.hl7.fhir.r4.model.Practitioner.SP_IDENTIFIER;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.openmrs.module.fhir2.FhirConstants.CODED_SEARCH_HANDLER;
 import static org.openmrs.module.fhir2.FhirConstants.DATE_RANGE_SEARCH_HANDLER;
@@ -60,6 +61,7 @@ import org.openmrs.module.fhir2.api.search.SearchQueryBundleProvider;
 import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.ServiceRequestTranslator;
+import org.openmrs.module.fhir2.api.translators.impl.ServiceRequestTranslatorImpl;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FhirServiceRequestServiceImplTest {
@@ -84,7 +86,6 @@ public class FhirServiceRequestServiceImplTest {
 	
 	private static final String OCCURRENCE = "2020-09-03";
 	
-	@Mock
 	private ServiceRequestTranslator<TestOrder> translator;
 	
 	@Mock
@@ -113,7 +114,7 @@ public class FhirServiceRequestServiceImplTest {
 			protected void validateObject(TestOrder object) {
 			}
 		};
-		
+		translator = mock(ServiceRequestTranslatorImpl.class);
 		serviceRequestService.setDao(dao);
 		serviceRequestService.setTranslator(translator);
 		serviceRequestService.setSearchQuery(searchQuery);

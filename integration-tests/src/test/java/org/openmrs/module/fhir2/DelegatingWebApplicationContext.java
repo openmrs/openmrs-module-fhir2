@@ -225,6 +225,16 @@ public class DelegatingWebApplicationContext implements WebApplicationContext {
 	}
 	
 	@Override
+	public <T> ObjectProvider<T> getBeanProvider(Class<T> aClass, boolean b) {
+		return applicationContext.getBeanProvider(aClass, b);
+	}
+	
+	@Override
+	public <T> ObjectProvider<T> getBeanProvider(ResolvableType resolvableType, boolean b) {
+		return applicationContext.getBeanProvider(resolvableType, b);
+	}
+	
+	@Override
 	public String[] getBeanNamesForType(ResolvableType resolvableType) {
 		return applicationContext.getBeanNamesForType(resolvableType);
 	}
@@ -269,5 +279,11 @@ public class DelegatingWebApplicationContext implements WebApplicationContext {
 	public <A extends Annotation> A findAnnotationOnBean(String beanName, Class<A> annotationType)
 	        throws NoSuchBeanDefinitionException {
 		return applicationContext.findAnnotationOnBean(beanName, annotationType);
+	}
+	
+	@Override
+	public <A extends Annotation> A findAnnotationOnBean(String s, Class<A> aClass, boolean b)
+	        throws NoSuchBeanDefinitionException {
+		return applicationContext.findAnnotationOnBean(s, aClass, b);
 	}
 }

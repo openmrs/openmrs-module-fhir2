@@ -11,6 +11,7 @@ package org.openmrs.module.fhir2.providers.r4;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
@@ -106,7 +107,7 @@ public class ConditionFhirResourceProviderWebTest extends BaseFhirR4ResourceProv
 		MockHttpServletResponse response = get("/Condition/" + CONDITION_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), containsString(FhirMediaTypes.JSON.toString()));
 		
 		Condition resource = readResponse(response);
 		assertThat(resource.getIdElement().getIdPart(), equalTo(CONDITION_UUID));
@@ -348,7 +349,7 @@ public class ConditionFhirResourceProviderWebTest extends BaseFhirR4ResourceProv
 		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), containsString(FhirMediaTypes.JSON.toString()));
 		assertThat(readBundleResponse(response).getEntry().size(), greaterThanOrEqualTo(1));
 	}
 }

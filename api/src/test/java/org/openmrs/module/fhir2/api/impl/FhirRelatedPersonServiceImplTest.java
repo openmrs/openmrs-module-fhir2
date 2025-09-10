@@ -23,6 +23,7 @@ import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.text.ParseException;
@@ -65,6 +66,7 @@ import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.RelatedPersonSearchParams;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.RelatedPersonTranslator;
+import org.openmrs.module.fhir2.api.translators.impl.RelatedPersonTranslatorImpl;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FhirRelatedPersonServiceImplTest {
@@ -120,7 +122,6 @@ public class FhirRelatedPersonServiceImplTest {
 	@Mock
 	private FhirRelatedPersonDao dao;
 	
-	@Mock
 	private RelatedPersonTranslator translator;
 	
 	@Mock
@@ -148,6 +149,8 @@ public class FhirRelatedPersonServiceImplTest {
 			protected void validateObject(Relationship object) {
 			}
 		};
+		
+		translator = mock(RelatedPersonTranslatorImpl.class);
 		
 		relatedPersonService.setDao(dao);
 		relatedPersonService.setTranslator(translator);

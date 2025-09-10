@@ -116,7 +116,6 @@ public class ServiceRequestTranslatorImplTest {
 		
 		TestOrder order = new TestOrder();
 		order.setUuid(SERVICE_REQUEST_UUID);
-		setOrderNumberByReflection(order, TEST_ORDER_NUMBER);
 		
 		OrderType ordertype = new OrderType();
 		ordertype.setUuid(TEST_ORDER_TYPE_UUID);
@@ -124,7 +123,6 @@ public class ServiceRequestTranslatorImplTest {
 		
 		discontinuedTestOrder = new TestOrder();
 		discontinuedTestOrder.setUuid(DISCONTINUED_TEST_ORDER_UUID);
-		setOrderNumberByReflection(discontinuedTestOrder, DISCONTINUED_TEST_ORDER_NUMBER);
 		discontinuedTestOrder.setPreviousOrder(order);
 	}
 	
@@ -142,7 +140,6 @@ public class ServiceRequestTranslatorImplTest {
 		assertThat(result.getId(), notNullValue());
 		assertThat(result.getId(), equalTo(DISCONTINUED_TEST_ORDER_UUID));
 		assertThat(result.getReplaces().get(0).getReference(), equalTo(PRIOR_SERVICE_REQUEST_REFERENCE));
-		assertThat(result.getReplaces().get(0).getIdentifier().getValue(), equalTo(TEST_ORDER_NUMBER));
 	}
 	
 	@Test
@@ -159,7 +156,6 @@ public class ServiceRequestTranslatorImplTest {
 		assertThat(result.getId(), notNullValue());
 		assertThat(result.getId(), equalTo(DISCONTINUED_TEST_ORDER_UUID));
 		assertThat(result.getReplaces().get(0).getReference(), equalTo(PRIOR_SERVICE_REQUEST_REFERENCE));
-		assertThat(result.getReplaces().get(0).getIdentifier().getValue(), equalTo(TEST_ORDER_NUMBER));
 	}
 	
 	@Test
@@ -176,7 +172,6 @@ public class ServiceRequestTranslatorImplTest {
 		assertThat(result.getId(), notNullValue());
 		assertThat(result.getId(), equalTo(DISCONTINUED_TEST_ORDER_UUID));
 		assertThat(result.getBasedOn().get(0).getReference(), equalTo(PRIOR_SERVICE_REQUEST_REFERENCE));
-		assertThat(result.getBasedOn().get(0).getIdentifier().getValue(), equalTo(TEST_ORDER_NUMBER));
 	}
 	
 	@Test

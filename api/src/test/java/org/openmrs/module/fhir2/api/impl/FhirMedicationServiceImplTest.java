@@ -22,6 +22,7 @@ import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -55,6 +56,7 @@ import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.MedicationSearchParams;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.MedicationTranslator;
+import org.openmrs.module.fhir2.api.translators.impl.MedicationTranslatorImpl;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FhirMedicationServiceImplTest {
@@ -73,7 +75,6 @@ public class FhirMedicationServiceImplTest {
 	
 	private static final int END_INDEX = 10;
 	
-	@Mock
 	private MedicationTranslator medicationTranslator;
 	
 	@Mock
@@ -102,7 +103,7 @@ public class FhirMedicationServiceImplTest {
 			protected void validateObject(Drug object) {
 			}
 		};
-		
+		medicationTranslator = mock(MedicationTranslatorImpl.class);
 		fhirMedicationService.setTranslator(medicationTranslator);
 		fhirMedicationService.setDao(medicationDao);
 		fhirMedicationService.setSearchQuery(searchQuery);

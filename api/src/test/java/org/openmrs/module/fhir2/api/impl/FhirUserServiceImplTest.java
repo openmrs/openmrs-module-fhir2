@@ -19,6 +19,7 @@ import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.openmrs.module.fhir2.FhirConstants.ADDRESS_SEARCH_HANDLER;
 import static org.openmrs.module.fhir2.FhirConstants.CITY_PROPERTY;
@@ -63,6 +64,7 @@ import org.openmrs.module.fhir2.api.search.SearchQueryBundleProvider;
 import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.PractitionerTranslator;
+import org.openmrs.module.fhir2.api.translators.impl.PractitionerTranslatorUserImpl;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FhirUserServiceImplTest {
@@ -116,7 +118,6 @@ public class FhirUserServiceImplTest {
 	@Mock
 	private SearchQuery<User, Practitioner, FhirUserDao, PractitionerTranslator<User>, SearchQueryInclude<Practitioner>> searchQuery;
 	
-	@Mock
 	private PractitionerTranslator<User> translator;
 	
 	@Mock
@@ -133,6 +134,7 @@ public class FhirUserServiceImplTest {
 		userService.setTranslator(translator);
 		userService.setSearchQuery(searchQuery);
 		userService.setSearchQueryInclude(searchQueryInclude);
+		translator = mock(PractitionerTranslatorUserImpl.class);
 		
 		user = new User();
 		user.setUuid(USER_UUID);

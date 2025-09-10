@@ -20,6 +20,7 @@ import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -50,6 +51,7 @@ import org.openmrs.module.fhir2.api.search.SearchQueryBundleProvider;
 import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.GroupTranslator;
+import org.openmrs.module.fhir2.api.translators.impl.GroupTranslatorImpl;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FhirGroupServiceImplTest {
@@ -63,7 +65,6 @@ public class FhirGroupServiceImplTest {
 	@Mock
 	private FhirGroupDao dao;
 	
-	@Mock
 	private GroupTranslator translator;
 	
 	@Mock
@@ -93,6 +94,7 @@ public class FhirGroupServiceImplTest {
 			protected void validateObject(Cohort object) {
 			}
 		};
+		translator = mock(GroupTranslatorImpl.class);
 		groupService.setDao(dao);
 		groupService.setTranslator(translator);
 		groupService.setSearchQuery(searchQuery);

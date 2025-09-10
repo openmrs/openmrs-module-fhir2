@@ -22,6 +22,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -62,6 +63,7 @@ import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.MedicationRequestSearchParams;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.MedicationRequestTranslator;
+import org.openmrs.module.fhir2.api.translators.impl.MedicationRequestTranslatorImpl;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FhirMedicationRequestServiceImplTest {
@@ -76,7 +78,6 @@ public class FhirMedicationRequestServiceImplTest {
 	
 	private static final String LAST_UPDATED_DATE = "2020-09-03";
 	
-	@Mock
 	private MedicationRequestTranslator medicationRequestTranslator;
 	
 	@Mock
@@ -105,6 +106,7 @@ public class FhirMedicationRequestServiceImplTest {
 			protected void validateObject(DrugOrder object) {
 			}
 		};
+		medicationRequestTranslator = mock(MedicationRequestTranslatorImpl.class);
 		medicationRequestService.setDao(dao);
 		medicationRequestService.setTranslator(medicationRequestTranslator);
 		medicationRequestService.setSearchQuery(searchQuery);

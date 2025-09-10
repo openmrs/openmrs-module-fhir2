@@ -24,6 +24,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.openmrs.module.fhir2.FhirConstants.FAMILY_PROPERTY;
 import static org.openmrs.module.fhir2.FhirConstants.NAME_PROPERTY;
@@ -66,6 +67,7 @@ import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.PractitionerSearchParams;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.PractitionerTranslator;
+import org.openmrs.module.fhir2.api.translators.impl.PractitionerTranslatorProviderImpl;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FhirPractitionerServiceImplTest {
@@ -122,7 +124,6 @@ public class FhirPractitionerServiceImplTest {
 	
 	private static final int END_INDEX = 10;
 	
-	@Mock
 	private PractitionerTranslator<Provider> practitionerTranslator;
 	
 	@Mock
@@ -154,7 +155,7 @@ public class FhirPractitionerServiceImplTest {
 	@Before
 	public void setUp() {
 		when(userService.searchForUsers(any())).thenReturn(new SimpleBundleProvider());
-		
+		practitionerTranslator = mock(PractitionerTranslatorProviderImpl.class);
 		practitionerService = new FhirPractitionerServiceImpl();
 		practitionerService.setDao(practitionerDao);
 		practitionerService.setTranslator(practitionerTranslator);

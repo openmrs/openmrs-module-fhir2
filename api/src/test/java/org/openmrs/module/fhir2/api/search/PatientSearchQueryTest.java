@@ -814,8 +814,8 @@ public class PatientSearchQueryTest extends BaseFhirContextSensitiveTest {
 		List<IBaseResource> resultList = results.getResources(START_INDEX, END_INDEX);
 		
 		assertThat(results, notNullValue());
-		assertThat(resultList.size(), equalTo(4)); // reverse included resources added as part of the result list
-		assertThat(resultList.subList(1, 4), everyItem(allOf(is(instanceOf(Encounter.class)),
+		assertThat(resultList.size(), equalTo(5)); // reverse included resources added as part of the result list
+		assertThat(resultList.subList(1, 5), everyItem(allOf(is(instanceOf(Encounter.class)),
 		    hasProperty("subject", hasProperty("referenceElement", hasProperty("idPart", equalTo(PATIENT_OTHER2_UUID)))))));
 	}
 	
@@ -930,8 +930,8 @@ public class PatientSearchQueryTest extends BaseFhirContextSensitiveTest {
 		List<IBaseResource> resultList = results.getResources(START_INDEX, END_INDEX);
 		
 		assertThat(results, notNullValue());
-		assertThat(resultList.size(), equalTo(13)); // reverse included resources (3 encounters + 9 observations) added as part of the result list
-		assertThat(resultList.subList(1, 13), everyItem(allOf(
+		assertThat(resultList.size(), equalTo(14)); // reverse included resources (3 encounters + 9 observations) added as part of the result list
+		assertThat(resultList.subList(1, 14), everyItem(allOf(
 		    anyOf(is(instanceOf(Encounter.class)), is(instanceOf(Observation.class))),
 		    hasProperty("subject", hasProperty("referenceElement", hasProperty("idPart", equalTo(PATIENT_OTHER2_UUID)))))));
 	}
@@ -1295,11 +1295,11 @@ public class PatientSearchQueryTest extends BaseFhirContextSensitiveTest {
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(15));
+		assertThat(results.size(), equalTo(16));
 		
 		List<IBaseResource> resultList = getAllResources(results);
 		
-		assertThat(resultList.size(), equalTo(15));
+		assertThat(resultList.size(), equalTo(16));
 	}
 	
 	@Test
@@ -1321,10 +1321,10 @@ public class PatientSearchQueryTest extends BaseFhirContextSensitiveTest {
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(44));
+		assertThat(results.size(), equalTo(45));
 		
 		List<IBaseResource> resultList = getAllResources(results);
 		
-		assertThat(resultList, hasSize(44));
+		assertThat(resultList, hasSize(45));
 	}
 }

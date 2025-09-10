@@ -4,7 +4,7 @@
 
     <groupId>org.openmrs.module</groupId>
     <artifactId>fhir2</artifactId>
-    <version>2.8.0-SNAPSHOT</version>
+    <version>3.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>FHIR2</name>
     <description>Implementation of FHIR R4 for OpenMRS</description>
@@ -38,13 +38,8 @@
     <modules>
         <module>test-data</module>
         <module>api</module>
-        <module>api-2.5</module>
-        <module>api-2.6</module>
-        <module>api-2.7</module>
         <module>omod</module>
         <module>integration-tests</module>
-        <module>integration-tests-2.6</module>
-        <module>integration-tests-2.7</module>
         <module>e2e-tests</module>
     </modules>
 
@@ -872,7 +867,7 @@
                 <plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>0.8.8</version>
+                    <version>0.8.13</version>
                     <executions>
                         <execution>
                             <goals>
@@ -944,8 +939,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.build.outputEncoding>UTF-8</project.build.outputEncoding>
         <lombokVersion>1.18.38</lombokVersion>
-        <openmrsPlatformVersion>2.4.1</openmrsPlatformVersion>
-        <openmrsPlatformToolsVersion>2.4.1</openmrsPlatformToolsVersion>
+        <openmrsPlatformVersion>2.7.6</openmrsPlatformVersion>
+        <openmrsPlatformToolsVersion>2.7.6</openmrsPlatformToolsVersion>
         <hapifhirVersion>5.7.9</hapifhirVersion>
         <ucumVersion>1.0.3</ucumVersion>
     </properties>
