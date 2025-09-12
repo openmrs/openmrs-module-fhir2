@@ -95,7 +95,7 @@ public class SearchParameterMap implements Serializable {
 	 */
 	@SuppressWarnings("UnstableApiUsage")
 	public <T> List<PropParam<T>> getParameters(@Nonnull String key) {
-		TypeToken<T> type = new TypeToken<T>() {};
+		TypeToken<T> type = new TypeToken<T>(getClass()) {};
 		
 		@SuppressWarnings("unchecked")
 		List<PropParam<T>> result = this.params.getOrDefault(key, new ArrayList<>()).stream()

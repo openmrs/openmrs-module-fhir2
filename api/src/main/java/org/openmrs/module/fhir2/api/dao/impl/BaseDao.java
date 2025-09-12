@@ -87,6 +87,8 @@ import org.openmrs.module.fhir2.model.FhirConceptSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
+import static org.openmrs.module.fhir2.api.util.FhirUtils.referenceToId;
+
 /**
  * <p>
  * A base class for OpenMRS FHIR2 Dao objects. It provides helpers to make generating complex
@@ -606,7 +608,7 @@ public abstract class BaseDao {
 						return propertyLike(criteriaContext, locationAlias, "country", token.getValue());
 				}
 			} else {
-				return Optional.of(criteriaContext.getCriteriaBuilder().equal(locationAlias.get("uuid"), token.getValue()));
+				return Optional.of(criteriaContext.getCriteriaBuilder().equal(locationAlias.get("uuid"), referenceToId(token.getValue()).orElse(token.getValue())));
 			}
 			
 			return Optional.empty();

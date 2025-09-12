@@ -17,10 +17,13 @@ import javax.annotation.Nonnull;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -85,7 +88,7 @@ public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLo
 					break;
 				case FhirConstants.LOCATION_REFERENCE_SEARCH_HANDLER:
 					entry.getValue().forEach(param -> handleLocationReference(criteriaContext, criteriaContext.getRoot(),
-					    (ReferenceAndListParam) param.getParam()));
+					    (ReferenceAndListParam) param.getParam()).ifPresent(criteriaContext::addPredicate));
 					break;
 				case FhirConstants.TAG_SEARCH_HANDLER:
 					entry.getValue().forEach(param -> handleTag(criteriaContext, (TokenAndListParam) param.getParam()));
@@ -187,47 +190,44 @@ public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLo
 			return Optional.empty();
 		}
 		
-		if (locationOrReference.size() > 1) {
-			throw new IllegalArgumentException("Only one location reference is supported");
-		}
-		
 		List<ReferenceParam> locationReferences = locationOrReference.get(0).getValuesAsQueryTokens();
 		
 		if (locationReferences == null || locationReferences.isEmpty()) {
 			return Optional.empty();
 		}
 		
-		if (locationReferences.size() > 1) {
-			throw new IllegalArgumentException("Only one location reference is supported");
-		}
-		
 		ReferenceParam locationReference = locationReferences.get(0);
 		
-		// TODO Fix this code
 		// **NOTE: this is a *bug* in the current HAPI FHIR implementation, "below" should be the "queryParameterQualifier",
 		// not the resource type; likely need update this when/fix the HAPI FHIR implementation is fixed**
 		// this is to support queries of the type "Location?partof=below:uuid"
 		if ("below".equalsIgnoreCase(locationReference.getResourceType())) {
-			//			int searchDepth = globalPropertyService
-			//			        .getGlobalPropertyAsInteger(FhirConstants.SUPPORTED_LOCATION_HIERARCHY_SEARCH_DEPTH, 5);
-			//
-			//			List<Predicate> belowReferenceCriteria = new ArrayList<>();
-			//
-			//			// we need to add a join to the parentLocation for each level of hierarchy we want to search, and add "equals" criterion for each level
-			//			int depth = 1;
-			//			while (depth <= searchDepth) {
-			//				belowReferenceCriteria.add(eq("ancestor" + depth + ".uuid", locationReference.getIdPart()));
-			//				criteria.createAlias(depth == 1 ? "parentLocation" : "ancestor" + (depth - 1) + ".parentLocation",
-			//				    "ancestor" + depth, JoinType.LEFT_OUTER_JOIN);
-			//				depth++;
-			//			}
-			//
-			//			// "or" these call together so that we return the location if any of the joined ancestor location uuids match
-			//			criteria.add(or(belowReferenceCriteria.toArray(new Criterion[0])));
-			return Optional.empty();
+			if (locationOrReference.size() > 1 || locationReferences.size() > 1) {
+				throw new IllegalArgumentException("Only one location reference is supported for :below queries");
+			}
+
+			int searchDepth = globalPropertyService
+					.getGlobalPropertyAsInteger(FhirConstants.SUPPORTED_LOCATION_HIERARCHY_SEARCH_DEPTH, 5);
+
+			List<Predicate> predicates = new ArrayList<>(searchDepth - 1);
+			From<?, ?> base = criteriaContext.getRoot();
+			for (int depth = 1; depth < searchDepth; depth++) {
+				String alias = "ancestor" + depth;
+				Join<?, ?> join = criteriaContext.addJoin(base,"parentLocation", alias, JoinType.LEFT);
+				predicates.add(criteriaContext.getCriteriaBuilder().equal(join.get("uuid"), locationReference.getIdPart()));
+
+				base = join;
+			}
+
+			if (predicates.isEmpty()) {
+				return Optional.empty();
+			} else {
+				return Optional.of(criteriaContext.getCriteriaBuilder().or(predicates.toArray(new Predicate[0])));
+			}
 		} else {
 			// this is to support queries of the type "Location?partof=uuid" or chained search like "Location?partof:Location=Location:name=xxx"
-			return super.<T, U> handleLocationReference(criteriaContext, locationAlias, locationAndReferences);
+			Join<?, ?> join = criteriaContext.addJoin("parentLocation", "loc");
+			return super.handleLocationReference(criteriaContext, join, locationAndReferences);
 		}
 	}
 	
