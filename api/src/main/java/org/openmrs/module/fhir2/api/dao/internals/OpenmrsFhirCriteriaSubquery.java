@@ -22,7 +22,7 @@ import lombok.Setter;
 
 public class OpenmrsFhirCriteriaSubquery<V, U> extends BaseFhirCriteriaHolder<V, U> {
 	
-	@Getter(onMethod = @__({@Nonnull}))
+	@Getter(onMethod = @__({ @Nonnull }))
 	Subquery<U> subquery;
 	
 	@Setter

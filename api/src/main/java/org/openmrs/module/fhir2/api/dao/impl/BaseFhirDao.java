@@ -36,7 +36,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.hibernate.CacheMode;
 import org.hibernate.Criteria;
 import org.hibernate.Hibernate;
-import org.hibernate.metamodel.spi.MetamodelImplementor;
 import org.hibernate.proxy.HibernateProxy;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.openmrs.Auditable;
@@ -186,14 +185,10 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 			TypedQuery<T> executableQuery = criteriaContext.getEntityManager().createQuery(criteriaQuery);
 			
 			executableQuery.setFirstResult(theParams.getFromIndex());
-			if (theParams.getToIndex() != Integer.MAX_VALUE) {
+			if (theParams.getToIndex() != Integer.MAX_VALUE && theParams.getToIndex() >= 0) {
 				int maxResults = theParams.getToIndex() - theParams.getFromIndex();
 				if (maxResults >= 0) {
 					executableQuery.setMaxResults(maxResults);
-				} else {
-					// TODO: this is really just a workaround, we can find a better way of handling the negative results
-					int negative = theParams.getFromIndex() - theParams.getToIndex();
-					executableQuery.setMaxResults(negative);
 				}
 			}
 			

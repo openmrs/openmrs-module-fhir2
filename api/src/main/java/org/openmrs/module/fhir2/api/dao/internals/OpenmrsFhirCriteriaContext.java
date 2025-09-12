@@ -49,13 +49,13 @@ public class OpenmrsFhirCriteriaContext<T, U> extends BaseFhirCriteriaHolder<T, 
 	
 	@Getter(onMethod = @__({ @Nonnull }))
 	private final EntityManager entityManager;
-
+	
 	@Getter(onMethod = @__({ @Nonnull }))
 	private final CriteriaQuery<U> criteriaQuery;
-
+	
 	@Getter(onMethod = @__({ @Nonnull }))
 	private final List<Order> orders = new ArrayList<>();
-
+	
 	@Getter(onMethod = @__({ @Nonnull }))
 	private final List<T> results = new ArrayList<>();
 	

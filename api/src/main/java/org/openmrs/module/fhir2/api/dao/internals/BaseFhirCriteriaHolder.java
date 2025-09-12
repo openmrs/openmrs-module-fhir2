@@ -11,7 +11,6 @@ package org.openmrs.module.fhir2.api.dao.internals;
 
 import javax.annotation.Nonnull;
 import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
@@ -27,7 +26,6 @@ import java.util.function.Function;
 
 import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor

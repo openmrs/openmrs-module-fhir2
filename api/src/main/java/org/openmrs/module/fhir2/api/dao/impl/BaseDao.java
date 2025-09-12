@@ -724,7 +724,7 @@ public abstract class BaseDao {
 					}
 				} else {
 					return Optional.of(
-					    criteriaContext.getCriteriaBuilder().equal(orderer.get("uuid"), participantToken.getValue()));
+					    criteriaContext.getCriteriaBuilder().equal(orderer.get("uuid"), participantToken.getIdPart()));
 				}
 				
 				return Optional.empty();
@@ -806,32 +806,28 @@ public abstract class BaseDao {
 	        ReferenceAndListParam patientReference, String associationPath) {
 		if (patientReference != null) {
 			Join<?, ?> personJoin = criteriaContext.addJoin(associationPath, "p");
-
+			
 			handleAndListParam(criteriaContext.getCriteriaBuilder(), patientReference, patientToken -> {
 				if (patientToken.getChain() != null) {
 					switch (patientToken.getChain()) {
 						case Patient.SP_IDENTIFIER:
-							Join<?, ?> associationPathIdentifiersJoin = criteriaContext.addJoin(
-									criteriaContext.getCriteriaBuilder().treat(
-											(Join<?, Person>) personJoin, org.openmrs.Patient.class),
-									"identifiers", "pi");
+							Join<?, ?> associationPathIdentifiersJoin = criteriaContext.addJoin(criteriaContext
+							        .getCriteriaBuilder().treat((Join<?, Person>) personJoin, org.openmrs.Patient.class),
+							    "identifiers", "pi");
 							return Optional.of(criteriaContext.getCriteriaBuilder()
 							        .like(associationPathIdentifiersJoin.get("identifier"), patientToken.getValue()));
 						case Patient.SP_GIVEN: {
-							Join<?, ?> associationPathNamesJoin = criteriaContext.addJoin(personJoin, "names",
-							    "pn");
+							Join<?, ?> associationPathNamesJoin = criteriaContext.addJoin(personJoin, "names", "pn");
 							return Optional.of(criteriaContext.getCriteriaBuilder()
 							        .like(associationPathNamesJoin.get("givenName"), patientToken.getValue()));
 						}
 						case Patient.SP_FAMILY: {
-							Join<?, ?> associationPathNamesJoin = criteriaContext.addJoin(personJoin, "names",
-							    "pn");
+							Join<?, ?> associationPathNamesJoin = criteriaContext.addJoin(personJoin, "names", "pn");
 							return Optional.of(criteriaContext.getCriteriaBuilder()
 							        .like(associationPathNamesJoin.get("familyName"), patientToken.getValue()));
 						}
 						case Patient.SP_NAME:
-							Join<?, ?> associationPathNamesJoin = criteriaContext.addJoin(personJoin, "names",
-							    "pn");
+							Join<?, ?> associationPathNamesJoin = criteriaContext.addJoin(personJoin, "names", "pn");
 							
 							List<Optional<? extends Predicate>> criterionList = new ArrayList<>();
 							
@@ -846,8 +842,8 @@ public abstract class BaseDao {
 							return Optional.of(criteriaContext.getCriteriaBuilder().or(toCriteriaArray(criterionList)));
 					}
 				} else {
-					return Optional.of(criteriaContext.getCriteriaBuilder().equal(personJoin.get("uuid"),
-					    patientToken.getIdPart()));
+					return Optional.of(
+					    criteriaContext.getCriteriaBuilder().equal(personJoin.get("uuid"), patientToken.getIdPart()));
 				}
 				
 				return Optional.empty();
@@ -1007,11 +1003,13 @@ public abstract class BaseDao {
 		            onDate)));
 	}
 	
-	protected <T, U> Predicate generateActiveOrderQuery(@Nonnull OpenmrsFhirCriteriaContext<T, U> criteriaContext, String path) {
+	protected <T, U> Predicate generateActiveOrderQuery(@Nonnull OpenmrsFhirCriteriaContext<T, U> criteriaContext,
+	        String path) {
 		return generateActiveOrderQuery(criteriaContext, path, new Date());
 	}
 	
-	protected <T, U> Predicate generateActiveOrderQuery(@Nonnull OpenmrsFhirCriteriaContext<T, U> criteriaContext, Date onDate) {
+	protected <T, U> Predicate generateActiveOrderQuery(@Nonnull OpenmrsFhirCriteriaContext<T, U> criteriaContext,
+	        Date onDate) {
 		return generateActiveOrderQuery(criteriaContext, "", onDate);
 	}
 	
@@ -1109,49 +1107,45 @@ public abstract class BaseDao {
 	protected <T, U> Path<?> paramToProp(OpenmrsFhirCriteriaContext<T, U> criteriaContext, @Nonnull String param) {
 		return null;
 	}
-
+	
 	/**
-	 * This function returns a {@link Optional<Predicate>} which, if present, contains a "like" query for a specified
-	 * property on the specified table. If a predicate is returned it is always a prefix search, meaning that the generated
-	 * query will have a clause like:
-	 *
-	 * <pre>@code{
+	 * This function returns a {@link Optional<Predicate>} which, if present, contains a "like" query
+	 * for a specified property on the specified table. If a predicate is returned it is always a prefix
+	 * search, meaning that the generated query will have a clause like: <pre>@code{
 	 *     WHERE <propertyName> LIKE '<value>%'
 	 * }</pre>
 	 *
 	 * @param criteriaContext The current criteriaContext
 	 * @param from The {@link From} object representing the table to get the property from
 	 * @param propertyName The name of the property to look for
-	 * @param value The string-value to match the prefix of the property against. Note that if the supplied value is a
-	 *              null or empty string, no predicate is returned.
+	 * @param value The string-value to match the prefix of the property against. Note that if the
+	 *            supplied value is a null or empty string, no predicate is returned.
 	 * @return An {@link Optional<Predicate>} to check this property for this value.
 	 * @param <T> The root type of the criteriaContext
 	 * @param <U> The return type of the criteriaContext
 	 */
-	protected <T, U> Optional<Predicate> propertyLike(@Nonnull OpenmrsFhirCriteriaContext<T, U> criteriaContext, @Nonnull From<?, ?> from,
-	        @Nonnull String propertyName, @Nullable String value) {
+	protected <T, U> Optional<Predicate> propertyLike(@Nonnull OpenmrsFhirCriteriaContext<T, U> criteriaContext,
+	        @Nonnull From<?, ?> from, @Nonnull String propertyName, @Nullable String value) {
 		if (value == null || value.trim().isEmpty()) {
 			return Optional.empty();
 		}
 		
 		return propertyLike(criteriaContext, from, propertyName, new StringParam(value));
 	}
-
+	
 	/**
-	 * This function returns a {@link Optional<Predicate>} which, if present, contains a "like" query for a specified
-	 * property on the specified table. If a predicate is returned it is always a prefix search, meaning that the generated
-	 * query will have a clause like:
-	 *
-	 * <pre>@code{
+	 * This function returns a {@link Optional<Predicate>} which, if present, contains a "like" query
+	 * for a specified property on the specified table. If a predicate is returned it is always a prefix
+	 * search, meaning that the generated query will have a clause like: <pre>@code{
 	 *     WHERE <propertyName> LIKE '<value>%'
 	 * }</pre>
 	 *
 	 * @param criteriaContext The current criteriaContext
 	 * @param from The {@link From} object representing the table to get the property from
 	 * @param propertyName The name of the property to look for
-	 * @param param A {@link StringParam} that describes the value to search for, including whether it is intended to
-	 *              be an exact match or a contains query. Note that a null param or an empty string that is not an exact
-	 *              match will not return a predicate
+	 * @param param A {@link StringParam} that describes the value to search for, including whether it
+	 *            is intended to be an exact match or a contains query. Note that a null param or an
+	 *            empty string that is not an exact match will not return a predicate
 	 * @return An {@link Optional<Predicate>} to check this property for this value.
 	 * @param <T> The root type of the criteriaContext
 	 * @param <U> The return type of the criteriaContext
@@ -1320,14 +1314,15 @@ public abstract class BaseDao {
 		
 		return Optional.empty();
 	}
-
+	
 	/**
-	 * This function creates a new {@link OpenmrsFhirCriteriaContext} for queries that select from the specified root type
-	 * and return those objects as results.
+	 * This function creates a new {@link OpenmrsFhirCriteriaContext} for queries that select from the
+	 * specified root type and return those objects as results.
 	 *
 	 * @param rootType An OpenMRS domain object that this criteria context queries
 	 * @return An {@link OpenmrsFhirCriteriaContext} for constructing a new query
-	 * @param <T> The root type and return type of queries run from the returned {@link OpenmrsFhirCriteriaContext}
+	 * @param <T> The root type and return type of queries run from the returned
+	 *            {@link OpenmrsFhirCriteriaContext}
 	 */
 	protected <T> OpenmrsFhirCriteriaContext<T, T> createCriteriaContext(@Nonnull Class<T> rootType) {
 		EntityManager em = sessionFactory.getCurrentSession();
@@ -1337,10 +1332,10 @@ public abstract class BaseDao {
 		
 		return new OpenmrsFhirCriteriaContext<>(em, cb, cq, root);
 	}
-
+	
 	/**
-	 * This function creates a new {@link OpenmrsFhirCriteriaContext} for queries that select from the specified root type
-	 * and return a different type of result
+	 * This function creates a new {@link OpenmrsFhirCriteriaContext} for queries that select from the
+	 * specified root type and return a different type of result
 	 *
 	 * @param rootType An OpenMRS domain object that this criteria context queries
 	 * @param resultType The type of results returned from this query
@@ -1348,7 +1343,8 @@ public abstract class BaseDao {
 	 * @param <T> The root type of the returned {@link OpenmrsFhirCriteriaContext}
 	 * @param <U> The rturn type of the returned {@link OpenmrsFhirCriteriaContext}
 	 */
-	protected <T, U> OpenmrsFhirCriteriaContext<T, U> createCriteriaContext(@Nonnull Class<T> rootType, @Nonnull Class<U> resultType) {
+	protected <T, U> OpenmrsFhirCriteriaContext<T, U> createCriteriaContext(@Nonnull Class<T> rootType,
+	        @Nonnull Class<U> resultType) {
 		EntityManager em = sessionFactory.getCurrentSession();
 		CriteriaBuilder cb = em.getCriteriaBuilder();
 		CriteriaQuery<U> cq = cb.createQuery(resultType);
@@ -1356,19 +1352,22 @@ public abstract class BaseDao {
 		
 		return new OpenmrsFhirCriteriaContext<>(em, cb, cq, root);
 	}
-
+	
 	/**
-	 * Attempts to provide a consistent interface to the {@link From} object representing either the {@link Root} object
-	 * for the current criteria context or the {@link Join} object for the named alias.
+	 * Attempts to provide a consistent interface to the {@link From} object representing either the
+	 * {@link Root} object for the current criteria context or the {@link Join} object for the named
+	 * alias.
 	 *
 	 * @param criteriaContext The criteriaContext to extract the {@link From} object from
-	 * @param alias The name of the alias to extract from the criteria context or else a null or empty string to return
-	 *              the root object
-	 * @return Either the {@link Root} for this query or the {@link Join} that is aliased by the provided name
+	 * @param alias The name of the alias to extract from the criteria context or else a null or empty
+	 *            string to return the root object
+	 * @return Either the {@link Root} for this query or the {@link Join} that is aliased by the
+	 *         provided name
 	 * @param <T> The root type of the criteriaContext
 	 * @param <U> The return type of the criteriaContext
 	 */
-	protected <T, U> From<?, ?> getRootOrJoin(@Nonnull OpenmrsFhirCriteriaContext<T, U> criteriaContext, @Nullable String alias) {
+	protected <T, U> From<?, ?> getRootOrJoin(@Nonnull OpenmrsFhirCriteriaContext<T, U> criteriaContext,
+	        @Nullable String alias) {
 		if (alias == null || alias.isEmpty()) {
 			return criteriaContext.getRoot();
 		} else {
@@ -1376,14 +1375,16 @@ public abstract class BaseDao {
 			        "Tried to reference alias " + alias + " before creating a join with that name"));
 		}
 	}
-
+	
 	/**
-	 * Attempts to provide a consistent interface to the {@link From} object representing either the {@link Root} object
-	 * for the current criteria context or the {@link Join} object that matches the provided {@link From} object.
+	 * Attempts to provide a consistent interface to the {@link From} object representing either the
+	 * {@link Root} object for the current criteria context or the {@link Join} object that matches the
+	 * provided {@link From} object.
 	 *
 	 * @param criteriaContext The criteriaContext to extract the {@link From} object from
 	 * @param alias The {@link From} alias to extract the join from
-	 * @return Either the {@link Root} for this query or the {@link Join} that is aliased by the provided name
+	 * @return Either the {@link Root} for this query or the {@link Join} that is aliased by the
+	 *         provided name
 	 * @param <T> The root type of the criteriaContext
 	 * @param <U> The return type of the criteriaContext
 	 */
@@ -1395,13 +1396,15 @@ public abstract class BaseDao {
 			        "Tried to reference alias " + alias + " before creating a join with that name"));
 		}
 	}
-
+	
 	/**
-	 * Gets the name of the entity's id property. Note that this method relies on Hibernate's SPI for JPA, so while
-	 * isn't using any internal implementation details, it is dependent on using Hibernate.
+	 * Gets the name of the entity's id property. Note that this method relies on Hibernate's SPI for
+	 * JPA, so while isn't using any internal implementation details, it is dependent on using
+	 * Hibernate.
 	 * <p/>
-	 * This method also assumes that there <em>is</em> an identifiable property name for the instance, which is true
-	 * for standard OpenMRS domain objects, but should be verified for domain objects not defined in core.
+	 * This method also assumes that there <em>is</em> an identifiable property name for the instance,
+	 * which is true for standard OpenMRS domain objects, but should be verified for domain objects not
+	 * defined in core.
 	 *
 	 * @param entityManager The current entity manager
 	 * @param clazz The persistent class to get the id from
@@ -1409,10 +1412,10 @@ public abstract class BaseDao {
 	 * @param <V> A persistent class
 	 */
 	protected <V> String getIdPropertyName(@Nonnull EntityManager entityManager, @Nonnull Class<V> clazz) {
-		return ((MetamodelImplementor) entityManager.getEntityManagerFactory().getMetamodel())
-				.entityPersister(clazz).getIdentifierPropertyName();
+		return ((MetamodelImplementor) entityManager.getEntityManagerFactory().getMetamodel()).entityPersister(clazz)
+		        .getIdentifierPropertyName();
 	}
-
+	
 	/**
 	 * This object is used to store the state of the sorting
 	 */
@@ -1420,11 +1423,11 @@ public abstract class BaseDao {
 	@Builder
 	@EqualsAndHashCode
 	public static final class SortState<T, U> {
-
+		
 		private OpenmrsFhirCriteriaContext<T, U> context;
-
+		
 		private SortOrderEnum sortOrder;
-
+		
 		private String parameter;
 	}
 }

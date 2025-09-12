@@ -14,7 +14,6 @@ import javax.persistence.criteria.From;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 
 import java.util.Date;
 import java.util.List;
@@ -164,7 +163,7 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 			
 			return count;
 		}
-
+		
 		return super.getSearchResultsCount(theParams);
 	}
 	
@@ -275,19 +274,19 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 				return Optional.empty();
 			}
 			
-			OpenmrsFhirCriteriaSubquery<FhirObservationCategoryMap, ?> subqueryContext = criteriaContext.addSubquery(FhirObservationCategoryMap.class,
-			    Long.class);
+			OpenmrsFhirCriteriaSubquery<FhirObservationCategoryMap, ?> subqueryContext = criteriaContext
+			        .addSubquery(FhirObservationCategoryMap.class, Long.class);
 			Join<?, ?> conceptClassSubqueryJoin = subqueryContext.addJoin("conceptClass", "ocm");
-
-			String idProperty = getIdPropertyName(criteriaContext.getEntityManager(), ConceptClass.class);
-
-			subqueryContext.setProjection(conceptClassSubqueryJoin.get(idProperty));
-
-			subqueryContext.addPredicate(
-			    subqueryContext.getCriteriaBuilder().equal(subqueryContext.getRoot().get("observationCategory"), param.getValue()));
 			
-			return Optional.of(
-			    criteriaContext.getCriteriaBuilder().in(conceptClassJoin.get(idProperty)).value(subqueryContext.finalizeQuery()));
+			String idProperty = getIdPropertyName(criteriaContext.getEntityManager(), ConceptClass.class);
+			
+			subqueryContext.setProjection(conceptClassSubqueryJoin.get(idProperty));
+			
+			subqueryContext.addPredicate(subqueryContext.getCriteriaBuilder()
+			        .equal(subqueryContext.getRoot().get("observationCategory"), param.getValue()));
+			
+			return Optional.of(criteriaContext.getCriteriaBuilder().in(conceptClassJoin.get(idProperty))
+			        .value(subqueryContext.finalizeQuery()));
 		}).ifPresent(criteriaContext::addPredicate);
 	}
 	

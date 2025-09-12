@@ -117,8 +117,8 @@ public class SearchQueryIncludeImpl<U extends IBaseResource> implements SearchQu
 		List<PropParam<Object>> includeParamList = theParams.getParameters(FhirConstants.INCLUDE_SEARCH_HANDLER);
 		List<PropParam<Object>> revIncludeParamList = theParams.getParameters(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER);
 		
-		Set<Include> includeSet = new LinkedHashSet<>();
-		Set<Include> revIncludeSet = new LinkedHashSet<>();
+		Set<Include> includeSet = new LinkedHashSet<>(0);
+		Set<Include> revIncludeSet = new LinkedHashSet<>(0);
 		
 		if (CollectionUtils.isNotEmpty(includeParamList)) {
 			includeSet = (Set<Include>) includeParamList.get(0).getParam();

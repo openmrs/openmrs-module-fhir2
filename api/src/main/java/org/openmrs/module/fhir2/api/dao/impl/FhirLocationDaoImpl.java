@@ -179,7 +179,7 @@ public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLo
 	}
 	
 	protected <T, U> Optional<Predicate> handleLocationReference(@Nonnull OpenmrsFhirCriteriaContext<T, U> criteriaContext,
-			 @Nonnull From<?, ?> locationAlias, ReferenceAndListParam locationAndReferences) {
+	        @Nonnull From<?, ?> locationAlias, ReferenceAndListParam locationAndReferences) {
 		if (locationAndReferences == null) {
 			return Optional.empty();
 		}
@@ -205,20 +205,20 @@ public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLo
 			if (locationOrReference.size() > 1 || locationReferences.size() > 1) {
 				throw new IllegalArgumentException("Only one location reference is supported for :below queries");
 			}
-
+			
 			int searchDepth = globalPropertyService
-					.getGlobalPropertyAsInteger(FhirConstants.SUPPORTED_LOCATION_HIERARCHY_SEARCH_DEPTH, 5);
-
+			        .getGlobalPropertyAsInteger(FhirConstants.SUPPORTED_LOCATION_HIERARCHY_SEARCH_DEPTH, 5);
+			
 			List<Predicate> predicates = new ArrayList<>(searchDepth - 1);
 			From<?, ?> base = criteriaContext.getRoot();
 			for (int depth = 1; depth < searchDepth; depth++) {
 				String alias = "ancestor" + depth;
-				Join<?, ?> join = criteriaContext.addJoin(base,"parentLocation", alias, JoinType.LEFT);
+				Join<?, ?> join = criteriaContext.addJoin(base, "parentLocation", alias, JoinType.LEFT);
 				predicates.add(criteriaContext.getCriteriaBuilder().equal(join.get("uuid"), locationReference.getIdPart()));
-
+				
 				base = join;
 			}
-
+			
 			if (predicates.isEmpty()) {
 				return Optional.empty();
 			} else {
