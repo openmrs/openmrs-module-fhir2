@@ -74,6 +74,7 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.FhirTestConstants;
 import org.openmrs.module.fhir2.api.dao.FhirEncounterDao;
 import org.openmrs.module.fhir2.api.dao.FhirObservationDao;
+import org.openmrs.module.fhir2.api.search.param.ObservationSearchParams;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.ObservationTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -687,12 +688,10 @@ public class ObservationSearchQueryTest extends BaseFhirContextSensitiveTest {
 	
 	@Test
 	public void searchForObs_shouldReturnObsByCategory() {
-		TokenAndListParam categories = new TokenAndListParam().addAnd(new TokenParam().setValue("laboratory"));
+		ObservationSearchParams theParams = new ObservationSearchParams();
+		theParams.setCategory(new TokenAndListParam().addAnd(new TokenParam().setValue("laboratory")));
 		
-		SearchParameterMap theParams = new SearchParameterMap();
-		theParams.addParameter(FhirConstants.CATEGORY_SEARCH_HANDLER, categories);
-		
-		IBundleProvider results = search(theParams);
+		IBundleProvider results = search(theParams.toSearchParameterMap());
 		
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(17));

@@ -164,6 +164,7 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 			
 			return count;
 		}
+
 		return super.getSearchResultsCount(theParams);
 	}
 	
@@ -254,10 +255,8 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 	
 	private <T, U> Optional<Predicate> handleValueStringParam(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
 	        @Nonnull String propertyName, StringAndListParam valueStringParam) {
-		//TODO: needs further investigation
-		Join<?, ?> propertyNameJoin = criteriaContext.addJoin(propertyName, propertyName);
 		return handleAndListParam(criteriaContext.getCriteriaBuilder(), valueStringParam,
-		    v -> propertyLike(criteriaContext, propertyNameJoin, propertyName, v.getValue()));
+		    v -> propertyLike(criteriaContext, criteriaContext.getRoot(), propertyName, v.getValue()));
 	}
 	
 	private <U> void handleCodedConcept(OpenmrsFhirCriteriaContext<Obs, U> criteriaContext, TokenAndListParam code) {
@@ -276,17 +275,19 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 				return Optional.empty();
 			}
 			
-			OpenmrsFhirCriteriaSubquery<ConceptClass, ?> context = criteriaContext.addSubquery(ConceptClass.class,
-			    String.class);
-			context.setProjection(context.getRoot().get("uuid"));
-			Root<FhirObservationCategoryMap> observationCategoryMapRoot = criteriaContext.getCriteriaQuery()
-			        .from(FhirObservationCategoryMap.class);
-			context.addJoin(observationCategoryMapRoot, "conceptClass", "ocm");
-			context.addPredicate(
-			    context.getCriteriaBuilder().equal(observationCategoryMapRoot.get("observationCategory"), param.getValue()));
+			OpenmrsFhirCriteriaSubquery<FhirObservationCategoryMap, ?> subqueryContext = criteriaContext.addSubquery(FhirObservationCategoryMap.class,
+			    Long.class);
+			Join<?, ?> conceptClassSubqueryJoin = subqueryContext.addJoin("conceptClass", "ocm");
+
+			String idProperty = getIdPropertyName(criteriaContext.getEntityManager(), ConceptClass.class);
+
+			subqueryContext.setProjection(conceptClassSubqueryJoin.get(idProperty));
+
+			subqueryContext.addPredicate(
+			    subqueryContext.getCriteriaBuilder().equal(subqueryContext.getRoot().get("observationCategory"), param.getValue()));
 			
 			return Optional.of(
-			    criteriaContext.getCriteriaBuilder().in(conceptClassJoin.get("uuid")).value(context.finalizeQuery()));
+			    criteriaContext.getCriteriaBuilder().in(conceptClassJoin.get(idProperty)).value(subqueryContext.finalizeQuery()));
 		}).ifPresent(criteriaContext::addPredicate);
 	}
 	

@@ -47,24 +47,23 @@ import lombok.NonNull;
  */
 public class OpenmrsFhirCriteriaContext<T, U> extends BaseFhirCriteriaHolder<T, U> {
 	
-	@Getter
-	@NonNull
+	@Getter(onMethod = @__({ @Nonnull }))
 	private final EntityManager entityManager;
-	
-	@Getter
-	@NonNull
+
+	@Getter(onMethod = @__({ @Nonnull }))
 	private final CriteriaQuery<U> criteriaQuery;
-	
+
+	@Getter(onMethod = @__({ @Nonnull }))
 	private final List<Order> orders = new ArrayList<>();
-	
-	@Getter
+
+	@Getter(onMethod = @__({ @Nonnull }))
 	private final List<T> results = new ArrayList<>();
 	
 	public OpenmrsFhirCriteriaContext(@Nonnull EntityManager entityManager, @NonNull CriteriaBuilder criteriaBuilder,
 	    @Nonnull CriteriaQuery<U> criteriaQuery, @NonNull Root<T> root) {
 		super(criteriaBuilder, root);
-		this.entityManager = entityManager;
 		this.criteriaQuery = criteriaQuery;
+		this.entityManager = entityManager;
 	}
 	
 	public <V> OpenmrsFhirCriteriaSubquery<V, Integer> addSubquery(Class<V> fromType) {
@@ -72,7 +71,7 @@ public class OpenmrsFhirCriteriaContext<T, U> extends BaseFhirCriteriaHolder<T, 
 	}
 	
 	public <V, U> OpenmrsFhirCriteriaSubquery<V, U> addSubquery(Class<V> fromType, Class<U> resultType) {
-		Subquery<U> subquery = criteriaQuery.subquery(resultType);
+		Subquery<U> subquery = getCriteriaQuery().subquery(resultType);
 		return new OpenmrsFhirCriteriaSubquery<>(getCriteriaBuilder(), subquery, subquery.from(fromType));
 	}
 	
@@ -92,11 +91,11 @@ public class OpenmrsFhirCriteriaContext<T, U> extends BaseFhirCriteriaHolder<T, 
 	}
 	
 	public CriteriaQuery<U> finalizeQuery() {
-		return criteriaQuery.where(getPredicates().toArray(new Predicate[0])).orderBy(orders);
+		return getCriteriaQuery().where(getPredicates().toArray(new Predicate[0])).orderBy(orders);
 	}
 	
 	public CriteriaQuery<U> finalizeIdQuery(String idProperty) {
-		return criteriaQuery.select(getRoot().get(idProperty)).where(getPredicates().toArray(new Predicate[0]))
+		return getCriteriaQuery().select(getRoot().get(idProperty)).where(getPredicates().toArray(new Predicate[0]))
 		        .distinct(true);
 	}
 	
@@ -104,6 +103,6 @@ public class OpenmrsFhirCriteriaContext<T, U> extends BaseFhirCriteriaHolder<T, 
 	public CriteriaQuery<U> finalizeWrapperQuery(String idProperty, Collection<Integer> ids) {
 		// the unchecked cast here from Root<T> to Path<U> relies on Hibernate implementation details and may not
 		// be safe long-term, but I can't figure out how to turn a Root into a Path
-		return criteriaQuery.select((Path<U>) getRoot()).where(getRoot().get(idProperty).in(ids)).orderBy(orders);
+		return getCriteriaQuery().select((Path<U>) getRoot()).where(getRoot().get(idProperty).in(ids)).orderBy(orders);
 	}
 }

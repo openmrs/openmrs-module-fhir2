@@ -20,10 +20,9 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 
-@Getter
 public class OpenmrsFhirCriteriaSubquery<V, U> extends BaseFhirCriteriaHolder<V, U> {
 	
-	@NonNull
+	@Getter(onMethod = @__({@Nonnull}))
 	Subquery<U> subquery;
 	
 	@Setter

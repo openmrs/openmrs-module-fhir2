@@ -401,8 +401,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	
 	@SuppressWarnings("UnstableApiUsage")
 	protected <V, U> String getIdPropertyName(@Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext) {
-		return ((MetamodelImplementor) criteriaContext.getEntityManager().getEntityManagerFactory().getMetamodel())
-		        .entityPersister(typeToken.getRawType()).getIdentifierPropertyName();
+		return getIdPropertyName(criteriaContext.getEntityManager(), typeToken.getRawType());
 	}
 	
 	/**
