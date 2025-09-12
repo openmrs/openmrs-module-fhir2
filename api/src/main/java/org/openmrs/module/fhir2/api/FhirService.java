@@ -28,6 +28,8 @@ public interface FhirService<T extends IAnyResource> {
 	
 	T update(@Nonnull String uuid, @Nonnull T updatedResource);
 	
+	T update(@Nonnull String uuid, @Nonnull T updatedResource, RequestDetails requestDetails);
+	
 	T patch(@Nonnull String uuid, @Nonnull PatchTypeEnum patchType, @Nonnull String body, RequestDetails requestDetails);
 	
 	void delete(@Nonnull String uuid);

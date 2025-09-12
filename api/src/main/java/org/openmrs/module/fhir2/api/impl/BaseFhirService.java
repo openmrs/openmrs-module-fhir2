@@ -17,6 +17,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -37,6 +38,7 @@ import org.openmrs.OpenmrsObject;
 import org.openmrs.Retireable;
 import org.openmrs.Voidable;
 import org.openmrs.api.ValidationException;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirService;
 import org.openmrs.module.fhir2.api.dao.FhirDao;
 import org.openmrs.module.fhir2.api.translators.OpenmrsFhirTranslator;
@@ -44,6 +46,7 @@ import org.openmrs.module.fhir2.api.translators.UpdatableOpenmrsTranslator;
 import org.openmrs.module.fhir2.api.util.FhirUtils;
 import org.openmrs.module.fhir2.api.util.JsonPatchUtils;
 import org.openmrs.module.fhir2.api.util.XmlPatchUtils;
+import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 import org.openmrs.validator.ValidateUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,6 +59,8 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 	protected final Logger log = LoggerFactory.getLogger(getClass());
 	
 	protected final Class<? super T> resourceClass;
+	
+	private Boolean isMetadataService;
 	
 	@Getter(PROTECTED)
 	@Setter(value = PROTECTED, onMethod_ = @__({ @Autowired, @Qualifier("fhirR4") }))
@@ -113,6 +118,11 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 	@Override
 	@SuppressWarnings("unchecked")
 	public T update(@Nonnull String uuid, @Nonnull T updatedResource) {
+		return update(uuid, updatedResource, null);
+	}
+	
+	@Override
+	public T update(@Nonnull String uuid, @Nonnull T updatedResource, RequestDetails requestDetails) {
 		if (uuid == null) {
 			throw new InvalidRequestException("Uuid cannot be null.");
 		}
@@ -134,9 +144,20 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 		U existingObject = getDao().get(uuid);
 		
 		if (existingObject == null) {
-			if (!isMetadata()) {
+			Map<Object, Object> userData = FhirProviderUtils.getUserData(requestDetails);
+			boolean createIfNotExists = false;
+			if (isMetadata()) {
+				Object createIfNotExistsObj = userData.get(FhirConstants.USER_DATA_KEY_CREATE_IF_NOT_EXISTS);
+				if (createIfNotExistsObj != null && (boolean) createIfNotExistsObj) {
+					createIfNotExists = true;
+				}
+			}
+			
+			if (!createIfNotExists) {
 				throw resourceNotFound(uuid);
 			}
+			
+			userData.put(FhirConstants.USER_DATA_KEY_OUTCOME_CREATED, true);
 		}
 		
 		return applyUpdate(existingObject, updatedResource);
@@ -273,7 +294,11 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 	}
 	
 	private boolean isMetadata() {
-		Type[] typeArguments = ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments();
-		return OpenmrsMetadata.class.isAssignableFrom((Class<?>) typeArguments[1]);
+		if (isMetadataService == null) {
+			Type[] typeArguments = ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments();
+			isMetadataService = OpenmrsMetadata.class.isAssignableFrom((Class<?>) typeArguments[1]);
+		}
+		
+		return isMetadataService;
 	}
 }

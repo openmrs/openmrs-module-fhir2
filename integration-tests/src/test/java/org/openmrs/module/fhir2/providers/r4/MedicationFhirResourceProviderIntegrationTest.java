@@ -634,12 +634,12 @@ public class MedicationFhirResourceProviderIntegrationTest extends BaseFhirR4Int
 		MockHttpServletResponse response = put("/Medication/" + uuid).accept(FhirMediaTypes.JSON).jsonContent(jsonMedication)
 		        .go();
 		
-		//assertThat(response, isCreated());
+		assertThat(response, isCreated());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
-		
 		Medication medication = readResponse(response);
 		assertThat(medication, notNullValue());
+		assertThat(medication.getIdElement().getIdPart(), is(uuid));
 		assertThat(medication.getStatus(), is(Medication.MedicationStatus.ACTIVE));
 		assertThat(medication.getCode().getCodingFirstRep().getCode(), equalTo(MEDICATION_CODE_UUID));
 		
