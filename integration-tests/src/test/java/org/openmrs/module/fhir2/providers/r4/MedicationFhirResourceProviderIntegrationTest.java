@@ -31,8 +31,10 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.OperationOutcome;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.openmrs.api.ConceptService;
 import org.openmrs.module.fhir2.BaseFhirIntegrationTest;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,6 +60,8 @@ public class MedicationFhirResourceProviderIntegrationTest extends BaseFhirR4Int
 	
 	private static final String JSON_CREATE_MEDICATION_DOCUMENT = "org/openmrs/module/fhir2/providers/MedicationWebTest_create.json";
 	
+	private static final String JSON_UPSERT_MEDICATION_DOCUMENT = "org/openmrs/module/fhir2/providers/MedicationWebTest_upsert.json";
+	
 	private static final String XML_CREATE_MEDICATION_DOCUMENT = "org/openmrs/module/fhir2/providers/MedicationWebTest_create.xml";
 	
 	private static final String XML_UPDATE_MEDICATION_DOCUMENT = "org/openmrs/module/fhir2/providers/MedicationWebTest_update.xml";
@@ -67,6 +71,9 @@ public class MedicationFhirResourceProviderIntegrationTest extends BaseFhirR4Int
 	@Autowired
 	@Getter(AccessLevel.PUBLIC)
 	private MedicationFhirResourceProvider resourceProvider;
+	
+	@Autowired
+	private ConceptService conceptService;
 	
 	@Before
 	@Override
@@ -612,5 +619,29 @@ public class MedicationFhirResourceProviderIntegrationTest extends BaseFhirR4Int
 		
 		assertThat(response, isOk());
 		assertThat(response, statusEquals(HttpStatus.NOT_MODIFIED));
+	}
+	
+	@Test
+	public void shouldCreateANewMedicationWithTheProvidedUuid() throws Exception {
+		final String uuid = "105bf9c4-8fef-11f0-b303-0242ac180002";
+		Assert.assertNull(conceptService.getDrug(uuid));
+		String jsonMedication;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPSERT_MEDICATION_DOCUMENT)) {
+			Objects.requireNonNull(is);
+			jsonMedication = inputStreamToString(is, UTF_8);
+		}
+		
+		MockHttpServletResponse response = put("/Medication/" + uuid).accept(FhirMediaTypes.JSON).jsonContent(jsonMedication)
+		        .go();
+		
+		//assertThat(response, isCreated());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Medication medication = readResponse(response);
+		assertThat(medication, notNullValue());
+		assertThat(medication.getStatus(), is(Medication.MedicationStatus.ACTIVE));
+		assertThat(medication.getCode().getCodingFirstRep().getCode(), equalTo(MEDICATION_CODE_UUID));
+		
 	}
 }

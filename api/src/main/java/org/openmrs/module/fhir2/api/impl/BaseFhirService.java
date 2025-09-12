@@ -13,6 +13,8 @@ import static lombok.AccessLevel.PROTECTED;
 
 import javax.annotation.Nonnull;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -30,6 +32,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.openmrs.Auditable;
+import org.openmrs.OpenmrsMetadata;
 import org.openmrs.OpenmrsObject;
 import org.openmrs.Retireable;
 import org.openmrs.Voidable;
@@ -131,7 +134,9 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 		U existingObject = getDao().get(uuid);
 		
 		if (existingObject == null) {
-			throw resourceNotFound(uuid);
+			if (!isMetadata()) {
+				throw resourceNotFound(uuid);
+			}
 		}
 		
 		return applyUpdate(existingObject, updatedResource);
@@ -188,7 +193,7 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 		OpenmrsFhirTranslator<U, T> translator = getTranslator();
 		
 		U updatedObject;
-		if (translator instanceof UpdatableOpenmrsTranslator) {
+		if (translator instanceof UpdatableOpenmrsTranslator && existingObject != null) {
 			UpdatableOpenmrsTranslator<U, T> updatableOpenmrsTranslator = (UpdatableOpenmrsTranslator<U, T>) translator;
 			updatedObject = updatableOpenmrsTranslator.toOpenmrsType(existingObject, updatedResource);
 		} else {
@@ -265,5 +270,10 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 	protected ResourceNotFoundException resourceNotFound(String uuid) {
 		return new ResourceNotFoundException(
 		        "Resource of type " + resourceClass.getSimpleName() + " with ID " + uuid + " is not known");
+	}
+	
+	private boolean isMetadata() {
+		Type[] typeArguments = ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments();
+		return OpenmrsMetadata.class.isAssignableFrom((Class<?>) typeArguments[1]);
 	}
 }
