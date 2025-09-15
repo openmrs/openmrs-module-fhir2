@@ -9,9 +9,8 @@
  */
 package org.openmrs.module.fhir2.providers.r4;
 
-import static java.util.Arrays.stream;
-
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -75,7 +74,7 @@ public abstract class BaseUpsertFhirResourceProvider<T extends IAnyResource> imp
 			AdministrationService adminService = Context.getAdministrationService();
 			String value = adminService.getGlobalProperty(GP_NAME_SUPPORTED_RESOURCES);
 			if (value != null) {
-				resources.addAll(stream(StringUtils.split(value, ',')).map(v -> v.trim()).filter(v -> v.length() > 0)
+				resources.addAll(Arrays.stream(StringUtils.split(value, ',')).filter(v -> v.trim().length() > 0)
 				        .collect(Collectors.toList()));
 			}
 			

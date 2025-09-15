@@ -33,6 +33,7 @@ import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.OperationOutcome.OperationOutcomeIssueComponent;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -95,6 +96,10 @@ public class MedicationFhirResourceProviderIntegrationTest extends BaseFhirR4Int
 			gp.setValue(null);
 			adminService.saveGlobalProperty(gp);
 		}
+	}
+	
+	@After
+	public void tearDown() {
 		Whitebox.setInternalState(BaseUpsertFhirResourceProvider.class, "supportedResources", (Object) null);
 	}
 	

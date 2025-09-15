@@ -41,6 +41,7 @@ import lombok.Getter;
 import org.apache.commons.lang.time.DateUtils;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Medication;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -51,6 +52,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirMedicationService;
 import org.openmrs.module.fhir2.api.search.param.MedicationSearchParams;
+import org.powermock.reflect.Whitebox;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -91,6 +93,11 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR4ResourcePro
 		medication = new Medication();
 		medication.setId(MEDICATION_UUID);
 		super.setup();
+	}
+	
+	@After
+	public void tearDown() {
+		Whitebox.setInternalState(BaseUpsertFhirResourceProvider.class, "supportedResources", (Object) null);
 	}
 	
 	@Test
@@ -266,6 +273,7 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR4ResourcePro
 			Objects.requireNonNull(is);
 			medicationJson = inputStreamToString(is, UTF_8);
 		}
+		Whitebox.setInternalState(BaseUpsertFhirResourceProvider.class, "supportedResources", Collections.emptyList());
 		
 		when(fhirMedicationService.update(any(String.class), any(Medication.class))).thenReturn(medication);
 		
