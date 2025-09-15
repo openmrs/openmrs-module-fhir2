@@ -296,8 +296,13 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 	
 	private boolean isMetadata() {
 		if (isMetadataService == null) {
-			Type[] typeArguments = ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments();
-			isMetadataService = OpenmrsMetadata.class.isAssignableFrom((Class<?>) typeArguments[1]);
+			Type superclass = getClass().getGenericSuperclass();
+			if (ParameterizedType.class.isAssignableFrom(superclass.getClass())) {
+				Type[] typeArguments = ((ParameterizedType) superclass).getActualTypeArguments();
+				isMetadataService = OpenmrsMetadata.class.isAssignableFrom((Class<?>) typeArguments[1]);
+			} else {
+				isMetadataService = false;
+			}
 		}
 		
 		return isMetadataService;
