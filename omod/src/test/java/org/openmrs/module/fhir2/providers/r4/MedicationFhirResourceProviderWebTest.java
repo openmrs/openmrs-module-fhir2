@@ -22,6 +22,7 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.openmrs.module.fhir2.api.util.GeneralUtils.inputStreamToString;
@@ -275,7 +276,7 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR4ResourcePro
 		}
 		Whitebox.setInternalState(BaseUpsertFhirResourceProvider.class, "supportedResources", Collections.emptyList());
 		
-		when(fhirMedicationService.update(any(String.class), any(Medication.class))).thenReturn(medication);
+		lenient().when(fhirMedicationService.update(any(String.class), any(Medication.class))).thenReturn(medication);
 		
 		MockHttpServletResponse response = put("/Medication/" + MEDICATION_UUID).jsonContent(medicationJson)
 		        .accept(FhirMediaTypes.JSON).go();
