@@ -144,9 +144,10 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 		U existingObject = getDao().get(uuid);
 		
 		if (existingObject == null) {
-			Map<Object, Object> userData = FhirProviderUtils.getUserData(requestDetails);
+			Map<Object, Object> userData = null;
 			boolean createIfNotExists = false;
-			if (isMetadata()) {
+			if (isMetadata() && requestDetails != null) {
+				userData = FhirProviderUtils.getUserData(requestDetails);
 				Object createIfNotExistsObj = userData.get(FhirConstants.USER_DATA_KEY_CREATE_IF_NOT_EXISTS);
 				if (createIfNotExistsObj != null && (boolean) createIfNotExistsObj) {
 					createIfNotExists = true;

@@ -19,6 +19,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.startsWith;
 import static org.openmrs.module.fhir2.api.util.GeneralUtils.inputStreamToString;
+import static org.openmrs.module.fhir2.providers.r4.BaseUpsertFhirResourceProvider.GP_NAME_SUPPORTED_RESOURCES;
 
 import java.io.InputStream;
 import java.util.List;
@@ -31,12 +32,17 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.OperationOutcome.OperationOutcomeIssueComponent;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.openmrs.GlobalProperty;
+import org.openmrs.api.AdministrationService;
 import org.openmrs.api.ConceptService;
+import org.openmrs.customdatatype.datatype.FreeTextDatatype;
 import org.openmrs.module.fhir2.BaseFhirIntegrationTest;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.powermock.reflect.Whitebox;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -75,11 +81,21 @@ public class MedicationFhirResourceProviderIntegrationTest extends BaseFhirR4Int
 	@Autowired
 	private ConceptService conceptService;
 	
+	@Autowired
+	private AdministrationService adminService;
+	
 	@Before
 	@Override
 	public void setup() throws Exception {
 		super.setup();
 		executeDataSet(MEDICATION_DATA_XML);
+		//Clear the global property value if set.
+		GlobalProperty gp = adminService.getGlobalPropertyObject(GP_NAME_SUPPORTED_RESOURCES);
+		if (gp != null) {
+			gp.setValue(null);
+			adminService.saveGlobalProperty(gp);
+		}
+		Whitebox.setInternalState(BaseUpsertFhirResourceProvider.class, "supportedResources", (Object) null);
 	}
 	
 	@Test
@@ -623,6 +639,13 @@ public class MedicationFhirResourceProviderIntegrationTest extends BaseFhirR4Int
 	
 	@Test
 	public void shouldCreateANewMedicationWithTheProvidedUuid() throws Exception {
+		GlobalProperty gp = adminService.getGlobalPropertyObject(GP_NAME_SUPPORTED_RESOURCES);
+		if (gp == null) {
+			gp = new GlobalProperty(GP_NAME_SUPPORTED_RESOURCES);
+			gp.setDatatypeClassname(FreeTextDatatype.class.getName());
+		}
+		gp.setValue("Medication");
+		adminService.saveGlobalProperty(gp);
 		final String uuid = "105bf9c4-8fef-11f0-b303-0242ac180002";
 		Assert.assertNull(conceptService.getDrug(uuid));
 		String jsonMedication;
@@ -643,5 +666,26 @@ public class MedicationFhirResourceProviderIntegrationTest extends BaseFhirR4Int
 		assertThat(medication.getStatus(), is(Medication.MedicationStatus.ACTIVE));
 		assertThat(medication.getCode().getCodingFirstRep().getCode(), equalTo(MEDICATION_CODE_UUID));
 		
+	}
+	
+	@Test
+	public void shouldFailToCreateANewMedicationWithTheProvidedUuidIfUpsertIsNotEnabled() throws Exception {
+		final String uuid = "105bf9c4-8fef-11f0-b303-0242ac180002";
+		Assert.assertNull(conceptService.getDrug(uuid));
+		String jsonMedication;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPSERT_MEDICATION_DOCUMENT)) {
+			Objects.requireNonNull(is);
+			jsonMedication = inputStreamToString(is, UTF_8);
+		}
+		
+		MockHttpServletResponse response = put("/Medication/" + uuid).accept(FhirMediaTypes.JSON).jsonContent(jsonMedication)
+		        .go();
+		
+		assertThat(response, isNotFound());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		OperationOutcome outcome = readOperationOutcome(response);
+		OperationOutcomeIssueComponent issue = outcome.getIssue().get(0);
+		assertThat(issue.getDiagnostics(), is("Resource of type Medication with ID " + uuid + " is not known"));
 	}
 }
