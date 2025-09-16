@@ -80,8 +80,7 @@ public class MedicationFhirResourceProvider extends BaseUpsertFhirResourceProvid
 	}
 	
 	@Override
-	protected MethodOutcome doUpsert(@IdParam IdType id, @ResourceParam Medication medication,
-	        RequestDetails requestDetails) {
+	protected MethodOutcome doUpsert(IdType id, Medication medication, RequestDetails requestDetails) {
 		if (id == null || id.getIdPart() == null) {
 			throw new InvalidRequestException("id must be specified to update");
 		}

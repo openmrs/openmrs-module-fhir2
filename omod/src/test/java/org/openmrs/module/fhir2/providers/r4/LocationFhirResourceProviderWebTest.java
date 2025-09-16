@@ -23,6 +23,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.openmrs.module.fhir2.api.util.GeneralUtils.inputStreamToString;
@@ -45,6 +46,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import org.apache.commons.lang.time.DateUtils;
 import org.hl7.fhir.r4.model.Location;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -55,6 +57,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirLocationService;
 import org.openmrs.module.fhir2.api.search.param.LocationSearchParams;
+import org.powermock.reflect.Whitebox;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -113,6 +116,11 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR4ResourceProvi
 		locationProvider = new LocationFhirResourceProvider();
 		locationProvider.setFhirLocationService(locationService);
 		super.setup();
+	}
+	
+	@After
+	public void tearDown() {
+		Whitebox.setInternalState(BaseUpsertFhirResourceProvider.class, "supportedResources", (Object) null);
 	}
 	
 	@Override
@@ -443,8 +451,9 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR4ResourceProvi
 		
 		Location location = new Location();
 		location.setId(LOCATION_UUID);
+		Whitebox.setInternalState(BaseUpsertFhirResourceProvider.class, "supportedResources", Collections.emptyList());
 		
-		when(locationService.update(anyString(), any(Location.class))).thenReturn(location);
+		lenient().when(locationService.update(anyString(), any(Location.class))).thenReturn(location);
 		
 		MockHttpServletResponse response = put("/Location/" + LOCATION_UUID).jsonContent(jsonLocation)
 		        .accept(FhirMediaTypes.JSON).go();
