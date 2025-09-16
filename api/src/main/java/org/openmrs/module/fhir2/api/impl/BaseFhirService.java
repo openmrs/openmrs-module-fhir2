@@ -146,7 +146,7 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 		if (existingObject == null) {
 			Map<Object, Object> userData = null;
 			boolean createIfNotExists = false;
-			if (isMetadata() && requestDetails != null) {
+			if (isMetadataService() && requestDetails != null) {
 				userData = FhirProviderUtils.getUserData(requestDetails);
 				Object createIfNotExistsObj = userData.get(FhirConstants.USER_DATA_KEY_CREATE_IF_NOT_EXISTS);
 				if (createIfNotExistsObj != null && (boolean) createIfNotExistsObj) {
@@ -294,13 +294,23 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 		        "Resource of type " + resourceClass.getSimpleName() + " with ID " + uuid + " is not known");
 	}
 	
-	private boolean isMetadata() {
+	private boolean isMetadataService() {
 		if (isMetadataService == null) {
-			Type superclass = getClass().getGenericSuperclass();
-			if (ParameterizedType.class.isAssignableFrom(superclass.getClass())) {
-				Type[] typeArguments = ((ParameterizedType) superclass).getActualTypeArguments();
-				isMetadataService = OpenmrsMetadata.class.isAssignableFrom((Class<?>) typeArguments[1]);
-			} else {
+			Type genericSuperType = getClass().getGenericSuperclass();
+			do {
+				if (genericSuperType instanceof ParameterizedType) {
+					Type[] typeArguments = ((ParameterizedType) genericSuperType).getActualTypeArguments();
+					isMetadataService = OpenmrsMetadata.class.isAssignableFrom((Class<?>) typeArguments[1]);
+				}
+				
+				if (genericSuperType instanceof Class<?>) {
+					genericSuperType = ((Class<?>) genericSuperType).getGenericSuperclass();
+				} else {
+					genericSuperType = null;
+				}
+			} while (genericSuperType != null && !BaseFhirService.class.equals(genericSuperType));
+			
+			if (isMetadataService == null) {
 				isMetadataService = false;
 			}
 		}
