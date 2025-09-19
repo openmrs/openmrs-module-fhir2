@@ -62,7 +62,7 @@ public final class ReferenceHandlingTranslator {
 	}
 	
 	public static Reference createMedicationReference(@Nonnull Drug drug) {
-		return createReferenceOfType(drug, FhirConstants.MEDICATION);
+		return createReferenceOfType(drug, FhirConstants.MEDICATION).setDisplay(drug.getDisplayName());
 	}
 	
 	public static Reference createObservationReference(@Nonnull Obs obs) {
@@ -163,7 +163,6 @@ public final class ReferenceHandlingTranslator {
 		}
 		
 		Reference reference = createReferenceOfType(drugOrder, FhirConstants.MEDICATION_REQUEST);
-		;
 		
 		if (orderIdentifierTranslator != null) {
 			reference.setIdentifier(orderIdentifierTranslator.toFhirResource(drugOrder));

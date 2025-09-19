@@ -30,6 +30,8 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Immunization;
 import org.hl7.fhir.r4.model.Immunization.ImmunizationPerformerComponent;
 import org.hl7.fhir.r4.model.Immunization.ImmunizationProtocolAppliedComponent;
@@ -46,6 +48,7 @@ import org.openmrs.Patient;
 import org.openmrs.Provider;
 import org.openmrs.Visit;
 import org.openmrs.api.ConceptService;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.ImmunizationTranslator;
@@ -62,8 +65,12 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 	
 	public static final String IMMUNIZATION_GROUPING_CONCEPT = "CIEL:1421";
 	
+	public static final String IMMUNIZATION_FREE_TEXT_COMMENT_CONCEPT = "CIEL:161011";
+	
+	public static final String IMMUNIZATION_NEXT_DOSE_DATE_CONCEPT_CODE = "CIEL:170000";
+	
 	public static final Set<String> IMMUNIZATION_CONCEPTS = ImmutableSet.of("CIEL:984", "CIEL:1410", "CIEL:1418",
-	    "CIEL:1419", "CIEL:1420", "CIEL:165907");
+	    "CIEL:1419", "CIEL:1420", "CIEL:165907", "CIEL:161011", "CIEL:170000");
 	
 	public static final String CIEL_984;
 	
@@ -77,6 +84,10 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 	
 	public static final String CIEL_165907;
 	
+	public static final String CIEL_161011;
+	
+	public static final String CIEL_170000;
+	
 	static {
 		final Iterator<String> conceptIterator = IMMUNIZATION_CONCEPTS.iterator();
 		CIEL_984 = conceptIterator.next();
@@ -85,6 +96,8 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 		CIEL_1419 = conceptIterator.next();
 		CIEL_1420 = conceptIterator.next();
 		CIEL_165907 = conceptIterator.next();
+		CIEL_161011 = conceptIterator.next();
+		CIEL_170000 = conceptIterator.next();
 	}
 	
 	@Getter(PROTECTED)
@@ -380,6 +393,56 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 			openmrsImmunization.removeGroupMember(members.get(CIEL_165907));
 		}
 		
+		Concept noteConcept = helper.conceptOrNull(CIEL_161011);
+		if (noteConcept != null && fhirImmunization.hasNote() && fhirImmunization.getNoteFirstRep().hasText()) {
+			Obs obs = members.get(CIEL_161011);
+			if (obs == null) {
+				obs = helper.addNewObs(openmrsImmunization, CIEL_161011);
+				members.put(CIEL_161011, obs);
+				obs.setValueText(fhirImmunization.getNoteFirstRep().getText());
+			} else if (obs.getId() == null) {
+				obs.setValueText(fhirImmunization.getNoteFirstRep().getText());
+			} else {
+				String newValue = fhirImmunization.getNoteFirstRep().getText();
+				String prevValue = obs.getValueText();
+				if (!newValue.equals(prevValue)) {
+					obs = helper.replaceObs(openmrsImmunization, obs);
+					obs.setValueText(newValue);
+				}
+			}
+		} else {
+			openmrsImmunization.removeGroupMember(members.get(CIEL_161011));
+		}
+		
+		Concept nextDoseDateConcept = helper.conceptOrNull(CIEL_170000);
+		if (nextDoseDateConcept != null
+		        && fhirImmunization.hasExtension(FhirConstants.OPENMRS_FHIR_EXT_IMMUNIZATION_NEXT_DOSE_DATE)) {
+			Extension extension = fhirImmunization
+			        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_IMMUNIZATION_NEXT_DOSE_DATE);
+			if (extension != null && extension.hasValue() && extension.getValue() instanceof DateTimeType) {
+				DateTimeType dateTimeValue = (DateTimeType) extension.getValue();
+				Date nextDoseDate = dateTimeValue.getValue();
+				
+				Obs obs = members.get(CIEL_170000);
+				if (obs == null) {
+					obs = helper.addNewObs(openmrsImmunization, CIEL_170000);
+					members.put(CIEL_170000, obs);
+					obs.setValueDatetime(nextDoseDate);
+				} else if (obs.getId() == null) {
+					obs.setValueDatetime(nextDoseDate);
+				} else {
+					Date prevValue = obs.getValueDatetime();
+					
+					if (!nextDoseDate.equals(prevValue)) {
+						obs = helper.replaceObs(openmrsImmunization, obs);
+						obs.setValueDatetime(nextDoseDate);
+					}
+				}
+			}
+		} else {
+			openmrsImmunization.removeGroupMember(members.get(CIEL_170000));
+		}
+		
 		return openmrsImmunization;
 	}
 	
@@ -439,6 +502,21 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 			Obs obs = members.get(CIEL_165907);
 			if (obs != null) {
 				immunization.setExpirationDate(obs.getValueDate());
+			}
+		}
+		
+		{
+			Obs obs = members.get(CIEL_161011);
+			if (obs != null) {
+				immunization.addNote().setText(obs.getValueText());
+			}
+		}
+		
+		{
+			Obs obs = members.get(CIEL_170000);
+			if (obs != null && obs.getValueDatetime() != null) {
+				immunization.addExtension(new Extension().setUrl(FhirConstants.OPENMRS_FHIR_EXT_IMMUNIZATION_NEXT_DOSE_DATE)
+				        .setValue(new DateTimeType(obs.getValueDatetime())));
 			}
 		}
 		

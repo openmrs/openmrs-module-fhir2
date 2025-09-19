@@ -80,6 +80,8 @@ public final class FhirConstants {
 	
 	public static final String VISIT_TYPE_SYSTEM_URI = OPENMRS_CODE_SYSTEM_PREFIX + "/visit-type";
 	
+	public static final String OPENMRS_FHIR_EXT_IMMUNIZATION_NEXT_DOSE_DATE = "http://hl7.eu/fhir/StructureDefinition/immunization-nextDoseDate";
+	
 	public static final String OPENMRS_FHIR_EXT_PREFIX = OPENMRS_FHIR_PREFIX + "/ext";
 	
 	public static final String OPENMRS_FHIR_EXT_OBS_LOCATION_VALUE = OPENMRS_FHIR_EXT_PREFIX + "/obs-location-value";
@@ -121,7 +123,7 @@ public final class FhirConstants {
 	public static final String OPENMRS_FHIR_EXT_RECORDED = OPENMRS_FHIR_EXT_PREFIX + "/medicationdispense/recorded";
 	
 	public static final String OPENMRS_FHIR_EXT_MEDICATION_REQUEST_FULFILLER_STATUS = OPENMRS_FHIR_EXT_PREFIX
-	        + "/medicationrequest/fullfillerstatus";
+	        + "/medicationrequest/fulfillerstatus";
 	
 	public static final String OPENMRS_FHIR_DEFAULT_PAGE_SIZE = "fhir2.paging.default";
 	
@@ -287,7 +289,7 @@ public final class FhirConstants {
 	
 	public static final String TASK_CODE_SEARCH_HANDLER = "task.code.search.handler";
 	
-	public static final String FULFILLER_STATUS_SEARCH_HANDLER = "fullfillerStatus.search.handler";
+	public static final String FULFILLER_STATUS_SEARCH_HANDLER = "fulfillerStatus.search.handler";
 	
 	public static final String BASED_ON_REFERENCE_SEARCH_HANDLER = "based.on.reference.search.handler";
 	

@@ -185,7 +185,7 @@ public class PersonAttributeTranslatorImplTest {
 		
 		Concept concept = new Concept();
 		concept.setConceptId(Integer.parseInt(CONCEPT_ATTRIBUTE_VALUE));
-		when(conceptService.get(CONCEPT_ATTRIBUTE_VALUE)).thenReturn(concept);
+		when(conceptService.get(Integer.parseInt(CONCEPT_ATTRIBUTE_VALUE))).thenReturn(concept);
 		
 		CodeableConcept codeableConcept = new CodeableConcept();
 		codeableConcept.setText("ConceptText");
@@ -378,6 +378,19 @@ public class PersonAttributeTranslatorImplTest {
 		assertThat(result, notNullValue());
 		assertThat(result.getAttributeType(), equalTo(personAttributeType));
 		assertThat(result.getValue(), equalTo(CONCEPT_ATTRIBUTE_VALUE));
+	}
+	
+	@Test
+	public void shouldReturnNullWhenPersonAttributeIsVoided() {
+		personAttribute.setVoided(true);
+		Extension result = personAttributeTranslator.toFhirResource(personAttribute);
+		assertThat(result, equalTo(null));
+	}
+	
+	@Test
+	public void shouldReturnNullWhenConceptIdIsNotAnInteger() {
+		CodeableConcept result = personAttributeTranslator.buildCodeableConcept("notAnInt");
+		assertThat(result, equalTo(null));
 	}
 	
 }
