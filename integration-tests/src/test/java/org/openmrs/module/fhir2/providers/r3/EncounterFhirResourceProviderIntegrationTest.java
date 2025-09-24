@@ -516,7 +516,7 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR3Inte
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(SEARCHSET));
-		assertThat(result, hasProperty("total", equalTo(9))); // 5 non-voided visits and 4 non-voided encounters in standard test dataset
+		assertThat(result, hasProperty("total", equalTo(10))); // 5 non-voided visits and 4 non-voided encounters in standard test dataset
 	}
 	
 	@Test
@@ -531,7 +531,7 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR3Inte
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(SEARCHSET));
-		assertThat(result, hasProperty("total", equalTo(9))); // 5 non-voided visits and 4 non-voided encounters in standard test data
+		assertThat(result, hasProperty("total", equalTo(10))); // 5 non-voided visits and 4 non-voided encounters in standard test data
 	}
 	
 	@Test

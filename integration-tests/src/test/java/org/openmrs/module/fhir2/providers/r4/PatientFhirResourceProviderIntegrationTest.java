@@ -100,6 +100,8 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR4Integr
 	
 	private static final String ENCOUNTER_UUID_3 = "eec646cb-c847-45a7-98bc-91c8c4f70add";
 	
+	private static final String ENCOUNTER_UUID_4 = "a2428fea-6b78-11e0-93c3-18a905e044dc";
+	
 	private static final String MEDICATION_REQUEST_UUID_1 = "e1f95924-697a-11e3-bd76-0800271c1b75";
 	
 	private static final String MEDICATION_REQUEST_UUID_2 = "921de0a3-05c4-444a-be03-e01b4c4b9142";
@@ -803,7 +805,7 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR4Integr
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
-		assertThat(result, hasProperty("total", equalTo(15)));
+		assertThat(result, hasProperty("total", equalTo(16)));
 		assertThat(result.getEntry(), hasSize(5));
 		
 		List<Bundle.BundleEntryComponent> entries = result.getEntry();
@@ -972,6 +974,7 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR4Integr
 		validResources.add(ENCOUNTER_UUID_1);
 		validResources.add(ENCOUNTER_UUID_2);
 		validResources.add(ENCOUNTER_UUID_3);
+		validResources.add(ENCOUNTER_UUID_4);
 		validResources.add(MEDICATION_REQUEST_UUID_1);
 		validResources.add(MEDICATION_REQUEST_UUID_2);
 		
