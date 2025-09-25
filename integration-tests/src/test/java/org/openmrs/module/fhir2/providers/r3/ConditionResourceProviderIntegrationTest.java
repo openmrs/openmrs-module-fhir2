@@ -21,6 +21,7 @@ import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.startsWith;
 import static org.openmrs.module.fhir2.api.util.GeneralUtils.inputStreamToString;
 
@@ -290,12 +291,10 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR3Integrat
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
 		
 		Condition condition = readResponse(response);
-		
 		assertThat(condition, notNullValue());
 		assertThat(condition.getCategoryFirstRep().getCodingFirstRep().getCode(), equalTo("encounter-diagnosis"));
 		assertThat(condition.getIdElement().getIdPart(), notNullValue());
-		assertThat(condition.getClinicalStatus(), notNullValue());
-		assertThat(condition.getClinicalStatus().toCode(), equalTo("unknown"));
+		assertThat(condition.getClinicalStatus(), nullValue());
 		
 		response = get("/Condition/" + condition.getIdElement().getIdPart()).accept(FhirMediaTypes.JSON).go();
 		

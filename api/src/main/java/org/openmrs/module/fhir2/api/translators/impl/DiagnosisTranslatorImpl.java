@@ -18,6 +18,7 @@ import javax.annotation.Nonnull;
 
 import java.util.Optional;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
 import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -99,12 +100,13 @@ public class DiagnosisTranslatorImpl implements DiagnosisTranslator {
 				fhirCondition.addExtension(extension);
 			}
 		}
-		
 		// Set clinical status as unknown
-		CodeableConcept clinicalStatus = new CodeableConcept();
-		clinicalStatus.addCoding(
-		    new Coding().setSystem(FhirConstants.CONDITION_CLINICAL_SYSTEM_URI).setCode("unknown").setDisplay("Unknown"));
-		fhirCondition.setClinicalStatus(clinicalStatus);
+		if (fhirCondition.getStructureFhirVersionEnum().isEqualOrNewerThan(FhirVersionEnum.R4)) {
+			CodeableConcept clinicalStatus = new CodeableConcept();
+			clinicalStatus.addCoding(new Coding().setSystem(FhirConstants.CONDITION_CLINICAL_SYSTEM_URI).setCode("unknown")
+			        .setDisplay("Unknown"));
+			fhirCondition.setClinicalStatus(clinicalStatus);
+		}
 		
 		// Set verification status based on certainty
 		CodeableConcept verificationStatus = new CodeableConcept();

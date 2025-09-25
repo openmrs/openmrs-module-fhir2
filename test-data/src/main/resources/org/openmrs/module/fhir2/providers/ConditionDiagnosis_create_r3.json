@@ -1,6 +1,6 @@
 {
   "resourceType": "Condition",
-  "clinicalStatus": "active",
+  "clinicalStatus": "unknown",
   "category": [
     {
       "coding": [
@@ -28,7 +28,7 @@
   "verificationStatus": {
     "coding": [
       {
-        "system": "http://hl7.org/fhir/condition-ver-status",
+        "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
         "code": "confirmed"
       }
     ]
