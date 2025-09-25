@@ -13,8 +13,6 @@ import static lombok.AccessLevel.PROTECTED;
 
 import javax.annotation.Nonnull;
 
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -58,7 +56,7 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 	
 	protected final Class<? super T> resourceClass;
 	
-	private Boolean isMetadataService;
+	private boolean handlesOpenmrsMetadata;
 	
 	@Getter(PROTECTED)
 	@Setter(value = PROTECTED, onMethod_ = @__({ @Autowired, @Qualifier("fhirR4") }))
@@ -70,6 +68,8 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 		// @formatter:on
 		
 		this.resourceClass = resourceTypeToken.getRawType();
+		TypeToken<U> openmrsTypeToken = new TypeToken<U>(getClass()) {};
+		handlesOpenmrsMetadata = OpenmrsMetadata.class.isAssignableFrom(openmrsTypeToken.getRawType());
 	}
 	
 	@Override
@@ -143,7 +143,7 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 		U existingObject = getDao().get(uuid);
 		
 		if (existingObject == null) {
-			if (!isMetadataService() || !createIfNotExists) {
+			if (!handlesOpenmrsMetadata || !createIfNotExists) {
 				throw resourceNotFound(uuid);
 			}
 			
@@ -286,27 +286,4 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 		        "Resource of type " + resourceClass.getSimpleName() + " with ID " + uuid + " is not known");
 	}
 	
-	private boolean isMetadataService() {
-		if (isMetadataService == null) {
-			Type genericSuperType = getClass().getGenericSuperclass();
-			do {
-				if (genericSuperType instanceof ParameterizedType) {
-					Type[] typeArguments = ((ParameterizedType) genericSuperType).getActualTypeArguments();
-					isMetadataService = OpenmrsMetadata.class.isAssignableFrom((Class<?>) typeArguments[1]);
-				}
-				
-				if (genericSuperType instanceof Class<?>) {
-					genericSuperType = ((Class<?>) genericSuperType).getGenericSuperclass();
-				} else {
-					genericSuperType = null;
-				}
-			} while (genericSuperType != null && !BaseFhirService.class.equals(genericSuperType));
-			
-			if (isMetadataService == null) {
-				isMetadataService = false;
-			}
-		}
-		
-		return isMetadataService;
-	}
 }
