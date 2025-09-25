@@ -17,6 +17,7 @@ import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.startsWith;
 import static org.openmrs.module.fhir2.api.util.GeneralUtils.inputStreamToString;
 import static org.openmrs.module.fhir2.providers.r4.BaseUpsertFhirResourceProvider.GP_NAME_SUPPORTED_RESOURCES;
@@ -33,8 +34,6 @@ import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.OperationOutcome.OperationOutcomeIssueComponent;
-import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.GlobalProperty;
@@ -43,7 +42,6 @@ import org.openmrs.api.ConceptService;
 import org.openmrs.customdatatype.datatype.FreeTextDatatype;
 import org.openmrs.module.fhir2.BaseFhirIntegrationTest;
 import org.openmrs.module.fhir2.FhirConstants;
-import org.powermock.reflect.Whitebox;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -96,11 +94,6 @@ public class MedicationFhirResourceProviderIntegrationTest extends BaseFhirR4Int
 			gp.setValue(null);
 			adminService.saveGlobalProperty(gp);
 		}
-	}
-	
-	@After
-	public void tearDown() {
-		Whitebox.setInternalState(BaseUpsertFhirResourceProvider.class, "supportedResources", (Object) null);
 	}
 	
 	@Test
@@ -652,7 +645,7 @@ public class MedicationFhirResourceProviderIntegrationTest extends BaseFhirR4Int
 		gp.setValue("Medication");
 		adminService.saveGlobalProperty(gp);
 		final String uuid = "105bf9c4-8fef-11f0-b303-0242ac180002";
-		Assert.assertNull(conceptService.getDrug(uuid));
+		assertThat(conceptService.getDrug(uuid), nullValue());
 		String jsonMedication;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPSERT_MEDICATION_DOCUMENT)) {
 			Objects.requireNonNull(is);
@@ -676,7 +669,7 @@ public class MedicationFhirResourceProviderIntegrationTest extends BaseFhirR4Int
 	@Test
 	public void shouldFailToCreateANewMedicationWithTheProvidedUuidIfUpsertIsNotEnabled() throws Exception {
 		final String uuid = "105bf9c4-8fef-11f0-b303-0242ac180002";
-		Assert.assertNull(conceptService.getDrug(uuid));
+		assertThat(conceptService.getDrug(uuid), nullValue());
 		String jsonMedication;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPSERT_MEDICATION_DOCUMENT)) {
 			Objects.requireNonNull(is);

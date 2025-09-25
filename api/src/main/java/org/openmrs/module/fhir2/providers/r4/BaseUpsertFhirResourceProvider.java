@@ -9,8 +9,8 @@
  */
 package org.openmrs.module.fhir2.providers.r4;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,9 +23,9 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.r4.model.IdType;
-import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 
 /**
  * An instance of this base resource provider class permits upsert operations if enabled.
@@ -34,7 +34,7 @@ public abstract class BaseUpsertFhirResourceProvider<T extends IAnyResource> imp
 	
 	protected static final String GP_NAME_SUPPORTED_RESOURCES = "fhir2.upsert.supported.resources";
 	
-	private static List<String> supportedResources;
+	private static FhirGlobalPropertyService globalPropsService;
 	
 	@Update
 	public MethodOutcome upsert(@IdParam IdType id, @ResourceParam T resource, RequestDetails requestDetails) {
@@ -64,19 +64,17 @@ public abstract class BaseUpsertFhirResourceProvider<T extends IAnyResource> imp
 	        boolean createIfNotExists);
 	
 	private List<String> getSupportedResources() {
-		if (supportedResources == null) {
-			List<String> resources = new ArrayList<>();
-			AdministrationService adminService = Context.getAdministrationService();
-			String value = adminService.getGlobalProperty(GP_NAME_SUPPORTED_RESOURCES);
-			if (value != null) {
-				resources.addAll(Arrays.stream(StringUtils.split(value, ',')).filter(v -> v.trim().length() > 0)
-				        .collect(Collectors.toList()));
-			}
-			
-			supportedResources = resources;
+		if (globalPropsService == null) {
+			globalPropsService = Context.getRegisteredComponents(FhirGlobalPropertyService.class).get(0);
 		}
 		
-		return supportedResources;
+		String value = globalPropsService.getGlobalProperty(GP_NAME_SUPPORTED_RESOURCES);
+		if (value != null) {
+			return Arrays.stream(StringUtils.split(value, ',')).filter(v -> v.trim().length() > 0)
+			        .collect(Collectors.toList());
+		}
+		
+		return Collections.EMPTY_LIST;
 	}
 	
 }
