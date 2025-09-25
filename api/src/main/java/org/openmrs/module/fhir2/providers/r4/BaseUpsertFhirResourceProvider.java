@@ -12,7 +12,6 @@ package org.openmrs.module.fhir2.providers.r4;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -27,7 +26,6 @@ import org.hl7.fhir.r4.model.IdType;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.fhir2.FhirConstants;
-import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 
 /**
  * An instance of this base resource provider class permits upsert operations if enabled.
@@ -41,14 +39,9 @@ public abstract class BaseUpsertFhirResourceProvider<T extends IAnyResource> imp
 	@Update
 	public MethodOutcome upsert(@IdParam IdType id, @ResourceParam T resource, RequestDetails requestDetails) {
 		boolean createIfNotExists = getSupportedResources().contains(resource.fhirType());
-		Map<Object, Object> userData = FhirProviderUtils.getUserData(requestDetails);
+		MethodOutcome outcome = doUpsert(id, resource, requestDetails, createIfNotExists);
 		if (createIfNotExists) {
-			userData.put(FhirConstants.USER_DATA_KEY_CREATE_IF_NOT_EXISTS, true);
-		}
-		
-		MethodOutcome outcome = doUpsert(id, resource, requestDetails);
-		if (createIfNotExists) {
-			Object created = userData.get(FhirConstants.USER_DATA_KEY_OUTCOME_CREATED);
+			Object created = requestDetails.getUserData().get(FhirConstants.USER_DATA_KEY_OUTCOME_CREATED);
 			if (created != null) {
 				outcome.setCreated((boolean) created);
 			}
@@ -59,14 +52,16 @@ public abstract class BaseUpsertFhirResourceProvider<T extends IAnyResource> imp
 	
 	/**
 	 * Updates the specified resource if it exists otherwise creates a new one of the resource provider
-	 * supports the operation.
+	 * supports the operation and createIfNotExists is set to true.
 	 * 
 	 * @param id the {@link IdType} object
 	 * @param resource the resource to update
-	 * @param requestDetails the RequestDetails instance
-	 * @return MethodOutcome instance
+	 * @param requestDetails the RequestDetails object
+	 * @param createIfNotExists specifies whether to create the resource if it does not exist.
+	 * @return MethodOutcome object
 	 */
-	protected abstract MethodOutcome doUpsert(IdType id, T resource, RequestDetails requestDetails);
+	protected abstract MethodOutcome doUpsert(IdType id, T resource, RequestDetails requestDetails,
+	        boolean createIfNotExists);
 	
 	private List<String> getSupportedResources() {
 		if (supportedResources == null) {

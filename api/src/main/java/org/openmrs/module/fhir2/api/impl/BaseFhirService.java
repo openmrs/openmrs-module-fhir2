@@ -17,7 +17,6 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -46,7 +45,6 @@ import org.openmrs.module.fhir2.api.translators.UpdatableOpenmrsTranslator;
 import org.openmrs.module.fhir2.api.util.FhirUtils;
 import org.openmrs.module.fhir2.api.util.JsonPatchUtils;
 import org.openmrs.module.fhir2.api.util.XmlPatchUtils;
-import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 import org.openmrs.validator.ValidateUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -118,11 +116,12 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 	@Override
 	@SuppressWarnings("unchecked")
 	public T update(@Nonnull String uuid, @Nonnull T updatedResource) {
-		return update(uuid, updatedResource, null);
+		return update(uuid, updatedResource, null, false);
 	}
 	
 	@Override
-	public T update(@Nonnull String uuid, @Nonnull T updatedResource, RequestDetails requestDetails) {
+	public T update(@Nonnull String uuid, @Nonnull T updatedResource, RequestDetails requestDetails,
+	        boolean createIfNotExists) {
 		if (uuid == null) {
 			throw new InvalidRequestException("Uuid cannot be null.");
 		}
@@ -144,21 +143,14 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 		U existingObject = getDao().get(uuid);
 		
 		if (existingObject == null) {
-			Map<Object, Object> userData = null;
-			boolean createIfNotExists = false;
-			if (isMetadataService() && requestDetails != null) {
-				userData = FhirProviderUtils.getUserData(requestDetails);
-				Object createIfNotExistsObj = userData.get(FhirConstants.USER_DATA_KEY_CREATE_IF_NOT_EXISTS);
-				if (createIfNotExistsObj != null && (boolean) createIfNotExistsObj) {
-					createIfNotExists = true;
-				}
-			}
-			
-			if (!createIfNotExists) {
+			if (!isMetadataService() || !createIfNotExists) {
 				throw resourceNotFound(uuid);
 			}
 			
-			userData.put(FhirConstants.USER_DATA_KEY_OUTCOME_CREATED, true);
+			//We need to communicate to the resource provider whether this operation resulted in a creation or an
+			//update but the return type provides no way, so we use the user data map on the request details object
+			//for this purpose as the recommended way, please to the javadocs of RequestDetails.getUserData().
+			requestDetails.getUserData().put(FhirConstants.USER_DATA_KEY_OUTCOME_CREATED, true);
 		}
 		
 		return applyUpdate(existingObject, updatedResource);

@@ -82,12 +82,13 @@ public class LocationFhirResourceProvider extends BaseUpsertFhirResourceProvider
 	}
 	
 	@Override
-	public MethodOutcome doUpsert(IdType id, Location location, RequestDetails requestDetails) {
+	public MethodOutcome doUpsert(IdType id, Location location, RequestDetails requestDetails, boolean createIfNotExists) {
 		if (id == null || id.getIdPart() == null) {
 			throw new InvalidRequestException("id must be specified to update");
 		}
 		
-		return FhirProviderUtils.buildUpdate(fhirLocationService.update(id.getIdPart(), location, requestDetails));
+		return FhirProviderUtils
+		        .buildUpdate(fhirLocationService.update(id.getIdPart(), location, requestDetails, createIfNotExists));
 	}
 	
 	@Patch

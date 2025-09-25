@@ -9,11 +9,7 @@
  */
 package org.openmrs.module.fhir2.providers.util;
 
-import java.util.Map;
-
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.RestfulResponse;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -65,11 +61,6 @@ public class FhirProviderUtils {
 		outcome.addIssue().setSeverity(org.hl7.fhir.dstu3.model.OperationOutcome.IssueSeverity.INFORMATION)
 		        .setCode(org.hl7.fhir.dstu3.model.OperationOutcome.IssueType.INFORMATIONAL).setDetails(MSG_DELETED_R3);
 		return outcome;
-	}
-	
-	public static Map<Object, Object> getUserData(RequestDetails requestDetails) {
-		RestfulResponse restfulResponse = (RestfulResponse) requestDetails.getResponse();
-		return restfulResponse.getRequestDetails().getUserData();
 	}
 	
 	private static MethodOutcome buildWithResource(MethodOutcome methodOutcome, IAnyResource resource) {

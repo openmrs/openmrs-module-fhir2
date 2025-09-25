@@ -535,29 +535,30 @@ public class LocationFhirResourceProviderTest extends BaseFhirProvenanceResource
 	public void doUpsert_shouldUpdateLocation() {
 		Location newLocation = location;
 		
-		when(locationService.update(LOCATION_UUID, location, mockRequestDetails)).thenReturn(newLocation);
+		when(locationService.update(LOCATION_UUID, location, mockRequestDetails, false)).thenReturn(newLocation);
 		
-		MethodOutcome result = resourceProvider.doUpsert(new IdType().setValue(LOCATION_UUID), location, mockRequestDetails);
+		MethodOutcome result = resourceProvider.doUpsert(new IdType().setValue(LOCATION_UUID), location, mockRequestDetails,
+		    false);
 		assertThat(result, notNullValue());
 		assertThat(result.getResource(), equalTo(newLocation));
 	}
 	
 	@Test(expected = InvalidRequestException.class)
 	public void doUpsert_shouldThrowInvalidRequestExceptionForUuidMismatch() {
-		when(locationService.update(WRONG_LOCATION_UUID, location, mockRequestDetails))
+		when(locationService.update(WRONG_LOCATION_UUID, location, mockRequestDetails, false))
 		        .thenThrow(InvalidRequestException.class);
 		
-		resourceProvider.doUpsert(new IdType().setValue(WRONG_LOCATION_UUID), location, mockRequestDetails);
+		resourceProvider.doUpsert(new IdType().setValue(WRONG_LOCATION_UUID), location, mockRequestDetails, false);
 	}
 	
 	@Test(expected = InvalidRequestException.class)
 	public void doUpsert_shouldThrowInvalidRequestExceptionForMissingId() {
 		Location noIdLocation = new Location();
 		
-		when(locationService.update(LOCATION_UUID, noIdLocation, mockRequestDetails))
+		when(locationService.update(LOCATION_UUID, noIdLocation, mockRequestDetails, false))
 		        .thenThrow(InvalidRequestException.class);
 		
-		resourceProvider.doUpsert(new IdType().setValue(LOCATION_UUID), noIdLocation, mockRequestDetails);
+		resourceProvider.doUpsert(new IdType().setValue(LOCATION_UUID), noIdLocation, mockRequestDetails, false);
 	}
 	
 	@Test(expected = MethodNotAllowedException.class)
@@ -566,10 +567,10 @@ public class LocationFhirResourceProviderTest extends BaseFhirProvenanceResource
 		
 		wrongLocation.setId(WRONG_LOCATION_UUID);
 		
-		when(locationService.update(WRONG_LOCATION_UUID, wrongLocation, mockRequestDetails))
+		when(locationService.update(WRONG_LOCATION_UUID, wrongLocation, mockRequestDetails, false))
 		        .thenThrow(MethodNotAllowedException.class);
 		
-		resourceProvider.doUpsert(new IdType().setValue(WRONG_LOCATION_UUID), wrongLocation, mockRequestDetails);
+		resourceProvider.doUpsert(new IdType().setValue(WRONG_LOCATION_UUID), wrongLocation, mockRequestDetails, false);
 	}
 	
 	@Test
