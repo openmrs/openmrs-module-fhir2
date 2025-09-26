@@ -55,6 +55,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.FhirLocationService;
 import org.openmrs.module.fhir2.api.search.param.LocationSearchParams;
 import org.powermock.reflect.Whitebox;
@@ -104,6 +105,9 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR4ResourceProvi
 	@Mock
 	private FhirLocationService locationService;
 	
+	@Mock
+	private FhirGlobalPropertyService fhirGpService;
+	
 	@Getter(AccessLevel.PUBLIC)
 	private LocationFhirResourceProvider locationProvider;
 	
@@ -115,12 +119,13 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR4ResourceProvi
 	public void setup() throws ServletException {
 		locationProvider = new LocationFhirResourceProvider();
 		locationProvider.setFhirLocationService(locationService);
+		Whitebox.setInternalState(BaseUpsertFhirResourceProvider.class, "globalPropsService", fhirGpService);
 		super.setup();
 	}
 	
 	@After
 	public void tearDown() {
-		Whitebox.setInternalState(BaseUpsertFhirResourceProvider.class, "supportedResources", (Object) null);
+		Whitebox.setInternalState(BaseUpsertFhirResourceProvider.class, "globalPropsService", (Object) null);
 	}
 	
 	@Override
@@ -451,7 +456,6 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR4ResourceProvi
 		
 		Location location = new Location();
 		location.setId(LOCATION_UUID);
-		Whitebox.setInternalState(BaseUpsertFhirResourceProvider.class, "supportedResources", Collections.emptyList());
 		
 		lenient().when(locationService.update(anyString(), any(Location.class))).thenReturn(location);
 		
