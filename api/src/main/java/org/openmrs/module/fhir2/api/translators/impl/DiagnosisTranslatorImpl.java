@@ -39,9 +39,11 @@ import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 @Component
+@Primary
 public class DiagnosisTranslatorImpl implements DiagnosisTranslator {
 	
 	@Getter(PROTECTED)
@@ -199,18 +201,12 @@ public class DiagnosisTranslatorImpl implements DiagnosisTranslator {
 		}
 		
 		// Set certainty from verification status
-		if (condition.hasVerificationStatus()) {
+		if (condition.hasVerificationStatus()
+		        && condition.getVerificationStatus().getCodingFirstRep().getCode().equals("confirmed")) {
 			// Map from FHIR verification status to OpenMRS certainty
-			String verificationCode = condition.getVerificationStatus().getCodingFirstRep().getCode();
-			switch (verificationCode) {
-				case "confirmed":
-					existingDiagnosis.setCertainty(ConditionVerificationStatus.CONFIRMED);
-					break;
-				case "provisional":
-				default:
-					existingDiagnosis.setCertainty(ConditionVerificationStatus.PROVISIONAL);
-					break;
-			}
+			existingDiagnosis.setCertainty(ConditionVerificationStatus.CONFIRMED);
+		} else {
+			existingDiagnosis.setCertainty(ConditionVerificationStatus.PROVISIONAL);
 		}
 		
 		// Set rank from extension
@@ -235,4 +231,5 @@ public class DiagnosisTranslatorImpl implements DiagnosisTranslator {
 		
 		return existingDiagnosis;
 	}
+	
 }

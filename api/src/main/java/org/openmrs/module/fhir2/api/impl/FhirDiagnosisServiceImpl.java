@@ -23,9 +23,11 @@ import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.DiagnosisTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 @Component
+@Primary
 public class FhirDiagnosisServiceImpl extends BaseFhirService<Condition, Diagnosis> implements FhirDiagnosisService {
 	
 	@Getter(value = PROTECTED)

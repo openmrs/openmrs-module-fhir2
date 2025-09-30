@@ -263,8 +263,7 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR3Integrat
 		assertThat(condition, notNullValue());
 		assertThat(condition.getCategoryFirstRep().getCodingFirstRep().getCode(), equalTo("encounter-diagnosis"));
 		assertThat(condition.getIdElement().getIdPart(), notNullValue());
-		assertThat(condition.getClinicalStatus(), notNullValue());
-		assertThat(condition.getClinicalStatus().toCode(), equalTo("unknown"));
+		assertThat(condition.hasClinicalStatus(), is(false));
 		
 		response = get("/Condition/" + condition.getIdElement().getIdPart()).accept(FhirMediaTypes.JSON).go();
 		

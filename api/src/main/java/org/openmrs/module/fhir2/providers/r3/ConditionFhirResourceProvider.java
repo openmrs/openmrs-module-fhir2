@@ -59,7 +59,7 @@ import org.springframework.stereotype.Component;
 public class ConditionFhirResourceProvider implements IResourceProvider {
 	
 	@Getter(PROTECTED)
-	@Setter(value = PACKAGE, onMethod_ = @Autowired)
+	@Setter(value = PACKAGE, onMethod_ = { @Autowired, @R3Provider })
 	private FhirConditionService conditionService;
 	
 	@Override
