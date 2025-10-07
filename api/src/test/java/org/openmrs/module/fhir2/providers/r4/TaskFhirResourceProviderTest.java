@@ -31,6 +31,8 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -133,7 +135,7 @@ public class TaskFhirResourceProviderTest extends BaseFhirProvenanceResourceTest
 		assertThat(result.getResource(), equalTo(task));
 	}
 	
-	/*@Test
+	@Test
 	public void doUpsert_shouldUpdateTask() {
 		when(taskService.update(TASK_UUID, task, mockRequestDetails, false)).thenReturn(task);
 		
@@ -169,7 +171,7 @@ public class TaskFhirResourceProviderTest extends BaseFhirProvenanceResourceTest
 		        .thenThrow(MethodNotAllowedException.class);
 		
 		resourceProvider.doUpsert(new IdType().setValue(WRONG_TASK_UUID), wrongTask, mockRequestDetails, false);
-	}*/
+	}
 	
 	@Test
 	public void searchTasks_shouldReturnMatchingTasks() {
