@@ -27,6 +27,7 @@ import java.util.List;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
@@ -66,6 +67,9 @@ public class MedicationFhirResourceProviderTest {
 	private static final int START_INDEX = 0;
 	
 	private static final int END_INDEX = 10;
+	
+	@Mock
+	private RequestDetails mockRequestDetails;
 	
 	@Mock
 	private FhirMedicationService fhirMedicationService;
@@ -247,43 +251,46 @@ public class MedicationFhirResourceProviderTest {
 	}
 	
 	@Test
-	public void updateMedication_shouldUpdateRequestedMedication() {
+	public void doUpsert_shouldUpdateRequestedMedication() {
 		Medication med = medication;
 		med.setStatus(Medication.MedicationStatus.INACTIVE);
 		
-		when(fhirMedicationService.update(MEDICATION_UUID, medication)).thenReturn(med);
+		when(fhirMedicationService.update(MEDICATION_UUID, medication, mockRequestDetails, false)).thenReturn(med);
 		
-		MethodOutcome result = resourceProvider.updateMedication(new IdType().setValue(MEDICATION_UUID), medication);
+		MethodOutcome result = resourceProvider.doUpsert(new IdType().setValue(MEDICATION_UUID), medication,
+		    mockRequestDetails, false);
 		assertThat(result, notNullValue());
 		assertThat(result.getResource(), equalTo(med));
 	}
 	
 	@Test(expected = InvalidRequestException.class)
-	public void updateMedication_shouldThrowInvalidRequestForUuidMismatch() {
-		when(fhirMedicationService.update(WRONG_MEDICATION_UUID, medication)).thenThrow(InvalidRequestException.class);
+	public void doUpsert_shouldThrowInvalidRequestForUuidMismatch() {
+		when(fhirMedicationService.update(WRONG_MEDICATION_UUID, medication, mockRequestDetails, false))
+		        .thenThrow(InvalidRequestException.class);
 		
-		resourceProvider.updateMedication(new IdType().setValue(WRONG_MEDICATION_UUID), medication);
+		resourceProvider.doUpsert(new IdType().setValue(WRONG_MEDICATION_UUID), medication, mockRequestDetails, false);
 	}
 	
 	@Test(expected = InvalidRequestException.class)
-	public void updateMedication_shouldThrowInvalidRequestForMissingId() {
+	public void doUpsert_shouldThrowInvalidRequestForMissingId() {
 		Medication noIdMedication = new Medication();
 		
-		when(fhirMedicationService.update(MEDICATION_UUID, noIdMedication)).thenThrow(InvalidRequestException.class);
+		when(fhirMedicationService.update(MEDICATION_UUID, noIdMedication, mockRequestDetails, false))
+		        .thenThrow(InvalidRequestException.class);
 		
-		resourceProvider.updateMedication(new IdType().setValue(MEDICATION_UUID), noIdMedication);
+		resourceProvider.doUpsert(new IdType().setValue(MEDICATION_UUID), noIdMedication, mockRequestDetails, false);
 	}
 	
 	@Test(expected = MethodNotAllowedException.class)
-	public void updateMedication_shouldThrowMethodNotAllowedIfDoesNotExist() {
+	public void doUpsert_shouldThrowMethodNotAllowedIfDoesNotExist() {
 		Medication wrongMedication = new Medication();
 		
 		wrongMedication.setId(WRONG_MEDICATION_UUID);
 		
-		when(fhirMedicationService.update(WRONG_MEDICATION_UUID, wrongMedication))
+		when(fhirMedicationService.update(WRONG_MEDICATION_UUID, wrongMedication, mockRequestDetails, false))
 		        .thenThrow(MethodNotAllowedException.class);
 		
-		resourceProvider.updateMedication(new IdType().setValue(WRONG_MEDICATION_UUID), wrongMedication);
+		resourceProvider.doUpsert(new IdType().setValue(WRONG_MEDICATION_UUID), wrongMedication, mockRequestDetails, false);
 	}
 	
 	@Test
