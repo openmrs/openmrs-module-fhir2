@@ -19,6 +19,7 @@ import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -44,6 +45,7 @@ import org.openmrs.module.fhir2.api.search.SearchQueryBundleProvider;
 import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.ValueSetTranslator;
+import org.openmrs.module.fhir2.api.translators.impl.ValueSetTranslatorImpl;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FhirValueSetServiceImplTest {
@@ -61,7 +63,6 @@ public class FhirValueSetServiceImplTest {
 	@Mock
 	private FhirConceptDao dao;
 	
-	@Mock
 	private ValueSetTranslator translator;
 	
 	@Mock
@@ -85,12 +86,12 @@ public class FhirValueSetServiceImplTest {
 	
 	@Before
 	public void setup() {
+		translator = mock(ValueSetTranslatorImpl.class);
 		fhirValueSetService = new FhirValueSetServiceImpl();
 		fhirValueSetService.setDao(dao);
 		fhirValueSetService.setTranslator(translator);
 		fhirValueSetService.setSearchQuery(searchQuery);
 		fhirValueSetService.setSearchQueryInclude(searchQueryInclude);
-		
 		concept = new Concept();
 		concept.setUuid(ROOT_CONCEPT_UUID);
 		

@@ -10,8 +10,7 @@
 package org.openmrs.module.fhir2.providers.r3;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInRelativeOrder;
-import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.hasProperty;
@@ -25,48 +24,60 @@ import java.util.List;
 import lombok.AccessLevel;
 import lombok.Getter;
 import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.RelatedPerson;
+import org.hl7.fhir.dstu3.model.MedicationDispense;
 import org.junit.Before;
 import org.junit.Test;
+import org.openmrs.api.ConceptService;
+import org.openmrs.module.fhir2.api.FhirConceptSourceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletResponse;
 
-public class RelatedPersonFhirResourceProviderIntegrationTest extends BaseFhirR3IntegrationTest<RelatedPersonFhirResourceProvider, RelatedPerson> {
+public class MedicationDispenseFhirResourceProviderIntegrationTest extends BaseFhirR3IntegrationTest<MedicationDispenseFhirResourceProvider, MedicationDispense> {
 	
-	private static final String RELATIONSHIP_UUID = "c3c91630-8563-481b-8efa-48e10c139a3d";
+	public static final String EXISTING_DISPENSE_UUID = "1bcb299c-b687-11ec-8065-0242ac110002";
 	
-	private static final String WRONG_RELATIONSHIP_UUID = "f4d45630-8563-481b-8efa-48e10c139a3d";
+	public static final String NEW_DISPENSE_UUID = "a15e4988-d07a-11ec-8307-0242ac110002";
 	
-	private static final String RELATED_PERSON_DATA_FILES = "org/openmrs/module/fhir2/api/dao/impl/FhirRelatedPersonDaoImplTest_initial_data.xml";
+	private static final String PATIENT_UUID = "5946f880-b197-400b-9caa-a3c661d23041";
 	
 	@Getter(AccessLevel.PUBLIC)
 	@Autowired
-	private RelatedPersonFhirResourceProvider resourceProvider;
+	private MedicationDispenseFhirResourceProvider resourceProvider;
+	
+	@Autowired
+	ConceptService conceptService;
+	
+	@Autowired
+	FhirConceptSourceService fhirConceptSourceService;
 	
 	@Before
 	@Override
 	public void setup() throws Exception {
 		super.setup();
-		executeDataSet(RELATED_PERSON_DATA_FILES);
+		executeDataSet("org/openmrs/api/include/MedicationDispenseServiceTest-initialData.xml");
+		executeDataSet("org/openmrs/module/fhir2/api/dao/impl/FhirMedicationDispenseDaoImplTest_initial_data.xml");
+		updateSearchIndex();
 	}
 	
 	@Test
-	public void shouldReturnRelatedPersonAsJson() throws Exception {
-		MockHttpServletResponse response = get("/RelatedPerson/" + RELATIONSHIP_UUID).accept(FhirMediaTypes.JSON).go();
+	public void shouldReturnExistingMedicationDispenseAsJson() throws Exception {
+		MockHttpServletResponse response = get("/MedicationDispense/" + EXISTING_DISPENSE_UUID).accept(FhirMediaTypes.JSON)
+		        .go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
-		RelatedPerson relatedPerson = readResponse(response);
+		MedicationDispense medicationDispense = readResponse(response);
 		
-		assertThat(relatedPerson, notNullValue());
-		assertThat(relatedPerson.getIdElement().getIdPart(), equalTo(RELATIONSHIP_UUID));
+		assertThat(medicationDispense, notNullValue());
+		assertThat(medicationDispense.getIdElement().getIdPart(), equalTo(EXISTING_DISPENSE_UUID));
+		assertThat(medicationDispense, validResource());
 	}
 	
 	@Test
-	public void shouldThrow404ForNonExistingRelationshipAsJson() throws Exception {
-		MockHttpServletResponse response = get("/RelatedPerson/" + WRONG_RELATIONSHIP_UUID).accept(FhirMediaTypes.JSON).go();
+	public void shouldThrow404ForNonExistingMedicationDispenseAsJson() throws Exception {
+		MockHttpServletResponse response = get("/MedicationDispense/" + NEW_DISPENSE_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isNotFound());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
@@ -74,22 +85,24 @@ public class RelatedPersonFhirResourceProviderIntegrationTest extends BaseFhirR3
 	}
 	
 	@Test
-	public void shouldReturnRelatedPersonAsXML() throws Exception {
-		MockHttpServletResponse response = get("/RelatedPerson/" + RELATIONSHIP_UUID).accept(FhirMediaTypes.XML).go();
+	public void shouldReturnExistingMedicationDispenseAsXML() throws Exception {
+		MockHttpServletResponse response = get("/MedicationDispense/" + EXISTING_DISPENSE_UUID).accept(FhirMediaTypes.XML)
+		        .go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
-		RelatedPerson relatedPerson = readResponse(response);
+		MedicationDispense medicationDispense = readResponse(response);
 		
-		assertThat(relatedPerson, notNullValue());
-		assertThat(relatedPerson.getIdElement().getIdPart(), equalTo(RELATIONSHIP_UUID));
+		assertThat(medicationDispense, notNullValue());
+		assertThat(medicationDispense.getIdElement().getIdPart(), equalTo(EXISTING_DISPENSE_UUID));
+		assertThat(medicationDispense, validResource());
 	}
 	
 	@Test
-	public void shouldThrow404ForNonExistingRelationshipAsXML() throws Exception {
-		MockHttpServletResponse response = get("/RelatedPerson/" + WRONG_RELATIONSHIP_UUID).accept(FhirMediaTypes.XML).go();
+	public void shouldThrow404ForNonExistingMedicationDispenseAsXML() throws Exception {
+		MockHttpServletResponse response = get("/MedicationDispense/" + NEW_DISPENSE_UUID).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isNotFound());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
@@ -97,28 +110,8 @@ public class RelatedPersonFhirResourceProviderIntegrationTest extends BaseFhirR3
 	}
 	
 	@Test
-	public void shouldReturnForAllRelatedPersonAsJson() throws Exception {
-		MockHttpServletResponse response = get("/RelatedPerson").accept(FhirMediaTypes.JSON).go();
-		
-		assertThat(response, isOk());
-		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
-		assertThat(response.getContentAsString(), notNullValue());
-		
-		Bundle results = readBundleResponse(response);
-		
-		assertThat(results, notNullValue());
-		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
-		assertThat(results.hasEntry(), is(true));
-		
-		List<Bundle.BundleEntryComponent> entries = results.getEntry();
-		
-		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R3/RelatedPerson/"))));
-		assertThat(entries, everyItem(hasResource(instanceOf(RelatedPerson.class))));
-	}
-	
-	@Test
-	public void shouldReturnSortedAndFilterSearchResultsForRelatedPersonAsJson() throws Exception {
-		MockHttpServletResponse response = get("/RelatedPerson?name=John&_sort=-date").accept(FhirMediaTypes.JSON).go();
+	public void shouldSearchForExistingMedicationDispensesAsJson() throws Exception {
+		MockHttpServletResponse response = get("/MedicationDispense").accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
@@ -133,34 +126,32 @@ public class RelatedPersonFhirResourceProviderIntegrationTest extends BaseFhirR3
 		List<Bundle.BundleEntryComponent> entries = results.getEntry();
 		
 		assertThat(entries,
-		    everyItem(hasResource(hasProperty("nameFirstRep", hasProperty("family", containsString("Doe"))))));
-		assertThat(entries, containsInRelativeOrder(
-		    hasResource(hasProperty("nameFirstRep", hasProperty("givenAsSingleString", containsString("F"))))));
-	}
-	
-	@Test
-	public void shouldReturnForAllRelatedPersonAsXML() throws Exception {
-		MockHttpServletResponse response = get("/RelatedPerson").accept(FhirMediaTypes.XML).go();
+		    everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R3/MedicationDispense/"))));
+		assertThat(entries, everyItem(hasResource(instanceOf(MedicationDispense.class))));
+		assertThat(entries, everyItem(hasResource(validResource())));
+		
+		response = get("/MedicationDispense?patient.identifier=6TS-4").accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
-		Bundle results = readBundleResponse(response);
+		results = readBundleResponse(response);
 		
 		assertThat(results, notNullValue());
 		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(results.hasEntry(), is(true));
 		
-		List<Bundle.BundleEntryComponent> entries = results.getEntry();
+		entries = results.getEntry();
 		
-		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R3/RelatedPerson/"))));
-		assertThat(entries, everyItem(hasResource(instanceOf(RelatedPerson.class))));
+		assertThat(entries,
+		    everyItem(hasResource(hasProperty("subject", hasProperty("reference", endsWith(PATIENT_UUID))))));
+		assertThat(entries, everyItem(hasResource(validResource())));
 	}
 	
 	@Test
-	public void shouldReturnSortedAndFilterSearchResultsForRelatedPersonAsXML() throws Exception {
-		MockHttpServletResponse response = get("/RelatedPerson?name=John&_sort=-date").accept(FhirMediaTypes.XML).go();
+	public void shouldSearchForExistingMedicationDispensesAsXML() throws Exception {
+		MockHttpServletResponse response = get("/MedicationDispense").accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
@@ -175,14 +166,32 @@ public class RelatedPersonFhirResourceProviderIntegrationTest extends BaseFhirR3
 		List<Bundle.BundleEntryComponent> entries = results.getEntry();
 		
 		assertThat(entries,
-		    everyItem(hasResource(hasProperty("nameFirstRep", hasProperty("family", containsString("Doe"))))));
-		assertThat(entries, containsInRelativeOrder(
-		    hasResource(hasProperty("nameFirstRep", hasProperty("givenAsSingleString", containsString("F"))))));
+		    everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R3/MedicationDispense/"))));
+		assertThat(entries, everyItem(hasResource(instanceOf(MedicationDispense.class))));
+		assertThat(entries, everyItem(hasResource(validResource())));
+		
+		response = get("/MedicationDispense?patient.identifier=6TS-4").accept(FhirMediaTypes.XML).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		results = readBundleResponse(response);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(results.hasEntry(), is(true));
+		
+		entries = results.getEntry();
+		
+		assertThat(entries,
+		    everyItem(hasResource(hasProperty("subject", hasProperty("reference", endsWith(PATIENT_UUID))))));
+		assertThat(entries, everyItem(hasResource(validResource())));
 	}
 	
 	@Test
-	public void shouldReturnCountForRelatedPersonAsJson() throws Exception {
-		MockHttpServletResponse response = get("/RelatedPerson?name=John&_summary=count").accept(FhirMediaTypes.JSON).go();
+	public void shouldReturnCountForMedicationDispenseAsJson() throws Exception {
+		MockHttpServletResponse response = get("/MedicationDispense?_summary=count").accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
@@ -192,12 +201,12 @@ public class RelatedPersonFhirResourceProviderIntegrationTest extends BaseFhirR3
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
-		assertThat(result, hasProperty("total", equalTo(1)));
+		assertThat(result, hasProperty("total", equalTo(3)));
 	}
 	
 	@Test
-	public void shouldReturnCountForRelatedPersonAsXml() throws Exception {
-		MockHttpServletResponse response = get("/RelatedPerson?name=John&_summary=count").accept(FhirMediaTypes.XML).go();
+	public void shouldReturnCountForMedicationDispenseAsXml() throws Exception {
+		MockHttpServletResponse response = get("/MedicationDispense?_summary=count").accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
@@ -207,6 +216,6 @@ public class RelatedPersonFhirResourceProviderIntegrationTest extends BaseFhirR3
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
-		assertThat(result, hasProperty("total", equalTo(1)));
+		assertThat(result, hasProperty("total", equalTo(3)));
 	}
 }

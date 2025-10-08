@@ -18,6 +18,7 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -42,6 +43,7 @@ import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.search.param.TaskSearchParams;
 import org.openmrs.module.fhir2.api.translators.TaskTranslator;
+import org.openmrs.module.fhir2.api.translators.impl.TaskTranslatorImpl;
 import org.openmrs.module.fhir2.model.FhirTask;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -72,7 +74,6 @@ public class FhirTaskServiceImplTest {
 	@Mock
 	private FhirTaskDao dao;
 	
-	@Mock
 	private TaskTranslator translator;
 	
 	@Mock
@@ -94,6 +95,7 @@ public class FhirTaskServiceImplTest {
 			protected void validateObject(FhirTask object) {
 			}
 		};
+		translator = mock(TaskTranslatorImpl.class);
 		fhirTaskService.setDao(dao);
 		fhirTaskService.setTranslator(translator);
 		fhirTaskService.setSearchQuery(searchQuery);

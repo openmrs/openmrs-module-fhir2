@@ -59,7 +59,7 @@ public class ValueSetFhirResourceProviderIntegrationTest extends BaseFhirR3Integ
 		MockHttpServletResponse response = get("/ValueSet/" + ROOT_CONCEPT_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		ValueSet valueSet = readResponse(response);
@@ -74,7 +74,7 @@ public class ValueSetFhirResourceProviderIntegrationTest extends BaseFhirR3Integ
 		MockHttpServletResponse response = get("/ValueSet/" + UNKNOWN_CONCEPT_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isNotFound());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		OperationOutcome operationOutcome = readOperationOutcome(response);
@@ -88,7 +88,7 @@ public class ValueSetFhirResourceProviderIntegrationTest extends BaseFhirR3Integ
 		MockHttpServletResponse response = get("/ValueSet/" + CONCEPT_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isNotFound());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		OperationOutcome operationOutcome = readOperationOutcome(response);
@@ -102,7 +102,7 @@ public class ValueSetFhirResourceProviderIntegrationTest extends BaseFhirR3Integ
 		MockHttpServletResponse response = get("/ValueSet/" + ROOT_CONCEPT_UUID).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		ValueSet valueSet = readResponse(response);
@@ -117,7 +117,7 @@ public class ValueSetFhirResourceProviderIntegrationTest extends BaseFhirR3Integ
 		MockHttpServletResponse response = get("/ValueSet/" + UNKNOWN_CONCEPT_UUID).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isNotFound());
-		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		OperationOutcome operationOutcome = readOperationOutcome(response);
@@ -131,7 +131,7 @@ public class ValueSetFhirResourceProviderIntegrationTest extends BaseFhirR3Integ
 		MockHttpServletResponse response = get("/ValueSet/" + UNKNOWN_CONCEPT_UUID).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isNotFound());
-		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		OperationOutcome operationOutcome = readOperationOutcome(response);
@@ -146,7 +146,7 @@ public class ValueSetFhirResourceProviderIntegrationTest extends BaseFhirR3Integ
 		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Bundle results = readBundleResponse(response);
@@ -170,7 +170,7 @@ public class ValueSetFhirResourceProviderIntegrationTest extends BaseFhirR3Integ
 		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Bundle results = readBundleResponse(response);
@@ -193,7 +193,7 @@ public class ValueSetFhirResourceProviderIntegrationTest extends BaseFhirR3Integ
 		MockHttpServletResponse response = get("/ValueSet/" + ROOT_CONCEPT_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		
 		assertThat(response.getHeader("etag"), notNullValue());
 		assertThat(response.getHeader("etag"), startsWith("W/"));
@@ -212,7 +212,7 @@ public class ValueSetFhirResourceProviderIntegrationTest extends BaseFhirR3Integ
 		MockHttpServletResponse response = get("/ValueSet/" + ROOT_CONCEPT_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		assertThat(response.getHeader("etag"), notNullValue());
 		

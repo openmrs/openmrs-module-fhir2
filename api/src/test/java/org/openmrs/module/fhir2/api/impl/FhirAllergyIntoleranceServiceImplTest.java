@@ -22,6 +22,7 @@ import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -57,6 +58,7 @@ import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.FhirAllergyIntoleranceSearchParams;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.AllergyIntoleranceTranslator;
+import org.openmrs.module.fhir2.api.translators.impl.AllergyIntoleranceTranslatorImpl;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FhirAllergyIntoleranceServiceImplTest {
@@ -82,7 +84,6 @@ public class FhirAllergyIntoleranceServiceImplTest {
 	@Mock
 	private FhirAllergyIntoleranceDao allergyIntoleranceDao;
 	
-	@Mock
 	private AllergyIntoleranceTranslator translator;
 	
 	@Mock
@@ -108,7 +109,7 @@ public class FhirAllergyIntoleranceServiceImplTest {
 			protected void validateObject(Allergy object) {
 			}
 		};
-		
+		translator = mock(AllergyIntoleranceTranslatorImpl.class);
 		service.setTranslator(translator);
 		service.setDao(allergyIntoleranceDao);
 		service.setSearchQuery(searchQuery);

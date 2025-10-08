@@ -11,6 +11,7 @@ package org.openmrs.module.fhir2.providers.r4;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.containsStringIgnoringCase;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
@@ -92,7 +93,7 @@ public class GroupFhirResourceProviderWebTest extends BaseFhirR4ResourceProvider
 		MockHttpServletResponse response = get("/Group/" + COHORT_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), containsString(FhirMediaTypes.JSON.toString()));
 		
 		Group resource = readResponse(response);
 		assertThat(resource.getIdElement().getIdPart(), equalTo(COHORT_UUID));
@@ -205,7 +206,7 @@ public class GroupFhirResourceProviderWebTest extends BaseFhirR4ResourceProvider
 		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), containsString(FhirMediaTypes.JSON.toString()));
 		
 		Bundle results = readBundleResponse(response);
 		assertThat(results.getEntry(), notNullValue());
@@ -253,7 +254,7 @@ public class GroupFhirResourceProviderWebTest extends BaseFhirR4ResourceProvider
 		MockHttpServletResponse response = delete("/Group/" + COHORT_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), containsString(FhirMediaTypes.JSON.toString()));
 	}
 	
 	@Test
@@ -263,6 +264,6 @@ public class GroupFhirResourceProviderWebTest extends BaseFhirR4ResourceProvider
 		MockHttpServletResponse response = delete("/Group/" + BAD_COHORT_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isNotFound());
-		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), containsString(FhirMediaTypes.JSON.toString()));
 	}
 }

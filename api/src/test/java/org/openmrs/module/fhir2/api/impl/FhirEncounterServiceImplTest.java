@@ -21,6 +21,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -66,6 +67,7 @@ import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.EncounterSearchParams;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.EncounterTranslator;
+import org.openmrs.module.fhir2.api.translators.impl.EncounterTranslatorImpl;
 import org.openmrs.module.fhir2.providers.r3.MockIBundleProvider;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -96,7 +98,6 @@ public class FhirEncounterServiceImplTest {
 	@Mock
 	private FhirEncounterDao dao;
 	
-	@Mock
 	private EncounterTranslator<Encounter> encounterTranslator;
 	
 	@Mock
@@ -125,6 +126,7 @@ public class FhirEncounterServiceImplTest {
 			protected void validateObject(Encounter object) {
 			}
 		};
+		encounterTranslator = mock(EncounterTranslatorImpl.class);
 		encounterService.setDao(dao);
 		encounterService.setTranslator(encounterTranslator);
 		encounterService.setVisitService(visitService);

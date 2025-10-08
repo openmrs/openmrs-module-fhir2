@@ -19,6 +19,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -51,6 +52,7 @@ import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.ObservationSearchParams;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.ObservationTranslator;
+import org.openmrs.module.fhir2.api.translators.impl.ObservationTranslatorImpl;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FhirObservationServiceImplTest {
@@ -79,7 +81,6 @@ public class FhirObservationServiceImplTest {
 	@Mock
 	private SearchQuery<Obs, Observation, FhirObservationDao, ObservationTranslator, SearchQueryInclude<Observation>> searchQuery;
 	
-	@Mock
 	private ObservationTranslator translator;
 	
 	private FhirObservationServiceImpl fhirObservationService;
@@ -92,7 +93,7 @@ public class FhirObservationServiceImplTest {
 			protected void validateObject(Obs object) {
 			}
 		};
-		
+		translator = mock(ObservationTranslatorImpl.class);
 		fhirObservationService.setDao(dao);
 		fhirObservationService.setSearchQuery(searchQuery);
 		fhirObservationService.setTranslator(translator);

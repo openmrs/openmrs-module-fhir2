@@ -19,6 +19,7 @@ import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -57,6 +58,7 @@ import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.ConditionSearchParams;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.ConditionTranslator;
+import org.openmrs.module.fhir2.api.translators.impl.ConditionTranslatorImpl;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FhirConditionServiceImplTest {
@@ -76,7 +78,6 @@ public class FhirConditionServiceImplTest {
 	@Mock
 	private FhirConditionDao dao;
 	
-	@Mock
 	private ConditionTranslator<Condition> conditionTranslator;
 	
 	@Mock
@@ -102,6 +103,8 @@ public class FhirConditionServiceImplTest {
 			protected void validateObject(Condition object) {
 			}
 		};
+		conditionTranslator = mock(ConditionTranslatorImpl.class);
+		;
 		conditionService.setDao(dao);
 		conditionService.setTranslator(conditionTranslator);
 		conditionService.setSearchQuery(searchQuery);

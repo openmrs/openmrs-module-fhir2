@@ -29,6 +29,7 @@ import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.text.ParseException;
@@ -73,6 +74,7 @@ import org.openmrs.module.fhir2.api.search.param.OpenmrsPatientSearchParams;
 import org.openmrs.module.fhir2.api.search.param.PatientSearchParams;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.PatientTranslator;
+import org.openmrs.module.fhir2.api.translators.impl.PatientTranslatorImpl;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FhirPatientServiceImplTest {
@@ -119,7 +121,6 @@ public class FhirPatientServiceImplTest {
 	
 	private static final SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
 	
-	@Mock
 	private PatientTranslator patientTranslator;
 	
 	@Mock
@@ -151,7 +152,7 @@ public class FhirPatientServiceImplTest {
 			protected void validateObject(Patient object) {
 			}
 		};
-		
+		patientTranslator = mock(PatientTranslatorImpl.class);
 		patientService.setDao(dao);
 		patientService.setSystemDao(systemDao);
 		patientService.setTranslator(patientTranslator);
