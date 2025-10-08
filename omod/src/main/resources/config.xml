@@ -177,4 +177,12 @@
 		<defaultValue>5</defaultValue>
 	</globalProperty>
 
+    <globalProperty>
+        <property>${project.parent.artifactId}.upsert.supported.resources</property>
+        <description>
+            Comma-separated list of resource names for which a new item is created if it does not exist when processing
+            an update request.
+        </description>
+    </globalProperty>
+
 </module>

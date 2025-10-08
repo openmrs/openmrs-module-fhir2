@@ -22,6 +22,7 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.openmrs.module.fhir2.api.util.GeneralUtils.inputStreamToString;
@@ -41,6 +42,7 @@ import lombok.Getter;
 import org.apache.commons.lang.time.DateUtils;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Medication;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -49,8 +51,10 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.FhirMedicationService;
 import org.openmrs.module.fhir2.api.search.param.MedicationSearchParams;
+import org.powermock.reflect.Whitebox;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -75,6 +79,9 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR4ResourcePro
 	@Mock
 	private FhirMedicationService fhirMedicationService;
 	
+	@Mock
+	private FhirGlobalPropertyService fhirGpService;
+	
 	@Getter
 	private MedicationFhirResourceProvider resourceProvider;
 	
@@ -88,9 +95,15 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR4ResourcePro
 	public void setup() throws ServletException {
 		resourceProvider = new MedicationFhirResourceProvider();
 		resourceProvider.setFhirMedicationService(fhirMedicationService);
+		Whitebox.setInternalState(BaseUpsertFhirResourceProvider.class, "globalPropsService", fhirGpService);
 		medication = new Medication();
 		medication.setId(MEDICATION_UUID);
 		super.setup();
+	}
+	
+	@After
+	public void tearDown() {
+		Whitebox.setInternalState(BaseUpsertFhirResourceProvider.class, "globalPropsService", (Object) null);
 	}
 	
 	@Test
@@ -267,7 +280,7 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR4ResourcePro
 			medicationJson = inputStreamToString(is, UTF_8);
 		}
 		
-		when(fhirMedicationService.update(any(String.class), any(Medication.class))).thenReturn(medication);
+		lenient().when(fhirMedicationService.update(any(String.class), any(Medication.class))).thenReturn(medication);
 		
 		MockHttpServletResponse response = put("/Medication/" + MEDICATION_UUID).jsonContent(medicationJson)
 		        .accept(FhirMediaTypes.JSON).go();

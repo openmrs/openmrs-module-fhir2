@@ -30,10 +30,12 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.openmrs.Auditable;
+import org.openmrs.OpenmrsMetadata;
 import org.openmrs.OpenmrsObject;
 import org.openmrs.Retireable;
 import org.openmrs.Voidable;
 import org.openmrs.api.ValidationException;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirService;
 import org.openmrs.module.fhir2.api.dao.FhirDao;
 import org.openmrs.module.fhir2.api.translators.OpenmrsFhirTranslator;
@@ -54,6 +56,8 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 	
 	protected final Class<? super T> resourceClass;
 	
+	private boolean handlesOpenmrsMetadata;
+	
 	@Getter(PROTECTED)
 	@Setter(value = PROTECTED, onMethod_ = @__({ @Autowired, @Qualifier("fhirR4") }))
 	private FhirContext fhirContext;
@@ -64,6 +68,8 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 		// @formatter:on
 		
 		this.resourceClass = resourceTypeToken.getRawType();
+		TypeToken<U> openmrsTypeToken = new TypeToken<U>(getClass()) {};
+		handlesOpenmrsMetadata = OpenmrsMetadata.class.isAssignableFrom(openmrsTypeToken.getRawType());
 	}
 	
 	@Override
@@ -110,6 +116,12 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 	@Override
 	@SuppressWarnings("unchecked")
 	public T update(@Nonnull String uuid, @Nonnull T updatedResource) {
+		return update(uuid, updatedResource, null, false);
+	}
+	
+	@Override
+	public T update(@Nonnull String uuid, @Nonnull T updatedResource, RequestDetails requestDetails,
+	        boolean createIfNotExists) {
 		if (uuid == null) {
 			throw new InvalidRequestException("Uuid cannot be null.");
 		}
@@ -131,7 +143,14 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 		U existingObject = getDao().get(uuid);
 		
 		if (existingObject == null) {
-			throw resourceNotFound(uuid);
+			if (!handlesOpenmrsMetadata || !createIfNotExists) {
+				throw resourceNotFound(uuid);
+			}
+			
+			//We need to communicate to the resource provider whether this operation resulted in a creation or an
+			//update but the return type provides no way, so we use the user data map on the request details object
+			//for this purpose as the recommended way, please refer to the javadocs of RequestDetails.getUserData().
+			requestDetails.getUserData().put(FhirConstants.USER_DATA_KEY_OUTCOME_CREATED, true);
 		}
 		
 		return applyUpdate(existingObject, updatedResource);
@@ -188,7 +207,7 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 		OpenmrsFhirTranslator<U, T> translator = getTranslator();
 		
 		U updatedObject;
-		if (translator instanceof UpdatableOpenmrsTranslator) {
+		if (translator instanceof UpdatableOpenmrsTranslator && existingObject != null) {
 			UpdatableOpenmrsTranslator<U, T> updatableOpenmrsTranslator = (UpdatableOpenmrsTranslator<U, T>) translator;
 			updatedObject = updatableOpenmrsTranslator.toOpenmrsType(existingObject, updatedResource);
 		} else {
@@ -266,4 +285,5 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 		return new ResourceNotFoundException(
 		        "Resource of type " + resourceClass.getSimpleName() + " with ID " + uuid + " is not known");
 	}
+	
 }
