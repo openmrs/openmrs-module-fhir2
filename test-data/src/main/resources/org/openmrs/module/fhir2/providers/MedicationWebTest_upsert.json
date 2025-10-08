@@ -1,0 +1,49 @@
+{
+    "resourceType": "Medication",
+    "id": "105bf9c4-8fef-11f0-b303-0242ac180002",
+    "code": {
+        "coding": [
+            {
+                "code": "5085AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+            }
+        ]
+    },
+    "status": "active",
+    "form": {
+        "coding": [
+            {
+                "code": "5086AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+            }
+        ]
+    },
+    "extension": [
+        {
+            "url": "http://fhir.openmrs.org/ext/medicine",
+            "extension": [
+                {
+                    "url": "http://fhir.openmrs.org/ext/medicine#maximumDailyDose",
+                    "valueString": "3.5"
+                },
+                {
+                    "url": "http://fhir.openmrs.org/ext/medicine#minimumDailyDose",
+                    "valueString": "3.0"
+                },
+                {
+                    "url": "http://fhir.openmrs.org/ext/medicine#strength",
+                    "valueString": "1000mg"
+                }
+            ]
+        }
+    ],
+    "ingredient": [
+        {
+            "itemCodeableConcept": {
+                "coding": [
+                    {
+                        "code": "5088AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                    }
+                ]
+            }
+        }
+    ]
+}

@@ -25,7 +25,6 @@ import ca.uhn.fhir.rest.annotation.Patch;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
-import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -33,7 +32,6 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
-import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.Setter;
@@ -56,7 +54,7 @@ import org.springframework.stereotype.Component;
 @Component("practitionerFhirR4ResourceProvider")
 @R4Provider
 @Setter(PACKAGE)
-public class PractitionerFhirResourceProvider implements IResourceProvider {
+public class PractitionerFhirResourceProvider extends BaseUpsertFhirResourceProvider<Practitioner> {
 	
 	@Autowired
 	private FhirPractitionerService practitionerService;
@@ -81,16 +79,17 @@ public class PractitionerFhirResourceProvider implements IResourceProvider {
 		return FhirProviderUtils.buildCreate(practitionerService.create(practitioner));
 	}
 	
-	@Update
-	@SuppressWarnings("unused")
-	public MethodOutcome updatePractitioner(@IdParam IdType id, @ResourceParam Practitioner practitioner) {
+	@Override
+	protected MethodOutcome doUpsert(IdType id, Practitioner practitioner, RequestDetails requestDetails,
+	        boolean createIfNotExists) {
 		if (id == null || id.getIdPart() == null) {
 			throw new InvalidRequestException("id must be specified to update");
 		}
 		
 		practitioner.setId(id.getIdPart());
 		
-		return FhirProviderUtils.buildUpdate(practitionerService.update(id.getIdPart(), practitioner));
+		return FhirProviderUtils
+		        .buildUpdate(practitionerService.update(id.getIdPart(), practitioner, requestDetails, createIfNotExists));
 	}
 	
 	@Patch
