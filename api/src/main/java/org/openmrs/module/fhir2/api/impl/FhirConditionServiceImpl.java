@@ -63,7 +63,7 @@ public class FhirConditionServiceImpl extends BaseFhirService<Condition, org.ope
 	private SearchQuery<org.openmrs.Condition, Condition, FhirConditionDao, ConditionTranslator<org.openmrs.Condition>, SearchQueryInclude<Condition>> searchQuery;
 	
 	@Getter(value = AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
+	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
 	private FhirDiagnosisService diagnosisService;
 	
 	@Override
