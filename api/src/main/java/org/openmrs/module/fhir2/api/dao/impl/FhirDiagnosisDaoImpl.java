@@ -50,8 +50,8 @@ public class FhirDiagnosisDaoImpl extends BaseFhirDao<Diagnosis> implements Fhir
 	
 	private void handleDiagnosisCode(Criteria criteria, TokenAndListParam code) {
 		if (code != null) {
-			criteria.createAlias("diagnosis.coded", "cd");
-			handleCodeableConcept(criteria, code, "cd", "map", "term").ifPresent(criteria::add);
+			criteria.createAlias("diagnosis.coded", "dc");
+			handleCodeableConcept(criteria, code, "dc", "dmap", "dterm").ifPresent(criteria::add);
 		}
 	}
 }
