@@ -13,7 +13,7 @@ import javax.annotation.Nonnull;
 
 import org.openmrs.Diagnosis;
 
-public interface DiagnosisTranslator extends OpenmrsFhirUpdatableTranslator<Diagnosis, org.hl7.fhir.r4.model.Condition> {
+public interface DiagnosisTranslator extends OpenmrsFhirUpdatableTranslator<Diagnosis, Condition> {
 	
 	/**
 	 * Maps <T> an openMrs condition to a {@link org.hl7.fhir.r4.model.Condition}
