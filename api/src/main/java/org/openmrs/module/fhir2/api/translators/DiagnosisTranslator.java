@@ -25,7 +25,7 @@ public interface DiagnosisTranslator extends OpenmrsFhirUpdatableTranslator<Diag
 	org.hl7.fhir.r4.model.Condition toFhirResource(@Nonnull Diagnosis diagnosis);
 	
 	/**
-	 * Maps a {@link org.hl7.fhir.r4.model.Condition} to an <T> an openMrs diagnosis
+	 * Maps a {@link org.hl7.fhir.r4.model.Condition} to an <T> an OpenMRS {@link Diagnosis}
 	 *
 	 * @param condition the FHIR condition to translate
 	 * @return the corresponding OpenMRS diagnosis
