@@ -55,7 +55,7 @@ public class FhirConditionServiceImpl extends BaseFhirService<Condition, org.ope
 	private SearchQueryInclude<Condition> searchQueryInclude;
 	
 	@Getter(value = AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
+	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
 	private FhirGlobalPropertyService globalPropertyService;
 	
 	@Getter(value = AccessLevel.PROTECTED)
