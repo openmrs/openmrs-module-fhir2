@@ -21,7 +21,6 @@ public class FhirDiagnosisServiceR3Impl extends FhirDiagnosisServiceImpl impleme
 	
 	@Override
 	@Autowired
-	@R3Provider
 	protected void setTranslator(DiagnosisTranslator translator) {
 		super.setTranslator(translator);
 	}
