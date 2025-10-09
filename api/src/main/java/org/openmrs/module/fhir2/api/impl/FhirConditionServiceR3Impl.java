@@ -21,7 +21,6 @@ public class FhirConditionServiceR3Impl extends FhirConditionServiceImpl impleme
 	
 	@Override
 	@Autowired
-	@R3Provider
 	void setDiagnosisService(FhirDiagnosisService diagnosisService) {
 		super.setDiagnosisService(diagnosisService);
 	}
