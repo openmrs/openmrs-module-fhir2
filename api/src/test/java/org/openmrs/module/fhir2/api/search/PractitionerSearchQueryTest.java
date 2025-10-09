@@ -49,6 +49,7 @@ import org.openmrs.Provider;
 import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirPractitionerDao;
+import org.openmrs.module.fhir2.api.search.param.MedicationRequestSearchParams;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.PractitionerTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -585,7 +586,7 @@ public class PractitionerSearchQueryTest extends BaseFhirContextSensitiveTest {
 		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(PRACTITIONER_UUID));
 		HashSet<Include> revIncludes = new HashSet<>();
 		revIncludes.add(new Include("MedicationRequest:requester"));
-		
+
 		SearchParameterMap theParams = new SearchParameterMap()
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
 		        .addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER, revIncludes);
@@ -597,7 +598,7 @@ public class PractitionerSearchQueryTest extends BaseFhirContextSensitiveTest {
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
 		assertThat(resultList, hasSize(equalTo(9))); // included resources added as part of result list
-		assertThat(resultList.subList(1, 9), everyItem(allOf(is(instanceOf(MedicationRequest.class)),
+		assertThat(resultList.subList(1, resultList.size()), everyItem(allOf(is(instanceOf(MedicationRequest.class)),
 		    hasProperty("requester", hasProperty("referenceElement", hasProperty("idPart", equalTo(PRACTITIONER_UUID)))))));
 	}
 	
