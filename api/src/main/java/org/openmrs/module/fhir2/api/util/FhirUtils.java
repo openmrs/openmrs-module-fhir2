@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.api.util;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -18,6 +19,8 @@ import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.OperationOutcome;
@@ -159,18 +162,34 @@ public class FhirUtils {
 	 * @return The condition type: "Diagnosis", "Condition", or empty.
 	 */
 	public static Optional<OpenmrsConditionType> getOpenmrsConditionType(Condition condition) {
-		if (condition.hasCategory() && condition.getCategoryFirstRep().hasCoding()) {
-			String code = condition.getCategoryFirstRep().getCodingFirstRep().getCode();
-			if (FhirConstants.CONDITION_CATEGORY_CODE_DIAGNOSIS.equals(code)) {
-				return Optional.of(OpenmrsConditionType.DIAGNOSIS);
-			} else if (FhirConstants.CONDITION_CATEGORY_CODE_CONDITION.equals(code)) {
-				return Optional.of(OpenmrsConditionType.CONDITION);
-			} else {
-				return Optional.empty();
-			}
+		if (!condition.hasCategory()) {
+			return Optional.of(OpenmrsConditionType.CONDITION);
 		}
 		
-		return Optional.of(OpenmrsConditionType.CONDITION);
+		List<Coding> categoryCodings = condition.getCategory().stream().filter(CodeableConcept::hasCoding)
+		        .flatMap(category -> category.getCoding().stream()).collect(Collectors.toList());
+		
+		if (categoryCodings.isEmpty()) {
+			return Optional.of(OpenmrsConditionType.CONDITION);
+		}
+		
+		List<Coding> hl7Codings = categoryCodings.stream()
+		        .filter(coding -> FhirConstants.CONDITION_CATEGORY_SYSTEM_URI.equals(coding.getSystem()))
+		        .collect(Collectors.toList());
+		
+		if (hl7Codings.isEmpty()) {
+			return Optional.empty();
+		}
+		
+		return hl7Codings.stream().map(Coding::getCode).map(code -> {
+			if (FhirConstants.CONDITION_CATEGORY_CODE_DIAGNOSIS.equals(code)) {
+				return OpenmrsConditionType.DIAGNOSIS;
+			} else if (FhirConstants.CONDITION_CATEGORY_CODE_CONDITION.equals(code)) {
+				return OpenmrsConditionType.CONDITION;
+			}
+			
+			return null;
+		}).filter(Objects::nonNull).findFirst();
 	}
 	
 	/**

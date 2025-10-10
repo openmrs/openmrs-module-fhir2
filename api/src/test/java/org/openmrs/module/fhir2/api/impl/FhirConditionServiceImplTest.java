@@ -19,7 +19,6 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -62,6 +61,7 @@ import org.openmrs.module.fhir2.api.search.SearchQueryBundleProvider;
 import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.TwoSearchQueryBundleProvider;
 import org.openmrs.module.fhir2.api.search.param.ConditionSearchParams;
+import org.openmrs.module.fhir2.api.search.param.DiagnosisSearchParams;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.ConditionTranslator;
 
@@ -276,12 +276,12 @@ public class FhirConditionServiceImplTest {
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated)
 		        .setSortSpec(sort);
 		
-		when(dao.getSearchResults(any())).thenReturn(Collections.singletonList(openmrsCondition));
+		List<Condition> daoResults = Collections.singletonList(openmrsCondition);
+		when(dao.getSearchResults(any())).thenReturn(daoResults);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, conditionTranslator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
-		when(conditionTranslator.toFhirResource(openmrsCondition)).thenReturn(fhirCondition);
-		when(conditionTranslator.toFhirResources(anyCollection())).thenCallRealMethod();
+		when(conditionTranslator.toFhirResources(daoResults)).thenReturn(Collections.singletonList(fhirCondition));
 		
 		IBundleProvider result = conditionService.searchConditions(new ConditionSearchParams(patientReference, codeList,
 		        clinicalList, onsetDate, onsetAge, recordDate, category, uuid, lastUpdated, sort, includes));
@@ -379,7 +379,7 @@ public class FhirConditionServiceImplTest {
 		        .add(FhirConstants.CONDITION_CATEGORY_SYSTEM_URI, FhirConstants.CONDITION_CATEGORY_CODE_DIAGNOSIS));
 		
 		IBundleProvider diagBundle = new SimpleBundleProvider();
-		when(diagnosisService.searchDiagnoses(any())).thenReturn(diagBundle);
+		when(diagnosisService.searchDiagnoses(any(DiagnosisSearchParams.class))).thenReturn(diagBundle);
 		
 		IBundleProvider result = conditionService.searchConditions(
 		    new ConditionSearchParams(null, null, null, null, null, null, category, null, null, null, new HashSet<>()));
@@ -397,7 +397,7 @@ public class FhirConditionServiceImplTest {
 		
 		IBundleProvider diagBundle = new SimpleBundleProvider();
 		IBundleProvider condBundle = new SimpleBundleProvider();
-		when(diagnosisService.searchDiagnoses(any())).thenReturn(diagBundle);
+		when(diagnosisService.searchDiagnoses(any(DiagnosisSearchParams.class))).thenReturn(diagBundle);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(condBundle);
 		
 		IBundleProvider result = conditionService.searchConditions(

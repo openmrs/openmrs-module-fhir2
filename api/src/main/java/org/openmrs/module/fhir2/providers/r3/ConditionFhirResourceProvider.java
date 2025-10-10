@@ -59,7 +59,7 @@ import org.springframework.stereotype.Component;
 public class ConditionFhirResourceProvider implements IResourceProvider {
 	
 	@Getter(PROTECTED)
-	@Setter(value = PACKAGE, onMethod_ = { @Autowired, @R3Provider })
+	@Setter(value = PACKAGE, onMethod_ = @Autowired)
 	private FhirConditionService conditionService;
 	
 	@Override
@@ -74,14 +74,16 @@ public class ConditionFhirResourceProvider implements IResourceProvider {
 			throw new ResourceNotFoundException("Could not find condition with Id " + id.getIdPart());
 		}
 		
-		return (Condition) VersionConvertorFactory_30_40.convertResource(condition);
+		return convertToR3Condition(condition);
 	}
 	
 	@Create
 	@SuppressWarnings("unused")
 	public MethodOutcome createCondition(@ResourceParam Condition newCondition) {
-		return FhirProviderUtils.buildCreate(VersionConvertorFactory_30_40.convertResource(conditionService
-		        .create((org.hl7.fhir.r4.model.Condition) VersionConvertorFactory_30_40.convertResource(newCondition))));
+		org.hl7.fhir.r4.model.Condition created = conditionService
+		        .create((org.hl7.fhir.r4.model.Condition) VersionConvertorFactory_30_40.convertResource(newCondition));
+		
+		return FhirProviderUtils.buildCreate(convertToR3Condition(created));
 	}
 	
 	@Update
@@ -92,9 +94,10 @@ public class ConditionFhirResourceProvider implements IResourceProvider {
 		
 		updatedCondition.setId(id);
 		
-		return FhirProviderUtils
-		        .buildUpdate(VersionConvertorFactory_30_40.convertResource(conditionService.update(id.getIdPart(),
-		            (org.hl7.fhir.r4.model.Condition) VersionConvertorFactory_30_40.convertResource(updatedCondition))));
+		org.hl7.fhir.r4.model.Condition updated = conditionService.update(id.getIdPart(),
+		    (org.hl7.fhir.r4.model.Condition) VersionConvertorFactory_30_40.convertResource(updatedCondition));
+		
+		return FhirProviderUtils.buildUpdate(convertToR3Condition(updated));
 	}
 	
 	@Delete
@@ -129,5 +132,16 @@ public class ConditionFhirResourceProvider implements IResourceProvider {
 		return new SearchQueryBundleProviderR3Wrapper(
 		        conditionService.searchConditions(new ConditionSearchParams(patientParam, code, clinicalStatus, onsetDate,
 		                onsetAge, recordedDate, category, id, lastUpdated, sort, includes)));
+	}
+	
+	private Condition convertToR3Condition(org.hl7.fhir.r4.model.Condition condition) {
+		if (condition == null) {
+			return null;
+		}
+		
+		org.hl7.fhir.r4.model.Condition copy = condition.copy();
+		copy.setClinicalStatus(null);
+		
+		return (Condition) VersionConvertorFactory_30_40.convertResource(copy);
 	}
 }

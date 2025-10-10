@@ -11,7 +11,9 @@ package org.openmrs.module.fhir2.api.impl;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -25,6 +27,7 @@ import org.openmrs.Diagnosis;
 import org.openmrs.module.fhir2.api.dao.FhirDiagnosisDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
+import org.openmrs.module.fhir2.api.search.param.DiagnosisSearchParams;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.DiagnosisTranslator;
 
@@ -61,9 +64,11 @@ public class FhirDiagnosisServiceImplTest {
 	
 	@Test
 	public void searchDiagnoses_shouldDelegateToSearchQuery() {
-		SearchParameterMap params = new SearchParameterMap();
+		DiagnosisSearchParams params = spy(DiagnosisSearchParams.builder().build());
+		SearchParameterMap expectedParams = new SearchParameterMap();
+		doReturn(expectedParams).when(params).toSearchParameterMap();
 		IBundleProvider provider = mock(IBundleProvider.class);
-		when(searchQuery.getQueryResults(params, dao, translator, searchQueryInclude)).thenReturn(provider);
+		when(searchQuery.getQueryResults(expectedParams, dao, translator, searchQueryInclude)).thenReturn(provider);
 		
 		IBundleProvider result = diagnosisService.searchDiagnoses(params);
 		assertThat(result, equalTo(provider));

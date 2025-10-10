@@ -11,9 +11,9 @@ package org.openmrs.module.fhir2.api;
 
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import org.hl7.fhir.r4.model.Condition;
-import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
+import org.openmrs.module.fhir2.api.search.param.DiagnosisSearchParams;
 
 public interface FhirDiagnosisService extends FhirService<Condition> {
 	
-	IBundleProvider searchDiagnoses(SearchParameterMap theParams);
+	IBundleProvider searchDiagnoses(DiagnosisSearchParams diagnosisSearchParams);
 }

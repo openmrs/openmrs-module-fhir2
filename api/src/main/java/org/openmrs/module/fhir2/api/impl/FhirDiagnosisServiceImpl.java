@@ -20,10 +20,10 @@ import org.openmrs.module.fhir2.api.FhirDiagnosisService;
 import org.openmrs.module.fhir2.api.dao.FhirDiagnosisDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
+import org.openmrs.module.fhir2.api.search.param.DiagnosisSearchParams;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.DiagnosisTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -46,7 +46,8 @@ public class FhirDiagnosisServiceImpl extends BaseFhirService<Condition, Diagnos
 	private SearchQuery<Diagnosis, Condition, FhirDiagnosisDao, DiagnosisTranslator, SearchQueryInclude<Condition>> searchQuery;
 	
 	@Override
-	public IBundleProvider searchDiagnoses(SearchParameterMap theParams) {
+	public IBundleProvider searchDiagnoses(DiagnosisSearchParams diagnosisSearchParams) {
+		SearchParameterMap theParams = diagnosisSearchParams.toSearchParameterMap();
 		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}
 }

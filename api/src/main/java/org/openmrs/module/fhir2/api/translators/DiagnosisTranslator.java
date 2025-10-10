@@ -11,6 +11,7 @@ package org.openmrs.module.fhir2.api.translators;
 
 import javax.annotation.Nonnull;
 
+import org.hl7.fhir.r4.model.Condition;
 import org.openmrs.Diagnosis;
 
 public interface DiagnosisTranslator extends OpenmrsFhirUpdatableTranslator<Diagnosis, Condition> {

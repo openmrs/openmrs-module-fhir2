@@ -64,6 +64,33 @@ public class FhirUtilsTest {
 	}
 	
 	@Test
+	public void getOpenmrsConditionType_shouldInspectAllCodings() {
+		Condition condition = new Condition();
+		CodeableConcept category = new CodeableConcept();
+		category.addCoding(new Coding("http://example.com/system", "other", null));
+		category.addCoding(
+		    new Coding(FhirConstants.CONDITION_CATEGORY_SYSTEM_URI, FhirConstants.CONDITION_CATEGORY_CODE_DIAGNOSIS, null));
+		condition.addCategory(category);
+		
+		Optional<FhirUtils.OpenmrsConditionType> result = FhirUtils.getOpenmrsConditionType(condition);
+		
+		assertThat(result.isPresent(), equalTo(true));
+		assertThat(result.get(), equalTo(FhirUtils.OpenmrsConditionType.DIAGNOSIS));
+	}
+	
+	@Test
+	public void getOpenmrsConditionType_shouldReturnEmptyWhenNoHl7CodingPresent() {
+		Condition condition = new Condition();
+		CodeableConcept category = new CodeableConcept();
+		category.addCoding(new Coding("http://example.com/system", "other", null));
+		condition.addCategory(category);
+		
+		Optional<FhirUtils.OpenmrsConditionType> result = FhirUtils.getOpenmrsConditionType(condition);
+		
+		assertThat(result.isPresent(), equalTo(false));
+	}
+	
+	@Test
 	public void referenceToType_shouldExtractType() {
 		Optional<String> result = FhirUtils.referenceToType("Patient/123");
 		assertThat(result.isPresent(), equalTo(true));

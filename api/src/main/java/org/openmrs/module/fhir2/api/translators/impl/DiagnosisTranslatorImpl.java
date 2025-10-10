@@ -18,7 +18,6 @@ import javax.annotation.Nonnull;
 
 import java.util.Optional;
 
-import ca.uhn.fhir.context.FhirVersionEnum;
 import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -39,7 +38,6 @@ import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -102,12 +100,10 @@ public class DiagnosisTranslatorImpl implements DiagnosisTranslator {
 			}
 		}
 		// Set clinical status as unknown
-		if (fhirCondition.getStructureFhirVersionEnum().isEqualOrNewerThan(FhirVersionEnum.R4)) {
-			CodeableConcept clinicalStatus = new CodeableConcept();
-			clinicalStatus.addCoding(new Coding().setSystem(FhirConstants.CONDITION_CLINICAL_SYSTEM_URI).setCode("unknown")
-			        .setDisplay("Unknown"));
-			fhirCondition.setClinicalStatus(clinicalStatus);
-		}
+		CodeableConcept clinicalStatus = new CodeableConcept();
+		clinicalStatus.addCoding(
+		    new Coding().setSystem(FhirConstants.CONDITION_CLINICAL_SYSTEM_URI).setCode("unknown").setDisplay("Unknown"));
+		fhirCondition.setClinicalStatus(clinicalStatus);
 		
 		// Set verification status based on certainty
 		CodeableConcept verificationStatus = new CodeableConcept();

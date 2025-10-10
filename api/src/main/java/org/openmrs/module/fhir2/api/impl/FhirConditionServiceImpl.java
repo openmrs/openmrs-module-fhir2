@@ -11,6 +11,8 @@ package org.openmrs.module.fhir2.api.impl;
 
 import javax.annotation.Nonnull;
 
+import java.util.HashSet;
+
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
@@ -31,11 +33,11 @@ import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.TwoSearchQueryBundleProvider;
 import org.openmrs.module.fhir2.api.search.param.ConditionSearchParams;
+import org.openmrs.module.fhir2.api.search.param.DiagnosisSearchParams;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.ConditionTranslator;
 import org.openmrs.module.fhir2.api.util.FhirUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -139,12 +141,24 @@ public class FhirConditionServiceImpl extends BaseFhirService<Condition, org.ope
 	public IBundleProvider searchConditions(ConditionSearchParams conditionSearchParams) {
 		SearchParameterMap theParams = conditionSearchParams.toSearchParameterMap();
 		
+		DiagnosisSearchParams diagnosisSearchParams = DiagnosisSearchParams.builder()
+		        .patientParam(conditionSearchParams.getPatientParam()).code(conditionSearchParams.getCode())
+		        .clinicalStatus(conditionSearchParams.getClinicalStatus()).onsetDate(conditionSearchParams.getOnsetDate())
+		        .onsetAge(conditionSearchParams.getOnsetAge()).recordedDate(conditionSearchParams.getRecordedDate())
+		        .category(conditionSearchParams.getCategory()).id(conditionSearchParams.getId())
+		        .lastUpdated(conditionSearchParams.getLastUpdated()).sort(conditionSearchParams.getSort())
+		        .includes(
+		            conditionSearchParams.getIncludes() == null ? null : new HashSet<>(conditionSearchParams.getIncludes()))
+		        .revIncludes(conditionSearchParams.getRevIncludes() == null ? null
+		                : new HashSet<>(conditionSearchParams.getRevIncludes()))
+		        .build();
+		
 		IBundleProvider diagnosisBundle = null;
 		IBundleProvider conditionBundle = null;
 		
 		if (shouldSearchExplicitlyFor(conditionSearchParams.getCategory(),
 		    FhirConstants.CONDITION_CATEGORY_CODE_DIAGNOSIS)) {
-			diagnosisBundle = diagnosisService.searchDiagnoses(theParams);
+			diagnosisBundle = diagnosisService.searchDiagnoses(diagnosisSearchParams);
 		}
 		
 		if (shouldSearchExplicitlyFor(conditionSearchParams.getCategory(),
