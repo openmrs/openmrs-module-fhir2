@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Task;
 import org.openmrs.module.fhir2.providers.util.TaskVersionConverter;
@@ -87,6 +88,12 @@ public class SearchQueryBundleProviderR3Wrapper implements IBundleProvider, Seri
 		} else if (resource instanceof Resource) {
 			if (resource instanceof Task) {
 				return TaskVersionConverter.convertTask((Task) resource);
+			}
+			
+			if (resource instanceof Condition) {
+				Condition condition = ((Condition) resource).copy();
+				condition.setClinicalStatus(null);
+				return convertResource(condition);
 			}
 			
 			return convertResource((Resource) resource);
