@@ -25,7 +25,6 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Sort;
-import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
@@ -34,7 +33,6 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
-import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.Getter;
@@ -53,7 +51,7 @@ import org.springframework.stereotype.Component;
 
 @Component("taskFhirR4ResourceProvider")
 @R4Provider
-public class TaskFhirResourceProvider implements IResourceProvider {
+public class TaskFhirResourceProvider extends BaseUpsertFhirResourceProvider<Task> {
 	
 	@Getter(PROTECTED)
 	@Setter(value = PACKAGE, onMethod_ = @Autowired)
@@ -78,9 +76,9 @@ public class TaskFhirResourceProvider implements IResourceProvider {
 		return FhirProviderUtils.buildCreate(service.create(newTask));
 	}
 	
-	@Update
-	public MethodOutcome updateTask(@IdParam IdType id, @ResourceParam Task task) {
-		return FhirProviderUtils.buildUpdate(service.update(id.getIdPart(), task));
+	@Override
+	protected MethodOutcome doUpsert(IdType id, Task task, RequestDetails requestDetails, boolean createIfNotExists) {
+		return FhirProviderUtils.buildUpdate(service.update(id.getIdPart(), task, requestDetails, createIfNotExists));
 	}
 	
 	@Patch

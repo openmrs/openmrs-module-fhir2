@@ -26,14 +26,12 @@ import ca.uhn.fhir.rest.annotation.Patch;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
-import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
-import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.Getter;
@@ -54,7 +52,7 @@ import org.springframework.stereotype.Component;
 
 @Component("medicationFhirR4ResourceProvider")
 @R4Provider
-public class MedicationFhirResourceProvider implements IResourceProvider {
+public class MedicationFhirResourceProvider extends BaseUpsertFhirResourceProvider<Medication> {
 	
 	@Getter(PROTECTED)
 	@Setter(value = PACKAGE, onMethod_ = @Autowired)
@@ -81,16 +79,17 @@ public class MedicationFhirResourceProvider implements IResourceProvider {
 		return FhirProviderUtils.buildCreate(fhirMedicationService.create(medication));
 	}
 	
-	@Update
-	@SuppressWarnings("unused")
-	public MethodOutcome updateMedication(@IdParam IdType id, @ResourceParam Medication medication) {
+	@Override
+	protected MethodOutcome doUpsert(IdType id, Medication medication, RequestDetails requestDetails,
+	        boolean createIfNotExists) {
 		if (id == null || id.getIdPart() == null) {
 			throw new InvalidRequestException("id must be specified to update");
 		}
 		
 		medication.setId(id.getIdPart());
 		
-		return FhirProviderUtils.buildUpdate(fhirMedicationService.update(id.getIdPart(), medication));
+		return FhirProviderUtils
+		        .buildUpdate(fhirMedicationService.update(id.getIdPart(), medication, requestDetails, createIfNotExists));
 	}
 	
 	@Patch
