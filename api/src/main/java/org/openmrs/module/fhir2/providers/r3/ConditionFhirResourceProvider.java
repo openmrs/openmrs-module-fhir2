@@ -50,6 +50,7 @@ import org.openmrs.module.fhir2.api.FhirConditionService;
 import org.openmrs.module.fhir2.api.annotations.R3Provider;
 import org.openmrs.module.fhir2.api.search.SearchQueryBundleProviderR3Wrapper;
 import org.openmrs.module.fhir2.api.search.param.ConditionSearchParams;
+import org.openmrs.module.fhir2.api.util.FhirUtils;
 import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -140,7 +141,10 @@ public class ConditionFhirResourceProvider implements IResourceProvider {
 		}
 		
 		org.hl7.fhir.r4.model.Condition copy = condition.copy();
-		copy.setClinicalStatus(null);
+		if (FhirUtils.getOpenmrsConditionType(condition).filter(type -> type == FhirUtils.OpenmrsConditionType.DIAGNOSIS)
+		        .isPresent()) {
+			copy.setClinicalStatus(null);
+		}
 		
 		return (Condition) VersionConvertorFactory_30_40.convertResource(copy);
 	}

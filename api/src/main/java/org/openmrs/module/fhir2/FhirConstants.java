@@ -391,7 +391,7 @@ public final class FhirConstants {
 	
 	public static final String CONDITION_VER_STATUS_SYSTEM_URI = HL7_FHIR_CODE_SYSTEM_PREFIX + "/condition-ver-status";
 	
-  public static final String USER_DATA_KEY_CREATE_IF_NOT_EXISTS = "fhir2_module_create_if_not_exists";
+	public static final String USER_DATA_KEY_CREATE_IF_NOT_EXISTS = "fhir2_module_create_if_not_exists";
 	
 	public static final String USER_DATA_KEY_OUTCOME_CREATED = "fhir2_module_outcome_created";
 	

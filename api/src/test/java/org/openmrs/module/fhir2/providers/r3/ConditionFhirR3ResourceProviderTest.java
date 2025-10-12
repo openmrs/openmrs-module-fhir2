@@ -46,6 +46,8 @@ import org.hl7.fhir.dstu3.model.Condition;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -109,6 +111,32 @@ public class ConditionFhirR3ResourceProviderTest extends BaseFhirR3ProvenanceRes
 		assertThat(condition, notNullValue());
 		assertThat(condition.getId(), notNullValue());
 		assertThat(condition.getId(), equalTo(CONDITION_UUID));
+	}
+	
+	@Test
+	public void getConditionByUuid_shouldRemoveClinicalStatusWhenDiagnosis() {
+		condition.setClinicalStatus(new CodeableConcept().addCoding(new Coding().setCode("active")));
+		condition.addCategory(
+		    new CodeableConcept().addCoding(new Coding().setSystem(FhirConstants.CONDITION_CATEGORY_SYSTEM_URI)
+		            .setCode(FhirConstants.CONDITION_CATEGORY_CODE_DIAGNOSIS)));
+		when(conditionService.get(CONDITION_UUID)).thenReturn(condition);
+		
+		Condition converted = resourceProvider.getConditionById(new IdType().setValue(CONDITION_UUID));
+		
+		assertThat(converted.hasClinicalStatus(), is(false));
+	}
+	
+	@Test
+	public void getConditionByUuid_shouldRetainClinicalStatusWhenNotDiagnosis() {
+		condition.setClinicalStatus(new CodeableConcept().addCoding(new Coding().setCode("active")));
+		condition.addCategory(
+		    new CodeableConcept().addCoding(new Coding().setSystem(FhirConstants.CONDITION_CATEGORY_SYSTEM_URI)
+		            .setCode(FhirConstants.CONDITION_CATEGORY_CODE_CONDITION)));
+		when(conditionService.get(CONDITION_UUID)).thenReturn(condition);
+		
+		Condition converted = resourceProvider.getConditionById(new IdType().setValue(CONDITION_UUID));
+		
+		assertThat(converted.hasClinicalStatus(), is(true));
 	}
 	
 	@Test(expected = ResourceNotFoundException.class)
