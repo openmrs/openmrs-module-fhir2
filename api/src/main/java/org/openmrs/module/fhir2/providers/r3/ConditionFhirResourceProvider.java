@@ -50,6 +50,7 @@ import org.openmrs.module.fhir2.api.FhirConditionService;
 import org.openmrs.module.fhir2.api.annotations.R3Provider;
 import org.openmrs.module.fhir2.api.search.SearchQueryBundleProviderR3Wrapper;
 import org.openmrs.module.fhir2.api.search.param.ConditionSearchParams;
+import org.openmrs.module.fhir2.api.util.FhirUtils;
 import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -74,14 +75,16 @@ public class ConditionFhirResourceProvider implements IResourceProvider {
 			throw new ResourceNotFoundException("Could not find condition with Id " + id.getIdPart());
 		}
 		
-		return (Condition) VersionConvertorFactory_30_40.convertResource(condition);
+		return convertToR3Condition(condition);
 	}
 	
 	@Create
 	@SuppressWarnings("unused")
 	public MethodOutcome createCondition(@ResourceParam Condition newCondition) {
-		return FhirProviderUtils.buildCreate(VersionConvertorFactory_30_40.convertResource(conditionService
-		        .create((org.hl7.fhir.r4.model.Condition) VersionConvertorFactory_30_40.convertResource(newCondition))));
+		org.hl7.fhir.r4.model.Condition created = conditionService
+		        .create((org.hl7.fhir.r4.model.Condition) VersionConvertorFactory_30_40.convertResource(newCondition));
+		
+		return FhirProviderUtils.buildCreate(convertToR3Condition(created));
 	}
 	
 	@Update
@@ -92,9 +95,10 @@ public class ConditionFhirResourceProvider implements IResourceProvider {
 		
 		updatedCondition.setId(id);
 		
-		return FhirProviderUtils
-		        .buildUpdate(VersionConvertorFactory_30_40.convertResource(conditionService.update(id.getIdPart(),
-		            (org.hl7.fhir.r4.model.Condition) VersionConvertorFactory_30_40.convertResource(updatedCondition))));
+		org.hl7.fhir.r4.model.Condition updated = conditionService.update(id.getIdPart(),
+		    (org.hl7.fhir.r4.model.Condition) VersionConvertorFactory_30_40.convertResource(updatedCondition));
+		
+		return FhirProviderUtils.buildUpdate(convertToR3Condition(updated));
 	}
 	
 	@Delete
@@ -114,6 +118,7 @@ public class ConditionFhirResourceProvider implements IResourceProvider {
 	        @OptionalParam(name = Condition.SP_ONSET_DATE) DateRangeParam onsetDate,
 	        @OptionalParam(name = Condition.SP_ONSET_AGE) QuantityAndListParam onsetAge,
 	        @OptionalParam(name = Condition.SP_ASSERTED_DATE) DateRangeParam recordedDate,
+	        @OptionalParam(name = Condition.SP_CATEGORY) TokenAndListParam category,
 	        @OptionalParam(name = Condition.SP_RES_ID) TokenAndListParam id,
 	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated, @Sort SortSpec sort,
 	        @IncludeParam(allow = { "Condition:" + Condition.SP_PATIENT }) HashSet<Include> includes) {
@@ -125,7 +130,22 @@ public class ConditionFhirResourceProvider implements IResourceProvider {
 			includes = null;
 		}
 		
-		return new SearchQueryBundleProviderR3Wrapper(conditionService.searchConditions(new ConditionSearchParams(
-		        patientParam, code, clinicalStatus, onsetDate, onsetAge, recordedDate, id, lastUpdated, sort, includes)));
+		return new SearchQueryBundleProviderR3Wrapper(
+		        conditionService.searchConditions(new ConditionSearchParams(patientParam, code, clinicalStatus, onsetDate,
+		                onsetAge, recordedDate, category, id, lastUpdated, sort, includes)));
+	}
+	
+	private Condition convertToR3Condition(org.hl7.fhir.r4.model.Condition condition) {
+		if (condition == null) {
+			return null;
+		}
+		
+		org.hl7.fhir.r4.model.Condition copy = condition.copy();
+		if (FhirUtils.getOpenmrsConditionType(condition).filter(type -> type == FhirUtils.OpenmrsConditionType.DIAGNOSIS)
+		        .isPresent()) {
+			copy.setClinicalStatus(null);
+		}
+		
+		return (Condition) VersionConvertorFactory_30_40.convertResource(copy);
 	}
 }

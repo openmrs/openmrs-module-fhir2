@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    This Source Code Form is subject to the terms of the Mozilla Public License,
+    v. 2.0. If a copy of the MPL was not distributed with this file, You can
+    obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+    the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+
+    Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+    graphic logo is a trademark of OpenMRS Inc.
+-->
+<Condition xmlns="http://hl7.org/fhir">
+    <clinicalStatus>
+        <coding>
+            <system value="http://terminology.hl7.org/CodeSystem/condition-clinical"/>
+            <code value="active"/>
+            <display value="Active"/>
+        </coding>
+    </clinicalStatus>
+    <category>
+        <coding>
+            <system value="http://terminology.hl7.org/CodeSystem/condition-category"/>
+            <code value="encounter-diagnosis"/>
+            <display value="Encounter Diagnosis"/>
+        </coding>
+    </category>
+    <code>
+        <coding>
+            <code value="116128AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+        </coding>
+    </code>
+    <subject>
+        <reference value="Patient/5946f880-b197-400b-9caa-a3c661d23041"/>
+    </subject>
+    <encounter>
+        <reference value="Encounter/6519d653-393b-4118-9c83-a3715b82d4ac"/>
+    </encounter>
+    <verificationStatus>
+        <coding>
+            <system value="http://terminology.hl7.org/CodeSystem/condition-ver-status"/>
+            <code value="confirmed"/>
+            <display value="Confirmed"/>
+        </coding>
+    </verificationStatus>
+    <extension url="http://fhir.openmrs.org/R4/StructureDefinition/diagnosis-rank">
+        <valueInteger value="1"/>
+    </extension>
+    <recordedDate value="2014-11-25T22:17:00+11:00"/>
+</Condition>

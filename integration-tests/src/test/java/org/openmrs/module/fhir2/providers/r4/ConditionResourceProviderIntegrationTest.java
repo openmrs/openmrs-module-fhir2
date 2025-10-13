@@ -18,6 +18,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -50,6 +51,10 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR4Integrat
 	private static final String JSON_CREATE_CONDITION_DOCUMENT = "org/openmrs/module/fhir2/providers/ConditionWebTest_create.json";
 	
 	private static final String XML_CREATE_CONDITION_DOCUMENT = "org/openmrs/module/fhir2/providers/ConditionWebTest_create.xml";
+	
+	private static final String JSON_CREATE_DIAGNOSIS_DOCUMENT = "org/openmrs/module/fhir2/providers/ConditionDiagnosis_create.json";
+	
+	private static final String XML_CREATE_DIAGNOSIS_DOCUMENT = "org/openmrs/module/fhir2/providers/ConditionDiagnosis_create.xml";
 	
 	private static final String JSON_MERGE_PATCH_CONDITION_PATH = "org/openmrs/module/fhir2/providers/Condition_json_merge_patch.json";
 	
@@ -167,7 +172,7 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR4Integrat
 	}
 	
 	@Test
-	public void shouldCreateNewPatientAsJson() throws Exception {
+	public void shouldCreateNewConditionAsJson() throws Exception {
 		String jsonCondition;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_CREATE_CONDITION_DOCUMENT)) {
 			assertThat(is, notNullValue());
@@ -232,6 +237,108 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR4Integrat
 		assertThat(condition.getSubject().getReference(), endsWith(CONDITION_SUBJECT_UUID));
 		
 		assertThat(condition, validResource());
+		
+		response = get("/Condition/" + condition.getIdElement().getIdPart()).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		
+		Condition newCondition = readResponse(response);
+		
+		assertThat(newCondition.getId(), equalTo(condition.getId()));
+	}
+	
+	@Test
+	public void shouldCreateNewDiagnosisAsJson() throws Exception {
+		String jsonDiagnosis;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_CREATE_DIAGNOSIS_DOCUMENT)) {
+			assertThat(is, notNullValue());
+			jsonDiagnosis = inputStreamToString(is, UTF_8);
+			assertThat(jsonDiagnosis, notNullValue());
+		}
+		
+		MockHttpServletResponse response = post("/Condition").accept(FhirMediaTypes.JSON).jsonContent(jsonDiagnosis).go();
+		
+		assertThat(response, isCreated());
+		assertThat(response.getHeader("Location"), containsString("/Condition/"));
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		
+		Condition condition = readResponse(response);
+		
+		assertThat(condition, notNullValue());
+		assertThat(condition.getCategoryFirstRep().getCodingFirstRep().getCode(), equalTo("encounter-diagnosis"));
+		assertThat(condition.getIdElement().getIdPart(), notNullValue());
+		assertThat(condition.getClinicalStatus(), notNullValue());
+		assertThat(condition.getClinicalStatus().getCodingFirstRep().getCode(), equalTo("unknown"));
+		
+		response = get("/Condition/" + condition.getIdElement().getIdPart()).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		
+		Condition newCondition = readResponse(response);
+		
+		assertThat(newCondition.getId(), equalTo(condition.getId()));
+	}
+	
+	@Test
+	public void shouldSearchDiagnosisWithCategoryParameter() throws Exception {
+		String jsonDiagnosis;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_CREATE_DIAGNOSIS_DOCUMENT)) {
+			assertThat(is, notNullValue());
+			jsonDiagnosis = inputStreamToString(is, UTF_8);
+			assertThat(jsonDiagnosis, notNullValue());
+		}
+		
+		MockHttpServletResponse response = post("/Condition").accept(FhirMediaTypes.JSON).jsonContent(jsonDiagnosis).go();
+		
+		assertThat(response, isCreated());
+		assertThat(response.getHeader("Location"), containsString("/Condition/"));
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		
+		Condition condition = readResponse(response);
+		
+		assertThat(condition, notNullValue());
+		assertThat(condition.getCategoryFirstRep().getCodingFirstRep().getCode(), equalTo("encounter-diagnosis"));
+		assertThat(condition.getIdElement().getIdPart(), notNullValue());
+		assertThat(condition.getClinicalStatus(), notNullValue());
+		assertThat(condition.getClinicalStatus().getCodingFirstRep().getCode(), equalTo("unknown"));
+		
+		response = get("/Condition?category=http://terminology.hl7.org/CodeSystem/condition-category|encounter-diagnosis")
+		        .accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		
+		Bundle responseBundle = readBundleResponse(response);
+		assertThat(responseBundle.getEntry(), notNullValue());
+		assertThat(responseBundle.getEntry(), hasSize(1));
+		assertThat(responseBundle.getEntry().get(0).getResource(), notNullValue());
+		
+		Condition newCondition = (Condition) responseBundle.getEntryFirstRep().getResource();
+		
+		assertThat(newCondition.getIdElement().getIdPart(), equalTo(condition.getIdElement().getIdPart()));
+	}
+	
+	@Test
+	public void shouldCreateNewDiagnosisAsXML() throws Exception {
+		String xmlDiagnosis;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(XML_CREATE_DIAGNOSIS_DOCUMENT)) {
+			assertThat(is, notNullValue());
+			xmlDiagnosis = inputStreamToString(is, UTF_8);
+			assertThat(xmlDiagnosis, notNullValue());
+		}
+		
+		MockHttpServletResponse response = post("/Condition").accept(FhirMediaTypes.XML).xmlContent(xmlDiagnosis).go();
+		
+		assertThat(response, isCreated());
+		assertThat(response.getHeader("Location"), containsString("/Condition/"));
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		
+		Condition condition = readResponse(response);
+		
+		assertThat(condition, notNullValue());
+		assertThat(condition.getCategoryFirstRep().getCodingFirstRep().getCode(), equalTo("encounter-diagnosis"));
+		assertThat(condition.getIdElement().getIdPart(), notNullValue());
+		assertThat(condition.getClinicalStatus(), notNullValue());
+		assertThat(condition.getClinicalStatus().getCodingFirstRep().getCode(), equalTo("unknown"));
 		
 		response = get("/Condition/" + condition.getIdElement().getIdPart()).accept(FhirMediaTypes.JSON).go();
 		
