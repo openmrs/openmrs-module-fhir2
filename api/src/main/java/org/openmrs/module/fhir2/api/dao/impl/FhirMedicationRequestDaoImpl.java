@@ -152,7 +152,7 @@ public class FhirMedicationRequestDaoImpl extends BaseFhirDao<DrugOrder> impleme
 	
 	private <U> void excludeDiscontinueOrders(OpenmrsFhirCriteriaContext<DrugOrder, U> criteriaContext) {
 		// exclude "discontinue" orders, see: https://issues.openmrs.org/browse/FM2-532
-		criteriaContext.getCriteriaBuilder().and(criteriaContext.getCriteriaBuilder()
-		        .notEqual(criteriaContext.getRoot().get("action"), Order.Action.DISCONTINUE));
+		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().and(criteriaContext.getCriteriaBuilder()
+		        .notEqual(criteriaContext.getRoot().get("action"), Order.Action.DISCONTINUE)));
 	}
 }

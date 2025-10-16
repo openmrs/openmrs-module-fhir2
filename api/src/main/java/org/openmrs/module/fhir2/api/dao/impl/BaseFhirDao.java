@@ -207,10 +207,12 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 			// Use distinct ids from the original query to return entire objects
 			@SuppressWarnings({ "UnstableApiUsage", "unchecked" })
 			OpenmrsFhirCriteriaContext<T, T> wrapperQuery = createCriteriaContext((Class<T>) typeToken.getRawType());
-			
+
 			// FIXME Maybe like this?
 			handleSort(wrapperQuery, theParams.getSortSpec());
 			handleIdPropertyOrdering(wrapperQuery, idProperty);
+
+            wrapperQuery.getCriteriaQuery().select(wrapperQuery.getRoot());
 			
 			results = wrapperQuery.getEntityManager().createQuery(wrapperQuery.finalizeWrapperQuery(idProperty, ids))
 			        .getResultList();

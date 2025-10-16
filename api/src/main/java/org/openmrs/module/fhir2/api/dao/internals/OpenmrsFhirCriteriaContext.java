@@ -99,10 +99,9 @@ public class OpenmrsFhirCriteriaContext<T, U> extends BaseFhirCriteriaHolder<T, 
 		        .distinct(true);
 	}
 	
-	@SuppressWarnings("unchecked")
 	public CriteriaQuery<U> finalizeWrapperQuery(String idProperty, Collection<Integer> ids) {
 		// the unchecked cast here from Root<T> to Path<U> relies on Hibernate implementation details and may not
 		// be safe long-term, but I can't figure out how to turn a Root into a Path
-		return getCriteriaQuery().select((Path<U>) getRoot()).where(getRoot().get(idProperty).in(ids)).orderBy(orders);
+		return getCriteriaQuery().where(getRoot().get(idProperty).in(ids)).orderBy(orders);
 	}
 }
