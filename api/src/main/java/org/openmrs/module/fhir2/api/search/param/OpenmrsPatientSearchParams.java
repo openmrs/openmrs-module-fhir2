@@ -71,10 +71,10 @@ public class OpenmrsPatientSearchParams extends BaseResourceSearchParams {
 	@Override
 	public SearchParameterMap toSearchParameterMap() {
 		return baseSearchParameterMap().addParameter(FhirConstants.QUERY_SEARCH_HANDLER, "query", getQuery())
-		        .addParameter(FhirConstants.GENDER_SEARCH_HANDLER, "gender", getGender())
-		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, "birthdate", getBirthDate())
-		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, "deathDate", getDeathDate())
-		        .addParameter(FhirConstants.BOOLEAN_SEARCH_HANDLER, "dead", getDeceased())
+		        .addParameter(FhirConstants.GENDER_SEARCH_HANDLER, FhirConstants.GENDER_PROPERTY, getGender())
+		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, FhirConstants.BIRTHDATE_PROPERTY, getBirthDate())
+		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, FhirConstants.DEATHDATE_PROPERTY, getDeathDate())
+		        .addParameter(FhirConstants.BOOLEAN_SEARCH_HANDLER, FhirConstants.DECEASED_PROPERTY, getDeceased())
 		        .addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.CITY_PROPERTY, getCity())
 		        .addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.STATE_PROPERTY, getState())
 		        .addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.POSTAL_CODE_PROPERTY, getPostalCode())

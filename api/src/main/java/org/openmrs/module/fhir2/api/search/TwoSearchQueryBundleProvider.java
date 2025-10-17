@@ -17,7 +17,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -26,6 +25,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
+import org.openmrs.module.fhir2.api.util.FhirUtils;
 import org.springframework.transaction.annotation.Transactional;
 
 public class TwoSearchQueryBundleProvider implements IBundleProvider {
@@ -55,7 +55,7 @@ public class TwoSearchQueryBundleProvider implements IBundleProvider {
 		this.firstProvider = firstProvider;
 		this.secondProvider = secondProvider;
 		this.published = InstantDt.withCurrentTime();
-		this.uuid = UUID.randomUUID().toString();
+		this.uuid = FhirUtils.newUuid();
 		this.globalPropertyService = globalPropertyService;
 		this.firstProviderSize = Optional.ofNullable(firstProvider.size()).orElse(Integer.MAX_VALUE);
 		this.secondProviderSize = Optional.ofNullable(secondProvider.size()).orElse(Integer.MAX_VALUE);
