@@ -1,0 +1,1223 @@
+technicise16@technicise16-H310M-H-2-0:~/code/openmrs-module-fhir2$ mvn clean install
+[INFO] Scanning for projects...
+[WARNING] 
+[WARNING] Some problems were encountered while building the effective model for org.openmrs.module:fhir2-omod:jar:2.8.0-SNAPSHOT
+[WARNING] 'dependencies.dependency.(groupId:artifactId:type:classifier)' must be unique: com.fasterxml.jackson.core:jackson-databind:jar -> duplicate declaration of version (?) @ line 113, column 15
+[WARNING] 
+[WARNING] It is highly recommended to fix these problems because they threaten the stability of your build.
+[WARNING] 
+[WARNING] For this reason, future Maven versions might no longer support building such malformed projects.
+[WARNING] 
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO] 
+[INFO] FHIR2                                                              [pom]
+[INFO] FHIR2 Test Data                                                    [jar]
+[INFO] FHIR2 API                                                          [jar]
+[INFO] FHIR2 API 2.5                                                      [jar]
+[INFO] FHIR2 API 2.6                                                      [jar]
+[INFO] FHIR2 API 2.7                                                      [jar]
+[INFO] FHIR2 OMOD                                                         [jar]
+[INFO] FHIR2 Integration Tests                                            [jar]
+[INFO] FHIR2 Integration Tests 2.6                                        [jar]
+[INFO] FHIR2 Integration Tests 2.7                                        [jar]
+[INFO] FHIR2 End-to-End Tests                                             [pom]
+[INFO] 
+[INFO] ----------------------< org.openmrs.module:fhir2 >----------------------
+[INFO] Building FHIR2 2.8.0-SNAPSHOT                                     [1/11]
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] --- maven-clean-plugin:3.4.1:clean (default-clean) @ fhir2 ---
+[INFO] 
+[INFO] --- maven-install-plugin:3.1.4:install (default-install) @ fhir2 ---
+[INFO] Installing /home/technicise16/code/openmrs-module-fhir2/pom.xml to /home/technicise16/.m2/repository/org/openmrs/module/fhir2/2.8.0-SNAPSHOT/fhir2-2.8.0-SNAPSHOT.pom
+[INFO] 
+[INFO] -----------------< org.openmrs.module:fhir2-test-data >-----------------
+[INFO] Building FHIR2 Test Data 2.8.0-SNAPSHOT                           [2/11]
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- maven-clean-plugin:3.4.1:clean (default-clean) @ fhir2-test-data ---
+[INFO] Deleting /home/technicise16/code/openmrs-module-fhir2/test-data/target
+[INFO] 
+[INFO] --- directory-maven-plugin:1.0:highest-basedir (directories) @ fhir2-test-data ---
+[INFO] Highest basedir set to: /home/technicise16/code/openmrs-module-fhir2
+[INFO] 
+[INFO] --- license-maven-plugin:3.0:format (add-license) @ fhir2-test-data ---
+[INFO] Updating license headers...
+[INFO] 
+[INFO] --- formatter-maven-plugin:2.16.0:format (default) @ fhir2-test-data ---
+[INFO] Using 'UTF-8' encoding to format source files.
+[INFO] Number of files to be formatted: 0
+[INFO] 
+[INFO] --- maven-resources-plugin:2.6:resources (default-resources) @ fhir2-test-data ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Copying 75 resources
+[INFO] Copying 125 resources
+[INFO] skip non existing resourceDirectory /home/technicise16/code/openmrs-module-fhir2/test-data/src/main/webapp
+[INFO] skip non existing resourceDirectory /home/technicise16/code/openmrs-module-fhir2/test-data/src/main/webapp
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.14.0:compile (default-compile) @ fhir2-test-data ---
+[INFO] No sources to compile
+[INFO] 
+[INFO] --- maven-resources-plugin:2.6:testResources (default-testResources) @ fhir2-test-data ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] skip non existing resourceDirectory /home/technicise16/code/openmrs-module-fhir2/test-data/src/test/resources
+[INFO] skip non existing resourceDirectory /home/technicise16/code/openmrs-module-fhir2/test-data/src/test/resources
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.14.0:testCompile (default-testCompile) @ fhir2-test-data ---
+[INFO] No sources to compile
+[INFO] 
+[INFO] --- maven-surefire-plugin:3.5.3:test (default-test) @ fhir2-test-data ---
+[INFO] No tests to run.
+[INFO] 
+[INFO] --- maven-jar-plugin:3.4.2:jar (default-jar) @ fhir2-test-data ---
+[INFO] Building jar: /home/technicise16/code/openmrs-module-fhir2/test-data/target/fhir2-test-data-2.8.0-SNAPSHOT.jar
+[INFO] 
+[INFO] --- maven-jar-plugin:3.4.2:test-jar (default) @ fhir2-test-data ---
+[WARNING] JAR will be empty - no content was marked for inclusion!
+[INFO] Building jar: /home/technicise16/code/openmrs-module-fhir2/test-data/target/fhir2-test-data-2.8.0-SNAPSHOT-tests.jar
+[INFO] 
+[INFO] --- maven-install-plugin:3.1.4:install (default-install) @ fhir2-test-data ---
+[INFO] Installing /home/technicise16/code/openmrs-module-fhir2/test-data/pom.xml to /home/technicise16/.m2/repository/org/openmrs/module/fhir2-test-data/2.8.0-SNAPSHOT/fhir2-test-data-2.8.0-SNAPSHOT.pom
+[INFO] Installing /home/technicise16/code/openmrs-module-fhir2/test-data/target/fhir2-test-data-2.8.0-SNAPSHOT.jar to /home/technicise16/.m2/repository/org/openmrs/module/fhir2-test-data/2.8.0-SNAPSHOT/fhir2-test-data-2.8.0-SNAPSHOT.jar
+[INFO] Installing /home/technicise16/code/openmrs-module-fhir2/test-data/target/fhir2-test-data-2.8.0-SNAPSHOT-tests.jar to /home/technicise16/.m2/repository/org/openmrs/module/fhir2-test-data/2.8.0-SNAPSHOT/fhir2-test-data-2.8.0-SNAPSHOT-tests.jar
+[INFO] 
+[INFO] --------------------< org.openmrs.module:fhir2-api >--------------------
+[INFO] Building FHIR2 API 2.8.0-SNAPSHOT                                 [3/11]
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- maven-clean-plugin:3.4.1:clean (default-clean) @ fhir2-api ---
+[INFO] Deleting /home/technicise16/code/openmrs-module-fhir2/api/target
+[INFO] 
+[INFO] --- directory-maven-plugin:1.0:highest-basedir (directories) @ fhir2-api ---
+[INFO] Highest basedir set to: /home/technicise16/code/openmrs-module-fhir2
+[INFO] 
+[INFO] --- license-maven-plugin:3.0:format (add-license) @ fhir2-api ---
+[INFO] Updating license headers...
+[INFO] 
+[INFO] --- jacoco-maven-plugin:0.8.8:prepare-agent (default) @ fhir2-api ---
+[INFO] argLine set to -javaagent:/home/technicise16/.m2/repository/org/jacoco/org.jacoco.agent/0.8.8/org.jacoco.agent-0.8.8-runtime.jar=destfile=/home/technicise16/code/openmrs-module-fhir2/api/target/jacoco.exec
+[INFO] 
+[INFO] --- formatter-maven-plugin:2.16.0:format (default) @ fhir2-api ---
+[INFO] Using 'UTF-8' encoding to format source files.
+[INFO] Number of files to be formatted: 555
+[INFO] Successfully formatted:          0 file(s)
+[INFO] Fail to format:                  0 file(s)
+[INFO] Skipped:                         555 file(s)
+[INFO] Read only skipped:               0 file(s)
+[INFO] Approximate time taken:          3s
+[INFO] 
+[INFO] --- impsort-maven-plugin:1.6.2:sort (default) @ fhir2-api ---
+[INFO] Processed 555 files in 00:02.672 (Already Sorted: 555, Needed Sorting: 0)
+[INFO] 
+[INFO] --- maven-resources-plugin:2.6:resources (default-resources) @ fhir2-api ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Copying 5 resources
+[INFO] Copying 1 resource
+[INFO] skip non existing resourceDirectory /home/technicise16/code/openmrs-module-fhir2/api/src/main/webapp
+[INFO] skip non existing resourceDirectory /home/technicise16/code/openmrs-module-fhir2/api/src/main/webapp
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.14.0:compile (default-compile) @ fhir2-api ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 364 source files with javac [debug target 1.8] to target/classes
+[INFO] /home/technicise16/code/openmrs-module-fhir2/api/src/main/java/org/openmrs/module/fhir2/api/dao/impl/BaseFhirDao.java: Some input files use or override a deprecated API.
+[INFO] /home/technicise16/code/openmrs-module-fhir2/api/src/main/java/org/openmrs/module/fhir2/api/dao/impl/BaseFhirDao.java: Recompile with -Xlint:deprecation for details.
+[INFO] /home/technicise16/code/openmrs-module-fhir2/api/src/main/java/org/openmrs/module/fhir2/api/dao/impl/BaseFhirDao.java: Some input files use unchecked or unsafe operations.
+[INFO] /home/technicise16/code/openmrs-module-fhir2/api/src/main/java/org/openmrs/module/fhir2/api/dao/impl/BaseFhirDao.java: Recompile with -Xlint:unchecked for details.
+[INFO] 
+[INFO] --- maven-resources-plugin:2.6:testResources (default-testResources) @ fhir2-api ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Copying 3 resources
+[INFO] Copying 1 resource
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.14.0:testCompile (default-testCompile) @ fhir2-api ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 191 source files with javac [debug target 1.8] to target/test-classes
+[INFO] /home/technicise16/code/openmrs-module-fhir2/api/src/test/java/org/openmrs/module/fhir2/BaseFhirContextSensitiveTest.java: Some input files use or override a deprecated API.
+[INFO] /home/technicise16/code/openmrs-module-fhir2/api/src/test/java/org/openmrs/module/fhir2/BaseFhirContextSensitiveTest.java: Recompile with -Xlint:deprecation for details.
+[INFO] /home/technicise16/code/openmrs-module-fhir2/api/src/test/java/org/openmrs/module/fhir2/api/search/ConditionSearchQueryTest.java: Some input files use unchecked or unsafe operations.
+[INFO] /home/technicise16/code/openmrs-module-fhir2/api/src/test/java/org/openmrs/module/fhir2/api/search/ConditionSearchQueryTest.java: Recompile with -Xlint:unchecked for details.
+[INFO] 
+[INFO] --- maven-surefire-plugin:3.5.3:test (default-test) @ fhir2-api ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running org.openmrs.module.fhir2.api.spi.ServiceClassLoaderTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.025 s -- in org.openmrs.module.fhir2.api.spi.ServiceClassLoaderTest
+[INFO] Running org.openmrs.module.fhir2.api.impl.FhirUserServiceImplTest
+[INFO] Tests run: 17, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.705 s -- in org.openmrs.module.fhir2.api.impl.FhirUserServiceImplTest
+[INFO] Running org.openmrs.module.fhir2.api.impl.FhirRelatedPersonServiceImplTest
+[INFO] Tests run: 23, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.118 s -- in org.openmrs.module.fhir2.api.impl.FhirRelatedPersonServiceImplTest
+[INFO] Running org.openmrs.module.fhir2.api.impl.FhirConceptSourceServiceImplTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.033 s -- in org.openmrs.module.fhir2.api.impl.FhirConceptSourceServiceImplTest
+[INFO] Running org.openmrs.module.fhir2.api.impl.FhirPersonServiceImplTest
+[INFO] Tests run: 21, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.065 s -- in org.openmrs.module.fhir2.api.impl.FhirPersonServiceImplTest
+[INFO] Running org.openmrs.module.fhir2.api.impl.FhirConditionServiceImplTest
+[INFO] Tests run: 23, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.097 s -- in org.openmrs.module.fhir2.api.impl.FhirConditionServiceImplTest
+[INFO] Running org.openmrs.module.fhir2.api.impl.FhirPractitionerServiceImplTest
+[INFO] Tests run: 29, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.107 s -- in org.openmrs.module.fhir2.api.impl.FhirPractitionerServiceImplTest
+[INFO] Running org.openmrs.module.fhir2.api.impl.FhirPatientServiceImplTest
+[INFO] Tests run: 40, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.093 s -- in org.openmrs.module.fhir2.api.impl.FhirPatientServiceImplTest
+[INFO] Running org.openmrs.module.fhir2.api.impl.FhirPatientIdentifierSystemServiceImplTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in org.openmrs.module.fhir2.api.impl.FhirPatientIdentifierSystemServiceImplTest
+[INFO] Running org.openmrs.module.fhir2.api.impl.FhirLocationServiceImplTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.074 s -- in org.openmrs.module.fhir2.api.impl.FhirLocationServiceImplTest
+[INFO] Running org.openmrs.module.fhir2.api.impl.FhirServiceRequestServiceImplTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.034 s -- in org.openmrs.module.fhir2.api.impl.FhirServiceRequestServiceImplTest
+[INFO] Running org.openmrs.module.fhir2.api.impl.FhirEncounterServiceImplTest
+[INFO] Tests run: 30, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.066 s -- in org.openmrs.module.fhir2.api.impl.FhirEncounterServiceImplTest
+[INFO] Running org.openmrs.module.fhir2.api.impl.FhirAllergyIntoleranceServiceImplTest
+[INFO] Tests run: 16, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.037 s -- in org.openmrs.module.fhir2.api.impl.FhirAllergyIntoleranceServiceImplTest
+[INFO] Running org.openmrs.module.fhir2.api.impl.FhirGroupServiceImplTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.026 s -- in org.openmrs.module.fhir2.api.impl.FhirGroupServiceImplTest
+[INFO] Running org.openmrs.module.fhir2.api.impl.FhirContactPointMapServiceImplTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.030 s -- in org.openmrs.module.fhir2.api.impl.FhirContactPointMapServiceImplTest
+[INFO] Running org.openmrs.module.fhir2.api.impl.FhirConceptServiceImplTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.014 s -- in org.openmrs.module.fhir2.api.impl.FhirConceptServiceImplTest
+[INFO] Running org.openmrs.module.fhir2.api.impl.FhirMedicationRequestServiceImplTest
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.040 s -- in org.openmrs.module.fhir2.api.impl.FhirMedicationRequestServiceImplTest
+[INFO] Running org.openmrs.module.fhir2.api.impl.FhirMedicationServiceImplTest
+[INFO] Tests run: 15, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.032 s -- in org.openmrs.module.fhir2.api.impl.FhirMedicationServiceImplTest
+[INFO] Running org.openmrs.module.fhir2.api.impl.FhirTaskServiceImplTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.034 s -- in org.openmrs.module.fhir2.api.impl.FhirTaskServiceImplTest
+[INFO] Running org.openmrs.module.fhir2.api.impl.FhirDiagnosisServiceImplTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.061 s -- in org.openmrs.module.fhir2.api.impl.FhirDiagnosisServiceImplTest
+[INFO] Running org.openmrs.module.fhir2.api.impl.FhirObservationServiceImplTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.025 s -- in org.openmrs.module.fhir2.api.impl.FhirObservationServiceImplTest
+[INFO] Running org.openmrs.module.fhir2.api.impl.FhirValueSetServiceImplTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.015 s -- in org.openmrs.module.fhir2.api.impl.FhirValueSetServiceImplTest
+[INFO] Running org.openmrs.module.fhir2.api.impl.FhirImmunizationServiceImplTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 15.98 s -- in org.openmrs.module.fhir2.api.impl.FhirImmunizationServiceImplTest
+[INFO] Running org.openmrs.module.fhir2.api.impl.FhirDiagnosticReportServiceImplTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.024 s -- in org.openmrs.module.fhir2.api.impl.FhirDiagnosticReportServiceImplTest
+[INFO] Running org.openmrs.module.fhir2.api.impl.FhirClientServiceImplTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.317 s -- in org.openmrs.module.fhir2.api.impl.FhirClientServiceImplTest
+[INFO] Running org.openmrs.module.fhir2.api.impl.FhirEpisodeOfCareServiceImplTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.013 s -- in org.openmrs.module.fhir2.api.impl.FhirEpisodeOfCareServiceImplTest
+[INFO] Running org.openmrs.module.fhir2.api.dao.impl.FhirPersonDaoImplTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.311 s -- in org.openmrs.module.fhir2.api.dao.impl.FhirPersonDaoImplTest
+[INFO] Running org.openmrs.module.fhir2.api.dao.impl.FhirPractitionerDaoImplTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.062 s -- in org.openmrs.module.fhir2.api.dao.impl.FhirPractitionerDaoImplTest
+[INFO] Running org.openmrs.module.fhir2.api.dao.impl.FhirPatientDaoImplPatientIdentifierTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.159 s -- in org.openmrs.module.fhir2.api.dao.impl.FhirPatientDaoImplPatientIdentifierTest
+[INFO] Running org.openmrs.module.fhir2.api.dao.impl.FhirMedicationRequestDaoImplTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.826 s -- in org.openmrs.module.fhir2.api.dao.impl.FhirMedicationRequestDaoImplTest
+[INFO] Running org.openmrs.module.fhir2.api.dao.impl.FhirMedicationDaoImplTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.183 s -- in org.openmrs.module.fhir2.api.dao.impl.FhirMedicationDaoImplTest
+[INFO] Running org.openmrs.module.fhir2.api.dao.impl.FhirDiagnosisDaoImplTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.052 s -- in org.openmrs.module.fhir2.api.dao.impl.FhirDiagnosisDaoImplTest
+[INFO] Running org.openmrs.module.fhir2.api.dao.impl.FhirContactPointMapDaoImplTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.354 s -- in org.openmrs.module.fhir2.api.dao.impl.FhirContactPointMapDaoImplTest
+[INFO] Running org.openmrs.module.fhir2.api.dao.impl.FhirConditionDaoImpl_Test
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.233 s -- in org.openmrs.module.fhir2.api.dao.impl.FhirConditionDaoImpl_Test
+[INFO] Running org.openmrs.module.fhir2.api.dao.impl.FhirGroupDaoImplTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.348 s -- in org.openmrs.module.fhir2.api.dao.impl.FhirGroupDaoImplTest
+[INFO] Running org.openmrs.module.fhir2.api.dao.impl.FhirEpisodeOfCareDaoImplTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.115 s -- in org.openmrs.module.fhir2.api.dao.impl.FhirEpisodeOfCareDaoImplTest
+[INFO] Running org.openmrs.module.fhir2.api.dao.impl.FhirConceptDaoImplTest
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.952 s -- in org.openmrs.module.fhir2.api.dao.impl.FhirConceptDaoImplTest
+[INFO] Running org.openmrs.module.fhir2.api.dao.impl.FhirDiagnosticReportDaoImplTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.241 s -- in org.openmrs.module.fhir2.api.dao.impl.FhirDiagnosticReportDaoImplTest
+[INFO] Running org.openmrs.module.fhir2.api.dao.impl.FhirPatientIdentifierSystemDaoImplTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.178 s -- in org.openmrs.module.fhir2.api.dao.impl.FhirPatientIdentifierSystemDaoImplTest
+[INFO] Running org.openmrs.module.fhir2.api.dao.impl.FhirUserDaoImplTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.093 s -- in org.openmrs.module.fhir2.api.dao.impl.FhirUserDaoImplTest
+[INFO] Running org.openmrs.module.fhir2.api.dao.impl.FhirVisitDaoImplTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.191 s -- in org.openmrs.module.fhir2.api.dao.impl.FhirVisitDaoImplTest
+[INFO] Running org.openmrs.module.fhir2.api.dao.impl.FhirEncounterDaoImplTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.427 s -- in org.openmrs.module.fhir2.api.dao.impl.FhirEncounterDaoImplTest
+[INFO] Running org.openmrs.module.fhir2.api.dao.impl.FhirObservationDaoImplTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.264 s -- in org.openmrs.module.fhir2.api.dao.impl.FhirObservationDaoImplTest
+[INFO] Running org.openmrs.module.fhir2.api.dao.impl.FhirServiceRequestDaoImplTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.149 s -- in org.openmrs.module.fhir2.api.dao.impl.FhirServiceRequestDaoImplTest
+[INFO] Running org.openmrs.module.fhir2.api.dao.impl.FhirLocationDaoImplTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.913 s -- in org.openmrs.module.fhir2.api.dao.impl.FhirLocationDaoImplTest
+[INFO] Running org.openmrs.module.fhir2.api.dao.impl.FhirRelatedPersonDaoImplTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.121 s -- in org.openmrs.module.fhir2.api.dao.impl.FhirRelatedPersonDaoImplTest
+[INFO] Running org.openmrs.module.fhir2.api.dao.impl.FhirAllergyIntoleranceDaoImplTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.287 s -- in org.openmrs.module.fhir2.api.dao.impl.FhirAllergyIntoleranceDaoImplTest
+[INFO] Running org.openmrs.module.fhir2.api.dao.impl.FhirPatientDaoImplTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.983 s -- in org.openmrs.module.fhir2.api.dao.impl.FhirPatientDaoImplTest
+[INFO] Running org.openmrs.module.fhir2.api.dao.impl.FhirConceptSourceDaoImplTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.200 s -- in org.openmrs.module.fhir2.api.dao.impl.FhirConceptSourceDaoImplTest
+[INFO] Running org.openmrs.module.fhir2.api.dao.impl.FhirTaskDaoImplTest
+[INFO] Tests run: 16, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.727 s -- in org.openmrs.module.fhir2.api.dao.impl.FhirTaskDaoImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.ObservationCategoryTranslatorImplTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.075 s -- in org.openmrs.module.fhir2.api.translators.impl.ObservationCategoryTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.PersonTranslatorImplTest
+[INFO] Tests run: 24, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.168 s -- in org.openmrs.module.fhir2.api.translators.impl.PersonTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.PractitionerReferenceTranslatorUserImplTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in org.openmrs.module.fhir2.api.translators.impl.PractitionerReferenceTranslatorUserImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.MedicationRequestTimingTranslatorImplTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.035 s -- in org.openmrs.module.fhir2.api.translators.impl.MedicationRequestTimingTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.ConditionTranslatorImplTest
+[INFO] Tests run: 24, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.024 s -- in org.openmrs.module.fhir2.api.translators.impl.ConditionTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.DurationUnitTranslatorImplTest
+[INFO] Tests run: 16, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.500 s -- in org.openmrs.module.fhir2.api.translators.impl.DurationUnitTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.PractitionerTranslatorProviderImplTest
+[INFO] Tests run: 17, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.008 s -- in org.openmrs.module.fhir2.api.translators.impl.PractitionerTranslatorProviderImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.BaseEncounterTranslatorTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.007 s -- in org.openmrs.module.fhir2.api.translators.impl.BaseEncounterTranslatorTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.GroupMemberTranslatorImplTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.171 s -- in org.openmrs.module.fhir2.api.translators.impl.GroupMemberTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.TaskTranslatorImplTest
+[INFO] Tests run: 61, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.052 s -- in org.openmrs.module.fhir2.api.translators.impl.TaskTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.LocationTranslatorImplTest
+[INFO] Tests run: 25, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.029 s -- in org.openmrs.module.fhir2.api.translators.impl.LocationTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.VisitReferenceTranslatorImplTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.008 s -- in org.openmrs.module.fhir2.api.translators.impl.VisitReferenceTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.TaskOutputTranslatorImplTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.014 s -- in org.openmrs.module.fhir2.api.translators.impl.TaskOutputTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.PatientIdentifierTranslatorImplTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.021 s -- in org.openmrs.module.fhir2.api.translators.impl.PatientIdentifierTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.LocationTagTranslatorImplTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in org.openmrs.module.fhir2.api.translators.impl.LocationTagTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.VisitTypeTranslatorImplTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.015 s -- in org.openmrs.module.fhir2.api.translators.impl.VisitTypeTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.MedicationRequestReferenceTranslatorImplTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in org.openmrs.module.fhir2.api.translators.impl.MedicationRequestReferenceTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.PatientReferenceTranslatorImplTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in org.openmrs.module.fhir2.api.translators.impl.PatientReferenceTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.ObservationComponentTranslatorImplTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.010 s -- in org.openmrs.module.fhir2.api.translators.impl.ObservationComponentTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.AllergyIntoleranceCategoryTranslatorImplTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in org.openmrs.module.fhir2.api.translators.impl.AllergyIntoleranceCategoryTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.DosageTranslatorImplTest
+[INFO] Tests run: 17, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.021 s -- in org.openmrs.module.fhir2.api.translators.impl.DosageTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.BaseGroupTranslatorTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.044 s -- in org.openmrs.module.fhir2.api.translators.impl.BaseGroupTranslatorTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.ObservationReferenceRangeTranslatorImplTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.008 s -- in org.openmrs.module.fhir2.api.translators.impl.ObservationReferenceRangeTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.MedicationTranslatorImplTest
+[INFO] Tests run: 24, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.015 s -- in org.openmrs.module.fhir2.api.translators.impl.MedicationTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.AllergyIntoleranceCriticalityTranslatorImplTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in org.openmrs.module.fhir2.api.translators.impl.AllergyIntoleranceCriticalityTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.ValueSetTranslatorImplTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.135 s -- in org.openmrs.module.fhir2.api.translators.impl.ValueSetTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.EncounterTypeTranslatorImplTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.023 s -- in org.openmrs.module.fhir2.api.translators.impl.EncounterTypeTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.VisitTranslatorImplTest
+[INFO] Tests run: 18, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.037 s -- in org.openmrs.module.fhir2.api.translators.impl.VisitTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.ReferenceTranslatorImplTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in org.openmrs.module.fhir2.api.translators.impl.ReferenceTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.AllergyIntoleranceSeverityTranslatorImplTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in org.openmrs.module.fhir2.api.translators.impl.AllergyIntoleranceSeverityTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.MedicationRequestPriorityTranslatorImplTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in org.openmrs.module.fhir2.api.translators.impl.MedicationRequestPriorityTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.DiagnosisTranslatorImplTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.013 s -- in org.openmrs.module.fhir2.api.translators.impl.DiagnosisTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.MedicationQuantityCodingTranslatorImplTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in org.openmrs.module.fhir2.api.translators.impl.MedicationQuantityCodingTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.DiagnosticReportTranslatorImplTest
+[INFO] Tests run: 21, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.021 s -- in org.openmrs.module.fhir2.api.translators.impl.DiagnosticReportTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.ObservationValueTranslatorImplTest
+[INFO] Tests run: 18, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.041 s -- in org.openmrs.module.fhir2.api.translators.impl.ObservationValueTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.PersonNameTranslatorImplTest
+[INFO] Tests run: 19, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in org.openmrs.module.fhir2.api.translators.impl.PersonNameTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.TelecomTranslatorImplTest
+[INFO] Tests run: 35, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.048 s -- in org.openmrs.module.fhir2.api.translators.impl.TelecomTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.ObservationStatusTranslatorImplTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in org.openmrs.module.fhir2.api.translators.impl.ObservationStatusTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.MedicationRequestTimingComponentTranslatorImplTest
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in org.openmrs.module.fhir2.api.translators.impl.MedicationRequestTimingComponentTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.PractitionerTranslatorUserImplTest
+[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.006 s -- in org.openmrs.module.fhir2.api.translators.impl.PractitionerTranslatorUserImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.ObservationBasedOnReferenceTranslatorImplTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in org.openmrs.module.fhir2.api.translators.impl.ObservationBasedOnReferenceTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.EpisodeOfCareTranslatorImplTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.006 s -- in org.openmrs.module.fhir2.api.translators.impl.EpisodeOfCareTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.ObservationQuantityCodingTranslatorImplTest
+[INFO] Tests run: 1369, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.686 s -- in org.openmrs.module.fhir2.api.translators.impl.ObservationQuantityCodingTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.PersonAttributeTranslatorImplTest
+[INFO] Tests run: 18, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.026 s -- in org.openmrs.module.fhir2.api.translators.impl.PersonAttributeTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.ObservationEffectiveDatetimeTranslatorImplTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in org.openmrs.module.fhir2.api.translators.impl.ObservationEffectiveDatetimeTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.MedicationReferenceTranslatorImplTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in org.openmrs.module.fhir2.api.translators.impl.MedicationReferenceTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.ConceptTranslatorImplTest
+[INFO] Tests run: 21, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.016 s -- in org.openmrs.module.fhir2.api.translators.impl.ConceptTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.ConditionVerificationStatusTranslatorImplTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in org.openmrs.module.fhir2.api.translators.impl.ConditionVerificationStatusTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.MedicationRequestStatusTranslatorImplTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in org.openmrs.module.fhir2.api.translators.impl.MedicationRequestStatusTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.EncounterLocationTranslatorImplTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in org.openmrs.module.fhir2.api.translators.impl.EncounterLocationTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.LocationAddressTranslatorImplTest
+[INFO] Tests run: 26, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.006 s -- in org.openmrs.module.fhir2.api.translators.impl.LocationAddressTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.MedicationRequestDispenseRequestComponentTranslatorImplTest
+[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in org.openmrs.module.fhir2.api.translators.impl.MedicationRequestDispenseRequestComponentTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.ObservationTranslatorImplTest
+[INFO] Tests run: 25, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.035 s -- in org.openmrs.module.fhir2.api.translators.impl.ObservationTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.PatientTranslatorImplTest
+[INFO] Tests run: 28, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.018 s -- in org.openmrs.module.fhir2.api.translators.impl.PatientTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.VisitPeriodTranslatorImplTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in org.openmrs.module.fhir2.api.translators.impl.VisitPeriodTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.TaskInputTranslatorImplTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in org.openmrs.module.fhir2.api.translators.impl.TaskInputTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.ObservationReferenceTranslatorImplTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in org.openmrs.module.fhir2.api.translators.impl.ObservationReferenceTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.ServiceRequestTranslatorImplTest
+[INFO] Tests run: 24, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.022 s -- in org.openmrs.module.fhir2.api.translators.impl.ServiceRequestTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.LocationTypeTranslatorImplTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in org.openmrs.module.fhir2.api.translators.impl.LocationTypeTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.ConditionClinicalStatusTranslatorImplTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in org.openmrs.module.fhir2.api.translators.impl.ConditionClinicalStatusTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.GenderTranslatorImplTest
+[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in org.openmrs.module.fhir2.api.translators.impl.GenderTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.PractitionerReferenceTranslatorProviderImplTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in org.openmrs.module.fhir2.api.translators.impl.PractitionerReferenceTranslatorProviderImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.EncounterReferenceTranslatorImplTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in org.openmrs.module.fhir2.api.translators.impl.EncounterReferenceTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.MedicationRequestTranslatorImplTest
+[INFO] Tests run: 36, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.032 s -- in org.openmrs.module.fhir2.api.translators.impl.MedicationRequestTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.ObservationInterpretationTranslatorImplTest
+[INFO] Tests run: 36, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.006 s -- in org.openmrs.module.fhir2.api.translators.impl.ObservationInterpretationTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.ReferenceHandlingTranslatorTest
+[INFO] Tests run: 28, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in org.openmrs.module.fhir2.api.translators.impl.ReferenceHandlingTranslatorTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.AllergyIntoleranceReactionComponentTranslatorImplTest
+[INFO] Tests run: 15, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.008 s -- in org.openmrs.module.fhir2.api.translators.impl.AllergyIntoleranceReactionComponentTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.EncounterParticipantTranslatorImplTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in org.openmrs.module.fhir2.api.translators.impl.EncounterParticipantTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.GroupTranslatorImplTest
+[WARNING] Tests run: 15, Failures: 0, Errors: 0, Skipped: 2, Time elapsed: 0.140 s -- in org.openmrs.module.fhir2.api.translators.impl.GroupTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.RelatedPersonTranslatorImplTest
+[INFO] Tests run: 15, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.007 s -- in org.openmrs.module.fhir2.api.translators.impl.RelatedPersonTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.PersonAddressTranslatorImplTest
+[INFO] Tests run: 31, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.008 s -- in org.openmrs.module.fhir2.api.translators.impl.PersonAddressTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.EncounterTranslatorImplTest
+[INFO] Tests run: 23, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.043 s -- in org.openmrs.module.fhir2.api.translators.impl.EncounterTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.EncounterPeriodTranslatorImplTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in org.openmrs.module.fhir2.api.translators.impl.EncounterPeriodTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.AllergyIntoleranceTranslatorImplTest
+[INFO] Tests run: 40, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.032 s -- in org.openmrs.module.fhir2.api.translators.impl.AllergyIntoleranceTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.util.FhirUtilsTest
+[INFO] Tests run: 16, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.007 s -- in org.openmrs.module.fhir2.api.util.FhirUtilsTest
+[INFO] Running org.openmrs.module.fhir2.api.util.JsonPatchUtilTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.176 s -- in org.openmrs.module.fhir2.api.util.JsonPatchUtilTest
+[INFO] Running org.openmrs.module.fhir2.api.search.MedicationSearchQueryTest
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.410 s -- in org.openmrs.module.fhir2.api.search.MedicationSearchQueryTest
+[INFO] Running org.openmrs.module.fhir2.api.search.DiagnosticReportSearchQueryTest
+[INFO] Tests run: 39, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.974 s -- in org.openmrs.module.fhir2.api.search.DiagnosticReportSearchQueryTest
+[INFO] Running org.openmrs.module.fhir2.api.search.GroupSearchQueryTest
+[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.624 s -- in org.openmrs.module.fhir2.api.search.GroupSearchQueryTest
+[INFO] Running org.openmrs.module.fhir2.api.search.param.SearchParameterMapTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in org.openmrs.module.fhir2.api.search.param.SearchParameterMapTest
+[INFO] Running org.openmrs.module.fhir2.api.search.ValueSetSearchQueryTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.072 s -- in org.openmrs.module.fhir2.api.search.ValueSetSearchQueryTest
+[INFO] Running org.openmrs.module.fhir2.api.search.LocationSearchQueryTest
+[INFO] Tests run: 34, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.543 s -- in org.openmrs.module.fhir2.api.search.LocationSearchQueryTest
+[INFO] Running org.openmrs.module.fhir2.api.search.PractitionerSearchQueryTest
+[INFO] Tests run: 31, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.444 s -- in org.openmrs.module.fhir2.api.search.PractitionerSearchQueryTest
+[INFO] Running org.openmrs.module.fhir2.api.search.UserSearchQueryTest
+[INFO] Tests run: 25, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.348 s -- in org.openmrs.module.fhir2.api.search.UserSearchQueryTest
+[INFO] Running org.openmrs.module.fhir2.api.search.ServiceRequestSearchQueryTest
+[INFO] Tests run: 52, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.871 s -- in org.openmrs.module.fhir2.api.search.ServiceRequestSearchQueryTest
+[INFO] Running org.openmrs.module.fhir2.api.search.TaskSearchQueryTest
+[INFO] Tests run: 28, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.028 s -- in org.openmrs.module.fhir2.api.search.TaskSearchQueryTest
+[INFO] Running org.openmrs.module.fhir2.api.search.MedicationRequestSearchQueryTest
+[INFO] Tests run: 51, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.759 s -- in org.openmrs.module.fhir2.api.search.MedicationRequestSearchQueryTest
+[INFO] Running org.openmrs.module.fhir2.api.search.PersonSearchQueryTest
+[INFO] Tests run: 24, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.445 s -- in org.openmrs.module.fhir2.api.search.PersonSearchQueryTest
+[INFO] Running org.openmrs.module.fhir2.api.search.VisitSearchQueryTest
+[INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.229 s -- in org.openmrs.module.fhir2.api.search.VisitSearchQueryTest
+[INFO] Running org.openmrs.module.fhir2.api.search.EncounterSearchQueryTest
+[INFO] Tests run: 59, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.594 s -- in org.openmrs.module.fhir2.api.search.EncounterSearchQueryTest
+[INFO] Running org.openmrs.module.fhir2.api.search.SearchQueryBundleProviderTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in org.openmrs.module.fhir2.api.search.SearchQueryBundleProviderTest
+[INFO] Running org.openmrs.module.fhir2.api.search.PatientSearchQueryTest
+[INFO] Tests run: 54, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 7.173 s -- in org.openmrs.module.fhir2.api.search.PatientSearchQueryTest
+[INFO] Running org.openmrs.module.fhir2.api.search.ObservationSearchQueryTest
+[INFO] Tests run: 71, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.676 s -- in org.openmrs.module.fhir2.api.search.ObservationSearchQueryTest
+[INFO] Running org.openmrs.module.fhir2.api.search.RelatedPersonSearchQueryTest
+[INFO] Tests run: 24, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.840 s -- in org.openmrs.module.fhir2.api.search.RelatedPersonSearchQueryTest
+[INFO] Running org.openmrs.module.fhir2.api.search.ConditionSearchQueryTest
+[INFO] Tests run: 42, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.506 s -- in org.openmrs.module.fhir2.api.search.ConditionSearchQueryTest
+[INFO] Running org.openmrs.module.fhir2.api.search.AllergyIntoleranceSearchQueryTest
+[INFO] Tests run: 36, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.233 s -- in org.openmrs.module.fhir2.api.search.AllergyIntoleranceSearchQueryTest
+[INFO] Running org.openmrs.module.fhir2.providers.r3.LocationFhirResourceProviderTest
+[INFO] Tests run: 27, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.275 s -- in org.openmrs.module.fhir2.providers.r3.LocationFhirResourceProviderTest
+[INFO] Running org.openmrs.module.fhir2.providers.r3.ObservationFhirResourceProviderTest
+[INFO] Tests run: 26, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.060 s -- in org.openmrs.module.fhir2.providers.r3.ObservationFhirResourceProviderTest
+[INFO] Running org.openmrs.module.fhir2.providers.r3.ConditionFhirR3ResourceProviderTest
+[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.023 s -- in org.openmrs.module.fhir2.providers.r3.ConditionFhirR3ResourceProviderTest
+[INFO] Running org.openmrs.module.fhir2.providers.r3.EncounterFhirResourceProviderTest
+[INFO] Tests run: 17, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.020 s -- in org.openmrs.module.fhir2.providers.r3.EncounterFhirResourceProviderTest
+[INFO] Running org.openmrs.module.fhir2.providers.r3.PractitionerFhirResourceProviderTest
+[INFO] Tests run: 31, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.024 s -- in org.openmrs.module.fhir2.providers.r3.PractitionerFhirResourceProviderTest
+[INFO] Running org.openmrs.module.fhir2.providers.r3.GroupFhirResourceProviderTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.087 s -- in org.openmrs.module.fhir2.providers.r3.GroupFhirResourceProviderTest
+[INFO] Running org.openmrs.module.fhir2.providers.r3.PatientFhirResourceProviderTest
+[INFO] Tests run: 32, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.018 s -- in org.openmrs.module.fhir2.providers.r3.PatientFhirResourceProviderTest
+[INFO] Running org.openmrs.module.fhir2.providers.r3.ProcedureRequestFhirResourceProviderTest
+[INFO] Tests run: 19, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.016 s -- in org.openmrs.module.fhir2.providers.r3.ProcedureRequestFhirResourceProviderTest
+[INFO] Running org.openmrs.module.fhir2.providers.r3.RelatedPersonFhirResourceProviderTest
+[INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.014 s -- in org.openmrs.module.fhir2.providers.r3.RelatedPersonFhirResourceProviderTest
+[INFO] Running org.openmrs.module.fhir2.providers.r3.DiagnosticReportFhirResourceProviderTest
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.009 s -- in org.openmrs.module.fhir2.providers.r3.DiagnosticReportFhirResourceProviderTest
+[INFO] Running org.openmrs.module.fhir2.providers.r3.PersonFhirResourceProviderTest
+[INFO] Tests run: 20, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.017 s -- in org.openmrs.module.fhir2.providers.r3.PersonFhirResourceProviderTest
+[INFO] Running org.openmrs.module.fhir2.providers.r3.TaskFhirResourceProviderTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.019 s -- in org.openmrs.module.fhir2.providers.r3.TaskFhirResourceProviderTest
+[INFO] Running org.openmrs.module.fhir2.providers.r3.AllergyIntoleranceFhirR3ResourceProviderTest
+[INFO] Tests run: 23, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.025 s -- in org.openmrs.module.fhir2.providers.r3.AllergyIntoleranceFhirR3ResourceProviderTest
+[INFO] Running org.openmrs.module.fhir2.providers.r3.MedicationFhirResourceProviderTest
+[INFO] Tests run: 16, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.023 s -- in org.openmrs.module.fhir2.providers.r3.MedicationFhirResourceProviderTest
+[INFO] Running org.openmrs.module.fhir2.providers.r3.ValueSetFhirResourceProviderTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.020 s -- in org.openmrs.module.fhir2.providers.r3.ValueSetFhirResourceProviderTest
+[INFO] Running org.openmrs.module.fhir2.providers.r3.EpisodeOfCareFhirResourceProviderTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.010 s -- in org.openmrs.module.fhir2.providers.r3.EpisodeOfCareFhirResourceProviderTest
+[INFO] Running org.openmrs.module.fhir2.providers.r3.MedicationRequestFhirResourceProviderTest
+[INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.012 s -- in org.openmrs.module.fhir2.providers.r3.MedicationRequestFhirResourceProviderTest
+[INFO] Running org.openmrs.module.fhir2.providers.r4.LocationFhirResourceProviderTest
+[INFO] Tests run: 27, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.034 s -- in org.openmrs.module.fhir2.providers.r4.LocationFhirResourceProviderTest
+[INFO] Running org.openmrs.module.fhir2.providers.r4.ObservationFhirResourceProviderTest
+[INFO] Tests run: 30, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.008 s -- in org.openmrs.module.fhir2.providers.r4.ObservationFhirResourceProviderTest
+[INFO] Running org.openmrs.module.fhir2.providers.r4.AllergyIntoleranceFhirResourceProviderTest
+[INFO] Tests run: 23, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.006 s -- in org.openmrs.module.fhir2.providers.r4.AllergyIntoleranceFhirResourceProviderTest
+[INFO] Running org.openmrs.module.fhir2.providers.r4.EncounterFhirResourceProviderTest
+[INFO] Tests run: 21, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in org.openmrs.module.fhir2.providers.r4.EncounterFhirResourceProviderTest
+[INFO] Running org.openmrs.module.fhir2.providers.r4.PractitionerFhirResourceProviderTest
+[INFO] Tests run: 31, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.007 s -- in org.openmrs.module.fhir2.providers.r4.PractitionerFhirResourceProviderTest
+[INFO] Running org.openmrs.module.fhir2.providers.r4.ConditionFhirResourceProviderTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in org.openmrs.module.fhir2.providers.r4.ConditionFhirResourceProviderTest
+[INFO] Running org.openmrs.module.fhir2.providers.r4.GroupFhirResourceProviderTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.006 s -- in org.openmrs.module.fhir2.providers.r4.GroupFhirResourceProviderTest
+[INFO] Running org.openmrs.module.fhir2.providers.r4.ServiceRequestFhirResourceProviderTest
+[INFO] Tests run: 19, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.007 s -- in org.openmrs.module.fhir2.providers.r4.ServiceRequestFhirResourceProviderTest
+[INFO] Running org.openmrs.module.fhir2.providers.r4.PatientFhirResourceProviderTest
+[INFO] Tests run: 32, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.010 s -- in org.openmrs.module.fhir2.providers.r4.PatientFhirResourceProviderTest
+[INFO] Running org.openmrs.module.fhir2.providers.r4.RelatedPersonFhirResourceProviderTest
+[INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in org.openmrs.module.fhir2.providers.r4.RelatedPersonFhirResourceProviderTest
+[INFO] Running org.openmrs.module.fhir2.providers.r4.DiagnosticReportFhirResourceProviderTest
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in org.openmrs.module.fhir2.providers.r4.DiagnosticReportFhirResourceProviderTest
+[INFO] Running org.openmrs.module.fhir2.providers.r4.PersonFhirResourceProviderTest
+[INFO] Tests run: 20, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in org.openmrs.module.fhir2.providers.r4.PersonFhirResourceProviderTest
+[INFO] Running org.openmrs.module.fhir2.providers.r4.TaskFhirResourceProviderTest
+[INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in org.openmrs.module.fhir2.providers.r4.TaskFhirResourceProviderTest
+[INFO] Running org.openmrs.module.fhir2.providers.r4.MedicationFhirResourceProviderTest
+[INFO] Tests run: 16, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in org.openmrs.module.fhir2.providers.r4.MedicationFhirResourceProviderTest
+[INFO] Running org.openmrs.module.fhir2.providers.r4.ValueSetFhirResourceProviderTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in org.openmrs.module.fhir2.providers.r4.ValueSetFhirResourceProviderTest
+[INFO] Running org.openmrs.module.fhir2.providers.r4.ImmunizationFhirResourceProviderTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.008 s -- in org.openmrs.module.fhir2.providers.r4.ImmunizationFhirResourceProviderTest
+[INFO] Running org.openmrs.module.fhir2.providers.r4.EpisodeOfCareFhirResourceProviderTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in org.openmrs.module.fhir2.providers.r4.EpisodeOfCareFhirResourceProviderTest
+[INFO] Running org.openmrs.module.fhir2.providers.r4.MedicationRequestFhirResourceProviderTest
+[INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in org.openmrs.module.fhir2.providers.r4.MedicationRequestFhirResourceProviderTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[WARNING] Tests run: 4071, Failures: 0, Errors: 0, Skipped: 2
+[INFO] 
+[INFO] 
+[INFO] --- jacoco-maven-plugin:0.8.8:report (report) @ fhir2-api ---
+[INFO] Loading execution data file /home/technicise16/code/openmrs-module-fhir2/api/target/jacoco.exec
+[INFO] Analyzed bundle 'FHIR2 API' with 233 classes
+[INFO] 
+[INFO] --- maven-jar-plugin:3.4.2:jar (default-jar) @ fhir2-api ---
+[INFO] Building jar: /home/technicise16/code/openmrs-module-fhir2/api/target/fhir2-api-2.8.0-SNAPSHOT.jar
+[INFO] 
+[INFO] --- maven-jar-plugin:3.4.2:test-jar (default) @ fhir2-api ---
+[INFO] Building jar: /home/technicise16/code/openmrs-module-fhir2/api/target/fhir2-api-2.8.0-SNAPSHOT-tests.jar
+[INFO] 
+[INFO] --- maven-install-plugin:3.1.4:install (default-install) @ fhir2-api ---
+[INFO] Installing /home/technicise16/code/openmrs-module-fhir2/api/pom.xml to /home/technicise16/.m2/repository/org/openmrs/module/fhir2-api/2.8.0-SNAPSHOT/fhir2-api-2.8.0-SNAPSHOT.pom
+[INFO] Installing /home/technicise16/code/openmrs-module-fhir2/api/target/fhir2-api-2.8.0-SNAPSHOT.jar to /home/technicise16/.m2/repository/org/openmrs/module/fhir2-api/2.8.0-SNAPSHOT/fhir2-api-2.8.0-SNAPSHOT.jar
+[INFO] Installing /home/technicise16/code/openmrs-module-fhir2/api/target/fhir2-api-2.8.0-SNAPSHOT-tests.jar to /home/technicise16/.m2/repository/org/openmrs/module/fhir2-api/2.8.0-SNAPSHOT/fhir2-api-2.8.0-SNAPSHOT-tests.jar
+[INFO] 
+[INFO] ------------------< org.openmrs.module:fhir2-api-2.5 >------------------
+[INFO] Building FHIR2 API 2.5 2.8.0-SNAPSHOT                             [4/11]
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- maven-clean-plugin:3.4.1:clean (default-clean) @ fhir2-api-2.5 ---
+[INFO] Deleting /home/technicise16/code/openmrs-module-fhir2/api-2.5/target
+[INFO] 
+[INFO] --- directory-maven-plugin:1.0:highest-basedir (directories) @ fhir2-api-2.5 ---
+[INFO] Highest basedir set to: /home/technicise16/code/openmrs-module-fhir2
+[INFO] 
+[INFO] --- license-maven-plugin:3.0:format (add-license) @ fhir2-api-2.5 ---
+[INFO] Updating license headers...
+[INFO] 
+[INFO] --- jacoco-maven-plugin:0.8.8:prepare-agent (default) @ fhir2-api-2.5 ---
+[INFO] argLine set to -javaagent:/home/technicise16/.m2/repository/org/jacoco/org.jacoco.agent/0.8.8/org.jacoco.agent-0.8.8-runtime.jar=destfile=/home/technicise16/code/openmrs-module-fhir2/api-2.5/target/jacoco.exec
+[INFO] 
+[INFO] --- formatter-maven-plugin:2.16.0:format (default) @ fhir2-api-2.5 ---
+[INFO] Using 'UTF-8' encoding to format source files.
+[INFO] Number of files to be formatted: 3
+[INFO] Successfully formatted:          0 file(s)
+[INFO] Fail to format:                  0 file(s)
+[INFO] Skipped:                         3 file(s)
+[INFO] Read only skipped:               0 file(s)
+[INFO] Approximate time taken:          0s
+[INFO] 
+[INFO] --- impsort-maven-plugin:1.6.2:sort (default) @ fhir2-api-2.5 ---
+[INFO] Processed 3 files in 00:00.003 (Already Sorted: 3, Needed Sorting: 0)
+[INFO] 
+[INFO] --- maven-resources-plugin:2.6:resources (default-resources) @ fhir2-api-2.5 ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] skip non existing resourceDirectory /home/technicise16/code/openmrs-module-fhir2/api-2.5/src/main/resources
+[INFO] skip non existing resourceDirectory /home/technicise16/code/openmrs-module-fhir2/api-2.5/src/main/resources
+[INFO] skip non existing resourceDirectory /home/technicise16/code/openmrs-module-fhir2/api-2.5/src/main/webapp
+[INFO] skip non existing resourceDirectory /home/technicise16/code/openmrs-module-fhir2/api-2.5/src/main/webapp
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.14.0:compile (default-compile) @ fhir2-api-2.5 ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 1 source file with javac [debug target 1.8] to target/classes
+[INFO] 
+[INFO] --- maven-resources-plugin:2.6:testResources (default-testResources) @ fhir2-api-2.5 ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] skip non existing resourceDirectory /home/technicise16/code/openmrs-module-fhir2/api-2.5/src/test/resources
+[INFO] skip non existing resourceDirectory /home/technicise16/code/openmrs-module-fhir2/api-2.5/src/test/resources
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.14.0:testCompile (default-testCompile) @ fhir2-api-2.5 ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 2 source files with javac [debug target 1.8] to target/test-classes
+[INFO] 
+[INFO] --- maven-surefire-plugin:3.5.3:test (default-test) @ fhir2-api-2.5 ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+Downloading from openmrs-repo: https://mavenrepo.openmrs.org/public/org/junit/platform/junit-platform-launcher/1.8.1/junit-platform-launcher-1.8.1.pom
+Downloaded from openmrs-repo: https://mavenrepo.openmrs.org/public/org/junit/platform/junit-platform-launcher/1.8.1/junit-platform-launcher-1.8.1.pom (3.0 kB at 927 B/s)
+Downloading from openmrs-repo: https://mavenrepo.openmrs.org/public/org/junit/platform/junit-platform-launcher/1.8.1/junit-platform-launcher-1.8.1.jar
+Downloaded from openmrs-repo: https://mavenrepo.openmrs.org/public/org/junit/platform/junit-platform-launcher/1.8.1/junit-platform-launcher-1.8.1.jar (160 kB at 99 kB/s)
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.LocationTypeTranslatorImpl2_5Test
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.235 s -- in org.openmrs.module.fhir2.api.translators.impl.LocationTypeTranslatorImpl2_5Test
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] --- jacoco-maven-plugin:0.8.8:report (report) @ fhir2-api-2.5 ---
+[INFO] Loading execution data file /home/technicise16/code/openmrs-module-fhir2/api-2.5/target/jacoco.exec
+[INFO] Analyzed bundle 'FHIR2 API 2.5' with 1 classes
+[INFO] 
+[INFO] --- maven-jar-plugin:3.4.2:jar (default-jar) @ fhir2-api-2.5 ---
+[INFO] Building jar: /home/technicise16/code/openmrs-module-fhir2/api-2.5/target/fhir2-api-2.5-2.8.0-SNAPSHOT.jar
+[INFO] 
+[INFO] --- maven-jar-plugin:3.4.2:test-jar (default) @ fhir2-api-2.5 ---
+[INFO] Building jar: /home/technicise16/code/openmrs-module-fhir2/api-2.5/target/fhir2-api-2.5-2.8.0-SNAPSHOT-tests.jar
+[INFO] 
+[INFO] --- maven-install-plugin:3.1.4:install (default-install) @ fhir2-api-2.5 ---
+[INFO] Installing /home/technicise16/code/openmrs-module-fhir2/api-2.5/pom.xml to /home/technicise16/.m2/repository/org/openmrs/module/fhir2-api-2.5/2.8.0-SNAPSHOT/fhir2-api-2.5-2.8.0-SNAPSHOT.pom
+[INFO] Installing /home/technicise16/code/openmrs-module-fhir2/api-2.5/target/fhir2-api-2.5-2.8.0-SNAPSHOT.jar to /home/technicise16/.m2/repository/org/openmrs/module/fhir2-api-2.5/2.8.0-SNAPSHOT/fhir2-api-2.5-2.8.0-SNAPSHOT.jar
+[INFO] Installing /home/technicise16/code/openmrs-module-fhir2/api-2.5/target/fhir2-api-2.5-2.8.0-SNAPSHOT-tests.jar to /home/technicise16/.m2/repository/org/openmrs/module/fhir2-api-2.5/2.8.0-SNAPSHOT/fhir2-api-2.5-2.8.0-SNAPSHOT-tests.jar
+[INFO] 
+[INFO] ------------------< org.openmrs.module:fhir2-api-2.6 >------------------
+[INFO] Building FHIR2 API 2.6 2.8.0-SNAPSHOT                             [5/11]
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- maven-clean-plugin:3.4.1:clean (default-clean) @ fhir2-api-2.6 ---
+[INFO] Deleting /home/technicise16/code/openmrs-module-fhir2/api-2.6/target
+[INFO] 
+[INFO] --- directory-maven-plugin:1.0:highest-basedir (directories) @ fhir2-api-2.6 ---
+[INFO] Highest basedir set to: /home/technicise16/code/openmrs-module-fhir2
+[INFO] 
+[INFO] --- license-maven-plugin:3.0:format (add-license) @ fhir2-api-2.6 ---
+[INFO] Updating license headers...
+[INFO] 
+[INFO] --- jacoco-maven-plugin:0.8.8:prepare-agent (default) @ fhir2-api-2.6 ---
+[INFO] argLine set to -javaagent:/home/technicise16/.m2/repository/org/jacoco/org.jacoco.agent/0.8.8/org.jacoco.agent-0.8.8-runtime.jar=destfile=/home/technicise16/code/openmrs-module-fhir2/api-2.6/target/jacoco.exec
+[INFO] 
+[INFO] --- formatter-maven-plugin:2.16.0:format (default) @ fhir2-api-2.6 ---
+[INFO] Using 'UTF-8' encoding to format source files.
+[INFO] Number of files to be formatted: 28
+[INFO] Successfully formatted:          0 file(s)
+[INFO] Fail to format:                  0 file(s)
+[INFO] Skipped:                         28 file(s)
+[INFO] Read only skipped:               0 file(s)
+[INFO] Approximate time taken:          0s
+[INFO] 
+[INFO] --- impsort-maven-plugin:1.6.2:sort (default) @ fhir2-api-2.6 ---
+[INFO] Processed 28 files in 00:00.085 (Already Sorted: 28, Needed Sorting: 0)
+[INFO] 
+[INFO] --- maven-resources-plugin:2.6:resources (default-resources) @ fhir2-api-2.6 ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] skip non existing resourceDirectory /home/technicise16/code/openmrs-module-fhir2/api-2.6/src/main/resources
+[INFO] skip non existing resourceDirectory /home/technicise16/code/openmrs-module-fhir2/api-2.6/src/main/resources
+[INFO] skip non existing resourceDirectory /home/technicise16/code/openmrs-module-fhir2/api-2.6/src/main/webapp
+[INFO] skip non existing resourceDirectory /home/technicise16/code/openmrs-module-fhir2/api-2.6/src/main/webapp
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.14.0:compile (default-compile) @ fhir2-api-2.6 ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 12 source files with javac [debug target 1.8] to target/classes
+[INFO] 
+[INFO] --- maven-resources-plugin:2.6:testResources (default-testResources) @ fhir2-api-2.6 ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] skip non existing resourceDirectory /home/technicise16/code/openmrs-module-fhir2/api-2.6/src/test/resources
+[INFO] skip non existing resourceDirectory /home/technicise16/code/openmrs-module-fhir2/api-2.6/src/test/resources
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.14.0:testCompile (default-testCompile) @ fhir2-api-2.6 ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 16 source files with javac [debug target 1.8] to target/test-classes
+[INFO] /home/technicise16/code/openmrs-module-fhir2/api-2.6/src/test/java/org/openmrs/module/fhir2/api/dao/impl/FhirMedicationDispenseDaoImplTest.java: Some input files use or override a deprecated API.
+[INFO] /home/technicise16/code/openmrs-module-fhir2/api-2.6/src/test/java/org/openmrs/module/fhir2/api/dao/impl/FhirMedicationDispenseDaoImplTest.java: Recompile with -Xlint:deprecation for details.
+[INFO] 
+[INFO] --- maven-surefire-plugin:3.5.3:test (default-test) @ fhir2-api-2.6 ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running org.openmrs.module.fhir2.api.impl.FhirMedicationDispenseServiceImplTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.841 s -- in org.openmrs.module.fhir2.api.impl.FhirMedicationDispenseServiceImplTest
+[INFO] Running org.openmrs.module.fhir2.api.dao.impl.FhirMedicationDispenseDaoImplTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 12.73 s -- in org.openmrs.module.fhir2.api.dao.impl.FhirMedicationDispenseDaoImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.MedicationDispenseStatusTranslatorImplTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.057 s -- in org.openmrs.module.fhir2.api.translators.impl.MedicationDispenseStatusTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.MedicationDispenseTranslatorImplTest
+[INFO] Tests run: 63, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.274 s -- in org.openmrs.module.fhir2.api.translators.impl.MedicationDispenseTranslatorImplTest
+[INFO] Running org.openmrs.module.fhir2.api.search.MedicationRequestSearchQueryImpl2_6Test
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.297 s -- in org.openmrs.module.fhir2.api.search.MedicationRequestSearchQueryImpl2_6Test
+[INFO] Running org.openmrs.module.fhir2.api.search.MedicationSearchQueryImpl2_6Test
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.214 s -- in org.openmrs.module.fhir2.api.search.MedicationSearchQueryImpl2_6Test
+[INFO] Running org.openmrs.module.fhir2.api.search.EncounterSearchQueryImpl2_6Test
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.232 s -- in org.openmrs.module.fhir2.api.search.EncounterSearchQueryImpl2_6Test
+[INFO] Running org.openmrs.module.fhir2.api.search.PractitionerSearchQueryImpl2_6Test
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.278 s -- in org.openmrs.module.fhir2.api.search.PractitionerSearchQueryImpl2_6Test
+[INFO] Running org.openmrs.module.fhir2.api.search.PatientSearchQueryImpl2_6Test
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.267 s -- in org.openmrs.module.fhir2.api.search.PatientSearchQueryImpl2_6Test
+[INFO] Running org.openmrs.module.fhir2.api.search.MedicationDispenseSearchQueryImpl2_6Test
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.324 s -- in org.openmrs.module.fhir2.api.search.MedicationDispenseSearchQueryImpl2_6Test
+[INFO] Running org.openmrs.module.fhir2.providers.r3.MedicationDispenseFhirResourceProviderTest
+[INFO] Tests run: 28, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.448 s -- in org.openmrs.module.fhir2.providers.r3.MedicationDispenseFhirResourceProviderTest
+[INFO] Running org.openmrs.module.fhir2.providers.r4.MedicationDispenseFhirResourceProviderTest
+[INFO] Tests run: 28, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.028 s -- in org.openmrs.module.fhir2.providers.r4.MedicationDispenseFhirResourceProviderTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 155, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] --- jacoco-maven-plugin:0.8.8:report (report) @ fhir2-api-2.6 ---
+[INFO] Loading execution data file /home/technicise16/code/openmrs-module-fhir2/api-2.6/target/jacoco.exec
+[INFO] Analyzed bundle 'FHIR2 API 2.6' with 7 classes
+[INFO] 
+[INFO] --- maven-jar-plugin:3.4.2:jar (default-jar) @ fhir2-api-2.6 ---
+[INFO] Building jar: /home/technicise16/code/openmrs-module-fhir2/api-2.6/target/fhir2-api-2.6-2.8.0-SNAPSHOT.jar
+[INFO] 
+[INFO] --- maven-jar-plugin:3.4.2:test-jar (default) @ fhir2-api-2.6 ---
+[INFO] Building jar: /home/technicise16/code/openmrs-module-fhir2/api-2.6/target/fhir2-api-2.6-2.8.0-SNAPSHOT-tests.jar
+[INFO] 
+[INFO] --- maven-install-plugin:3.1.4:install (default-install) @ fhir2-api-2.6 ---
+[INFO] Installing /home/technicise16/code/openmrs-module-fhir2/api-2.6/pom.xml to /home/technicise16/.m2/repository/org/openmrs/module/fhir2-api-2.6/2.8.0-SNAPSHOT/fhir2-api-2.6-2.8.0-SNAPSHOT.pom
+[INFO] Installing /home/technicise16/code/openmrs-module-fhir2/api-2.6/target/fhir2-api-2.6-2.8.0-SNAPSHOT.jar to /home/technicise16/.m2/repository/org/openmrs/module/fhir2-api-2.6/2.8.0-SNAPSHOT/fhir2-api-2.6-2.8.0-SNAPSHOT.jar
+[INFO] Installing /home/technicise16/code/openmrs-module-fhir2/api-2.6/target/fhir2-api-2.6-2.8.0-SNAPSHOT-tests.jar to /home/technicise16/.m2/repository/org/openmrs/module/fhir2-api-2.6/2.8.0-SNAPSHOT/fhir2-api-2.6-2.8.0-SNAPSHOT-tests.jar
+[INFO] 
+[INFO] ------------------< org.openmrs.module:fhir2-api-2.7 >------------------
+[INFO] Building FHIR2 API 2.7 2.8.0-SNAPSHOT                             [6/11]
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- maven-clean-plugin:3.4.1:clean (default-clean) @ fhir2-api-2.7 ---
+[INFO] Deleting /home/technicise16/code/openmrs-module-fhir2/api-2.7/target
+[INFO] 
+[INFO] --- directory-maven-plugin:1.0:highest-basedir (directories) @ fhir2-api-2.7 ---
+[INFO] Highest basedir set to: /home/technicise16/code/openmrs-module-fhir2
+[INFO] 
+[INFO] --- license-maven-plugin:3.0:format (add-license) @ fhir2-api-2.7 ---
+[INFO] Updating license headers...
+[INFO] 
+[INFO] --- jacoco-maven-plugin:0.8.8:prepare-agent (default) @ fhir2-api-2.7 ---
+[INFO] argLine set to -javaagent:/home/technicise16/.m2/repository/org/jacoco/org.jacoco.agent/0.8.8/org.jacoco.agent-0.8.8-runtime.jar=destfile=/home/technicise16/code/openmrs-module-fhir2/api-2.7/target/jacoco.exec
+[INFO] 
+[INFO] --- formatter-maven-plugin:2.16.0:format (default) @ fhir2-api-2.7 ---
+[INFO] Using 'UTF-8' encoding to format source files.
+[INFO] Number of files to be formatted: 2
+[INFO] Successfully formatted:          0 file(s)
+[INFO] Fail to format:                  0 file(s)
+[INFO] Skipped:                         2 file(s)
+[INFO] Read only skipped:               0 file(s)
+[INFO] Approximate time taken:          0s
+[INFO] 
+[INFO] --- impsort-maven-plugin:1.6.2:sort (default) @ fhir2-api-2.7 ---
+[INFO] Processed 2 files in 00:00.005 (Already Sorted: 2, Needed Sorting: 0)
+[INFO] 
+[INFO] --- maven-resources-plugin:2.6:resources (default-resources) @ fhir2-api-2.7 ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] skip non existing resourceDirectory /home/technicise16/code/openmrs-module-fhir2/api-2.7/src/main/resources
+[INFO] skip non existing resourceDirectory /home/technicise16/code/openmrs-module-fhir2/api-2.7/src/main/resources
+[INFO] skip non existing resourceDirectory /home/technicise16/code/openmrs-module-fhir2/api-2.7/src/main/webapp
+[INFO] skip non existing resourceDirectory /home/technicise16/code/openmrs-module-fhir2/api-2.7/src/main/webapp
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.14.0:compile (default-compile) @ fhir2-api-2.7 ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 1 source file with javac [debug target 1.8] to target/classes
+[INFO] 
+[INFO] --- maven-resources-plugin:2.6:testResources (default-testResources) @ fhir2-api-2.7 ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] skip non existing resourceDirectory /home/technicise16/code/openmrs-module-fhir2/api-2.7/src/test/resources
+[INFO] skip non existing resourceDirectory /home/technicise16/code/openmrs-module-fhir2/api-2.7/src/test/resources
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.14.0:testCompile (default-testCompile) @ fhir2-api-2.7 ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 1 source file with javac [debug target 1.8] to target/test-classes
+[INFO] 
+[INFO] --- maven-surefire-plugin:3.5.3:test (default-test) @ fhir2-api-2.7 ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running org.openmrs.module.fhir2.api.translators.impl.ObservationReferenceRangeTranslatorImpl2_7Test
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.942 s -- in org.openmrs.module.fhir2.api.translators.impl.ObservationReferenceRangeTranslatorImpl2_7Test
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] --- jacoco-maven-plugin:0.8.8:report (report) @ fhir2-api-2.7 ---
+[INFO] Loading execution data file /home/technicise16/code/openmrs-module-fhir2/api-2.7/target/jacoco.exec
+[INFO] Analyzed bundle 'FHIR2 API 2.7' with 1 classes
+[INFO] 
+[INFO] --- maven-jar-plugin:3.4.2:jar (default-jar) @ fhir2-api-2.7 ---
+[INFO] Building jar: /home/technicise16/code/openmrs-module-fhir2/api-2.7/target/fhir2-api-2.7-2.8.0-SNAPSHOT.jar
+[INFO] 
+[INFO] --- maven-jar-plugin:3.4.2:test-jar (default) @ fhir2-api-2.7 ---
+[INFO] Building jar: /home/technicise16/code/openmrs-module-fhir2/api-2.7/target/fhir2-api-2.7-2.8.0-SNAPSHOT-tests.jar
+[INFO] 
+[INFO] --- maven-install-plugin:3.1.4:install (default-install) @ fhir2-api-2.7 ---
+[INFO] Installing /home/technicise16/code/openmrs-module-fhir2/api-2.7/pom.xml to /home/technicise16/.m2/repository/org/openmrs/module/fhir2-api-2.7/2.8.0-SNAPSHOT/fhir2-api-2.7-2.8.0-SNAPSHOT.pom
+[INFO] Installing /home/technicise16/code/openmrs-module-fhir2/api-2.7/target/fhir2-api-2.7-2.8.0-SNAPSHOT.jar to /home/technicise16/.m2/repository/org/openmrs/module/fhir2-api-2.7/2.8.0-SNAPSHOT/fhir2-api-2.7-2.8.0-SNAPSHOT.jar
+[INFO] Installing /home/technicise16/code/openmrs-module-fhir2/api-2.7/target/fhir2-api-2.7-2.8.0-SNAPSHOT-tests.jar to /home/technicise16/.m2/repository/org/openmrs/module/fhir2-api-2.7/2.8.0-SNAPSHOT/fhir2-api-2.7-2.8.0-SNAPSHOT-tests.jar
+[INFO] 
+[INFO] -------------------< org.openmrs.module:fhir2-omod >--------------------
+[INFO] Building FHIR2 OMOD 2.8.0-SNAPSHOT                                [7/11]
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- maven-clean-plugin:3.4.1:clean (default-clean) @ fhir2-omod ---
+[INFO] Deleting /home/technicise16/code/openmrs-module-fhir2/omod/target
+[INFO] 
+[INFO] --- directory-maven-plugin:1.0:highest-basedir (directories) @ fhir2-omod ---
+[INFO] Highest basedir set to: /home/technicise16/code/openmrs-module-fhir2
+[INFO] 
+[INFO] --- license-maven-plugin:3.0:format (add-license) @ fhir2-omod ---
+[INFO] Updating license headers...
+[INFO] 
+[INFO] --- jacoco-maven-plugin:0.8.8:prepare-agent (default) @ fhir2-omod ---
+[INFO] argLine set to -javaagent:/home/technicise16/.m2/repository/org/jacoco/org.jacoco.agent/0.8.8/org.jacoco.agent-0.8.8-runtime.jar=destfile=/home/technicise16/code/openmrs-module-fhir2/omod/target/jacoco.exec
+[INFO] 
+[INFO] --- formatter-maven-plugin:2.16.0:format (default) @ fhir2-omod ---
+[INFO] Using 'UTF-8' encoding to format source files.
+[INFO] Number of files to be formatted: 75
+[INFO] Successfully formatted:          0 file(s)
+[INFO] Fail to format:                  0 file(s)
+[INFO] Skipped:                         75 file(s)
+[INFO] Read only skipped:               0 file(s)
+[INFO] Approximate time taken:          1s
+[INFO] 
+[INFO] --- impsort-maven-plugin:1.6.2:sort (default) @ fhir2-omod ---
+[INFO] Processed 75 files in 00:00.717 (Already Sorted: 75, Needed Sorting: 0)
+[INFO] 
+[INFO] --- maven-dependency-plugin:3.8.1:unpack-dependencies (Expand resources) @ fhir2-omod ---
+[INFO] 
+[INFO] --- maven-resources-plugin:2.6:resources (default-resources) @ fhir2-omod ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Copying 6 resources
+[INFO] Copying 25 resources
+[INFO] skip non existing resourceDirectory /home/technicise16/code/openmrs-module-fhir2/omod/src/main/webapp
+[INFO] skip non existing resourceDirectory /home/technicise16/code/openmrs-module-fhir2/omod/src/main/webapp
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.14.0:compile (default-compile) @ fhir2-omod ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 15 source files with javac [debug target 1.8] to target/classes
+[INFO] /home/technicise16/code/openmrs-module-fhir2/omod/src/main/java/org/openmrs/module/fhir2/narrative/OpenmrsNarrativeTemplateManifest.java: /home/technicise16/code/openmrs-module-fhir2/omod/src/main/java/org/openmrs/module/fhir2/narrative/OpenmrsNarrativeTemplateManifest.java uses unchecked or unsafe operations.
+[INFO] /home/technicise16/code/openmrs-module-fhir2/omod/src/main/java/org/openmrs/module/fhir2/narrative/OpenmrsNarrativeTemplateManifest.java: Recompile with -Xlint:unchecked for details.
+[INFO] 
+[INFO] --- maven-resources-plugin:2.6:testResources (default-testResources) @ fhir2-omod ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Copying 3 resources
+[INFO] Copying 1 resource
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.14.0:testCompile (default-testCompile) @ fhir2-omod ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 60 source files with javac [debug target 1.8] to target/test-classes
+[INFO] 
+[INFO] --- maven-surefire-plugin:3.5.3:test (default-test) @ fhir2-omod ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running org.openmrs.module.fhir2.narrative.EncounterNarrativeTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.910 s -- in org.openmrs.module.fhir2.narrative.EncounterNarrativeTest
+[INFO] Running org.openmrs.module.fhir2.narrative.LocationNarrativeTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.114 s -- in org.openmrs.module.fhir2.narrative.LocationNarrativeTest
+[INFO] Running org.openmrs.module.fhir2.narrative.TaskNarrativeTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.257 s -- in org.openmrs.module.fhir2.narrative.TaskNarrativeTest
+[INFO] Running org.openmrs.module.fhir2.narrative.PatientNarrativeTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.178 s -- in org.openmrs.module.fhir2.narrative.PatientNarrativeTest
+[INFO] Running org.openmrs.module.fhir2.narrative.MedicationNarrativeTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.125 s -- in org.openmrs.module.fhir2.narrative.MedicationNarrativeTest
+[INFO] Running org.openmrs.module.fhir2.narrative.ObservationNarrativeTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.201 s -- in org.openmrs.module.fhir2.narrative.ObservationNarrativeTest
+[INFO] Running org.openmrs.module.fhir2.narrative.MedicationRequestNarrativeTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.244 s -- in org.openmrs.module.fhir2.narrative.MedicationRequestNarrativeTest
+[INFO] Running org.openmrs.module.fhir2.narrative.RelatedPersonNarrativeTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.073 s -- in org.openmrs.module.fhir2.narrative.RelatedPersonNarrativeTest
+[INFO] Running org.openmrs.module.fhir2.narrative.PractitionerRoleNarrativeTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.090 s -- in org.openmrs.module.fhir2.narrative.PractitionerRoleNarrativeTest
+[INFO] Running org.openmrs.module.fhir2.narrative.PersonNarrativeTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.089 s -- in org.openmrs.module.fhir2.narrative.PersonNarrativeTest
+[INFO] Running org.openmrs.module.fhir2.narrative.DiagnosticReportNarrativeTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.148 s -- in org.openmrs.module.fhir2.narrative.DiagnosticReportNarrativeTest
+[INFO] Running org.openmrs.module.fhir2.narrative.ConditionNarrativeTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.178 s -- in org.openmrs.module.fhir2.narrative.ConditionNarrativeTest
+[INFO] Running org.openmrs.module.fhir2.narrative.MessageResolverTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.542 s -- in org.openmrs.module.fhir2.narrative.MessageResolverTest
+[INFO] Running org.openmrs.module.fhir2.narrative.ServiceRequestNarrativeTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.137 s -- in org.openmrs.module.fhir2.narrative.ServiceRequestNarrativeTest
+[INFO] Running org.openmrs.module.fhir2.narrative.AllergyIntoleranceNarrativeTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.161 s -- in org.openmrs.module.fhir2.narrative.AllergyIntoleranceNarrativeTest
+[INFO] Running org.openmrs.module.fhir2.narrative.NarrativeGeneratorTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.023 s -- in org.openmrs.module.fhir2.narrative.NarrativeGeneratorTest
+[INFO] Running org.openmrs.module.fhir2.narrative.PractitionerNarrativeTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.072 s -- in org.openmrs.module.fhir2.narrative.PractitionerNarrativeTest
+[INFO] Running org.openmrs.module.fhir2.web.authentication.RequireAuthenticationInterceptorTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.017 s -- in org.openmrs.module.fhir2.web.authentication.RequireAuthenticationInterceptorTest
+[INFO] Running org.openmrs.module.fhir2.web.servlet.FhirRestServletTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.129 s -- in org.openmrs.module.fhir2.web.servlet.FhirRestServletTest
+[INFO] Running org.openmrs.module.fhir2.web.filter.AuthenticationFilterTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.200 s -- in org.openmrs.module.fhir2.web.filter.AuthenticationFilterTest
+[INFO] Running org.openmrs.module.fhir2.web.filter.ForwardingFilterTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in org.openmrs.module.fhir2.web.filter.ForwardingFilterTest
+[INFO] Running org.openmrs.module.fhir2.web.util.NarrativeUtilTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in org.openmrs.module.fhir2.web.util.NarrativeUtilTest
+[INFO] Running org.openmrs.module.fhir2.web.util.OpenmrsFhirAddressStrategyTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.034 s -- in org.openmrs.module.fhir2.web.util.OpenmrsFhirAddressStrategyTest
+[INFO] Running org.openmrs.module.fhir2.web.util.FhirVersionUtilsTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in org.openmrs.module.fhir2.web.util.FhirVersionUtilsTest
+[INFO] Running org.openmrs.module.fhir2.providers.r3.DiagnosticReportFhirResourceProviderWebTest
+[INFO] Tests run: 29, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.886 s -- in org.openmrs.module.fhir2.providers.r3.DiagnosticReportFhirResourceProviderWebTest
+[INFO] Running org.openmrs.module.fhir2.providers.r3.EncounterFhirResourceProviderWebTest
+[INFO] Tests run: 44, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.720 s -- in org.openmrs.module.fhir2.providers.r3.EncounterFhirResourceProviderWebTest
+[INFO] Running org.openmrs.module.fhir2.providers.r3.TaskFhirResourceProviderWebTest
+[INFO] Tests run: 15, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.191 s -- in org.openmrs.module.fhir2.providers.r3.TaskFhirResourceProviderWebTest
+[INFO] Running org.openmrs.module.fhir2.providers.r3.PersonFhirResourceProviderWebTest
+[INFO] Tests run: 25, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.309 s -- in org.openmrs.module.fhir2.providers.r3.PersonFhirResourceProviderWebTest
+[INFO] Running org.openmrs.module.fhir2.providers.r3.PatientFhirR3ResourceProviderWebTest
+[INFO] Tests run: 42, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.536 s -- in org.openmrs.module.fhir2.providers.r3.PatientFhirR3ResourceProviderWebTest
+[INFO] Running org.openmrs.module.fhir2.providers.r3.LocationFhirResourceProviderWebTest
+[INFO] Tests run: 27, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.424 s -- in org.openmrs.module.fhir2.providers.r3.LocationFhirResourceProviderWebTest
+[INFO] Running org.openmrs.module.fhir2.providers.r3.ConditionFhirR3ResourceProviderWebTest
+[INFO] Tests run: 16, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.198 s -- in org.openmrs.module.fhir2.providers.r3.ConditionFhirR3ResourceProviderWebTest
+[INFO] Running org.openmrs.module.fhir2.providers.r3.RelatedPersonFhirResourceProviderWebTest
+[INFO] Tests run: 18, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.257 s -- in org.openmrs.module.fhir2.providers.r3.RelatedPersonFhirResourceProviderWebTest
+[INFO] Running org.openmrs.module.fhir2.providers.r3.MedicationDispenseFhirResourceProviderWebTest
+[INFO] Tests run: 24, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.134 s -- in org.openmrs.module.fhir2.providers.r3.MedicationDispenseFhirResourceProviderWebTest
+[INFO] Running org.openmrs.module.fhir2.providers.r3.MedicationFhirResourceProviderWebTest
+[INFO] Tests run: 16, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.188 s -- in org.openmrs.module.fhir2.providers.r3.MedicationFhirResourceProviderWebTest
+[INFO] Running org.openmrs.module.fhir2.providers.r3.ObservationFhirResourceProviderWebTest
+[INFO] Tests run: 53, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.900 s -- in org.openmrs.module.fhir2.providers.r3.ObservationFhirResourceProviderWebTest
+[INFO] Running org.openmrs.module.fhir2.providers.r3.GroupFhirResourceProviderWebTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.069 s -- in org.openmrs.module.fhir2.providers.r3.GroupFhirResourceProviderWebTest
+[INFO] Running org.openmrs.module.fhir2.providers.r3.MedicationRequestFhirResourceProviderWebTest
+[INFO] Tests run: 32, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.378 s -- in org.openmrs.module.fhir2.providers.r3.MedicationRequestFhirResourceProviderWebTest
+[INFO] Running org.openmrs.module.fhir2.providers.r3.PractitionerFhirResourceProviderWebTest
+[INFO] Tests run: 24, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.259 s -- in org.openmrs.module.fhir2.providers.r3.PractitionerFhirResourceProviderWebTest
+[INFO] Running org.openmrs.module.fhir2.providers.r3.AllergyIntoleranceFhirR3ResourceProviderWebTest
+[INFO] Tests run: 26, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.363 s -- in org.openmrs.module.fhir2.providers.r3.AllergyIntoleranceFhirR3ResourceProviderWebTest
+[INFO] Running org.openmrs.module.fhir2.providers.r3.ProcedureRequestFhirResourceProviderWebTest
+[INFO] Tests run: 27, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.113 s -- in org.openmrs.module.fhir2.providers.r3.ProcedureRequestFhirResourceProviderWebTest
+[INFO] Running org.openmrs.module.fhir2.providers.r4.DiagnosticReportFhirResourceProviderWebTest
+[INFO] Tests run: 29, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.450 s -- in org.openmrs.module.fhir2.providers.r4.DiagnosticReportFhirResourceProviderWebTest
+[INFO] Running org.openmrs.module.fhir2.providers.r4.ServiceRequestFhirResourceProviderWebTest
+[INFO] Tests run: 27, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.296 s -- in org.openmrs.module.fhir2.providers.r4.ServiceRequestFhirResourceProviderWebTest
+[INFO] Running org.openmrs.module.fhir2.providers.r4.EncounterFhirResourceProviderWebTest
+[INFO] Tests run: 46, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.522 s -- in org.openmrs.module.fhir2.providers.r4.EncounterFhirResourceProviderWebTest
+[INFO] Running org.openmrs.module.fhir2.providers.r4.TaskFhirResourceProviderWebTest
+[INFO] Tests run: 15, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.155 s -- in org.openmrs.module.fhir2.providers.r4.TaskFhirResourceProviderWebTest
+[INFO] Running org.openmrs.module.fhir2.providers.r4.PersonFhirResourceProviderWebTest
+[INFO] Tests run: 25, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.251 s -- in org.openmrs.module.fhir2.providers.r4.PersonFhirResourceProviderWebTest
+[INFO] Running org.openmrs.module.fhir2.providers.r4.ConditionFhirResourceProviderWebTest
+[INFO] Tests run: 16, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.198 s -- in org.openmrs.module.fhir2.providers.r4.ConditionFhirResourceProviderWebTest
+[INFO] Running org.openmrs.module.fhir2.providers.r4.LocationFhirResourceProviderWebTest
+[INFO] Tests run: 27, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.325 s -- in org.openmrs.module.fhir2.providers.r4.LocationFhirResourceProviderWebTest
+[INFO] Running org.openmrs.module.fhir2.providers.r4.RelatedPersonFhirResourceProviderWebTest
+[INFO] Tests run: 18, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.183 s -- in org.openmrs.module.fhir2.providers.r4.RelatedPersonFhirResourceProviderWebTest
+[INFO] Running org.openmrs.module.fhir2.providers.r4.MedicationDispenseFhirResourceProviderWebTest
+[INFO] Tests run: 24, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.084 s -- in org.openmrs.module.fhir2.providers.r4.MedicationDispenseFhirResourceProviderWebTest
+[INFO] Running org.openmrs.module.fhir2.providers.r4.MedicationFhirResourceProviderWebTest
+[INFO] Tests run: 16, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.152 s -- in org.openmrs.module.fhir2.providers.r4.MedicationFhirResourceProviderWebTest
+[INFO] Running org.openmrs.module.fhir2.providers.r4.ObservationFhirResourceProviderWebTest
+[INFO] Tests run: 53, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.569 s -- in org.openmrs.module.fhir2.providers.r4.ObservationFhirResourceProviderWebTest
+[INFO] Running org.openmrs.module.fhir2.providers.r4.GroupFhirResourceProviderWebTest
+[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.058 s -- in org.openmrs.module.fhir2.providers.r4.GroupFhirResourceProviderWebTest
+[INFO] Running org.openmrs.module.fhir2.providers.r4.PatientFhirResourceProviderWebTest
+[INFO] Tests run: 44, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.435 s -- in org.openmrs.module.fhir2.providers.r4.PatientFhirResourceProviderWebTest
+[INFO] Running org.openmrs.module.fhir2.providers.r4.AllergyIntoleranceFhirResourceProviderWebTest
+[INFO] Tests run: 27, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.278 s -- in org.openmrs.module.fhir2.providers.r4.AllergyIntoleranceFhirResourceProviderWebTest
+[INFO] Running org.openmrs.module.fhir2.providers.r4.MedicationRequestFhirResourceProviderWebTest
+[INFO] Tests run: 32, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.390 s -- in org.openmrs.module.fhir2.providers.r4.MedicationRequestFhirResourceProviderWebTest
+[INFO] Running org.openmrs.module.fhir2.providers.r4.PractitionerFhirResourceProviderWebTest
+[INFO] Tests run: 24, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.203 s -- in org.openmrs.module.fhir2.providers.r4.PractitionerFhirResourceProviderWebTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 925, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] --- jacoco-maven-plugin:0.8.8:report (report) @ fhir2-omod ---
+[INFO] Loading execution data file /home/technicise16/code/openmrs-module-fhir2/omod/target/jacoco.exec
+[INFO] Analyzed bundle 'FHIR2 OMOD' with 18 classes
+[INFO] 
+[INFO] --- maven-jar-plugin:3.4.2:jar (default-jar) @ fhir2-omod ---
+[INFO] Building jar: /home/technicise16/code/openmrs-module-fhir2/omod/target/fhir2-2.8.0-SNAPSHOT.jar
+[INFO] 
+[INFO] --- maven-openmrs-plugin:1.0.1:package-module (pack) @ fhir2-omod ---
+[INFO] Packaging OpenMRS module
+[INFO] Building jar: /home/technicise16/code/openmrs-module-fhir2/omod/target/fhir2-2.8.0-SNAPSHOT.omod
+[INFO] 
+[INFO] --- maven-jar-plugin:3.4.2:test-jar (default) @ fhir2-omod ---
+[INFO] Building jar: /home/technicise16/code/openmrs-module-fhir2/omod/target/fhir2-2.8.0-SNAPSHOT-tests.jar
+[INFO] 
+[INFO] --- maven-install-plugin:3.1.4:install (default-install) @ fhir2-omod ---
+[INFO] Installing /home/technicise16/code/openmrs-module-fhir2/omod/pom.xml to /home/technicise16/.m2/repository/org/openmrs/module/fhir2-omod/2.8.0-SNAPSHOT/fhir2-omod-2.8.0-SNAPSHOT.pom
+[INFO] Installing /home/technicise16/code/openmrs-module-fhir2/omod/target/fhir2-2.8.0-SNAPSHOT.omod to /home/technicise16/.m2/repository/org/openmrs/module/fhir2-omod/2.8.0-SNAPSHOT/fhir2-omod-2.8.0-SNAPSHOT.jar
+[INFO] Installing /home/technicise16/code/openmrs-module-fhir2/omod/target/fhir2-2.8.0-SNAPSHOT-tests.jar to /home/technicise16/.m2/repository/org/openmrs/module/fhir2-omod/2.8.0-SNAPSHOT/fhir2-omod-2.8.0-SNAPSHOT-tests.jar
+[INFO] 
+[INFO] -------------< org.openmrs.module:fhir2-integration-tests >-------------
+[INFO] Building FHIR2 Integration Tests 2.8.0-SNAPSHOT                   [8/11]
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- maven-clean-plugin:3.4.1:clean (default-clean) @ fhir2-integration-tests ---
+[INFO] Deleting /home/technicise16/code/openmrs-module-fhir2/integration-tests/target
+[INFO] 
+[INFO] --- directory-maven-plugin:1.0:highest-basedir (directories) @ fhir2-integration-tests ---
+[INFO] Highest basedir set to: /home/technicise16/code/openmrs-module-fhir2
+[INFO] 
+[INFO] --- license-maven-plugin:3.0:format (add-license) @ fhir2-integration-tests ---
+[INFO] Updating license headers...
+[INFO] 
+[INFO] --- jacoco-maven-plugin:0.8.8:prepare-agent (default) @ fhir2-integration-tests ---
+[INFO] argLine set to -javaagent:/home/technicise16/.m2/repository/org/jacoco/org.jacoco.agent/0.8.8/org.jacoco.agent-0.8.8-runtime.jar=destfile=/home/technicise16/code/openmrs-module-fhir2/integration-tests/target/jacoco.exec
+[INFO] 
+[INFO] --- formatter-maven-plugin:2.16.0:format (default) @ fhir2-integration-tests ---
+[INFO] Using 'UTF-8' encoding to format source files.
+[INFO] Number of files to be formatted: 38
+[INFO] Successfully formatted:          0 file(s)
+[INFO] Fail to format:                  0 file(s)
+[INFO] Skipped:                         38 file(s)
+[INFO] Read only skipped:               0 file(s)
+[INFO] Approximate time taken:          0s
+[INFO] 
+[INFO] --- impsort-maven-plugin:1.6.2:sort (default) @ fhir2-integration-tests ---
+[INFO] Processed 38 files in 00:00.544 (Already Sorted: 38, Needed Sorting: 0)
+[INFO] 
+[INFO] --- maven-resources-plugin:2.6:resources (default-resources) @ fhir2-integration-tests ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] skip non existing resourceDirectory /home/technicise16/code/openmrs-module-fhir2/integration-tests/src/main/resources
+[INFO] skip non existing resourceDirectory /home/technicise16/code/openmrs-module-fhir2/integration-tests/src/main/resources
+[INFO] skip non existing resourceDirectory /home/technicise16/code/openmrs-module-fhir2/integration-tests/src/main/webapp
+[INFO] skip non existing resourceDirectory /home/technicise16/code/openmrs-module-fhir2/integration-tests/src/main/webapp
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.14.0:compile (default-compile) @ fhir2-integration-tests ---
+[INFO] No sources to compile
+[INFO] 
+[INFO] --- maven-resources-plugin:2.6:testResources (default-testResources) @ fhir2-integration-tests ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] skip non existing resourceDirectory /home/technicise16/code/openmrs-module-fhir2/integration-tests/src/test/resources
+[INFO] skip non existing resourceDirectory /home/technicise16/code/openmrs-module-fhir2/integration-tests/src/test/resources
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.14.0:testCompile (default-testCompile) @ fhir2-integration-tests ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 38 source files with javac [debug target 1.8] to target/test-classes
+[INFO] /home/technicise16/code/openmrs-module-fhir2/integration-tests/src/test/java/org/openmrs/module/fhir2/BaseFhirIntegrationTest.java: /home/technicise16/code/openmrs-module-fhir2/integration-tests/src/test/java/org/openmrs/module/fhir2/BaseFhirIntegrationTest.java uses or overrides a deprecated API.
+[INFO] /home/technicise16/code/openmrs-module-fhir2/integration-tests/src/test/java/org/openmrs/module/fhir2/BaseFhirIntegrationTest.java: Recompile with -Xlint:deprecation for details.
+[INFO] 
+[INFO] --- maven-surefire-plugin:3.5.3:test (default-test) @ fhir2-integration-tests ---
+[INFO] 
+[INFO] --- jacoco-maven-plugin:0.8.8:report (report) @ fhir2-integration-tests ---
+[INFO] Skipping JaCoCo execution due to missing execution data file.
+[INFO] 
+[INFO] --- maven-jar-plugin:3.4.2:jar (default-jar) @ fhir2-integration-tests ---
+[INFO] Skipping packaging of the jar
+[INFO] 
+[INFO] --- maven-jar-plugin:3.4.2:test-jar (default) @ fhir2-integration-tests ---
+[INFO] Building jar: /home/technicise16/code/openmrs-module-fhir2/integration-tests/target/fhir2-integration-tests-2.8.0-SNAPSHOT-tests.jar
+[INFO] 
+[INFO] --- maven-install-plugin:3.1.4:install (default-install) @ fhir2-integration-tests ---
+[INFO] Skipping artifact installation
+[INFO] 
+[INFO] -----------< org.openmrs.module:fhir2-integration-tests-2.6 >-----------
+[INFO] Building FHIR2 Integration Tests 2.6 2.8.0-SNAPSHOT               [9/11]
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- maven-clean-plugin:3.4.1:clean (default-clean) @ fhir2-integration-tests-2.6 ---
+[INFO] Deleting /home/technicise16/code/openmrs-module-fhir2/integration-tests-2.6/target
+[INFO] 
+[INFO] --- directory-maven-plugin:1.0:highest-basedir (directories) @ fhir2-integration-tests-2.6 ---
+[INFO] Highest basedir set to: /home/technicise16/code/openmrs-module-fhir2
+[INFO] 
+[INFO] --- license-maven-plugin:3.0:format (add-license) @ fhir2-integration-tests-2.6 ---
+[INFO] Updating license headers...
+[INFO] 
+[INFO] --- jacoco-maven-plugin:0.8.8:prepare-agent (default) @ fhir2-integration-tests-2.6 ---
+[INFO] argLine set to -javaagent:/home/technicise16/.m2/repository/org/jacoco/org.jacoco.agent/0.8.8/org.jacoco.agent-0.8.8-runtime.jar=destfile=/home/technicise16/code/openmrs-module-fhir2/integration-tests-2.6/target/jacoco.exec
+[INFO] 
+[INFO] --- formatter-maven-plugin:2.16.0:format (default) @ fhir2-integration-tests-2.6 ---
+[INFO] Using 'UTF-8' encoding to format source files.
+[INFO] Number of files to be formatted: 4
+[INFO] Successfully formatted:          0 file(s)
+[INFO] Fail to format:                  0 file(s)
+[INFO] Skipped:                         4 file(s)
+[INFO] Read only skipped:               0 file(s)
+[INFO] Approximate time taken:          0s
+[INFO] 
+[INFO] --- impsort-maven-plugin:1.6.2:sort (default) @ fhir2-integration-tests-2.6 ---
+[INFO] Processed 4 files in 00:00.077 (Already Sorted: 4, Needed Sorting: 0)
+[INFO] 
+[INFO] --- maven-resources-plugin:2.6:resources (default-resources) @ fhir2-integration-tests-2.6 ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] skip non existing resourceDirectory /home/technicise16/code/openmrs-module-fhir2/integration-tests-2.6/src/main/resources
+[INFO] skip non existing resourceDirectory /home/technicise16/code/openmrs-module-fhir2/integration-tests-2.6/src/main/resources
+[INFO] skip non existing resourceDirectory /home/technicise16/code/openmrs-module-fhir2/integration-tests-2.6/src/main/webapp
+[INFO] skip non existing resourceDirectory /home/technicise16/code/openmrs-module-fhir2/integration-tests-2.6/src/main/webapp
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.14.0:compile (default-compile) @ fhir2-integration-tests-2.6 ---
+[INFO] No sources to compile
+[INFO] 
+[INFO] --- maven-resources-plugin:2.6:testResources (default-testResources) @ fhir2-integration-tests-2.6 ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] skip non existing resourceDirectory /home/technicise16/code/openmrs-module-fhir2/integration-tests-2.6/src/test/resources
+[INFO] skip non existing resourceDirectory /home/technicise16/code/openmrs-module-fhir2/integration-tests-2.6/src/test/resources
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.14.0:testCompile (default-testCompile) @ fhir2-integration-tests-2.6 ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 4 source files with javac [debug target 1.8] to target/test-classes
+[INFO] 
+[INFO] --- maven-surefire-plugin:3.5.3:test (default-test) @ fhir2-integration-tests-2.6 ---
+[INFO] 
+[INFO] --- jacoco-maven-plugin:0.8.8:report (report) @ fhir2-integration-tests-2.6 ---
+[INFO] Skipping JaCoCo execution due to missing execution data file.
+[INFO] 
+[INFO] --- maven-jar-plugin:3.4.2:jar (default-jar) @ fhir2-integration-tests-2.6 ---
+[INFO] Skipping packaging of the jar
+[INFO] 
+[INFO] --- maven-jar-plugin:3.4.2:test-jar (default) @ fhir2-integration-tests-2.6 ---
+[INFO] Building jar: /home/technicise16/code/openmrs-module-fhir2/integration-tests-2.6/target/fhir2-integration-tests-2.6-2.8.0-SNAPSHOT-tests.jar
+[INFO] 
+[INFO] --- maven-install-plugin:3.1.4:install (default-install) @ fhir2-integration-tests-2.6 ---
+[INFO] Skipping artifact installation
+[INFO] 
+[INFO] -----------< org.openmrs.module:fhir2-integration-tests-2.7 >-----------
+[INFO] Building FHIR2 Integration Tests 2.7 2.8.0-SNAPSHOT              [10/11]
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- maven-clean-plugin:3.4.1:clean (default-clean) @ fhir2-integration-tests-2.7 ---
+[INFO] Deleting /home/technicise16/code/openmrs-module-fhir2/integration-tests-2.7/target
+[INFO] 
+[INFO] --- directory-maven-plugin:1.0:highest-basedir (directories) @ fhir2-integration-tests-2.7 ---
+[INFO] Highest basedir set to: /home/technicise16/code/openmrs-module-fhir2
+[INFO] 
+[INFO] --- license-maven-plugin:3.0:format (add-license) @ fhir2-integration-tests-2.7 ---
+[INFO] Updating license headers...
+[INFO] 
+[INFO] --- jacoco-maven-plugin:0.8.8:prepare-agent (default) @ fhir2-integration-tests-2.7 ---
+[INFO] argLine set to -javaagent:/home/technicise16/.m2/repository/org/jacoco/org.jacoco.agent/0.8.8/org.jacoco.agent-0.8.8-runtime.jar=destfile=/home/technicise16/code/openmrs-module-fhir2/integration-tests-2.7/target/jacoco.exec
+[INFO] 
+[INFO] --- formatter-maven-plugin:2.16.0:format (default) @ fhir2-integration-tests-2.7 ---
+[INFO] Using 'UTF-8' encoding to format source files.
+[INFO] Number of files to be formatted: 2
+[INFO] Successfully formatted:          0 file(s)
+[INFO] Fail to format:                  0 file(s)
+[INFO] Skipped:                         2 file(s)
+[INFO] Read only skipped:               0 file(s)
+[INFO] Approximate time taken:          0s
+[INFO] 
+[INFO] --- impsort-maven-plugin:1.6.2:sort (default) @ fhir2-integration-tests-2.7 ---
+[INFO] Processed 2 files in 00:00.003 (Already Sorted: 2, Needed Sorting: 0)
+[INFO] 
+[INFO] --- maven-resources-plugin:2.6:resources (default-resources) @ fhir2-integration-tests-2.7 ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] skip non existing resourceDirectory /home/technicise16/code/openmrs-module-fhir2/integration-tests-2.7/src/main/resources
+[INFO] skip non existing resourceDirectory /home/technicise16/code/openmrs-module-fhir2/integration-tests-2.7/src/main/resources
+[INFO] skip non existing resourceDirectory /home/technicise16/code/openmrs-module-fhir2/integration-tests-2.7/src/main/webapp
+[INFO] skip non existing resourceDirectory /home/technicise16/code/openmrs-module-fhir2/integration-tests-2.7/src/main/webapp
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.14.0:compile (default-compile) @ fhir2-integration-tests-2.7 ---
+[INFO] No sources to compile
+[INFO] 
+[INFO] --- maven-resources-plugin:2.6:testResources (default-testResources) @ fhir2-integration-tests-2.7 ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] skip non existing resourceDirectory /home/technicise16/code/openmrs-module-fhir2/integration-tests-2.7/src/test/resources
+[INFO] skip non existing resourceDirectory /home/technicise16/code/openmrs-module-fhir2/integration-tests-2.7/src/test/resources
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.14.0:testCompile (default-testCompile) @ fhir2-integration-tests-2.7 ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 2 source files with javac [debug target 1.8] to target/test-classes
+[INFO] 
+[INFO] --- maven-surefire-plugin:3.5.3:test (default-test) @ fhir2-integration-tests-2.7 ---
+[INFO] 
+[INFO] --- jacoco-maven-plugin:0.8.8:report (report) @ fhir2-integration-tests-2.7 ---
+[INFO] Skipping JaCoCo execution due to missing execution data file.
+[INFO] 
+[INFO] --- maven-jar-plugin:3.4.2:jar (default-jar) @ fhir2-integration-tests-2.7 ---
+[INFO] Skipping packaging of the jar
+[INFO] 
+[INFO] --- maven-jar-plugin:3.4.2:test-jar (default) @ fhir2-integration-tests-2.7 ---
+[INFO] Building jar: /home/technicise16/code/openmrs-module-fhir2/integration-tests-2.7/target/fhir2-integration-tests-2.7-2.8.0-SNAPSHOT-tests.jar
+[INFO] 
+[INFO] --- maven-install-plugin:3.1.4:install (default-install) @ fhir2-integration-tests-2.7 ---
+[INFO] Skipping artifact installation
+[INFO] 
+[INFO] -----------------< org.openmrs.module:fhir2-e2e-tests >-----------------
+[INFO] Building FHIR2 End-to-End Tests 2.8.0-SNAPSHOT                   [11/11]
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] --- maven-clean-plugin:3.4.1:clean (default-clean) @ fhir2-e2e-tests ---
+[INFO] 
+[INFO] --- directory-maven-plugin:1.0:highest-basedir (directories) @ fhir2-e2e-tests ---
+[INFO] Highest basedir set to: /home/technicise16/code/openmrs-module-fhir2
+[INFO] 
+[INFO] --- license-maven-plugin:3.0:format (add-license) @ fhir2-e2e-tests ---
+[INFO] Updating license headers...
+[INFO] 
+[INFO] --- jacoco-maven-plugin:0.8.8:prepare-agent (default) @ fhir2-e2e-tests ---
+[INFO] argLine set to -javaagent:/home/technicise16/.m2/repository/org/jacoco/org.jacoco.agent/0.8.8/org.jacoco.agent-0.8.8-runtime.jar=destfile=/home/technicise16/code/openmrs-module-fhir2/e2e-tests/target/jacoco.exec
+[INFO] 
+[INFO] --- formatter-maven-plugin:2.16.0:format (default) @ fhir2-e2e-tests ---
+[INFO] Using 'UTF-8' encoding to format source files.
+[INFO] Number of files to be formatted: 1
+[INFO] Successfully formatted:          0 file(s)
+[INFO] Fail to format:                  0 file(s)
+[INFO] Skipped:                         1 file(s)
+[INFO] Read only skipped:               0 file(s)
+[INFO] Approximate time taken:          0s
+[INFO] 
+[INFO] --- impsort-maven-plugin:1.6.2:sort (default) @ fhir2-e2e-tests ---
+[INFO] Processed 1 files in 00:00.004 (Already Sorted: 1, Needed Sorting: 0)
+[INFO] 
+[INFO] --- jacoco-maven-plugin:0.8.8:report (report) @ fhir2-e2e-tests ---
+[INFO] Skipping JaCoCo execution due to missing execution data file.
+[INFO] 
+[INFO] --- maven-jar-plugin:3.4.2:test-jar (default) @ fhir2-e2e-tests ---
+[INFO] Skipping packaging of the test-jar
+[INFO] 
+[INFO] --- maven-install-plugin:3.1.4:install (default-install) @ fhir2-e2e-tests ---
+[INFO] Skipping artifact installation
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary for FHIR2 2.8.0-SNAPSHOT:
+[INFO] 
+[INFO] FHIR2 .............................................. SUCCESS [  0.182 s]
+[INFO] FHIR2 Test Data .................................... SUCCESS [  2.651 s]
+[INFO] FHIR2 API .......................................... SUCCESS [01:45 min]
+[INFO] FHIR2 API 2.5 ...................................... SUCCESS [  8.301 s]
+[INFO] FHIR2 API 2.6 ...................................... SUCCESS [ 21.411 s]
+[INFO] FHIR2 API 2.7 ...................................... SUCCESS [  3.012 s]
+[INFO] FHIR2 OMOD ......................................... SUCCESS [ 28.225 s]
+[INFO] FHIR2 Integration Tests ............................ SUCCESS [  5.071 s]
+[INFO] FHIR2 Integration Tests 2.6 ........................ SUCCESS [  1.731 s]
+[INFO] FHIR2 Integration Tests 2.7 ........................ SUCCESS [  0.573 s]
+[INFO] FHIR2 End-to-End Tests ............................. SUCCESS [  0.046 s]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  02:57 min
+[INFO] Finished at: 2025-10-17T11:37:14+05:30
+[INFO] ------------------------------------------------------------------------
