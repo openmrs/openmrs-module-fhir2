@@ -77,9 +77,7 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 		}
 		
 		From<?, ?> person = getPersonProperty(criteriaContext);
-		if (param.startsWith("address")) {
-			criteriaContext.addJoin(person, "addresses", "pad");
-		} else if (param.equals(SP_NAME) || param.equals(SP_GIVEN) || param.equals(SP_FAMILY)) {
+		if (param.equals(SP_NAME) || param.equals(SP_GIVEN) || param.equals(SP_FAMILY)) {
 			CriteriaBuilder cb = criteriaContext.getCriteriaBuilder();
 			
 			// For person names, we have several subqueries to ensure that we are only working against a single person name
@@ -192,20 +190,25 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 	@Override
 	protected <V, U> Path<?> paramToProp(@Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext, @Nonnull String param) {
 		From<?, ?> person = getPersonProperty(criteriaContext);
-		From<?, ?> address = criteriaContext.getJoin("pad")
-		        .orElseGet(() -> criteriaContext.addJoin(person, "addresses", "pad"));
+        if (param.startsWith("address")) {
+            From<?, ?> address = criteriaContext.getJoin("pad")
+                    .orElseGet(() -> criteriaContext.addJoin(person, "addresses", "pad", JoinType.LEFT));
+
+            switch (param) {
+                case SP_ADDRESS_CITY:
+                    return address.get("cityVillage");
+                case SP_ADDRESS_STATE:
+                    return address.get("stateProvince");
+                case SP_ADDRESS_POSTALCODE:
+                    return address.get("postalCode");
+                case SP_ADDRESS_COUNTRY:
+                    return address.get("country");
+            }
+        }
 		
 		switch (param) {
 			case SP_BIRTHDATE:
 				return person.get("birthdate");
-			case SP_ADDRESS_CITY:
-				return address.get("cityVillage");
-			case SP_ADDRESS_STATE:
-				return address.get("stateProvince");
-			case SP_ADDRESS_POSTALCODE:
-				return address.get("postalCode");
-			case SP_ADDRESS_COUNTRY:
-				return address.get("country");
 			default:
 				return null;
 		}

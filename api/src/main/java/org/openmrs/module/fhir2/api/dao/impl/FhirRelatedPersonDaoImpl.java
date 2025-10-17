@@ -143,9 +143,7 @@ public class FhirRelatedPersonDaoImpl extends BaseFhirDao<Relationship> implemen
 		}
 		
 		From<?, ?> person = criteriaContext.addJoin("personA", "m");
-		if (param.startsWith("address") && !criteriaContext.getJoin("pad").isPresent()) {
-			criteriaContext.addJoin(person, "addresses", "pad", javax.persistence.criteria.JoinType.LEFT);
-		} else if (param.equals(SP_NAME) || param.equals(SP_GIVEN) || param.equals(SP_FAMILY)) {
+		if (param.equals(SP_NAME) || param.equals(SP_GIVEN) || param.equals(SP_FAMILY)) {
 			CriteriaBuilder cb = criteriaContext.getCriteriaBuilder();
 
             // first criteria query: get the first preferred, non-voided person name
@@ -252,20 +250,25 @@ public class FhirRelatedPersonDaoImpl extends BaseFhirDao<Relationship> implemen
 	@Override
 	protected <V, U> Path<?> paramToProp(@Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext, @Nonnull String param) {
 		From<?, ?> personJoin = criteriaContext.getJoin("m").orElseGet(() -> criteriaContext.addJoin("person", "m"));
-        From<?, ?> personAddressJoin = criteriaContext.getJoin("pad")
-                .orElseGet(() -> criteriaContext.addJoin(personJoin, "addresses", "pad", JoinType.LEFT));
+        if (param.startsWith("address")) {
+            From<?, ?> personAddressJoin = criteriaContext.getJoin("pad")
+                    .orElseGet(() -> criteriaContext.addJoin(personJoin, "addresses", "pad", JoinType.LEFT));
+
+            switch (param) {
+                case SP_ADDRESS_CITY:
+                    return personAddressJoin.get("cityVillage");
+                case SP_ADDRESS_STATE:
+                    return personAddressJoin.get("stateProvince");
+                case SP_ADDRESS_POSTALCODE:
+                    return personAddressJoin.get("postalCode");
+                case SP_ADDRESS_COUNTRY:
+                    return personAddressJoin.get("country");
+            }
+        }
 
 		switch (param) {
 			case SP_BIRTHDATE:
 				return personJoin.get("birthdate");
-			case SP_ADDRESS_CITY:
-				return personAddressJoin.get("cityVillage");
-			case SP_ADDRESS_STATE:
-				return personAddressJoin.get("stateProvince");
-			case SP_ADDRESS_POSTALCODE:
-				return personAddressJoin.get("postalCode");
-			case SP_ADDRESS_COUNTRY:
-				return personAddressJoin.get("country");
 			default:
 				return super.paramToProp(criteriaContext, param);
 		}
