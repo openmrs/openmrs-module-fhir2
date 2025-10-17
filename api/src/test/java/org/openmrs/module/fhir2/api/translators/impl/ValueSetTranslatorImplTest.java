@@ -16,7 +16,6 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.openmrs.module.fhir2.FhirConstants.GLOBAL_PROPERTY_DEFAULT_CONCEPT_MAP_TYPE;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -37,9 +36,7 @@ import org.openmrs.ConceptSet;
 import org.openmrs.ConceptSource;
 import org.openmrs.module.fhir2.FhirTestConstants;
 import org.openmrs.module.fhir2.api.FhirConceptSourceService;
-import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.model.FhirConceptSource;
-import org.springframework.beans.factory.annotation.Autowired;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ValueSetTranslatorImplTest {
@@ -50,9 +47,6 @@ public class ValueSetTranslatorImplTest {
 	
 	private Concept concept;
 	
-	@Autowired
-	private FhirGlobalPropertyService globalPropertyService;
-	
 	private final ValueSetTranslatorImpl valueSetTranslator = new ValueSetTranslatorImpl();
 	
 	@Before
@@ -60,11 +54,6 @@ public class ValueSetTranslatorImplTest {
 		conceptSourceService = mock(FhirConceptSourceService.class);
 		concept = mock(Concept.class);
 		valueSetTranslator.setConceptSourceService(conceptSourceService);
-	}
-	
-	@Before
-	public void setGlobalProperty() {
-		when(globalPropertyService.getGlobalProperty(GLOBAL_PROPERTY_DEFAULT_CONCEPT_MAP_TYPE)).thenReturn("NARROWER-THAN");
 	}
 	
 	@Test
