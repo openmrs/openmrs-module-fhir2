@@ -28,8 +28,14 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * This is a common super-type for classes which attempt to allow building a query or subquery. This allows us to pass
+ * a single object around, similar to what was done with the previous Hibernate Criteria-based API.
+ *
+ * @param <V> The type of the root entity for this query
+ */
 @RequiredArgsConstructor
-public abstract class BaseFhirCriteriaHolder<V, U> {
+public abstract class BaseFhirCriteriaHolder<V> {
 	
 	@Getter(onMethod = @__({ @Nonnull }))
 	private final CriteriaBuilder criteriaBuilder;
@@ -183,7 +189,7 @@ public abstract class BaseFhirCriteriaHolder<V, U> {
 		});
 	}
 	
-	public BaseFhirCriteriaHolder<V, U> addPredicate(Predicate predicate) {
+	public BaseFhirCriteriaHolder<V> addPredicate(Predicate predicate) {
 		predicates.add(predicate);
 		return this;
 	}

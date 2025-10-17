@@ -44,7 +44,7 @@ import lombok.NonNull;
  * @param <T> The root type for the query
  * @param <U> The type for the result of the query
  */
-public class OpenmrsFhirCriteriaContext<T, U> extends BaseFhirCriteriaHolder<T, U> {
+public class OpenmrsFhirCriteriaContext<T, U> extends BaseFhirCriteriaHolder<T> {
 	
 	@Getter(onMethod = @__({ @Nonnull }))
 	private final EntityManager entityManager;
@@ -64,16 +64,43 @@ public class OpenmrsFhirCriteriaContext<T, U> extends BaseFhirCriteriaHolder<T, 
 		this.criteriaQuery = criteriaQuery;
 		this.entityManager = entityManager;
 	}
-	
+
+    /**
+     * This function creates a new subquery for this query. Since the return type for this function is not specified, it
+     * is assumed to be an {@link Integer}, since most subqueries will be used to correlate objects by id.
+     * <br/>
+     * Note that by default this subquery is not in any way correlated with the main query.
+     *
+     * @param fromType The root type for the new subquery
+     * @return A {@link OpenmrsFhirCriteriaSubquery} to hold the state of the subquery
+     * @param <V> The root type of the new subquery
+     */
 	public <V> OpenmrsFhirCriteriaSubquery<V, Integer> addSubquery(Class<V> fromType) {
 		return addSubquery(fromType, Integer.class);
 	}
-	
-	public <V, U> OpenmrsFhirCriteriaSubquery<V, U> addSubquery(Class<V> fromType, Class<U> resultType) {
-		Subquery<U> subquery = getCriteriaQuery().subquery(resultType);
+
+    /**
+     * This function creates a new subquery for this query, with the specified root type and return type.
+     * <br/>
+     * Note that by default the returned subquery is not in any way correlated with the main query.
+     *
+     * @param fromType The root type for the new subquery
+     * @param resultType The type of object this subquery returns
+     * @return A {@link OpenmrsFhirCriteriaSubquery} to hold the state of the subquery
+     * @param <V> The root type of the new subquery
+     * @param <X> The return type of the new subquery
+     */
+	public <V, X> OpenmrsFhirCriteriaSubquery<V, X> addSubquery(Class<V> fromType, Class<X> resultType) {
+		Subquery<X> subquery = getCriteriaQuery().subquery(resultType);
 		return new OpenmrsFhirCriteriaSubquery<>(getCriteriaBuilder(), subquery, subquery.from(fromType));
 	}
-	
+
+    /**
+     * This function adds a new predicate to the list of predicates being applied to the query under construction.
+     *
+     * @param predicate The {@link Predicate} to add
+     * @return The current context to facilitate chaining
+     */
 	@Override
 	public OpenmrsFhirCriteriaContext<T, U> addPredicate(Predicate predicate) {
 		return (OpenmrsFhirCriteriaContext<T, U>) super.addPredicate(predicate);

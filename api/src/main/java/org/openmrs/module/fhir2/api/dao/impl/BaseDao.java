@@ -83,6 +83,7 @@ import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.codesystems.AdministrativeGender;
 import org.openmrs.Person;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.dao.internals.BaseFhirCriteriaHolder;
 import org.openmrs.module.fhir2.api.dao.internals.OpenmrsFhirCriteriaContext;
 import org.openmrs.module.fhir2.api.dao.internals.OpenmrsFhirCriteriaSubquery;
 import org.openmrs.module.fhir2.api.search.param.PropParam;
@@ -224,15 +225,18 @@ public abstract class BaseDao {
 	}
 	
 	/**
-	 * A generic handler for any subtype of {@link IQueryParameterAnd} which creates a criterion that
-	 * represents the intersection of all the parameters contained
+	 * A generic handler for any subtype of {@link IQueryParameterAnd<T>} which creates a criterion that
+	 * represents the intersection of all the parameters contained<br/>
+     * <br/>
+     * This differs from {@link #handleAndListParamBy(CriteriaBuilder, IQueryParameterAnd, Function)} in that the
+     * handler is called for each parameter in the {@link IQueryParameterOr<U>}.
 	 *
-	 * @param andListParam the {@link IQueryParameterAnd} to handle
-	 * @param handler a {@link Function} which maps a parameter to a {@link Criterion}
-	 * @param <T> the subtype of {@link IQueryParameterOr} that this {@link IQueryParameterAnd} contains
-	 * @param <U> the subtype of {@link IQueryParameterType} for this parameter
-	 * @return the resulting criterion, which is the intersection of all the unions of contained
-	 *         parameters
+     * @param criteriaBuilder the active {@link CriteriaBuilder} for the current query
+	 * @param andListParam the {@link IQueryParameterAnd<T>} to handle
+	 * @param handler a {@link Function} which maps a parameter to a {@link Optional<Predicate>}
+	 * @param <T> the subtype of {@link IQueryParameterAnd} that this operates on
+	 * @param <U> the subtype of {@link IQueryParameterType} that each {@link IQueryParameterOr} uses
+	 * @return the resulting criterion, which is the intersection of all the parameters
 	 */
 	protected <T extends IQueryParameterOr<U>, U extends IQueryParameterType> Optional<Predicate> handleAndListParam(
 	        CriteriaBuilder criteriaBuilder, IQueryParameterAnd<T> andListParam, Function<U, Optional<Predicate>> handler) {
@@ -243,7 +247,21 @@ public abstract class BaseDao {
 		return Optional.ofNullable(criteriaBuilder.and(toCriteriaArray(
 		    handleAndListParam(andListParam).map(orListParam -> handleOrListParam(criteriaBuilder, orListParam, handler)))));
 	}
-	
+
+    /**
+     * A generic handler for any subtype of {@link IQueryParameterAnd<T>} which creates a criterion that
+     * represents the intersection of all the parameters contained<br/>
+     * <br/>
+     * This differs from {@link #handleAndListParam(CriteriaBuilder, IQueryParameterAnd, Function)} in that the
+     * handler is called with each {@link IQueryParameterOr<U>} rather than each individual parameter
+     *
+     * @param criteriaBuilder the active {@link CriteriaBuilder} for the current query
+     * @param andListParam the {@link IQueryParameterAnd<T>} to handle
+     * @param handler a {@link Function} which maps a parameter to a {@link Optional<Predicate>}
+     * @param <T> the subtype of {@link IQueryParameterAnd} that this operates on
+     * @param <U> the subtype of {@link IQueryParameterType} that each {@link IQueryParameterOr} uses
+     * @return the resulting criterion, which is the intersection of all the parameters
+     */
 	@SuppressWarnings("unused")
 	protected <T extends IQueryParameterOr<U>, U extends IQueryParameterType> Optional<Predicate> handleAndListParamBy(
 	        CriteriaBuilder criteriaBuilder, IQueryParameterAnd<T> andListParam,
@@ -260,7 +278,21 @@ public abstract class BaseDao {
 		
 		return Optional.of(criteriaBuilder.and(predicates));
 	}
-	
+
+    /**
+     * A generic handler for any subtype of {@link IQueryParameterAnd<T>} which creates a criterion that
+     * represents the intersection of all the parameters contained<br/>
+     * <br/>
+     * This differs from {@link #handleAndListParam(CriteriaBuilder, IQueryParameterAnd, Function)} in that the
+     * handler is called during stream processing, which may make it more efficient.
+     *
+     * @param criteriaBuilder the active {@link CriteriaBuilder} for the current query
+     * @param andListParam the {@link IQueryParameterAnd<T>} to handle
+     * @param handler a {@link Function} which maps a parameter to a {@link Optional<Predicate>}
+     * @param <T> the subtype of {@link IQueryParameterAnd} that this operates on
+     * @param <U> the subtype of {@link IQueryParameterType} that each {@link IQueryParameterOr} uses
+     * @return the resulting criterion, which is the intersection of all the parameters
+     */
 	protected <T extends IQueryParameterOr<U>, U extends IQueryParameterType> Optional<Predicate> handleAndListParamAsStream(
 	        CriteriaBuilder criteriaBuilder, IQueryParameterAnd<T> andListParam,
 	        Function<U, Stream<Optional<Predicate>>> handler) {
@@ -282,6 +314,7 @@ public abstract class BaseDao {
 	 * A generic handler for any subtype of {@link IQueryParameterOr} which creates a criterion that
 	 * represents the union of all the parameters
 	 *
+     * @param criteriaBuilder the active {@link CriteriaBuilder} for the current query
 	 * @param orListParam the {@link IQueryParameterOr} to handle
 	 * @param handler a {@link Function} which maps a parameter to a {@link Criterion}
 	 * @param <T> the subtype of {@link IQueryParameterType} for this parameter
@@ -301,7 +334,20 @@ public abstract class BaseDao {
 		
 		return Optional.of(criteriaBuilder.or(predicates));
 	}
-	
+
+    /**
+     * A generic handler for any subtype of {@link IQueryParameterOr} which creates a criterion that
+     * represents the union of all the parameters<br/>
+     * <br/>
+     * Unlike {@link #handleAndListParam(CriteriaBuilder, IQueryParameterAnd, Function)}, this function is called as
+     * part of the list streaming and may be slightly more efficient.
+     *
+     * @param criteriaBuilder the active {@link CriteriaBuilder} for the current query
+     * @param orListParam the {@link IQueryParameterOr} to handle
+     * @param handler a {@link Function} which maps a parameter to a {@link Criterion}
+     * @param <T> the subtype of {@link IQueryParameterType} for this parameter
+     * @return the resulting {@link Predicate}, which is the union of all contained parameters
+     */
 	protected <T extends IQueryParameterType> Optional<Predicate> handleOrListParamAsStream(CriteriaBuilder criteriaBuilder,
 	        IQueryParameterOr<T> orListParam, Function<T, Stream<Optional<Predicate>>> handler) {
 		if (orListParam == null) {
@@ -322,10 +368,11 @@ public abstract class BaseDao {
 	 * and handled according to the system they belong to This is useful for queries drawing their
 	 * values from CodeableConcepts
 	 *
+     * @param criteriaBuilder the active {@link CriteriaBuilder} for the current query
 	 * @param andListParam the {@link IQueryParameterAnd} to handle
 	 * @param systemTokenHandler a {@link BiFunction} taking the system and associated list of
 	 *            {@link TokenParam}s and returning a {@link Criterion}
-	 * @return a {@link Criterion} representing the intersection of all produced {@link Criterion}
+	 * @return a {@link Predicate} representing the intersection of all produced {@link Predicate}s
 	 */
 	protected <T extends IQueryParameterOr<TokenParam>> Optional<Predicate> handleAndListParamBySystem(
 	        CriteriaBuilder criteriaBuilder, IQueryParameterAnd<T> andListParam,
@@ -343,6 +390,7 @@ public abstract class BaseDao {
 	 * handled according to the system they belong to This is useful for queries drawing their values
 	 * from CodeableConcepts
 	 *
+     * @param criteriaBuilder the active {@link CriteriaBuilder} for the current query
 	 * @param orListParam the {@link IQueryParameterOr} to handle
 	 * @param systemTokenHandler a {@link BiFunction} taking the system and associated list of
 	 *            {@link TokenParam}s and returning a {@link Criterion}
@@ -364,13 +412,14 @@ public abstract class BaseDao {
 	/**
 	 * Handler for a {@link TokenOrListParam} that represents boolean values
 	 *
+     * @param criteriaContext the active {@link BaseFhirCriteriaHolder} for the current query
 	 * @param propertyName the name of the property in the query to use
 	 * @param booleanToken the {@link TokenOrListParam} to handle
-	 * @return a {@link Criterion} to be added to the query indicating that the property matches the
+	 * @return a {@link Predicate} to be added to the query indicating that the property matches the
 	 *         given value
 	 */
-	protected <T, U> Optional<Predicate> handleBoolean(OpenmrsFhirCriteriaContext<T, U> criteriaContext, String propertyName,
-	        TokenAndListParam booleanToken) {
+	protected <T, U> Optional<Predicate> handleBoolean(BaseFhirCriteriaHolder<T, U> criteriaContext, String propertyName,
+           TokenAndListParam booleanToken) {
 		if (booleanToken == null) {
 			return Optional.empty();
 		}
@@ -387,8 +436,17 @@ public abstract class BaseDao {
 			return Optional.empty();
 		});
 	}
-	
-	protected <T, U> Optional<Predicate> handleBooleanProperty(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
+
+    /**
+     * Handler for an individual boolean value that represents boolean values
+     *
+     * @param criteriaContext the active {@link BaseFhirCriteriaHolder} for the current query
+     * @param propertyName the name of the property in the query to use
+     * @param booleanVal the value to restrict this boolean property to
+     * @return a {@link Predicate} to be added to the query indicating that the property matches the
+     *         given value
+     */
+	protected <T, U> Optional<Predicate> handleBooleanProperty(BaseFhirCriteriaHolder<T, U> criteriaContext,
 	        String propertyName, boolean booleanVal) {
 		return Optional
 		        .of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get(propertyName), booleanVal));
@@ -413,13 +471,14 @@ public abstract class BaseDao {
 	}
 	
 	/**
-	 * A handler for a {@link DateParam}, which represents a day and an comparator
+	 * A handler for a {@link DateParam}, which represents a date and a comparator
 	 *
+     * @param criteriaContext the active {@link BaseFhirCriteriaHolder} for the current query
 	 * @param propertyName the name of the property in the query to use
 	 * @param dateParam the {@link DateParam} to handle
-	 * @return a {@link Predicate} to be added to the query for the indicate date param
+	 * @return a {@link Predicate} to be added to the query for the indicated date parameter
 	 */
-	protected <T, U> Optional<Predicate> handleDate(OpenmrsFhirCriteriaContext<T, U> criteriaContext, String propertyName,
+	protected <T, U> Optional<Predicate> handleDate(BaseFhirCriteriaHolder<T, U> criteriaContext, String propertyName,
 	        DateParam dateParam) {
 		if (dateParam == null) {
 			return Optional.empty();
@@ -464,8 +523,16 @@ public abstract class BaseDao {
 		
 		return Optional.empty();
 	}
-	
-	protected <T, U> Optional<Predicate> handleQuantity(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
+
+    /**
+     * A handler for a {@link QuantityParam}, which represents a quantity and a comparator
+     *
+     * @param criteriaContext the active {@link BaseFhirCriteriaHolder} for the current query
+     * @param propertyName the name of the property in the query to use
+     * @param quantityParam the {@link QuantityParam} to handle
+     * @return a {@link Predicate} to be added to the query for the indicated date parameter
+     */
+	protected <T, U> Optional<Predicate> handleQuantity(BaseFhirCriteriaHolder<T, U> criteriaContext,
 	        String propertyName, QuantityParam quantityParam) {
 		if (quantityParam == null) {
 			return Optional.empty();
@@ -518,7 +585,7 @@ public abstract class BaseDao {
 		return Optional.empty();
 	}
 	
-	protected <T, U> Optional<Predicate> handleQuantity(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
+	protected <T, U> Optional<Predicate> handleQuantity(BaseFhirCriteriaHolder<T, U> criteriaContext,
 	        @Nonnull String propertyName, QuantityAndListParam quantityAndListParam) {
 		if (quantityAndListParam == null) {
 			return Optional.empty();
@@ -528,12 +595,12 @@ public abstract class BaseDao {
 		    quantityParam -> handleQuantity(criteriaContext, propertyName, quantityParam));
 	}
 	
-	protected <T, U> void handleEncounterReference(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
+	protected <T, U> void handleEncounterReference(BaseFhirCriteriaHolder<T, U> criteriaContext,
 	        ReferenceAndListParam encounterReference, @Nonnull String encounterAlias) {
 		handleEncounterReference(criteriaContext, encounterReference, encounterAlias, "encounter");
 	}
 	
-	protected <T, U> void handleEncounterReference(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
+	protected <T, U> void handleEncounterReference(BaseFhirCriteriaHolder<T, U> criteriaContext,
 	        ReferenceAndListParam encounterReference, @Nonnull String encounterAlias, @Nonnull String associationPath) {
 		
 		if (encounterReference == null) {
@@ -1115,7 +1182,7 @@ public abstract class BaseDao {
 	 *     WHERE <propertyName> LIKE '<value>%'
 	 * }</pre>
 	 *
-	 * @param criteriaContext The current criteriaContext
+	 * @param criteriaContext The {@link BaseFhirCriteriaHolder} for the current criteriaContext
 	 * @param from The {@link From} object representing the table to get the property from
 	 * @param propertyName The name of the property to look for
 	 * @param value The string-value to match the prefix of the property against. Note that if the
@@ -1124,7 +1191,7 @@ public abstract class BaseDao {
 	 * @param <T> The root type of the criteriaContext
 	 * @param <U> The return type of the criteriaContext
 	 */
-	protected <T, U> Optional<Predicate> propertyLike(@Nonnull OpenmrsFhirCriteriaContext<T, U> criteriaContext,
+	protected <T, U> Optional<Predicate> propertyLike(@Nonnull BaseFhirCriteriaHolder<T, U> criteriaContext,
 	        @Nonnull From<?, ?> from, @Nonnull String propertyName, @Nullable String value) {
 		if (value == null || value.trim().isEmpty()) {
 			return Optional.empty();
@@ -1140,7 +1207,7 @@ public abstract class BaseDao {
 	 *     WHERE <propertyName> LIKE '<value>%'
 	 * }</pre>
 	 *
-	 * @param criteriaContext The current criteriaContext
+	 * @param criteriaContext The {@link BaseFhirCriteriaHolder} for the current criteriaContext
 	 * @param from The {@link From} object representing the table to get the property from
 	 * @param propertyName The name of the property to look for
 	 * @param param A {@link StringParam} that describes the value to search for, including whether it
@@ -1150,7 +1217,7 @@ public abstract class BaseDao {
 	 * @param <T> The root type of the criteriaContext
 	 * @param <U> The return type of the criteriaContext
 	 */
-	protected <T, U> Optional<Predicate> propertyLike(OpenmrsFhirCriteriaContext<T, U> criteriaContext, From<?, ?> from,
+	protected <T, U> Optional<Predicate> propertyLike(BaseFhirCriteriaHolder<T, U> criteriaContext, From<?, ?> from,
 	        @Nonnull String propertyName, StringParam param) {
 		if (param == null || (!param.isExact() && param.getValue().trim().isEmpty())) {
 			return Optional.empty();
@@ -1202,8 +1269,20 @@ public abstract class BaseDao {
 	protected @Nonnull Predicate[] toCriteriaArray(@Nonnull Stream<Optional<? extends Predicate>> predicateStream) {
 		return predicateStream.filter(Optional::isPresent).map(Optional::get).toArray(Predicate[]::new);
 	}
-	
-	protected <T, U> Optional<Predicate> handleAgeByDateProperty(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
+
+    /**
+     * Constructs a predicate filtering entities based on age criteria derived from the QuantityParam against specified date property.
+     * Calculates temporal boundaries using current system time minus provided age duration and builds comparison predicate expressions
+     * based on QuantityParam prefix type (e.g., equals, greater than).
+     *
+     * @param criteriaContext provides access to query building utilities and entity metadata mappings
+     * @param datePropertyName the name of property in criteria entity mapping used for filtering temporal comparisons
+     * @param age QuantityParam containing age value and units defining duration boundaries relative to current time
+     *
+     * @return Optional<Predicate> containing filtering condition matching age criteria against date property,
+     *         or empty optional when prefix type cannot produce valid predicate constraints
+     */
+	protected <T, U> Optional<Predicate> handleAgeByDateProperty(BaseFhirCriteriaHolder<T, U> criteriaContext,
 	        @Nonnull String datePropertyName, @Nonnull QuantityParam age) {
 		BigDecimal value = age.getValue();
 		if (value == null) {
@@ -1358,7 +1437,7 @@ public abstract class BaseDao {
 	 * {@link Root} object for the current criteria context or the {@link Join} object for the named
 	 * alias.
 	 *
-	 * @param criteriaContext The criteriaContext to extract the {@link From} object from
+	 * @param criteriaContext The {@link BaseFhirCriteriaHolder} to extract the {@link From} object from
 	 * @param alias The name of the alias to extract from the criteria context or else a null or empty
 	 *            string to return the root object
 	 * @return Either the {@link Root} for this query or the {@link Join} that is aliased by the
@@ -1366,7 +1445,7 @@ public abstract class BaseDao {
 	 * @param <T> The root type of the criteriaContext
 	 * @param <U> The return type of the criteriaContext
 	 */
-	protected <T, U> From<?, ?> getRootOrJoin(@Nonnull OpenmrsFhirCriteriaContext<T, U> criteriaContext,
+	protected <T, U> From<?, ?> getRootOrJoin(@Nonnull BaseFhirCriteriaHolder<T, U> criteriaContext,
 	        @Nullable String alias) {
 		if (alias == null || alias.isEmpty()) {
 			return criteriaContext.getRoot();
@@ -1417,14 +1496,14 @@ public abstract class BaseDao {
 	}
 	
 	/**
-	 * This object is used to store the state of the sorting
+	 * This object is used to track the state of the sorting
 	 */
 	@Data
 	@Builder
 	@EqualsAndHashCode
 	public static final class SortState<T, U> {
 		
-		private OpenmrsFhirCriteriaContext<T, U> context;
+		private BaseFhirCriteriaHolder<T, U> context;
 		
 		private SortOrderEnum sortOrder;
 		

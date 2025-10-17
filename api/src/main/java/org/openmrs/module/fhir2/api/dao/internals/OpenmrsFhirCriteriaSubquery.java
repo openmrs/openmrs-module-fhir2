@@ -31,7 +31,7 @@ import lombok.Setter;
  * @param <V> The root type for the query
  * @param <U> The type for the result of the query
  */
-public class OpenmrsFhirCriteriaSubquery<V, U> extends BaseFhirCriteriaHolder<V, U> {
+public class OpenmrsFhirCriteriaSubquery<V, U> extends BaseFhirCriteriaHolder<V> {
 	
 	@Getter(onMethod = @__({ @Nonnull }))
 	Subquery<U> subquery;
