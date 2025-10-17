@@ -418,7 +418,7 @@ public abstract class BaseDao {
 	 * @return a {@link Predicate} to be added to the query indicating that the property matches the
 	 *         given value
 	 */
-	protected <T, U> Optional<Predicate> handleBoolean(BaseFhirCriteriaHolder<T, U> criteriaContext, String propertyName,
+	protected <T> Optional<Predicate> handleBoolean(BaseFhirCriteriaHolder<T> criteriaContext, String propertyName,
            TokenAndListParam booleanToken) {
 		if (booleanToken == null) {
 			return Optional.empty();
@@ -446,7 +446,7 @@ public abstract class BaseDao {
      * @return a {@link Predicate} to be added to the query indicating that the property matches the
      *         given value
      */
-	protected <T, U> Optional<Predicate> handleBooleanProperty(BaseFhirCriteriaHolder<T, U> criteriaContext,
+	protected <T> Optional<Predicate> handleBooleanProperty(BaseFhirCriteriaHolder<T> criteriaContext,
 	        String propertyName, boolean booleanVal) {
 		return Optional
 		        .of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get(propertyName), booleanVal));
@@ -478,7 +478,7 @@ public abstract class BaseDao {
 	 * @param dateParam the {@link DateParam} to handle
 	 * @return a {@link Predicate} to be added to the query for the indicated date parameter
 	 */
-	protected <T, U> Optional<Predicate> handleDate(BaseFhirCriteriaHolder<T, U> criteriaContext, String propertyName,
+	protected <T> Optional<Predicate> handleDate(BaseFhirCriteriaHolder<T> criteriaContext, String propertyName,
 	        DateParam dateParam) {
 		if (dateParam == null) {
 			return Optional.empty();
@@ -532,7 +532,7 @@ public abstract class BaseDao {
      * @param quantityParam the {@link QuantityParam} to handle
      * @return a {@link Predicate} to be added to the query for the indicated date parameter
      */
-	protected <T, U> Optional<Predicate> handleQuantity(BaseFhirCriteriaHolder<T, U> criteriaContext,
+	protected <T> Optional<Predicate> handleQuantity(BaseFhirCriteriaHolder<T> criteriaContext,
 	        String propertyName, QuantityParam quantityParam) {
 		if (quantityParam == null) {
 			return Optional.empty();
@@ -585,7 +585,7 @@ public abstract class BaseDao {
 		return Optional.empty();
 	}
 	
-	protected <T, U> Optional<Predicate> handleQuantity(BaseFhirCriteriaHolder<T, U> criteriaContext,
+	protected <T> Optional<Predicate> handleQuantity(BaseFhirCriteriaHolder<T> criteriaContext,
 	        @Nonnull String propertyName, QuantityAndListParam quantityAndListParam) {
 		if (quantityAndListParam == null) {
 			return Optional.empty();
@@ -595,12 +595,12 @@ public abstract class BaseDao {
 		    quantityParam -> handleQuantity(criteriaContext, propertyName, quantityParam));
 	}
 	
-	protected <T, U> void handleEncounterReference(BaseFhirCriteriaHolder<T, U> criteriaContext,
+	protected <T> void handleEncounterReference(BaseFhirCriteriaHolder<T> criteriaContext,
 	        ReferenceAndListParam encounterReference, @Nonnull String encounterAlias) {
 		handleEncounterReference(criteriaContext, encounterReference, encounterAlias, "encounter");
 	}
 	
-	protected <T, U> void handleEncounterReference(BaseFhirCriteriaHolder<T, U> criteriaContext,
+	protected <T> void handleEncounterReference(BaseFhirCriteriaHolder<T> criteriaContext,
 	        ReferenceAndListParam encounterReference, @Nonnull String encounterAlias, @Nonnull String associationPath) {
 		
 		if (encounterReference == null) {
@@ -1014,12 +1014,12 @@ public abstract class BaseDao {
 	}
 	
 	protected <T, U> Optional<List<Order>> handleSort(OpenmrsFhirCriteriaContext<T, U> criteriaContext, SortSpec sort,
-	        BiFunction<OpenmrsFhirCriteriaContext<T, U>, SortState<T, U>, Collection<javax.persistence.criteria.Order>> paramToProp) {
+	        BiFunction<OpenmrsFhirCriteriaContext<T, U>, SortState<T>, Collection<javax.persistence.criteria.Order>> paramToProp) {
 		
 		List<Order> orderings = new ArrayList<>();
 		SortSpec sortSpec = sort;
 		while (sortSpec != null) {
-			SortState<T, U> state = SortState.<T, U> builder().context(criteriaContext).sortOrder(sortSpec.getOrder())
+			SortState<T> state = SortState.<T> builder().context(criteriaContext).sortOrder(sortSpec.getOrder())
 			        .parameter(sortSpec.getParamName().toLowerCase()).build();
 			
 			Collection<Order> orders = paramToProp.apply(criteriaContext, state);
@@ -1132,7 +1132,7 @@ public abstract class BaseDao {
 	 * @return the corresponding ordering(s) needed for this property
 	 */
 	protected <T, U> Collection<Order> paramToProps(@Nonnull OpenmrsFhirCriteriaContext<T, U> criteriaContext,
-	        @Nonnull SortState<T, U> sortState) {
+	        @Nonnull SortState<T> sortState) {
 		Collection<Path<?>> prop = paramToProps(criteriaContext, sortState.getParameter());
 		if (prop != null) {
 			switch (sortState.getSortOrder()) {
@@ -1189,9 +1189,8 @@ public abstract class BaseDao {
 	 *            supplied value is a null or empty string, no predicate is returned.
 	 * @return An {@link Optional<Predicate>} to check this property for this value.
 	 * @param <T> The root type of the criteriaContext
-	 * @param <U> The return type of the criteriaContext
 	 */
-	protected <T, U> Optional<Predicate> propertyLike(@Nonnull BaseFhirCriteriaHolder<T, U> criteriaContext,
+	protected <T> Optional<Predicate> propertyLike(@Nonnull BaseFhirCriteriaHolder<T> criteriaContext,
 	        @Nonnull From<?, ?> from, @Nonnull String propertyName, @Nullable String value) {
 		if (value == null || value.trim().isEmpty()) {
 			return Optional.empty();
@@ -1215,9 +1214,8 @@ public abstract class BaseDao {
 	 *            empty string that is not an exact match will not return a predicate
 	 * @return An {@link Optional<Predicate>} to check this property for this value.
 	 * @param <T> The root type of the criteriaContext
-	 * @param <U> The return type of the criteriaContext
 	 */
-	protected <T, U> Optional<Predicate> propertyLike(BaseFhirCriteriaHolder<T, U> criteriaContext, From<?, ?> from,
+	protected <T> Optional<Predicate> propertyLike(BaseFhirCriteriaHolder<T> criteriaContext, From<?, ?> from,
 	        @Nonnull String propertyName, StringParam param) {
 		if (param == null || (!param.isExact() && param.getValue().trim().isEmpty())) {
 			return Optional.empty();
@@ -1282,7 +1280,7 @@ public abstract class BaseDao {
      * @return Optional<Predicate> containing filtering condition matching age criteria against date property,
      *         or empty optional when prefix type cannot produce valid predicate constraints
      */
-	protected <T, U> Optional<Predicate> handleAgeByDateProperty(BaseFhirCriteriaHolder<T, U> criteriaContext,
+	protected <T> Optional<Predicate> handleAgeByDateProperty(BaseFhirCriteriaHolder<T> criteriaContext,
 	        @Nonnull String datePropertyName, @Nonnull QuantityParam age) {
 		BigDecimal value = age.getValue();
 		if (value == null) {
@@ -1443,9 +1441,8 @@ public abstract class BaseDao {
 	 * @return Either the {@link Root} for this query or the {@link Join} that is aliased by the
 	 *         provided name
 	 * @param <T> The root type of the criteriaContext
-	 * @param <U> The return type of the criteriaContext
 	 */
-	protected <T, U> From<?, ?> getRootOrJoin(@Nonnull BaseFhirCriteriaHolder<T, U> criteriaContext,
+	protected <T> From<?, ?> getRootOrJoin(@Nonnull BaseFhirCriteriaHolder<T> criteriaContext,
 	        @Nullable String alias) {
 		if (alias == null || alias.isEmpty()) {
 			return criteriaContext.getRoot();
@@ -1501,9 +1498,9 @@ public abstract class BaseDao {
 	@Data
 	@Builder
 	@EqualsAndHashCode
-	public static final class SortState<T, U> {
+	public static final class SortState<T> {
 		
-		private BaseFhirCriteriaHolder<T, U> context;
+		private BaseFhirCriteriaHolder<T> context;
 		
 		private SortOrderEnum sortOrder;
 		
