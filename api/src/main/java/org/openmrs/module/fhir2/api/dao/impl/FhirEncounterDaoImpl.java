@@ -122,23 +122,22 @@ public class FhirEncounterDaoImpl extends BaseEncounterDao<Encounter> implements
 	
 	@Override
 	protected <T, U> Predicate generateNotCompletedOrderQuery(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
-            Join<?, ?> ordersJoin) {
-		return criteriaContext.getCriteriaBuilder().or(
-		    criteriaContext.getCriteriaBuilder().isNull(ordersJoin.get("fulfillerStatus")),
-		    criteriaContext.getCriteriaBuilder().notEqual(ordersJoin.get("fulfillerStatus"),
-		        Order.FulfillerStatus.COMPLETED));
+	        Join<?, ?> ordersJoin) {
+		return criteriaContext.getCriteriaBuilder()
+		        .or(criteriaContext.getCriteriaBuilder().isNull(ordersJoin.get("fulfillerStatus")), criteriaContext
+		                .getCriteriaBuilder().notEqual(ordersJoin.get("fulfillerStatus"), Order.FulfillerStatus.COMPLETED));
 	}
 	
 	@Override
-    public <T, U> Predicate generateFulfillerStatusRestriction(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
-            Join<?, ?> ordersJoin, String fulfillerStatus) {
+	public <T, U> Predicate generateFulfillerStatusRestriction(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
+	        Join<?, ?> ordersJoin, String fulfillerStatus) {
 		return criteriaContext.getCriteriaBuilder().equal(ordersJoin.get("fulfillerStatus"),
 		    Order.FulfillerStatus.valueOf(fulfillerStatus.toUpperCase()));
 	}
 	
 	@Override
 	protected <T, U> Predicate generateNotFulfillerStatusRestriction(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
-            Join<?, ?> ordersJoin, String fulfillerStatus) {
+	        Join<?, ?> ordersJoin, String fulfillerStatus) {
 		return criteriaContext.getCriteriaBuilder().or(
 		    criteriaContext.getCriteriaBuilder().isNull(ordersJoin.get("fulfillerStatus")),
 		    criteriaContext.getCriteriaBuilder().notEqual(ordersJoin.get("fulfillerStatus"),

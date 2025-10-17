@@ -30,7 +30,7 @@ public class FhirMedicationDispenseDaoImpl extends BaseFhirDao<MedicationDispens
 	
 	@Override
 	protected <U> void setupSearchParams(@Nonnull OpenmrsFhirCriteriaContext<MedicationDispense, U> criteriaContext,
-										 @Nonnull SearchParameterMap theParams) {
+	        @Nonnull SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER:
@@ -42,7 +42,7 @@ public class FhirMedicationDispenseDaoImpl extends BaseFhirDao<MedicationDispens
 					    e -> handleEncounterReference(criteriaContext, (ReferenceAndListParam) e.getParam(), "e"));
 					break;
 				case FhirConstants.MEDICATION_REQUEST_REFERENCE_SEARCH_HANDLER:
-					From<?,?> drugOrder = criteriaContext.addJoin("drugOrder", "drugOrder");
+					From<?, ?> drugOrder = criteriaContext.addJoin("drugOrder", "drugOrder");
 					entry.getValue().forEach(e -> handleMedicationRequestReference(criteriaContext, drugOrder,
 					    (ReferenceAndListParam) e.getParam()).ifPresent(criteriaContext::addPredicate));
 					break;
@@ -56,7 +56,7 @@ public class FhirMedicationDispenseDaoImpl extends BaseFhirDao<MedicationDispens
 	
 	@Override
 	protected <T, U> Optional<Predicate> handleLastUpdated(@Nonnull OpenmrsFhirCriteriaContext<T, U> criteriaContext,
-														   DateRangeParam param) {
+	        DateRangeParam param) {
 		return super.handleLastUpdatedImmutable(criteriaContext, param);
 	}
 	

@@ -67,9 +67,9 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 	public List<Obs> getSearchResults(@Nonnull SearchParameterMap theParams) {
 		if (!theParams.getParameters(FhirConstants.LASTN_OBSERVATION_SEARCH_HANDLER).isEmpty()) {
 			OpenmrsFhirCriteriaContext<Obs, Obs> criteriaContext = getSearchResultCriteria(theParams);
-
-            Join<?, ?> conceptJoin = criteriaContext.getJoin("c").orElseGet(() -> criteriaContext.addJoin("concept", "c"));
-            String conceptIdProperty = getIdPropertyName(criteriaContext.getEntityManager(), Concept.class);
+			
+			Join<?, ?> conceptJoin = criteriaContext.getJoin("c").orElseGet(() -> criteriaContext.addJoin("concept", "c"));
+			String conceptIdProperty = getIdPropertyName(criteriaContext.getEntityManager(), Concept.class);
 			
 			CriteriaQuery<Obs> finalizedQuery = criteriaContext.finalizeQuery().orderBy(
 			    criteriaContext.getCriteriaBuilder().asc(conceptJoin.get(conceptIdProperty)),
@@ -83,9 +83,9 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 			int groupCount = maxGroupCount;
 			
 			while (criteriaContext.getResults().size() < theParams.getToIndex()) {
-                TypedQuery<Obs> obsQuery = criteriaContext.getEntityManager().createQuery(finalizedQuery);
-                obsQuery.setFirstResult(firstResult);
-                obsQuery.setMaxResults(batchSize);
+				TypedQuery<Obs> obsQuery = criteriaContext.getEntityManager().createQuery(finalizedQuery);
+				obsQuery.setFirstResult(firstResult);
+				obsQuery.setMaxResults(batchSize);
 				
 				List<Obs> observations = obsQuery.getResultList();
 				
@@ -133,25 +133,26 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 	public int getSearchResultsCount(@Nonnull SearchParameterMap theParams) {
 		if (!theParams.getParameters(FhirConstants.LASTN_OBSERVATION_SEARCH_HANDLER).isEmpty()) {
 			OpenmrsFhirCriteriaContext<Obs, Object[]> criteriaContext = createCriteriaContext(Obs.class, Object[].class);
-            getSearchResultCriteria(criteriaContext, theParams);
-
-            Join<?, ?> conceptJoin = criteriaContext.getJoin("c").orElseGet(() -> criteriaContext.addJoin("concept", "c"));
-            String conceptIdProperty = getIdPropertyName(criteriaContext.getEntityManager(), Concept.class);
-
+			getSearchResultCriteria(criteriaContext, theParams);
+			
+			Join<?, ?> conceptJoin = criteriaContext.getJoin("c").orElseGet(() -> criteriaContext.addJoin("concept", "c"));
+			String conceptIdProperty = getIdPropertyName(criteriaContext.getEntityManager(), Concept.class);
+			
 			criteriaContext.getCriteriaQuery().orderBy(
-                    criteriaContext.getCriteriaBuilder().asc(conceptJoin.get(conceptIdProperty)),
-                    criteriaContext.getCriteriaBuilder().desc(criteriaContext.getRoot().get("obsDatetime")));
-
+			    criteriaContext.getCriteriaBuilder().asc(conceptJoin.get(conceptIdProperty)),
+			    criteriaContext.getCriteriaBuilder().desc(criteriaContext.getRoot().get("obsDatetime")));
+			
 			criteriaContext.getCriteriaQuery().multiselect(conceptJoin.get(conceptIdProperty),
 			    criteriaContext.getRoot().get("obsDatetime"),
 			    criteriaContext.getCriteriaBuilder().count(criteriaContext.getRoot()));
-
-            criteriaContext.getCriteriaQuery().groupBy(conceptJoin.get(conceptIdProperty),
-                    criteriaContext.getRoot().get("obsDatetime"));
+			
+			criteriaContext.getCriteriaQuery().groupBy(conceptJoin.get(conceptIdProperty),
+			    criteriaContext.getRoot().get("obsDatetime"));
 			
 			applyExactTotal(criteriaContext, theParams);
 			
-			List<Object[]> rows = criteriaContext.getEntityManager().createQuery(criteriaContext.finalizeQuery()).getResultList();
+			List<Object[]> rows = criteriaContext.getEntityManager().createQuery(criteriaContext.finalizeQuery())
+			        .getResultList();
 			final int maxGroupCount = getMaxParameter(theParams);
 			int groupCount = maxGroupCount;
 			int count = 0;

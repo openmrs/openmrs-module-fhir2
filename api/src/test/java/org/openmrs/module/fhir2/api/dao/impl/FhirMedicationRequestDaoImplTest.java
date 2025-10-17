@@ -100,9 +100,9 @@ public class FhirMedicationRequestDaoImplTest extends BaseFhirContextSensitiveTe
 	@Test
 	public void getMedicationRequestsBySearchResults_shouldNotReturnDiscontinuedOrders() {
 		SearchParameterMap theParams = new SearchParameterMap();
-
+		
 		List<DrugOrder> drugOrders = medicationRequestDao.getSearchResults(theParams);
-
+		
 		assertThat(drugOrders, not(hasItems(hasId(DISCONTINUE_ORDER_ID))));
 		assertThat(drugOrders, hasSize(11));
 	}

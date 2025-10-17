@@ -10,15 +10,12 @@
 package org.openmrs.module.fhir2.api.dao;
 
 import javax.annotation.Nonnull;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.Predicate;
 
 import java.util.Collection;
 import java.util.List;
 
 import org.openmrs.Encounter;
 import org.openmrs.annotation.Authorized;
-import org.openmrs.module.fhir2.api.dao.internals.OpenmrsFhirCriteriaContext;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.util.PrivilegeConstants;
 

@@ -14,7 +14,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Order;
-import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
@@ -91,11 +90,11 @@ public class OpenmrsFhirCriteriaContext<T, U> extends BaseFhirCriteriaHolder<T, 
 	}
 	
 	public CriteriaQuery<U> finalizeQuery() {
-        CriteriaQuery<U> cq = getCriteriaQuery();
-        cq = cq.where(getPredicates().toArray(new Predicate[0]));
-        if (!orders.isEmpty()) {
-            cq = cq.orderBy(orders);
-        }
+		CriteriaQuery<U> cq = getCriteriaQuery();
+		cq = cq.where(getPredicates().toArray(new Predicate[0]));
+		if (!orders.isEmpty()) {
+			cq = cq.orderBy(orders);
+		}
 		return cq;
 	}
 	

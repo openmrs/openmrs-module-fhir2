@@ -11,7 +11,6 @@ package org.openmrs.module.fhir2.api.dao.internals;
 
 import javax.annotation.Nonnull;
 import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -22,13 +21,12 @@ import lombok.NonNull;
 import lombok.Setter;
 
 /**
- * {@code OpenmrsFhirCriteriaSubquery} is a holder object for creating subqueries for query defined by a
- * {@link OpenmrsFhirCriteriaContext}. Like a {@link OpenmrsFhirCriteriaContext}, it has its own set of
- * predicates, joins, and its own root type.
- * <br/>
- * Unlike {@link OpenmrsFhirCriteriaContext}, it has an optional {@link Expression} that is used to define
- * the query projection. This is included because it is expected that a subquery will be used to partially
- * filter a main query.
+ * {@code OpenmrsFhirCriteriaSubquery} is a holder object for creating subqueries for query defined
+ * by a {@link OpenmrsFhirCriteriaContext}. Like a {@link OpenmrsFhirCriteriaContext}, it has its
+ * own set of predicates, joins, and its own root type. <br/>
+ * Unlike {@link OpenmrsFhirCriteriaContext}, it has an optional {@link Expression} that is used to
+ * define the query projection. This is included because it is expected that a subquery will be used
+ * to partially filter a main query.
  *
  * @param <V> The root type for the query
  * @param <U> The type for the result of the query

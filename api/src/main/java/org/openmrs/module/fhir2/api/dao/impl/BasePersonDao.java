@@ -121,7 +121,7 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 			personNameSecondSubquery.addPredicate(cb.and(cb.equal(personNameSecondSubquery.getRoot().get("voided"), false),
 			    cb.equal(personNameSecondSubquery.getRoot().get("preferred"), true),
 			    cb.equal(personNameSecondSubquery.getRoot().get("person"), criteriaContext.getRoot())));
-            personNameSecondSubquery.getSubquery().select(personNameSecondSubquery.getRoot().get("personNameId"));
+			personNameSecondSubquery.getSubquery().select(personNameSecondSubquery.getRoot().get("personNameId"));
 			
 			// third criteria query, just get the first non-voided person name
 			/*
@@ -190,21 +190,21 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 	@Override
 	protected <V, U> Path<?> paramToProp(@Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext, @Nonnull String param) {
 		From<?, ?> person = getPersonProperty(criteriaContext);
-        if (param.startsWith("address")) {
-            From<?, ?> address = criteriaContext.getJoin("pad")
-                    .orElseGet(() -> criteriaContext.addJoin(person, "addresses", "pad", JoinType.LEFT));
-
-            switch (param) {
-                case SP_ADDRESS_CITY:
-                    return address.get("cityVillage");
-                case SP_ADDRESS_STATE:
-                    return address.get("stateProvince");
-                case SP_ADDRESS_POSTALCODE:
-                    return address.get("postalCode");
-                case SP_ADDRESS_COUNTRY:
-                    return address.get("country");
-            }
-        }
+		if (param.startsWith("address")) {
+			From<?, ?> address = criteriaContext.getJoin("pad")
+			        .orElseGet(() -> criteriaContext.addJoin(person, "addresses", "pad", JoinType.LEFT));
+			
+			switch (param) {
+				case SP_ADDRESS_CITY:
+					return address.get("cityVillage");
+				case SP_ADDRESS_STATE:
+					return address.get("stateProvince");
+				case SP_ADDRESS_POSTALCODE:
+					return address.get("postalCode");
+				case SP_ADDRESS_COUNTRY:
+					return address.get("country");
+			}
+		}
 		
 		switch (param) {
 			case SP_BIRTHDATE:

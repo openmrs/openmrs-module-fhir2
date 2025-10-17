@@ -209,11 +209,11 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 			// Use distinct ids from the original query to return entire objects
 			@SuppressWarnings({ "UnstableApiUsage", "unchecked" })
 			OpenmrsFhirCriteriaContext<T, T> wrapperQuery = createCriteriaContext((Class<T>) typeToken.getRawType());
-
+			
 			handleSort(wrapperQuery, theParams.getSortSpec());
 			handleIdPropertyOrdering(wrapperQuery, idProperty);
-
-            wrapperQuery.getCriteriaQuery().select(wrapperQuery.getRoot());
+			
+			wrapperQuery.getCriteriaQuery().select(wrapperQuery.getRoot());
 			
 			results = wrapperQuery.getEntityManager().createQuery(wrapperQuery.finalizeWrapperQuery(idProperty, ids))
 			        .getResultList();
@@ -348,7 +348,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	protected <V, U> Collection<javax.persistence.criteria.Order> paramToProps(
 	        @Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext, @Nonnull SortState<V, U> sortState) {
 		String param = sortState.getParameter();
-        CriteriaBuilder cb = criteriaContext.getCriteriaBuilder();
+		CriteriaBuilder cb = criteriaContext.getCriteriaBuilder();
 		
 		if (FhirConstants.SP_LAST_UPDATED.equalsIgnoreCase(param)) {
 			if (isImmutable) {
@@ -359,9 +359,9 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 						return Collections.singletonList(cb.desc(criteriaContext.getRoot().get("dateCreated")));
 				}
 			}
-
-            Expression<?> coalescedAttributes = cb.coalesce(
-                    criteriaContext.getRoot().get("dateChanged"), criteriaContext.getRoot().get("dateCreated"));
+			
+			Expression<?> coalescedAttributes = cb.coalesce(criteriaContext.getRoot().get("dateChanged"),
+			    criteriaContext.getRoot().get("dateCreated"));
 			switch (sortState.getSortOrder()) {
 				case ASC:
 					return Collections.singletonList(cb.asc(coalescedAttributes));

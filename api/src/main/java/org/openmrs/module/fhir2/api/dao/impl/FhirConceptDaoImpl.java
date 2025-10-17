@@ -64,25 +64,26 @@ public class FhirConceptDaoImpl extends BaseFhirDao<Concept> implements FhirConc
 			return Optional.empty();
 		}
 		
-		OpenmrsFhirCriteriaContext<ConceptMap, Concept> criteriaContext = createConceptMapCriteriaBuilder(conceptSource, mappingCode);
-        Optional<Join<?, ?>> conceptMapTypeJoin = criteriaContext.getJoin("mapType");
-        Optional<Join<?, ?>> conceptJoin = criteriaContext.getJoin("concept");
-        if (!conceptMapTypeJoin.isPresent() || !conceptJoin.isPresent()) {
-            return Optional.empty();
-        }
-
-		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().or(
-		    criteriaContext.getCriteriaBuilder().equal(conceptMapTypeJoin.get().get("uuid"), ConceptMapType.SAME_AS_MAP_TYPE_UUID),
-		    criteriaContext.getCriteriaBuilder().equal(conceptMapTypeJoin.get().get("name"), "SAME-AS")));
-
-		criteriaContext.addOrder(
-		    criteriaContext.getCriteriaBuilder().asc(conceptJoin.get().get("retired")));
-
-        TypedQuery<Concept> query = criteriaContext.getEntityManager().createQuery(criteriaContext.finalizeQuery());
-        query.setMaxResults(1);
-
-        List<Concept> results = query.getResultList();
-        return !results.isEmpty() ? Optional.of(results.get(0)) : Optional.empty();
+		OpenmrsFhirCriteriaContext<ConceptMap, Concept> criteriaContext = createConceptMapCriteriaBuilder(conceptSource,
+		    mappingCode);
+		Optional<Join<?, ?>> conceptMapTypeJoin = criteriaContext.getJoin("mapType");
+		Optional<Join<?, ?>> conceptJoin = criteriaContext.getJoin("concept");
+		if (!conceptMapTypeJoin.isPresent() || !conceptJoin.isPresent()) {
+			return Optional.empty();
+		}
+		
+		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder()
+		        .or(criteriaContext.getCriteriaBuilder().equal(conceptMapTypeJoin.get().get("uuid"),
+		            ConceptMapType.SAME_AS_MAP_TYPE_UUID),
+		            criteriaContext.getCriteriaBuilder().equal(conceptMapTypeJoin.get().get("name"), "SAME-AS")));
+		
+		criteriaContext.addOrder(criteriaContext.getCriteriaBuilder().asc(conceptJoin.get().get("retired")));
+		
+		TypedQuery<Concept> query = criteriaContext.getEntityManager().createQuery(criteriaContext.finalizeQuery());
+		query.setMaxResults(1);
+		
+		List<Concept> results = query.getResultList();
+		return !results.isEmpty() ? Optional.of(results.get(0)) : Optional.empty();
 	}
 	
 	@Override
@@ -92,16 +93,16 @@ public class FhirConceptDaoImpl extends BaseFhirDao<Concept> implements FhirConc
 			return Collections.emptyList();
 		}
 		
-		OpenmrsFhirCriteriaContext<ConceptMap, Concept> criteriaContext = createConceptMapCriteriaBuilder(conceptSource, mappingCode);
+		OpenmrsFhirCriteriaContext<ConceptMap, Concept> criteriaContext = createConceptMapCriteriaBuilder(conceptSource,
+		    mappingCode);
 		Optional<Join<?, ?>> conceptJoin = criteriaContext.getJoin("concept");
-        if (!conceptJoin.isPresent()) {
-            return Collections.emptyList();
-        }
-
+		if (!conceptJoin.isPresent()) {
+			return Collections.emptyList();
+		}
+		
 		criteriaContext.addOrder(criteriaContext.getCriteriaBuilder().asc(conceptJoin.get().get("retired")));
-        criteriaContext.getCriteriaQuery().distinct(true);
-
-
+		criteriaContext.getCriteriaQuery().distinct(true);
+		
 		return criteriaContext.getEntityManager().createQuery(criteriaContext.finalizeQuery()).getResultList();
 	}
 	
@@ -126,12 +127,14 @@ public class FhirConceptDaoImpl extends BaseFhirDao<Concept> implements FhirConc
 		            .ifPresent(criteriaContext::addPredicate);
 	}
 	
-	protected OpenmrsFhirCriteriaContext<ConceptMap, Concept> createConceptMapCriteriaBuilder(@Nonnull ConceptSource conceptSource, String mappingCode) {
-		OpenmrsFhirCriteriaContext<ConceptMap, Concept> criteriaContext = createCriteriaContext(ConceptMap.class, Concept.class);
+	protected OpenmrsFhirCriteriaContext<ConceptMap, Concept> createConceptMapCriteriaBuilder(
+	        @Nonnull ConceptSource conceptSource, String mappingCode) {
+		OpenmrsFhirCriteriaContext<ConceptMap, Concept> criteriaContext = createCriteriaContext(ConceptMap.class,
+		    Concept.class);
 		criteriaContext.addJoin("conceptMapType", "mapType");
 		Join<?, ?> conceptJoin = criteriaContext.addJoin("concept", "concept");
-        criteriaContext.getCriteriaQuery().select(conceptJoin.as(Concept.class));
-
+		criteriaContext.getCriteriaQuery().select(conceptJoin.as(Concept.class));
+		
 		Join<?, ?> conceptReferenceTermJoin = criteriaContext.addJoin("conceptReferenceTerm", "term");
 		if (Context.getAdministrationService().isDatabaseStringComparisonCaseSensitive()) {
 			criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().equal(
@@ -141,10 +144,10 @@ public class FhirConceptDaoImpl extends BaseFhirDao<Concept> implements FhirConc
 			criteriaContext.addPredicate(
 			    criteriaContext.getCriteriaBuilder().equal(conceptReferenceTermJoin.get("code"), mappingCode));
 		}
-
+		
 		criteriaContext.addPredicate(
 		    criteriaContext.getCriteriaBuilder().equal(conceptReferenceTermJoin.get("conceptSource"), conceptSource));
-
-        return criteriaContext;
+		
+		return criteriaContext;
 	}
 }
