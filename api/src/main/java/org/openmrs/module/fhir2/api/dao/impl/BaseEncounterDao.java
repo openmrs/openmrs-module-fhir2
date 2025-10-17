@@ -14,9 +14,12 @@ import static org.openmrs.module.fhir2.FhirConstants.ENCOUNTER_TYPE_REFERENCE_SE
 import javax.annotation.Nonnull;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -91,12 +94,11 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 					log.debug("Handling hasOrListParam");
 					// Making the assumption that any "orListParams" match everything except for the value
 					HasParam hasParam = hasOrListParam.getValuesAsQueryTokens().get(0);
-					Set<String> values = new HashSet<>();
+					Set<String> values = new LinkedHashSet<>();
 					hasOrListParam.getValuesAsQueryTokens().forEach(orParam -> values.add(orParam.getParameterValue()));
 					
-					log.debug("Handling hasParam = {}", hasParam.getQueryParameterQualifier());
-					log.debug("With value in {}", values);
-					
+					log.debug("Handling hasParam = {} for values in {}", hasParam.getQueryParameterQualifier(), values);
+
 					boolean handled = false;
 					
 					// Support constraining encounter resources to those that contain only certain Medication Requests
@@ -112,13 +114,18 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 									criteriaContext.addJoin("en.orders", "orders");
 								}
 							}
-							Join<DrugOrder, Order> join = criteriaContext.getRoot().join("orders");
+
+                            Optional<Join<?, ?>> ordersJoin = criteriaContext.getJoin("orders");
+                            if (!ordersJoin.isPresent()) {
+                                return;
+                            }
+
 							// Constrain only on non-voided Drug Orders
 							// TODO Do these criteria still work?
 							criteriaContext
-							        .addPredicate(criteriaContext.getCriteriaBuilder().equal(join.get("voided"), false));
+							        .addPredicate(criteriaContext.getCriteriaBuilder().equal(ordersJoin.get().get("voided"), false));
 							criteriaContext.addPredicate(
-							    criteriaContext.getCriteriaBuilder().notEqual(join.get("action"), Order.Action.DISCONTINUE));
+							    criteriaContext.getCriteriaBuilder().notEqual(ordersJoin.get().get("action"), Order.Action.DISCONTINUE));
 							
 							String paramName = hasParam.getParameterName();
 							String paramValue = hasParam.getParameterValue();
@@ -132,8 +139,8 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 								if (paramValue != null) {
 									if (MedicationRequest.MedicationRequestStatus.ACTIVE.toString()
 									        .equalsIgnoreCase(paramValue)) {
-										criteriaContext.getCriteriaBuilder()
-										        .and(generateActiveOrderQuery(criteriaContext, "orders"));
+										criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder()
+										        .and(generateActiveOrderQuery(criteriaContext, "orders")));
 									}
 								}
 								handled = true;
@@ -141,29 +148,29 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 								if (paramValue != null) {
 									if (MedicationRequest.MedicationRequestStatus.CANCELLED.toString()
 									        .equalsIgnoreCase(paramValue)) {
-										criteriaContext.getCriteriaBuilder()
-										        .and(generateNotCancelledOrderQuery(criteriaContext, "orders"));
+                                        criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder()
+										        .and(generateNotCancelledOrderQuery(criteriaContext, "orders")));
 									}
 									if (MedicationRequest.MedicationRequestStatus.COMPLETED.toString()
 									        .equalsIgnoreCase(paramValue)) {
 										Predicate notCompletedCriterion = generateNotCompletedOrderQuery(criteriaContext,
-										    "orders");
+                                            ordersJoin.get());
 										if (notCompletedCriterion != null) {
-											criteriaContext.getCriteriaBuilder().and(notCompletedCriterion);
+                                            criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().and(notCompletedCriterion));
 										}
 									}
 								}
 								handled = true;
 							} else if ((FhirConstants.SP_FULFILLER_STATUS).equalsIgnoreCase(paramName)) {
 								if (paramValue != null) {
-									criteriaContext.getCriteriaBuilder()
-									        .and(generateFulfillerStatusRestriction(criteriaContext, "orders", paramValue));
+                                    criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder()
+									        .and(generateFulfillerStatusRestriction(criteriaContext, ordersJoin.get(), paramValue)));
 								}
 								handled = true;
 							} else if ((FhirConstants.SP_FULFILLER_STATUS + ":not").equalsIgnoreCase(paramName)) {
 								if (paramValue != null) {
-									criteriaContext.getCriteriaBuilder().and(
-									    generateNotFulfillerStatusRestriction(criteriaContext, "orders", paramValue));
+                                    criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().and(
+									    generateNotFulfillerStatusRestriction(criteriaContext, ordersJoin.get(), paramValue)));
 								}
 								handled = true;
 							}
@@ -187,19 +194,19 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 	        ReferenceAndListParam referenceAndListParam);
 	
 	protected <V, U> Predicate generateNotCompletedOrderQuery(OpenmrsFhirCriteriaContext<V, U> criteriaContext,
-	        String path) {
+            Join<?, ?> ordersJoin) {
 		// not implemented in Core until 2.2; see override in FhirEncounterDaoImpl_2_2
 		return null;
 	}
 	
 	protected <V, U> Predicate generateFulfillerStatusRestriction(OpenmrsFhirCriteriaContext<V, U> criteriaContext,
-	        String path, String fulfillerStatus) {
+	        Join<?, ?> ordersJoin, String fulfillerStatus) {
 		// not implemented in Core until 2.2; see override in FhirEncounterDaoImpl_2_2
 		return null;
 	}
 	
 	protected <V, U> Predicate generateNotFulfillerStatusRestriction(OpenmrsFhirCriteriaContext<V, U> criteriaContext,
-	        String path, String fulfillerStatus) {
+            Join<?, ?> ordersJoin, String fulfillerStatus) {
 		// not implemented in Core until 2.2; see override in FhirEncounterDaoImpl_2_2
 		return null;
 	}

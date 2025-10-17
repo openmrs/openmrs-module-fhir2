@@ -18,7 +18,9 @@ import javax.persistence.CacheStoreMode;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
@@ -208,7 +210,6 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 			@SuppressWarnings({ "UnstableApiUsage", "unchecked" })
 			OpenmrsFhirCriteriaContext<T, T> wrapperQuery = createCriteriaContext((Class<T>) typeToken.getRawType());
 
-			// FIXME Maybe like this?
 			handleSort(wrapperQuery, theParams.getSortSpec());
 			handleIdPropertyOrdering(wrapperQuery, idProperty);
 
@@ -347,24 +348,25 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	protected <V, U> Collection<javax.persistence.criteria.Order> paramToProps(
 	        @Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext, @Nonnull SortState<V, U> sortState) {
 		String param = sortState.getParameter();
+        CriteriaBuilder cb = criteriaContext.getCriteriaBuilder();
 		
 		if (FhirConstants.SP_LAST_UPDATED.equalsIgnoreCase(param)) {
 			if (isImmutable) {
 				switch (sortState.getSortOrder()) {
 					case ASC:
-						return Collections.singletonList(
-						    criteriaContext.getCriteriaBuilder().asc(criteriaContext.getRoot().get("dateCreated")));
+						return Collections.singletonList(cb.asc(criteriaContext.getRoot().get("dateCreated")));
 					case DESC:
-						return Collections.singletonList(
-						    criteriaContext.getCriteriaBuilder().desc(criteriaContext.getRoot().get("dateCreated")));
+						return Collections.singletonList(cb.desc(criteriaContext.getRoot().get("dateCreated")));
 				}
 			}
-			
+
+            Expression<?> coalescedAttributes = cb.coalesce(
+                    criteriaContext.getRoot().get("dateChanged"), criteriaContext.getRoot().get("dateCreated"));
 			switch (sortState.getSortOrder()) {
 				case ASC:
-					return Collections.singletonList(CoalescedOrder.asc("dateChanged", "dateCreated"));
+					return Collections.singletonList(cb.asc(coalescedAttributes));
 				case DESC:
-					return Collections.singletonList(CoalescedOrder.desc("dateChanged", "dateCreated"));
+					return Collections.singletonList(cb.desc(coalescedAttributes));
 			}
 		}
 		

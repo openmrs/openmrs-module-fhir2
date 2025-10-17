@@ -122,26 +122,26 @@ public class FhirEncounterDaoImpl extends BaseEncounterDao<Encounter> implements
 	
 	@Override
 	protected <T, U> Predicate generateNotCompletedOrderQuery(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
-	        String path) {
+            Join<?, ?> ordersJoin) {
 		return criteriaContext.getCriteriaBuilder().or(
-		    criteriaContext.getCriteriaBuilder().isNull(criteriaContext.getRoot().join(path).get("fulfillerStatus")),
-		    criteriaContext.getCriteriaBuilder().notEqual(criteriaContext.getRoot().join(path).get("fulfillerStatus"),
+		    criteriaContext.getCriteriaBuilder().isNull(ordersJoin.get("fulfillerStatus")),
+		    criteriaContext.getCriteriaBuilder().notEqual(ordersJoin.get("fulfillerStatus"),
 		        Order.FulfillerStatus.COMPLETED));
 	}
 	
 	@Override
-	protected <T, U> Predicate generateFulfillerStatusRestriction(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
-	        String path, String fulfillerStatus) {
-		return criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().join(path).get("fulfillerStatus"),
+    public <T, U> Predicate generateFulfillerStatusRestriction(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
+            Join<?, ?> ordersJoin, String fulfillerStatus) {
+		return criteriaContext.getCriteriaBuilder().equal(ordersJoin.get("fulfillerStatus"),
 		    Order.FulfillerStatus.valueOf(fulfillerStatus.toUpperCase()));
 	}
 	
 	@Override
 	protected <T, U> Predicate generateNotFulfillerStatusRestriction(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
-	        String path, String fulfillerStatus) {
+            Join<?, ?> ordersJoin, String fulfillerStatus) {
 		return criteriaContext.getCriteriaBuilder().or(
-		    criteriaContext.getCriteriaBuilder().isNull(criteriaContext.getRoot().join(path).get("fulfillerStatus")),
-		    criteriaContext.getCriteriaBuilder().notEqual(criteriaContext.getRoot().join(path).get("fulfillerStatus"),
+		    criteriaContext.getCriteriaBuilder().isNull(ordersJoin.get("fulfillerStatus")),
+		    criteriaContext.getCriteriaBuilder().notEqual(ordersJoin.get("fulfillerStatus"),
 		        Order.FulfillerStatus.valueOf(fulfillerStatus.toUpperCase())));
 	}
 }
