@@ -1529,7 +1529,7 @@ public class ObservationSearchQueryTest extends BaseFhirContextSensitiveTest {
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		List<IBaseResource> resultList = get(results);
+		List<IBaseResource> resultList = results.getAllResources();
 		
 		assertThat(resultList.size(), equalTo(2));
 		assertThat(resultList, everyItem(anyOf(allOf(is(instanceOf(Observation.class))))));
@@ -1552,7 +1552,7 @@ public class ObservationSearchQueryTest extends BaseFhirContextSensitiveTest {
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		List<IBaseResource> resultList = get(results);
+		List<IBaseResource> resultList = results.getAllResources();
 		
 		assertThat(resultList.size(), equalTo(2));
 		assertThat(resultList, everyItem(anyOf(allOf(is(instanceOf(Observation.class))))));
@@ -1580,7 +1580,7 @@ public class ObservationSearchQueryTest extends BaseFhirContextSensitiveTest {
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		List<IBaseResource> resultList = get(results);
+		List<IBaseResource> resultList = results.getAllResources();
 		
 		assertThat(resultList.size(), equalTo(2));
 		assertThat(resultList, everyItem(anyOf(allOf(is(instanceOf(Observation.class))))));
@@ -1607,10 +1607,10 @@ public class ObservationSearchQueryTest extends BaseFhirContextSensitiveTest {
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		List<IBaseResource> resultList = get(results);
+		List<IBaseResource> resultList = results.getAllResources();
 		
-		assertThat(results.size(), equalTo(17));
-		assertThat(resultList.size(), equalTo(10));
+		assertThat(results.size(), equalTo(16));
+		assertThat(resultList.size(), equalTo(16));
 		assertThat(resultList, everyItem(anyOf(allOf(is(instanceOf(Observation.class))))));
 		assertThat(resultList, isSortedAndWithinMax(2));
 	}
@@ -1639,7 +1639,7 @@ public class ObservationSearchQueryTest extends BaseFhirContextSensitiveTest {
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		List<IBaseResource> resultList = get(results);
+		List<IBaseResource> resultList = results.getAllResources();
 		
 		assertThat(resultList.size(), equalTo(2));
 		assertThat(resultList, everyItem(anyOf(allOf(is(instanceOf(Observation.class))))));

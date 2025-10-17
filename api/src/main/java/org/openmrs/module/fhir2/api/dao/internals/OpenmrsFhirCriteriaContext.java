@@ -91,7 +91,12 @@ public class OpenmrsFhirCriteriaContext<T, U> extends BaseFhirCriteriaHolder<T, 
 	}
 	
 	public CriteriaQuery<U> finalizeQuery() {
-		return getCriteriaQuery().where(getPredicates().toArray(new Predicate[0])).orderBy(orders);
+        CriteriaQuery<U> cq = getCriteriaQuery();
+        cq = cq.where(getPredicates().toArray(new Predicate[0]));
+        if (!orders.isEmpty()) {
+            cq = cq.orderBy(orders);
+        }
+		return cq;
 	}
 	
 	public CriteriaQuery<U> finalizeIdQuery(String idProperty) {

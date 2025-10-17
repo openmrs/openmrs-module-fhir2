@@ -10,6 +10,8 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import javax.annotation.Nonnull;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Path;
@@ -64,12 +66,13 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 	@Transactional(readOnly = true)
 	public List<Obs> getSearchResults(@Nonnull SearchParameterMap theParams) {
 		if (!theParams.getParameters(FhirConstants.LASTN_OBSERVATION_SEARCH_HANDLER).isEmpty()) {
-			OpenmrsFhirCriteriaContext<Obs, Obs> criteriaContext = createCriteriaContext(Obs.class);
+			OpenmrsFhirCriteriaContext<Obs, Obs> criteriaContext = getSearchResultCriteria(theParams);
+
+            Join<?, ?> conceptJoin = criteriaContext.getJoin("c").orElseGet(() -> criteriaContext.addJoin("concept", "c"));
+            String conceptIdProperty = getIdPropertyName(criteriaContext.getEntityManager(), Concept.class);
 			
-			setupSearchParams(criteriaContext, theParams);
-			
-			criteriaContext.getCriteriaQuery().orderBy(
-			    criteriaContext.getCriteriaBuilder().asc(criteriaContext.getRoot().get("concept")),
+			CriteriaQuery<Obs> finalizedQuery = criteriaContext.finalizeQuery().orderBy(
+			    criteriaContext.getCriteriaBuilder().asc(conceptJoin.get(conceptIdProperty)),
 			    criteriaContext.getCriteriaBuilder().desc(criteriaContext.getRoot().get("obsDatetime")));
 			
 			int firstResult = 0;
@@ -80,12 +83,11 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 			int groupCount = maxGroupCount;
 			
 			while (criteriaContext.getResults().size() < theParams.getToIndex()) {
-				criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery())
-				        .setFirstResult(firstResult);
-				criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).setMaxResults(batchSize);
+                TypedQuery<Obs> obsQuery = criteriaContext.getEntityManager().createQuery(finalizedQuery);
+                obsQuery.setFirstResult(firstResult);
+                obsQuery.setMaxResults(batchSize);
 				
-				List<Obs> observations = criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery())
-				        .getResultList();
+				List<Obs> observations = obsQuery.getResultList();
 				
 				for (Obs obs : observations) {
 					if (prevConcept == obs.getConcept()) {
@@ -130,20 +132,26 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 	@Transactional(readOnly = true)
 	public int getSearchResultsCount(@Nonnull SearchParameterMap theParams) {
 		if (!theParams.getParameters(FhirConstants.LASTN_OBSERVATION_SEARCH_HANDLER).isEmpty()) {
-			OpenmrsFhirCriteriaContext<Obs, Obs> criteriaContext = createCriteriaContext(Obs.class);
-			setupSearchParams(criteriaContext, theParams);
-			criteriaContext.getCriteriaQuery()
-			        .orderBy(criteriaContext.getCriteriaBuilder().asc(criteriaContext.getRoot().get("concept")))
-			        .orderBy(criteriaContext.getCriteriaBuilder().desc(criteriaContext.getRoot().get("obsDatetime")));
-			
-			criteriaContext.getCriteriaQuery().multiselect(criteriaContext.getRoot().get("concept.id"),
+			OpenmrsFhirCriteriaContext<Obs, Object[]> criteriaContext = createCriteriaContext(Obs.class, Object[].class);
+            getSearchResultCriteria(criteriaContext, theParams);
+
+            Join<?, ?> conceptJoin = criteriaContext.getJoin("c").orElseGet(() -> criteriaContext.addJoin("concept", "c"));
+            String conceptIdProperty = getIdPropertyName(criteriaContext.getEntityManager(), Concept.class);
+
+			criteriaContext.getCriteriaQuery().orderBy(
+                    criteriaContext.getCriteriaBuilder().asc(conceptJoin.get(conceptIdProperty)),
+                    criteriaContext.getCriteriaBuilder().desc(criteriaContext.getRoot().get("obsDatetime")));
+
+			criteriaContext.getCriteriaQuery().multiselect(conceptJoin.get(conceptIdProperty),
 			    criteriaContext.getRoot().get("obsDatetime"),
 			    criteriaContext.getCriteriaBuilder().count(criteriaContext.getRoot()));
+
+            criteriaContext.getCriteriaQuery().groupBy(conceptJoin.get(conceptIdProperty),
+                    criteriaContext.getRoot().get("obsDatetime"));
 			
 			applyExactTotal(criteriaContext, theParams);
 			
-			OpenmrsFhirCriteriaContext<Object[], Object[]> context = createCriteriaContext(Object[].class);
-			List<Object[]> rows = context.getEntityManager().createQuery(context.getCriteriaQuery()).getResultList();
+			List<Object[]> rows = criteriaContext.getEntityManager().createQuery(criteriaContext.finalizeQuery()).getResultList();
 			final int maxGroupCount = getMaxParameter(theParams);
 			int groupCount = maxGroupCount;
 			int count = 0;
