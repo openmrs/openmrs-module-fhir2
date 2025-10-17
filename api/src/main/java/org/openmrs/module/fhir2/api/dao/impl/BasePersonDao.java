@@ -122,7 +122,8 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 			        .addSubquery(PersonName.class);
 			personNameSecondSubquery.addPredicate(cb.and(cb.equal(personNameSecondSubquery.getRoot().get("voided"), false),
 			    cb.equal(personNameSecondSubquery.getRoot().get("preferred"), true),
-			    cb.equal(personNameFirstSubquery.getRoot().get("person"), criteriaContext.getRoot())));
+			    cb.equal(personNameSecondSubquery.getRoot().get("person"), criteriaContext.getRoot())));
+            personNameSecondSubquery.getSubquery().select(personNameSecondSubquery.getRoot().get("personNameId"));
 			
 			// third criteria query, just get the first non-voided person name
 			/*
@@ -142,7 +143,7 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 			        .addSubquery(PersonName.class);
 			personNameThirdSubquery.addPredicate(cb.and(cb.equal(personNameThirdSubquery.getRoot().get("voided"), false),
 			    cb.equal(personNameThirdSubquery.getRoot().get("person"), criteriaContext.getRoot())));
-			personNameThirdSubquery.getSubquery().select(cb.min(personNameFirstSubquery.getRoot().get("personNameId")));
+			personNameThirdSubquery.getSubquery().select(cb.min(personNameThirdSubquery.getRoot().get("personNameId")));
 			
 			Join<?, ?> personName = criteriaContext.addJoin(person, "names", "pn", JoinType.LEFT,
 			    (personNameJoin) -> cb.and(cb.equal(personNameJoin.get("voided"), false), cb.or(

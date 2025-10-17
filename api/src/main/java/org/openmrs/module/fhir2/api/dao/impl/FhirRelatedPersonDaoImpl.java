@@ -147,25 +147,68 @@ public class FhirRelatedPersonDaoImpl extends BaseFhirDao<Relationship> implemen
 			criteriaContext.addJoin(person, "addresses", "pad", javax.persistence.criteria.JoinType.LEFT);
 		} else if (param.equals(SP_NAME) || param.equals(SP_GIVEN) || param.equals(SP_FAMILY)) {
 			CriteriaBuilder cb = criteriaContext.getCriteriaBuilder();
-			//pn1
+
+            // first criteria query: get the first preferred, non-voided person name
+            /*
+             * Should be something like the inner query in the below:
+             *
+             * select *
+             * from person p1_
+             * join person_name pn1_ on
+             *     pn1_.person_id = p1_.person_id and
+             * 	   pn1_.person_name_id = (
+             *         select min(personNameId)
+             *         from person_name pn2_
+             *         where pn2_.voided = false and pn2_.preferred = true and pn2_.person_id = p1.person_id
+             *     )
+             */
 			OpenmrsFhirCriteriaSubquery<PersonName, Integer> personNameFirstSubquery = criteriaContext
 			        .addSubquery(PersonName.class);
 			personNameFirstSubquery.addPredicate(cb.and(cb.equal(personNameFirstSubquery.getRoot().get("voided"), false),
 			    cb.equal(personNameFirstSubquery.getRoot().get("preferred"), true),
 			    cb.equal(personNameFirstSubquery.getRoot().get("person"), criteriaContext.getRoot())));
 			personNameFirstSubquery.getSubquery().select(cb.min(personNameFirstSubquery.getRoot().get("personNameId")));
-			//pn2
+
+            // second criteria query, used in `or` clause to ensure that there is no preferred person name
+            /*
+             * Should be something like:
+             * select *
+             * from person p1_
+             * join person_name pn1_ on
+             *     pn1_.person_id = p1_.person_id and
+             *     not exists (
+             * 	       select *
+             *         from person_name pn2_
+             *         where pn2_.voided = false and pn2_.preferred = true and pn2_.person_id = p1.person_id
+             *     )
+             */
 			OpenmrsFhirCriteriaSubquery<PersonName, Integer> personNameSecondSubquery = criteriaContext
 			        .addSubquery(PersonName.class);
 			personNameSecondSubquery.addPredicate(cb.and(cb.equal(personNameSecondSubquery.getRoot().get("voided"), false),
 			    cb.equal(personNameSecondSubquery.getRoot().get("preferred"), true),
-			    cb.equal(personNameFirstSubquery.getRoot().get("person"), criteriaContext.getRoot())));
-			//pn3
+			    cb.equal(personNameSecondSubquery.getRoot().get("person"), criteriaContext.getRoot())));
+            personNameSecondSubquery.getSubquery().select(personNameSecondSubquery.getRoot().get("personNameId"));
+
+            // third criteria query, just get the first non-voided person name
+            /*
+             * Should be something like the inner query in the below:
+             *
+             * select *
+             * from person p1_
+             * join person_name pn1_ on
+             *     pn1_.person_id = p1_.person_id and
+             * 	   pn1_.person_name_id = (
+             *         select min(personNameId)
+             *         from person_name pn2_
+             *         where pn2_.voided = false and pn2_.person_id = p1.person_id
+             *     )
+             */
 			OpenmrsFhirCriteriaSubquery<PersonName, Integer> personNameThirdSubquery = criteriaContext
 			        .addSubquery(PersonName.class);
 			personNameThirdSubquery.addPredicate(cb.and(cb.equal(personNameThirdSubquery.getRoot().get("voided"), false),
 			    cb.equal(personNameThirdSubquery.getRoot().get("person"), criteriaContext.getRoot())));
-			personNameThirdSubquery.getSubquery().select(cb.min(personNameFirstSubquery.getRoot().get("personNameId")));
+			personNameThirdSubquery.getSubquery().select(cb.min(personNameThirdSubquery.getRoot().get("personNameId")));
+
 			//pn
 			Join<?, ?> personName = criteriaContext.addJoin(person, "names", "pn", JoinType.LEFT,
 			    (personNameJoin) -> cb.and(cb.equal(personNameJoin.get("voided"), false),
