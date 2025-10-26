@@ -346,7 +346,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	
 	@Override
 	protected <V, U> Collection<javax.persistence.criteria.Order> paramToProps(
-	        @Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext, @Nonnull SortState<V, U> sortState) {
+	        @Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext, @Nonnull SortState<V> sortState) {
 		String param = sortState.getParameter();
 		CriteriaBuilder cb = criteriaContext.getCriteriaBuilder();
 		

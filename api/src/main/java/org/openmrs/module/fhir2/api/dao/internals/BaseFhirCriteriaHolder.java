@@ -29,8 +29,9 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 /**
- * This is a common super-type for classes which attempt to allow building a query or subquery. This allows us to pass
- * a single object around, similar to what was done with the previous Hibernate Criteria-based API.
+ * This is a common super-type for classes which attempt to allow building a query or subquery. This
+ * allows us to pass a single object around, similar to what was done with the previous Hibernate
+ * Criteria-based API.
  *
  * @param <V> The type of the root entity for this query
  */

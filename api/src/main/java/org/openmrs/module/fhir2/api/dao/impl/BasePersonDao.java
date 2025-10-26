@@ -69,7 +69,7 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 	
 	@Override
 	protected <V, U> Collection<Order> paramToProps(@Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext,
-	        @Nonnull SortState<V, U> sortState) {
+	        @Nonnull SortState<V> sortState) {
 		String param = sortState.getParameter();
 		
 		if (param == null) {

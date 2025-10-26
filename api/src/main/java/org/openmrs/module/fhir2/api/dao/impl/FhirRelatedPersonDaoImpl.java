@@ -135,7 +135,7 @@ public class FhirRelatedPersonDaoImpl extends BaseFhirDao<Relationship> implemen
 	
 	@Override
 	protected <T, U> Collection<Order> paramToProps(@Nonnull OpenmrsFhirCriteriaContext<T, U> criteriaContext,
-	        @Nonnull SortState<T, U> sortState) {
+	        @Nonnull SortState<T> sortState) {
 		String param = sortState.getParameter();
 		
 		if (param == null) {
