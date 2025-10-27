@@ -199,27 +199,21 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 		}
 		Join<?, ?> personNameJoin = criteriaContext.addJoin("names", "pn");
 		Join<?, ?> identifiersJoin = criteriaContext.addJoin("identifiers", "pi");
+		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().equal(personNameJoin.get("voided"), false));
+		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().equal(identifiersJoin.get("voided"), false));
 		
 		handleAndListParam(criteriaContext.getCriteriaBuilder(), query, q -> {
 			List<Optional<? extends Predicate>> arrayList = new ArrayList<>();
 			
 			for (String token : StringUtils.split(q.getValueNotNull(), " \t,")) {
 				StringParam param = new StringParam(token).setContains(q.isContains()).setExact(q.isExact());
-				arrayList.add(propertyLike(criteriaContext, personNameJoin, "givenName", param)
-				        .map(c -> criteriaContext.getCriteriaBuilder().and(c,
-				            criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("voided"), false))));
-				arrayList.add(propertyLike(criteriaContext, personNameJoin, "middleName", param)
-				        .map(c -> criteriaContext.getCriteriaBuilder().and(c,
-				            criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("voided"), false))));
-				arrayList.add(propertyLike(criteriaContext, personNameJoin, "familyName", param)
-				        .map(c -> criteriaContext.getCriteriaBuilder().and(c,
-				            criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("voided"), false))));
+				arrayList.add(propertyLike(criteriaContext, personNameJoin, "givenName", param));
+				arrayList.add(propertyLike(criteriaContext, personNameJoin, "middleName", param));
+				arrayList.add(propertyLike(criteriaContext, personNameJoin, "familyName", param));
 			}
 			
 			arrayList.add(propertyLike(criteriaContext, identifiersJoin, "identifier",
-			    new StringParam(q.getValueNotNull()).setContains(q.isContains()).setExact(q.isExact()))
-			            .map(c -> criteriaContext.getCriteriaBuilder().and(c,
-			                criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("voided"), false))));
+			    new StringParam(q.getValueNotNull()).setContains(q.isContains()).setExact(q.isExact())));
 			
 			return Optional.of(criteriaContext.getCriteriaBuilder().or(toCriteriaArray(arrayList)));
 		}).ifPresent(criteriaContext::addPredicate);
