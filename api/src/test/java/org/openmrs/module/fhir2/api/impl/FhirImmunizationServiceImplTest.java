@@ -223,7 +223,7 @@ public class FhirImmunizationServiceImplTest extends BaseFhirContextSensitiveTes
 		assertThat(savedImmunization.getExtension().size(), is(1));
 		
 		org.hl7.fhir.r4.model.Extension extension = savedImmunization
-		        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXIT_IMMUNIZATION_NEXT_DOSE_DATE);
+		        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_IMMUNIZATION_NEXT_DOSE_DATE);
 		assertThat(extension, notNullValue());
 		assertThat(extension.getValue(), notNullValue());
 		assertThat(extension.getValue() instanceof DateTimeType, is(true));
@@ -347,7 +347,7 @@ public class FhirImmunizationServiceImplTest extends BaseFhirContextSensitiveTes
 		Immunization immunizationToBeUpdated = service.get(created.getId());
 		immunizationToBeUpdated.getExtension().clear();
 		org.hl7.fhir.r4.model.Extension newExtension = new org.hl7.fhir.r4.model.Extension();
-		newExtension.setUrl(FhirConstants.OPENMRS_FHIR_EXIT_IMMUNIZATION_NEXT_DOSE_DATE);
+		newExtension.setUrl(FhirConstants.OPENMRS_FHIR_EXT_IMMUNIZATION_NEXT_DOSE_DATE);
 		newExtension.setValue(new DateTimeType("2024-07-15T10:30:00Z"));
 		immunizationToBeUpdated.addExtension(newExtension);
 		
@@ -356,7 +356,7 @@ public class FhirImmunizationServiceImplTest extends BaseFhirContextSensitiveTes
 		assertThat(updated.getExtension().size(), is(1));
 		
 		org.hl7.fhir.r4.model.Extension extension = updated
-		        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXIT_IMMUNIZATION_NEXT_DOSE_DATE);
+		        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_IMMUNIZATION_NEXT_DOSE_DATE);
 		assertThat(extension, notNullValue());
 		assertThat(extension.getValue(), notNullValue());
 		assertThat(extension.getValue() instanceof DateTimeType, is(true));

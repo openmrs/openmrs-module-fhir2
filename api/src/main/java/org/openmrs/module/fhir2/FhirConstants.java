@@ -80,7 +80,7 @@ public final class FhirConstants {
 	
 	public static final String VISIT_TYPE_SYSTEM_URI = OPENMRS_CODE_SYSTEM_PREFIX + "/visit-type";
 	
-	public static final String OPENMRS_FHIR_EXIT_IMMUNIZATION_NEXT_DOSE_DATE = "http://hl7.eu/fhir/StructureDefinition/immunization-nextDoseDate";
+	public static final String OPENMRS_FHIR_EXT_IMMUNIZATION_NEXT_DOSE_DATE = "http://hl7.eu/fhir/StructureDefinition/immunization-nextDoseDate";
 	
 	public static final String OPENMRS_FHIR_EXT_PREFIX = OPENMRS_FHIR_PREFIX + "/ext";
 	
@@ -123,7 +123,7 @@ public final class FhirConstants {
 	public static final String OPENMRS_FHIR_EXT_RECORDED = OPENMRS_FHIR_EXT_PREFIX + "/medicationdispense/recorded";
 	
 	public static final String OPENMRS_FHIR_EXT_MEDICATION_REQUEST_FULFILLER_STATUS = OPENMRS_FHIR_EXT_PREFIX
-	        + "/medicationrequest/fullfillerstatus";
+	        + "/medicationrequest/fulfillerstatus";
 	
 	public static final String OPENMRS_FHIR_DEFAULT_PAGE_SIZE = "fhir2.paging.default";
 	
@@ -291,7 +291,7 @@ public final class FhirConstants {
 	
 	public static final String TASK_CODE_SEARCH_HANDLER = "task.code.search.handler";
 	
-	public static final String FULFILLER_STATUS_SEARCH_HANDLER = "fullfillerStatus.search.handler";
+	public static final String FULFILLER_STATUS_SEARCH_HANDLER = "fulfillerStatus.search.handler";
 	
 	public static final String BASED_ON_REFERENCE_SEARCH_HANDLER = "based.on.reference.search.handler";
 	
@@ -380,5 +380,21 @@ public final class FhirConstants {
 	public static final String COUNT_QUERY_CACHE = "countQueryCache";
 	
 	public static final String INCLUDE_MEMBER_PARAM = "member";
+	
+	public static final String CONDITION_CATEGORY_SYSTEM_URI = HL7_FHIR_CODE_SYSTEM_PREFIX + "/condition-category";
+	
+	public static final String CONDITION_CATEGORY_CODE_CONDITION = "problem-list-item";
+	
+	public static final String CONDITION_CATEGORY_CODE_DIAGNOSIS = "encounter-diagnosis";
+	
+	public static final String DIAGNOSIS_RANK_EXTENSION_URI = "http://fhir.openmrs.org/R4/StructureDefinition/diagnosis-rank";
+	
+	public static final String CONDITION_CLINICAL_SYSTEM_URI = HL7_FHIR_CODE_SYSTEM_PREFIX + "/condition-clinical";
+	
+	public static final String CONDITION_VER_STATUS_SYSTEM_URI = HL7_FHIR_CODE_SYSTEM_PREFIX + "/condition-ver-status";
+	
+	public static final String USER_DATA_KEY_CREATE_IF_NOT_EXISTS = "fhir2_module_create_if_not_exists";
+	
+	public static final String USER_DATA_KEY_OUTCOME_CREATED = "fhir2_module_outcome_created";
 	
 }

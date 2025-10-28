@@ -21,6 +21,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.openmrs.module.fhir2.api.util.GeneralUtils.inputStreamToString;
@@ -32,6 +33,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Objects;
 
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
@@ -42,6 +44,7 @@ import lombok.Getter;
 import org.apache.commons.lang.time.DateUtils;
 import org.hamcrest.MatcherAssert;
 import org.hl7.fhir.r4.model.Task;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -50,8 +53,10 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.FhirTaskService;
 import org.openmrs.module.fhir2.api.search.param.TaskSearchParams;
+import org.powermock.reflect.Whitebox;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -78,6 +83,9 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirR4ResourceProviderW
 	@Mock
 	private FhirTaskService service;
 	
+	@Mock
+	private FhirGlobalPropertyService fhirGpService;
+	
 	@Getter(AccessLevel.PUBLIC)
 	private TaskFhirResourceProvider resourceProvider;
 	
@@ -88,12 +96,18 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirR4ResourceProviderW
 	public void setup() throws ServletException {
 		resourceProvider = new TaskFhirResourceProvider();
 		resourceProvider.setService(service);
+		Whitebox.setInternalState(BaseUpsertFhirResourceProvider.class, "globalPropsService", fhirGpService);
 		
 		super.setup();
 		
 		task = new Task();
 		task.setId(TASK_UUID);
 		when(service.get(TASK_UUID)).thenReturn(task);
+	}
+	
+	@After
+	public void tearDown() {
+		Whitebox.setInternalState(BaseUpsertFhirResourceProvider.class, "globalPropsService", (Object) null);
 	}
 	
 	@Test
@@ -137,7 +151,7 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirR4ResourceProviderW
 			jsonTask = inputStreamToString(is, UTF_8);
 		}
 		
-		when(service.update(anyString(), any(Task.class))).thenReturn(task);
+		lenient().when(service.update(anyString(), any(Task.class))).thenReturn(task);
 		
 		MockHttpServletResponse response = put("/Task/" + TASK_UUID).jsonContent(jsonTask).accept(FhirMediaTypes.JSON).go();
 		
@@ -181,7 +195,7 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirR4ResourceProviderW
 			jsonTask = inputStreamToString(is, UTF_8);
 		}
 		
-		when(service.update(eq(WRONG_TASK_UUID), any(Task.class)))
+		lenient().when(service.update(eq(WRONG_TASK_UUID), any(Task.class), any(RequestDetails.class), eq(false)))
 		        .thenThrow(new MethodNotAllowedException("Can't find Task"));
 		
 		MockHttpServletResponse response = put("/Task/" + WRONG_TASK_UUID).jsonContent(jsonTask).accept(FhirMediaTypes.JSON)

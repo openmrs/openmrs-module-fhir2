@@ -26,7 +26,7 @@ import org.openmrs.module.fhir2.FhirConstants;
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public class ConditionSearchParams extends BaseResourceSearchParams {
+public class DiagnosisSearchParams extends BaseResourceSearchParams {
 	
 	private ReferenceAndListParam patientParam;
 	
@@ -43,12 +43,12 @@ public class ConditionSearchParams extends BaseResourceSearchParams {
 	private TokenAndListParam category;
 	
 	@Builder
-	public ConditionSearchParams(ReferenceAndListParam patientParam, TokenAndListParam code,
+	public DiagnosisSearchParams(ReferenceAndListParam patientParam, TokenAndListParam code,
 	    TokenAndListParam clinicalStatus, DateRangeParam onsetDate, QuantityAndListParam onsetAge,
 	    DateRangeParam recordedDate, TokenAndListParam category, TokenAndListParam id, DateRangeParam lastUpdated,
-	    SortSpec sort, HashSet<Include> includes) {
+	    SortSpec sort, HashSet<Include> includes, HashSet<Include> revIncludes) {
 		
-		super(id, lastUpdated, sort, includes, null);
+		super(id, lastUpdated, sort, includes, revIncludes);
 		
 		this.patientParam = patientParam;
 		this.code = code;
