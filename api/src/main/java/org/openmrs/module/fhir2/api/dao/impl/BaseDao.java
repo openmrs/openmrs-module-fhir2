@@ -872,7 +872,7 @@ public abstract class BaseDao {
 	
 	protected <T, U> void handlePatientReference(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
 	        ReferenceAndListParam patientReference, String associationPath) {
-		if (patientReference != null) {
+		if (patientReference != null && patientReference.size() > 0) {
 			Join<?, ?> personJoin = criteriaContext.addJoin(associationPath, "p");
 			
 			handleAndListParam(criteriaContext.getCriteriaBuilder(), patientReference, patientToken -> {
