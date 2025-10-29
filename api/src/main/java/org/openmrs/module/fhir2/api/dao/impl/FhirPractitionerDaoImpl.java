@@ -9,21 +9,17 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
-import static org.hibernate.criterion.Restrictions.eq;
-
 import javax.annotation.Nonnull;
 
 import java.util.List;
 import java.util.Optional;
 
 import ca.uhn.fhir.rest.param.TokenAndListParam;
-import org.hibernate.Criteria;
-import org.hibernate.sql.JoinType;
 import org.openmrs.Provider;
 import org.openmrs.ProviderAttribute;
 import org.openmrs.module.fhir2.api.dao.FhirPractitionerDao;
+import org.openmrs.module.fhir2.api.dao.internals.OpenmrsFhirCriteriaContext;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class FhirPractitionerDaoImpl extends BasePractitionerDao<Provider> implements FhirPractitionerDao {
@@ -34,18 +30,28 @@ public class FhirPractitionerDaoImpl extends BasePractitionerDao<Provider> imple
 	}
 	
 	@Override
-	protected void handleIdentifier(Criteria criteria, TokenAndListParam identifier) {
-		handleAndListParam(identifier, param -> Optional.of(eq("identifier", param.getValue()))).ifPresent(criteria::add);
+	protected <U> void handleIdentifier(OpenmrsFhirCriteriaContext<Provider, U> criteriaContext,
+	        TokenAndListParam identifier) {
+		handleAndListParam(criteriaContext.getCriteriaBuilder(), identifier,
+		    param -> Optional.of(
+		        criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("identifier"), param.getValue())))
+		                .ifPresent(criteriaContext::addPredicate);
 	}
 	
 	@Override
-	@Transactional(readOnly = true)
-	@SuppressWarnings("unchecked")
 	public List<ProviderAttribute> getActiveAttributesByPractitionerAndAttributeTypeUuid(@Nonnull Provider provider,
 	        @Nonnull String providerAttributeTypeUuid) {
-		return (List<ProviderAttribute>) getSessionFactory().getCurrentSession().createCriteria(ProviderAttribute.class)
-		        .createAlias("provider", "p", JoinType.INNER_JOIN, eq("p.id", provider.getId()))
-		        .createAlias("attributeType", "pat").add(eq("pat.uuid", providerAttributeTypeUuid)).add(eq("voided", false))
-		        .list();
+		OpenmrsFhirCriteriaContext<ProviderAttribute, ProviderAttribute> criteriaContext = createCriteriaContext(
+		    ProviderAttribute.class);
+		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot());
+		
+		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().and(
+		    criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().join("provider").get("providerId"),
+		        provider.getId()),
+		    criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().join("attributeType").get("uuid"),
+		        providerAttributeTypeUuid),
+		    criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("voided"), false)));
+		
+		return criteriaContext.getEntityManager().createQuery(criteriaContext.finalizeQuery()).getResultList();
 	}
 }

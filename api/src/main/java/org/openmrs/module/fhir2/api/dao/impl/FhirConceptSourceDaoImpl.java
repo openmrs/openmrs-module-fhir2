@@ -9,10 +9,17 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
-import static org.hibernate.criterion.Restrictions.eq;
-
 import javax.annotation.Nonnull;
+import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -20,12 +27,11 @@ import java.util.Optional;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Order;
 import org.openmrs.ConceptSource;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.fhir2.api.dao.FhirConceptSourceDao;
+import org.openmrs.module.fhir2.api.dao.internals.OpenmrsFhirCriteriaContext;
 import org.openmrs.module.fhir2.model.FhirConceptSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -41,48 +47,94 @@ public class FhirConceptSourceDaoImpl implements FhirConceptSourceDao {
 	
 	@Override
 	@Transactional(readOnly = true)
-	@SuppressWarnings("unchecked")
 	public Collection<FhirConceptSource> getFhirConceptSources() {
-		return sessionFactory.getCurrentSession().createCriteria(FhirConceptSource.class).list();
+		OpenmrsFhirCriteriaContext<FhirConceptSource, FhirConceptSource> criteriaContext = openmrsFhirCriteriaContext();
+		
+		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot());
+		return criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).getResultList();
 	}
 	
 	@Override
 	@Transactional(readOnly = true)
 	public Optional<FhirConceptSource> getFhirConceptSourceByUrl(@Nonnull String url) {
-		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(FhirConceptSource.class);
-		criteria.add(eq("url", url)).add(eq("retired", false));
-		return Optional.ofNullable((FhirConceptSource) criteria.uniqueResult());
+		OpenmrsFhirCriteriaContext<FhirConceptSource, FhirConceptSource> criteriaContext = openmrsFhirCriteriaContext();
+		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot());
+		
+		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().and(
+		    criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("url"), url),
+		    criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("retired"), false)));
+		
+		try {
+			return Optional.ofNullable(
+			    criteriaContext.getEntityManager().createQuery(criteriaContext.finalizeQuery()).getSingleResult());
+		}
+		catch (NoResultException e) {
+			return Optional.empty();
+		}
 	}
 	
 	@Override
 	@Transactional(readOnly = true)
 	public Optional<FhirConceptSource> getFhirConceptSourceByConceptSourceName(@Nonnull String sourceName) {
-		return Optional
-		        .ofNullable((FhirConceptSource) sessionFactory.getCurrentSession().createCriteria(FhirConceptSource.class)
-		                .createAlias("conceptSource", "conceptSource").add(eq("conceptSource.name", sourceName))
-		                .add(eq("conceptSource.retired", false)).add(eq("retired", false)).uniqueResult());
+		
+		OpenmrsFhirCriteriaContext<FhirConceptSource, FhirConceptSource> criteriaContext = openmrsFhirCriteriaContext();
+		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot());
+		
+		Join<FhirConceptSource, ConceptSource> conceptSourceJoin = criteriaContext.getRoot().join("conceptSource");
+		
+		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().and(
+		    criteriaContext.getCriteriaBuilder().equal(conceptSourceJoin.get("name"), sourceName),
+		    criteriaContext.getCriteriaBuilder().equal(conceptSourceJoin.get("retired"), false),
+		    criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("retired"), false)));
+		
+		try {
+			return Optional.ofNullable(
+			    criteriaContext.getEntityManager().createQuery(criteriaContext.finalizeQuery()).getSingleResult());
+		}
+		catch (NoResultException e) {
+			return Optional.empty();
+		}
 	}
 	
 	@Override
 	@Transactional(readOnly = true)
 	public Optional<FhirConceptSource> getFhirConceptSourceByConceptSource(@Nonnull ConceptSource conceptSource) {
-		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(FhirConceptSource.class);
-		criteria.add(eq("conceptSource", conceptSource));
-		return Optional.ofNullable((FhirConceptSource) criteria.uniqueResult());
+		EntityManager em = sessionFactory.getCurrentSession();
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<FhirConceptSource> cq = cb.createQuery(FhirConceptSource.class);
+		Root<FhirConceptSource> root = cq.from(FhirConceptSource.class);
+		
+		List<Predicate> predicates = new ArrayList<>();
+		predicates.add(cb.equal(root.get("conceptSource"), conceptSource));
+		
+		cq.distinct(true).where(predicates.toArray(new Predicate[] {}));
+		TypedQuery<FhirConceptSource> query = em.createQuery(cq);
+		query.setMaxResults(1);
+		
+		FhirConceptSource result = query.getResultList().stream().findFirst().orElse(null);
+		return Optional.ofNullable(result);
 	}
 	
 	@Override
 	@Transactional(readOnly = true)
 	public Optional<ConceptSource> getConceptSourceByHl7Code(@Nonnull String hl7Code) {
-		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(ConceptSource.class);
-		if (Context.getAdministrationService().isDatabaseStringComparisonCaseSensitive()) {
-			criteria.add(eq("hl7Code", hl7Code).ignoreCase());
-		} else {
-			criteria.add(eq("hl7Code", hl7Code));
-		}
-		criteria.addOrder(Order.asc("retired"));
+		EntityManager entityManager = sessionFactory.getCurrentSession();
+		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+		CriteriaQuery<ConceptSource> criteriaQuery = criteriaBuilder.createQuery(ConceptSource.class);
+		Root<ConceptSource> sourceRoot = criteriaQuery.from(ConceptSource.class);
 		
-		List<ConceptSource> matchingSources = criteria.list();
+		List<Predicate> predicates = new ArrayList<>();
+		
+		if (Context.getAdministrationService().isDatabaseStringComparisonCaseSensitive()) {
+			predicates.add(criteriaBuilder.equal(criteriaBuilder.lower(sourceRoot.get("hl7Code")), hl7Code.toLowerCase()));
+		} else {
+			predicates.add(criteriaBuilder.equal(sourceRoot.get("hl7Code"), hl7Code));
+		}
+		
+		criteriaQuery.orderBy(criteriaBuilder.asc(sourceRoot.get("retired"))).where(predicates.toArray(new Predicate[] {}));
+		
+		TypedQuery<ConceptSource> fhirConceptSourceTypedQuery = entityManager.createQuery(criteriaQuery);
+		List<ConceptSource> matchingSources = fhirConceptSourceTypedQuery.getResultList();
 		if (matchingSources.isEmpty()) {
 			return Optional.empty();
 		}
@@ -95,5 +147,15 @@ public class FhirConceptSourceDaoImpl implements FhirConceptSourceDao {
 	public FhirConceptSource saveFhirConceptSource(@Nonnull FhirConceptSource fhirConceptSource) {
 		sessionFactory.getCurrentSession().saveOrUpdate(fhirConceptSource);
 		return fhirConceptSource;
+	}
+	
+	private OpenmrsFhirCriteriaContext<FhirConceptSource, FhirConceptSource> openmrsFhirCriteriaContext() {
+		EntityManager em = sessionFactory.getCurrentSession();
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<FhirConceptSource> cq = cb.createQuery(FhirConceptSource.class);
+		Root<FhirConceptSource> root = cq.from(FhirConceptSource.class);
+		
+		return new OpenmrsFhirCriteriaContext<>(em, cb, cq, root);
+		
 	}
 }

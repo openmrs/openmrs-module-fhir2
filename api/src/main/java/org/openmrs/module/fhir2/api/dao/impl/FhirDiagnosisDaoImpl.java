@@ -9,12 +9,15 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
+import javax.annotation.Nonnull;
+import javax.persistence.criteria.Join;
+
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
-import org.hibernate.Criteria;
 import org.openmrs.Diagnosis;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirDiagnosisDao;
+import org.openmrs.module.fhir2.api.dao.internals.OpenmrsFhirCriteriaContext;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.stereotype.Component;
 
@@ -22,36 +25,35 @@ import org.springframework.stereotype.Component;
 public class FhirDiagnosisDaoImpl extends BaseFhirDao<Diagnosis> implements FhirDiagnosisDao {
 	
 	@Override
-	public boolean hasDistinctResults() {
-		return false;
-	}
-	
-	@Override
-	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
+	protected <U> void setupSearchParams(@Nonnull OpenmrsFhirCriteriaContext<Diagnosis, U> criteriaContext,
+	        @Nonnull SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER:
-					entry.getValue().forEach(
-					    param -> handlePatientReference(criteria, (ReferenceAndListParam) param.getParam(), "patient"));
+					entry.getValue().forEach(param -> handlePatientReference(criteriaContext,
+					    (ReferenceAndListParam) param.getParam(), "patient"));
 					break;
 				case FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER:
-					entry.getValue().forEach(
-					    param -> handleEncounterReference(criteria, (ReferenceAndListParam) param.getParam(), "encounter"));
+					entry.getValue().forEach(param -> handleEncounterReference(criteriaContext,
+					    (ReferenceAndListParam) param.getParam(), "encounter"));
 					break;
 				case FhirConstants.CODED_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handleDiagnosisCode(criteria, (TokenAndListParam) param.getParam()));
+					entry.getValue()
+					        .forEach(param -> handleDiagnosisCode(criteriaContext, (TokenAndListParam) param.getParam()));
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(entry.getValue()).ifPresent(criteria::add);
+					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(criteriaContext::addPredicate);
 					break;
 			}
 		});
 	}
 	
-	private void handleDiagnosisCode(Criteria criteria, TokenAndListParam code) {
-		if (code != null) {
-			criteria.createAlias("diagnosis.coded", "dc");
-			handleCodeableConcept(criteria, code, "dc", "dmap", "dterm").ifPresent(criteria::add);
+	protected <U> void handleDiagnosisCode(@Nonnull OpenmrsFhirCriteriaContext<Diagnosis, U> context,
+	        TokenAndListParam code) {
+		if (code != null && code.size() > 0) {
+			Join<?, ?> codedOrFreeTextJoin = context.addJoin("diagnosis", "diag");
+			Join<?, ?> codedJoin = context.addJoin(codedOrFreeTextJoin, "coded", "dc");
+			handleCodeableConcept(context, code, codedJoin, "dmap", "dterm").ifPresent(context::addPredicate);
 		}
 	}
 }

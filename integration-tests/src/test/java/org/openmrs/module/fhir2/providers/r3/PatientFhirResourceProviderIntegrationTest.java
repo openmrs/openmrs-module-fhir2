@@ -16,6 +16,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.equalToIgnoringCase;
 import static org.hamcrest.Matchers.everyItem;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.in;
@@ -502,11 +503,11 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR3Integr
 		
 		List<Bundle.BundleEntryComponent> entries = results.getEntry();
 		
-		assertThat(entries, everyItem(hasResource(hasProperty("nameFirstRep", hasProperty("family", startsWith("Doe"))))));
+		assertThat(entries, everyItem(hasResource(hasProperty("name", hasItem(hasProperty("family", startsWith("Doe")))))));
 		assertThat(entries,
 		    containsInRelativeOrder(
-		        hasResource(hasProperty("nameFirstRep", hasProperty("givenAsSingleString", containsString("Jean")))),
-		        hasResource(hasProperty("nameFirstRep", hasProperty("givenAsSingleString", containsString("John"))))));
+		        hasResource(hasProperty("name", hasItem(hasProperty("givenAsSingleString", containsString("Jean"))))),
+		        hasResource(hasProperty("name", hasItem(hasProperty("givenAsSingleString", containsString("John")))))));
 		assertThat(entries, everyItem(hasResource(validResource())));
 	}
 	
@@ -527,11 +528,11 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR3Integr
 		
 		List<Bundle.BundleEntryComponent> entries = results.getEntry();
 		
-		assertThat(entries, everyItem(hasResource(hasProperty("nameFirstRep", hasProperty("family", startsWith("Doe"))))));
+		assertThat(entries, everyItem(hasResource(hasProperty("name", hasItem(hasProperty("family", startsWith("Doe")))))));
 		assertThat(entries,
 		    containsInRelativeOrder(
-		        hasResource(hasProperty("nameFirstRep", hasProperty("givenAsSingleString", containsString("Jean")))),
-		        hasResource(hasProperty("nameFirstRep", hasProperty("givenAsSingleString", containsString("John"))))));
+		        hasResource(hasProperty("name", hasItem(hasProperty("givenAsSingleString", containsString("Jean"))))),
+		        hasResource(hasProperty("name", hasItem(hasProperty("givenAsSingleString", containsString("John")))))));
 		assertThat(entries, everyItem(hasResource(validResource())));
 	}
 	
@@ -588,11 +589,11 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR3Integr
 		
 		List<Bundle.BundleEntryComponent> entries = results.getEntry();
 		
-		assertThat(entries, everyItem(hasResource(hasProperty("nameFirstRep", hasProperty("family", startsWith("Doe"))))));
+		assertThat(entries, everyItem(hasResource(hasProperty("name", hasItem(hasProperty("family", startsWith("Doe")))))));
 		assertThat(entries,
 		    containsInRelativeOrder(
-		        hasResource(hasProperty("nameFirstRep", hasProperty("givenAsSingleString", containsString("Jean")))),
-		        hasResource(hasProperty("nameFirstRep", hasProperty("givenAsSingleString", containsString("John"))))));
+		        hasResource(hasProperty("name", hasItem(hasProperty("givenAsSingleString", containsString("Jean"))))),
+		        hasResource(hasProperty("name", hasItem(hasProperty("givenAsSingleString", containsString("John")))))));
 		assertThat(entries, everyItem(hasResource(validResource())));
 	}
 	
@@ -613,11 +614,11 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR3Integr
 		
 		List<Bundle.BundleEntryComponent> entries = results.getEntry();
 		
-		assertThat(entries, everyItem(hasResource(hasProperty("nameFirstRep", hasProperty("family", startsWith("Doe"))))));
+		assertThat(entries, everyItem(hasResource(hasProperty("name", hasItem(hasProperty("family", startsWith("Doe")))))));
 		assertThat(entries,
 		    containsInRelativeOrder(
-		        hasResource(hasProperty("nameFirstRep", hasProperty("givenAsSingleString", containsString("Jean")))),
-		        hasResource(hasProperty("nameFirstRep", hasProperty("givenAsSingleString", containsString("John"))))));
+		        hasResource(hasProperty("name", hasItem(hasProperty("givenAsSingleString", containsString("Jean"))))),
+		        hasResource(hasProperty("name", hasItem(hasProperty("givenAsSingleString", containsString("John")))))));
 		assertThat(entries, everyItem(hasResource(validResource())));
 	}
 	

@@ -305,7 +305,7 @@ public class LocationSearchQueryTest extends BaseFhirContextSensitiveTest {
 		List<Location> resultList = get(locations);
 		
 		assertThat(locations, notNullValue());
-		assertThat(resultList.size(), equalTo(2));
+		assertThat(resultList, hasSize(equalTo(2)));
 		assertThat(resultList.get(0).getMeta().getTag().iterator().next().getCode(), equalTo(LOGIN_LOCATION_TAG_NAME));
 	}
 	

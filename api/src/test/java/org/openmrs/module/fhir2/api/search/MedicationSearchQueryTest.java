@@ -304,7 +304,7 @@ public class MedicationSearchQueryTest extends BaseFhirContextSensitiveTest {
 		
 		assertThat(resultList, not(empty()));
 		assertThat(resultList.size(), equalTo(5)); // reverse included resources added as part of the result list
-		assertThat(resultList.subList(1, 5),
+		assertThat(resultList.subList(1, resultList.size()),
 		    everyItem(allOf(is(instanceOf(MedicationRequest.class)), hasProperty("medicationReference",
 		        hasProperty("referenceElement", hasProperty("idPart", equalTo(MEDICATION_REVINCLUDE_UUID)))))));
 	}
