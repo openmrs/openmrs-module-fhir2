@@ -1039,6 +1039,7 @@
                                             <username>${artifactory.username}</username>
                                             <password>${artifactory.password}</password>
                                             <repoKey>modules</repoKey>
+                                            <snapshotRepoKey>snapshots</snapshotRepoKey>
                                         </publisher>
                                     </configuration>
                                 </execution>
