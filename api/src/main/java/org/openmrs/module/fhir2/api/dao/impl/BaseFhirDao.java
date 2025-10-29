@@ -24,6 +24,7 @@ import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -33,10 +34,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import com.google.common.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.CacheMode;
-import org.hibernate.Criteria;
 import org.hibernate.Hibernate;
 import org.hibernate.proxy.HibernateProxy;
 import org.hl7.fhir.r4.model.DomainResource;
@@ -86,45 +86,6 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	}
 	
 	@Override
-	@Transactional(readOnly = true)
-	public T get(@Nonnull String uuid) {
-		@SuppressWarnings({ "UnstableApiUsage", "unchecked" })
-		OpenmrsFhirCriteriaContext<T, T> criteriaContext = createCriteriaContext((Class<T>) typeToken.getRawType());
-		
-		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot());
-		criteriaContext
-		        .addPredicate(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("uuid"), uuid));
-		
-		// try-catch phrase is a workaround for https://github.com/jakartaee/persistence/issues/298
-		try {
-			return deproxyResult(
-			    criteriaContext.getEntityManager().createQuery(criteriaContext.finalizeQuery()).getSingleResult());
-		}
-		catch (NoResultException e) {
-			return null;
-		}
-	}
-	
-	@Override
-	@Transactional(readOnly = true)
-	public List<T> get(@Nonnull Collection<String> uuids) {
-		@SuppressWarnings({ "UnstableApiUsage", "unchecked" })
-		OpenmrsFhirCriteriaContext<T, T> criteriaContext = createCriteriaContext((Class<T>) typeToken.getRawType());
-		
-		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot());
-		criteriaContext.addPredicate(criteriaContext.getRoot().get("uuid").in(uuids));
-		
-		if (isVoidable) {
-			handleVoidable(criteriaContext);
-		} else if (isRetireable) {
-			handleRetireable(criteriaContext);
-		}
-		
-		return criteriaContext.getEntityManager().createQuery(criteriaContext.finalizeQuery()).getResultList().stream()
-		        .filter(Objects::nonNull).map(this::deproxyResult).collect(Collectors.toList());
-	}
-	
-	@Override
 	@Transactional
 	public T createOrUpdate(@Nonnull T newEntry) {
 		sessionFactory.getCurrentSession().saveOrUpdate(newEntry);
@@ -152,22 +113,43 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 		return existing;
 	}
 	
-	@SuppressWarnings({ "UnstableApiUsage", "unchecked" })
-	protected OpenmrsFhirCriteriaContext<T, T> getSearchResultCriteria(SearchParameterMap theParams) {
-		return getSearchResultCriteria(createCriteriaContext((Class<T>) typeToken.getRawType()), theParams);
-	}
-	
-	protected <U> OpenmrsFhirCriteriaContext<T, U> getSearchResultCriteria(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
-	        SearchParameterMap theParams) {
+	@Override
+	@Transactional(readOnly = true)
+	public List<T> get(@Nonnull Collection<String> uuids) {
+		@SuppressWarnings({ "UnstableApiUsage", "unchecked" })
+		OpenmrsFhirCriteriaContext<T, T> criteriaContext = createCriteriaContext((Class<T>) typeToken.getRawType());
+		
+		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot());
+		criteriaContext.addPredicate(criteriaContext.getRoot().get("uuid").in(uuids));
+		
 		if (isVoidable) {
 			handleVoidable(criteriaContext);
 		} else if (isRetireable) {
 			handleRetireable(criteriaContext);
 		}
 		
-		setupSearchParams(criteriaContext, theParams);
+		return criteriaContext.getEntityManager().createQuery(criteriaContext.finalizeQuery()).getResultList().stream()
+		        .filter(Objects::nonNull).map(this::deproxyResult).collect(Collectors.toList());
+	}
+	
+	@Override
+	@Transactional(readOnly = true)
+	public T get(@Nonnull String uuid) {
+		@SuppressWarnings({ "UnstableApiUsage", "unchecked" })
+		OpenmrsFhirCriteriaContext<T, T> criteriaContext = createCriteriaContext((Class<T>) typeToken.getRawType());
 		
-		return criteriaContext;
+		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot());
+		criteriaContext
+		        .addPredicate(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("uuid"), uuid));
+		
+		// try-catch phrase is a workaround for https://github.com/jakartaee/persistence/issues/298
+		try {
+			return deproxyResult(
+			    criteriaContext.getEntityManager().createQuery(criteriaContext.finalizeQuery()).getSingleResult());
+		}
+		catch (NoResultException e) {
+			return null;
+		}
 	}
 	
 	@Override
@@ -240,32 +222,98 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 		return criteriaContext.getEntityManager().createQuery(criteriaContext.finalizeQuery()).getSingleResult().intValue();
 	}
 	
-	/**
-	 * Override to return false if the getSearchResults may return duplicate items that need to be
-	 * removed from the results. Note that it has performance implications as it requires "select
-	 * distinct" and 2 queries instead of 1 for getting the results.
-	 *
-	 * @return See the above explanation
-	 */
-	protected boolean hasDistinctResults() {
-		return true;
+	protected static <V> V deproxyObject(@Nonnull V object) {
+		if (object instanceof HibernateProxy) {
+			Hibernate.initialize(object);
+			@SuppressWarnings("unchecked")
+			V theResult = (V) ((HibernateProxy) object).getHibernateLazyInitializer().getImplementation();
+			return theResult;
+		}
+		
+		return object;
 	}
 	
-	protected void applyExactTotal(SearchParameterMap theParams, Criteria criteria) {
+	protected <V, U> void applyExactTotal(@Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext,
+	        SearchParameterMap theParams) {
 		List<PropParam<Boolean>> exactTotal = theParams.getParameters(EXACT_TOTAL_SEARCH_PARAMETER);
+		
+		EntityManager manager = criteriaContext.getEntityManager();
 		if (!exactTotal.isEmpty()) {
 			PropParam<Boolean> propParam = exactTotal.get(0);
 			if (propParam.getParam()) {
-				criteria.setCacheMode(CacheMode.REFRESH);
+				manager.setProperty("javax.persistence.cache.retrieveMode", CacheRetrieveMode.BYPASS);
 			}
 		} else {
-			criteria.setCacheable(true);
-			criteria.setCacheRegion(COUNT_QUERY_CACHE);
+			manager.setProperty("javax.persistence.cache.storeMode", CacheStoreMode.USE);
+			manager.setProperty("javax.persistence.cache.region", COUNT_QUERY_CACHE);
 		}
 	}
 	
-	@Override
-	protected <T, U> Optional<Predicate> handleLastUpdated(@Nonnull OpenmrsFhirCriteriaContext<T, U> criteriaContext,
+	protected T deproxyResult(@Nonnull T result) {
+		return deproxyObject(result);
+	}
+	
+	@SuppressWarnings("UnstableApiUsage")
+	protected <V, U> String getIdPropertyName(@Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext) {
+		return getIdPropertyName(criteriaContext.getEntityManager(), typeToken.getRawType());
+	}
+	
+	@SuppressWarnings({ "UnstableApiUsage", "unchecked" })
+	protected OpenmrsFhirCriteriaContext<T, T> getSearchResultCriteria(SearchParameterMap theParams) {
+		return getSearchResultCriteria(createCriteriaContext((Class<T>) typeToken.getRawType()), theParams);
+	}
+	
+	protected <U> OpenmrsFhirCriteriaContext<T, U> getSearchResultCriteria(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
+	        SearchParameterMap theParams) {
+		if (isVoidable) {
+			handleVoidable(criteriaContext);
+		} else if (isRetireable) {
+			handleRetireable(criteriaContext);
+		}
+		
+		setupSearchParams(criteriaContext, theParams);
+		
+		return criteriaContext;
+	}
+	
+	protected <V, U> Optional<Predicate> handleCommonSearchParameters(OpenmrsFhirCriteriaContext<V, U> criteriaContext,
+	        List<PropParam<?>> theCommonParams) {
+		List<Optional<? extends Predicate>> predicateList = new ArrayList<>();
+		
+		for (PropParam<?> commonSearchParam : theCommonParams) {
+			switch (commonSearchParam.getPropertyName()) {
+				case FhirConstants.ID_PROPERTY:
+					predicateList.add(handleAndListParam(criteriaContext.getCriteriaBuilder(),
+					    (TokenAndListParam) commonSearchParam.getParam(), param -> Optional.of(criteriaContext
+					            .getCriteriaBuilder().equal(criteriaContext.getRoot().get("uuid"), param.getValue()))));
+					break;
+				case FhirConstants.LAST_UPDATED_PROPERTY:
+					predicateList.add(handleLastUpdated(criteriaContext, (DateRangeParam) commonSearchParam.getParam()));
+					break;
+			}
+		}
+		return Optional.of(criteriaContext.getCriteriaBuilder().and(toCriteriaArray(predicateList.stream())));
+	}
+	
+	/**
+	 * Handles the ordering of the criteria based on the specified id property name.
+	 *
+	 * @param criteriaContext The criteria context containing the criteria builder and root.
+	 * @param idPropertyName The name of the id property to be used for ordering.
+	 */
+	protected <V, U> void handleIdPropertyOrdering(@Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext,
+	        String idPropertyName) {
+		criteriaContext.addOrder(criteriaContext.getCriteriaBuilder().asc(criteriaContext.getRoot().get(idPropertyName)));
+	}
+	
+	/**
+	 * This function should be overridden by implementations. It is used to return a criterion for
+	 * _lastUpdated from resources where there are multiple properties to be considered.
+	 *
+	 * @param param the DateRangeParam used to query for _lastUpdated
+	 * @return an optional criterion for the query
+	 */
+	protected <V, U> Optional<Predicate> handleLastUpdated(@Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext,
 	        DateRangeParam param) {
 		if (isImmutable) {
 			return handleLastUpdatedImmutable(criteriaContext, param);
@@ -274,29 +322,18 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 		return handleLastUpdatedMutable(criteriaContext, param);
 	}
 	
-	protected <V, U> Optional<Predicate> handleLastUpdatedMutable(@Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext,
-	        DateRangeParam param) {
-		// @formatter:off
-		return Optional.of(criteriaContext.getCriteriaBuilder().or(toCriteriaArray(handleDateRange(criteriaContext,"dateChanged", param), Optional.of(
-                criteriaContext.getCriteriaBuilder().and(toCriteriaArray(Stream.of(Optional.of(criteriaContext.getCriteriaBuilder().isNull(criteriaContext.getRoot().get("dateChanged"))), handleDateRange(criteriaContext,"dateCreated", param))))))));
-		// @formatter:on
-	}
-	
 	// Implementation of handleLastUpdated for "immutable" types, that is, those that cannot be changed
 	protected <V, U> Optional<Predicate> handleLastUpdatedImmutable(
 	        @Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext, DateRangeParam param) {
 		return handleDateRange(criteriaContext, "dateCreated", param);
 	}
 	
-	/**
-	 * This provides a default implementation for dealing with voidable objects. By default, voided
-	 * objects are excluded from searches, but not from get
-	 *
-	 * @param criteriaContext The {@link OpenmrsFhirCriteriaContext} for the current query
-	 */
-	protected <U> void handleVoidable(@Nonnull OpenmrsFhirCriteriaContext<T, U> criteriaContext) {
-		criteriaContext
-		        .addPredicate(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("voided"), false));
+	protected <V, U> Optional<Predicate> handleLastUpdatedMutable(@Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext,
+	        DateRangeParam param) {
+		// @formatter:off
+		return Optional.of(criteriaContext.getCriteriaBuilder().or(toCriteriaArray(handleDateRange(criteriaContext,"dateChanged", param), Optional.of(
+                criteriaContext.getCriteriaBuilder().and(toCriteriaArray(Stream.of(Optional.of(criteriaContext.getCriteriaBuilder().isNull(criteriaContext.getRoot().get("dateChanged"))), handleDateRange(criteriaContext,"dateCreated", param))))))));
+		// @formatter:on
 	}
 	
 	/**
@@ -311,37 +348,34 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	}
 	
 	/**
-	 * Voids the given object
-	 *
-	 * @param object the object implementing the Voidable interface
-	 * @return the same object voided
-	 */
-	protected T voidObject(@Nonnull T object) {
-		RequiredDataAdvice.recursivelyHandle(VoidHandler.class, object, "Voided via FHIR API");
-		return object;
-	}
-	
-	/**
-	 * Retires the given object
-	 *
-	 * @param object the object implementing the Retireable interface
-	 * @return the same object retired
-	 */
-	protected T retireObject(@Nonnull T object) {
-		RequiredDataAdvice.recursivelyHandle(RetireHandler.class, object, "Retired via FHIR API");
-		return object;
-	}
-	
-	/**
-	 * This is intended to be overridden by subclasses to implement any special handling they might
-	 * require
+	 * This provides a default implementation for dealing with voidable objects. By default, voided
+	 * objects are excluded from searches, but not from get
 	 *
 	 * @param criteriaContext The {@link OpenmrsFhirCriteriaContext} for the current query
-	 * @param theParams the parameters for this search
 	 */
-	protected <U> void setupSearchParams(@Nonnull OpenmrsFhirCriteriaContext<T, U> criteriaContext,
-	        @Nonnull SearchParameterMap theParams) {
+	protected <U> void handleVoidable(@Nonnull OpenmrsFhirCriteriaContext<T, U> criteriaContext) {
+		criteriaContext
+		        .addPredicate(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("voided"), false));
+	}
+	
+	/**
+	 * Override to return false if the getSearchResults may return duplicate items that need to be
+	 * removed from the results. Note that it has performance implications as it requires "select
+	 * distinct" and 2 queries instead of 1 for getting the results.
+	 *
+	 * @return See the above explanation
+	 */
+	protected boolean hasDistinctResults() {
+		return true;
+	}
+	
+	@Override
+	protected <V, U> Path<?> paramToProp(@Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext, @Nonnull String param) {
+		if (DomainResource.SP_RES_ID.equals(param)) {
+			return criteriaContext.getRoot().get("uuid");
+		}
 		
+		return super.paramToProp(criteriaContext, param);
 	}
 	
 	@Override
@@ -373,59 +407,37 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 		return super.paramToProps(criteriaContext, sortState);
 	}
 	
-	@Override
-	protected <V, U> Path<?> paramToProp(@Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext, @Nonnull String param) {
-		if (DomainResource.SP_RES_ID.equals(param)) {
-			return criteriaContext.getRoot().get("uuid");
-		}
-		
-		return super.paramToProp(criteriaContext, param);
-	}
-	
-	protected <V, U> void applyExactTotal(@Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext,
-	        SearchParameterMap theParams) {
-		List<PropParam<Boolean>> exactTotal = theParams.getParameters(EXACT_TOTAL_SEARCH_PARAMETER);
-		
-		EntityManager manager = criteriaContext.getEntityManager();
-		if (!exactTotal.isEmpty()) {
-			PropParam<Boolean> propParam = exactTotal.get(0);
-			if (propParam.getParam()) {
-				manager.setProperty("javax.persistence.cache.retrieveMode", CacheRetrieveMode.BYPASS);
-			}
-		} else {
-			manager.setProperty("javax.persistence.cache.storeMode", CacheStoreMode.USE);
-			manager.setProperty("javax.persistence.cache.region", COUNT_QUERY_CACHE);
-		}
-	}
-	
-	@SuppressWarnings("UnstableApiUsage")
-	protected <V, U> String getIdPropertyName(@Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext) {
-		return getIdPropertyName(criteriaContext.getEntityManager(), typeToken.getRawType());
-	}
-	
 	/**
-	 * Handles the ordering of the criteria based on the specified id property name.
+	 * Retires the given object
 	 *
-	 * @param criteriaContext The criteria context containing the criteria builder and root.
-	 * @param idPropertyName The name of the id property to be used for ordering.
+	 * @param object the object implementing the Retireable interface
+	 * @return the same object retired
 	 */
-	protected <V, U> void handleIdPropertyOrdering(@Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext,
-	        String idPropertyName) {
-		criteriaContext.addOrder(criteriaContext.getCriteriaBuilder().asc(criteriaContext.getRoot().get(idPropertyName)));
-	}
-	
-	protected static <V> V deproxyObject(@Nonnull V object) {
-		if (object instanceof HibernateProxy) {
-			Hibernate.initialize(object);
-			@SuppressWarnings("unchecked")
-			V theResult = (V) ((HibernateProxy) object).getHibernateLazyInitializer().getImplementation();
-			return theResult;
-		}
-		
+	protected T retireObject(@Nonnull T object) {
+		RequiredDataAdvice.recursivelyHandle(RetireHandler.class, object, "Retired via FHIR API");
 		return object;
 	}
 	
-	protected T deproxyResult(@Nonnull T result) {
-		return deproxyObject(result);
+	/**
+	 * This is intended to be overridden by subclasses to implement any special handling they might
+	 * require
+	 *
+	 * @param criteriaContext The {@link OpenmrsFhirCriteriaContext} for the current query
+	 * @param theParams the parameters for this search
+	 */
+	protected <U> void setupSearchParams(@Nonnull OpenmrsFhirCriteriaContext<T, U> criteriaContext,
+	        @Nonnull SearchParameterMap theParams) {
+		
+	}
+	
+	/**
+	 * Voids the given object
+	 *
+	 * @param object the object implementing the Voidable interface
+	 * @return the same object voided
+	 */
+	protected T voidObject(@Nonnull T object) {
+		RequiredDataAdvice.recursivelyHandle(VoidHandler.class, object, "Voided via FHIR API");
+		return object;
 	}
 }
