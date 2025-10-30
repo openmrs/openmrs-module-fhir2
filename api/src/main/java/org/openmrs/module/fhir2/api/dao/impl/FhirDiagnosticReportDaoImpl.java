@@ -37,11 +37,11 @@ public class FhirDiagnosticReportDaoImpl extends BaseFhirDao<FhirDiagnosticRepor
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER:
-					entry.getValue().forEach(
-					    param -> handleEncounterReference(criteriaContext, (ReferenceAndListParam) param.getParam(), "e"));
+					entry.getValue().forEach(param -> getSearchQueryHelper().handleEncounterReference(criteriaContext,
+					    (ReferenceAndListParam) param.getParam(), "e"));
 					break;
 				case FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handlePatientReference(criteriaContext,
+					entry.getValue().forEach(param -> getSearchQueryHelper().handlePatientReference(criteriaContext,
 					    (ReferenceAndListParam) param.getParam(), "subject"));
 					break;
 				case FhirConstants.CODED_SEARCH_HANDLER:
@@ -50,7 +50,8 @@ public class FhirDiagnosticReportDaoImpl extends BaseFhirDao<FhirDiagnosticRepor
 					break;
 				case FhirConstants.DATE_RANGE_SEARCH_HANDLER:
 					entry.getValue()
-					        .forEach(param -> handleDateRange(criteriaContext, "issued", (DateRangeParam) param.getParam())
+					        .forEach(param -> getSearchQueryHelper()
+					                .handleDateRange(criteriaContext, "issued", (DateRangeParam) param.getParam())
 					                .ifPresent(criteriaContext::addPredicate));
 					break;
 				case FhirConstants.RESULT_SEARCH_HANDLER:
@@ -68,7 +69,8 @@ public class FhirDiagnosticReportDaoImpl extends BaseFhirDao<FhirDiagnosticRepor
 	        TokenAndListParam code) {
 		if (code != null) {
 			From<?, ?> from = criteriaContext.addJoin("code", "c");
-			handleCodeableConcept(criteriaContext, code, from, "cm", "crt").ifPresent(criteriaContext::addPredicate);
+			getSearchQueryHelper().handleCodeableConcept(criteriaContext, code, from, "cm", "crt")
+			        .ifPresent(criteriaContext::addPredicate);
 		}
 	}
 	

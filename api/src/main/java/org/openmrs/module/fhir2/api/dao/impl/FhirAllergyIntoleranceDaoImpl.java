@@ -60,7 +60,7 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implemen
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handlePatientReference(criteriaContext,
+					entry.getValue().forEach(param -> getSearchQueryHelper().handlePatientReference(criteriaContext,
 					    (ReferenceAndListParam) param.getParam(), "patient"));
 					break;
 				case FhirConstants.CATEGORY_SEARCH_HANDLER: {
@@ -81,9 +81,11 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implemen
 					break;
 				case FhirConstants.BOOLEAN_SEARCH_HANDLER:
 					entry.getValue()
-					        .forEach(param -> handleBoolean(criteriaContext, "voided",
-					            convertStringStatusToBoolean((TokenAndListParam) param.getParam()))
-					                    .ifPresent(criteriaContext::addPredicate));
+					        .forEach(param -> getSearchQueryHelper()
+					                .handleBoolean(criteriaContext, "voided",
+					                    getSearchQueryHelper()
+					                            .convertStringStatusToBoolean((TokenAndListParam) param.getParam()))
+					                .ifPresent(criteriaContext::addPredicate));
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
 					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(criteriaContext::addPredicate);
@@ -97,7 +99,7 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implemen
 			Join<?, ?> reactionsJoin = criteriaContext.addJoin("reactions", "r");
 			Join<?, ?> reactionJoin = criteriaContext.addJoin(reactionsJoin, "reaction", "rc");
 			
-			handleCodeableConcept(criteriaContext, code, reactionJoin, "rcm", "rcrt")
+			getSearchQueryHelper().handleCodeableConcept(criteriaContext, code, reactionJoin, "rcm", "rcrt")
 			        .ifPresent(criteriaContext::addPredicate);
 		}
 	}
@@ -107,7 +109,7 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implemen
 			Join<?, ?> allergenJoin = criteriaContext.addJoin("allergen", "allergen");
 			Join<?, ?> codedAllergenJoin = criteriaContext.addJoin(allergenJoin, "codedAllergen", "ac");
 			
-			handleCodeableConcept(criteriaContext, code, codedAllergenJoin, "acm", "acrt")
+			getSearchQueryHelper().handleCodeableConcept(criteriaContext, code, codedAllergenJoin, "acm", "acrt")
 			        .ifPresent(criteriaContext::addPredicate);
 		}
 	}

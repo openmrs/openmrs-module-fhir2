@@ -22,7 +22,6 @@ import java.util.List;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
-import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.MedicationDispense;
@@ -32,10 +31,11 @@ import org.openmrs.api.OrderService;
 import org.openmrs.api.PatientService;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
+import org.openmrs.module.fhir2.api.dao.FhirMedicationDispenseDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
@@ -60,15 +60,13 @@ public class FhirMedicationDispenseDaoImplTest extends BaseModuleContextSensitiv
 	private ConceptService conceptService;
 	
 	@Autowired
-	@Qualifier("sessionFactory")
-	private SessionFactory sessionFactory;
+	private ObjectProvider<FhirMedicationDispenseDao<MedicationDispense>> daoProvider;
 	
-	private FhirMedicationDispenseDaoImpl dao;
+	private FhirMedicationDispenseDao<MedicationDispense> dao;
 	
 	@Before
 	public void setUp() {
-		dao = new FhirMedicationDispenseDaoImpl();
-		dao.setSessionFactory(sessionFactory);
+		dao = daoProvider.getObject();
 		executeDataSet("org/openmrs/api/include/MedicationDispenseServiceTest-initialData.xml");
 		updateSearchIndex();
 	}
@@ -151,6 +149,7 @@ public class FhirMedicationDispenseDaoImplTest extends BaseModuleContextSensitiv
 		theParams.addParameter(FhirConstants.MEDICATION_REQUEST_REFERENCE_SEARCH_HANDLER, param);
 		
 		List<MedicationDispense> results = dao.getSearchResults(theParams);
+		
 		assertThat(results, containsInAnyOrder(hasId(1)));
 	}
 	

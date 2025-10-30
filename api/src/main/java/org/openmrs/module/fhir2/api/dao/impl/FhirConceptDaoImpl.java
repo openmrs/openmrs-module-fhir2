@@ -123,7 +123,7 @@ public class FhirConceptDaoImpl extends BaseFhirDao<Concept> implements FhirConc
 	protected <U> void handleTitle(OpenmrsFhirCriteriaContext<Concept, U> criteriaContext, StringAndListParam titlePattern) {
 		Join<?, ?> conceptNamesJoin = criteriaContext.addJoin("names", "cn");
 		handleAndListParam(criteriaContext.getCriteriaBuilder(), titlePattern,
-		    (title) -> propertyLike(criteriaContext, conceptNamesJoin, "name", title))
+		    (title) -> getSearchQueryHelper().propertyLike(criteriaContext, conceptNamesJoin, "name", title))
 		            .ifPresent(criteriaContext::addPredicate);
 	}
 	

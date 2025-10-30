@@ -40,6 +40,7 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirRelatedPersonDao;
 import org.openmrs.module.fhir2.api.dao.internals.OpenmrsFhirCriteriaContext;
 import org.openmrs.module.fhir2.api.dao.internals.OpenmrsFhirCriteriaSubquery;
+import org.openmrs.module.fhir2.api.dao.internals.SortState;
 import org.openmrs.module.fhir2.api.search.param.PropParam;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.stereotype.Component;
@@ -54,13 +55,14 @@ public class FhirRelatedPersonDaoImpl extends BaseFhirDao<Relationship> implemen
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.NAME_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handleNames(criteriaContext, (StringAndListParam) param.getParam(),
-					    null, null, personJoin));
+					entry.getValue().forEach(param -> getSearchQueryHelper().handleNames(criteriaContext,
+					    (StringAndListParam) param.getParam(), null, null, personJoin));
 					break;
 				case FhirConstants.GENDER_SEARCH_HANDLER:
 					entry.getValue()
-					        .forEach(param -> handleGender(criteriaContext, personJoin, FhirConstants.GENDER_PROPERTY,
-					            (TokenAndListParam) param.getParam()).ifPresent(criteriaContext::addPredicate));
+					        .forEach(param -> getSearchQueryHelper().handleGender(criteriaContext, personJoin,
+					            FhirConstants.GENDER_PROPERTY, (TokenAndListParam) param.getParam())
+					                .ifPresent(criteriaContext::addPredicate));
 					break;
 				case FhirConstants.DATE_RANGE_SEARCH_HANDLER:
 					entry.getValue()
@@ -299,7 +301,7 @@ public class FhirRelatedPersonDaoImpl extends BaseFhirDao<Relationship> implemen
 		
 		From<?, ?> personJoin = criteriaContext.addJoin("personA", "m");
 		From<?, ?> padJoin = criteriaContext.addJoin(personJoin, "addresses", "pad");
-		handlePersonAddress(criteriaContext, padJoin, city, state, postalCode, country)
+		getSearchQueryHelper().handlePersonAddress(criteriaContext, padJoin, city, state, postalCode, country)
 		        .ifPresent(criteriaContext::addPredicate);
 	}
 	

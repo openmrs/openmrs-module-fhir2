@@ -40,6 +40,7 @@ import org.openmrs.PersonName;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.internals.OpenmrsFhirCriteriaContext;
 import org.openmrs.module.fhir2.api.dao.internals.OpenmrsFhirCriteriaSubquery;
+import org.openmrs.module.fhir2.api.dao.internals.SortState;
 import org.openmrs.module.fhir2.api.search.param.PropParam;
 
 /**
@@ -239,7 +240,7 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 		
 		From<?, ?> person = getPersonProperty(criteriaContext);
 		From<?, ?> padJoin = criteriaContext.addJoin(person, "addresses", "pad");
-		handlePersonAddress(criteriaContext, padJoin, city, state, postalCode, country)
+		getSearchQueryHelper().handlePersonAddress(criteriaContext, padJoin, city, state, postalCode, country)
 		        .ifPresent(criteriaContext::addPredicate);
 	}
 	
@@ -262,6 +263,6 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 			}
 		}
 		
-		handleNames(criteriaContext, name, given, family, getPersonProperty(criteriaContext));
+		getSearchQueryHelper().handleNames(criteriaContext, name, given, family, getPersonProperty(criteriaContext));
 	}
 }

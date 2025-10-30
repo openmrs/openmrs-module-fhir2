@@ -44,26 +44,29 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.DATE_RANGE_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handleDate(criteriaContext, (DateRangeParam) param.getParam()));
+					entry.getValue().forEach(param -> handleDate(criteriaContext, (DateRangeParam) param.getParam())
+					        .ifPresent(criteriaContext::addPredicate));
 					break;
 				case FhirConstants.LOCATION_REFERENCE_SEARCH_HANDLER:
 					entry.getValue().forEach(param -> {
 						From<?, ?> locationAlias = criteriaContext.addJoin("location", "l");
-						handleLocationReference(criteriaContext, locationAlias, (ReferenceAndListParam) param.getParam())
-						        .ifPresent(criteriaContext::addPredicate);
+						getSearchQueryHelper().handleLocationReference(criteriaContext, locationAlias,
+						    (ReferenceAndListParam) param.getParam()).ifPresent(criteriaContext::addPredicate);
 					});
 					break;
 				case FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER:
 					entry.getValue()
-					        .forEach(param -> handleParticipant(criteriaContext, (ReferenceAndListParam) param.getParam()));
+					        .forEach(param -> handleParticipant(criteriaContext, (ReferenceAndListParam) param.getParam())
+					                .ifPresent(criteriaContext::addPredicate));
 					break;
 				case FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER:
-					entry.getValue().forEach(
-					    param -> handlePatientReference(criteriaContext, (ReferenceAndListParam) param.getParam()));
+					entry.getValue().forEach(param -> getSearchQueryHelper().handlePatientReference(criteriaContext,
+					    (ReferenceAndListParam) param.getParam()));
 					break;
 				case ENCOUNTER_TYPE_REFERENCE_SEARCH_HANDLER:
 					entry.getValue()
-					        .forEach(param -> handleEncounterType(criteriaContext, (TokenAndListParam) param.getParam()));
+					        .forEach(param -> handleEncounterType(criteriaContext, (TokenAndListParam) param.getParam())
+					                .ifPresent(criteriaContext::addPredicate));
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
 					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(criteriaContext::addPredicate);
@@ -136,8 +139,8 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 								if (paramValue != null) {
 									if (MedicationRequest.MedicationRequestStatus.ACTIVE.toString()
 									        .equalsIgnoreCase(paramValue)) {
-										criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder()
-										        .and(generateActiveOrderQuery(criteriaContext, "orders")));
+										criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().and(
+										    getSearchQueryHelper().handleQueryForActiveOrders(criteriaContext, "orders")));
 									}
 								}
 								handled = true;
@@ -145,8 +148,9 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 								if (paramValue != null) {
 									if (MedicationRequest.MedicationRequestStatus.CANCELLED.toString()
 									        .equalsIgnoreCase(paramValue)) {
-										criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder()
-										        .and(generateNotCancelledOrderQuery(criteriaContext, "orders")));
+										criteriaContext
+										        .addPredicate(criteriaContext.getCriteriaBuilder().and(getSearchQueryHelper()
+										                .handleQueryForCancelledOrders(criteriaContext, "orders")));
 									}
 									if (MedicationRequest.MedicationRequestStatus.COMPLETED.toString()
 									        .equalsIgnoreCase(paramValue)) {
@@ -184,12 +188,13 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 		}
 	}
 	
-	protected abstract <U> void handleDate(OpenmrsFhirCriteriaContext<T, U> criteriaContext, DateRangeParam dateRangeParam);
+	protected abstract <U> Optional<Predicate> handleDate(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
+	        DateRangeParam dateRangeParam);
 	
-	protected abstract <U> void handleEncounterType(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
+	protected abstract <U> Optional<Predicate> handleEncounterType(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
 	        TokenAndListParam tokenAndListParam);
 	
-	protected abstract <U> void handleParticipant(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
+	protected abstract <U> Optional<Predicate> handleParticipant(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
 	        ReferenceAndListParam referenceAndListParam);
 	
 	protected <V, U> Predicate generateNotCompletedOrderQuery(OpenmrsFhirCriteriaContext<V, U> criteriaContext,

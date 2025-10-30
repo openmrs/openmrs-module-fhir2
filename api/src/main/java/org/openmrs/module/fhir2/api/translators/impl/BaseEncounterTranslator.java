@@ -16,14 +16,14 @@ import lombok.Setter;
 import org.hl7.fhir.r4.model.Coding;
 import org.openmrs.Location;
 import org.openmrs.module.fhir2.FhirConstants;
-import org.openmrs.module.fhir2.api.mappings.EncounterClassMap;
+import org.openmrs.module.fhir2.api.dao.impl.FhirEncounterClassMapDaoImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public abstract class BaseEncounterTranslator {
 	
 	@Getter(PROTECTED)
 	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private EncounterClassMap encounterClassMap;
+	private FhirEncounterClassMapDaoImpl encounterClassMap;
 	
 	protected Coding mapLocationToClass(Location location) {
 		Coding coding = new Coding();

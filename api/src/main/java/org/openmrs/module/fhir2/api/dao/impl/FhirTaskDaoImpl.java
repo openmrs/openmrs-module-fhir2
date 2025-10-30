@@ -38,20 +38,24 @@ public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDa
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.BASED_ON_REFERENCE_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handleReference(criteriaContext,
-					    (ReferenceAndListParam) param.getParam(), "basedOnReferences", "bo"));
+					entry.getValue()
+					        .forEach(param -> handleReference(criteriaContext, (ReferenceAndListParam) param.getParam(),
+					            "basedOnReferences", "bo").ifPresent(criteriaContext::addPredicate));
 					break;
 				case FhirConstants.OWNER_REFERENCE_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handleReference(criteriaContext,
-					    (ReferenceAndListParam) param.getParam(), "ownerReference", "o"));
+					entry.getValue()
+					        .forEach(param -> handleReference(criteriaContext, (ReferenceAndListParam) param.getParam(),
+					            "ownerReference", "o").ifPresent(criteriaContext::addPredicate));
 					break;
 				case FhirConstants.FOR_REFERENCE_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handleReference(criteriaContext,
-					    (ReferenceAndListParam) param.getParam(), "forReference", "f"));
+					entry.getValue()
+					        .forEach(param -> handleReference(criteriaContext, (ReferenceAndListParam) param.getParam(),
+					            "forReference", "f").ifPresent(criteriaContext::addPredicate));
 					break;
 				case FhirConstants.TASK_CODE_SEARCH_HANDLER:
 					entry.getValue()
-					        .forEach(code -> handleTaskCodeConcept(criteriaContext, (TokenAndListParam) code.getParam()));
+					        .forEach(code -> handleTaskCodeConcept(criteriaContext, (TokenAndListParam) code.getParam())
+					                .ifPresent(criteriaContext::addPredicate));
 					break;
 				case FhirConstants.STATUS_SEARCH_HANDLER:
 					entry.getValue().forEach(param -> handleStatus(criteriaContext, (TokenAndListParam) param.getParam())
@@ -98,9 +102,9 @@ public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDa
 		});
 	}
 	
-	private <U> void handleReference(OpenmrsFhirCriteriaContext<FhirTask, U> criteriaContext,
+	private <U> Optional<Predicate> handleReference(@Nonnull OpenmrsFhirCriteriaContext<FhirTask, U> criteriaContext,
 	        ReferenceAndListParam reference, String property, String alias) {
-		handleAndListParam(criteriaContext.getCriteriaBuilder(), reference, param -> {
+		return handleAndListParam(criteriaContext.getCriteriaBuilder(), reference, param -> {
 			if (validReferenceParam(param)) {
 				Join<?, ?> taskAliasJoin = criteriaContext.addJoin(property, alias);
 				
@@ -113,14 +117,16 @@ public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDa
 			}
 			
 			return Optional.empty();
-		}).ifPresent(criteriaContext::addPredicate);
+		});
 	}
 	
-	private <U> void handleTaskCodeConcept(OpenmrsFhirCriteriaContext<FhirTask, U> criteriaContext, TokenAndListParam code) {
-		if (code != null) {
-			From<?, ?> join = criteriaContext.addJoin("taskCode", "tc");
-			
-			handleCodeableConcept(criteriaContext, code, join, "tcm", "tcrt").ifPresent(criteriaContext::addPredicate);
+	private <U> Optional<Predicate> handleTaskCodeConcept(@Nonnull OpenmrsFhirCriteriaContext<FhirTask, U> criteriaContext,
+	        TokenAndListParam code) {
+		if (code == null) {
+			return Optional.empty();
 		}
+		
+		From<?, ?> join = criteriaContext.addJoin("taskCode", "tc");
+		return getSearchQueryHelper().handleCodeableConcept(criteriaContext, code, join, "tcm", "tcrt");
 	}
 }

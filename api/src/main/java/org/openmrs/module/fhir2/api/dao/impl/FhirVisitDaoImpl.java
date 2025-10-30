@@ -15,6 +15,7 @@ import javax.annotation.Nonnull;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Path;
+import javax.persistence.criteria.Predicate;
 
 import java.util.Optional;
 
@@ -30,25 +31,29 @@ import org.springframework.stereotype.Component;
 public class FhirVisitDaoImpl extends BaseEncounterDao<Visit> implements FhirVisitDao {
 	
 	@Override
-	protected <U> void handleDate(OpenmrsFhirCriteriaContext<Visit, U> criteriaContext, DateRangeParam dateRangeParam) {
-		handleDateRange(criteriaContext, "startDatetime", dateRangeParam).ifPresent(criteriaContext::addPredicate);
+	protected <U> Optional<Predicate> handleDate(@Nonnull OpenmrsFhirCriteriaContext<Visit, U> criteriaContext,
+	        DateRangeParam dateRangeParam) {
+		return getSearchQueryHelper().handleDateRange(criteriaContext, "startDatetime", dateRangeParam);
 	}
 	
 	@Override
-	protected <U> void handleEncounterType(OpenmrsFhirCriteriaContext<Visit, U> criteriaContext,
+	protected <U> Optional<Predicate> handleEncounterType(@Nonnull OpenmrsFhirCriteriaContext<Visit, U> criteriaContext,
 	        TokenAndListParam tokenAndListParam) {
 		Join<?, ?> visitTypeJoin = criteriaContext.addJoin("visitType", "vt");
-		handleAndListParam(criteriaContext.getCriteriaBuilder(), tokenAndListParam,
-		    t -> Optional.of(criteriaContext.getCriteriaBuilder().equal(visitTypeJoin.get("uuid"), t.getValue())))
-		            .ifPresent(criteriaContext::addPredicate);
+		return handleAndListParam(criteriaContext.getCriteriaBuilder(), tokenAndListParam,
+		    t -> Optional.of(criteriaContext.getCriteriaBuilder().equal(visitTypeJoin.get("uuid"), t.getValue())));
 	}
 	
 	@Override
-	protected <U> void handleParticipant(OpenmrsFhirCriteriaContext<Visit, U> criteriaContext,
+	protected <U> Optional<Predicate> handleParticipant(OpenmrsFhirCriteriaContext<Visit, U> criteriaContext,
 	        ReferenceAndListParam referenceAndListParam) {
+		if (referenceAndListParam == null || referenceAndListParam.size() == 0) {
+			return Optional.empty();
+		}
+		
 		Join<?, ?> encounterJoin = criteriaContext.addJoin("encounters", "en");
 		From<?, ?> epJoin = criteriaContext.addJoin(encounterJoin, "encounterProviders", "ep");
-		handleParticipantReference(criteriaContext, referenceAndListParam, epJoin);
+		return getSearchQueryHelper().handleParticipantReference(criteriaContext, referenceAndListParam, epJoin);
 	}
 	
 	@Override

@@ -38,7 +38,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.*;
 import org.openmrs.api.EncounterService;
 import org.openmrs.module.fhir2.FhirConstants;
-import org.openmrs.module.fhir2.api.mappings.EncounterClassMap;
+import org.openmrs.module.fhir2.api.dao.impl.FhirEncounterClassMapDaoImpl;
 import org.openmrs.module.fhir2.api.translators.EncounterLocationTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterParticipantTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterPeriodTranslator;
@@ -102,7 +102,7 @@ public class EncounterTranslatorImplTest {
 	private EncounterPeriodTranslator<org.openmrs.Encounter> encounterPeriodTranslator;
 	
 	@Mock
-	private EncounterClassMap encounterClassMap;
+	private FhirEncounterClassMapDaoImpl encounterClassMap;
 	
 	@Mock
 	private EncounterService encounterService;

@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
+import static org.openmrs.module.fhir2.FhirConstants.COMMON_SEARCH_HANDLER;
 import static org.openmrs.module.fhir2.FhirConstants.COUNT_QUERY_CACHE;
 import static org.openmrs.module.fhir2.FhirConstants.EXACT_TOTAL_SEARCH_PARAMETER;
 
@@ -30,15 +31,18 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import com.google.common.reflect.TypeToken;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.Hibernate;
-import org.hibernate.proxy.HibernateProxy;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.openmrs.Auditable;
 import org.openmrs.Obs;
@@ -51,18 +55,24 @@ import org.openmrs.api.handler.RetireHandler;
 import org.openmrs.api.handler.VoidHandler;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirDao;
+import org.openmrs.module.fhir2.api.dao.internals.FhirSearchQueryHelper;
 import org.openmrs.module.fhir2.api.dao.internals.OpenmrsFhirCriteriaContext;
+import org.openmrs.module.fhir2.api.dao.internals.SortState;
 import org.openmrs.module.fhir2.api.search.param.PropParam;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * This is a base class for FHIR2 Dao objects providing default implementations for the
- * {@link FhirDao} interface. It extends {@link BaseDao} so that the criteria helpers used there
- * will be available to all subclasses. In general, Dao objects implementing this class will simply
- * need to provide implementation(s) for search functionality
+ * {@link FhirDao} interface. It includes a {@link FhirSearchQueryHelper} so that the criteria
+ * helpers used there will be available to all subclasses.
+ * <p/>
+ * In general, objects extending this class will simply need to provide implementation(s) for search
+ * functionality, i.e., {@link #setupSearchParams(OpenmrsFhirCriteriaContext, SearchParameterMap)},
+ * and {@link #paramToProp(OpenmrsFhirCriteriaContext, String)}. See those functions for details.
  *
- * @param <T> the {@link OpenmrsObject} managed by this Dao
+ * @param <T> the {@link Auditable} {@link OpenmrsObject} managed by this Dao
  */
 @Transactional
 @Slf4j
@@ -70,6 +80,10 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	
 	@SuppressWarnings("UnstableApiUsage")
 	protected final TypeToken<T> typeToken = new TypeToken<T>(getClass()) {};
+	
+	@Getter(AccessLevel.PROTECTED)
+	@Setter(value = AccessLevel.PROTECTED, onMethod_ = { @Autowired })
+	private FhirSearchQueryHelper searchQueryHelper;
 	
 	private final boolean isRetireable;
 	
@@ -87,10 +101,10 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	
 	@Override
 	@Transactional
-	public T createOrUpdate(@Nonnull T newEntry) {
-		sessionFactory.getCurrentSession().saveOrUpdate(newEntry);
+	public T createOrUpdate(@Nonnull T object) {
+		getSessionFactory().getCurrentSession().saveOrUpdate(object);
 		
-		return newEntry;
+		return object;
 	}
 	
 	@Override
@@ -108,7 +122,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 			existing = retireObject(existing);
 		}
 		
-		sessionFactory.getCurrentSession().saveOrUpdate(existing);
+		getSessionFactory().getCurrentSession().saveOrUpdate(existing);
 		
 		return existing;
 	}
@@ -158,7 +172,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 		
 		if (hasDistinctResults()) {
 			OpenmrsFhirCriteriaContext<T, T> criteriaContext = getSearchResultCriteria(theParams);
-			String idProperty = getIdPropertyName(criteriaContext);
+			String idProperty = getIdPropertyName(criteriaContext.getEntityManager());
 			
 			handleSort(criteriaContext, theParams.getSortSpec());
 			handleIdPropertyOrdering(criteriaContext, idProperty);
@@ -182,11 +196,15 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 			OpenmrsFhirCriteriaContext<T, Integer> criteriaContext = getSearchResultCriteria(
 			    createCriteriaContext((Class<T>) typeToken.getRawType(), Integer.class), theParams);
 			
-			String idProperty = getIdPropertyName(criteriaContext);
+			String idProperty = getIdPropertyName(criteriaContext.getEntityManager());
 			
 			CriteriaQuery<Integer> query = criteriaContext.finalizeIdQuery(idProperty);
 			
 			List<Integer> ids = criteriaContext.getEntityManager().createQuery(query).getResultList();
+			
+			if (ids == null || ids.isEmpty()) {
+				return Collections.emptyList();
+			}
 			
 			// Use distinct ids from the original query to return entire objects
 			@SuppressWarnings({ "UnstableApiUsage", "unchecked" })
@@ -216,21 +234,10 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 			criteriaContext.getCriteriaQuery().select(criteriaContext.getCriteriaBuilder().count(criteriaContext.getRoot()));
 		} else {
 			criteriaContext.getCriteriaQuery().select(criteriaContext.getCriteriaBuilder()
-			        .countDistinct(criteriaContext.getRoot().get(getIdPropertyName(criteriaContext))));
+			        .countDistinct(criteriaContext.getRoot().get(getIdPropertyName(criteriaContext.getEntityManager()))));
 		}
 		
 		return criteriaContext.getEntityManager().createQuery(criteriaContext.finalizeQuery()).getSingleResult().intValue();
-	}
-	
-	protected static <V> V deproxyObject(@Nonnull V object) {
-		if (object instanceof HibernateProxy) {
-			Hibernate.initialize(object);
-			@SuppressWarnings("unchecked")
-			V theResult = (V) ((HibernateProxy) object).getHibernateLazyInitializer().getImplementation();
-			return theResult;
-		}
-		
-		return object;
 	}
 	
 	protected <V, U> void applyExactTotal(@Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext,
@@ -249,13 +256,35 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 		}
 	}
 	
+	/**
+	 * This is an overrideable implementation to convert a result that may be a proxied Hibernate object
+	 * into its underlying implementation.
+	 * <p/>
+	 * Overrides are most commonly needed where, e.g., "deep" properties of an object are usually needed
+	 * to properly convert that object to FHIR, e.g., to ensure that the {@link org.openmrs.Concept}
+	 * associated with an {@link org.openmrs.Obs} is also deproxied when the {@link org.openmrs.Obs} is
+	 * deproxied.
+	 * <p/>
+	 * It is uncommon for subclasses to need this functionality
+	 *
+	 * @param result The Hibernate result object to deproxy
+	 * @return The underlying implementation of the supplied object
+	 * @see BaseDao#deproxyObject(Object)
+	 */
 	protected T deproxyResult(@Nonnull T result) {
 		return deproxyObject(result);
 	}
 	
+	/**
+	 * Gets the name of the property annotated as the {@link javax.persistence.Id} for the persistent
+	 * class this manages.
+	 *
+	 * @param entityManager The current entity manager
+	 * @return The name of the id property for the domain object managed by this class
+	 */
 	@SuppressWarnings("UnstableApiUsage")
-	protected <V, U> String getIdPropertyName(@Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext) {
-		return getIdPropertyName(criteriaContext.getEntityManager(), typeToken.getRawType());
+	protected String getIdPropertyName(@Nonnull EntityManager entityManager) {
+		return getIdPropertyName(entityManager, typeToken.getRawType());
 	}
 	
 	@SuppressWarnings({ "UnstableApiUsage", "unchecked" })
@@ -325,14 +354,14 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	// Implementation of handleLastUpdated for "immutable" types, that is, those that cannot be changed
 	protected <V, U> Optional<Predicate> handleLastUpdatedImmutable(
 	        @Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext, DateRangeParam param) {
-		return handleDateRange(criteriaContext, "dateCreated", param);
+		return getSearchQueryHelper().handleDateRange(criteriaContext, "dateCreated", param);
 	}
 	
 	protected <V, U> Optional<Predicate> handleLastUpdatedMutable(@Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext,
 	        DateRangeParam param) {
 		// @formatter:off
-		return Optional.of(criteriaContext.getCriteriaBuilder().or(toCriteriaArray(handleDateRange(criteriaContext,"dateChanged", param), Optional.of(
-                criteriaContext.getCriteriaBuilder().and(toCriteriaArray(Stream.of(Optional.of(criteriaContext.getCriteriaBuilder().isNull(criteriaContext.getRoot().get("dateChanged"))), handleDateRange(criteriaContext,"dateCreated", param))))))));
+		return Optional.of(criteriaContext.getCriteriaBuilder().or(toCriteriaArray(getSearchQueryHelper().handleDateRange(criteriaContext,"dateChanged", param), Optional.of(
+                criteriaContext.getCriteriaBuilder().and(toCriteriaArray(Stream.of(Optional.of(criteriaContext.getCriteriaBuilder().isNull(criteriaContext.getRoot().get("dateChanged"))), getSearchQueryHelper().handleDateRange(criteriaContext,"dateCreated", param))))))));
 		// @formatter:on
 	}
 	
@@ -359,26 +388,80 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	}
 	
 	/**
+	 * Use this method to properly implement sorting for your query. Note that for this method to work,
+	 * you must override one or more of: {@link #paramToProps(OpenmrsFhirCriteriaContext, SortState)},
+	 * {@link #paramToProps(OpenmrsFhirCriteriaContext, String)}, or
+	 * {@link #paramToProp(OpenmrsFhirCriteriaContext, String)}.
+	 *
+	 * @param criteriaContext The {@link OpenmrsFhirCriteriaContext} for the current query
+	 * @param sort the {@link SortSpec} which defines the sorting to be translated
+	 */
+	protected <V, U> void handleSort(OpenmrsFhirCriteriaContext<V, U> criteriaContext, SortSpec sort) {
+		handleSort(criteriaContext, sort, this::paramToProps).ifPresent(l -> l.forEach(criteriaContext::addOrder));
+	}
+	
+	protected <V, U> Optional<List<javax.persistence.criteria.Order>> handleSort(
+	        OpenmrsFhirCriteriaContext<V, U> criteriaContext, SortSpec sort,
+	        BiFunction<OpenmrsFhirCriteriaContext<V, U>, SortState<V>, Collection<javax.persistence.criteria.Order>> paramToProp) {
+		
+		List<javax.persistence.criteria.Order> orderings = new ArrayList<>();
+		SortSpec sortSpec = sort;
+		while (sortSpec != null) {
+			SortState<V> state = SortState.<V> builder().context(criteriaContext).sortOrder(sortSpec.getOrder())
+			        .parameter(sortSpec.getParamName().toLowerCase()).build();
+			
+			Collection<javax.persistence.criteria.Order> orders = paramToProp.apply(criteriaContext, state);
+			if (orders != null) {
+				orderings.addAll(orders);
+			}
+			
+			sortSpec = sortSpec.getChain();
+		}
+		
+		if (orderings.isEmpty()) {
+			return Optional.empty();
+		}
+		
+		return Optional.of(orderings);
+	}
+	
+	/**
 	 * Override to return false if the getSearchResults may return duplicate items that need to be
 	 * removed from the results. Note that it has performance implications as it requires "select
 	 * distinct" and 2 queries instead of 1 for getting the results.
+	 * <p/>
+	 * This is primarily needed for cases where one domain type extends another, similar to the
+	 * relationship between {@link org.openmrs.Patient} and {@link org.openmrs.Person} where
+	 * {@link org.openmrs.Patient} extends {@link org.openmrs.Person}.
 	 *
-	 * @return See the above explanation
+	 * @return By default, <tt>true</tt>
 	 */
 	protected boolean hasDistinctResults() {
 		return true;
 	}
 	
-	@Override
+	/**
+	 * This function is used to map FHIR parameter names to properties where there is only a single
+	 * property.
+	 *
+	 * @param param the FHIR parameter to map
+	 * @return the name of the corresponding property from the current query
+	 */
 	protected <V, U> Path<?> paramToProp(@Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext, @Nonnull String param) {
 		if (DomainResource.SP_RES_ID.equals(param)) {
 			return criteriaContext.getRoot().get("uuid");
 		}
 		
-		return super.paramToProp(criteriaContext, param);
+		return null;
 	}
 	
-	@Override
+	/**
+	 * This function should be overridden by implementations. It is used to map FHIR parameter names to
+	 * their corresponding values in the query.
+	 *
+	 * @param sortState a {@link SortState} object describing the current sort state
+	 * @return the corresponding ordering(s) needed for this property
+	 */
 	protected <V, U> Collection<javax.persistence.criteria.Order> paramToProps(
 	        @Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext, @Nonnull SortState<V> sortState) {
 		String param = sortState.getParameter();
@@ -404,7 +487,35 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 			}
 		}
 		
-		return super.paramToProps(criteriaContext, sortState);
+		Collection<Path<?>> prop = paramToProps(criteriaContext, sortState.getParameter());
+		if (prop != null) {
+			switch (sortState.getSortOrder()) {
+				case ASC:
+					return prop.stream().map(p -> criteriaContext.getCriteriaBuilder().asc(p)).collect(Collectors.toList());
+				case DESC:
+					return prop.stream().map(p -> criteriaContext.getCriteriaBuilder().desc(p)).collect(Collectors.toList());
+			}
+		}
+		
+		return null;
+	}
+	
+	/**
+	 * This function should be overridden by implementations. It is used to map FHIR parameter names to
+	 * properties where there is only a single property.
+	 *
+	 * @param param the FHIR parameter to map
+	 * @return the name of the corresponding property from the current query
+	 */
+	protected <V, U> Collection<Path<?>> paramToProps(@Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext,
+	        @Nonnull String param) {
+		Path<?> prop = paramToProp(criteriaContext, param);
+		
+		if (prop != null) {
+			return Collections.singleton(prop);
+		}
+		
+		return null;
 	}
 	
 	/**
@@ -419,15 +530,38 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	}
 	
 	/**
-	 * This is intended to be overridden by subclasses to implement any special handling they might
-	 * require
+	 * This is intended to be overridden by subclasses to implement the handling of specific search
+	 * parameters.
+	 * <p/>
+	 * The {@link SearchParameterMap} provides an interface for tracking all the FHIR search parameters
+	 * the user supplied for the current search query. It is the responsibility of this function to map
+	 * all known parameters into JPA criteria {@link Predicate}s that are added to the current
+	 * {@link OpenmrsFhirCriteriaContext}, so that they act as appropriate restrictions on the generated
+	 * queries.
+	 * <p/>
+	 * The {@link BaseDao} and {@link FhirSearchQueryHelper} classes provide helpers for constructing
+	 * such queries, with the {@link BaseDao} providing generic handling for HAPI's
+	 * {@link ca.uhn.fhir.model.api.IQueryParameterAnd} and
+	 * {@link ca.uhn.fhir.model.api.IQueryParameterOr} types. Meanwhile, the
+	 * {@link FhirSearchQueryHelper} provides helpers for correctly constructing predicates for various
+	 * HAPI FHIR types or common query elements, e.g., translating
+	 * {@link ca.uhn.fhir.rest.param.TokenParam}s into queries against the OpenMRS Concept Dictionary.
+	 * <p/>
+	 * Generally, implementations of this class consist of a simple switch statement to handle each
+	 * parameter in turn.
 	 *
 	 * @param criteriaContext The {@link OpenmrsFhirCriteriaContext} for the current query
 	 * @param theParams the parameters for this search
 	 */
+	@SuppressWarnings("SwitchStatementWithTooFewBranches")
 	protected <U> void setupSearchParams(@Nonnull OpenmrsFhirCriteriaContext<T, U> criteriaContext,
 	        @Nonnull SearchParameterMap theParams) {
-		
+		theParams.getParameters().forEach(param -> {
+			switch (param.getKey()) {
+				case COMMON_SEARCH_HANDLER:
+					handleCommonSearchParameters(criteriaContext, param.getValue()).ifPresent(criteriaContext::addPredicate);
+			}
+		});
 	}
 	
 	/**

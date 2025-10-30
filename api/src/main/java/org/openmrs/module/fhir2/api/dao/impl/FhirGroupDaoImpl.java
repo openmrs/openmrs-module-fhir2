@@ -81,9 +81,12 @@ public class FhirGroupDaoImpl extends BaseFhirDao<Cohort> implements FhirGroupDa
 							Join<?, ?> creatorPersonNameJoin = criteriaContext.addJoin(creatorPersonJoin, NAMES_ALIAS, "pn");
 							
 							for (String token : StringUtils.split(participantToken.getValue(), " \t,")) {
-								criterionList.add(propertyLike(criteriaContext, creatorPersonNameJoin, "givenName", token));
-								criterionList.add(propertyLike(criteriaContext, creatorPersonNameJoin, "middleName", token));
-								criterionList.add(propertyLike(criteriaContext, creatorPersonNameJoin, "familyName", token));
+								criterionList.add(getSearchQueryHelper().propertyLike(criteriaContext, creatorPersonNameJoin,
+								    "givenName", token));
+								criterionList.add(getSearchQueryHelper().propertyLike(criteriaContext, creatorPersonNameJoin,
+								    "middleName", token));
+								criterionList.add(getSearchQueryHelper().propertyLike(criteriaContext, creatorPersonNameJoin,
+								    "familyName", token));
 							}
 							
 							return Optional.of(criteriaContext.getCriteriaBuilder().or(toCriteriaArray(criterionList)));

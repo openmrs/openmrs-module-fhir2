@@ -30,11 +30,11 @@ public class FhirDiagnosisDaoImpl extends BaseFhirDao<Diagnosis> implements Fhir
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handlePatientReference(criteriaContext,
+					entry.getValue().forEach(param -> getSearchQueryHelper().handlePatientReference(criteriaContext,
 					    (ReferenceAndListParam) param.getParam(), "patient"));
 					break;
 				case FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handleEncounterReference(criteriaContext,
+					entry.getValue().forEach(param -> getSearchQueryHelper().handleEncounterReference(criteriaContext,
 					    (ReferenceAndListParam) param.getParam(), "encounter"));
 					break;
 				case FhirConstants.CODED_SEARCH_HANDLER:
@@ -53,7 +53,8 @@ public class FhirDiagnosisDaoImpl extends BaseFhirDao<Diagnosis> implements Fhir
 		if (code != null && code.size() > 0) {
 			Join<?, ?> codedOrFreeTextJoin = context.addJoin("diagnosis", "diag");
 			Join<?, ?> codedJoin = context.addJoin(codedOrFreeTextJoin, "coded", "dc");
-			handleCodeableConcept(context, code, codedJoin, "dmap", "dterm").ifPresent(context::addPredicate);
+			getSearchQueryHelper().handleCodeableConcept(context, code, codedJoin, "dmap", "dterm")
+			        .ifPresent(context::addPredicate);
 		}
 	}
 }

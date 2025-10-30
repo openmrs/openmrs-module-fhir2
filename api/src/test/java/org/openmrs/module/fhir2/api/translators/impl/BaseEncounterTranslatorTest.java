@@ -22,7 +22,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Location;
 import org.openmrs.module.fhir2.FhirConstants;
-import org.openmrs.module.fhir2.api.mappings.EncounterClassMap;
+import org.openmrs.module.fhir2.api.dao.impl.FhirEncounterClassMapDaoImpl;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BaseEncounterTranslatorTest {
@@ -30,7 +30,7 @@ public class BaseEncounterTranslatorTest {
 	private static final String LOCATION_UUID = "276379ef-07ce-4108-b5e0-c4dc21964b4f";
 	
 	@Mock
-	private EncounterClassMap encounterClassMap;
+	private FhirEncounterClassMapDaoImpl encounterClassMap;
 	
 	private BaseEncounterTranslator baseEncounterTranslator;
 	

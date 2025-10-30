@@ -13,14 +13,10 @@ import static org.hl7.fhir.r4.model.Encounter.SP_DATE;
 import static org.openmrs.module.fhir2.api.util.LastnOperationUtils.getTopNRankedIds;
 
 import javax.annotation.Nonnull;
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 
 import java.util.List;
 import java.util.Optional;
@@ -47,35 +43,31 @@ public class FhirEncounterDaoImpl extends BaseEncounterDao<Encounter> implements
 	@Override
 	@Transactional(readOnly = true)
 	public List<String> getSearchResultUuids(@Nonnull SearchParameterMap theParams) {
-		OpenmrsFhirCriteriaContext<Encounter, Encounter> criteriaContext = createCriteriaContext(Encounter.class);
-		
 		if (!theParams.getParameters(FhirConstants.LASTN_ENCOUNTERS_SEARCH_HANDLER).isEmpty()) {
+			OpenmrsFhirCriteriaContext<Encounter, Object[]> criteriaContext = createCriteriaContext(Encounter.class,
+			    Object[].class);
+			
 			setupSearchParams(criteriaContext, theParams);
 			
-			EntityManager em = sessionFactory.getCurrentSession();
-			CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
-			CriteriaQuery<Object[]> criteriaQuery = criteriaBuilder.createQuery(Object[].class);
-			Root<Encounter> root = criteriaQuery.from(Encounter.class);
+			criteriaContext.getCriteriaQuery().multiselect(criteriaContext.getRoot().get("uuid"),
+			    criteriaContext.getRoot().get("encounterDatetime"));
 			
-			criteriaQuery.multiselect(root.get("uuid"), root.get("encounterDatetime"));
-			
-			List<LastnResult<String>> results = em.createQuery(criteriaQuery).getResultList().stream()
+			List<LastnResult<String>> results = criteriaContext.getEntityManager()
+			        .createQuery(criteriaContext.finalizeQuery()).getResultList().stream()
 			        .map(array -> new LastnResult<String>(array)).collect(Collectors.toList());
 			
 			return getTopNRankedIds(results, getMaxParameter(theParams));
 		}
 		
+		OpenmrsFhirCriteriaContext<Encounter, String> criteriaContext = createCriteriaContext(Encounter.class, String.class);
+		
 		handleVoidable(criteriaContext);
 		setupSearchParams(criteriaContext, theParams);
 		handleSort(criteriaContext, theParams.getSortSpec());
 		
-		EntityManager em = sessionFactory.getCurrentSession();
-		CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
-		CriteriaQuery<String> query = criteriaBuilder.createQuery(String.class);
-		Root<Encounter> root = query.from(Encounter.class);
-		
-		query.select(root.get("uuid"));
-		return em.createQuery(query).getResultList().stream().distinct().collect(Collectors.toList());
+		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot().get("uuid"));
+		return criteriaContext.getEntityManager().createQuery(criteriaContext.finalizeQuery()).getResultList().stream()
+		        .distinct().collect(Collectors.toList());
 	}
 	
 	@Override
@@ -89,29 +81,37 @@ public class FhirEncounterDaoImpl extends BaseEncounterDao<Encounter> implements
 	}
 	
 	@Override
-	protected <U> void handleDate(OpenmrsFhirCriteriaContext<Encounter, U> criteriaContext, DateRangeParam dateRangeParam) {
-		handleDateRange(criteriaContext, "encounterDatetime", dateRangeParam).ifPresent(criteriaContext::addPredicate);
+	protected <U> Optional<Predicate> handleDate(OpenmrsFhirCriteriaContext<Encounter, U> criteriaContext,
+	        DateRangeParam dateRangeParam) {
+		return getSearchQueryHelper().handleDateRange(criteriaContext, "encounterDatetime", dateRangeParam);
 	}
 	
 	@Override
-	protected <U> void handleEncounterType(OpenmrsFhirCriteriaContext<Encounter, U> criteriaContext,
+	protected <U> Optional<Predicate> handleEncounterType(OpenmrsFhirCriteriaContext<Encounter, U> criteriaContext,
 	        TokenAndListParam tokenAndListParam) {
-		Join<?, ?> join = criteriaContext.addJoin("encounterType", "et");
+		if (tokenAndListParam == null || tokenAndListParam.size() == 0) {
+			return Optional.empty();
+		}
 		
-		handleAndListParam(criteriaContext.getCriteriaBuilder(), tokenAndListParam,
-		    t -> Optional.of(criteriaContext.getCriteriaBuilder().equal(join.get("uuid"), t.getValue())))
-		            .ifPresent(criteriaContext::addPredicate);
+		Join<?, ?> join = criteriaContext.addJoin("encounterType", "et");
+		return handleAndListParam(criteriaContext.getCriteriaBuilder(), tokenAndListParam,
+		    t -> Optional.of(criteriaContext.getCriteriaBuilder().equal(join.get("uuid"), t.getValue())));
 	}
 	
 	@Override
-	protected <U> void handleParticipant(OpenmrsFhirCriteriaContext<Encounter, U> criteriaContext,
+	protected <U> Optional<Predicate> handleParticipant(OpenmrsFhirCriteriaContext<Encounter, U> criteriaContext,
 	        ReferenceAndListParam referenceAndListParam) {
+		if (referenceAndListParam == null || referenceAndListParam.size() == 0) {
+			return Optional.empty();
+		}
+		
 		From<?, ?> epJoin = criteriaContext.addJoin("encounterProviders", "ep");
-		handleParticipantReference(criteriaContext, referenceAndListParam, epJoin);
+		return getSearchQueryHelper().handleParticipantReference(criteriaContext, referenceAndListParam, epJoin);
 	}
 	
 	@Override
-	protected <V, U> Path<?> paramToProp(@Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext, @NonNull String param) {
+	@SuppressWarnings("SwitchStatementWithTooFewBranches")
+	protected <T, U> Path<?> paramToProp(@Nonnull OpenmrsFhirCriteriaContext<T, U> criteriaContext, @NonNull String param) {
 		switch (param) {
 			case SP_DATE:
 				return criteriaContext.getRoot().get("encounterDatetime");

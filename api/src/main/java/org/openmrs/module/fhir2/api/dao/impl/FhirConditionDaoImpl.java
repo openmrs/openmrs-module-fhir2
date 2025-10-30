@@ -43,8 +43,8 @@ public class FhirConditionDaoImpl extends BaseFhirDao<Condition> implements Fhir
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER:
-					entry.getValue().forEach(
-					    param -> handlePatientReference(criteriaContext, (ReferenceAndListParam) param.getParam()));
+					entry.getValue().forEach(param -> getSearchQueryHelper().handlePatientReference(criteriaContext,
+					    (ReferenceAndListParam) param.getParam()));
 					break;
 				case FhirConstants.CODED_SEARCH_HANDLER:
 					entry.getValue().forEach(param -> handleCode(criteriaContext, (TokenAndListParam) param.getParam()));
@@ -54,9 +54,9 @@ public class FhirConditionDaoImpl extends BaseFhirDao<Condition> implements Fhir
 					        .forEach(param -> handleClinicalStatus(criteriaContext, (TokenAndListParam) param.getParam()));
 					break;
 				case FhirConstants.DATE_RANGE_SEARCH_HANDLER:
-					entry.getValue().forEach(
-					    param -> handleDateRange(criteriaContext, param.getPropertyName(), (DateRangeParam) param.getParam())
-					            .ifPresent(criteriaContext::addPredicate));
+					entry.getValue().forEach(param -> getSearchQueryHelper()
+					        .handleDateRange(criteriaContext, param.getPropertyName(), (DateRangeParam) param.getParam())
+					        .ifPresent(criteriaContext::addPredicate));
 					break;
 				case FhirConstants.QUANTITY_SEARCH_HANDLER:
 					entry.getValue()
@@ -73,7 +73,8 @@ public class FhirConditionDaoImpl extends BaseFhirDao<Condition> implements Fhir
 		if (code != null) {
 			From<?, ?> conditionJoin = criteriaContext.addJoin("condition", "condition");
 			From<?, ?> codedJoin = criteriaContext.addJoin(conditionJoin, "coded", "cd");
-			handleCodeableConcept(criteriaContext, code, codedJoin, "map", "term").ifPresent(criteriaContext::addPredicate);
+			getSearchQueryHelper().handleCodeableConcept(criteriaContext, code, codedJoin, "map", "term")
+			        .ifPresent(criteriaContext::addPredicate);
 		}
 	}
 	
@@ -95,7 +96,7 @@ public class FhirConditionDaoImpl extends BaseFhirDao<Condition> implements Fhir
 	private <U> void handleOnsetAge(OpenmrsFhirCriteriaContext<Condition, U> criteriaContext,
 	        QuantityAndListParam onsetAge) {
 		handleAndListParam(criteriaContext.getCriteriaBuilder(), onsetAge,
-		    onsetAgeParam -> handleAgeByDateProperty(criteriaContext, "onsetDate", onsetAgeParam))
+		    onsetAgeParam -> getSearchQueryHelper().handleAgeByDateProperty(criteriaContext, "onsetDate", onsetAgeParam))
 		            .ifPresent(criteriaContext::addPredicate);
 	}
 	

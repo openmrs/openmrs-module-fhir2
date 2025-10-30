@@ -58,7 +58,7 @@ public class FhirMedicationDaoImpl extends BaseFhirDao<Drug> implements FhirMedi
 			
 			OpenmrsFhirCriteriaSubquery<Concept, Integer> conceptSubquery = criteriaContext.addSubquery(Concept.class,
 			    Integer.class);
-			handleCodeableConcept(criteriaContext, ingredientCode, conceptJoin, "icm", "icrt")
+			getSearchQueryHelper().handleCodeableConcept(criteriaContext, ingredientCode, conceptJoin, "icm", "icrt")
 			        .ifPresent(conceptSubquery::addPredicate);
 			conceptSubquery.setProjection(conceptSubquery.getRoot().get("conceptId"));
 			
@@ -70,7 +70,7 @@ public class FhirMedicationDaoImpl extends BaseFhirDao<Drug> implements FhirMedi
 	private <U> void handleMedicationCode(OpenmrsFhirCriteriaContext<Drug, U> criteriaContext, TokenAndListParam code) {
 		if (code != null) {
 			From<?, ?> conceptJoin = criteriaContext.addJoin("concept", "c");
-			handleCodeableConcept(criteriaContext, code, conceptJoin, "ccm", "ccrt")
+			getSearchQueryHelper().handleCodeableConcept(criteriaContext, code, conceptJoin, "ccm", "ccrt")
 			        .ifPresent(criteriaContext::addPredicate);
 			criteriaContext.finalizeQuery();
 		}
@@ -80,7 +80,7 @@ public class FhirMedicationDaoImpl extends BaseFhirDao<Drug> implements FhirMedi
 	        TokenAndListParam dosageForm) {
 		if (dosageForm != null) {
 			From<?, ?> dosageFormJoin = criteriaContext.addJoin("dosageForm", "dc");
-			handleCodeableConcept(criteriaContext, dosageForm, dosageFormJoin, "dcm", "dcrt")
+			getSearchQueryHelper().handleCodeableConcept(criteriaContext, dosageForm, dosageFormJoin, "dcm", "dcrt")
 			        .ifPresent(criteriaContext::addPredicate);
 			criteriaContext.finalizeQuery();
 		}

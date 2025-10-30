@@ -56,14 +56,16 @@ public class FhirPersonDaoImpl extends BasePersonDao<Person> implements FhirPers
 					break;
 				case FhirConstants.GENDER_SEARCH_HANDLER:
 					entry.getValue()
-					        .forEach(param -> handleGender(criteriaContext, getPersonProperty(criteriaContext),
-					            FhirConstants.GENDER_PROPERTY, (TokenAndListParam) param.getParam())
-					                    .ifPresent(criteriaContext::addPredicate));
+					        .forEach(param -> getSearchQueryHelper()
+					                .handleGender(criteriaContext, getPersonProperty(criteriaContext),
+					                    FhirConstants.GENDER_PROPERTY, (TokenAndListParam) param.getParam())
+					                .ifPresent(criteriaContext::addPredicate));
 					break;
 				case FhirConstants.DATE_RANGE_SEARCH_HANDLER:
-					entry.getValue().forEach(
-					    param -> handleDateRange(criteriaContext, "birthdate", (DateRangeParam) param.getParam())
-					            .ifPresent(criteriaContext::addPredicate));
+					entry.getValue()
+					        .forEach(param -> getSearchQueryHelper()
+					                .handleDateRange(criteriaContext, "birthdate", (DateRangeParam) param.getParam())
+					                .ifPresent(criteriaContext::addPredicate));
 					break;
 				case FhirConstants.ADDRESS_SEARCH_HANDLER:
 					handleAddresses(criteriaContext, entry);
@@ -79,12 +81,12 @@ public class FhirPersonDaoImpl extends BasePersonDao<Person> implements FhirPers
 	protected <T, U> Optional<Predicate> handleLastUpdated(@Nonnull OpenmrsFhirCriteriaContext<T, U> criteriaContext,
 	        DateRangeParam param) {
 		return Optional.of(criteriaContext.getCriteriaBuilder().or(toCriteriaArray(
-		    handleDateRange(criteriaContext, "personDateChanged", param),
+		    getSearchQueryHelper().handleDateRange(criteriaContext, "personDateChanged", param),
 		    Optional.of(criteriaContext.getCriteriaBuilder()
 		            .and(toCriteriaArray(Stream.of(
 		                Optional.of(
 		                    criteriaContext.getCriteriaBuilder().isNull(criteriaContext.getRoot().get("personDateChanged"))),
-		                handleDateRange(criteriaContext, "personDateCreated", param))))))));
+		                getSearchQueryHelper().handleDateRange(criteriaContext, "personDateCreated", param))))))));
 	}
 	
 	@Override

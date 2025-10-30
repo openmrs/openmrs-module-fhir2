@@ -119,10 +119,14 @@ public class OpenmrsFhirCriteriaContext<T, U> extends BaseFhirCriteriaHolder<T> 
 	
 	public CriteriaQuery<U> finalizeQuery() {
 		CriteriaQuery<U> cq = getCriteriaQuery();
-		cq = cq.where(getPredicates().toArray(new Predicate[0]));
+		if (!getPredicates().isEmpty()) {
+			cq = cq.where(getPredicates().toArray(new Predicate[0]));
+		}
+		
 		if (!orders.isEmpty()) {
 			cq = cq.orderBy(orders);
 		}
+		
 		return cq;
 	}
 	

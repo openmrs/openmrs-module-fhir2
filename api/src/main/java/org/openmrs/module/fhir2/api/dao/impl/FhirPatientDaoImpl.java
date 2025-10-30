@@ -12,6 +12,7 @@ package org.openmrs.module.fhir2.api.dao.impl;
 import static org.hl7.fhir.r4.model.Patient.SP_DEATH_DATE;
 
 import javax.annotation.Nonnull;
+import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Join;
@@ -99,36 +100,54 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 	}
 	
 	@Override
+	protected String getIdPropertyName(@Nonnull EntityManager entityManager) {
+		// since a patient is-a person, the id returned by default is "personId", but this is not actually
+		// a property of patient, so the selection fails
+		return "patientId";
+	}
+	
+	@Override
+	protected boolean hasDistinctResults() {
+		return false;
+	}
+	
+	@Override
 	protected <U> void setupSearchParams(@Nonnull OpenmrsFhirCriteriaContext<Patient, U> criteriaContext,
 	        @Nonnull SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.QUERY_SEARCH_HANDLER:
 					entry.getValue()
-					        .forEach(query -> handlePatientQuery(criteriaContext, (StringAndListParam) query.getParam()));
+					        .forEach(query -> handlePatientQuery(criteriaContext, (StringAndListParam) query.getParam())
+					                .ifPresent(criteriaContext::addPredicate));
 					break;
 				case FhirConstants.NAME_SEARCH_HANDLER:
 					handleNames(criteriaContext, entry.getValue());
 					break;
 				case FhirConstants.GENDER_SEARCH_HANDLER:
 					entry.getValue()
-					        .forEach(p -> handleGender(criteriaContext, getPersonProperty(criteriaContext),
-					            FhirConstants.GENDER_PROPERTY, (TokenAndListParam) p.getParam())
-					                    .ifPresent(criteriaContext::addPredicate));
+					        .forEach(p -> getSearchQueryHelper()
+					                .handleGender(criteriaContext, getPersonProperty(criteriaContext),
+					                    FhirConstants.GENDER_PROPERTY, (TokenAndListParam) p.getParam())
+					                .ifPresent(criteriaContext::addPredicate));
 					break;
 				case FhirConstants.IDENTIFIER_SEARCH_HANDLER:
 					entry.getValue().forEach(
-					    identifier -> handleIdentifier(criteriaContext, (TokenAndListParam) identifier.getParam()));
+					    identifier -> handleIdentifier(criteriaContext, (TokenAndListParam) identifier.getParam())
+					            .ifPresent(criteriaContext::addPredicate));
 					break;
 				case FhirConstants.DATE_RANGE_SEARCH_HANDLER:
 					entry.getValue()
-					        .forEach(dateRangeParam -> handleDateRange(criteriaContext, dateRangeParam.getPropertyName(),
-					            (DateRangeParam) dateRangeParam.getParam()).ifPresent(criteriaContext::addPredicate));
+					        .forEach(dateRangeParam -> getSearchQueryHelper()
+					                .handleDateRange(criteriaContext, dateRangeParam.getPropertyName(),
+					                    (DateRangeParam) dateRangeParam.getParam())
+					                .ifPresent(criteriaContext::addPredicate));
 					break;
 				case FhirConstants.BOOLEAN_SEARCH_HANDLER:
-					entry.getValue().forEach(
-					    b -> handleBoolean(criteriaContext, b.getPropertyName(), (TokenAndListParam) b.getParam())
-					            .ifPresent(criteriaContext::addPredicate));
+					entry.getValue()
+					        .forEach(b -> getSearchQueryHelper()
+					                .handleBoolean(criteriaContext, b.getPropertyName(), (TokenAndListParam) b.getParam())
+					                .ifPresent(criteriaContext::addPredicate));
 					break;
 				case FhirConstants.ADDRESS_SEARCH_HANDLER:
 					handleAddresses(criteriaContext, entry);
@@ -174,7 +193,8 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 		}
 	}
 	
-	private <U> void verifyPatientInGroups(OpenmrsFhirCriteriaContext<Patient, U> criteriaContext, List<String> groupIds) {
+	protected <U> void verifyPatientInGroups(@Nonnull OpenmrsFhirCriteriaContext<Patient, U> criteriaContext,
+	        List<String> groupIds) {
 		Set<Integer> patientIds = new HashSet<>();
 		groupIds.forEach(groupId -> patientIds.addAll(getGroupMemberIds(groupId)));
 		
@@ -192,43 +212,44 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 		return criteriaContext.getEntityManager().createQuery(criteriaContext.finalizeQuery()).getResultList();
 	}
 	
-	private <U> void handlePatientQuery(OpenmrsFhirCriteriaContext<Patient, U> criteriaContext,
+	private <U> Optional<Predicate> handlePatientQuery(@Nonnull OpenmrsFhirCriteriaContext<Patient, U> criteriaContext,
 	        @Nonnull StringAndListParam query) {
 		if (query == null) {
-			return;
+			return Optional.empty();
 		}
+		
 		Join<?, ?> personNameJoin = criteriaContext.addJoin("names", "pn");
 		Join<?, ?> identifiersJoin = criteriaContext.addJoin("identifiers", "pi");
 		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().equal(personNameJoin.get("voided"), false));
 		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().equal(identifiersJoin.get("voided"), false));
 		
-		handleAndListParam(criteriaContext.getCriteriaBuilder(), query, q -> {
+		return handleAndListParam(criteriaContext.getCriteriaBuilder(), query, q -> {
 			List<Optional<? extends Predicate>> arrayList = new ArrayList<>();
 			
 			for (String token : StringUtils.split(q.getValueNotNull(), " \t,")) {
 				StringParam param = new StringParam(token).setContains(q.isContains()).setExact(q.isExact());
-				arrayList.add(propertyLike(criteriaContext, personNameJoin, "givenName", param));
-				arrayList.add(propertyLike(criteriaContext, personNameJoin, "middleName", param));
-				arrayList.add(propertyLike(criteriaContext, personNameJoin, "familyName", param));
+				arrayList.add(getSearchQueryHelper().propertyLike(criteriaContext, personNameJoin, "givenName", param));
+				arrayList.add(getSearchQueryHelper().propertyLike(criteriaContext, personNameJoin, "middleName", param));
+				arrayList.add(getSearchQueryHelper().propertyLike(criteriaContext, personNameJoin, "familyName", param));
 			}
 			
-			arrayList.add(propertyLike(criteriaContext, identifiersJoin, "identifier",
+			arrayList.add(getSearchQueryHelper().propertyLike(criteriaContext, identifiersJoin, "identifier",
 			    new StringParam(q.getValueNotNull()).setContains(q.isContains()).setExact(q.isExact())));
 			
 			return Optional.of(criteriaContext.getCriteriaBuilder().or(toCriteriaArray(arrayList)));
-		}).ifPresent(criteriaContext::addPredicate);
+		});
 	}
 	
-	protected <U> void handleIdentifier(OpenmrsFhirCriteriaContext<Patient, U> criteriaContext,
+	protected <U> Optional<Predicate> handleIdentifier(OpenmrsFhirCriteriaContext<Patient, U> criteriaContext,
 	        TokenAndListParam identifier) {
 		if (identifier == null) {
-			return;
+			return Optional.empty();
 		}
 		
 		Join<?, ?> identifiersJoin = criteriaContext.addJoin("identifiers", "pi");
 		criteriaContext.getCriteriaBuilder().equal(identifiersJoin.get("voided"), false);
 		
-		handleAndListParamBySystem(criteriaContext.getCriteriaBuilder(), identifier, (system, tokens) -> {
+		return handleAndListParamBySystem(criteriaContext.getCriteriaBuilder(), identifier, (system, tokens) -> {
 			if (system.isEmpty()) {
 				return Optional.of(
 				    criteriaContext.getCriteriaBuilder().in(identifiersJoin.get("identifier")).value(tokensToList(tokens)));
@@ -240,7 +261,7 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 				    criteriaContext.getCriteriaBuilder().equal(identifiersIdentifierTypeJoin.get("name"), system),
 				    criteriaContext.getCriteriaBuilder().in(identifiersJoin.get("identifier")).value(tokensToList(tokens))));
 			}
-		}).ifPresent(criteriaContext::addPredicate);
+		});
 	}
 	
 	@Override
@@ -248,18 +269,7 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 		if (SP_DEATH_DATE.equalsIgnoreCase(param)) {
 			return criteriaContext.getRoot().get("deathDate");
 		}
+		
 		return super.paramToProp(criteriaContext, param);
-	}
-	
-	@Override
-	protected <V, U> String getIdPropertyName(@Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext) {
-		// since a patient is-a person, the id returned by default is "personId", but this is not actually
-		// a property of patient, so the selection fails
-		return "patientId";
-	}
-	
-	@Override
-	public boolean hasDistinctResults() {
-		return false;
 	}
 }
