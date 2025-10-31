@@ -44,7 +44,6 @@ import org.openmrs.module.fhir2.api.dao.FhirEncounterDao;
 import org.openmrs.module.fhir2.api.dao.FhirObservationDao;
 import org.openmrs.module.fhir2.api.dao.internals.OpenmrsFhirCriteriaContext;
 import org.openmrs.module.fhir2.api.dao.internals.OpenmrsFhirCriteriaSubquery;
-import org.openmrs.module.fhir2.api.mappings.ObservationCategoryMap;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.model.FhirObservationCategoryMap;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,7 +55,7 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 	
 	@Getter(AccessLevel.PROTECTED)
 	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
-	private ObservationCategoryMap categoryMap;
+	private FhirObservationCategoryMapDaoImpl categoryMap;
 	
 	@Getter(AccessLevel.PROTECTED)
 	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)

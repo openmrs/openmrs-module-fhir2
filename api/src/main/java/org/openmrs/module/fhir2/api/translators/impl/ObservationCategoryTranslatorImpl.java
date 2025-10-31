@@ -19,7 +19,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.openmrs.Concept;
 import org.openmrs.module.fhir2.FhirConstants;
-import org.openmrs.module.fhir2.api.mappings.ObservationCategoryMap;
+import org.openmrs.module.fhir2.api.dao.impl.FhirObservationCategoryMapDaoImpl;
 import org.openmrs.module.fhir2.api.translators.ObservationCategoryTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
@@ -30,7 +30,7 @@ public class ObservationCategoryTranslatorImpl implements ObservationCategoryTra
 	
 	@Getter(PROTECTED)
 	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private ObservationCategoryMap categoryMap;
+	private FhirObservationCategoryMapDaoImpl categoryMap;
 	
 	@Override
 	@Cacheable(value = "fhir2ObservationCategoryToCodeableConcept")
