@@ -29,6 +29,19 @@ import org.openmrs.Location;
 import org.openmrs.Retireable;
 import org.openmrs.User;
 
+/**
+ * This is class supports a mapping between a FHIR Encounter class and an OpenMRS location.
+ * <p/>
+ * FHIR's Encounter class property is generally used to differentiate between the type of setting
+ * that an encounter took place in, e.g., ambulatory encounters vs those that happened in an
+ * emergency, inpatient or virtual context. In OpenMRS, we currently have no way to directly
+ * represent this information, at least in a persistent fashion. However, clinical locations are
+ * often good proxies for the type of visit, as an outpatient clinic is unlikely to have many
+ * inpatient encounters. And since we <em>do</em> have mappings between encounters and the location
+ * where it happened, we can use this information to infer what the FHIR Encounter class should be.
+ * <p/>
+ * We assume that each location only has a single type of encounter that occurs there.
+ */
 @Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @Entity
