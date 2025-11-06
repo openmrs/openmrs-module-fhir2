@@ -162,6 +162,11 @@ public abstract class BaseFhirCriteriaHolder<V> {
 	 * explicitly joined to the {@link From} object passed in, which should be either the root or
 	 * another join. This join is filtered using the resulting predicate returned from the
 	 * {@param onGenerator} parameter.
+	 * <p/>
+	 * If a join with the given alias already exists, this method will reuse that join. If the existing
+	 * join has an ON clause and a new {@code onGenerator} is provided, the new predicate will be
+	 * combined with the existing ON clause using {@code AND} logic. This allows multiple calls to
+	 * progressively refine the join conditions.
 	 *
 	 * @param from The {@link From} object that represents the table to join with
 	 * @param attributeName The name of the attribute (from the {@link From} object) to join on
@@ -169,25 +174,45 @@ public abstract class BaseFhirCriteriaHolder<V> {
 	 * @param joinType The {@link JoinType} representing the type of join, i.e., {@code INNER},
 	 *            {@code LEFT}, {@code RIGHT}
 	 * @param onGenerator A {@link Function} that takes a {@link From} object and returns the predicate
-	 *            for the on clause
-	 * @return Returns the new {@link Join} that has been added to the criteria context
+	 *            for the on clause. If a join with this alias already exists with an ON clause, the new
+	 *            predicate will be ANDed with the existing one.
+	 * @return Returns the {@link Join} that has been added to or retrieved from the criteria context
 	 */
 	public Join<?, ?> addJoin(From<?, ?> from, @Nonnull String attributeName, @Nonnull String alias,
 	        @Nonnull JoinType joinType, Function<From<?, ?>, Predicate> onGenerator) {
-		return Optional.<Join<?, ?>> ofNullable(aliases.get(alias)).orElseGet(() -> {
-			Join<?, ?> newJoin = from.join(attributeName, joinType);
-			newJoin.alias(alias);
-			aliases.put(alias, newJoin);
-			
+		Join<?, ?> existingJoin = aliases.get(alias);
+		
+		if (existingJoin != null) {
+			// If we have a new ON clause to add to an existing join, combine them with AND
 			if (onGenerator != null) {
-				Predicate onPredicate = onGenerator.apply(newJoin);
-				if (onPredicate != null) {
-					newJoin.on(onPredicate);
+				Predicate newOnPredicate = onGenerator.apply(existingJoin);
+				if (newOnPredicate != null) {
+					Predicate existingOnPredicate = existingJoin.getOn();
+					if (existingOnPredicate != null) {
+						// Combine existing and new predicates with AND
+						existingJoin.on(getCriteriaBuilder().and(existingOnPredicate, newOnPredicate));
+					} else {
+						// No existing ON clause, just set the new one
+						existingJoin.on(newOnPredicate);
+					}
 				}
 			}
-			
-			return newJoin;
-		});
+			return existingJoin;
+		}
+		
+		// Create new join
+		Join<?, ?> newJoin = from.join(attributeName, joinType);
+		newJoin.alias(alias);
+		aliases.put(alias, newJoin);
+		
+		if (onGenerator != null) {
+			Predicate onPredicate = onGenerator.apply(newJoin);
+			if (onPredicate != null) {
+				newJoin.on(onPredicate);
+			}
+		}
+		
+		return newJoin;
 	}
 	
 	public BaseFhirCriteriaHolder<V> addPredicate(Predicate predicate) {

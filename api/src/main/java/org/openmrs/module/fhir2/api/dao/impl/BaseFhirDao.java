@@ -192,21 +192,54 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 			
 			results = executableQuery.getResultList();
 		} else {
+			// For non-distinct results, use a two-query approach:
+			// 1. Get sorted, paginated IDs with necessary join conditions
+			// 2. Fetch full objects using those IDs
+			
 			@SuppressWarnings({ "UnstableApiUsage", "unchecked" })
-			OpenmrsFhirCriteriaContext<T, Integer> criteriaContext = getSearchResultCriteria(
-			    createCriteriaContext((Class<T>) typeToken.getRawType(), Integer.class), theParams);
+			OpenmrsFhirCriteriaContext<T, Object[]> criteriaContext = getSearchResultCriteria(
+			    createCriteriaContext((Class<T>) typeToken.getRawType(), Object[].class), theParams);
 			
 			String idProperty = getIdPropertyName(criteriaContext.getEntityManager());
 			
-			CriteriaQuery<Integer> query = criteriaContext.finalizeIdQuery(idProperty);
+			// Apply sorting to the ID query so we can paginate correctly
+			handleSort(criteriaContext, theParams.getSortSpec());
+			handleIdPropertyOrdering(criteriaContext, idProperty);
 			
-			List<Integer> ids = criteriaContext.getEntityManager().createQuery(query).getResultList();
+			CriteriaQuery<Object[]> query = criteriaContext.finalizeIdQuery(idProperty);
 			
-			if (ids == null || ids.isEmpty()) {
+			// Apply pagination to the ID query
+			TypedQuery<Object[]> idQuery = criteriaContext.getEntityManager().createQuery(query);
+			idQuery.setFirstResult(theParams.getFromIndex());
+			if (theParams.getToIndex() != Integer.MAX_VALUE && theParams.getToIndex() >= 0) {
+				int maxResults = theParams.getToIndex() - theParams.getFromIndex();
+				if (maxResults >= 0) {
+					idQuery.setMaxResults(maxResults);
+				}
+			}
+			
+			List<Object[]> idResults = idQuery.getResultList();
+			
+			if (idResults == null || idResults.isEmpty()) {
 				return Collections.emptyList();
 			}
 			
-			// Use distinct ids from the original query to return entire objects
+			// Extract IDs from the results
+			// If there are sort orders, finalizeIdQuery returns Object[] with ID as first element
+			// Otherwise, it returns just the ID
+			List<Integer> ids = new ArrayList<>();
+			for (Object[] row : idResults) {
+				if (row != null && row.length > 0 && row[0] != null) {
+					ids.add((Integer) row[0]);
+				}
+			}
+			
+			if (ids.isEmpty()) {
+				return Collections.emptyList();
+			}
+			
+			// Use the IDs to fetch full objects
+			// We still need to sort the wrapper query to maintain the order, as IN() doesn't guarantee order
 			@SuppressWarnings({ "UnstableApiUsage", "unchecked" })
 			OpenmrsFhirCriteriaContext<T, T> wrapperQuery = createCriteriaContext((Class<T>) typeToken.getRawType());
 			

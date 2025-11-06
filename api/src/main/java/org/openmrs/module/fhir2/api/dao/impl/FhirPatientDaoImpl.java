@@ -218,10 +218,10 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 			return Optional.empty();
 		}
 		
-		Join<?, ?> personNameJoin = criteriaContext.addJoin("names", "pn");
-		Join<?, ?> identifiersJoin = criteriaContext.addJoin("identifiers", "pi");
-		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().equal(personNameJoin.get("voided"), false));
-		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().equal(identifiersJoin.get("voided"), false));
+		Join<?, ?> personNameJoin = criteriaContext.addJoin("names", "pn",
+		    pn -> criteriaContext.getCriteriaBuilder().equal(pn.get("voided"), false));
+		Join<?, ?> identifiersJoin = criteriaContext.addJoin("identifiers", "pi",
+		    pi -> criteriaContext.getCriteriaBuilder().equal(pi.get("voided"), false));
 		
 		return handleAndListParam(criteriaContext.getCriteriaBuilder(), query, q -> {
 			List<Optional<? extends Predicate>> arrayList = new ArrayList<>();
@@ -246,8 +246,8 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 			return Optional.empty();
 		}
 		
-		Join<?, ?> identifiersJoin = criteriaContext.addJoin("identifiers", "pi");
-		criteriaContext.getCriteriaBuilder().equal(identifiersJoin.get("voided"), false);
+		Join<?, ?> identifiersJoin = criteriaContext.addJoin("identifiers", "pi",
+		    pi -> criteriaContext.getCriteriaBuilder().equal(pi.get("voided"), false));
 		
 		return handleAndListParamBySystem(criteriaContext.getCriteriaBuilder(), identifier, (system, tokens) -> {
 			if (system.isEmpty()) {
