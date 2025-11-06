@@ -17,6 +17,7 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -74,6 +75,8 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 			    criteriaContext.getCriteriaBuilder().asc(conceptJoin.get(conceptIdProperty)),
 			    criteriaContext.getCriteriaBuilder().desc(criteriaContext.getRoot().get("obsDatetime")));
 			
+			// Accumulate results across batched queries for $lastn operation
+			List<Obs> accumulatedResults = new ArrayList<>();
 			int firstResult = 0;
 			final int maxGroupCount = getMaxParameter(theParams);
 			final int batchSize = 100;
@@ -81,7 +84,7 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 			Date prevObsDatetime = null;
 			int groupCount = maxGroupCount;
 			
-			while (criteriaContext.getResults().size() < theParams.getToIndex()) {
+			while (accumulatedResults.size() < theParams.getToIndex()) {
 				TypedQuery<Obs> obsQuery = criteriaContext.getEntityManager().createQuery(finalizedQuery);
 				obsQuery.setFirstResult(firstResult);
 				obsQuery.setMaxResults(batchSize);
@@ -96,17 +99,17 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 								groupCount--;
 							}
 							prevObsDatetime = obs.getObsDatetime();
-							criteriaContext.addResults(obs);
+							accumulatedResults.add(obs);
 						}
 					} else {
 						prevConcept = obs.getConcept();
 						prevObsDatetime = obs.getObsDatetime();
 						groupCount = maxGroupCount;
-						criteriaContext.addResults(obs);
+						accumulatedResults.add(obs);
 						groupCount--;
 					}
 					
-					if (criteriaContext.getResults().size() >= theParams.getToIndex()) {
+					if (accumulatedResults.size() >= theParams.getToIndex()) {
 						// Load only as many results as requested per page
 						break;
 					}
@@ -119,8 +122,8 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 				}
 			}
 			
-			int toIndex = Math.min(criteriaContext.getResults().size(), theParams.getToIndex());
-			return criteriaContext.getResults().subList(theParams.getFromIndex(), toIndex).stream().map(this::deproxyResult)
+			int toIndex = Math.min(accumulatedResults.size(), theParams.getToIndex());
+			return accumulatedResults.subList(theParams.getFromIndex(), toIndex).stream().map(this::deproxyResult)
 			        .collect(Collectors.toList());
 		}
 		

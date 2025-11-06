@@ -56,9 +56,6 @@ public class OpenmrsFhirCriteriaContext<T, U> extends BaseFhirCriteriaHolder<T> 
 	@Getter(onMethod = @__({ @Nonnull }))
 	private final List<Order> orders = new ArrayList<>();
 	
-	@Getter(onMethod = @__({ @Nonnull }))
-	private final List<T> results = new ArrayList<>();
-	
 	public OpenmrsFhirCriteriaContext(@Nonnull EntityManager entityManager, @NonNull CriteriaBuilder criteriaBuilder,
 	    @Nonnull CriteriaQuery<U> criteriaQuery, @NonNull Root<T> root) {
 		super(criteriaBuilder, root);
@@ -108,16 +105,30 @@ public class OpenmrsFhirCriteriaContext<T, U> extends BaseFhirCriteriaHolder<T> 
 		return (OpenmrsFhirCriteriaContext<T, U>) super.addPredicate(predicate);
 	}
 	
+	/**
+	 * Adds an {@link Order} to the list of sort orders for this query. Multiple orders can be added and
+	 * will be applied in the sequence they are added. These orders are applied when
+	 * {@link #finalizeQuery()}, {@link #finalizeIdQuery(String)}, or
+	 * {@link #finalizeWrapperQuery(String, Collection)} are called.
+	 *
+	 * @param order The {@link Order} to add to the query
+	 * @return The current context to facilitate chaining
+	 */
 	public OpenmrsFhirCriteriaContext<T, U> addOrder(Order order) {
 		orders.add(order);
 		return this;
 	}
 	
-	public OpenmrsFhirCriteriaContext<T, U> addResults(T result) {
-		results.add(result);
-		return this;
-	}
-	
+	/**
+	 * Finalizes the query by applying all accumulated predicates and sort orders to the
+	 * {@link CriteriaQuery}. This should be called once the query has been fully constructed and is
+	 * ready to be executed.
+	 * <p/>
+	 * This method does not set the SELECT clause - that should be done separately using
+	 * {@code getCriteriaQuery().select()}.
+	 *
+	 * @return The finalized {@link CriteriaQuery} with WHERE and ORDER BY clauses applied
+	 */
 	public CriteriaQuery<U> finalizeQuery() {
 		CriteriaQuery<U> cq = getCriteriaQuery();
 		if (!getPredicates().isEmpty()) {
@@ -164,6 +175,20 @@ public class OpenmrsFhirCriteriaContext<T, U> extends BaseFhirCriteriaHolder<T> 
 		return query;
 	}
 	
+	/**
+	 * Finalizes a query that fetches full objects using a list of IDs obtained from a previous query.
+	 * This is the second part of the two-query approach used for non-distinct results, where the first
+	 * query ({@link #finalizeIdQuery(String)}) retrieves matching IDs, and this query fetches the
+	 * complete objects.
+	 * <p/>
+	 * The query is constructed with a {@code WHERE id IN (...)} clause and applies the accumulated sort
+	 * orders to maintain result ordering.
+	 *
+	 * @param idProperty The name of the ID property to filter on
+	 * @param ids The collection of IDs to fetch
+	 * @return A finalized {@link CriteriaQuery} selecting full objects matching the provided IDs
+	 * @see #finalizeIdQuery(String) for the first part of the two-query approach
+	 */
 	public CriteriaQuery<U> finalizeWrapperQuery(String idProperty, Collection<Integer> ids) {
 		return getCriteriaQuery().where(getRoot().get(idProperty).in(ids)).orderBy(orders);
 	}

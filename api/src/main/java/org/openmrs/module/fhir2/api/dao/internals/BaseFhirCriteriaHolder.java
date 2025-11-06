@@ -215,6 +215,14 @@ public abstract class BaseFhirCriteriaHolder<V> {
 		return newJoin;
 	}
 	
+	/**
+	 * Adds a predicate to the list of predicates being applied to the query under construction.
+	 * Multiple predicates can be added and will be combined with {@code AND} logic when the query is
+	 * finalized.
+	 *
+	 * @param predicate The {@link Predicate} to add
+	 * @return The current holder to facilitate chaining
+	 */
 	public BaseFhirCriteriaHolder<V> addPredicate(Predicate predicate) {
 		predicates.add(predicate);
 		return this;
@@ -224,6 +232,15 @@ public abstract class BaseFhirCriteriaHolder<V> {
 		return Optional.ofNullable(aliases.get(alias));
 	}
 	
+	/**
+	 * Retrieves a join by its {@link From} object. This is a convenience method that extracts the alias
+	 * from the provided {@link From} object and looks up the join.
+	 *
+	 * @param alias The {@link From} object whose alias will be used to look up the join
+	 * @return An {@link Optional} containing the {@link Join} if found, or empty if no join exists with
+	 *         that alias
+	 * @see #getJoin(String) for direct alias lookup
+	 */
 	public Optional<Join<?, ?>> getJoin(From<?, ?> alias) {
 		return Optional.ofNullable(aliases.get(alias.getAlias()));
 	}

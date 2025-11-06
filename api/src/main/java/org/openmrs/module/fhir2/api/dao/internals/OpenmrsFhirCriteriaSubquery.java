@@ -36,6 +36,13 @@ public class OpenmrsFhirCriteriaSubquery<V, U> extends BaseFhirCriteriaHolder<V>
 	@Getter(onMethod = @__({ @Nonnull }))
 	Subquery<U> subquery;
 	
+	/**
+	 * The projection expression for this subquery. This defines what the subquery will return (e.g., an
+	 * ID field, a COUNT, or another expression).
+	 * <p/>
+	 * If no projection is set, the subquery must have its select clause set explicitly before
+	 * finalization. The projection will be applied when {@link #finalizeQuery()} is called.
+	 */
 	@Setter
 	Expression<U> projection = null;
 	
@@ -45,11 +52,30 @@ public class OpenmrsFhirCriteriaSubquery<V, U> extends BaseFhirCriteriaHolder<V>
 		this.subquery = subquery;
 	}
 	
+	/**
+	 * Adds a new predicate to the list of predicates being applied to the subquery under construction.
+	 * <p/>
+	 * This method overrides the parent to return the more specific {@link OpenmrsFhirCriteriaSubquery}
+	 * type for method chaining.
+	 *
+	 * @param predicate The {@link Predicate} to add
+	 * @return The current subquery context to facilitate chaining
+	 */
 	@Override
 	public OpenmrsFhirCriteriaSubquery<V, U> addPredicate(Predicate predicate) {
 		return (OpenmrsFhirCriteriaSubquery<V, U>) super.addPredicate(predicate);
 	}
 	
+	/**
+	 * Finalizes the subquery by applying the projection (if set) and all accumulated predicates. This
+	 * should be called once the subquery has been fully constructed and is ready to be used within the
+	 * parent query.
+	 * <p/>
+	 * If a projection has been set via {@link #setProjection(Expression)}, it will be applied as the
+	 * SELECT clause. Otherwise, the subquery's SELECT clause should have been set explicitly.
+	 *
+	 * @return The finalized {@link Subquery} with SELECT and WHERE clauses applied
+	 */
 	public Subquery<U> finalizeQuery() {
 		if (projection != null) {
 			subquery = subquery.select(projection);
