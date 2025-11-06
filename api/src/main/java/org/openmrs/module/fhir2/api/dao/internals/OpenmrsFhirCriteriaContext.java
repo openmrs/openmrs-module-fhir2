@@ -16,7 +16,6 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Selection;
 import javax.persistence.criteria.Subquery;
 
 import java.util.ArrayList;
@@ -143,34 +142,23 @@ public class OpenmrsFhirCriteriaContext<T, U> extends BaseFhirCriteriaHolder<T> 
 	}
 	
 	/**
-	 * Finalizes a query that selects only the ID property, optionally including sort columns in the
-	 * projection to enable sorting with DISTINCT. This is used for the two-query approach where we
-	 * first get matching IDs, then fetch full objects.
+	 * Finalizes a query that selects only the ID property with DISTINCT, applying any accumulated sort
+	 * orders. This is used for the two-query approach where we first get matching sorted IDs, then
+	 * fetch full objects.
 	 * <p/>
-	 * This method always returns results as Object[] to maintain consistency, with the ID as the first
-	 * element. When sort orders are provided, additional sort expressions are included in the SELECT
-	 * clause, which is necessary for databases to sort DISTINCT results correctly.
+	 * Unlike GROUP BY, SELECT DISTINCT does not require ORDER BY columns to be in the SELECT clause, so
+	 * we can simply select the ID and apply sorting directly.
 	 *
 	 * @param idProperty The name of the ID property to select
-	 * @return A finalized {@link CriteriaQuery} selecting ID and sort columns as Object[]
+	 * @return A finalized {@link CriteriaQuery} selecting distinct IDs with sorting applied
 	 */
 	public CriteriaQuery<U> finalizeIdQuery(String idProperty) {
-		CriteriaQuery<U> query = getCriteriaQuery().where(getPredicates().toArray(new Predicate[0])).distinct(true);
+		CriteriaQuery<U> query = getCriteriaQuery().select(getRoot().get(idProperty))
+		        .where(getPredicates().toArray(new Predicate[0])).distinct(true);
 		
-		List<Selection<?>> selections = new ArrayList<>();
-		selections.add(getRoot().get(idProperty));
-		
-		// If there are sort orders, include sort expressions in the selection
-		// for DISTINCT to work properly with ORDER BY
 		if (!orders.isEmpty()) {
-			for (Order order : orders) {
-				selections.add(order.getExpression());
-			}
-			query.orderBy(orders);
+			query = query.orderBy(orders);
 		}
-		
-		// Always use multiselect to return Object[] for consistency
-		query.multiselect(selections);
 		
 		return query;
 	}

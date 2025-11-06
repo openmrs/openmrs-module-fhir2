@@ -193,12 +193,12 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 			results = executableQuery.getResultList();
 		} else {
 			// For non-distinct results, use a two-query approach:
-			// 1. Get sorted, paginated IDs with necessary join conditions
+			// 1. Get distinct, sorted, paginated IDs with necessary join conditions
 			// 2. Fetch full objects using those IDs
 			
 			@SuppressWarnings({ "UnstableApiUsage", "unchecked" })
-			OpenmrsFhirCriteriaContext<T, Object[]> criteriaContext = getSearchResultCriteria(
-			    createCriteriaContext((Class<T>) typeToken.getRawType(), Object[].class), theParams);
+			OpenmrsFhirCriteriaContext<T, Integer> criteriaContext = getSearchResultCriteria(
+			    createCriteriaContext((Class<T>) typeToken.getRawType(), Integer.class), theParams);
 			
 			String idProperty = getIdPropertyName(criteriaContext.getEntityManager());
 			
@@ -206,35 +206,21 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 			handleSort(criteriaContext, theParams.getSortSpec());
 			handleIdPropertyOrdering(criteriaContext, idProperty);
 			
-			CriteriaQuery<Object[]> query = criteriaContext.finalizeIdQuery(idProperty);
+			CriteriaQuery<Integer> idQuery = criteriaContext.finalizeIdQuery(idProperty);
 			
-			// Apply pagination to the ID query
-			TypedQuery<Object[]> idQuery = criteriaContext.getEntityManager().createQuery(query);
-			idQuery.setFirstResult(theParams.getFromIndex());
+			// Apply pagination to the sorted ID query
+			TypedQuery<Integer> executableIdQuery = criteriaContext.getEntityManager().createQuery(idQuery);
+			executableIdQuery.setFirstResult(theParams.getFromIndex());
 			if (theParams.getToIndex() != Integer.MAX_VALUE && theParams.getToIndex() >= 0) {
 				int maxResults = theParams.getToIndex() - theParams.getFromIndex();
 				if (maxResults >= 0) {
-					idQuery.setMaxResults(maxResults);
+					executableIdQuery.setMaxResults(maxResults);
 				}
 			}
 			
-			List<Object[]> idResults = idQuery.getResultList();
+			List<Integer> ids = executableIdQuery.getResultList();
 			
-			if (idResults == null || idResults.isEmpty()) {
-				return Collections.emptyList();
-			}
-			
-			// Extract IDs from the results
-			// If there are sort orders, finalizeIdQuery returns Object[] with ID as first element
-			// Otherwise, it returns just the ID
-			List<Integer> ids = new ArrayList<>();
-			for (Object[] row : idResults) {
-				if (row != null && row.length > 0 && row[0] != null) {
-					ids.add((Integer) row[0]);
-				}
-			}
-			
-			if (ids.isEmpty()) {
+			if (ids == null || ids.isEmpty()) {
 				return Collections.emptyList();
 			}
 			
