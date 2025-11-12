@@ -40,7 +40,9 @@ import org.openmrs.Concept;
 @Table(name = "fhir_task")
 public class FhirTask extends BaseOpenmrsMetadata {
 	
-	// Based on https://www.hl7.org/fhir/task.html v4.0.1
+	/**
+	 * Based on <a href="https://www.hl7.org/fhir/task.html">...</a> v4.0.1
+	 */
 	public enum TaskStatus {
 		REQUESTED,
 		REJECTED,
@@ -112,14 +114,15 @@ public class FhirTask extends BaseOpenmrsMetadata {
 	
 	/**
 	 * Additional information that may be needed in the execution of the task. see
-	 * https://www.hl7.org/fhir/task-definitions.html#Task.input
+	 * <a href="https://www.hl7.org/fhir/task-definitions.html#Task.input">...</a>
 	 */
 	@OneToMany(cascade = CascadeType.ALL)
 	@JoinColumn(name = "task_id")
 	private Set<FhirTaskInput> input;
 	
 	/**
-	 * Outputs produced by the Task. see https://www.hl7.org/fhir/task-definitions.html#Task.output
+	 * Outputs produced by the Task. see
+	 * <a href="https://www.hl7.org/fhir/task-definitions.html#Task.output">...</a>
 	 */
 	@OneToMany(cascade = CascadeType.ALL)
 	@JoinColumn(name = "task_id")

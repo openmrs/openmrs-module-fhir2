@@ -9,17 +9,18 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
-import static org.hibernate.criterion.Restrictions.and;
-import static org.hibernate.criterion.Restrictions.eq;
-import static org.hibernate.criterion.Restrictions.in;
-import static org.hibernate.criterion.Restrictions.or;
 import static org.hl7.fhir.r4.model.Patient.SP_DEATH_DATE;
 
 import javax.annotation.Nonnull;
+import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Path;
+import javax.persistence.criteria.Predicate;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -31,16 +32,14 @@ import ca.uhn.fhir.rest.param.HasAndListParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
+import lombok.NonNull;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.Criteria;
-import org.hibernate.criterion.Criterion;
-import org.hibernate.criterion.Projections;
-import org.hibernate.sql.JoinType;
 import org.openmrs.CohortMembership;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirPatientDao;
+import org.openmrs.module.fhir2.api.dao.internals.OpenmrsFhirCriteriaContext;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,24 +50,38 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 	@Override
 	@Transactional(readOnly = true)
 	public Patient getPatientById(@Nonnull Integer id) {
-		return (Patient) getSessionFactory().getCurrentSession().createCriteria(Patient.class).add(eq("patientId", id))
-		        .uniqueResult();
+		OpenmrsFhirCriteriaContext<Patient, Patient> criteriaContext = createCriteriaContext(Patient.class);
+		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot())
+		        .where(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("patientId"), id));
+		
+		TypedQuery<Patient> query = criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery());
+		return query.getResultList().stream().findFirst().orElse(null);
 	}
 	
 	@Override
-	@Transactional(readOnly = true)
-	@SuppressWarnings("unchecked")
 	public List<Patient> getPatientsByIds(@Nonnull Collection<Integer> ids) {
-		return getSessionFactory().getCurrentSession().createCriteria(Patient.class).add(in("id", ids)).list();
+		OpenmrsFhirCriteriaContext<Patient, Patient> criteriaContext = createCriteriaContext(Patient.class);
+		
+		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot());
+		criteriaContext.getCriteriaQuery().where(criteriaContext.getRoot().get("id").in(ids));
+		return criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).getResultList();
 	}
 	
 	@Override
-	@Transactional(readOnly = true)
-	@SuppressWarnings("unchecked")
 	public PatientIdentifierType getPatientIdentifierTypeByNameOrUuid(String name, String uuid) {
-		List<PatientIdentifierType> identifierTypes = (List<PatientIdentifierType>) getSessionFactory().getCurrentSession()
-		        .createCriteria(PatientIdentifierType.class)
-		        .add(or(and(eq("name", name), eq("retired", false)), eq("uuid", uuid))).list();
+		OpenmrsFhirCriteriaContext<PatientIdentifierType, PatientIdentifierType> criteriaContext = createCriteriaContext(
+		    PatientIdentifierType.class);
+		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot())
+		        .where(
+		            criteriaContext
+		                    .getCriteriaBuilder().or(
+		                        criteriaContext.getCriteriaBuilder().and(
+		                            criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("name"), name),
+		                            criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("retired"),
+		                                false)),
+		                        criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("uuid"), uuid)));
+		List<PatientIdentifierType> identifierTypes = criteriaContext.getEntityManager()
+		        .createQuery(criteriaContext.getCriteriaQuery()).getResultList();
 		
 		if (identifierTypes.isEmpty()) {
 			return null;
@@ -87,46 +100,71 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 	}
 	
 	@Override
-	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
+	protected String getIdPropertyName(@Nonnull EntityManager entityManager) {
+		// since a patient is-a person, the id returned by default is "personId", but this is not actually
+		// a property of patient, so the selection fails
+		return "patientId";
+	}
+	
+	@Override
+	protected boolean hasDistinctResults() {
+		return false;
+	}
+	
+	@Override
+	protected <U> void setupSearchParams(@Nonnull OpenmrsFhirCriteriaContext<Patient, U> criteriaContext,
+	        @Nonnull SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.QUERY_SEARCH_HANDLER:
-					entry.getValue().forEach(query -> handlePatientQuery(criteria, (StringAndListParam) query.getParam()));
+					entry.getValue()
+					        .forEach(query -> handlePatientQuery(criteriaContext, (StringAndListParam) query.getParam())
+					                .ifPresent(criteriaContext::addPredicate));
 					break;
 				case FhirConstants.NAME_SEARCH_HANDLER:
-					handleNames(criteria, entry.getValue());
+					handleNames(criteriaContext, entry.getValue());
 					break;
 				case FhirConstants.GENDER_SEARCH_HANDLER:
 					entry.getValue()
-					        .forEach(p -> handleGender(FhirConstants.GENDER_PROPERTY, (TokenAndListParam) p.getParam())
-					                .ifPresent(criteria::add));
+					        .forEach(p -> getSearchQueryHelper()
+					                .handleGender(criteriaContext, getPersonProperty(criteriaContext),
+					                    FhirConstants.GENDER_PROPERTY, (TokenAndListParam) p.getParam())
+					                .ifPresent(criteriaContext::addPredicate));
 					break;
 				case FhirConstants.IDENTIFIER_SEARCH_HANDLER:
-					entry.getValue()
-					        .forEach(identifier -> handleIdentifier(criteria, (TokenAndListParam) identifier.getParam()));
+					entry.getValue().forEach(
+					    identifier -> handleIdentifier(criteriaContext, (TokenAndListParam) identifier.getParam())
+					            .ifPresent(criteriaContext::addPredicate));
 					break;
 				case FhirConstants.DATE_RANGE_SEARCH_HANDLER:
-					entry.getValue().forEach(dateRangeParam -> handleDateRange(dateRangeParam.getPropertyName(),
-					    (DateRangeParam) dateRangeParam.getParam()).ifPresent(criteria::add));
+					entry.getValue()
+					        .forEach(dateRangeParam -> getSearchQueryHelper()
+					                .handleDateRange(criteriaContext, dateRangeParam.getPropertyName(),
+					                    (DateRangeParam) dateRangeParam.getParam())
+					                .ifPresent(criteriaContext::addPredicate));
 					break;
 				case FhirConstants.BOOLEAN_SEARCH_HANDLER:
-					entry.getValue().forEach(
-					    b -> handleBoolean(b.getPropertyName(), (TokenAndListParam) b.getParam()).ifPresent(criteria::add));
+					entry.getValue()
+					        .forEach(b -> getSearchQueryHelper()
+					                .handleBoolean(criteriaContext, b.getPropertyName(), (TokenAndListParam) b.getParam())
+					                .ifPresent(criteriaContext::addPredicate));
 					break;
 				case FhirConstants.ADDRESS_SEARCH_HANDLER:
-					handleAddresses(criteria, entry);
+					handleAddresses(criteriaContext, entry);
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(entry.getValue()).ifPresent(criteria::add);
+					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(criteriaContext::addPredicate);
 					break;
 				case FhirConstants.HAS_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handleHasAndListParam(criteria, (HasAndListParam) param.getParam()));
+					entry.getValue()
+					        .forEach(param -> handleHasAndListParam(criteriaContext, (HasAndListParam) param.getParam()));
 					break;
 			}
 		});
 	}
 	
-	protected void handleHasAndListParam(Criteria criteria, HasAndListParam hasAndListParam) {
+	protected <U> void handleHasAndListParam(OpenmrsFhirCriteriaContext<Patient, U> criteriaContext,
+	        HasAndListParam hasAndListParam) {
 		if (hasAndListParam != null) {
 			List<String> groupIds = new ArrayList<>();
 			hasAndListParam.getValuesAsQueryTokens().forEach(hasOrListParam -> {
@@ -150,93 +188,94 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 			});
 			
 			if (!groupIds.isEmpty()) {
-				verifyPatientInGroups(criteria, groupIds);
+				verifyPatientInGroups(criteriaContext, groupIds);
 			}
 		}
 	}
 	
-	private void verifyPatientInGroups(Criteria criteria, List<String> groupIds) {
+	protected <U> void verifyPatientInGroups(@Nonnull OpenmrsFhirCriteriaContext<Patient, U> criteriaContext,
+	        List<String> groupIds) {
 		Set<Integer> patientIds = new HashSet<>();
 		groupIds.forEach(groupId -> patientIds.addAll(getGroupMemberIds(groupId)));
 		
-		criteria.add(in("patientId", patientIds.isEmpty() ? Collections.emptyList() : patientIds));
+		if (!patientIds.isEmpty()) {
+			criteriaContext.addPredicate(criteriaContext.getRoot().get("patientId").in(patientIds));
+		} else {
+			// If no patients belong to the specified groups, add a predicate that matches nothing
+			// This ensures the query returns no results (rather than generating invalid SQL with an empty IN clause)
+			criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().disjunction());
+		}
 	}
 	
 	private List<Integer> getGroupMemberIds(String groupId) {
-		Criteria subquery = getSessionFactory().getCurrentSession().createCriteria(CohortMembership.class, "cm")
-		        .createAlias("cm.cohort", "co").add(eq("co.uuid", groupId))
-		        .setProjection(Projections.property("cm.patientId"));
+		OpenmrsFhirCriteriaContext<CohortMembership, Integer> criteriaContext = createCriteriaContext(CohortMembership.class,
+		    Integer.class);
+		CriteriaBuilder cb = criteriaContext.getCriteriaBuilder();
 		
-		return subquery.list();
+		criteriaContext.addPredicate(cb.equal(criteriaContext.getRoot().get("cohort").get("uuid"), groupId));
+		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot().get("patientId"));
+		
+		return criteriaContext.getEntityManager().createQuery(criteriaContext.finalizeQuery()).getResultList();
 	}
 	
-	private void handlePatientQuery(Criteria criteria, @Nonnull StringAndListParam query) {
+	private <U> Optional<Predicate> handlePatientQuery(@Nonnull OpenmrsFhirCriteriaContext<Patient, U> criteriaContext,
+	        @Nonnull StringAndListParam query) {
 		if (query == null) {
-			return;
+			return Optional.empty();
 		}
 		
-		if (lacksAlias(criteria, "pn")) {
-			criteria.createAlias("names", "pn");
-		}
+		Join<?, ?> personNameJoin = criteriaContext.addJoin("names", "pn",
+		    pn -> criteriaContext.getCriteriaBuilder().equal(pn.get("voided"), false));
+		Join<?, ?> identifiersJoin = criteriaContext.addJoin("identifiers", "pi",
+		    pi -> criteriaContext.getCriteriaBuilder().equal(pi.get("voided"), false));
 		
-		if (lacksAlias(criteria, "pi")) {
-			criteria.createAlias("identifiers", "pi");
-		}
-		
-		handleAndListParam(query, q -> {
-			List<Optional<? extends Criterion>> criterionList = new ArrayList<>();
+		return handleAndListParam(criteriaContext.getCriteriaBuilder(), query, q -> {
+			List<Optional<? extends Predicate>> arrayList = new ArrayList<>();
 			
 			for (String token : StringUtils.split(q.getValueNotNull(), " \t,")) {
 				StringParam param = new StringParam(token).setContains(q.isContains()).setExact(q.isExact());
-				criterionList.add(propertyLike("pn.givenName", param).map(c -> and(c, eq("pn.voided", false))));
-				criterionList.add(propertyLike("pn.middleName", param).map(c -> and(c, eq("pn.voided", false))));
-				criterionList.add(propertyLike("pn.familyName", param).map(c -> and(c, eq("pn.voided", false))));
+				arrayList.add(getSearchQueryHelper().propertyLike(criteriaContext, personNameJoin, "givenName", param));
+				arrayList.add(getSearchQueryHelper().propertyLike(criteriaContext, personNameJoin, "middleName", param));
+				arrayList.add(getSearchQueryHelper().propertyLike(criteriaContext, personNameJoin, "familyName", param));
 			}
 			
-			criterionList.add(propertyLike("pi.identifier",
-			    new StringParam(q.getValueNotNull()).setContains(q.isContains()).setExact(q.isExact()))
-			            .map(c -> and(c, eq("pi.voided", false))));
+			arrayList.add(getSearchQueryHelper().propertyLike(criteriaContext, identifiersJoin, "identifier",
+			    new StringParam(q.getValueNotNull()).setContains(q.isContains()).setExact(q.isExact())));
 			
-			return Optional.of(or(toCriteriaArray(criterionList)));
-		}).ifPresent(criteria::add);
+			return Optional.of(criteriaContext.getCriteriaBuilder().or(toCriteriaArray(arrayList)));
+		});
 	}
 	
-	protected void handleIdentifier(Criteria criteria, TokenAndListParam identifier) {
+	protected <U> Optional<Predicate> handleIdentifier(OpenmrsFhirCriteriaContext<Patient, U> criteriaContext,
+	        TokenAndListParam identifier) {
 		if (identifier == null) {
-			return;
+			return Optional.empty();
 		}
 		
-		criteria.createAlias("identifiers", "pi", JoinType.INNER_JOIN, eq("pi.voided", false));
+		Join<?, ?> identifiersJoin = criteriaContext.addJoin("identifiers", "pi",
+		    pi -> criteriaContext.getCriteriaBuilder().equal(pi.get("voided"), false));
 		
-		handleAndListParamBySystem(identifier, (system, tokens) -> {
+		return handleAndListParamBySystem(criteriaContext.getCriteriaBuilder(), identifier, (system, tokens) -> {
 			if (system.isEmpty()) {
-				return Optional.of(in("pi.identifier", tokensToList(tokens)));
+				return Optional.of(
+				    criteriaContext.getCriteriaBuilder().in(identifiersJoin.get("identifier")).value(tokensToList(tokens)));
 			} else {
-				if (lacksAlias(criteria, "pit")) {
-					criteria.createAlias("pi.identifierType", "pit", JoinType.INNER_JOIN, eq("pit.retired", false));
-				}
+				Join<?, ?> identifiersIdentifierTypeJoin = criteriaContext.addJoin(identifiersJoin, "identifierType", "pit",
+				    pit -> criteriaContext.getCriteriaBuilder().equal(pit.get("retired"), false));
 				
-				return Optional.of(and(eq("pit.name", system), in("pi.identifier", tokensToList(tokens))));
+				return Optional.of(criteriaContext.getCriteriaBuilder().and(
+				    criteriaContext.getCriteriaBuilder().equal(identifiersIdentifierTypeJoin.get("name"), system),
+				    criteriaContext.getCriteriaBuilder().in(identifiersJoin.get("identifier")).value(tokensToList(tokens))));
 			}
-		}).ifPresent(criteria::add);
+		});
 	}
 	
 	@Override
-	protected String getSqlAlias() {
-		return "this_1_";
-	}
-	
-	@Override
-	protected String paramToProp(@Nonnull String param) {
+	protected <V, U> Path<?> paramToProp(@Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext, @NonNull String param) {
 		if (SP_DEATH_DATE.equalsIgnoreCase(param)) {
-			return "deathDate";
+			return criteriaContext.getRoot().get("deathDate");
 		}
 		
-		return super.paramToProp(param);
-	}
-	
-	@Override
-	public boolean hasDistinctResults() {
-		return false;
+		return super.paramToProp(criteriaContext, param);
 	}
 }

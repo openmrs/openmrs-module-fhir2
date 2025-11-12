@@ -24,6 +24,29 @@ import lombok.NoArgsConstructor;
 import org.openmrs.BaseOpenmrsMetadata;
 import org.openmrs.ConceptSource;
 
+/**
+ * This class provides a means of mappings between the way FHIR represents different code systems
+ * and how they are represented in OpenMRS's concept dictionary.
+ * <br/>
+ * In FHIR, concepts are identified by the "code system" they belong to and this "code system" is,
+ * in turn, normally represented by a URL. For example, concepts drawn from LOINC are usually
+ * identified by the URL "http://loinc.org".
+ * <br/>
+ * In order to properly map between the representation of concepts in FHIR, e.g., <pre>{@code
+ *  {
+ *      "system": "http://loinc.org",
+ *      "code": "44564-3"
+ *  }
+ * }</pre> and the way concepts are represented in the OpenMRS concept dictionary (using a
+ * {@link ConceptSource}, a {@link org.openmrs.ConceptReferenceTerm}, and a
+ * {@link org.openmrs.ConceptReferenceTermMap}), we need a way of translating this URL into a
+ * {@link ConceptSource}, which is the mapping this class provides.
+ * <p />
+ * While it's less common, occasionally FHIR will use URNs rather than URLs to represent code
+ * systems, e.g., in order to support legacy HL7 code systems or value sets that are uniquely
+ * identified by OIDs. These are also supported by this class, even though we follow FHIR in calling
+ * the property "url".
+ */
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)

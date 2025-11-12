@@ -9,38 +9,18 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
-import static org.hibernate.criterion.Projections.property;
-import static org.hibernate.criterion.Restrictions.and;
-import static org.hibernate.criterion.Restrictions.between;
-import static org.hibernate.criterion.Restrictions.eq;
-import static org.hibernate.criterion.Restrictions.ge;
-import static org.hibernate.criterion.Restrictions.gt;
-import static org.hibernate.criterion.Restrictions.ilike;
-import static org.hibernate.criterion.Restrictions.in;
-import static org.hibernate.criterion.Restrictions.isNull;
-import static org.hibernate.criterion.Restrictions.le;
-import static org.hibernate.criterion.Restrictions.lt;
-import static org.hibernate.criterion.Restrictions.ne;
-import static org.hibernate.criterion.Restrictions.not;
-import static org.hibernate.criterion.Restrictions.or;
-import static org.hibernate.criterion.Subqueries.propertyEq;
-
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.persistence.EntityManager;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.From;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
-import java.math.BigDecimal;
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.Period;
-import java.time.ZoneId;
-import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalAmount;
-import java.time.temporal.TemporalUnit;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -55,47 +35,21 @@ import java.util.stream.StreamSupport;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.rest.api.SortOrderEnum;
-import ca.uhn.fhir.rest.api.SortSpec;
-import ca.uhn.fhir.rest.param.DateParam;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.ParamPrefixEnum;
-import ca.uhn.fhir.rest.param.QuantityAndListParam;
-import ca.uhn.fhir.rest.param.QuantityParam;
-import ca.uhn.fhir.rest.param.ReferenceAndListParam;
-import ca.uhn.fhir.rest.param.StringAndListParam;
-import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.rest.param.TokenAndListParam;
-import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
-import org.apache.commons.lang3.time.DateUtils;
-import org.hibernate.Criteria;
+import org.hibernate.Hibernate;
+import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Criterion;
-import org.hibernate.criterion.DetachedCriteria;
-import org.hibernate.criterion.MatchMode;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
-import org.hibernate.internal.CriteriaImpl;
-import org.hibernate.sql.JoinType;
-import org.hl7.fhir.dstu3.model.Encounter;
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.r4.model.Location;
-import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Practitioner;
-import org.hl7.fhir.r4.model.codesystems.AdministrativeGender;
-import org.openmrs.module.fhir2.FhirConstants;
-import org.openmrs.module.fhir2.api.search.param.PropParam;
-import org.openmrs.module.fhir2.api.util.LocalDateTimeFactory;
-import org.openmrs.module.fhir2.model.FhirConceptSource;
+import org.hibernate.metamodel.spi.MetamodelImplementor;
+import org.hibernate.proxy.HibernateProxy;
+import org.openmrs.module.fhir2.api.dao.internals.BaseFhirCriteriaHolder;
+import org.openmrs.module.fhir2.api.dao.internals.OpenmrsFhirCriteriaContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 /**
  * <p>
@@ -170,35 +124,35 @@ import org.springframework.beans.factory.annotation.Autowired;
  * }</pre>
  * </p>
  */
+@Slf4j
 public abstract class BaseDao {
 	
-	private static final BigDecimal APPROX_RANGE = new BigDecimal("0.1");
-	
-	@Getter(value = AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
-	private LocalDateTimeFactory localDateTimeFactory;
+	@Getter(AccessLevel.PROTECTED)
+	@Setter(value = AccessLevel.PROTECTED, onMethod_ = { @Autowired, @Qualifier("sessionFactory") })
+	private SessionFactory sessionFactory;
 	
 	/**
-	 * Converts an {@link Iterable} to a {@link Stream}
+	 * If the supplied object is a {@link HibernateProxy} instead of the "normal" class, returns the
+	 * "normal" class version of the object. If the supplied object is not a {@link HibernateProxy}, it
+	 * is returned unchanged.
+	 * <br/>
+	 * Note that for objects that have collection properties is not guaranteed that these collections
+	 * are materialized as they may be lazy-loaded on access.
 	 *
-	 * @param iterable the iterable
-	 * @param <T> any type
-	 * @return a stream containing the same objects as the iterable
+	 * @param object The object to potentially convert to it's implementation
+	 * @return A concrete implementation of an object of type {@link V}
+	 * @param <V> The expected type of the object. Note that a {@link ClassCastException} may be thrown
+	 *            if the underlying implementation of the proxied object does not match this type.
 	 */
-	@SuppressWarnings("unused")
-	protected static <T> Stream<T> stream(Iterable<T> iterable) {
-		return stream(iterable.iterator());
-	}
-	
-	/**
-	 * Converts an {@link Iterator} to a {@link Stream}
-	 *
-	 * @param iterator the iterator
-	 * @param <T> any type
-	 * @return a stream containing the same objects as the iterator
-	 */
-	protected static <T> Stream<T> stream(Iterator<T> iterator) {
-		return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator, Spliterator.ORDERED), false);
+	protected static <V> V deproxyObject(@Nonnull V object) {
+		if (object instanceof HibernateProxy) {
+			Hibernate.initialize(object);
+			@SuppressWarnings("unchecked")
+			V theResult = (V) ((HibernateProxy) object).getHibernateLazyInitializer().getImplementation();
+			return theResult;
+		}
+		
+		return object;
 	}
 	
 	/**
@@ -225,98 +179,225 @@ public abstract class BaseDao {
 	}
 	
 	/**
-	 * Determines whether or not the given criteria object already has a given alias. This is useful to
-	 * determine whether a mapping has already been made or whether a given alias is already in use.
+	 * Converts an {@link Iterable} to a {@link Stream}
 	 *
-	 * @param criteria the {@link Criteria} object to examine
-	 * @param alias the alias to look for
-	 * @return true if the alias exists in this criteria object, false otherwise
+	 * @param iterable the iterable
+	 * @param <T> any type
+	 * @return a stream containing the same objects as the iterable
 	 */
-	protected boolean lacksAlias(@Nonnull Criteria criteria, @Nonnull String alias) {
-		Optional<Iterator<CriteriaImpl.Subcriteria>> subcriteria = asImpl(criteria).map(CriteriaImpl::iterateSubcriteria);
-		
-		return subcriteria.filter(subcriteriaIterator -> containsAlias(subcriteriaIterator, alias)).isPresent();
-	}
-	
-	/**
-	 * Determines whether any of the {@link CriteriaImpl.Subcriteria} objects returned by a given
-	 * iterator are mapped to the specified alias.
-	 *
-	 * @param subcriteriaIterator an {@link Iterator} of {@link CriteriaImpl.Subcriteria} to check for
-	 *            the given alias
-	 * @param alias the alias to look for
-	 * @return true if any of the given subcriteria use the specified alias, false otherwise
-	 */
-	protected boolean containsAlias(Iterator<CriteriaImpl.Subcriteria> subcriteriaIterator, @Nonnull String alias) {
-		return stream(subcriteriaIterator).noneMatch(sc -> sc.getAlias().equals(alias));
-	}
-	
-	/**
-	 * A generic handler for any subtype of {@link IQueryParameterAnd} which creates a criterion that
-	 * represents the intersection of all of the parameters contained
-	 *
-	 * @param andListParam the {@link IQueryParameterAnd} to handle
-	 * @param handler a {@link Function} which maps a parameter to a {@link Criterion}
-	 * @param <T> the subtype of {@link IQueryParameterOr} that this {@link IQueryParameterAnd} contains
-	 * @param <U> the subtype of {@link IQueryParameterType} for this parameter
-	 * @return the resulting criterion, which is the intersection of all of the unions of contained
-	 *         parameters
-	 */
-	protected <T extends IQueryParameterOr<U>, U extends IQueryParameterType> Optional<Criterion> handleAndListParam(
-	        IQueryParameterAnd<T> andListParam, Function<U, Optional<Criterion>> handler) {
-		if (andListParam == null) {
-			return Optional.empty();
-		}
-		
-		return Optional.of(and(
-		    toCriteriaArray(handleAndListParam(andListParam).map(orListParam -> handleOrListParam(orListParam, handler)))));
-	}
-	
 	@SuppressWarnings("unused")
-	protected <T extends IQueryParameterOr<U>, U extends IQueryParameterType> Optional<Criterion> handleAndListParamBy(
-	        IQueryParameterAnd<T> andListParam, Function<IQueryParameterOr<U>, Optional<Criterion>> handler) {
-		if (andListParam == null) {
-			return Optional.empty();
-		}
-		
-		return Optional.of(and(toCriteriaArray(handleAndListParam(andListParam).map(handler))));
-	}
-	
-	protected <T extends IQueryParameterOr<U>, U extends IQueryParameterType> Optional<Criterion> handleAndListParamAsStream(
-	        IQueryParameterAnd<T> andListParam, Function<U, Stream<Optional<Criterion>>> handler) {
-		if (andListParam == null) {
-			return Optional.empty();
-		}
-		
-		return Optional.of(and(toCriteriaArray(
-		    handleAndListParam(andListParam).map(orListParam -> handleOrListParamAsStream(orListParam, handler)))));
+	protected static <T> Stream<T> stream(Iterable<T> iterable) {
+		return stream(iterable.iterator());
 	}
 	
 	/**
-	 * A generic handler for any subtype of {@link IQueryParameterOr} which creates a criterion that
-	 * represents the union of all the parameters
+	 * Converts an {@link Iterator} to a {@link Stream}
 	 *
-	 * @param orListParam the {@link IQueryParameterOr} to handle
-	 * @param handler a {@link Function} which maps a parameter to a {@link Criterion}
-	 * @param <T> the subtype of {@link IQueryParameterType} for this parameter
-	 * @return the resulting criterion, which is the union of all contained parameters
+	 * @param iterator the iterator
+	 * @param <T> any type
+	 * @return a stream containing the same objects as the iterator
 	 */
-	protected <T extends IQueryParameterType> Optional<Criterion> handleOrListParam(IQueryParameterOr<T> orListParam,
-	        Function<T, Optional<Criterion>> handler) {
-		if (orListParam == null) {
-			return Optional.empty();
-		}
-		
-		return Optional.of(or(toCriteriaArray(handleOrListParam(orListParam).map(handler))));
+	protected static <T> Stream<T> stream(Iterator<T> iterator) {
+		return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator, Spliterator.ORDERED), false);
 	}
 	
-	protected <T extends IQueryParameterType> Optional<Criterion> handleOrListParamAsStream(IQueryParameterOr<T> orListParam,
-	        Function<T, Stream<Optional<Criterion>>> handler) {
-		if (orListParam == null) {
+	/**
+	 * This function creates a new {@link OpenmrsFhirCriteriaContext} for queries that select from the
+	 * specified root type and return those objects as results.
+	 *
+	 * @param rootType An OpenMRS domain object that this criteria context queries
+	 * @return An {@link OpenmrsFhirCriteriaContext} for constructing a new query
+	 * @param <T> The root type and return type of queries run from the returned
+	 *            {@link OpenmrsFhirCriteriaContext}
+	 */
+	protected <T> OpenmrsFhirCriteriaContext<T, T> createCriteriaContext(@Nonnull Class<T> rootType) {
+		EntityManager em = sessionFactory.getCurrentSession();
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<T> cq = cb.createQuery(rootType);
+		Root<T> root = cq.from(rootType);
+		
+		return new OpenmrsFhirCriteriaContext<>(em, cb, cq, root);
+	}
+	
+	/**
+	 * This function creates a new {@link OpenmrsFhirCriteriaContext} for queries that select from the
+	 * specified root type and return a different type of result
+	 *
+	 * @param rootType An OpenMRS domain object that this criteria context queries
+	 * @param resultType The type of results returned from this query
+	 * @return An {@link OpenmrsFhirCriteriaContext} for constructing a new query
+	 * @param <T> The root type of the returned {@link OpenmrsFhirCriteriaContext}
+	 * @param <U> The rturn type of the returned {@link OpenmrsFhirCriteriaContext}
+	 */
+	protected <T, U> OpenmrsFhirCriteriaContext<T, U> createCriteriaContext(@Nonnull Class<T> rootType,
+	        @Nonnull Class<U> resultType) {
+		EntityManager em = sessionFactory.getCurrentSession();
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<U> cq = cb.createQuery(resultType);
+		Root<T> root = cq.from(rootType);
+		
+		return new OpenmrsFhirCriteriaContext<>(em, cb, cq, root);
+	}
+	
+	/**
+	 * Gets the name of the entity's id property. Note that this method relies on Hibernate's SPI for
+	 * JPA, so while isn't using any internal implementation details, it is dependent on using
+	 * Hibernate.
+	 * <br/>
+	 * This method also assumes that there <em>is</em> an identifiable property name for the instance,
+	 * which is true for standard OpenMRS domain objects, but should be verified for domain objects not
+	 * defined in core.
+	 *
+	 * @param entityManager The current entity manager
+	 * @param clazz The persistent class to get the id from
+	 * @return The name of the id property for this instance.
+	 * @param <V> A persistent class
+	 */
+	protected <V> String getIdPropertyName(@Nonnull EntityManager entityManager, @Nonnull Class<V> clazz) {
+		return ((MetamodelImplementor) entityManager.getEntityManagerFactory().getMetamodel()).entityPersister(clazz)
+		        .getIdentifierPropertyName();
+	}
+	
+	/**
+	 * Attempts to provide a consistent interface to the {@link From} object representing either the
+	 * {@link Root} object for the current criteria context or the {@link Join} object for the named
+	 * alias.
+	 *
+	 * @param criteriaContext The {@link BaseFhirCriteriaHolder} to extract the {@link From} object from
+	 * @param alias The name of the alias to extract from the criteria context or else a null or empty
+	 *            string to return the root object
+	 * @return Either the {@link Root} for this query or the {@link Join} that is aliased by the
+	 *         provided name
+	 * @param <T> The root type of the criteriaContext
+	 */
+	protected <T> From<?, ?> getRootOrJoin(@Nonnull BaseFhirCriteriaHolder<T> criteriaContext, @Nullable String alias) {
+		if (alias == null || alias.isEmpty()) {
+			return criteriaContext.getRoot();
+		} else {
+			return criteriaContext.getJoin(alias).orElseThrow(() -> new IllegalStateException(
+			        "Tried to reference alias " + alias + " before creating a join with that name"));
+		}
+	}
+	
+	/**
+	 * Attempts to provide a consistent interface to the {@link From} object representing either the
+	 * {@link Root} object for the current criteria context or the {@link Join} object that matches the
+	 * provided {@link From} object.
+	 *
+	 * @param criteriaContext The criteriaContext to extract the {@link From} object from
+	 * @param alias The {@link From} alias to extract the join from
+	 * @return Either the {@link Root} for this query or the {@link Join} that is aliased by the
+	 *         provided name
+	 * @param <T> The root type of the criteriaContext
+	 * @param <U> The return type of the criteriaContext
+	 */
+	protected <T, U> From<?, ?> getRootOrJoin(OpenmrsFhirCriteriaContext<T, U> criteriaContext, From<?, ?> alias) {
+		if (alias == null) {
+			return criteriaContext.getRoot();
+		} else {
+			return criteriaContext.getJoin(alias).orElseThrow(() -> new IllegalStateException(
+			        "Tried to reference alias " + alias + " before creating a join with that name"));
+		}
+	}
+	
+	/**
+	 * A generic handler for any subtype of {@link IQueryParameterAnd<T>} which converts the
+	 * {@link IQueryParameterAnd<T>} into a stream of {@link IQueryParameterOr<T>} objects.
+	 *
+	 * @param <T> the subtype of {@link IQueryParameterAnd} that this operates on
+	 * @param <U> the subtype of {@link IQueryParameterType} that each {@link IQueryParameterOr} uses
+	 * @return A stream of {@link IQueryParameterOr<T>}s contained in the {@link IQueryParameterAnd<T>}
+	 */
+	protected <T extends IQueryParameterOr<U>, U extends IQueryParameterType> Stream<T> handleAndListParam(
+	        IQueryParameterAnd<T> andListParameter) {
+		return andListParameter.getValuesAsQueryTokens().stream();
+	}
+	
+	/**
+	 * A generic handler for any subtype of {@link IQueryParameterAnd<T>} which creates a criterion that
+	 * represents the intersection of all the parameters contained<br/>
+	 * <br/>
+	 * This differs from {@link #handleAndListParamBy(CriteriaBuilder, IQueryParameterAnd, Function)} in
+	 * that the handler is called for each parameter in the {@link IQueryParameterOr<U>}.
+	 *
+	 * @param criteriaBuilder the active {@link CriteriaBuilder} for the current query
+	 * @param andListParam the {@link IQueryParameterAnd<T>} to handle
+	 * @param handler a {@link Function} which maps a parameter to a {@link Optional<Predicate>}
+	 * @param <T> the subtype of {@link IQueryParameterAnd} that this operates on
+	 * @param <U> the subtype of {@link IQueryParameterType} that each {@link IQueryParameterOr} uses
+	 * @return the resulting criterion, which is the intersection of all the parameters
+	 */
+	protected <T extends IQueryParameterOr<U>, U extends IQueryParameterType> Optional<Predicate> handleAndListParam(
+	        CriteriaBuilder criteriaBuilder, IQueryParameterAnd<T> andListParam, Function<U, Optional<Predicate>> handler) {
+		if (andListParam == null) {
 			return Optional.empty();
 		}
 		
-		return Optional.of(or(toCriteriaArray(handleOrListParam(orListParam).flatMap(handler))));
+		return Optional.ofNullable(criteriaBuilder.and(toCriteriaArray(
+		    handleAndListParam(andListParam).map(orListParam -> handleOrListParam(criteriaBuilder, orListParam, handler)))));
+	}
+	
+	/**
+	 * A generic handler for any subtype of {@link IQueryParameterAnd<T>} which creates a criterion that
+	 * represents the intersection of all the parameters contained<br/>
+	 * <br/>
+	 * This differs from {@link #handleAndListParam(CriteriaBuilder, IQueryParameterAnd, Function)} in
+	 * that the handler is called during stream processing, which may make it more efficient.
+	 *
+	 * @param criteriaBuilder the active {@link CriteriaBuilder} for the current query
+	 * @param andListParam the {@link IQueryParameterAnd<T>} to handle
+	 * @param handler a {@link Function} which maps a parameter to a {@link Optional<Predicate>}
+	 * @param <T> the subtype of {@link IQueryParameterAnd} that this operates on
+	 * @param <U> the subtype of {@link IQueryParameterType} that each {@link IQueryParameterOr} uses
+	 * @return the resulting criterion, which is the intersection of all the parameters
+	 */
+	protected <T extends IQueryParameterOr<U>, U extends IQueryParameterType> Optional<Predicate> handleAndListParamAsStream(
+	        CriteriaBuilder criteriaBuilder, IQueryParameterAnd<T> andListParam,
+	        Function<U, Stream<Optional<Predicate>>> handler) {
+		if (andListParam == null) {
+			return Optional.empty();
+		}
+		
+		Predicate[] predicates = toCriteriaArray(handleAndListParam(andListParam)
+		        .map(orListParam -> handleOrListParamAsStream(criteriaBuilder, orListParam, handler)));
+		
+		if (predicates.length == 0) {
+			return Optional.empty();
+		}
+		
+		return Optional.of(criteriaBuilder.and(predicates));
+	}
+	
+	/**
+	 * A generic handler for any subtype of {@link IQueryParameterAnd<T>} which creates a criterion that
+	 * represents the intersection of all the parameters contained<br/>
+	 * <br/>
+	 * This differs from {@link #handleAndListParam(CriteriaBuilder, IQueryParameterAnd, Function)} in
+	 * that the handler is called with each {@link IQueryParameterOr<U>} rather than each individual
+	 * parameter
+	 *
+	 * @param criteriaBuilder the active {@link CriteriaBuilder} for the current query
+	 * @param andListParam the {@link IQueryParameterAnd<T>} to handle
+	 * @param handler a {@link Function} which maps a parameter to a {@link Optional<Predicate>}
+	 * @param <T> the subtype of {@link IQueryParameterAnd} that this operates on
+	 * @param <U> the subtype of {@link IQueryParameterType} that each {@link IQueryParameterOr} uses
+	 * @return the resulting criterion, which is the intersection of all the parameters
+	 */
+	@SuppressWarnings("unused")
+	protected <T extends IQueryParameterOr<U>, U extends IQueryParameterType> Optional<Predicate> handleAndListParamBy(
+	        CriteriaBuilder criteriaBuilder, IQueryParameterAnd<T> andListParam,
+	        Function<IQueryParameterOr<U>, Optional<Predicate>> handler) {
+		if (andListParam == null) {
+			return Optional.empty();
+		}
+		
+		Predicate[] predicates = toCriteriaArray(handleAndListParam(andListParam).map(handler));
+		
+		if (predicates.length == 0) {
+			return Optional.empty();
+		}
+		
+		return Optional.of(criteriaBuilder.and(predicates));
 	}
 	
 	/**
@@ -324,20 +405,85 @@ public abstract class BaseDao {
 	 * and handled according to the system they belong to This is useful for queries drawing their
 	 * values from CodeableConcepts
 	 *
+	 * @param criteriaBuilder the active {@link CriteriaBuilder} for the current query
 	 * @param andListParam the {@link IQueryParameterAnd} to handle
 	 * @param systemTokenHandler a {@link BiFunction} taking the system and associated list of
 	 *            {@link TokenParam}s and returning a {@link Criterion}
-	 * @return a {@link Criterion} representing the intersection of all produced {@link Criterion}
+	 * @return a {@link Predicate} representing the intersection of all produced {@link Predicate}s
 	 */
-	protected <T extends IQueryParameterOr<TokenParam>> Optional<Criterion> handleAndListParamBySystem(
-	        IQueryParameterAnd<T> andListParam,
-	        BiFunction<String, List<TokenParam>, Optional<Criterion>> systemTokenHandler) {
+	protected <T extends IQueryParameterOr<TokenParam>> Optional<Predicate> handleAndListParamBySystem(
+	        CriteriaBuilder criteriaBuilder, IQueryParameterAnd<T> andListParam,
+	        BiFunction<String, List<TokenParam>, Optional<Predicate>> systemTokenHandler) {
 		if (andListParam == null) {
 			return Optional.empty();
 		}
 		
-		return Optional.of(and(toCriteriaArray(
-		    handleAndListParam(andListParam).map(param -> handleOrListParamBySystem(param, systemTokenHandler)))));
+		return Optional.of(criteriaBuilder.and(toCriteriaArray(handleAndListParam(andListParam)
+		        .map(param -> handleOrListParamBySystem(criteriaBuilder, param, systemTokenHandler)))));
+	}
+	
+	/**
+	 * A generic handler for any subtype of {@link IQueryParameterAnd<T>} which converts the
+	 * {@link IQueryParameterOr<T>} into a stream of {@link IQueryParameterType<T>} objects.
+	 *
+	 * @param <T> the subtype of {@link IQueryParameterType} that each {@link IQueryParameterOr} uses
+	 * @return A stream of {@link IQueryParameterType<T>}s contained in the {@link IQueryParameterOr<T>}
+	 */
+	protected <T extends IQueryParameterType> Stream<T> handleOrListParam(IQueryParameterOr<T> orListParameter) {
+		return orListParameter.getValuesAsQueryTokens().stream();
+	}
+	
+	/**
+	 * A generic handler for any subtype of {@link IQueryParameterOr} which creates a criterion that
+	 * represents the union of all the parameters
+	 *
+	 * @param criteriaBuilder the active {@link CriteriaBuilder} for the current query
+	 * @param orListParam the {@link IQueryParameterOr} to handle
+	 * @param handler a {@link Function} which maps a parameter to a {@link Criterion}
+	 * @param <T> the subtype of {@link IQueryParameterType} for this parameter
+	 * @return the resulting criterion, which is the union of all contained parameters
+	 */
+	protected <T extends IQueryParameterType> Optional<Predicate> handleOrListParam(CriteriaBuilder criteriaBuilder,
+	        IQueryParameterOr<T> orListParam, Function<T, Optional<Predicate>> handler) {
+		if (orListParam == null) {
+			return Optional.empty();
+		}
+		
+		Predicate[] predicates = toCriteriaArray(handleOrListParam(orListParam).map(handler));
+		
+		if (predicates.length == 0) {
+			return Optional.empty();
+		}
+		
+		return Optional.of(criteriaBuilder.or(predicates));
+	}
+	
+	/**
+	 * A generic handler for any subtype of {@link IQueryParameterOr} which creates a criterion that
+	 * represents the union of all the parameters<br/>
+	 * <br/>
+	 * Unlike {@link #handleAndListParam(CriteriaBuilder, IQueryParameterAnd, Function)}, this function
+	 * is called as part of the list streaming and may be slightly more efficient.
+	 *
+	 * @param criteriaBuilder the active {@link CriteriaBuilder} for the current query
+	 * @param orListParam the {@link IQueryParameterOr} to handle
+	 * @param handler a {@link Function} which maps a parameter to a {@link Criterion}
+	 * @param <T> the subtype of {@link IQueryParameterType} for this parameter
+	 * @return the resulting {@link Predicate}, which is the union of all contained parameters
+	 */
+	protected <T extends IQueryParameterType> Optional<Predicate> handleOrListParamAsStream(CriteriaBuilder criteriaBuilder,
+	        IQueryParameterOr<T> orListParam, Function<T, Stream<Optional<Predicate>>> handler) {
+		if (orListParam == null) {
+			return Optional.empty();
+		}
+		
+		Predicate[] predicates = toCriteriaArray(handleOrListParam(orListParam).flatMap(handler));
+		
+		if (predicates.length == 0) {
+			return Optional.empty();
+		}
+		
+		return Optional.of(criteriaBuilder.or(predicates));
 	}
 	
 	/**
@@ -345,884 +491,82 @@ public abstract class BaseDao {
 	 * handled according to the system they belong to This is useful for queries drawing their values
 	 * from CodeableConcepts
 	 *
+	 * @param criteriaBuilder the active {@link CriteriaBuilder} for the current query
 	 * @param orListParam the {@link IQueryParameterOr} to handle
 	 * @param systemTokenHandler a {@link BiFunction} taking the system and associated list of
 	 *            {@link TokenParam}s and returning a {@link Criterion}
 	 * @return a {@link Criterion} representing the union of all produced {@link Criterion}
 	 */
-	protected Optional<Criterion> handleOrListParamBySystem(IQueryParameterOr<TokenParam> orListParam,
-	        BiFunction<String, List<TokenParam>, Optional<Criterion>> systemTokenHandler) {
+	protected Optional<Predicate> handleOrListParamBySystem(CriteriaBuilder criteriaBuilder,
+	        IQueryParameterOr<TokenParam> orListParam,
+	        BiFunction<String, List<TokenParam>, Optional<Predicate>> systemTokenHandler) {
 		
 		if (orListParam == null) {
 			return Optional.empty();
 		}
 		
-		return Optional
-		        .of(or(toCriteriaArray(handleOrListParam(orListParam).collect(Collectors.groupingBy(this::groupBySystem))
-		                .entrySet().stream().map(e -> systemTokenHandler.apply(e.getKey(), e.getValue())))));
+		return Optional.of(criteriaBuilder.or(toCriteriaArray(
+		    handleOrListParam(orListParam).collect(Collectors.groupingBy((t) -> StringUtils.trimToEmpty(t.getSystem())))
+		            .entrySet().stream().map(e -> systemTokenHandler.apply(e.getKey(), e.getValue())))));
 	}
 	
 	/**
-	 * Handler for a {@link TokenOrListParam} that represents boolean values
+	 * Converts a given set of {@link Optional<Predicate>}s into a {@link Predicate[]}. <br/>
+	 * Any {@link Optional<Predicate>}s that are empty are skipped.
 	 *
-	 * @param propertyName the name of the property in the query to use
-	 * @param booleanToken the {@link TokenOrListParam} to handle
-	 * @return a {@link Criterion} to be added to the query indicating that the property matches the
-	 *         given value
+	 * @param predicates The {@link Optional<Predicate>}s to convert to an array
+	 * @return an array of {@link Predicate} objects for each non-empty predicate in the supplied
+	 *         arguments
 	 */
-	protected Optional<Criterion> handleBoolean(String propertyName, TokenAndListParam booleanToken) {
-		if (booleanToken == null) {
-			return Optional.empty();
-		}
-		
-		// note that we use a custom implementation here as Boolean.valueOf() and Boolean.parse() only determine whether
-		// the string matches "true". We could potentially be passed a non-valid Boolean value here.
-		return handleAndListParam(booleanToken, token -> {
-			if (token.getValue().equalsIgnoreCase("true")) {
-				return handleBooleanProperty(propertyName, true);
-			} else if (token.getValue().equalsIgnoreCase("false")) {
-				return handleBooleanProperty(propertyName, false);
-			}
-			
-			return Optional.empty();
-		});
-	}
-	
-	protected Optional<Criterion> handleBooleanProperty(String propertyName, boolean booleanVal) {
-		return Optional.of(eq(propertyName, booleanVal));
+	@SafeVarargs
+	protected final @Nonnull Predicate[] toCriteriaArray(@Nonnull Optional<? extends Predicate>... predicates) {
+		return toCriteriaArray(Arrays.stream(predicates));
 	}
 	
 	/**
-	 * A handler for a {@link DateRangeParam}, which represents an inclusive set of {@link DateParam}s
+	 * Converts a given {@link Collection} of {@link Optional<Predicate>}s into a {@link Predicate[]}.
+	 * <br/>
+	 * Any {@link Optional<Predicate>}s that are empty are skipped.
 	 *
-	 * @param propertyName the name of the property in the query to use
-	 * @param dateRangeParam the {@link DateRangeParam} to handle
-	 * @return a {@link Criterion} to be added to the query for the indicated date range
+	 * @param predicates The {@link Collection} of {@link Optional<Predicate>}s to convert to an array
+	 * @return an array of {@link Predicate} objects for each non-empty predicate in the supplied
+	 *         arguments
 	 */
-	protected Optional<Criterion> handleDateRange(String propertyName, DateRangeParam dateRangeParam) {
-		if (dateRangeParam == null) {
-			return Optional.empty();
-		}
-		
-		return Optional.of(and(toCriteriaArray(Stream.of(handleDate(propertyName, dateRangeParam.getLowerBound()),
-		    handleDate(propertyName, dateRangeParam.getUpperBound())))));
+	protected @Nonnull Predicate[] toCriteriaArray(@Nonnull Collection<Optional<? extends Predicate>> predicates) {
+		return toCriteriaArray(predicates.stream());
 	}
 	
 	/**
-	 * A handler for a {@link DateParam}, which represents a day and an comparator
+	 * Converts a given {@link Stream} of {@link Optional<Predicate>}s into a {@link Predicate[]}. <br/>
+	 * Any {@link Optional<Predicate>}s that are empty are skipped.
 	 *
-	 * @param propertyName the name of the property in the query to use
-	 * @param dateParam the {@link DateParam} to handle
-	 * @return a {@link Criterion} to be added to the query for the indicate date param
+	 * @param predicates The {@link Stream} of {@link Optional<Predicate>}s to convert to an array
+	 * @return an array of {@link Predicate} objects for each non-empty predicate in the supplied
+	 *         arguments
 	 */
-	protected Optional<Criterion> handleDate(String propertyName, DateParam dateParam) {
-		if (dateParam == null) {
-			return Optional.empty();
-		}
-		
-		int calendarPrecision = dateParam.getPrecision().getCalendarConstant();
-		if (calendarPrecision > Calendar.SECOND) {
-			calendarPrecision = Calendar.SECOND;
-		}
-		// TODO We may want to not use the default Calendar
-		Date dateStart = DateUtils.truncate(dateParam.getValue(), calendarPrecision);
-		Date dateEnd = DateUtils.ceiling(dateParam.getValue(), calendarPrecision);
-		
-		// TODO This does not properly handle FHIR Periods and Timings, though its unclear if we are using those
-		// see https://www.hl7.org/fhir/search.html#date
-		switch (dateParam.getPrefix()) {
-			case EQUAL:
-				return Optional.of(and(ge(propertyName, dateStart), lt(propertyName, dateEnd)));
-			case NOT_EQUAL:
-				return Optional.of(not(and(ge(propertyName, dateStart), lt(propertyName, dateEnd))));
-			case LESSTHAN_OR_EQUALS:
-			case LESSTHAN:
-				return Optional.of(le(propertyName, dateEnd));
-			case GREATERTHAN_OR_EQUALS:
-			case GREATERTHAN:
-				return Optional.of(ge(propertyName, dateStart));
-			case STARTS_AFTER:
-				return Optional.of(gt(propertyName, dateEnd));
-			case ENDS_BEFORE:
-				return Optional.of(lt(propertyName, dateStart));
-		}
-		
-		return Optional.empty();
-	}
-	
-	protected Optional<Criterion> handleQuantity(String propertyName, QuantityParam quantityParam) {
-		if (quantityParam == null) {
-			return Optional.empty();
-		}
-		
-		BigDecimal value = quantityParam.getValue();
-		if (quantityParam.getPrefix() == null || quantityParam.getPrefix() == ParamPrefixEnum.APPROXIMATE) {
-			String plainString = quantityParam.getValue().toPlainString();
-			int dotIdx = plainString.indexOf('.');
-			
-			BigDecimal approxRange = APPROX_RANGE.multiply(value);
-			if (dotIdx == -1) {
-				return Optional.of(
-				    between(propertyName, value.subtract(approxRange).doubleValue(), value.add(approxRange).doubleValue()));
-			} else {
-				int precision = plainString.length() - (dotIdx);
-				double mul = Math.pow(10, -precision);
-				double val = mul * 5.0d;
-				return Optional.of(between(propertyName, value.subtract(new BigDecimal(val)).doubleValue(),
-				    value.add(new BigDecimal(val)).doubleValue()));
-			}
-		} else {
-			double val = value.doubleValue();
-			switch (quantityParam.getPrefix()) {
-				case EQUAL:
-					return Optional.of(eq(propertyName, val));
-				case NOT_EQUAL:
-					return Optional.of(ne(propertyName, val));
-				case LESSTHAN_OR_EQUALS:
-					return Optional.of(le(propertyName, val));
-				case LESSTHAN:
-					return Optional.of(lt(propertyName, val));
-				case GREATERTHAN_OR_EQUALS:
-					return Optional.of(ge(propertyName, val));
-				case GREATERTHAN:
-					return Optional.of(gt(propertyName, val));
-			}
-		}
-		
-		return Optional.empty();
-	}
-	
-	protected Optional<Criterion> handleQuantity(@Nonnull String propertyName, QuantityAndListParam quantityAndListParam) {
-		if (quantityAndListParam == null) {
-			return Optional.empty();
-		}
-		
-		return handleAndListParam(quantityAndListParam, quantityParam -> handleQuantity(propertyName, quantityParam));
-	}
-	
-	protected void handleEncounterReference(Criteria criteria, ReferenceAndListParam encounterReference,
-	        @Nonnull String encounterAlias) {
-		handleEncounterReference(criteria, encounterReference, encounterAlias, "encounter");
-	}
-	
-	protected void handleEncounterReference(Criteria criteria, ReferenceAndListParam encounterReference,
-	        @Nonnull String encounterAlias, @Nonnull String associationPath) {
-		if (encounterReference == null) {
-			return;
-		}
-		
-		if (lacksAlias(criteria, encounterAlias)) {
-			criteria.createAlias(associationPath, encounterAlias);
-		}
-		
-		handleAndListParam(encounterReference, token -> {
-			if (token.getChain() != null) {
-				switch (token.getChain()) {
-					case Encounter.SP_TYPE:
-						if (lacksAlias(criteria, "et")) {
-							criteria.createAlias(String.format("%s.encounterType", encounterAlias), "et");
-						}
-						return propertyLike("et.uuid", new StringParam(token.getValue(), true));
-				}
-			} else {
-				return Optional.of(eq(String.format("%s.uuid", encounterAlias), token.getIdPart()));
-			}
-			
-			return Optional.empty();
-		}).ifPresent(criteria::add);
-	}
-	
-	protected Optional<Criterion> handleGender(@Nonnull String propertyName, TokenAndListParam gender) {
-		if (gender == null) {
-			return Optional.empty();
-		}
-		
-		return handleAndListParam(gender, token -> {
-			try {
-				AdministrativeGender administrativeGender = AdministrativeGender.fromCode(token.getValue());
-				
-				if (administrativeGender == null) {
-					return Optional.of(isNull(propertyName));
-				}
-				
-				switch (administrativeGender) {
-					case MALE:
-						return Optional.of(ilike(propertyName, "M", MatchMode.EXACT));
-					case FEMALE:
-						return Optional.of(ilike(propertyName, "F", MatchMode.EXACT));
-					case OTHER:
-					case UNKNOWN:
-					case NULL:
-						return Optional.of(isNull(propertyName));
-				}
-			}
-			catch (FHIRException ignored) {}
-			
-			return Optional.of(ilike(propertyName, token.getValue(), MatchMode.EXACT));
-		});
-	}
-	
-	protected Optional<Criterion> handleLocationReference(@Nonnull String locationAlias,
-	        ReferenceAndListParam locationReference) {
-		if (locationReference == null) {
-			return Optional.empty();
-		}
-		
-		return handleAndListParam(locationReference, token -> {
-			if (token.getChain() != null) {
-				switch (token.getChain()) {
-					case Location.SP_NAME:
-						return propertyLike(String.format("%s.name", locationAlias), token.getValue());
-					case Location.SP_ADDRESS_CITY:
-						return propertyLike(String.format("%s.cityVillage", locationAlias), token.getValue());
-					case Location.SP_ADDRESS_STATE:
-						return propertyLike(String.format("%s.stateProvince", locationAlias), token.getValue());
-					case Location.SP_ADDRESS_POSTALCODE:
-						return propertyLike(String.format("%s.postalCode", locationAlias), token.getValue());
-					case Location.SP_ADDRESS_COUNTRY:
-						return propertyLike(String.format("%s.country", locationAlias), token.getValue());
-				}
-			} else {
-				return Optional.of(eq(String.format("%s.uuid", locationAlias), token.getValue()));
-			}
-			
-			return Optional.empty();
-		});
-		
-	}
-	
-	protected void handleParticipantReference(Criteria criteria, ReferenceAndListParam participantReference) {
-		if (participantReference != null) {
-			if (lacksAlias(criteria, "ep")) {
-				return;
-			}
-			
-			handleAndListParam(participantReference, participantToken -> {
-				if (participantToken.getChain() != null) {
-					switch (participantToken.getChain()) {
-						case Practitioner.SP_IDENTIFIER:
-							if (lacksAlias(criteria, "p")) {
-								criteria.createAlias("ep.provider", "p");
-							}
-							return Optional.of(ilike("p.identifier", participantToken.getValue()));
-						case Practitioner.SP_GIVEN:
-							if ((lacksAlias(criteria, "pro")
-							        && (lacksAlias(criteria, "ps") && (lacksAlias(criteria, "pn"))))) {
-								criteria.createAlias("ep.provider", "pro").createAlias("pro.person", "ps")
-								        .createAlias("ps.names", "pn");
-							}
-							return Optional.of(ilike("pn.givenName", participantToken.getValue(), MatchMode.START));
-						case Practitioner.SP_FAMILY:
-							if ((lacksAlias(criteria, "pro")
-							        && (lacksAlias(criteria, "ps") && (lacksAlias(criteria, "pn"))))) {
-								criteria.createAlias("ep.provider", "pro").createAlias("pro.person", "ps")
-								        .createAlias("ps.names", "pn");
-							}
-							return Optional.of(ilike("pn.familyName", participantToken.getValue(), MatchMode.START));
-						case Practitioner.SP_NAME:
-							if ((lacksAlias(criteria, "pro")
-							        && (lacksAlias(criteria, "ps") && (lacksAlias(criteria, "pn"))))) {
-								criteria.createAlias("ep.provider", "pro").createAlias("pro.person", "ps")
-								        .createAlias("ps.names", "pn");
-							}
-							
-							List<Optional<? extends Criterion>> criterionList = new ArrayList<>();
-							
-							for (String token : StringUtils.split(participantToken.getValue(), " \t,")) {
-								criterionList.add(propertyLike("pn.givenName", token));
-								criterionList.add(propertyLike("pn.middleName", token));
-								criterionList.add(propertyLike("pn.familyName", token));
-							}
-							
-							return Optional.of(or(toCriteriaArray(criterionList)));
-					}
-				} else {
-					if (lacksAlias(criteria, "pro")) {
-						criteria.createAlias("ep.provider", "pro");
-					}
-					return Optional.of(eq("pro.uuid", participantToken.getValue()));
-				}
-				
-				return Optional.empty();
-			}).ifPresent(criteria::add);
-		}
-	}
-	
-	//Added this method to allow handling classes with provider instead  of encounterProvider
-	protected void handleProviderReference(Criteria criteria, ReferenceAndListParam providerReference) {
-		if (providerReference != null) {
-			criteria.createAlias("orderer", "or");
-			
-			handleAndListParam(providerReference, participantToken -> {
-				if (participantToken.getChain() != null) {
-					switch (participantToken.getChain()) {
-						case Practitioner.SP_IDENTIFIER:
-							return Optional.of(ilike("or.identifier", participantToken.getValue()));
-						case Practitioner.SP_GIVEN:
-							if ((lacksAlias(criteria, "ps") && (lacksAlias(criteria, "pn")))) {
-								criteria.createAlias("or.person", "ps").createAlias("ps.names", "pn");
-							}
-							return Optional.of(ilike("pn.givenName", participantToken.getValue(), MatchMode.START));
-						case Practitioner.SP_FAMILY:
-							if ((lacksAlias(criteria, "ps") && (lacksAlias(criteria, "pn")))) {
-								criteria.createAlias("or.person", "ps").createAlias("ps.names", "pn");
-							}
-							return Optional.of(ilike("pn.familyName", participantToken.getValue(), MatchMode.START));
-						case Practitioner.SP_NAME:
-							if ((lacksAlias(criteria, "ps") && (lacksAlias(criteria, "pn")))) {
-								criteria.createAlias("or.person", "ps").createAlias("ps.names", "pn");
-							}
-							
-							List<Optional<? extends Criterion>> criterionList = new ArrayList<>();
-							
-							for (String token : StringUtils.split(participantToken.getValue(), " \t,")) {
-								criterionList.add(propertyLike("pn.givenName", token));
-								criterionList.add(propertyLike("pn.middleName", token));
-								criterionList.add(propertyLike("pn.familyName", token));
-							}
-							
-							return Optional.of(or(toCriteriaArray(criterionList)));
-					}
-				} else {
-					return Optional.of(eq("or.uuid", participantToken.getValue()));
-				}
-				
-				return Optional.empty();
-			}).ifPresent(criteria::add);
-		}
-	}
-	
-	protected Optional<Criterion> handleCodeableConcept(Criteria criteria, TokenAndListParam concepts,
-	        @Nonnull String conceptAlias, @Nonnull String conceptMapAlias, @Nonnull String conceptReferenceTermAlias) {
-		if (concepts == null) {
-			return Optional.empty();
-		}
-		
-		return handleAndListParamBySystem(concepts, (system, tokens) -> {
-			if (system.isEmpty()) {
-				return Optional.of(or(
-				    in(String.format("%s.conceptId", conceptAlias),
-				        tokensToParams(tokens).map(NumberUtils::toInt).collect(Collectors.toList())),
-				    in(String.format("%s.uuid", conceptAlias), tokensToList(tokens))));
-			} else {
-				if (lacksAlias(criteria, conceptMapAlias)) {
-					criteria.createAlias(String.format("%s.conceptMappings", conceptAlias), conceptMapAlias).createAlias(
-					    String.format("%s.conceptReferenceTerm", conceptMapAlias), conceptReferenceTermAlias);
-				}
-				
-				return Optional.of(generateSystemQuery(system, tokensToList(tokens), conceptReferenceTermAlias));
-			}
-		});
-	}
-	
-	protected void handleNames(Criteria criteria, StringAndListParam name, StringAndListParam given,
-	        StringAndListParam family) {
-		handleNames(criteria, name, given, family, null);
-	}
-	
-	protected void handleNames(Criteria criteria, StringAndListParam name, StringAndListParam given,
-	        StringAndListParam family, String personAlias) {
-		if (name == null && given == null && family == null) {
-			return;
-		}
-		
-		if (lacksAlias(criteria, "pn")) {
-			if (StringUtils.isNotBlank(personAlias)) {
-				criteria.createAlias(String.format("%s.names", personAlias), "pn", JoinType.INNER_JOIN,
-				    eq("pn.voided", false));
-			} else {
-				criteria.createAlias("names", "pn", JoinType.INNER_JOIN, eq("pn.voided", false));
-			}
-		}
-		
-		if (name != null) {
-			handleAndListParamAsStream(name,
-			    (nameParam) -> Arrays.stream(StringUtils.split(nameParam.getValue(), " \t,"))
-			            .map(token -> new StringParam().setValue(token).setExact(nameParam.isExact())
-			                    .setContains(nameParam.isContains()))
-			            .map(tokenParam -> Arrays.asList(propertyLike("pn.givenName", tokenParam),
-			                propertyLike("pn.middleName", tokenParam), propertyLike("pn.familyName", tokenParam)))
-			            .flatMap(Collection::stream)).ifPresent(criteria::add);
-		}
-		
-		if (given != null) {
-			handleAndListParam(given, (givenName) -> propertyLike("pn.givenName", givenName)).ifPresent(criteria::add);
-		}
-		
-		if (family != null) {
-			handleAndListParam(family, (familyName) -> propertyLike("pn.familyName", familyName)).ifPresent(criteria::add);
-		}
-	}
-	
-	protected void handlePatientReference(Criteria criteria, ReferenceAndListParam patientReference) {
-		handlePatientReference(criteria, patientReference, "patient");
-	}
-	
-	protected void handlePatientReference(Criteria criteria, ReferenceAndListParam patientReference,
-	        String associationPath) {
-		if (patientReference != null) {
-			criteria.createAlias(associationPath, "p");
-			
-			handleAndListParam(patientReference, patientToken -> {
-				if (patientToken.getChain() != null) {
-					switch (patientToken.getChain()) {
-						case Patient.SP_IDENTIFIER:
-							if (lacksAlias(criteria, "pi")) {
-								criteria.createAlias("p.identifiers", "pi");
-							}
-							return Optional.of(ilike("pi.identifier", patientToken.getValue()));
-						case Patient.SP_GIVEN:
-							if (lacksAlias(criteria, "pn")) {
-								criteria.createAlias("p.names", "pn");
-							}
-							return Optional.of(ilike("pn.givenName", patientToken.getValue(), MatchMode.START));
-						case Patient.SP_FAMILY:
-							if (lacksAlias(criteria, "pn")) {
-								criteria.createAlias("p.names", "pn");
-							}
-							return Optional.of(ilike("pn.familyName", patientToken.getValue(), MatchMode.START));
-						case Patient.SP_NAME:
-							if (lacksAlias(criteria, "pn")) {
-								criteria.createAlias("p.names", "pn");
-							}
-							List<Optional<? extends Criterion>> criterionList = new ArrayList<>();
-							
-							for (String token : StringUtils.split(patientToken.getValue(), " \t,")) {
-								criterionList.add(propertyLike("pn.givenName", token));
-								criterionList.add(propertyLike("pn.middleName", token));
-								criterionList.add(propertyLike("pn.familyName", token));
-							}
-							
-							return Optional.of(or(toCriteriaArray(criterionList)));
-					}
-				} else {
-					return Optional.of(eq("p.uuid", patientToken.getValue()));
-				}
-				
-				return Optional.empty();
-			}).ifPresent(criteria::add);
-		}
-	}
-	
-	protected Optional<Criterion> handleCommonSearchParameters(List<PropParam<?>> theCommonParams) {
-		List<Optional<? extends Criterion>> criterionList = new ArrayList<>();
-		
-		for (PropParam<?> commonSearchParam : theCommonParams) {
-			switch (commonSearchParam.getPropertyName()) {
-				case FhirConstants.ID_PROPERTY:
-					criterionList.add(handleAndListParam((TokenAndListParam) commonSearchParam.getParam(),
-					    param -> Optional.of(eq("uuid", param.getValue()))));
-					break;
-				case FhirConstants.LAST_UPDATED_PROPERTY:
-					criterionList.add(handleLastUpdated((DateRangeParam) commonSearchParam.getParam()));
-					break;
-			}
-		}
-		
-		return Optional.of(and(toCriteriaArray(criterionList.stream())));
+	protected @Nonnull Predicate[] toCriteriaArray(@Nonnull Stream<Optional<? extends Predicate>> predicates) {
+		return predicates.filter(Optional::isPresent).map(Optional::get).toArray(Predicate[]::new);
 	}
 	
 	/**
-	 * This function should be overridden by implementations. It is used to return a criterion for
-	 * _lastUpdated from resources where there are multiple properties to be considered.
+	 * Concerts a {@link List} of {@link TokenParam}s into a {@link List} of {@link String}s where each
+	 * string is the value only of the token param.
 	 *
-	 * @param param the DateRangeParam used to query for _lastUpdated
-	 * @return an optional criterion for the query
+	 * @param tokens The {@link List} of {@link TokenParam}s to convert
+	 * @return A list of the values of each {@link TokenParam}
 	 */
-	protected abstract Optional<Criterion> handleLastUpdated(DateRangeParam param);
-	
-	protected Optional<Criterion> handlePersonAddress(String aliasPrefix, StringAndListParam city, StringAndListParam state,
-	        StringAndListParam postalCode, StringAndListParam country) {
-		if (city == null && state == null && postalCode == null && country == null) {
-			return Optional.empty();
-		}
-		
-		List<Optional<? extends Criterion>> criterionList = new ArrayList<>();
-		
-		if (city != null) {
-			criterionList.add(handleAndListParam(city, c -> propertyLike(String.format("%s.cityVillage", aliasPrefix), c)));
-		}
-		
-		if (state != null) {
-			criterionList
-			        .add(handleAndListParam(state, c -> propertyLike(String.format("%s.stateProvince", aliasPrefix), c)));
-		}
-		
-		if (postalCode != null) {
-			criterionList
-			        .add(handleAndListParam(postalCode, c -> propertyLike(String.format("%s.postalCode", aliasPrefix), c)));
-		}
-		
-		if (country != null) {
-			criterionList.add(handleAndListParam(country, c -> propertyLike(String.format("%s.country", aliasPrefix), c)));
-		}
-		
-		return Optional.of(and(toCriteriaArray(criterionList.stream())));
-	}
-	
-	protected Optional<Criterion> handleMedicationReference(@Nonnull String medicationAlias,
-	        ReferenceAndListParam medicationReference) {
-		if (medicationReference == null) {
-			return Optional.empty();
-		}
-		
-		return handleAndListParam(medicationReference,
-		    token -> Optional.of(eq(String.format("%s.uuid", medicationAlias), token.getIdPart())));
-	}
-	
-	protected Optional<Criterion> handleMedicationRequestReference(@Nonnull String drugOrderAlias,
-	        ReferenceAndListParam drugOrderReference) {
-		if (drugOrderReference == null) {
-			return Optional.empty();
-		}
-		
-		return handleAndListParam(drugOrderReference,
-		    token -> Optional.of(eq(String.format("%s.uuid", drugOrderAlias), token.getIdPart())));
-	}
-	
-	/**
-	 * Use this method to properly implement sorting for your query. Note that for this method to work,
-	 * you must override one or more of: {@link #paramToProps(SortState)},
-	 * {@link #paramToProps(String)}, or {@link #paramToProp(String)}.
-	 *
-	 * @param criteria the current criteria
-	 * @param sort the {@link SortSpec} which defines the sorting to be translated
-	 */
-	protected void handleSort(Criteria criteria, SortSpec sort) {
-		handleSort(criteria, sort, this::paramToProps).ifPresent(l -> l.forEach(criteria::addOrder));
-	}
-	
-	protected Optional<List<Order>> handleSort(Criteria criteria, SortSpec sort,
-	        Function<SortState, Collection<Order>> paramToProp) {
-		List<Order> orderings = new ArrayList<>();
-		SortSpec sortSpec = sort;
-		while (sortSpec != null) {
-			SortState state = SortState.builder().criteria(criteria).sortOrder(sortSpec.getOrder())
-			        .parameter(sortSpec.getParamName().toLowerCase()).build();
-			
-			Collection<Order> orders = paramToProp.apply(state);
-			if (orders != null) {
-				orderings.addAll(orders);
-			}
-			
-			sortSpec = sortSpec.getChain();
-		}
-		
-		if (orderings.size() == 0) {
-			return Optional.empty();
-		}
-		
-		return Optional.of(orderings);
-	}
-	
-	protected Criterion generateSystemQuery(String system, List<String> codes, String conceptReferenceTermAlias) {
-		DetachedCriteria conceptSourceCriteria = DetachedCriteria.forClass(FhirConceptSource.class).add(eq("url", system))
-		        .setProjection(property("conceptSource"));
-		
-		if (codes.size() > 1) {
-			return and(propertyEq(String.format("%s.conceptSource", conceptReferenceTermAlias), conceptSourceCriteria),
-			    in(String.format("%s.code", conceptReferenceTermAlias), codes));
-		} else {
-			return and(propertyEq(String.format("%s.conceptSource", conceptReferenceTermAlias), conceptSourceCriteria),
-			    eq(String.format("%s.code", conceptReferenceTermAlias), codes.get(0)));
-		}
-	}
-	
-	protected Criterion generateActiveOrderQuery(String path, Date onDate) {
-		if (StringUtils.isNotBlank(path)) {
-			path = path + ".";
-		}
-		
-		// ACTIVE = date activated null or less than or equal to current datetime, date stopped null or in the future, auto expire date null or in the future
-		return Restrictions.and(
-		    Restrictions.or(Restrictions.isNull(path + "dateActivated"), Restrictions.le(path + "dateActivated", onDate)),
-		    Restrictions.or(Restrictions.isNull(path + "dateStopped"), Restrictions.gt(path + "dateStopped", onDate)),
-		    Restrictions.or(Restrictions.isNull(path + "autoExpireDate"), Restrictions.gt(path + "autoExpireDate", onDate)));
-	}
-	
-	protected Criterion generateActiveOrderQuery(String path) {
-		return generateActiveOrderQuery(path, new Date());
-	}
-	
-	protected Criterion generateActiveOrderQuery(Date onDate) {
-		return generateActiveOrderQuery("", onDate);
-	}
-	
-	protected Criterion generateActiveOrderQuery() {
-		return generateActiveOrderQuery("", new Date());
-	}
-	
-	protected Criterion generateNotCancelledOrderQuery() {
-		return generateNotCancelledOrderQuery("");
-	}
-	
-	protected Criterion generateNotCancelledOrderQuery(String path) {
-		if (StringUtils.isNotBlank(path)) {
-			path = path + ".";
-		}
-		
-		Date now = new Date();
-		
-		return Restrictions.or(Restrictions.isNull(path + "dateStopped"), Restrictions.gt(path + "dateStopped", now));
-	}
-	
-	protected TokenOrListParam convertStringStatusToBoolean(TokenOrListParam statusParam) {
-		if (statusParam != null) {
-			return handleOrListParam(statusParam).map(s -> {
-				switch (s.getValue()) {
-					case "active":
-						return Optional.of("false");
-					case "inactive":
-						return Optional.of("true");
-					default:
-						return Optional.empty();
-				}
-			}).filter(Optional::isPresent).map(Optional::get).collect(TokenOrListParam::new,
-			    (tp, v) -> tp.add(String.valueOf(v)), (tp1, tp2) -> tp2.getListAsCodings().forEach(tp1::add));
-		}
-		
-		return null;
-	}
-	
-	protected TokenAndListParam convertStringStatusToBoolean(TokenAndListParam statusParam) {
-		if (statusParam != null) {
-			return handleAndListParam(statusParam).map(this::convertStringStatusToBoolean).collect(TokenAndListParam::new,
-			    TokenAndListParam::addAnd, (tp1, tp2) -> tp2.getValuesAsQueryTokens().forEach(tp1::addAnd));
-		}
-		
-		return null;
-	}
-	
-	/**
-	 * This function should be overridden by implementations. It is used to map FHIR parameter names to
-	 * their corresponding values in the query.
-	 *
-	 * @param sortState a {@link SortState} object describing the current sort state
-	 * @return the corresponding ordering(s) needed for this property
-	 */
-	protected Collection<Order> paramToProps(@Nonnull SortState sortState) {
-		Collection<String> prop = paramToProps(sortState.getParameter());
-		
-		if (prop != null) {
-			switch (sortState.getSortOrder()) {
-				case ASC:
-					return prop.stream().map(Order::asc).collect(Collectors.toList());
-				case DESC:
-					return prop.stream().map(Order::desc).collect(Collectors.toList());
-			}
-		}
-		
-		return null;
-	}
-	
-	/**
-	 * This function should be overridden by implementations. It is used to map FHIR parameter names to
-	 * properties where there is only a single property.
-	 *
-	 * @param param the FHIR parameter to map
-	 * @return the name of the corresponding property from the current query
-	 */
-	protected Collection<String> paramToProps(@Nonnull String param) {
-		String prop = paramToProp(param);
-		
-		if (prop != null) {
-			return Collections.singleton(prop);
-		}
-		
-		return null;
-	}
-	
-	/**
-	 * This function should be overridden by implementations. It is used to map FHIR parameter names to
-	 * properties where there is only a single property.
-	 *
-	 * @param param the FHIR parameter to map
-	 * @return the name of the corresponding property from the current query
-	 */
-	protected String paramToProp(@Nonnull String param) {
-		return null;
-	}
-	
-	protected Optional<Criterion> propertyLike(@Nonnull String propertyName, String value) {
-		if (value == null) {
-			return Optional.empty();
-		}
-		
-		return propertyLike(propertyName, new StringParam(value));
-	}
-	
-	protected Optional<Criterion> propertyLike(@Nonnull String propertyName, StringParam param) {
-		if (param == null) {
-			return Optional.empty();
-		}
-		
-		if (param.isExact()) {
-			return Optional.of(ilike(propertyName, param.getValue(), MatchMode.EXACT));
-		} else if (param.isContains()) {
-			return Optional.of(ilike(propertyName, param.getValue(), MatchMode.ANYWHERE));
-		}
-		
-		return Optional.of(ilike(propertyName, param.getValue(), MatchMode.START));
-	}
-	
-	protected Optional<CriteriaImpl> asImpl(Criteria criteria) {
-		if (CriteriaImpl.class.isAssignableFrom(criteria.getClass())) {
-			return Optional.of((CriteriaImpl) criteria);
-		} else if (CriteriaImpl.Subcriteria.class.isAssignableFrom(criteria.getClass())) {
-			return Optional.of((CriteriaImpl) ((CriteriaImpl.Subcriteria) criteria).getParent());
-		}
-		
-		return Optional.empty();
-	}
-	
-	protected List<String> tokensToList(List<TokenParam> tokens) {
+	public List<String> tokensToList(List<TokenParam> tokens) {
 		return tokensToParams(tokens).collect(Collectors.toList());
 	}
 	
-	protected Stream<String> tokensToParams(List<TokenParam> tokens) {
+	/**
+	 * Concerts a {@link List} of {@link TokenParam}s into a {@link Stream} of {@link String}s where
+	 * each string is the value only of the token param.
+	 *
+	 * @param tokens The {@link List} of {@link TokenParam}s to convert
+	 * @return A {@link Stream} of the values of each {@link TokenParam}
+	 */
+	public Stream<String> tokensToParams(List<TokenParam> tokens) {
 		return tokens.stream().map(TokenParam::getValue);
 	}
-	
-	private String groupBySystem(@Nonnull TokenParam token) {
-		return StringUtils.trimToEmpty(token.getSystem());
-	}
-	
-	protected <T extends IQueryParameterOr<U>, U extends IQueryParameterType> Stream<T> handleAndListParam(
-	        IQueryParameterAnd<T> andListParameter) {
-		return andListParameter.getValuesAsQueryTokens().stream();
-	}
-	
-	protected <T extends IQueryParameterType> Stream<T> handleOrListParam(IQueryParameterOr<T> orListParameter) {
-		return orListParameter.getValuesAsQueryTokens().stream();
-	}
-	
-	@SafeVarargs
-	@SuppressWarnings("unused")
-	protected final Criterion[] toCriteriaArray(Optional<? extends Criterion>... criteria) {
-		return toCriteriaArray(Arrays.stream(criteria));
-	}
-	
-	protected Criterion[] toCriteriaArray(Collection<Optional<? extends Criterion>> collection) {
-		return toCriteriaArray(collection.stream());
-	}
-	
-	protected Criterion[] toCriteriaArray(Stream<Optional<? extends Criterion>> criteriaStream) {
-		return criteriaStream.filter(Optional::isPresent).map(Optional::get).toArray(Criterion[]::new);
-	}
-	
-	/**
-	 * This object is used to store the state of the sorting
-	 */
-	@Data
-	@Builder
-	@EqualsAndHashCode
-	public static final class SortState {
-		
-		private Criteria criteria;
-		
-		private SortOrderEnum sortOrder;
-		
-		private String parameter;
-	}
-	
-	protected Optional<Criterion> handleAgeByDateProperty(@Nonnull String datePropertyName, @Nonnull QuantityParam age) {
-		BigDecimal value = age.getValue();
-		if (value == null) {
-			throw new IllegalArgumentException("Age value should be provided in " + age);
-		}
-		
-		String unit = age.getUnits();
-		if (unit == null) {
-			throw new IllegalArgumentException("Age unit should be provided in " + age);
-		}
-		
-		LocalDateTime localDateTime = localDateTimeFactory.now();
-		
-		TemporalAmount temporalAmount;
-		TemporalUnit temporalUnit;
-		// TODO check if HAPI FHIR already defines these constant strings. These are mostly from
-		// http://www.hl7.org/fhir/valueset-age-units.html with the exception of "s" which is not
-		// listed but was seen in FHIR examples: http://www.hl7.org/fhir/datatypes-examples.html#Quantity
-		switch (unit) {
-			case "s":
-				temporalUnit = ChronoUnit.SECONDS;
-				temporalAmount = Duration.ofSeconds(value.longValue());
-				break;
-			case "min":
-				temporalUnit = ChronoUnit.MINUTES;
-				temporalAmount = Duration.ofMinutes(value.longValue());
-				break;
-			case "h":
-				temporalUnit = ChronoUnit.HOURS;
-				temporalAmount = Duration.ofHours(value.longValue());
-				break;
-			case "d":
-				temporalUnit = ChronoUnit.DAYS;
-				temporalAmount = Period.ofDays(value.intValue());
-				break;
-			case "wk":
-				temporalUnit = ChronoUnit.WEEKS;
-				temporalAmount = Period.ofWeeks(value.intValue());
-				break;
-			case "mo":
-				temporalUnit = ChronoUnit.MONTHS;
-				temporalAmount = Period.ofMonths(value.intValue());
-				break;
-			case "a":
-				temporalUnit = ChronoUnit.YEARS;
-				temporalAmount = Period.ofYears(value.intValue());
-				break;
-			default:
-				throw new IllegalArgumentException(
-				        "Invalid unit " + unit + " in age " + age + " should be one of 'min', 'h', 'd', 'wk', 'mo', 'a'");
-		}
-		
-		localDateTime = localDateTime.minus(temporalAmount);
-		
-		ParamPrefixEnum prefix = age.getPrefix();
-		if (prefix == null) {
-			prefix = ParamPrefixEnum.EQUAL;
-		}
-		
-		if (prefix == ParamPrefixEnum.EQUAL || prefix == ParamPrefixEnum.NOT_EQUAL) {
-			// Create a range for the targeted unit; the interval length is determined by the unit and
-			// its center is `offsetSeconds` in the past.
-			final long offset;
-			
-			// Duration only supports hours as a chunk of seconds
-			if (temporalUnit == ChronoUnit.HOURS) {
-				offset = temporalAmount.get(ChronoUnit.SECONDS) / (2 * 3600);
-			} else {
-				offset = temporalAmount.get(temporalUnit) / 2;
-			}
-			
-			LocalDateTime lowerBoundDateTime = LocalDateTime.from(localDateTime).minus(Duration.of(offset, temporalUnit));
-			Date lowerBound = Date.from(lowerBoundDateTime.atZone(ZoneId.systemDefault()).toInstant());
-			
-			LocalDateTime upperBoundDateTime = LocalDateTime.from(localDateTime).plus(offset, temporalUnit);
-			Date upperBound = Date.from(upperBoundDateTime.atZone(ZoneId.systemDefault()).toInstant());
-			
-			if (prefix == ParamPrefixEnum.EQUAL) {
-				return Optional.of(and(ge(datePropertyName, lowerBound), le(datePropertyName, upperBound)));
-			} else {
-				return Optional.of(not(and(ge(datePropertyName, lowerBound), le(datePropertyName, upperBound))));
-			}
-		}
-		
-		switch (prefix) {
-			case LESSTHAN_OR_EQUALS:
-			case LESSTHAN:
-			case STARTS_AFTER:
-				return Optional
-				        .of(ge(datePropertyName, Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant())));
-			case GREATERTHAN_OR_EQUALS:
-			case GREATERTHAN:
-				return Optional
-				        .of(le(datePropertyName, Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant())));
-			// Ignoring ENDS_BEFORE as it is not meaningful for age.
-		}
-		
-		return Optional.empty();
-	}
-	
 }

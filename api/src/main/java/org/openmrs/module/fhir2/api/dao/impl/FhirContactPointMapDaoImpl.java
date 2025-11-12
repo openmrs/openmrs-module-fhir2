@@ -10,6 +10,10 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import javax.annotation.Nonnull;
+import javax.persistence.EntityManager;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 
 import java.util.Optional;
 
@@ -17,14 +21,13 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang.StringUtils;
-import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Restrictions;
 import org.openmrs.LocationAttributeType;
 import org.openmrs.PersonAttributeType;
 import org.openmrs.ProviderAttributeType;
 import org.openmrs.attribute.BaseAttributeType;
 import org.openmrs.module.fhir2.api.dao.FhirContactPointMapDao;
+import org.openmrs.module.fhir2.api.dao.internals.OpenmrsFhirCriteriaContext;
 import org.openmrs.module.fhir2.model.FhirContactPointMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -41,9 +44,12 @@ public class FhirContactPointMapDaoImpl implements FhirContactPointMapDao {
 	@Override
 	@Transactional(readOnly = true)
 	public Optional<FhirContactPointMap> getFhirContactPointMapByUuid(String uuid) {
-		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(FhirContactPointMap.class);
-		criteria.add(Restrictions.eq("uuid", uuid));
-		return Optional.ofNullable((FhirContactPointMap) criteria.uniqueResult());
+		OpenmrsFhirCriteriaContext<FhirContactPointMap, FhirContactPointMap> criteriaContext = openmrsFhirCriteriaContext();
+		criteriaContext
+		        .addPredicate(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("uuid"), uuid));
+		
+		return Optional.ofNullable(
+		    criteriaContext.getEntityManager().createQuery(criteriaContext.finalizeQuery()).getSingleResult());
 	}
 	
 	@Override
@@ -54,9 +60,13 @@ public class FhirContactPointMapDaoImpl implements FhirContactPointMapDao {
 			return Optional.empty();
 		}
 		
-		return Optional.ofNullable((FhirContactPointMap) sessionFactory.getCurrentSession().createQuery(
-		    "from FhirContactPointMap fcp where fcp.attributeTypeDomain = 'person' and fcp.attributeTypeId = :attribute_type_id")
-		        .setParameter("attribute_type_id", attributeType.getId()).uniqueResult());
+		OpenmrsFhirCriteriaContext<FhirContactPointMap, FhirContactPointMap> criteriaContext = openmrsFhirCriteriaContext();
+		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot());
+		
+		return criteriaContext.getEntityManager().createQuery(
+		    "from FhirContactPointMap fcp where fcp.attributeTypeDomain = 'person' and fcp.attributeTypeId = :attribute_type_id",
+		    FhirContactPointMap.class).setParameter("attribute_type_id", attributeType.getId()).getResultList().stream()
+		        .findFirst();
 	}
 	
 	@Override
@@ -84,19 +94,26 @@ public class FhirContactPointMapDaoImpl implements FhirContactPointMapDao {
 			return Optional.empty();
 		}
 		
-		return Optional.ofNullable((FhirContactPointMap) sessionFactory.getCurrentSession().createQuery(
-		    "from FhirContactPointMap fcp where fcp.attributeTypeDomain = :attribute_type_domain and fcp.attributeTypeId = :attribute_type_id")
-		        .setParameter("attribute_type_domain", attributeTypeDomain)
-		        .setParameter("attribute_type_id", attributeType.getId()).uniqueResult());
+		OpenmrsFhirCriteriaContext<FhirContactPointMap, FhirContactPointMap> criteriaContext = openmrsFhirCriteriaContext();
+		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot());
+		
+		return criteriaContext.getEntityManager().createQuery(
+		    "from FhirContactPointMap fcp where fcp.attributeTypeDomain = :attribute_type_domain and fcp.attributeTypeId = :attribute_type_id",
+		    FhirContactPointMap.class).setParameter("attribute_type_domain", attributeTypeDomain)
+		        .setParameter("attribute_type_id", attributeType.getId()).getResultList().stream().findFirst();
 	}
 	
 	@Override
 	@Transactional
 	public FhirContactPointMap saveFhirContactPointMap(@Nonnull FhirContactPointMap contactPointMap) {
-		FhirContactPointMap existingContactPointMap = (FhirContactPointMap) sessionFactory.getCurrentSession().createQuery(
-		    "from FhirContactPointMap fcp where fcp.attributeTypeDomain = :attribute_type_domain and fcp.attributeTypeId = :attribute_type_id")
-		        .setParameter("attribute_type_domain", contactPointMap.getAttributeTypeDomain())
-		        .setParameter("attribute_type_id", contactPointMap.getAttributeTypeId()).uniqueResult();
+		OpenmrsFhirCriteriaContext<FhirContactPointMap, FhirContactPointMap> criteriaContext = openmrsFhirCriteriaContext();
+		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot());
+		
+		FhirContactPointMap existingContactPointMap = criteriaContext.getEntityManager().createQuery(
+		    "from FhirContactPointMap fcp where fcp.attributeTypeDomain = :attribute_type_domain and fcp.attributeTypeId = :attribute_type_id",
+		    FhirContactPointMap.class).setParameter("attribute_type_domain", contactPointMap.getAttributeTypeDomain())
+		        .setParameter("attribute_type_id", contactPointMap.getAttributeTypeId()).getResultList().stream().findFirst()
+		        .orElse(null);
 		
 		if (existingContactPointMap != null) {
 			existingContactPointMap.setSystem(contactPointMap.getSystem());
@@ -108,6 +125,15 @@ public class FhirContactPointMapDaoImpl implements FhirContactPointMapDao {
 			sessionFactory.getCurrentSession().saveOrUpdate(contactPointMap);
 			return contactPointMap;
 		}
+	}
+	
+	private OpenmrsFhirCriteriaContext<FhirContactPointMap, FhirContactPointMap> openmrsFhirCriteriaContext() {
+		EntityManager em = sessionFactory.getCurrentSession();
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<FhirContactPointMap> cq = cb.createQuery(FhirContactPointMap.class);
+		Root<FhirContactPointMap> root = cq.from(FhirContactPointMap.class);
+		
+		return new OpenmrsFhirCriteriaContext<>(em, cb, cq, root);
 	}
 	
 }

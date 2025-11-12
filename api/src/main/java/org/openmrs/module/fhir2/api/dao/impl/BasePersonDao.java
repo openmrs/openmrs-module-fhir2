@@ -9,11 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
-import static org.hibernate.criterion.Restrictions.and;
-import static org.hibernate.criterion.Restrictions.eq;
-import static org.hibernate.criterion.Restrictions.isNull;
-import static org.hibernate.criterion.Restrictions.or;
-import static org.hibernate.criterion.Restrictions.sqlRestriction;
 import static org.hl7.fhir.r4.model.Patient.SP_FAMILY;
 import static org.hl7.fhir.r4.model.Patient.SP_GIVEN;
 import static org.hl7.fhir.r4.model.Person.SP_ADDRESS_CITY;
@@ -24,26 +19,28 @@ import static org.hl7.fhir.r4.model.Person.SP_BIRTHDATE;
 import static org.hl7.fhir.r4.model.Person.SP_NAME;
 
 import javax.annotation.Nonnull;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.From;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Order;
+import javax.persistence.criteria.Path;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import ca.uhn.fhir.rest.param.StringAndListParam;
-import org.hibernate.Criteria;
-import org.hibernate.criterion.DetachedCriteria;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Subqueries;
-import org.hibernate.sql.JoinType;
 import org.openmrs.Auditable;
 import org.openmrs.OpenmrsObject;
 import org.openmrs.Patient;
 import org.openmrs.Person;
 import org.openmrs.PersonName;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.dao.internals.OpenmrsFhirCriteriaContext;
+import org.openmrs.module.fhir2.api.dao.internals.OpenmrsFhirCriteriaSubquery;
+import org.openmrs.module.fhir2.api.dao.internals.SortState;
 import org.openmrs.module.fhir2.api.search.param.PropParam;
 
 /**
@@ -56,107 +53,170 @@ import org.openmrs.module.fhir2.api.search.param.PropParam;
 public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends BaseFhirDao<T> {
 	
 	/**
-	 * Returns the sqlAlias of the Person class for queries from this class
+	 * This is intended to be overridden by subclasses to provide the {@link From} that defines the
+	 * Person for this object
 	 *
-	 * @return the sqlAlias for the Person class for queries from this class
-	 */
-	protected abstract String getSqlAlias();
-	
-	/**
-	 * This is intended to be overridden by subclasses to provide the property that defines the Person
-	 * for this object
-	 *
-	 * @return the property that points to the person for this object
+	 * @return the {@link From} object that points to the person for this object
 	 */
 	@SuppressWarnings("UnstableApiUsage")
-	protected String getPersonProperty() {
+	protected <V, U> From<?, ?> getPersonProperty(OpenmrsFhirCriteriaContext<V, U> criteriaContext) {
 		Class<? super T> rawType = typeToken.getRawType();
 		if (rawType.equals(Person.class) || rawType.equals(Patient.class)) {
-			return null;
+			return criteriaContext.getRoot();
 		}
 		
-		return "person";
+		return criteriaContext.addJoin("person", "person");
 	}
 	
 	@Override
-	protected Collection<Order> paramToProps(@Nonnull SortState sortState) {
+	protected <V, U> Collection<Order> paramToProps(@Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext,
+	        @Nonnull SortState<V> sortState) {
 		String param = sortState.getParameter();
 		
 		if (param == null) {
 			return null;
 		}
 		
-		Criteria criteria = sortState.getCriteria();
-		if (param.startsWith("address") && lacksAlias(criteria, "pad")) {
-			criteria.createAlias(getAssociationPath("addresses"), "pad", JoinType.LEFT_OUTER_JOIN);
-		} else if (param.equals(SP_NAME) || param.equals(SP_GIVEN) || param.equals(SP_FAMILY)) {
-			if (lacksAlias(criteria, "pn")) {
-				criteria.createAlias(getAssociationPath("names"), "pn", JoinType.LEFT_OUTER_JOIN);
-			}
+		From<?, ?> person = getPersonProperty(criteriaContext);
+		if (param.equals(SP_NAME) || param.equals(SP_GIVEN) || param.equals(SP_FAMILY)) {
+			CriteriaBuilder cb = criteriaContext.getCriteriaBuilder();
 			
-			String sqlAlias = getSqlAlias();
+			// For person names, we have several subqueries to ensure that we are only working against a single person name
 			
-			criteria.add(and(eq("pn.voided", false), or(
-			    and(eq("pn.preferred", true),
-			        Subqueries.propertyEq("pn.personNameId",
-			            DetachedCriteria.forClass(PersonName.class, "pn1").add(eq("pn1.preferred", true))
-			                    .add(sqlRestriction(String.format("pn1_.person_id = %s.person_id", sqlAlias)))
-			                    .setProjection(Projections.min("pn1.personNameId")))),
-			    and(Subqueries.notExists(DetachedCriteria.forClass(PersonName.class, "pn2").add(eq("pn2.preferred", true))
-			            // WARNING this is fragile
-			            .add(sqlRestriction(String.format("pn2_.person_id = %s.person_id", sqlAlias)))
-			            .setProjection(Projections.id())),
-			        Subqueries.propertyEq("pn.personNameId",
-			            DetachedCriteria.forClass(PersonName.class, "pn3").add(eq("pn3.preferred", false))
-			                    // WARNING this is fragile
-			                    .add(sqlRestriction(String.format("pn3_.person_id = %s.person_id", sqlAlias)))
-			                    .setProjection(Projections.min("pn3.personNameId")))),
-			    isNull("pn.personNameId"))));
+			// first criteria query: get the first preferred, non-voided person name
+			/*
+			 * Should be something like the inner query in the below:
+			 *
+			 * select *
+			 * from person p1_
+			 * join person_name pn1_ on
+			 *     pn1_.person_id = p1_.person_id and
+			 * 	   pn1_.person_name_id = (
+			 *         select min(personNameId)
+			 *         from person_name pn2_
+			 *         where pn2_.voided = false and pn2_.preferred = true and pn2_.person_id = p1.person_id
+			 *     )
+			 */
+			OpenmrsFhirCriteriaSubquery<PersonName, Integer> personNameFirstSubquery = criteriaContext
+			        .addSubquery(PersonName.class);
+			personNameFirstSubquery.addPredicate(cb.and(cb.equal(personNameFirstSubquery.getRoot().get("voided"), false),
+			    cb.equal(personNameFirstSubquery.getRoot().get("preferred"), true),
+			    cb.equal(personNameFirstSubquery.getRoot().get("person"), criteriaContext.getRoot())));
+			personNameFirstSubquery.getSubquery().select(cb.min(personNameFirstSubquery.getRoot().get("personNameId")));
+			
+			// second criteria query, used in `or` clause to ensure that there is no preferred person name
+			/*
+			 * Should be something like:
+			 * select *
+			 * from person p1_
+			 * join person_name pn1_ on
+			 *     pn1_.person_id = p1_.person_id and
+			 *     not exists (
+			 * 	       select *
+			 *         from person_name pn2_
+			 *         where pn2_.voided = false and pn2_.preferred = true and pn2_.person_id = p1.person_id
+			 *     )
+			 */
+			OpenmrsFhirCriteriaSubquery<PersonName, Integer> personNameSecondSubquery = criteriaContext
+			        .addSubquery(PersonName.class);
+			personNameSecondSubquery.addPredicate(cb.and(cb.equal(personNameSecondSubquery.getRoot().get("voided"), false),
+			    cb.equal(personNameSecondSubquery.getRoot().get("preferred"), true),
+			    cb.equal(personNameSecondSubquery.getRoot().get("person"), criteriaContext.getRoot())));
+			personNameSecondSubquery.getSubquery().select(personNameSecondSubquery.getRoot().get("personNameId"));
+			
+			// third criteria query, just get the first non-voided person name
+			/*
+			 * Should be something like the inner query in the below:
+			 *
+			 * select *
+			 * from person p1_
+			 * join person_name pn1_ on
+			 *     pn1_.person_id = p1_.person_id and
+			 * 	   pn1_.person_name_id = (
+			 *         select min(personNameId)
+			 *         from person_name pn2_
+			 *         where pn2_.voided = false and pn2_.person_id = p1.person_id
+			 *     )
+			 */
+			OpenmrsFhirCriteriaSubquery<PersonName, Integer> personNameThirdSubquery = criteriaContext
+			        .addSubquery(PersonName.class);
+			personNameThirdSubquery.addPredicate(cb.and(cb.equal(personNameThirdSubquery.getRoot().get("voided"), false),
+			    cb.equal(personNameThirdSubquery.getRoot().get("person"), criteriaContext.getRoot())));
+			personNameThirdSubquery.getSubquery().select(cb.min(personNameThirdSubquery.getRoot().get("personNameId")));
+			
+			Join<?, ?> personName = criteriaContext.addJoin(person, "names", "pn_sort", JoinType.LEFT,
+			    (personNameJoin) -> cb.and(cb.equal(personNameJoin.get("voided"), false), cb.or(
+			        // preferred patient name
+			        cb.equal(personNameJoin.get("personNameId"), personNameFirstSubquery.finalizeQuery()),
+			        // first patient name if there are no preferred patient name
+			        cb.and(cb.not(cb.exists(personNameSecondSubquery.finalizeQuery())),
+			            cb.equal(personNameJoin.get("personNameId"), personNameThirdSubquery.finalizeQuery())),
+			        // ultimate fallback, I guess?
+			        cb.isNull(personNameJoin.get("personNameId")))));
 			
 			String[] properties = null;
 			switch (param) {
 				case SP_NAME:
-					properties = new String[] { "pn.familyName", "pn.familyName2", "pn.givenName", "pn.middleName",
-					        "pn.familyNamePrefix", "pn.familyNameSuffix" };
+					properties = new String[] { "familyName", "familyName2", "givenName", "middleName", "familyNamePrefix",
+					        "familyNameSuffix" };
 					break;
 				case SP_GIVEN:
-					properties = new String[] { "pn.givenName" };
+					properties = new String[] { "givenName" };
 					break;
 				case SP_FAMILY:
-					properties = new String[] { "pn.familyName" };
+					properties = new String[] { "familyName" };
 					break;
 			}
 			
+			List<Order> sortStateOrders = new ArrayList<>();
 			switch (sortState.getSortOrder()) {
 				case ASC:
-					return Arrays.stream(properties).map(Order::asc).collect(Collectors.toList());
+					for (String property : properties) {
+						sortStateOrders.add(criteriaContext.getCriteriaBuilder().asc(personName.get(property)));
+					}
+					break;
 				case DESC:
-					return Arrays.stream(properties).map(Order::desc).collect(Collectors.toList());
+					for (String property : properties) {
+						sortStateOrders.add(criteriaContext.getCriteriaBuilder().desc(personName.get(property)));
+					}
+					break;
 			}
+			
+			return sortStateOrders;
 		}
 		
-		return super.paramToProps(sortState);
+		return super.paramToProps(criteriaContext, sortState);
 	}
 	
 	@Override
-	protected String paramToProp(@Nonnull String param) {
+	protected <V, U> Path<?> paramToProp(@Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext, @Nonnull String param) {
+		From<?, ?> person = getPersonProperty(criteriaContext);
+		if (param.startsWith("address")) {
+			From<?, ?> address = criteriaContext.getJoin("pad")
+			        .orElseGet(() -> criteriaContext.addJoin(person, "addresses", "pad", JoinType.LEFT));
+			
+			switch (param) {
+				case SP_ADDRESS_CITY:
+					return address.get("cityVillage");
+				case SP_ADDRESS_STATE:
+					return address.get("stateProvince");
+				case SP_ADDRESS_POSTALCODE:
+					return address.get("postalCode");
+				case SP_ADDRESS_COUNTRY:
+					return address.get("country");
+			}
+		}
+		
 		switch (param) {
 			case SP_BIRTHDATE:
-				return "birthdate";
-			case SP_ADDRESS_CITY:
-				return "pad.cityVillage";
-			case SP_ADDRESS_STATE:
-				return "pad.stateProvince";
-			case SP_ADDRESS_POSTALCODE:
-				return "pad.postalCode";
-			case SP_ADDRESS_COUNTRY:
-				return "pad.country";
+				return person.get("birthdate");
 			default:
 				return null;
 		}
 	}
 	
-	protected void handleAddresses(Criteria criteria, Map.Entry<String, List<PropParam<?>>> entry) {
+	protected <U> void handleAddresses(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
+	        Map.Entry<String, List<PropParam<?>>> entry) {
 		StringAndListParam city = null;
 		StringAndListParam country = null;
 		StringAndListParam postalCode = null;
@@ -178,13 +238,13 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 			}
 		}
 		
-		handlePersonAddress("pad", city, state, postalCode, country).ifPresent(c -> {
-			criteria.createAlias(getAssociationPath("addresses"), "pad");
-			criteria.add(c);
-		});
+		From<?, ?> person = getPersonProperty(criteriaContext);
+		From<?, ?> padJoin = criteriaContext.addJoin(person, "addresses", "pad");
+		getSearchQueryHelper().handlePersonAddress(criteriaContext, padJoin, city, state, postalCode, country)
+		        .ifPresent(criteriaContext::addPredicate);
 	}
 	
-	protected void handleNames(Criteria criteria, List<PropParam<?>> params) {
+	protected <U> void handleNames(OpenmrsFhirCriteriaContext<T, U> criteriaContext, List<PropParam<?>> params) {
 		StringAndListParam name = null;
 		StringAndListParam given = null;
 		StringAndListParam family = null;
@@ -203,11 +263,6 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 			}
 		}
 		
-		handleNames(criteria, name, given, family, getPersonProperty());
-	}
-	
-	private String getAssociationPath(String property) {
-		String personProperty = getPersonProperty();
-		return personProperty == null ? property : personProperty + "." + property;
+		getSearchQueryHelper().handleNames(criteriaContext, name, given, family, getPersonProperty(criteriaContext));
 	}
 }

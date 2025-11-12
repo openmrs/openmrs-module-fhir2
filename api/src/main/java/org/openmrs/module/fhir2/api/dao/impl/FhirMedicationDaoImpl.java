@@ -9,15 +9,17 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
+import javax.annotation.Nonnull;
+import javax.persistence.criteria.From;
+import javax.persistence.criteria.Join;
+
 import ca.uhn.fhir.rest.param.TokenAndListParam;
-import org.hibernate.Criteria;
-import org.hibernate.criterion.DetachedCriteria;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Subqueries;
 import org.openmrs.Concept;
 import org.openmrs.Drug;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirMedicationDao;
+import org.openmrs.module.fhir2.api.dao.internals.OpenmrsFhirCriteriaContext;
+import org.openmrs.module.fhir2.api.dao.internals.OpenmrsFhirCriteriaSubquery;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.stereotype.Component;
 
@@ -25,47 +27,62 @@ import org.springframework.stereotype.Component;
 public class FhirMedicationDaoImpl extends BaseFhirDao<Drug> implements FhirMedicationDao {
 	
 	@Override
-	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
+	protected <U> void setupSearchParams(@Nonnull OpenmrsFhirCriteriaContext<Drug, U> criteriaContext,
+	        @Nonnull SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.CODED_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handleMedicationCode(criteria, (TokenAndListParam) param.getParam()));
+					entry.getValue()
+					        .forEach(param -> handleMedicationCode(criteriaContext, (TokenAndListParam) param.getParam()));
 					break;
 				case FhirConstants.DOSAGE_FORM_SEARCH_HANDLER:
-					entry.getValue()
-					        .forEach(param -> handleMedicationDosageForm(criteria, (TokenAndListParam) param.getParam()));
+					entry.getValue().forEach(
+					    param -> handleMedicationDosageForm(criteriaContext, (TokenAndListParam) param.getParam()));
 					break;
 				case FhirConstants.INGREDIENT_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handleIngredientCode(criteria, (TokenAndListParam) param.getParam()));
+					entry.getValue()
+					        .forEach(param -> handleIngredientCode(criteriaContext, (TokenAndListParam) param.getParam()));
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(entry.getValue()).ifPresent(criteria::add);
+					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(criteriaContext::addPredicate);
 					break;
 			}
 		});
 	}
 	
-	private void handleIngredientCode(Criteria criteria, TokenAndListParam ingredientCode) {
+	private <U> void handleIngredientCode(OpenmrsFhirCriteriaContext<Drug, U> criteriaContext,
+	        TokenAndListParam ingredientCode) {
 		if (ingredientCode != null) {
-			criteria.createAlias("ingredients", "i");
-			DetachedCriteria detachedCriteria = DetachedCriteria.forClass(Concept.class, "ic");
-			handleCodeableConcept(criteria, ingredientCode, "ic", "icm", "icrt").ifPresent(detachedCriteria::add);
-			detachedCriteria.setProjection(Projections.property("conceptId"));
-			criteria.add(Subqueries.propertyIn("i.ingredient", detachedCriteria));
+			Join<?, ?> ingredientsJoin = criteriaContext.addJoin("ingredients", "i");
+			Join<?, ?> conceptJoin = criteriaContext.addJoin(ingredientsJoin, "ingredient", "ic");
+			
+			OpenmrsFhirCriteriaSubquery<Concept, Integer> conceptSubquery = criteriaContext.addSubquery(Concept.class,
+			    Integer.class);
+			getSearchQueryHelper().handleCodeableConcept(criteriaContext, ingredientCode, conceptJoin, "icm", "icrt")
+			        .ifPresent(conceptSubquery::addPredicate);
+			conceptSubquery.setProjection(conceptSubquery.getRoot().get("conceptId"));
+			
+			criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().in(conceptJoin.get("conceptId"))
+			        .value(conceptSubquery.finalizeQuery()));
 		}
 	}
 	
-	private void handleMedicationCode(Criteria criteria, TokenAndListParam code) {
+	private <U> void handleMedicationCode(OpenmrsFhirCriteriaContext<Drug, U> criteriaContext, TokenAndListParam code) {
 		if (code != null) {
-			criteria.createAlias("concept", "cc");
-			handleCodeableConcept(criteria, code, "cc", "ccm", "ccrt").ifPresent(criteria::add);
+			From<?, ?> conceptJoin = criteriaContext.addJoin("concept", "c");
+			getSearchQueryHelper().handleCodeableConcept(criteriaContext, code, conceptJoin, "ccm", "ccrt")
+			        .ifPresent(criteriaContext::addPredicate);
+			criteriaContext.finalizeQuery();
 		}
 	}
 	
-	private void handleMedicationDosageForm(Criteria criteria, TokenAndListParam dosageForm) {
+	private <U> void handleMedicationDosageForm(OpenmrsFhirCriteriaContext<Drug, U> criteriaContext,
+	        TokenAndListParam dosageForm) {
 		if (dosageForm != null) {
-			criteria.createAlias("dosageForm", "dc");
-			handleCodeableConcept(criteria, dosageForm, "dc", "dcm", "dcrt").ifPresent(criteria::add);
+			From<?, ?> dosageFormJoin = criteriaContext.addJoin("dosageForm", "dc");
+			getSearchQueryHelper().handleCodeableConcept(criteriaContext, dosageForm, dosageFormJoin, "dcm", "dcrt")
+			        .ifPresent(criteriaContext::addPredicate);
+			criteriaContext.finalizeQuery();
 		}
 	}
 }

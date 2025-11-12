@@ -23,6 +23,9 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.stream.Collectors;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -88,6 +91,21 @@ public abstract class BaseFhirIntegrationTest<T extends IResourceProvider, U ext
 	public abstract Class<? extends IBaseOperationOutcome> getOperationOutcomeClass();
 	
 	public abstract U removeNarrativeAndContained(U item);
+	
+	@Override
+	public void initializeInMemoryDatabase() throws SQLException {
+		super.initializeInMemoryDatabase();
+		
+		// Configure H2 to use MySQL compatibility mode
+		// This makes H2 behave more like production databases (MySQL, PostgreSQL) by relaxing
+		// the requirement that ORDER BY columns must appear in SELECT when using DISTINCT.
+		// Production databases don't have this restriction, so this ensures our tests reflect
+		// production behavior rather than H2's stricter requirements.
+		Connection connection = getConnection();
+		try (Statement statement = connection.createStatement()) {
+			statement.execute("SET MODE MySQL");
+		}
+	}
 	
 	@Before
 	public void setup() throws Exception {
