@@ -27,6 +27,10 @@ import lombok.Setter;
  * Unlike {@link OpenmrsFhirCriteriaContext}, it has an optional {@link Expression} that is used to
  * define the query projection. This is included because it is expected that a subquery will be used
  * to partially filter a main query.
+ * <br/>
+ * <strong>Thread Safety:</strong> This class is <em>not</em> thread-safe. Instances maintain
+ * mutable state (predicates, joins, projection) and should be used within a single request context.
+ * Do not share instances across threads.
  *
  * @param <V> The root type for the query
  * @param <U> The type for the result of the query
@@ -39,7 +43,7 @@ public class OpenmrsFhirCriteriaSubquery<V, U> extends BaseFhirCriteriaHolder<V>
 	/**
 	 * The projection expression for this subquery. This defines what the subquery will return (e.g., an
 	 * ID field, a COUNT, or another expression).
-	 * <p/>
+	 * <br/>
 	 * If no projection is set, the subquery must have its select clause set explicitly before
 	 * finalization. The projection will be applied when {@link #finalizeQuery()} is called.
 	 */
@@ -54,7 +58,7 @@ public class OpenmrsFhirCriteriaSubquery<V, U> extends BaseFhirCriteriaHolder<V>
 	
 	/**
 	 * Adds a new predicate to the list of predicates being applied to the subquery under construction.
-	 * <p/>
+	 * <br/>
 	 * This method overrides the parent to return the more specific {@link OpenmrsFhirCriteriaSubquery}
 	 * type for method chaining.
 	 *
@@ -70,7 +74,7 @@ public class OpenmrsFhirCriteriaSubquery<V, U> extends BaseFhirCriteriaHolder<V>
 	 * Finalizes the subquery by applying the projection (if set) and all accumulated predicates. This
 	 * should be called once the subquery has been fully constructed and is ready to be used within the
 	 * parent query.
-	 * <p/>
+	 * <br/>
 	 * If a projection has been set via {@link #setProjection(Expression)}, it will be applied as the
 	 * SELECT clause. Otherwise, the subquery's SELECT clause should have been set explicitly.
 	 *
@@ -81,6 +85,10 @@ public class OpenmrsFhirCriteriaSubquery<V, U> extends BaseFhirCriteriaHolder<V>
 			subquery = subquery.select(projection);
 		}
 		
-		return subquery.where(getPredicates().toArray(new Predicate[0]));
+		if (!getPredicates().isEmpty()) {
+			subquery = subquery.where(getPredicates().toArray(new Predicate[0]));
+		}
+		
+		return subquery;
 	}
 }

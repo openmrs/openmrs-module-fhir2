@@ -9,6 +9,10 @@
  */
 package org.openmrs.module.fhir2;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
+
 import org.junit.Before;
 import org.openmrs.api.cache.CacheConfig;
 import org.openmrs.module.fhir2.api.util.FhirGlobalPropertyHolder;
@@ -21,6 +25,21 @@ public abstract class BaseFhirContextSensitiveTest extends BaseModuleContextSens
 	
 	@Autowired
 	CacheConfig cacheConfig;
+	
+	@Override
+	public void initializeInMemoryDatabase() throws SQLException {
+		super.initializeInMemoryDatabase();
+		
+		// Configure H2 to use MySQL compatibility mode
+		// This makes H2 behave more like production databases (MySQL, PostgreSQL) by relaxing
+		// the requirement that ORDER BY columns must appear in SELECT when using DISTINCT.
+		// Production databases don't have this restriction, so this ensures our tests reflect
+		// production behavior rather than H2's stricter requirements.
+		Connection connection = getConnection();
+		try (Statement statement = connection.createStatement()) {
+			statement.execute("SET MODE MySQL");
+		}
+	}
 	
 	@Before
 	public void setupBaseFhirContextSensitive() {

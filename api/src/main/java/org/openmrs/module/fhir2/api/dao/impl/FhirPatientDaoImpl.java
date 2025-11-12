@@ -198,7 +198,13 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 		Set<Integer> patientIds = new HashSet<>();
 		groupIds.forEach(groupId -> patientIds.addAll(getGroupMemberIds(groupId)));
 		
-		criteriaContext.addPredicate(criteriaContext.getRoot().get("patientId").in(patientIds));
+		if (!patientIds.isEmpty()) {
+			criteriaContext.addPredicate(criteriaContext.getRoot().get("patientId").in(patientIds));
+		} else {
+			// If no patients belong to the specified groups, add a predicate that matches nothing
+			// This ensures the query returns no results (rather than generating invalid SQL with an empty IN clause)
+			criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().disjunction());
+		}
 	}
 	
 	private List<Integer> getGroupMemberIds(String groupId) {
@@ -254,8 +260,8 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 				return Optional.of(
 				    criteriaContext.getCriteriaBuilder().in(identifiersJoin.get("identifier")).value(tokensToList(tokens)));
 			} else {
-				Join<?, ?> identifiersIdentifierTypeJoin = criteriaContext.addJoin(identifiersJoin, "identifierType", "pit");
-				criteriaContext.getCriteriaBuilder().equal(identifiersIdentifierTypeJoin.get("retired"), false);
+				Join<?, ?> identifiersIdentifierTypeJoin = criteriaContext.addJoin(identifiersJoin, "identifierType", "pit",
+				    pit -> criteriaContext.getCriteriaBuilder().equal(pit.get("retired"), false));
 				
 				return Optional.of(criteriaContext.getCriteriaBuilder().and(
 				    criteriaContext.getCriteriaBuilder().equal(identifiersIdentifierTypeJoin.get("name"), system),

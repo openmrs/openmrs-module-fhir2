@@ -32,6 +32,10 @@ import lombok.RequiredArgsConstructor;
  * This is a common super-type for classes which attempt to allow building a query or subquery. This
  * allows us to pass a single object around, similar to what was done with the previous Hibernate
  * Criteria-based API.
+ * <br/>
+ * <strong>Thread Safety:</strong> This class is <em>not</em> thread-safe. Instances maintain
+ * mutable state (predicates, joins, aliases) and should be used within a single request context. Do
+ * not share instances across threads.
  *
  * @param <V> The type of the root entity for this query
  */
@@ -162,7 +166,7 @@ public abstract class BaseFhirCriteriaHolder<V> {
 	 * explicitly joined to the {@link From} object passed in, which should be either the root or
 	 * another join. This join is filtered using the resulting predicate returned from the
 	 * {@param onGenerator} parameter.
-	 * <p/>
+	 * <br/>
 	 * If a join with the given alias already exists, this method will reuse that join. If the existing
 	 * join has an ON clause and a new {@code onGenerator} is provided, the new predicate will be
 	 * combined with the existing ON clause using {@code AND} logic. This allows multiple calls to

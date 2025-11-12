@@ -144,7 +144,7 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 			    cb.equal(personNameThirdSubquery.getRoot().get("person"), criteriaContext.getRoot())));
 			personNameThirdSubquery.getSubquery().select(cb.min(personNameThirdSubquery.getRoot().get("personNameId")));
 			
-			Join<?, ?> personName = criteriaContext.addJoin(person, "names", "pn", JoinType.LEFT,
+			Join<?, ?> personName = criteriaContext.addJoin(person, "names", "pn_sort", JoinType.LEFT,
 			    (personNameJoin) -> cb.and(cb.equal(personNameJoin.get("voided"), false), cb.or(
 			        // preferred patient name
 			        cb.equal(personNameJoin.get("personNameId"), personNameFirstSubquery.finalizeQuery()),
