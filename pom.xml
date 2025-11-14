@@ -811,61 +811,87 @@
                         </execution>
                     </executions>
                 </plugin>
-                <!-- NB must be declare *before* the license-maven-plugin -->
                 <plugin>
-                    <groupId>org.commonjava.maven.plugins</groupId>
-                    <artifactId>directory-maven-plugin</artifactId>
-                    <version>1.0</version>
+                    <groupId>com.mycila</groupId>
+                    <artifactId>license-maven-plugin</artifactId>
+                    <version>4.6</version>
+                    <configuration>
+                        <licenseSets>
+                            <licenseSet>
+                                <header>${maven.multiModuleProjectDirectory}/license-header.txt</header>
+                                <headerDefinitions>
+                                    <headerDefinition>${maven.multiModuleProjectDirectory}/license-format.xml</headerDefinition>
+                                </headerDefinitions>
+                                <includes>
+                                    <include>**/*.java</include>
+                                    <include>**/*.xml</include>
+                                    <include>**/*.properties</include>
+                                </includes>
+                                <excludes>
+                                    <exclude>**/pom.xml</exclude>
+                                    <exclude>**/target/**</exclude>
+                                    <exclude>.git/**</exclude>
+                                    <exclude>.idea/**</exclude>
+                                    <exclude>.settings/**</exclude>
+                                    <exclude>.externalToolBuilders/</exclude>
+                                    <exclude>nbproject/private/</exclude>
+                                    <exclude>.classpath</exclude>
+                                    <exclude>.project</exclude>
+                                </excludes>
+                            </licenseSet>
+                        </licenseSets>
+                        <mapping>
+                            <java>java_style</java>
+                            <xml>myxml_style</xml>
+                            <properties>SCRIPT_STYLE</properties>
+                        </mapping>
+                    </configuration>
                     <executions>
                         <execution>
-                            <id>directories</id>
                             <goals>
-                                <goal>highest-basedir</goal>
+                                <goal>format</goal>
                             </goals>
-                            <phase>validate</phase>
-                            <configuration>
-                                <property>main.basedir</property>
-                            </configuration>
+                            <phase>process-sources</phase>
                         </execution>
                     </executions>
                 </plugin>
                 <plugin>
-                    <groupId>com.mycila</groupId>
-                    <artifactId>license-maven-plugin</artifactId>
-                    <version>3.0</version>
+                    <groupId>com.diffplug.spotless</groupId>
+                    <artifactId>spotless-maven-plugin</artifactId>
+                    <version>2.30.0</version>
                     <configuration>
-                        <header>${main.basedir}${file.separator}license-header.txt</header>
-                        <headerDefinitions>
-                            <headerDefinition>${main.basedir}${file.separator}license-format.xml</headerDefinition>
-                        </headerDefinitions>
-                        <mapping>
-                            <java>JAVA_STYLE</java>
-                            <xml>MYXML_STYLE</xml>
-                        </mapping>
-                        <includes>
-                            <include>**/*.java</include>
-                            <include>**/*.xml</include>
-                            <include>**/*.properties</include>
-                        </includes>
-                        <excludes>
-                            <exclude>license-format.xml</exclude>
-                            <exclude>**/pom.xml</exclude>
-                            <exclude>**/target/**</exclude>
-                            <exclude>.git/**</exclude>
-                            <exclude>.idea/**</exclude>
-                            <exclude>.settings/**</exclude>
-                            <exclude>.externalToolBuilders/</exclude>
-                            <exclude>nbproject/private/</exclude>
-                            <exclude>.vscode/**</exclude>
-                        </excludes>
+                        <java>
+                            <!-- Eclipse formatter from openmrs-tools dependency -->
+                            <eclipse>
+                                <file>eclipse/OpenMRSFormatter.xml</file>
+                            </eclipse>
+                            <!-- Import ordering -->
+                            <importOrder>
+                                <order>javax,java,</order>
+                            </importOrder>
+                            <removeUnusedImports/>
+                            <includes>
+                                <include>**/*.java</include>
+                            </includes>
+                            <excludes>
+                                <exclude>**/target/**</exclude>
+                            </excludes>
+                        </java>
                     </configuration>
+                    <dependencies>
+                        <!-- Eclipse formatter configuration from openmrs-tools -->
+                        <dependency>
+                            <groupId>org.openmrs.tools</groupId>
+                            <artifactId>openmrs-tools</artifactId>
+                            <version>${openmrsPlatformToolsVersion}</version>
+                        </dependency>
+                    </dependencies>
                     <executions>
                         <execution>
-                            <id>add-license</id>
                             <goals>
-                                <goal>format</goal>
+                                <goal>apply</goal>
                             </goals>
-                            <phase>validate</phase>
+                            <phase>process-sources</phase>
                         </execution>
                     </executions>
                 </plugin>
@@ -887,52 +913,6 @@
                             </goals>
                         </execution>
                     </executions>
-                </plugin>
-                <plugin>
-                    <groupId>net.revelc.code.formatter</groupId>
-                    <artifactId>formatter-maven-plugin</artifactId>
-                    <version>2.16.0</version>
-                    <configuration>
-                        <lineEnding>LF</lineEnding>
-                        <configFile>eclipse/OpenMRSFormatter.xml</configFile>
-                    </configuration>
-                    <dependencies>
-                        <dependency>
-                            <groupId>org.openmrs.tools</groupId>
-                            <artifactId>openmrs-tools</artifactId>
-                            <version>${openmrsPlatformToolsVersion}</version>
-                        </dependency>
-                    </dependencies>
-                    <executions>
-                        <execution>
-                            <goals>
-                                <goal>format</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-                <plugin>
-                    <groupId>net.revelc.code</groupId>
-                    <artifactId>impsort-maven-plugin</artifactId>
-                    <version>1.6.2</version>
-                    <configuration>
-                        <groups>javax, java, *</groups>
-                        <removeUnused>true</removeUnused>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <goals>
-                                <goal>sort</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                    <dependencies>
-                        <dependency>
-                            <groupId>org.codehaus.plexus</groupId>
-                            <artifactId>plexus-utils</artifactId>
-                            <version>3.3.1</version>
-                        </dependency>
-                    </dependencies>
                 </plugin>
             </plugins>
         </pluginManagement>

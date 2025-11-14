@@ -30,8 +30,7 @@ import org.openmrs.Retireable;
 import org.openmrs.User;
 
 /**
- * This is class supports a mapping between a FHIR Encounter class and an OpenMRS location.
- * <br/>
+ * This is class supports a mapping between a FHIR Encounter class and an OpenMRS location. <br/>
  * FHIR's Encounter class property is generally used to differentiate between the type of setting
  * that an encounter took place in, e.g., ambulatory encounters vs those that happened in an
  * emergency, inpatient or virtual context. In OpenMRS, we currently have no way to directly

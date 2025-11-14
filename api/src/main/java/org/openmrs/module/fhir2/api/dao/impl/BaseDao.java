@@ -134,8 +134,7 @@ public abstract class BaseDao {
 	/**
 	 * If the supplied object is a {@link HibernateProxy} instead of the "normal" class, returns the
 	 * "normal" class version of the object. If the supplied object is not a {@link HibernateProxy}, it
-	 * is returned unchanged.
-	 * <br/>
+	 * is returned unchanged. <br/>
 	 * Note that for objects that have collection properties is not guaranteed that these collections
 	 * are materialized as they may be lazy-loaded on access.
 	 *
@@ -227,7 +226,7 @@ public abstract class BaseDao {
 	 * @param resultType The type of results returned from this query
 	 * @return An {@link OpenmrsFhirCriteriaContext} for constructing a new query
 	 * @param <T> The root type of the returned {@link OpenmrsFhirCriteriaContext}
-	 * @param <U> The rturn type of the returned {@link OpenmrsFhirCriteriaContext}
+	 * @param <U> The return type of the returned {@link OpenmrsFhirCriteriaContext}
 	 */
 	protected <T, U> OpenmrsFhirCriteriaContext<T, U> createCriteriaContext(@Nonnull Class<T> rootType,
 	        @Nonnull Class<U> resultType) {
@@ -242,8 +241,7 @@ public abstract class BaseDao {
 	/**
 	 * Gets the name of the entity's id property. Note that this method relies on Hibernate's SPI for
 	 * JPA, so while isn't using any internal implementation details, it is dependent on using
-	 * Hibernate.
-	 * <br/>
+	 * Hibernate. <br/>
 	 * This method also assumes that there <em>is</em> an identifiable property name for the instance,
 	 * which is true for standard OpenMRS domain objects, but should be verified for domain objects not
 	 * defined in core.

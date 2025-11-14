@@ -39,8 +39,7 @@ import lombok.NonNull;
  * The type {@code T} indicates the type of object that is the "root" of the query. For most
  * queries, the type {@code U}, which is the expected type of the result, will be the same as
  * {@code T}; however, for some queries, like those that count results, {@code U} will have a
- * different type.
- * <br/>
+ * different type. <br/>
  * <strong>Thread Safety:</strong> This class is <em>not</em> thread-safe. Instances maintain
  * mutable state (predicates, joins, orders) and should be used within a single request context. Do
  * not share instances across threads.
@@ -125,8 +124,7 @@ public class OpenmrsFhirCriteriaContext<T, U> extends BaseFhirCriteriaHolder<T> 
 	/**
 	 * Finalizes the query by applying all accumulated predicates and sort orders to the
 	 * {@link CriteriaQuery}. This should be called once the query has been fully constructed and is
-	 * ready to be executed.
-	 * <br/>
+	 * ready to be executed. <br/>
 	 * This method does not set the SELECT clause - that should be done separately using
 	 * {@code getCriteriaQuery().select()}.
 	 *
@@ -148,8 +146,7 @@ public class OpenmrsFhirCriteriaContext<T, U> extends BaseFhirCriteriaHolder<T> 
 	/**
 	 * Finalizes a query that selects only the ID property with DISTINCT, applying any accumulated sort
 	 * orders. This is used for the two-query approach where we first get matching sorted IDs, then
-	 * fetch full objects.
-	 * <br/>
+	 * fetch full objects. <br/>
 	 * Unlike GROUP BY, SELECT DISTINCT does not require ORDER BY columns to be in the SELECT clause, so
 	 * we can simply select the ID and apply sorting directly.
 	 *
@@ -171,8 +168,7 @@ public class OpenmrsFhirCriteriaContext<T, U> extends BaseFhirCriteriaHolder<T> 
 	 * Finalizes a query that fetches full objects using a list of IDs obtained from a previous query.
 	 * This is the second part of the two-query approach used for non-distinct results, where the first
 	 * query ({@link #finalizeIdQuery(String)}) retrieves matching IDs, and this query fetches the
-	 * complete objects.
-	 * <br/>
+	 * complete objects. <br/>
 	 * The query is constructed with a {@code WHERE id IN (...)} clause and applies the accumulated sort
 	 * orders to maintain result ordering.
 	 *

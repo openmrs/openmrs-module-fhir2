@@ -66,8 +66,7 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * This is a base class for FHIR2 Dao objects providing default implementations for the
  * {@link FhirDao} interface. It includes a {@link FhirSearchQueryHelper} so that the criteria
- * helpers used there will be available to all subclasses.
- * <br/>
+ * helpers used there will be available to all subclasses. <br/>
  * In general, objects extending this class will simply need to provide implementation(s) for search
  * functionality, i.e., {@link #setupSearchParams(OpenmrsFhirCriteriaContext, SearchParameterMap)},
  * and {@link #paramToProp(OpenmrsFhirCriteriaContext, String)}. See those functions for details.
@@ -281,13 +280,11 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	
 	/**
 	 * This is an overrideable implementation to convert a result that may be a proxied Hibernate object
-	 * into its underlying implementation.
-	 * <br/>
+	 * into its underlying implementation. <br/>
 	 * Overrides are most commonly needed where, e.g., "deep" properties of an object are usually needed
 	 * to properly convert that object to FHIR, e.g., to ensure that the {@link org.openmrs.Concept}
 	 * associated with an {@link org.openmrs.Obs} is also deproxied when the {@link org.openmrs.Obs} is
-	 * deproxied.
-	 * <br/>
+	 * deproxied. <br/>
 	 * It is uncommon for subclasses to need to override this functionality
 	 *
 	 * @param result The Hibernate result object to deproxy
@@ -451,8 +448,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	/**
 	 * Override to return false if the getSearchResults may return duplicate items that need to be
 	 * removed from the results. Note that it has performance implications as it requires "select
-	 * distinct" and 2 queries instead of 1 for getting the results.
-	 * <br/>
+	 * distinct" and 2 queries instead of 1 for getting the results. <br/>
 	 * This is primarily needed for cases where one domain type extends another, similar to the
 	 * relationship between {@link org.openmrs.Patient} and {@link org.openmrs.Person} where
 	 * {@link org.openmrs.Patient} extends {@link org.openmrs.Person}.
@@ -554,14 +550,12 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	
 	/**
 	 * This is intended to be overridden by subclasses to implement the handling of specific search
-	 * parameters.
-	 * <br/>
+	 * parameters. <br/>
 	 * The {@link SearchParameterMap} provides an interface for tracking all the FHIR search parameters
 	 * the user supplied for the current search query. It is the responsibility of this function to map
 	 * all known parameters into JPA criteria {@link Predicate}s that are added to the current
 	 * {@link OpenmrsFhirCriteriaContext}, so that they act as appropriate restrictions on the generated
-	 * queries.
-	 * <br/>
+	 * queries. <br/>
 	 * The {@link BaseDao} and {@link FhirSearchQueryHelper} classes provide helpers for constructing
 	 * such queries, with the {@link BaseDao} providing generic handling for HAPI's
 	 * {@link ca.uhn.fhir.model.api.IQueryParameterAnd} and

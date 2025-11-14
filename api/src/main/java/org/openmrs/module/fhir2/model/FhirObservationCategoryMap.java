@@ -31,8 +31,7 @@ import org.openmrs.User;
 
 /**
  * This class provides a means of mapping between FHIR's concept of a observation category and
- * OpenMRS's concept class.
- * <br/>
+ * OpenMRS's concept class. <br/>
  * FHIR's observation category property provides a way of communicating information of the type of
  * result an observation represents, e.g., whether it's a laboratory result, a radiology result,
  * etc. OpenMRS does not directly store this information about observations, but we do have a
