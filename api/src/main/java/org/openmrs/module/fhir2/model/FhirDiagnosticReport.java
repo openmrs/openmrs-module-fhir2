@@ -33,6 +33,7 @@ import org.openmrs.BaseOpenmrsData;
 import org.openmrs.Concept;
 import org.openmrs.Encounter;
 import org.openmrs.Obs;
+import org.openmrs.Order;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
 
@@ -78,10 +79,19 @@ public class FhirDiagnosticReport extends BaseOpenmrsData {
 	@JoinTable(name = "fhir_diagnostic_report_results", joinColumns = @JoinColumn(name = "diagnostic_report_id"), inverseJoinColumns = @JoinColumn(name = "obs_id"))
 	private Set<Obs> results = new HashSet<>();
 	
+	@OneToOne
+	@JoinColumn(name = "order_id", referencedColumnName = "order_id")
+	private Order order;
+	
+	@Column(name = "conclusion")
+	private String conclusion;
+	
 	public enum DiagnosticReportStatus {
 		REGISTERED,
 		PARTIAL,
 		PRELIMINARY,
+		AMENDED,
+		CANCELLED,
 		FINAL,
 		UNKNOWN
 	}

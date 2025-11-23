@@ -1121,4 +1121,31 @@
                                  referencedColumnNames="reference_id"/>
     </changeSet>
 
+
+    <changeSet id="add_col_diagnostic_report_status_order_id_202511" author="angshu">
+        <preConditions onFail="MARK_RAN" onError="WARN">
+            <tableExists tableName="fhir_diagnostic_report"/>
+            <not>
+                <columnExists tableName="fhir_diagnostic_report" columnName="order_id"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="fhir_diagnostic_report">
+            <column name="order_id" type="int"/>
+        </addColumn>
+        <addForeignKeyConstraint constraintName="fhir_diagnostic_report_order_id_fk"
+                                 baseTableName="fhir_diagnostic_report" baseColumnNames="order_id"
+                                 referencedTableName="orders" referencedColumnNames="order_id"/>
+    </changeSet>
+    <changeSet id="add_col_diagnostic_report_status_conclusion_202511" author="angshu">
+        <preConditions onFail="MARK_RAN" onError="WARN">
+            <tableExists tableName="fhir_diagnostic_report"/>
+            <not>
+                <columnExists tableName="fhir_diagnostic_report" columnName="conclusion"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="fhir_diagnostic_report">
+            <column name="conclusion" type="VARCHAR(512)"/>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

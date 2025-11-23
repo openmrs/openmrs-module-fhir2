@@ -10,13 +10,10 @@
 package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasProperty;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -25,6 +22,7 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.Reference;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,12 +31,14 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Concept;
 import org.openmrs.Encounter;
 import org.openmrs.Obs;
+import org.openmrs.Order;
 import org.openmrs.Patient;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
+import org.openmrs.module.fhir2.api.translators.ServiceRequestReferenceTranslator;
 import org.openmrs.module.fhir2.model.FhirDiagnosticReport;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -49,6 +49,10 @@ public class DiagnosticReportTranslatorImplTest {
 	private static final String CHILD_UUID = "faf75a02-5083-454c-a4ec-9a4babf26558";
 	
 	private static final String CODE = "249b9094-5083-454c-a4ec-9a4babf26558";
+	
+	private static final String PATIENT_UUID = "3434gh32-34h3j4-34jk34-3422h";
+	
+	public static final String RADIOLOGY_ORDER_REFERENCE = "ServiceRequest/radiology-order-id";
 	
 	@Mock
 	private EncounterReferenceTranslator<Encounter> encounterReferenceTranslator;
@@ -61,6 +65,9 @@ public class DiagnosticReportTranslatorImplTest {
 	
 	@Mock
 	private ObservationReferenceTranslator observationReferenceTranslator;
+	
+	@Mock
+	ServiceRequestReferenceTranslator serviceRequestReferenceTranslator;
 	
 	private DiagnosticReportTranslatorImpl translator;
 	
@@ -75,6 +82,8 @@ public class DiagnosticReportTranslatorImplTest {
 		translator.setConceptTranslator(conceptTranslator);
 		translator.setEncounterReferenceTranslator(encounterReferenceTranslator);
 		translator.setPatientReferenceTranslator(patientReferenceTranslator);
+		
+		translator.setServiceRequestReferenceTranslator(serviceRequestReferenceTranslator);
 		
 		// OpenMRS setup
 		fhirDiagnosticReport = new FhirDiagnosticReport();
@@ -304,6 +313,27 @@ public class DiagnosticReportTranslatorImplTest {
 	@Test(expected = NullPointerException.class)
 	public void toOpenmrsType_shouldThrowExceptionWhenNoneProvided() {
 		translator.toOpenmrsType(null, diagnosticReport);
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldResolveOrderId() {
+		Reference radiologyOrderRef = new Reference(RADIOLOGY_ORDER_REFERENCE);
+		diagnosticReport.setBasedOn(Collections.singletonList(radiologyOrderRef));
+		Order radiologyOrder = new Order();
+		when(serviceRequestReferenceTranslator.toOpenmrsType(radiologyOrderRef)).thenReturn(radiologyOrder);
+		FhirDiagnosticReport result = translator.toOpenmrsType(diagnosticReport);
+		Assert.assertEquals(radiologyOrder, result.getOrder());
+	}
+	
+	@Test
+	public void toFhirResource_shouldReturnOrderRef() {
+		Order radiologyOrder = new Order();
+		radiologyOrder.setUuid(RADIOLOGY_ORDER_REFERENCE.substring(RADIOLOGY_ORDER_REFERENCE.indexOf("/")));
+		fhirDiagnosticReport.setOrder(radiologyOrder);
+		when(serviceRequestReferenceTranslator.toFhirResource(radiologyOrder))
+		        .thenReturn(new Reference(RADIOLOGY_ORDER_REFERENCE));
+		DiagnosticReport result = translator.toFhirResource(fhirDiagnosticReport);
+		Assert.assertEquals(RADIOLOGY_ORDER_REFERENCE, result.getBasedOn().get(0).getReference());
 	}
 	
 }
