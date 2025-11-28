@@ -83,7 +83,7 @@ public class FhirDiagnosticReport extends BaseOpenmrsData {
 	@JoinColumn(name = "order_id", referencedColumnName = "order_id")
 	private Order order;
 	
-	@Column(name = "conclusion")
+	@Column(name = "conclusion", length = 1020)
 	private String conclusion;
 	
 	public enum DiagnosticReportStatus {
