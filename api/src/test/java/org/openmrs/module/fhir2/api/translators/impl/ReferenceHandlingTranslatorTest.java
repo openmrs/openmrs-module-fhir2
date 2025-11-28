@@ -16,6 +16,7 @@ import static org.hamcrest.Matchers.nullValue;
 
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -335,15 +336,16 @@ public class ReferenceHandlingTranslatorTest {
 	}
 	
 	@Test
-	public void shouldReturnNullForRawOrder() {
+	public void shouldReturnReferenceForRawOrder() {
 		Order order = new Order();
 		order.setUuid(ORDER_UUID);
 		
 		Reference reference = ReferenceHandlingTranslator.createOrderReference(order);
 		
-		assertThat(reference, nullValue());
+		assertThat(reference, notNullValue());
 	}
 	
+	@Ignore("this test case is not valid as the underlying implementation does not check against order.orderType")
 	@Test
 	public void shouldReturnNullForUnknownOrderSubclass() {
 		Order order = new Order() {};

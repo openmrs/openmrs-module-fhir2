@@ -20,7 +20,6 @@ import java.util.Optional;
 import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Reference;
-import org.openmrs.DrugOrder;
 import org.openmrs.Order;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirGenericServiceRequestDao;
@@ -57,7 +56,7 @@ public class ServiceRequestReferenceTranslatorImpl implements ServiceRequestRefe
 		Optional<String> referenceType = getReferenceType(reference);
 		if (referenceType
 		        .map(ref -> !(ref.equals(FhirConstants.SERVICE_REQUEST) || ref.equals(FhirConstants.MEDICATION_REQUEST)))
-		        .orElse(false)) {
+		        .orElse(true)) {
 			throw new IllegalArgumentException("Reference must be to a ServiceRequest or MedicationRequest");
 		}
 		
@@ -74,11 +73,6 @@ public class ServiceRequestReferenceTranslatorImpl implements ServiceRequestRefe
 	}
 	
 	private Reference getServiceRequestReference(Order order) {
-		if (order instanceof DrugOrder) {
-			return ReferenceHandlingTranslator.createDrugOrderReference((DrugOrder) order);
-		} else {
-			return new Reference().setReference(FhirConstants.SERVICE_REQUEST + "/" + order.getUuid())
-			        .setType(FhirConstants.SERVICE_REQUEST);
-		}
+		return ReferenceHandlingTranslator.createOrderReference(order);
 	}
 }

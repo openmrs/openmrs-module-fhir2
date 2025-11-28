@@ -31,7 +31,6 @@ import org.openmrs.PatientIdentifier;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.Person;
 import org.openmrs.Provider;
-import org.openmrs.TestOrder;
 import org.openmrs.User;
 import org.openmrs.Visit;
 import org.openmrs.module.fhir2.FhirConstants;
@@ -141,15 +140,18 @@ public final class ReferenceHandlingTranslator {
 		if (order == null) {
 			return null;
 		}
+		//		if (order.getOrderType() == null) {
+		//			return null;
+		//		}
 		
-		if (order instanceof TestOrder) {
-			return createTestOrderReference((TestOrder) order, orderIdentifierTranslator);
-		} else if (order instanceof DrugOrder) {
+		if (order instanceof DrugOrder) {
 			return createDrugOrderReference((DrugOrder) order, orderIdentifierTranslator);
-		} else {
-			log.warn("Could not determine order type for order {}", order);
-			return null;
 		}
+		if (order instanceof Order) {
+			return createTestOrderReference(order, orderIdentifierTranslator);
+		}
+		log.warn("Could not determine order type for order {}", order);
+		return null;
 	}
 	
 	public static Reference createDrugOrderReference(@Nonnull DrugOrder drugOrder) {
@@ -171,11 +173,11 @@ public final class ReferenceHandlingTranslator {
 		return reference;
 	}
 	
-	public static Reference createTestOrderReference(@Nonnull TestOrder order) {
+	public static Reference createTestOrderReference(@Nonnull Order order) {
 		return createTestOrderReference(order, null);
 	}
 	
-	public static Reference createTestOrderReference(@Nonnull TestOrder order,
+	public static Reference createTestOrderReference(@Nonnull Order order,
 	        OrderIdentifierTranslator orderIdentifierTranslator) {
 		if (order == null) {
 			return null;
