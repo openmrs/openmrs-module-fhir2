@@ -17,6 +17,7 @@ import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.
 import javax.annotation.Nonnull;
 
 import java.util.Date;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import lombok.Getter;
@@ -30,6 +31,7 @@ import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.DiagnosticReportTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationReferenceTranslator;
+import org.openmrs.module.fhir2.api.translators.OrderReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.util.FhirUtils;
 import org.openmrs.module.fhir2.model.FhirDiagnosticReport;
@@ -54,6 +56,10 @@ public class DiagnosticReportTranslatorImpl implements DiagnosticReportTranslato
 	@Getter(PROTECTED)
 	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private ConceptTranslator conceptTranslator;
+	
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
+	private OrderReferenceTranslator orderReferenceTranslator;
 	
 	@Override
 	public DiagnosticReport toFhirResource(@Nonnull FhirDiagnosticReport fhirDiagnosticReport) {
@@ -96,6 +102,11 @@ public class DiagnosticReportTranslatorImpl implements DiagnosticReportTranslato
 		for (Obs obs : fhirDiagnosticReport.getResults()) {
 			diagnosticReport.addResult(observationReferenceTranslator.toFhirResource(obs));
 		}
+		
+		diagnosticReport.setConclusion(fhirDiagnosticReport.getConclusion());
+		Optional.ofNullable(fhirDiagnosticReport.getOrder()).ifPresent((value -> {
+			diagnosticReport.addBasedOn(orderReferenceTranslator.toFhirResource(value));
+		}));
 		
 		diagnosticReport.getMeta().setLastUpdated(getLastUpdated(fhirDiagnosticReport));
 		diagnosticReport.getMeta().setVersionId(getVersionId(fhirDiagnosticReport));
@@ -141,7 +152,6 @@ public class DiagnosticReportTranslatorImpl implements DiagnosticReportTranslato
 					        .setSubject(patientReferenceTranslator.toOpenmrsType(diagnosticReport.getSubject()));
 				}
 			});
-			
 		}
 		
 		if (diagnosticReport.hasCode()) {
@@ -152,6 +162,15 @@ public class DiagnosticReportTranslatorImpl implements DiagnosticReportTranslato
 			existingDiagnosticReport.setIssued(diagnosticReport.getIssued());
 		} else if (existingDiagnosticReport.getIssued() == null) {
 			existingDiagnosticReport.setIssued(new Date());
+		}
+		
+		if (diagnosticReport.hasConclusion()) {
+			existingDiagnosticReport.setConclusion(diagnosticReport.getConclusion());
+		}
+		
+		if (diagnosticReport.hasBasedOn()) {
+			Optional.ofNullable(orderReferenceTranslator.toOpenmrsType(diagnosticReport.getBasedOn().get(0)))
+			        .ifPresent(value -> existingDiagnosticReport.setOrder(value));
 		}
 		
 		existingDiagnosticReport.setResults(diagnosticReport.getResult().stream()
