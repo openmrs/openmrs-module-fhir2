@@ -31,8 +31,8 @@ import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.DiagnosticReportTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationReferenceTranslator;
+import org.openmrs.module.fhir2.api.translators.OrderReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
-import org.openmrs.module.fhir2.api.translators.ServiceRequestReferenceTranslator;
 import org.openmrs.module.fhir2.api.util.FhirUtils;
 import org.openmrs.module.fhir2.model.FhirDiagnosticReport;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,7 +59,7 @@ public class DiagnosticReportTranslatorImpl implements DiagnosticReportTranslato
 	
 	@Getter(PROTECTED)
 	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private ServiceRequestReferenceTranslator serviceRequestReferenceTranslator;
+	private OrderReferenceTranslator orderReferenceTranslator;
 	
 	@Override
 	public DiagnosticReport toFhirResource(@Nonnull FhirDiagnosticReport fhirDiagnosticReport) {
@@ -105,7 +105,7 @@ public class DiagnosticReportTranslatorImpl implements DiagnosticReportTranslato
 		
 		diagnosticReport.setConclusion(fhirDiagnosticReport.getConclusion());
 		Optional.ofNullable(fhirDiagnosticReport.getOrder()).ifPresent((value -> {
-			diagnosticReport.addBasedOn(serviceRequestReferenceTranslator.toFhirResource(value));
+			diagnosticReport.addBasedOn(orderReferenceTranslator.toFhirResource(value));
 		}));
 		
 		diagnosticReport.getMeta().setLastUpdated(getLastUpdated(fhirDiagnosticReport));
@@ -169,7 +169,7 @@ public class DiagnosticReportTranslatorImpl implements DiagnosticReportTranslato
 		}
 		
 		if (diagnosticReport.hasBasedOn()) {
-			Optional.ofNullable(serviceRequestReferenceTranslator.toOpenmrsType(diagnosticReport.getBasedOn().get(0)))
+			Optional.ofNullable(orderReferenceTranslator.toOpenmrsType(diagnosticReport.getBasedOn().get(0)))
 			        .ifPresent(value -> existingDiagnosticReport.setOrder(value));
 		}
 		

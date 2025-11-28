@@ -12,4 +12,4 @@ package org.openmrs.module.fhir2.api.translators;
 import org.hl7.fhir.r4.model.Reference;
 import org.openmrs.Order;
 
-public interface ServiceRequestReferenceTranslator extends OpenmrsFhirTranslator<Order, Reference> {}
+public interface OrderReferenceTranslator extends OpenmrsFhirTranslator<Order, Reference> {}

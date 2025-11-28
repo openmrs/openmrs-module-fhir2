@@ -23,7 +23,7 @@ import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
-public class FhirGenericServiceRequestDaoImplTest extends BaseFhirContextSensitiveTest {
+public class FhirOrderDaoImplTest extends BaseFhirContextSensitiveTest {
 	
 	private static final String ORDER_INITIAL_DATA = "org/openmrs/module/fhir2/api/dao/impl/FhirServiceRequestTest_initial_data.xml";
 	
@@ -33,13 +33,13 @@ public class FhirGenericServiceRequestDaoImplTest extends BaseFhirContextSensiti
 	@Qualifier("sessionFactory")
 	private SessionFactory sessionFactory;
 	
-	private FhirGenericServiceRequestDaoImpl dao;
+	private FhirOrderDaoImpl dao;
 	
 	@Before
 	public void setup() throws Exception {
 		executeDataSet(ORDER_INITIAL_DATA);
 		
-		dao = new FhirGenericServiceRequestDaoImpl();
+		dao = new FhirOrderDaoImpl();
 		dao.setSessionFactory(sessionFactory);
 	}
 	

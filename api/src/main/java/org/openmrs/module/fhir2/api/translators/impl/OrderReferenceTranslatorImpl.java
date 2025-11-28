@@ -22,14 +22,14 @@ import lombok.Setter;
 import org.hl7.fhir.r4.model.Reference;
 import org.openmrs.Order;
 import org.openmrs.module.fhir2.FhirConstants;
-import org.openmrs.module.fhir2.api.dao.FhirGenericServiceRequestDao;
 import org.openmrs.module.fhir2.api.dao.FhirMedicationRequestDao;
-import org.openmrs.module.fhir2.api.translators.ServiceRequestReferenceTranslator;
+import org.openmrs.module.fhir2.api.dao.FhirOrderDao;
+import org.openmrs.module.fhir2.api.translators.OrderReferenceTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ServiceRequestReferenceTranslatorImpl implements ServiceRequestReferenceTranslator {
+public class OrderReferenceTranslatorImpl implements OrderReferenceTranslator {
 	
 	@Getter(PROTECTED)
 	@Setter(value = PROTECTED, onMethod_ = @Autowired)
@@ -37,7 +37,7 @@ public class ServiceRequestReferenceTranslatorImpl implements ServiceRequestRefe
 	
 	@Getter(PROTECTED)
 	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private FhirGenericServiceRequestDao serviceRequestDao;
+	private FhirOrderDao orderDao;
 	
 	@Override
 	public Reference toFhirResource(@Nonnull Order order) {
@@ -65,7 +65,7 @@ public class ServiceRequestReferenceTranslatorImpl implements ServiceRequestRefe
 				case FhirConstants.MEDICATION_REQUEST:
 					return medicationRequestDao.get(uuid);
 				case FhirConstants.SERVICE_REQUEST:
-					return serviceRequestDao.get(uuid);
+					return orderDao.get(uuid);
 				default:
 					return null;
 			}

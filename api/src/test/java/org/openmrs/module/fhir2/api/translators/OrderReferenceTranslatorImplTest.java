@@ -20,12 +20,12 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.DrugOrder;
 import org.openmrs.Order;
-import org.openmrs.module.fhir2.api.dao.FhirGenericServiceRequestDao;
 import org.openmrs.module.fhir2.api.dao.FhirMedicationRequestDao;
-import org.openmrs.module.fhir2.api.translators.ServiceRequestReferenceTranslator;
+import org.openmrs.module.fhir2.api.dao.FhirOrderDao;
+import org.openmrs.module.fhir2.api.translators.OrderReferenceTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ServiceRequestReferenceTranslatorImplTest {
+public class OrderReferenceTranslatorImplTest {
 	
 	private static final String MEDICATION_REQUEST_TYPE = "MedicationRequest";
 	
@@ -35,15 +35,15 @@ public class ServiceRequestReferenceTranslatorImplTest {
 	private FhirMedicationRequestDao medicationRequestDao;
 	
 	@Mock
-	private FhirGenericServiceRequestDao fhirOrderServiceRequestDao;
+	private FhirOrderDao fhirOrderDao;
 	
-	ServiceRequestReferenceTranslator translator;
+	OrderReferenceTranslator translator;
 	
 	@Before
 	public void setUp() {
-		ServiceRequestReferenceTranslatorImpl orderReferenceTranslator = new ServiceRequestReferenceTranslatorImpl();
+		OrderReferenceTranslatorImpl orderReferenceTranslator = new OrderReferenceTranslatorImpl();
 		orderReferenceTranslator.setMedicationRequestDao(medicationRequestDao);
-		orderReferenceTranslator.setServiceRequestDao(fhirOrderServiceRequestDao);
+		orderReferenceTranslator.setOrderDao(fhirOrderDao);
 		translator = orderReferenceTranslator;
 	}
 	
@@ -72,7 +72,7 @@ public class ServiceRequestReferenceTranslatorImplTest {
 	@Test
 	public void shouldReturnGenericOrderReference() {
 		Reference reference = new Reference().setReference(SERVICE_REQUEST_TYPE + "/123");
-		when(fhirOrderServiceRequestDao.get("123")).thenReturn(new Order());
+		when(fhirOrderDao.get("123")).thenReturn(new Order());
 		Order order = translator.toOpenmrsType(reference);
 		Assert.assertTrue(order instanceof Order);
 	}

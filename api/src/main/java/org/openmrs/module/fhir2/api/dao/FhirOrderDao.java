@@ -11,4 +11,4 @@ package org.openmrs.module.fhir2.api.dao;
 
 import org.openmrs.Order;
 
-public interface FhirGenericServiceRequestDao extends FhirDao<Order> {}
+public interface FhirOrderDao extends FhirDao<Order> {}

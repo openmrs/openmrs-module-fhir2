@@ -31,6 +31,7 @@ import org.openmrs.PatientIdentifier;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.Person;
 import org.openmrs.Provider;
+import org.openmrs.TestOrder;
 import org.openmrs.User;
 import org.openmrs.Visit;
 import org.openmrs.module.fhir2.FhirConstants;
@@ -140,18 +141,20 @@ public final class ReferenceHandlingTranslator {
 		if (order == null) {
 			return null;
 		}
-		//		if (order.getOrderType() == null) {
-		//			return null;
-		//		}
+		
+		if (order instanceof TestOrder) {
+			return createTestOrderReference((TestOrder) order, orderIdentifierTranslator);
+		}
 		
 		if (order instanceof DrugOrder) {
 			return createDrugOrderReference((DrugOrder) order, orderIdentifierTranslator);
 		}
-		if (order instanceof Order) {
-			return createTestOrderReference(order, orderIdentifierTranslator);
+		
+		Reference reference = createReferenceOfType(order, FhirConstants.SERVICE_REQUEST);
+		if (orderIdentifierTranslator != null) {
+			reference.setIdentifier(orderIdentifierTranslator.toFhirResource(order));
 		}
-		log.warn("Could not determine order type for order {}", order);
-		return null;
+		return reference;
 	}
 	
 	public static Reference createDrugOrderReference(@Nonnull DrugOrder drugOrder) {
@@ -173,11 +176,11 @@ public final class ReferenceHandlingTranslator {
 		return reference;
 	}
 	
-	public static Reference createTestOrderReference(@Nonnull Order order) {
+	public static Reference createTestOrderReference(@Nonnull TestOrder order) {
 		return createTestOrderReference(order, null);
 	}
 	
-	public static Reference createTestOrderReference(@Nonnull Order order,
+	public static Reference createTestOrderReference(@Nonnull TestOrder order,
 	        OrderIdentifierTranslator orderIdentifierTranslator) {
 		if (order == null) {
 			return null;

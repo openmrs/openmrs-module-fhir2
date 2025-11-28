@@ -41,8 +41,8 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationReferenceTranslator;
+import org.openmrs.module.fhir2.api.translators.OrderReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
-import org.openmrs.module.fhir2.api.translators.ServiceRequestReferenceTranslator;
 import org.openmrs.module.fhir2.model.FhirDiagnosticReport;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -71,7 +71,7 @@ public class DiagnosticReportTranslatorImplTest {
 	private ObservationReferenceTranslator observationReferenceTranslator;
 	
 	@Mock
-	ServiceRequestReferenceTranslator serviceRequestReferenceTranslator;
+	OrderReferenceTranslator orderReferenceTranslator;
 	
 	private DiagnosticReportTranslatorImpl translator;
 	
@@ -87,7 +87,7 @@ public class DiagnosticReportTranslatorImplTest {
 		translator.setEncounterReferenceTranslator(encounterReferenceTranslator);
 		translator.setPatientReferenceTranslator(patientReferenceTranslator);
 		
-		translator.setServiceRequestReferenceTranslator(serviceRequestReferenceTranslator);
+		translator.setOrderReferenceTranslator(orderReferenceTranslator);
 		
 		// OpenMRS setup
 		fhirDiagnosticReport = new FhirDiagnosticReport();
@@ -324,7 +324,7 @@ public class DiagnosticReportTranslatorImplTest {
 		Reference radiologyOrderRef = new Reference(RADIOLOGY_ORDER_REFERENCE);
 		diagnosticReport.setBasedOn(Collections.singletonList(radiologyOrderRef));
 		Order radiologyOrder = new Order();
-		when(serviceRequestReferenceTranslator.toOpenmrsType(radiologyOrderRef)).thenReturn(radiologyOrder);
+		when(orderReferenceTranslator.toOpenmrsType(radiologyOrderRef)).thenReturn(radiologyOrder);
 		FhirDiagnosticReport result = translator.toOpenmrsType(diagnosticReport);
 		Assert.assertEquals(radiologyOrder, result.getOrder());
 	}
@@ -334,8 +334,7 @@ public class DiagnosticReportTranslatorImplTest {
 		Order radiologyOrder = new Order();
 		radiologyOrder.setUuid(RADIOLOGY_ORDER_REFERENCE.substring(RADIOLOGY_ORDER_REFERENCE.indexOf("/")));
 		fhirDiagnosticReport.setOrder(radiologyOrder);
-		when(serviceRequestReferenceTranslator.toFhirResource(radiologyOrder))
-		        .thenReturn(new Reference(RADIOLOGY_ORDER_REFERENCE));
+		when(orderReferenceTranslator.toFhirResource(radiologyOrder)).thenReturn(new Reference(RADIOLOGY_ORDER_REFERENCE));
 		DiagnosticReport result = translator.toFhirResource(fhirDiagnosticReport);
 		Assert.assertEquals(RADIOLOGY_ORDER_REFERENCE, result.getBasedOn().get(0).getReference());
 	}

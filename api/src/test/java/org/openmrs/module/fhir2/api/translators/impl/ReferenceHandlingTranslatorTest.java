@@ -345,7 +345,7 @@ public class ReferenceHandlingTranslatorTest {
 		assertThat(reference, notNullValue());
 	}
 	
-	@Ignore("this test case is not valid as the underlying implementation does not check against order.orderType")
+	@Ignore("this test case is no longer valid, as all other order subclasses now return a reference to ServiceRequest")
 	@Test
 	public void shouldReturnNullForUnknownOrderSubclass() {
 		Order order = new Order() {};

@@ -10,10 +10,10 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import org.openmrs.Order;
-import org.openmrs.module.fhir2.api.dao.FhirGenericServiceRequestDao;
+import org.openmrs.module.fhir2.api.dao.FhirOrderDao;
 import org.springframework.stereotype.Component;
 
 @Component
-public class FhirGenericServiceRequestDaoImpl extends BaseFhirDao<Order> implements FhirGenericServiceRequestDao {
+public class FhirOrderDaoImpl extends BaseFhirDao<Order> implements FhirOrderDao {
 	
 }
