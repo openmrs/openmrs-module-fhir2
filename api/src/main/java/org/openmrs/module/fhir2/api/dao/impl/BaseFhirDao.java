@@ -200,8 +200,8 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 			// 2. Fetch full objects using those IDs
 			
 			@SuppressWarnings({ "UnstableApiUsage", "unchecked" })
-			OpenmrsFhirCriteriaContext<T, Integer> criteriaContext = getSearchResultCriteria(
-			    createCriteriaContext((Class<T>) typeToken.getRawType(), Integer.class), theParams);
+			OpenmrsFhirCriteriaContext<T, Object> criteriaContext = getSearchResultCriteria(
+			    createCriteriaContext((Class<T>) typeToken.getRawType(), Object.class), theParams);
 			
 			String idProperty = getIdPropertyName(criteriaContext.getEntityManager());
 			
@@ -209,10 +209,10 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 			handleSort(criteriaContext, theParams.getSortSpec());
 			handleIdPropertyOrdering(criteriaContext, idProperty);
 			
-			CriteriaQuery<Integer> idQuery = criteriaContext.finalizeIdQuery(idProperty);
+			CriteriaQuery<Object> idQuery = criteriaContext.finalizeIdQuery(idProperty);
 			
 			// Apply pagination to the sorted ID query
-			TypedQuery<Integer> executableIdQuery = criteriaContext.getEntityManager().createQuery(idQuery);
+			TypedQuery<Object> executableIdQuery = criteriaContext.getEntityManager().createQuery(idQuery);
 			executableIdQuery.setFirstResult(theParams.getFromIndex());
 			if (theParams.getToIndex() != Integer.MAX_VALUE && theParams.getToIndex() >= 0) {
 				int maxResults = theParams.getToIndex() - theParams.getFromIndex();
@@ -221,10 +221,20 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 				}
 			}
 			
-			List<Integer> ids = executableIdQuery.getResultList();
+			List<Object> rawResults = executableIdQuery.getResultList();
 			
-			if (ids == null || ids.isEmpty()) {
+			if (rawResults == null || rawResults.isEmpty()) {
 				return Collections.emptyList();
+			}
+			
+			// Extract IDs from results - when ORDER BY is present, results are Object[] with ID as first element
+			List<Integer> ids = new ArrayList<>(rawResults.size());
+			for (Object result : rawResults) {
+				if (result instanceof Object[]) {
+					ids.add((Integer) ((Object[]) result)[0]);
+				} else {
+					ids.add((Integer) result);
+				}
 			}
 			
 			// Use the IDs to fetch full objects

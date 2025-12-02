@@ -16,6 +16,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Selection;
 import javax.persistence.criteria.Subquery;
 
 import java.util.ArrayList;
@@ -144,21 +145,28 @@ public class OpenmrsFhirCriteriaContext<T, U> extends BaseFhirCriteriaHolder<T> 
 	}
 	
 	/**
-	 * Finalizes a query that selects only the ID property with DISTINCT, applying any accumulated sort
-	 * orders. This is used for the two-query approach where we first get matching sorted IDs, then
-	 * fetch full objects. <br/>
-	 * Unlike GROUP BY, SELECT DISTINCT does not require ORDER BY columns to be in the SELECT clause, so
-	 * we can simply select the ID and apply sorting directly.
+	 * Finalizes a query that selects distinct IDs with sorting applied. When ORDER BY expressions are
+	 * present, they are included in the SELECT clause for database compatibility. The result will be an
+	 * Object[] where the first element is the ID.
 	 *
 	 * @param idProperty The name of the ID property to select
 	 * @return A finalized {@link CriteriaQuery} selecting distinct IDs with sorting applied
 	 */
 	public CriteriaQuery<U> finalizeIdQuery(String idProperty) {
-		CriteriaQuery<U> query = getCriteriaQuery().select(getRoot().get(idProperty))
-		        .where(getPredicates().toArray(new Predicate[0])).distinct(true);
+		CriteriaQuery<U> query = getCriteriaQuery().where(getPredicates().toArray(new Predicate[0])).distinct(true);
 		
 		if (!orders.isEmpty()) {
-			query = query.orderBy(orders);
+			// Include ORDER BY expressions in SELECT to maximize compatibility
+			List<Selection<?>> selections = new ArrayList<>();
+			selections.add(getRoot().get(idProperty));
+			
+			for (Order order : orders) {
+				selections.add(order.getExpression());
+			}
+			
+			query = query.multiselect(selections).orderBy(orders);
+		} else {
+			query = query.select(getRoot().get(idProperty));
 		}
 		
 		return query;
