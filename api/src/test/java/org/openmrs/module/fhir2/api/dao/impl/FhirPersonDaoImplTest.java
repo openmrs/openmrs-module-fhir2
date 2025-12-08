@@ -21,7 +21,6 @@ import static org.openmrs.util.PrivilegeConstants.GET_PERSONS;
 import java.util.Arrays;
 import java.util.List;
 
-import org.hamcrest.CoreMatchers;
 import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
@@ -68,7 +67,7 @@ public class FhirPersonDaoImplTest extends BaseFhirContextSensitiveTest {
 	}
 	
 	@Test
-	public void getPersonByUuid_shouldReturnMatchingPerson() {
+	public void shouldReturnMatchingPerson() {
 		Person person = fhirPersonDao.get(PERSON_UUID);
 		assertThat(person, notNullValue());
 		assertThat(person.getUuid(), equalTo(PERSON_UUID));
@@ -77,10 +76,97 @@ public class FhirPersonDaoImplTest extends BaseFhirContextSensitiveTest {
 	}
 	
 	@Test
-	public void getPersonByWithWrongUuid_shouldReturnNullPerson() {
+	public void shouldReturnNullPersonForPersonNotFoundByUuid() {
 		Person person = fhirPersonDao.get(WRONG_PERSON_UUID);
 		assertThat(person, nullValue());
 	}
+
+    @Test
+    public void shouldRequireGetPersonsPrivilegeForGet() {
+        Context.logout();
+
+        try {
+            fhirPersonDao.get(PERSON_UUID);
+            fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
+        }
+        catch (APIAuthenticationException e) {
+            assertThat(e.getMessage(), containsString("Privilege"));
+        }
+
+        try {
+            Context.addProxyPrivilege(GET_PERSONS);
+            assertThat(fhirPersonDao.get(PERSON_UUID), notNullValue());
+        }
+        finally {
+            Context.removeProxyPrivilege(GET_PERSONS);
+        }
+    }
+
+    @Test
+    public void shouldRequireGetPersonsPrivilegeForGetByCollection() {
+        Context.logout();
+
+        try {
+            fhirPersonDao.get(Arrays.asList(PERSON_UUID));
+            fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
+        }
+        catch (APIAuthenticationException e) {
+            assertThat(e.getMessage(), containsString("Privilege"));
+        }
+
+        try {
+            Context.addProxyPrivilege(GET_PERSONS);
+            List<Person> persons = fhirPersonDao.get(Arrays.asList(PERSON_UUID));
+            assertThat(persons, notNullValue());
+        }
+        finally {
+            Context.removeProxyPrivilege(GET_PERSONS);
+        }
+    }
+
+    @Test
+    public void shouldRequireGetPersonsPrivilegeForGetSearchResults() {
+        Context.logout();
+
+        try {
+            fhirPersonDao.getSearchResults(new SearchParameterMap());
+            fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
+        }
+        catch (APIAuthenticationException e) {
+            assertThat(e.getMessage(), containsString("Privilege"));
+        }
+
+        try {
+            Context.addProxyPrivilege(GET_PERSONS);
+            List<Person> persons = fhirPersonDao.getSearchResults(new SearchParameterMap());
+            assertThat(persons, notNullValue());
+        }
+        finally {
+            Context.removeProxyPrivilege(GET_PERSONS);
+        }
+    }
+
+    @Test
+    public void shouldRequireGetPersonsPrivilegeForGetSearchResultsCount() {
+        Context.logout();
+
+        try {
+            fhirPersonDao.getSearchResultsCount(new SearchParameterMap());
+            fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
+        }
+        catch (APIAuthenticationException e) {
+            assertThat(e.getMessage(), containsString("Privilege"));
+        }
+
+        try {
+            Context.addProxyPrivilege(GET_PERSONS);
+            int count = fhirPersonDao.getSearchResultsCount(new SearchParameterMap());
+            assertThat(count, notNullValue());
+        }
+        finally {
+            Context.removeProxyPrivilege(GET_PERSONS);
+        }
+    }
 	
 	@Test
 	public void getActiveAttributesByPersonAndAttributeTypeUuid_shouldReturnPersonAttribute() {
@@ -96,97 +182,11 @@ public class FhirPersonDaoImplTest extends BaseFhirContextSensitiveTest {
 	@Test
 	public void delete_shouldVoidPerson() {
 		Person person = fhirPersonDao.delete(PERSON_UUID);
-		assertThat(person.getVoided(), CoreMatchers.equalTo(true));
-		assertThat(person.getDateVoided(), not(CoreMatchers.nullValue()));
-		assertThat(person.getVoidedBy(), CoreMatchers.equalTo(Context.getAuthenticatedUser()));
-		assertThat(person.getVoidReason(), CoreMatchers.equalTo("Voided via FHIR API"));
+		
+		assertThat(person.getVoided(), equalTo(true));
+		assertThat(person.getDateVoided(), not(nullValue()));
+		assertThat(person.getVoidedBy(), equalTo(Context.getAuthenticatedUser()));
+		assertThat(person.getVoidReason(), equalTo("Voided via FHIR API"));
 	}
-	
-	@Test
-	public void shouldRequireGetPersonsPrivilegeForGet() {
-		Context.logout();
-		
-		try {
-			fhirPersonDao.get(PERSON_UUID);
-			fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
-		}
-		catch (APIAuthenticationException e) {
-			assertThat(e.getMessage(), containsString("Privilege"));
-		}
-		
-		try {
-			Context.addProxyPrivilege(GET_PERSONS);
-			assertThat(fhirPersonDao.get(PERSON_UUID), notNullValue());
-		}
-		finally {
-			Context.removeProxyPrivilege(GET_PERSONS);
-		}
-	}
-	
-	@Test
-	public void shouldRequireGetPersonsPrivilegeForGetByCollection() {
-		Context.logout();
-		
-		try {
-			fhirPersonDao.get(Arrays.asList(PERSON_UUID));
-			fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
-		}
-		catch (APIAuthenticationException e) {
-			assertThat(e.getMessage(), containsString("Privilege"));
-		}
-		
-		try {
-			Context.addProxyPrivilege(GET_PERSONS);
-			List<Person> persons = fhirPersonDao.get(Arrays.asList(PERSON_UUID));
-			assertThat(persons, notNullValue());
-		}
-		finally {
-			Context.removeProxyPrivilege(GET_PERSONS);
-		}
-	}
-	
-	@Test
-	public void shouldRequireGetPersonsPrivilegeForGetSearchResults() {
-		Context.logout();
-		
-		try {
-			fhirPersonDao.getSearchResults(new SearchParameterMap());
-			fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
-		}
-		catch (APIAuthenticationException e) {
-			assertThat(e.getMessage(), containsString("Privilege"));
-		}
-		
-		try {
-			Context.addProxyPrivilege(GET_PERSONS);
-			List<Person> persons = fhirPersonDao.getSearchResults(new SearchParameterMap());
-			assertThat(persons, notNullValue());
-		}
-		finally {
-			Context.removeProxyPrivilege(GET_PERSONS);
-		}
-	}
-	
-	@Test
-	public void shouldRequireGetPersonsPrivilegeForGetSearchResultsCount() {
-		Context.logout();
-		
-		try {
-			fhirPersonDao.getSearchResultsCount(new SearchParameterMap());
-			fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
-		}
-		catch (APIAuthenticationException e) {
-			assertThat(e.getMessage(), containsString("Privilege"));
-		}
-		
-		try {
-			Context.addProxyPrivilege(GET_PERSONS);
-			int count = fhirPersonDao.getSearchResultsCount(new SearchParameterMap());
-			assertThat(count, notNullValue());
-		}
-		finally {
-			Context.removeProxyPrivilege(GET_PERSONS);
-		}
-	}
-	
+
 }

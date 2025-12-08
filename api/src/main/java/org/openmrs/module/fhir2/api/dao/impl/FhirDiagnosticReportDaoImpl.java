@@ -9,19 +9,21 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
-import static org.hibernate.criterion.Restrictions.eq;
-
 import javax.annotation.Nonnull;
+import javax.persistence.criteria.From;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Path;
 
 import java.util.Optional;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
-import org.hibernate.Criteria;
+import lombok.NonNull;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirDiagnosticReportDao;
+import org.openmrs.module.fhir2.api.dao.internals.OpenmrsFhirCriteriaContext;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.model.FhirDiagnosticReport;
 import org.springframework.stereotype.Component;
@@ -30,61 +32,65 @@ import org.springframework.stereotype.Component;
 public class FhirDiagnosticReportDaoImpl extends BaseFhirDao<FhirDiagnosticReport> implements FhirDiagnosticReportDao {
 	
 	@Override
-	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
+	protected <U> void setupSearchParams(@Nonnull OpenmrsFhirCriteriaContext<FhirDiagnosticReport, U> criteriaContext,
+	        @Nonnull SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER:
-					entry.getValue().forEach(
-					    param -> handleEncounterReference(criteria, (ReferenceAndListParam) param.getParam(), "e"));
+					entry.getValue().forEach(param -> getSearchQueryHelper().handleEncounterReference(criteriaContext,
+					    (ReferenceAndListParam) param.getParam(), "e"));
 					break;
 				case FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER:
-					entry.getValue().forEach(
-					    param -> handlePatientReference(criteria, (ReferenceAndListParam) param.getParam(), "subject"));
+					entry.getValue().forEach(param -> getSearchQueryHelper().handlePatientReference(criteriaContext,
+					    (ReferenceAndListParam) param.getParam(), "subject"));
 					break;
 				case FhirConstants.CODED_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handleCodedConcept(criteria, (TokenAndListParam) param.getParam()));
+					entry.getValue()
+					        .forEach(param -> handleCodedConcept(criteriaContext, (TokenAndListParam) param.getParam()));
 					break;
 				case FhirConstants.DATE_RANGE_SEARCH_HANDLER:
-					entry.getValue().forEach(
-					    param -> handleDateRange("issued", (DateRangeParam) param.getParam()).ifPresent(criteria::add));
+					entry.getValue()
+					        .forEach(param -> getSearchQueryHelper()
+					                .handleDateRange(criteriaContext, "issued", (DateRangeParam) param.getParam())
+					                .ifPresent(criteriaContext::addPredicate));
 					break;
 				case FhirConstants.RESULT_SEARCH_HANDLER:
 					entry.getValue().forEach(
-					    param -> handleObservationReference(criteria, (ReferenceAndListParam) param.getParam()));
+					    param -> handleObservationReference(criteriaContext, (ReferenceAndListParam) param.getParam()));
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(entry.getValue()).ifPresent(criteria::add);
+					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(criteriaContext::addPredicate);
 					break;
 			}
 		});
 	}
 	
-	private void handleCodedConcept(Criteria criteria, TokenAndListParam code) {
+	private <U> void handleCodedConcept(OpenmrsFhirCriteriaContext<FhirDiagnosticReport, U> criteriaContext,
+	        TokenAndListParam code) {
 		if (code != null) {
-			if (lacksAlias(criteria, "c")) {
-				criteria.createAlias("code", "c");
-			}
-			handleCodeableConcept(criteria, code, "c", "cm", "crt").ifPresent(criteria::add);
+			From<?, ?> from = criteriaContext.addJoin("code", "c");
+			getSearchQueryHelper().handleCodeableConcept(criteriaContext, code, from, "cm", "crt")
+			        .ifPresent(criteriaContext::addPredicate);
 		}
 	}
 	
-	private void handleObservationReference(Criteria criteria, ReferenceAndListParam result) {
+	private <U> void handleObservationReference(OpenmrsFhirCriteriaContext<FhirDiagnosticReport, U> criteriaContext,
+	        ReferenceAndListParam result) {
 		if (result != null) {
-			if (lacksAlias(criteria, "obs")) {
-				criteria.createAlias("results", "obs");
-			}
+			Join<?, ?> resultsJoin = criteriaContext.addJoin("results", "obs");
 			
-			handleAndListParam(result, token -> Optional.of(eq("obs.uuid", token.getIdPart()))).ifPresent(criteria::add);
+			handleAndListParam(criteriaContext.getCriteriaBuilder(), result,
+			    token -> Optional.of(criteriaContext.getCriteriaBuilder().equal(resultsJoin.get("uuid"), token.getIdPart())))
+			            .ifPresent(criteriaContext::addPredicate);
 		}
 	}
 	
 	@Override
-	protected String paramToProp(@Nonnull String param) {
+	protected <V, U> Path<?> paramToProp(@Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext, @NonNull String param) {
 		if (DiagnosticReport.SP_ISSUED.equals(param)) {
-			return "issued";
+			return criteriaContext.getRoot().get("issued");
 		}
 		
-		return super.paramToProp(param);
+		return super.paramToProp(criteriaContext, param);
 	}
-	
 }

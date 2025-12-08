@@ -9,11 +9,13 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
+import javax.annotation.Nonnull;
+
 import ca.uhn.fhir.rest.param.TokenAndListParam;
-import org.hibernate.Criteria;
 import org.openmrs.Auditable;
 import org.openmrs.OpenmrsObject;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.dao.internals.OpenmrsFhirCriteriaContext;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 
 /**
@@ -24,35 +26,28 @@ import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 public abstract class BasePractitionerDao<T extends OpenmrsObject & Auditable> extends BasePersonDao<T> {
 	
 	@Override
-	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
-		criteria.createAlias("person", "p");
+	protected <U> void setupSearchParams(@Nonnull OpenmrsFhirCriteriaContext<T, U> criteriaContext,
+	        @Nonnull SearchParameterMap theParams) {
+		criteriaContext.addJoin("person", "p");
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.IDENTIFIER_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handleIdentifier(criteria, (TokenAndListParam) param.getParam()));
+					entry.getValue()
+					        .forEach(param -> handleIdentifier(criteriaContext, (TokenAndListParam) param.getParam()));
 					break;
 				case FhirConstants.NAME_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handleNames(criteria, entry.getValue()));
+					entry.getValue().forEach(param -> handleNames(criteriaContext, entry.getValue()));
 					break;
 				case FhirConstants.ADDRESS_SEARCH_HANDLER:
-					handleAddresses(criteria, entry);
+					handleAddresses(criteriaContext, entry);
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(entry.getValue()).ifPresent(criteria::add);
+					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(criteriaContext::addPredicate);
 					break;
 			}
 		});
 	}
 	
-	protected abstract void handleIdentifier(Criteria criteria, TokenAndListParam identifier);
-	
-	@Override
-	protected String getSqlAlias() {
-		return "p_";
-	}
-	
-	@Override
-	protected String getPersonProperty() {
-		return "p";
-	}
+	protected abstract <U> void handleIdentifier(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
+	        TokenAndListParam identifier);
 }

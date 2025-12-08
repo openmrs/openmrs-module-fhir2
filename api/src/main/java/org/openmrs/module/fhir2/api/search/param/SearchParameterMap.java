@@ -16,8 +16,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import ca.uhn.fhir.rest.api.SortSpec;
+import com.google.common.reflect.TypeToken;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -91,8 +93,16 @@ public class SearchParameterMap implements Serializable {
 	 * @return A {@link java.util.List} of {@link org.openmrs.module.fhir2.api.search.param.PropParam}
 	 *         parameters
 	 */
-	public List<PropParam<?>> getParameters(@Nonnull String key) {
-		return this.params.getOrDefault(key, new ArrayList<>());
+	@SuppressWarnings("UnstableApiUsage")
+	public <T> List<PropParam<T>> getParameters(@Nonnull String key) {
+		TypeToken<T> type = new TypeToken<T>(getClass()) {};
+		
+		@SuppressWarnings("unchecked")
+		List<PropParam<T>> result = this.params.getOrDefault(key, new ArrayList<>()).stream()
+		        .filter(param -> type.getRawType().isAssignableFrom(param.getClass())).map(param -> (PropParam<T>) param)
+		        .collect(Collectors.toList());
+		
+		return result;
 	}
 	
 	/**

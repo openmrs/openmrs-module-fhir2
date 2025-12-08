@@ -26,7 +26,6 @@ import java.util.List;
 import ca.uhn.fhir.rest.param.HasAndListParam;
 import ca.uhn.fhir.rest.param.HasOrListParam;
 import ca.uhn.fhir.rest.param.HasParam;
-import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.DrugOrder;
@@ -38,9 +37,8 @@ import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirEncounterDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
-import org.springframework.beans.factory.ObjectFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 public class FhirEncounterDaoImplTest extends BaseFhirContextSensitiveTest {
 	
@@ -67,18 +65,13 @@ public class FhirEncounterDaoImplTest extends BaseFhirContextSensitiveTest {
 	private static final String ENCOUNTER_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirEncounterDaoImpl_2_2Test_initial_data.xml";
 	
 	@Autowired
-	@Qualifier("sessionFactory")
-	private SessionFactory sessionFactory;
-	
-	@Autowired
-	private ObjectFactory<FhirEncounterDao> daoFactory;
-	
+	private ObjectProvider<FhirEncounterDao> daoProvider;
+
 	private FhirEncounterDao dao;
 	
 	@Before
 	public void setUp() throws Exception {
-		dao = daoFactory.getObject();
-		
+		dao = daoProvider.getObject();
 		executeDataSet(ENCOUNTER_INITIAL_DATA_XML);
 	}
 	
@@ -150,6 +143,7 @@ public class FhirEncounterDaoImplTest extends BaseFhirContextSensitiveTest {
 		    hasAndListParam);
 		
 		List<Encounter> matchingResources = dao.getSearchResults(theParams);
+		
 		assertThat("Encounter with Drug Orders is returned", matchingResources,
 		    hasItem(hasId(ENCOUNTER_WITH_DRUG_ORDERS_ID)));
 		assertThat("Encounter with only cancelled Drug Orders not is returned", matchingResources,
@@ -170,6 +164,7 @@ public class FhirEncounterDaoImplTest extends BaseFhirContextSensitiveTest {
 		    hasAndListParam);
 		
 		List<Encounter> matchingResources = dao.getSearchResults(theParams);
+		
 		assertThat("Encounter with Drug Orders is returned", matchingResources,
 		    hasItem(hasId(ENCOUNTER_WITH_DRUG_ORDERS_ID)));
 		assertThat("Encounter with only cancelled Drug Orders not is returned", matchingResources,
@@ -191,6 +186,7 @@ public class FhirEncounterDaoImplTest extends BaseFhirContextSensitiveTest {
 		    hasAndListParam);
 		
 		List<Encounter> matchingResources = dao.getSearchResults(theParams);
+		
 		assertThat("Encounter with Drug Orders is returned", matchingResources,
 		    hasItem(hasId(ENCOUNTER_WITH_DRUG_ORDERS_ID)));
 		assertThat("Encounter with only cancelled Drug Orders is returned", matchingResources,
@@ -290,6 +286,7 @@ public class FhirEncounterDaoImplTest extends BaseFhirContextSensitiveTest {
 		    hasAndListParam);
 		
 		List<Encounter> matchingResources = dao.getSearchResults(theParams);
+		
 		assertThat("Encounter with Drug Orders is returned", matchingResources,
 		    hasItem(hasId(ENCOUNTER_WITH_DRUG_ORDERS_ID)));
 		assertThat("Encounter with only cancelled Drug Orders is returned", matchingResources,
@@ -323,6 +320,7 @@ public class FhirEncounterDaoImplTest extends BaseFhirContextSensitiveTest {
 		    hasAndListParam);
 		
 		List<Encounter> matchingResources = dao.getSearchResults(theParams);
+		
 		assertThat("Encounter with Drug Orders is returned", matchingResources,
 		    hasItem(hasId(ENCOUNTER_WITH_DRUG_ORDERS_ID)));
 		assertThat("Encounter with only cancelled Drug Orders is returned", matchingResources,
@@ -356,6 +354,7 @@ public class FhirEncounterDaoImplTest extends BaseFhirContextSensitiveTest {
 		    hasAndListParam);
 		
 		List<Encounter> matchingResources = dao.getSearchResults(theParams);
+		
 		assertThat("Encounter with Drug Orders is returned", matchingResources,
 		    hasItem(hasId(ENCOUNTER_WITH_DRUG_ORDERS_ID)));
 		assertThat("Encounter with only cancelled Drug Orders is returned", matchingResources,
@@ -389,6 +388,7 @@ public class FhirEncounterDaoImplTest extends BaseFhirContextSensitiveTest {
 		    hasAndListParam);
 		
 		List<Encounter> matchingResources = dao.getSearchResults(theParams);
+		
 		assertThat("Encounter with Drug Orders is not returned", matchingResources,
 		    not(hasItem(hasId(ENCOUNTER_WITH_DRUG_ORDERS_ID))));
 		assertThat("Encounter with only cancelled Drug Orders is not returned", matchingResources,

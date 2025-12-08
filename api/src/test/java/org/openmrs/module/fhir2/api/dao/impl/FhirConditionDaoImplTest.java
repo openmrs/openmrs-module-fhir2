@@ -130,51 +130,50 @@ public class FhirConditionDaoImplTest extends BaseFhirContextSensitiveTest {
 			Context.removeProxyPrivilege(GET_CONDITIONS);
 		}
 	}
-
-
-    @Test
-    public void shouldRequireGetConditionsPrivilegeForGetSearchResults() {
-        Context.logout();
-
-        try {
-            dao.getSearchResults(new SearchParameterMap());
-            fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
-        }
-        catch (APIAuthenticationException e) {
-            assertThat(e.getMessage(), containsString("Privilege"));
-        }
-
-        try {
-            Context.addProxyPrivilege(GET_CONDITIONS);
-            List<Condition> conditions = dao.getSearchResults(new SearchParameterMap());
-            assertThat(conditions, notNullValue());
-        }
-        finally {
-            Context.removeProxyPrivilege(GET_CONDITIONS);
-        }
-    }
-
-    @Test
-    public void shouldRequireGetConditionsPrivilegeForGetSearchResultsCount() {
-        Context.logout();
-
-        try {
-            dao.getSearchResultsCount(new SearchParameterMap());
-            fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
-        }
-        catch (APIAuthenticationException e) {
-            assertThat(e.getMessage(), containsString("Privilege"));
-        }
-
-        try {
-            Context.addProxyPrivilege(GET_CONDITIONS);
-            int count = dao.getSearchResultsCount(new SearchParameterMap());
-            assertThat(count, notNullValue());
-        }
-        finally {
-            Context.removeProxyPrivilege(GET_CONDITIONS);
-        }
-    }
+	
+	@Test
+	public void shouldRequireGetConditionsPrivilegeForGetSearchResults() {
+		Context.logout();
+		
+		try {
+			dao.getSearchResults(new SearchParameterMap());
+			fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
+		}
+		catch (APIAuthenticationException e) {
+			assertThat(e.getMessage(), containsString("Privilege"));
+		}
+		
+		try {
+			Context.addProxyPrivilege(GET_CONDITIONS);
+			List<Condition> conditions = dao.getSearchResults(new SearchParameterMap());
+			assertThat(conditions, notNullValue());
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_CONDITIONS);
+		}
+	}
+	
+	@Test
+	public void shouldRequireGetConditionsPrivilegeForGetSearchResultsCount() {
+		Context.logout();
+		
+		try {
+			dao.getSearchResultsCount(new SearchParameterMap());
+			fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
+		}
+		catch (APIAuthenticationException e) {
+			assertThat(e.getMessage(), containsString("Privilege"));
+		}
+		
+		try {
+			Context.addProxyPrivilege(GET_CONDITIONS);
+			int count = dao.getSearchResultsCount(new SearchParameterMap());
+			assertThat(count, notNullValue());
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_CONDITIONS);
+		}
+	}
 	
 	@Test
 	public void shouldSaveNewCondition() {

@@ -36,9 +36,11 @@ public interface FhirConceptDao extends FhirDao<Concept> {
 	@Authorized(PrivilegeConstants.GET_CONCEPTS)
 	List<Concept> get(@Nonnull Collection<String> uuids);
 	
+	@Transactional(readOnly = true)
 	@Authorized(PrivilegeConstants.GET_CONCEPTS)
 	Optional<Concept> getConceptWithSameAsMappingInSource(ConceptSource conceptSource, String mappingCode);
 	
+	@Transactional(readOnly = true)
 	@Authorized(PrivilegeConstants.GET_CONCEPTS)
 	List<Concept> getConceptsWithAnyMappingInSource(ConceptSource conceptSource, String mappingCode);
 	

@@ -9,10 +9,10 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
-import static org.hibernate.criterion.Restrictions.and;
-import static org.hibernate.criterion.Restrictions.eq;
-
 import javax.annotation.Nonnull;
+import javax.persistence.criteria.From;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Predicate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,11 +21,10 @@ import java.util.Optional;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
-import org.hibernate.Criteria;
-import org.hibernate.criterion.Criterion;
 import org.openmrs.api.db.DAOException;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirTaskDao;
+import org.openmrs.module.fhir2.api.dao.internals.OpenmrsFhirCriteriaContext;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.model.FhirTask;
 import org.springframework.stereotype.Component;
@@ -34,30 +33,36 @@ import org.springframework.stereotype.Component;
 public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDao {
 	
 	@Override
-	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
+	protected <U> void setupSearchParams(@Nonnull OpenmrsFhirCriteriaContext<FhirTask, U> criteriaContext,
+	        @Nonnull SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.BASED_ON_REFERENCE_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handleReference(criteria, (ReferenceAndListParam) param.getParam(),
-					    "basedOnReferences", "bo"));
+					entry.getValue()
+					        .forEach(param -> handleReference(criteriaContext, (ReferenceAndListParam) param.getParam(),
+					            "basedOnReferences", "bo").ifPresent(criteriaContext::addPredicate));
 					break;
 				case FhirConstants.OWNER_REFERENCE_SEARCH_HANDLER:
-					entry.getValue().forEach(
-					    param -> handleReference(criteria, (ReferenceAndListParam) param.getParam(), "ownerReference", "o"));
+					entry.getValue()
+					        .forEach(param -> handleReference(criteriaContext, (ReferenceAndListParam) param.getParam(),
+					            "ownerReference", "o").ifPresent(criteriaContext::addPredicate));
 					break;
 				case FhirConstants.FOR_REFERENCE_SEARCH_HANDLER:
-					entry.getValue().forEach(
-					    param -> handleReference(criteria, (ReferenceAndListParam) param.getParam(), "forReference", "f"));
+					entry.getValue()
+					        .forEach(param -> handleReference(criteriaContext, (ReferenceAndListParam) param.getParam(),
+					            "forReference", "f").ifPresent(criteriaContext::addPredicate));
 					break;
 				case FhirConstants.TASK_CODE_SEARCH_HANDLER:
-					entry.getValue().forEach(code -> handleTaskCodeConcept(criteria, (TokenAndListParam) code.getParam()));
+					entry.getValue()
+					        .forEach(code -> handleTaskCodeConcept(criteriaContext, (TokenAndListParam) code.getParam())
+					                .ifPresent(criteriaContext::addPredicate));
 					break;
 				case FhirConstants.STATUS_SEARCH_HANDLER:
-					entry.getValue()
-					        .forEach(param -> handleStatus((TokenAndListParam) param.getParam()).ifPresent(criteria::add));
+					entry.getValue().forEach(param -> handleStatus(criteriaContext, (TokenAndListParam) param.getParam())
+					        .ifPresent(criteriaContext::addPredicate));
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(entry.getValue()).ifPresent(criteria::add);
+					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(criteriaContext::addPredicate);
 					break;
 			}
 		});
@@ -79,11 +84,14 @@ public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDa
 		return (ref != null && ref.getIdPart() != null && ref.getResourceType() != null);
 	}
 	
-	private Optional<Criterion> handleStatus(TokenAndListParam tokenAndListParam) {
-		return handleAndListParam(tokenAndListParam, token -> {
+	private <U> Optional<Predicate> handleStatus(OpenmrsFhirCriteriaContext<FhirTask, U> criteriaContext,
+	        TokenAndListParam tokenAndListParam) {
+		
+		return handleAndListParam(criteriaContext.getCriteriaBuilder(), tokenAndListParam, token -> {
 			if (token.getValue() != null) {
 				try {
-					return Optional.of(eq("status", FhirTask.TaskStatus.valueOf(token.getValue().toUpperCase())));
+					return Optional.of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("status"),
+					    FhirTask.TaskStatus.valueOf(token.getValue().toUpperCase())));
 				}
 				catch (IllegalArgumentException e) {
 					return Optional.empty();
@@ -94,30 +102,31 @@ public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDa
 		});
 	}
 	
-	private void handleReference(Criteria criteria, ReferenceAndListParam reference, String property, String alias) {
-		handleAndListParam(reference, param -> {
+	private <U> Optional<Predicate> handleReference(@Nonnull OpenmrsFhirCriteriaContext<FhirTask, U> criteriaContext,
+	        ReferenceAndListParam reference, String property, String alias) {
+		return handleAndListParam(criteriaContext.getCriteriaBuilder(), reference, param -> {
 			if (validReferenceParam(param)) {
-				if (lacksAlias(criteria, alias)) {
-					criteria.createAlias(property, alias);
-				}
+				Join<?, ?> taskAliasJoin = criteriaContext.addJoin(property, alias);
 				
-				List<Optional<? extends Criterion>> criterionList = new ArrayList<>();
-				criterionList.add(Optional.of(eq(String.format("%s.reference", alias), param.getIdPart())));
-				criterionList.add(Optional.of(eq(String.format("%s.type", alias), param.getResourceType())));
-				return Optional.of(and(toCriteriaArray(criterionList)));
+				List<Optional<? extends Predicate>> predicateList = new ArrayList<>();
+				predicateList.add(Optional
+				        .of(criteriaContext.getCriteriaBuilder().equal(taskAliasJoin.get("reference"), param.getIdPart())));
+				predicateList.add(Optional
+				        .of(criteriaContext.getCriteriaBuilder().equal(taskAliasJoin.get("type"), param.getResourceType())));
+				return Optional.of(criteriaContext.getCriteriaBuilder().and(toCriteriaArray(predicateList)));
 			}
 			
 			return Optional.empty();
-		}).ifPresent(criteria::add);
+		});
 	}
 	
-	private void handleTaskCodeConcept(Criteria criteria, TokenAndListParam code) {
-		if (code != null) {
-			if (lacksAlias(criteria, "tc")) {
-				criteria.createAlias("taskCode", "tc");
-			}
-			
-			handleCodeableConcept(criteria, code, "tc", "tcm", "tcrt").ifPresent(criteria::add);
+	private <U> Optional<Predicate> handleTaskCodeConcept(@Nonnull OpenmrsFhirCriteriaContext<FhirTask, U> criteriaContext,
+	        TokenAndListParam code) {
+		if (code == null) {
+			return Optional.empty();
 		}
+		
+		From<?, ?> join = criteriaContext.addJoin("taskCode", "tc");
+		return getSearchQueryHelper().handleCodeableConcept(criteriaContext, code, join, "tcm", "tcrt");
 	}
 }

@@ -9,9 +9,11 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
-import static org.hibernate.criterion.Restrictions.eq;
-
 import javax.annotation.Nonnull;
+import javax.persistence.criteria.From;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Path;
+import javax.persistence.criteria.Predicate;
 
 import java.util.Map;
 import java.util.Optional;
@@ -21,8 +23,6 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.Criteria;
-import org.hibernate.criterion.Criterion;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
 import org.openmrs.AllergenType;
@@ -31,6 +31,7 @@ import org.openmrs.AllergyReaction;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirAllergyIntoleranceDao;
+import org.openmrs.module.fhir2.api.dao.internals.OpenmrsFhirCriteriaContext;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -54,57 +55,67 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implemen
 	}
 	
 	@Override
-	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
+	protected <U> void setupSearchParams(@Nonnull OpenmrsFhirCriteriaContext<Allergy, U> criteriaContext,
+	        @Nonnull SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER:
-					entry.getValue().forEach(
-					    param -> handlePatientReference(criteria, (ReferenceAndListParam) param.getParam(), "patient"));
+					entry.getValue().forEach(param -> getSearchQueryHelper().handlePatientReference(criteriaContext,
+					    (ReferenceAndListParam) param.getParam(), "patient"));
 					break;
-				case FhirConstants.CATEGORY_SEARCH_HANDLER:
-					entry.getValue().forEach(
-					    param -> handleAllergenCategory("allergen.allergenType", (TokenAndListParam) param.getParam())
-					            .ifPresent(criteria::add));
+				case FhirConstants.CATEGORY_SEARCH_HANDLER: {
+					From<?, ?> allergyJoin = criteriaContext.addJoin("allergen", "allergen");
+					entry.getValue().forEach(param -> handleAllergenCategory(criteriaContext, allergyJoin, "allergenType",
+					    (TokenAndListParam) param.getParam()).ifPresent(criteriaContext::addPredicate));
 					break;
+				}
 				case FhirConstants.ALLERGEN_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handleAllergen(criteria, (TokenAndListParam) param.getParam()));
+					entry.getValue().forEach(param -> handleAllergen(criteriaContext, (TokenAndListParam) param.getParam()));
 					break;
 				case FhirConstants.SEVERITY_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handleSeverity(criteria, (TokenAndListParam) param.getParam()));
+					entry.getValue().forEach(param -> handleSeverity(criteriaContext, (TokenAndListParam) param.getParam()));
 					break;
 				case FhirConstants.CODED_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handleManifestation(criteria, (TokenAndListParam) param.getParam()));
+					entry.getValue()
+					        .forEach(param -> handleManifestation(criteriaContext, (TokenAndListParam) param.getParam()));
 					break;
 				case FhirConstants.BOOLEAN_SEARCH_HANDLER:
-					entry.getValue().forEach(
-					    param -> handleBoolean("voided", convertStringStatusToBoolean((TokenAndListParam) param.getParam()))
-					            .ifPresent(criteria::add));
+					entry.getValue()
+					        .forEach(param -> getSearchQueryHelper()
+					                .handleBoolean(criteriaContext, "voided",
+					                    getSearchQueryHelper()
+					                            .convertStringStatusToBoolean((TokenAndListParam) param.getParam()))
+					                .ifPresent(criteriaContext::addPredicate));
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(entry.getValue()).ifPresent(criteria::add);
+					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(criteriaContext::addPredicate);
 					break;
 			}
 		});
 	}
 	
-	private void handleManifestation(Criteria criteria, TokenAndListParam code) {
+	private <U> void handleManifestation(OpenmrsFhirCriteriaContext<Allergy, U> criteriaContext, TokenAndListParam code) {
 		if (code != null) {
-			criteria.createAlias("reactions", "r");
-			criteria.createAlias("r.reaction", "rc");
+			Join<?, ?> reactionsJoin = criteriaContext.addJoin("reactions", "r");
+			Join<?, ?> reactionJoin = criteriaContext.addJoin(reactionsJoin, "reaction", "rc");
 			
-			handleCodeableConcept(criteria, code, "rc", "rcm", "rcrt").ifPresent(criteria::add);
+			getSearchQueryHelper().handleCodeableConcept(criteriaContext, code, reactionJoin, "rcm", "rcrt")
+			        .ifPresent(criteriaContext::addPredicate);
 		}
 	}
 	
-	private void handleAllergen(Criteria criteria, TokenAndListParam code) {
+	private <U> void handleAllergen(OpenmrsFhirCriteriaContext<Allergy, U> criteriaContext, TokenAndListParam code) {
 		if (code != null) {
-			criteria.createAlias("allergen.codedAllergen", "ac");
+			Join<?, ?> allergenJoin = criteriaContext.addJoin("allergen", "allergen");
+			Join<?, ?> codedAllergenJoin = criteriaContext.addJoin(allergenJoin, "codedAllergen", "ac");
 			
-			handleCodeableConcept(criteria, code, "ac", "acm", "acrt").ifPresent(criteria::add);
+			getSearchQueryHelper().handleCodeableConcept(criteriaContext, code, codedAllergenJoin, "acm", "acrt")
+			        .ifPresent(criteriaContext::addPredicate);
 		}
 	}
 	
-	private void handleSeverity(Criteria criteria, TokenAndListParam severityParam) {
+	private <U> void handleSeverity(OpenmrsFhirCriteriaContext<Allergy, U> criteriaContext,
+	        TokenAndListParam severityParam) {
 		if (severityParam == null) {
 			return;
 		}
@@ -112,46 +123,55 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implemen
 		    FhirConstants.GLOBAL_PROPERTY_MILD, FhirConstants.GLOBAL_PROPERTY_MODERATE, FhirConstants.GLOBAL_PROPERTY_SEVERE,
 		    FhirConstants.GLOBAL_PROPERTY_OTHER);
 		
-		criteria.createAlias("severity", "sc");
+		Join<?, ?> severeJoin = criteriaContext.addJoin("severity", "sc");
 		
-		handleAndListParam(severityParam, token -> {
+		handleAndListParam(criteriaContext.getCriteriaBuilder(), severityParam, token -> {
 			try {
 				AllergyIntolerance.AllergyIntoleranceSeverity severity = AllergyIntolerance.AllergyIntoleranceSeverity
 				        .fromCode(token.getValue());
 				switch (severity) {
 					case MILD:
-						return Optional.of(eq("sc.uuid", severityConceptUuids.get(FhirConstants.GLOBAL_PROPERTY_MILD)));
+						return Optional.of(criteriaContext.getCriteriaBuilder().equal(severeJoin.get("uuid"),
+						    severityConceptUuids.get(FhirConstants.GLOBAL_PROPERTY_MILD)));
 					case MODERATE:
-						return Optional.of(eq("sc.uuid", severityConceptUuids.get(FhirConstants.GLOBAL_PROPERTY_MODERATE)));
+						return Optional.of(criteriaContext.getCriteriaBuilder().equal(severeJoin.get("uuid"),
+						    severityConceptUuids.get(FhirConstants.GLOBAL_PROPERTY_MODERATE)));
 					case SEVERE:
-						return Optional.of(eq("sc.uuid", severityConceptUuids.get(FhirConstants.GLOBAL_PROPERTY_SEVERE)));
+						return Optional.of(criteriaContext.getCriteriaBuilder().equal(severeJoin.get("uuid"),
+						    severityConceptUuids.get(FhirConstants.GLOBAL_PROPERTY_SEVERE)));
 					case NULL:
-						return Optional.of(eq("sc.uuid", severityConceptUuids.get(FhirConstants.GLOBAL_PROPERTY_OTHER)));
+						return Optional.of(criteriaContext.getCriteriaBuilder().equal(severeJoin.get("uuid"),
+						    severityConceptUuids.get(FhirConstants.GLOBAL_PROPERTY_OTHER)));
 				}
 			}
 			catch (FHIRException ignored) {}
 			return Optional.empty();
-		}).ifPresent(criteria::add);
+		}).ifPresent(criteriaContext::addPredicate);
 	}
 	
-	private Optional<Criterion> handleAllergenCategory(String propertyName, TokenAndListParam categoryParam) {
+	private <T, U> Optional<Predicate> handleAllergenCategory(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
+	        From<?, ?> allergyJoin, String propertyName, TokenAndListParam categoryParam) {
 		if (categoryParam == null) {
 			return Optional.empty();
 		}
 		
-		return handleAndListParam(categoryParam, token -> {
+		return handleAndListParam(criteriaContext.getCriteriaBuilder(), categoryParam, token -> {
 			try {
 				AllergyIntolerance.AllergyIntoleranceCategory category = AllergyIntolerance.AllergyIntoleranceCategory
 				        .fromCode(token.getValue());
 				switch (category) {
 					case FOOD:
-						return Optional.of(eq(propertyName, AllergenType.FOOD));
+						return Optional.of(
+						    criteriaContext.getCriteriaBuilder().equal(allergyJoin.get(propertyName), AllergenType.FOOD));
 					case MEDICATION:
-						return Optional.of(eq(propertyName, AllergenType.DRUG));
+						return Optional.of(
+						    criteriaContext.getCriteriaBuilder().equal(allergyJoin.get(propertyName), AllergenType.DRUG));
 					case ENVIRONMENT:
-						return Optional.of(eq(propertyName, AllergenType.ENVIRONMENT));
+						return Optional.of(criteriaContext.getCriteriaBuilder().equal(allergyJoin.get(propertyName),
+						    AllergenType.ENVIRONMENT));
 					case NULL:
-						return Optional.of(eq(propertyName, AllergenType.OTHER));
+						return Optional.of(
+						    criteriaContext.getCriteriaBuilder().equal(allergyJoin.get(propertyName), AllergenType.OTHER));
 				}
 			}
 			catch (FHIRException ignored) {}
@@ -161,11 +181,11 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implemen
 	}
 	
 	@Override
-	protected String paramToProp(@Nonnull String param) {
+	protected <V, U> Path<?> paramToProp(@Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext, @Nonnull String param) {
 		if (AllergyIntolerance.SP_SEVERITY.equals(param)) {
-			return "severity";
+			return criteriaContext.getRoot().get("severity");
 		}
 		
-		return super.paramToProp(param);
+		return super.paramToProp(criteriaContext, param);
 	}
 }

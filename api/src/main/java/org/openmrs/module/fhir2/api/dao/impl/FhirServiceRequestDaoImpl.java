@@ -9,8 +9,9 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
-import static org.hibernate.criterion.Restrictions.and;
-import static org.hibernate.criterion.Restrictions.or;
+import javax.annotation.Nonnull;
+import javax.persistence.criteria.From;
+import javax.persistence.criteria.Predicate;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -18,11 +19,10 @@ import java.util.stream.Stream;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
-import org.hibernate.Criteria;
-import org.hibernate.criterion.Criterion;
 import org.openmrs.TestOrder;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirServiceRequestDao;
+import org.openmrs.module.fhir2.api.dao.internals.OpenmrsFhirCriteriaContext;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.stereotype.Component;
 
@@ -35,55 +35,65 @@ public class FhirServiceRequestDaoImpl extends BaseFhirDao<TestOrder> implements
 	}
 	
 	@Override
-	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
+	protected <U> void setupSearchParams(@Nonnull OpenmrsFhirCriteriaContext<TestOrder, U> criteriaContext,
+	        @Nonnull SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER:
-					entry.getValue().forEach(
-					    param -> handleEncounterReference(criteria, (ReferenceAndListParam) param.getParam(), "e"));
+					entry.getValue().forEach(param -> getSearchQueryHelper().handleEncounterReference(criteriaContext,
+					    (ReferenceAndListParam) param.getParam(), "e"));
 					break;
 				case FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER:
-					entry.getValue().forEach(patientReference -> handlePatientReference(criteria,
-					    (ReferenceAndListParam) patientReference.getParam(), "patient"));
+					entry.getValue()
+					        .forEach(patientReference -> getSearchQueryHelper().handlePatientReference(criteriaContext,
+					            (ReferenceAndListParam) patientReference.getParam(), "patient"));
 					break;
 				case FhirConstants.CODED_SEARCH_HANDLER:
-					entry.getValue().forEach(code -> handleCodedConcept(criteria, (TokenAndListParam) code.getParam()));
+					entry.getValue().forEach(code -> handleCodedConcept(criteriaContext, (TokenAndListParam) code.getParam())
+					        .ifPresent(criteriaContext::addPredicate));
 					break;
 				case FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER:
-					entry.getValue().forEach(participantReference -> handleProviderReference(criteria,
-					    (ReferenceAndListParam) participantReference.getParam()));
+					entry.getValue()
+					        .forEach(participantReference -> getSearchQueryHelper().handleProviderReference(criteriaContext,
+					            (ReferenceAndListParam) participantReference.getParam()));
 					break;
 				case FhirConstants.DATE_RANGE_SEARCH_HANDLER:
-					entry.getValue().forEach(dateRangeParam -> handleDateRange((DateRangeParam) dateRangeParam.getParam())
-					        .ifPresent(criteria::add));
+					entry.getValue().forEach(
+					    dateRangeParam -> handleDateRange(criteriaContext, (DateRangeParam) dateRangeParam.getParam())
+					            .ifPresent(d -> criteriaContext.addPredicate(d).finalizeQuery()));
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(entry.getValue()).ifPresent(criteria::add);
+					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(criteriaContext::addPredicate);
 					break;
 			}
 		});
 	}
 	
-	private void handleCodedConcept(Criteria criteria, TokenAndListParam code) {
-		if (code != null) {
-			if (lacksAlias(criteria, "c")) {
-				criteria.createAlias("concept", "c");
-			}
-			
-			handleCodeableConcept(criteria, code, "c", "cm", "crt").ifPresent(criteria::add);
+	private <U> Optional<Predicate> handleCodedConcept(@Nonnull OpenmrsFhirCriteriaContext<TestOrder, U> criteriaContext,
+	        TokenAndListParam code) {
+		if (code == null) {
+			return Optional.empty();
 		}
+		
+		From<?, ?> conceptJoin = criteriaContext.addJoin("concept", "c");
+		return getSearchQueryHelper().handleCodeableConcept(criteriaContext, code, conceptJoin, "cm", "crt");
 	}
 	
-	private Optional<Criterion> handleDateRange(DateRangeParam dateRangeParam) {
+	private <T, U> Optional<Predicate> handleDateRange(@Nonnull OpenmrsFhirCriteriaContext<T, U> criteriaContext,
+	        DateRangeParam dateRangeParam) {
 		if (dateRangeParam == null) {
 			return Optional.empty();
 		}
 		
-		return Optional.of(and(toCriteriaArray(Stream.of(
-		    Optional.of(or(toCriteriaArray(Stream.of(handleDate("scheduledDate", dateRangeParam.getLowerBound()),
-		        handleDate("dateActivated", dateRangeParam.getLowerBound()))))),
-		    Optional.of(or(toCriteriaArray(Stream.of(handleDate("dateStopped", dateRangeParam.getUpperBound()),
-		        handleDate("autoExpireDate", dateRangeParam.getUpperBound())))))))));
+		return Optional.of(criteriaContext.getCriteriaBuilder().and(toCriteriaArray(Stream.of(
+		    Optional.of(criteriaContext.getCriteriaBuilder()
+		            .or(toCriteriaArray(Stream.of(
+		                getSearchQueryHelper().handleDate(criteriaContext, "scheduledDate", dateRangeParam.getLowerBound()),
+		                getSearchQueryHelper().handleDate(criteriaContext, "dateActivated",
+		                    dateRangeParam.getLowerBound()))))),
+		    Optional.of(criteriaContext.getCriteriaBuilder().or(toCriteriaArray(Stream.of(
+		        getSearchQueryHelper().handleDate(criteriaContext, "dateStopped", dateRangeParam.getUpperBound()),
+		        getSearchQueryHelper().handleDate(criteriaContext, "autoExpireDate", dateRangeParam.getUpperBound())))))))));
 	}
 	
 }

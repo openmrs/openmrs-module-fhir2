@@ -33,6 +33,7 @@ import static org.hl7.fhir.r4.model.Person.SP_ADDRESS_POSTALCODE;
 import static org.hl7.fhir.r4.model.Person.SP_ADDRESS_STATE;
 import static org.hl7.fhir.r4.model.Person.SP_BIRTHDATE;
 import static org.hl7.fhir.r4.model.Person.SP_NAME;
+import static org.junit.Assert.fail;
 import static org.openmrs.util.OpenmrsUtil.compareWithNullAsGreatest;
 
 import java.text.ParseException;
@@ -110,8 +111,12 @@ public class PersonSearchQueryTest extends BaseFhirContextSensitiveTest {
 		ret = compareWithNullAsGreatest(o1.getFamily(), o2.getFamily()); // familyName
 		
 		if (ret == 0) { // familyName2
-			ret = compareWithNullAsGreatest(o1.getExtension().get(2).getValue().toString(),
-			    o2.getExtension().get(2).getValue().toString());
+			if (o1.hasExtension(FhirConstants.OPENMRS_FHIR_EXT_NAME + "#familyName2")
+			        && o2.hasExtension(FhirConstants.OPENMRS_FHIR_EXT_NAME + "#familyName2")) {
+				ret = compareWithNullAsGreatest(
+				    o1.getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_NAME + "#familyName2").getValue().toString(),
+				    o2.getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_NAME + "#familyName2").getValue().toString());
+			}
 		}
 		
 		if (ret == 0) { // givenName + middleName
@@ -119,13 +124,21 @@ public class PersonSearchQueryTest extends BaseFhirContextSensitiveTest {
 		}
 		
 		if (ret == 0) { // familyNamePrefix
-			ret = compareWithNullAsGreatest(o1.getExtension().get(1).getValue().toString(),
-			    o2.getExtension().get(1).getValue().toString());
+			if (o1.hasExtension(FhirConstants.OPENMRS_FHIR_EXT_NAME + "#familyNamePrefix")
+			        && o2.hasExtension(FhirConstants.OPENMRS_FHIR_EXT_NAME + "#familyNamePrefix")) {
+				ret = compareWithNullAsGreatest(
+				    o1.getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_NAME + "#familyNamePrefix").getValue().toString(),
+				    o2.getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_NAME + "#familyNamePrefix").getValue().toString());
+			}
 		}
 		
 		if (ret == 0) { // familyNameSuffix
-			ret = compareWithNullAsGreatest(o1.getExtension().get(3).getValue().toString(),
-			    o2.getExtension().get(3).getValue().toString());
+			if (o1.hasExtension(FhirConstants.OPENMRS_FHIR_EXT_NAME + "#familyNameSuffix")
+			        && o2.hasExtension(FhirConstants.OPENMRS_FHIR_EXT_NAME + "#familyNameSuffix")) {
+				ret = compareWithNullAsGreatest(
+				    o1.getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_NAME + "#familyNameSuffix").getValue().toString(),
+				    o2.getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_NAME + "#familyNameSuffix").getValue().toString());
+			}
 		}
 		
 		if (ret == 0) {
@@ -475,7 +488,7 @@ public class PersonSearchQueryTest extends BaseFhirContextSensitiveTest {
 	}
 	
 	@Test
-	public void shouldReturnCollectionOfPeopleSortedByGivenName() {
+	public void shouldReturnCollectionOfPeopleSortedByName() {
 		SortSpec sort = new SortSpec();
 		sort.setParamName(SP_NAME);
 		sort.setOrder(SortOrderEnum.ASC);
@@ -493,7 +506,28 @@ public class PersonSearchQueryTest extends BaseFhirContextSensitiveTest {
 		assertThat(people, hasSize(greaterThan(1)));
 		
 		for (int i = 1; i < people.size(); i++) {
-			assertThat(people.get(i - 1).getNameFirstRep(), NAME_MATCHER.lessThanOrEqualTo(people.get(i).getNameFirstRep()));
+			if (people.get(i).getName().size() > 1 || people.get(i - 1).getName().size() > 1) {
+				boolean found = false;
+				
+				search: for (int j = 0; j < people.get(i).getName().size(); j++) {
+					for (int k = 0; k < people.get(i - 1).getName().size(); k++) {
+						if (NAME_MATCHER.lessThanOrEqualTo(people.get(i).getName().get(j))
+						        .matches(people.get(i - 1).getName().get(k))) {
+							found = true;
+							break search;
+						}
+					}
+				}
+				
+				if (!found) {
+					fail("Expected " + people.get(i).getNameFirstRep().getText()
+					        + " to have at least one name greater than one name of "
+					        + people.get(i - 1).getNameFirstRep().getText());
+				}
+			} else {
+				assertThat(people.get(i - 1).getNameFirstRep(),
+				    NAME_MATCHER.lessThanOrEqualTo(people.get(i).getNameFirstRep()));
+			}
 		}
 		
 		sort.setOrder(SortOrderEnum.DESC);
@@ -510,8 +544,28 @@ public class PersonSearchQueryTest extends BaseFhirContextSensitiveTest {
 		assertThat(people, hasSize(greaterThan(1)));
 		
 		for (int i = 1; i < people.size(); i++) {
-			assertThat(people.get(i - 1).getNameFirstRep(),
-			    NAME_MATCHER.greaterThanOrEqualTo(people.get(i).getNameFirstRep()));
+			if (people.get(i).getName().size() > 1 || people.get(i - 1).getName().size() > 1) {
+				boolean found = false;
+				
+				search: for (int j = 0; j < people.get(i).getName().size(); j++) {
+					for (int k = 0; k < people.get(i - 1).getName().size(); k++) {
+						if (NAME_MATCHER.greaterThanOrEqualTo(people.get(i).getName().get(j))
+						        .matches(people.get(i - 1).getName().get(k))) {
+							found = true;
+							break search;
+						}
+					}
+				}
+				
+				if (!found) {
+					fail("Expected " + people.get(i).getNameFirstRep().getText()
+					        + " to have at least one name greater than one name of "
+					        + people.get(i - 1).getNameFirstRep().getText());
+				}
+			} else {
+				assertThat(people.get(i - 1).getNameFirstRep(),
+				    NAME_MATCHER.greaterThanOrEqualTo(people.get(i).getNameFirstRep()));
+			}
 		}
 	}
 	

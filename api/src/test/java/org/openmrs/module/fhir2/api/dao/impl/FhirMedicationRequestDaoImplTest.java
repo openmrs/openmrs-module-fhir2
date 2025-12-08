@@ -30,7 +30,6 @@ import java.util.List;
 
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.DrugOrder;
@@ -40,9 +39,8 @@ import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirMedicationRequestDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
-import org.springframework.beans.factory.ObjectFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 public class FhirMedicationRequestDaoImplTest extends BaseFhirContextSensitiveTest {
 	
@@ -59,28 +57,20 @@ public class FhirMedicationRequestDaoImplTest extends BaseFhirContextSensitiveTe
 	private static final String MEDICATION_REQUEST_CONCEPT_ID = "4020";
 	
 	@Autowired
-	@Qualifier("sessionFactory")
-	private SessionFactory sessionFactory;
+	private ObjectProvider<FhirMedicationRequestDao> daoProvider;
 	
-	@Autowired
-	private ObjectFactory<FhirMedicationRequestDao> daoFactory;
-	
+
 	private FhirMedicationRequestDao dao;
-	
-	private FhirMedicationRequestDaoImpl daoImpl;
 	
 	@Before
 	public void setup() throws Exception {
+		dao = daoProvider.getObject();
 		executeDataSet(MEDICATION_REQUEST_INITIAL_DATA_XML);
-		
-		dao = daoFactory.getObject();
-		daoImpl = new FhirMedicationRequestDaoImpl();
-		daoImpl.setSessionFactory(sessionFactory);
 	}
 	
 	@Test
 	public void getMedicationRequestByUuid_shouldGetByUuid() {
-		DrugOrder drugOrder = daoImpl.get(DRUG_ORDER_UUID);
+		DrugOrder drugOrder = dao.get(DRUG_ORDER_UUID);
 		assertThat(drugOrder, notNullValue());
 		assertThat(drugOrder.getUuid(), notNullValue());
 		assertThat(drugOrder.getUuid(), equalTo(DRUG_ORDER_UUID));
@@ -88,25 +78,28 @@ public class FhirMedicationRequestDaoImplTest extends BaseFhirContextSensitiveTe
 	
 	@Test
 	public void getMedicationRequestByUuid_shouldReturnNullWhenCalledWithBadUuid() {
-		DrugOrder drugOrder = daoImpl.get(BAD_DRUG_ORDER_UUID);
+		DrugOrder drugOrder = dao.get(BAD_DRUG_ORDER_UUID);
 		assertThat(drugOrder, nullValue());
 	}
 	
 	@Test
 	public void getMedicationRequestByUuids_shouldReturnEmptyListWhenCalledWithBadUuid() {
-		List<DrugOrder> drugOrders = daoImpl.get(Collections.singletonList(BAD_DRUG_ORDER_UUID));
+		List<DrugOrder> drugOrders = dao.get(Collections.singletonList(BAD_DRUG_ORDER_UUID));
+
 		assertThat(drugOrders.size(), is(0));
 	}
 	
 	@Test
 	public void getMedicationRequestByUuid_shouldReturnNullWhenRequestingDiscontinueOrder() {
-		DrugOrder drugOrder = daoImpl.get(DISCONTINUE_ORDER_UUID);
+		DrugOrder drugOrder = dao.get(DISCONTINUE_ORDER_UUID);
+
 		assertThat(drugOrder, nullValue());
 	}
 	
 	@Test
 	public void getMedicationRequestsByUuid_shouldNotReturnDiscontinueOrders() {
-		List<DrugOrder> drugOrders = daoImpl.get(Arrays.asList(DRUG_ORDER_UUID, DISCONTINUE_ORDER_UUID));
+		List<DrugOrder> drugOrders = dao.get(Arrays.asList(DRUG_ORDER_UUID, DISCONTINUE_ORDER_UUID));
+
 		assertThat(drugOrders.size(), is(1));
 		assertThat(drugOrders.get(0).getUuid(), is(DRUG_ORDER_UUID));
 	}
@@ -114,8 +107,9 @@ public class FhirMedicationRequestDaoImplTest extends BaseFhirContextSensitiveTe
 	@Test
 	public void getMedicationRequestsBySearchResults_shouldNotReturnDiscontinuedOrders() {
 		SearchParameterMap theParams = new SearchParameterMap();
-		theParams.setToIndex(20);
-		List<DrugOrder> drugOrders = daoImpl.getSearchResults(theParams);
+		
+		List<DrugOrder> drugOrders = dao.getSearchResults(theParams);
+		
 		assertThat(drugOrders, not(hasItems(hasId(DISCONTINUE_ORDER_ID))));
 		assertThat(drugOrders, hasSize(11));
 	}
@@ -129,9 +123,9 @@ public class FhirMedicationRequestDaoImplTest extends BaseFhirContextSensitiveTe
 		
 		SearchParameterMap theParams = new SearchParameterMap();
 		theParams.addParameter(FhirConstants.CODED_SEARCH_HANDLER, code);
-		
-		Collection<DrugOrder> drugOrders = daoImpl.getSearchResults(theParams);
-		
+
+		Collection<DrugOrder> drugOrders = dao.getSearchResults(theParams);
+
 		assertThat(drugOrders, notNullValue());
 		assertThat(drugOrders, hasSize(greaterThanOrEqualTo(1)));
 	}

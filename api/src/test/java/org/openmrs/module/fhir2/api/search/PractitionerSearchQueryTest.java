@@ -597,7 +597,7 @@ public class PractitionerSearchQueryTest extends BaseFhirContextSensitiveTest {
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
 		assertThat(resultList, hasSize(equalTo(9))); // included resources added as part of result list
-		assertThat(resultList.subList(1, 9), everyItem(allOf(is(instanceOf(MedicationRequest.class)),
+		assertThat(resultList.subList(1, resultList.size()), everyItem(allOf(is(instanceOf(MedicationRequest.class)),
 		    hasProperty("requester", hasProperty("referenceElement", hasProperty("idPart", equalTo(PRACTITIONER_UUID)))))));
 	}
 	

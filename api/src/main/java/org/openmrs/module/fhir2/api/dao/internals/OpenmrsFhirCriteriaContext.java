@@ -1,0 +1,191 @@
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public License,
+ * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+ * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+ * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ *
+ * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+ * graphic logo is a trademark of OpenMRS Inc.
+ */
+package org.openmrs.module.fhir2.api.dao.internals;
+
+import javax.annotation.Nonnull;
+import javax.persistence.EntityManager;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Order;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Selection;
+import javax.persistence.criteria.Subquery;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import lombok.Getter;
+import lombok.NonNull;
+
+/**
+ * {@code OpenmrsFhirCriteriaContext} is a holder object for building criteria queries in the FHIR2
+ * DAO API. It is provided as a convenience since the old Hibernate Criteria API allowed us to
+ * simply pass a Criteria object around, but the JPA2 Criteria API requires us to pass several
+ * different classes around. <br/>
+ * <br/>
+ * Criteria queries are built up mostly by calling methods on this class to add various joins,
+ * predicates, and sort orders which are built into a {@link CriteriaQuery<U>} by calling
+ * {@link #finalizeQuery()}. {@link #finalizeQuery()} should only be called once the full query has
+ * been built and only just before running the query if possible. <br/>
+ * <br/>
+ * The type {@code T} indicates the type of object that is the "root" of the query. For most
+ * queries, the type {@code U}, which is the expected type of the result, will be the same as
+ * {@code T}; however, for some queries, like those that count results, {@code U} will have a
+ * different type. <br/>
+ * <strong>Thread Safety:</strong> This class is <em>not</em> thread-safe. Instances maintain
+ * mutable state (predicates, joins, orders) and should be used within a single request context. Do
+ * not share instances across threads.
+ *
+ * @param <T> The root type for the query
+ * @param <U> The type for the result of the query
+ */
+public class OpenmrsFhirCriteriaContext<T, U> extends BaseFhirCriteriaHolder<T> {
+	
+	@Getter(onMethod = @__({ @Nonnull }))
+	private final EntityManager entityManager;
+	
+	@Getter(onMethod = @__({ @Nonnull }))
+	private final CriteriaQuery<U> criteriaQuery;
+	
+	@Getter(onMethod = @__({ @Nonnull }))
+	private final List<Order> orders = new ArrayList<>();
+	
+	public OpenmrsFhirCriteriaContext(@Nonnull EntityManager entityManager, @NonNull CriteriaBuilder criteriaBuilder,
+	    @Nonnull CriteriaQuery<U> criteriaQuery, @NonNull Root<T> root) {
+		super(criteriaBuilder, root);
+		this.criteriaQuery = criteriaQuery;
+		this.entityManager = entityManager;
+	}
+	
+	/**
+	 * This function creates a new subquery for this query. Since the return type for this function is
+	 * not specified, it is assumed to be an {@link Integer}, since most subqueries will be used to
+	 * correlate objects by id. <br/>
+	 * Note that by default this subquery is not in any way correlated with the main query.
+	 *
+	 * @param fromType The root type for the new subquery
+	 * @return A {@link OpenmrsFhirCriteriaSubquery} to hold the state of the subquery
+	 * @param <V> The root type of the new subquery
+	 */
+	public <V> OpenmrsFhirCriteriaSubquery<V, Integer> addSubquery(Class<V> fromType) {
+		return addSubquery(fromType, Integer.class);
+	}
+	
+	/**
+	 * This function creates a new subquery for this query, with the specified root type and return
+	 * type. <br/>
+	 * Note that by default the returned subquery is not in any way correlated with the main query.
+	 *
+	 * @param fromType The root type for the new subquery
+	 * @param resultType The type of object this subquery returns
+	 * @return A {@link OpenmrsFhirCriteriaSubquery} to hold the state of the subquery
+	 * @param <V> The root type of the new subquery
+	 * @param <X> The return type of the new subquery
+	 */
+	public <V, X> OpenmrsFhirCriteriaSubquery<V, X> addSubquery(Class<V> fromType, Class<X> resultType) {
+		Subquery<X> subquery = getCriteriaQuery().subquery(resultType);
+		return new OpenmrsFhirCriteriaSubquery<>(getCriteriaBuilder(), subquery, subquery.from(fromType));
+	}
+	
+	/**
+	 * This function adds a new predicate to the list of predicates being applied to the query under
+	 * construction.
+	 *
+	 * @param predicate The {@link Predicate} to add
+	 * @return The current context to facilitate chaining
+	 */
+	@Override
+	public OpenmrsFhirCriteriaContext<T, U> addPredicate(Predicate predicate) {
+		return (OpenmrsFhirCriteriaContext<T, U>) super.addPredicate(predicate);
+	}
+	
+	/**
+	 * Adds an {@link Order} to the list of sort orders for this query. Multiple orders can be added and
+	 * will be applied in the sequence they are added. These orders are applied when
+	 * {@link #finalizeQuery()}, {@link #finalizeIdQuery(String)}, or
+	 * {@link #finalizeWrapperQuery(String, Collection)} are called.
+	 *
+	 * @param order The {@link Order} to add to the query
+	 * @return The current context to facilitate chaining
+	 */
+	public OpenmrsFhirCriteriaContext<T, U> addOrder(Order order) {
+		orders.add(order);
+		return this;
+	}
+	
+	/**
+	 * Finalizes the query by applying all accumulated predicates and sort orders to the
+	 * {@link CriteriaQuery}. This should be called once the query has been fully constructed and is
+	 * ready to be executed. <br/>
+	 * This method does not set the SELECT clause - that should be done separately using
+	 * {@code getCriteriaQuery().select()}.
+	 *
+	 * @return The finalized {@link CriteriaQuery} with WHERE and ORDER BY clauses applied
+	 */
+	public CriteriaQuery<U> finalizeQuery() {
+		CriteriaQuery<U> cq = getCriteriaQuery();
+		if (!getPredicates().isEmpty()) {
+			cq = cq.where(getPredicates().toArray(new Predicate[0]));
+		}
+		
+		if (!orders.isEmpty()) {
+			cq = cq.orderBy(orders);
+		}
+		
+		return cq;
+	}
+	
+	/**
+	 * Finalizes a query that selects distinct IDs with sorting applied. When ORDER BY expressions are
+	 * present, they are included in the SELECT clause for database compatibility. The result will be an
+	 * Object[] where the first element is the ID.
+	 *
+	 * @param idProperty The name of the ID property to select
+	 * @return A finalized {@link CriteriaQuery} selecting distinct IDs with sorting applied
+	 */
+	public CriteriaQuery<U> finalizeIdQuery(String idProperty) {
+		CriteriaQuery<U> query = getCriteriaQuery().where(getPredicates().toArray(new Predicate[0])).distinct(true);
+		
+		if (!orders.isEmpty()) {
+			// Include ORDER BY expressions in SELECT to maximize compatibility
+			List<Selection<?>> selections = new ArrayList<>();
+			selections.add(getRoot().get(idProperty));
+			
+			for (Order order : orders) {
+				selections.add(order.getExpression());
+			}
+			
+			query = query.multiselect(selections).orderBy(orders);
+		} else {
+			query = query.select(getRoot().get(idProperty));
+		}
+		
+		return query;
+	}
+	
+	/**
+	 * Finalizes a query that fetches full objects using a list of IDs obtained from a previous query.
+	 * This is the second part of the two-query approach used for non-distinct results, where the first
+	 * query ({@link #finalizeIdQuery(String)}) retrieves matching IDs, and this query fetches the
+	 * complete objects. <br/>
+	 * The query is constructed with a {@code WHERE id IN (...)} clause and applies the accumulated sort
+	 * orders to maintain result ordering.
+	 *
+	 * @param idProperty The name of the ID property to filter on
+	 * @param ids The collection of IDs to fetch
+	 * @return A finalized {@link CriteriaQuery} selecting full objects matching the provided IDs
+	 * @see #finalizeIdQuery(String) for the first part of the two-query approach
+	 */
+	public CriteriaQuery<U> finalizeWrapperQuery(String idProperty, Collection<Integer> ids) {
+		return getCriteriaQuery().where(getRoot().get(idProperty).in(ids)).orderBy(orders);
+	}
+}

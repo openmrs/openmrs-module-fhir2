@@ -9,12 +9,14 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
-import static org.hibernate.criterion.Projections.property;
-import static org.hibernate.criterion.Restrictions.eq;
 import static org.hl7.fhir.r4.model.Encounter.SP_DATE;
 import static org.openmrs.module.fhir2.api.util.LastnOperationUtils.getTopNRankedIds;
 
 import javax.annotation.Nonnull;
+import javax.persistence.criteria.From;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Path;
+import javax.persistence.criteria.Predicate;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,15 +26,12 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
-import org.apache.commons.lang3.StringUtils;
-import org.hibernate.Criteria;
-import org.hibernate.criterion.Criterion;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
+import lombok.NonNull;
 import org.openmrs.Encounter;
 import org.openmrs.Order;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirEncounterDao;
+import org.openmrs.module.fhir2.api.dao.internals.OpenmrsFhirCriteriaContext;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.util.LastnResult;
 import org.springframework.stereotype.Component;
@@ -45,32 +44,30 @@ public class FhirEncounterDaoImpl extends BaseEncounterDao<Encounter> implements
 	@Transactional(readOnly = true)
 	public List<String> getSearchResultUuids(@Nonnull SearchParameterMap theParams) {
 		if (!theParams.getParameters(FhirConstants.LASTN_ENCOUNTERS_SEARCH_HANDLER).isEmpty()) {
-			Criteria criteria = getSessionFactory().getCurrentSession().createCriteria(Encounter.class);
+			OpenmrsFhirCriteriaContext<Encounter, Object[]> criteriaContext = createCriteriaContext(Encounter.class,
+			    Object[].class);
 			
-			setupSearchParams(criteria, theParams);
+			setupSearchParams(criteriaContext, theParams);
 			
-			criteria.setProjection(Projections.projectionList().add(property("uuid")).add(property("encounterDatetime")));
+			criteriaContext.getCriteriaQuery().multiselect(criteriaContext.getRoot().get("uuid"),
+			    criteriaContext.getRoot().get("encounterDatetime"));
 			
-			@SuppressWarnings("unchecked")
-			List<LastnResult<String>> results = ((List<Object[]>) criteria.list()).stream()
+			List<LastnResult<String>> results = criteriaContext.getEntityManager()
+			        .createQuery(criteriaContext.finalizeQuery()).getResultList().stream()
 			        .map(array -> new LastnResult<String>(array)).collect(Collectors.toList());
 			
 			return getTopNRankedIds(results, getMaxParameter(theParams));
 		}
 		
-		Criteria criteria = getSessionFactory().getCurrentSession().createCriteria(Encounter.class);
+		OpenmrsFhirCriteriaContext<Encounter, String> criteriaContext = createCriteriaContext(Encounter.class, String.class);
 		
-		handleVoidable(criteria);
+		handleVoidable(criteriaContext);
+		setupSearchParams(criteriaContext, theParams);
+		handleSort(criteriaContext, theParams.getSortSpec());
 		
-		setupSearchParams(criteria, theParams);
-		handleSort(criteria, theParams.getSortSpec());
-		
-		criteria.setProjection(Projections.property("uuid"));
-		
-		@SuppressWarnings("unchecked")
-		List<String> results = criteria.list();
-		
-		return results.stream().distinct().collect(Collectors.toList());
+		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot().get("uuid"));
+		return criteriaContext.getEntityManager().createQuery(criteriaContext.finalizeQuery()).getResultList().stream()
+		        .distinct().collect(Collectors.toList());
 	}
 	
 	@Override
@@ -84,61 +81,66 @@ public class FhirEncounterDaoImpl extends BaseEncounterDao<Encounter> implements
 	}
 	
 	@Override
-	protected void handleDate(Criteria criteria, DateRangeParam dateRangeParam) {
-		handleDateRange("encounterDatetime", dateRangeParam).ifPresent(criteria::add);
+	protected <U> Optional<Predicate> handleDate(OpenmrsFhirCriteriaContext<Encounter, U> criteriaContext,
+	        DateRangeParam dateRangeParam) {
+		return getSearchQueryHelper().handleDateRange(criteriaContext, "encounterDatetime", dateRangeParam);
 	}
 	
 	@Override
-	protected void handleEncounterType(Criteria criteria, TokenAndListParam tokenAndListParam) {
-		handleAndListParam(tokenAndListParam, t -> Optional.of(eq("et.uuid", t.getValue())))
-		        .ifPresent(t -> criteria.createAlias("encounterType", "et").add(t));
+	protected <U> Optional<Predicate> handleEncounterType(OpenmrsFhirCriteriaContext<Encounter, U> criteriaContext,
+	        TokenAndListParam tokenAndListParam) {
+		if (tokenAndListParam == null || tokenAndListParam.size() == 0) {
+			return Optional.empty();
+		}
+		
+		Join<?, ?> join = criteriaContext.addJoin("encounterType", "et");
+		return handleAndListParam(criteriaContext.getCriteriaBuilder(), tokenAndListParam,
+		    t -> Optional.of(criteriaContext.getCriteriaBuilder().equal(join.get("uuid"), t.getValue())));
 	}
 	
 	@Override
-	protected void handleParticipant(Criteria criteria, ReferenceAndListParam referenceAndListParam) {
-		criteria.createAlias("encounterProviders", "ep");
-		handleParticipantReference(criteria, referenceAndListParam);
+	protected <U> Optional<Predicate> handleParticipant(OpenmrsFhirCriteriaContext<Encounter, U> criteriaContext,
+	        ReferenceAndListParam referenceAndListParam) {
+		if (referenceAndListParam == null || referenceAndListParam.size() == 0) {
+			return Optional.empty();
+		}
+		
+		From<?, ?> epJoin = criteriaContext.addJoin("encounterProviders", "ep");
+		return getSearchQueryHelper().handleParticipantReference(criteriaContext, referenceAndListParam, epJoin);
 	}
 	
 	@Override
-	protected String paramToProp(@Nonnull String param) {
+	@SuppressWarnings("SwitchStatementWithTooFewBranches")
+	protected <T, U> Path<?> paramToProp(@Nonnull OpenmrsFhirCriteriaContext<T, U> criteriaContext, @NonNull String param) {
 		switch (param) {
 			case SP_DATE:
-				return "encounterDatetime";
+				return criteriaContext.getRoot().get("encounterDatetime");
 			default:
 				return null;
 		}
 	}
 	
 	@Override
-	protected Criterion generateNotCompletedOrderQuery(String path) {
-		if (StringUtils.isNotBlank(path)) {
-			path = path + ".";
-		}
-		
-		return Restrictions.or(Restrictions.isNull(path + "fulfillerStatus"),
-		    Restrictions.ne(path + "fulfillerStatus", org.openmrs.Order.FulfillerStatus.COMPLETED));
-		
+	protected <T, U> Predicate generateNotCompletedOrderQuery(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
+	        Join<?, ?> ordersJoin) {
+		return criteriaContext.getCriteriaBuilder()
+		        .or(criteriaContext.getCriteriaBuilder().isNull(ordersJoin.get("fulfillerStatus")), criteriaContext
+		                .getCriteriaBuilder().notEqual(ordersJoin.get("fulfillerStatus"), Order.FulfillerStatus.COMPLETED));
 	}
 	
 	@Override
-	protected Criterion generateFulfillerStatusRestriction(String path, String fulfillerStatus) {
-		
-		if (StringUtils.isNotBlank(path)) {
-			path = path + ".";
-		}
-		
-		return Restrictions.eq(path + "fulfillerStatus", Order.FulfillerStatus.valueOf(fulfillerStatus.toUpperCase()));
+	public <T, U> Predicate generateFulfillerStatusRestriction(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
+	        Join<?, ?> ordersJoin, String fulfillerStatus) {
+		return criteriaContext.getCriteriaBuilder().equal(ordersJoin.get("fulfillerStatus"),
+		    Order.FulfillerStatus.valueOf(fulfillerStatus.toUpperCase()));
 	}
 	
 	@Override
-	protected Criterion generateNotFulfillerStatusRestriction(String path, String fulfillerStatus) {
-		
-		if (StringUtils.isNotBlank(path)) {
-			path = path + ".";
-		}
-		
-		return Restrictions.or(Restrictions.isNull(path + "fulfillerStatus"),
-		    Restrictions.ne(path + "fulfillerStatus", Order.FulfillerStatus.valueOf(fulfillerStatus.toUpperCase())));
+	protected <T, U> Predicate generateNotFulfillerStatusRestriction(OpenmrsFhirCriteriaContext<T, U> criteriaContext,
+	        Join<?, ?> ordersJoin, String fulfillerStatus) {
+		return criteriaContext.getCriteriaBuilder().or(
+		    criteriaContext.getCriteriaBuilder().isNull(ordersJoin.get("fulfillerStatus")),
+		    criteriaContext.getCriteriaBuilder().notEqual(ordersJoin.get("fulfillerStatus"),
+		        Order.FulfillerStatus.valueOf(fulfillerStatus.toUpperCase())));
 	}
 }
