@@ -49,13 +49,17 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Practitioner;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Provider;
 import org.openmrs.User;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.FhirUserService;
@@ -143,6 +147,8 @@ public class FhirPractitionerServiceImplTest {
 	@Mock
 	private SearchQueryBundleProvider<User, Practitioner> userPractitionerSearchQueryBundleProvider;
 	
+	private MockedStatic<Context> contextMock;
+	
 	private FhirPractitionerServiceImpl practitionerService;
 	
 	private Provider provider;
@@ -178,6 +184,14 @@ public class FhirPractitionerServiceImplTest {
 		practitioner2.setId(UUID2);
 		practitioner2.setIdentifier(Collections.singletonList(new Identifier().setValue(USER_SYSTEM_ID)));
 		practitioner2.setActive(false);
+		
+		contextMock = Mockito.mockStatic(Context.class);
+		contextMock.when(() -> Context.hasPrivilege(any())).thenReturn(true);
+	}
+	
+	@After
+	public void tearDown() {
+		contextMock.close();
 	}
 	
 	private List<IBaseResource> get(IBundleProvider results) {

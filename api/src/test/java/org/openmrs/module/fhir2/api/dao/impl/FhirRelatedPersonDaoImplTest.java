@@ -10,15 +10,27 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.fail;
+import static org.openmrs.util.PrivilegeConstants.GET_PERSONS;
+import static org.openmrs.util.PrivilegeConstants.GET_RELATIONSHIPS;
+
+import java.util.Arrays;
+import java.util.List;
 
 import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.Relationship;
+import org.openmrs.api.APIAuthenticationException;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
+import org.openmrs.module.fhir2.api.dao.FhirRelatedPersonDao;
+import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
+import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -38,18 +50,25 @@ public class FhirRelatedPersonDaoImplTest extends BaseFhirContextSensitiveTest {
 	@Qualifier("sessionFactory")
 	private SessionFactory sessionFactory;
 	
-	private FhirRelatedPersonDaoImpl relatedPersonDao;
+	@Autowired
+	private ObjectFactory<FhirRelatedPersonDao> daoFactory;
+	
+	private FhirRelatedPersonDao dao;
+	
+	private FhirRelatedPersonDaoImpl daoImpl;
 	
 	@Before
 	public void setup() throws Exception {
-		relatedPersonDao = new FhirRelatedPersonDaoImpl();
-		relatedPersonDao.setSessionFactory(sessionFactory);
 		executeDataSet(RELATIONSHIP_DATA_XML);
+		
+		dao = daoFactory.getObject();
+		daoImpl = new FhirRelatedPersonDaoImpl();
+		daoImpl.setSessionFactory(sessionFactory);
 	}
 	
 	@Test
 	public void getRelationshipByUuid_shouldReturnMatchingRelationship() {
-		Relationship relationship = relatedPersonDao.get(RELATIONSHIP_UUID);
+		Relationship relationship = daoImpl.get(RELATIONSHIP_UUID);
 		assertThat(relationship, notNullValue());
 		assertThat(relationship.getUuid(), notNullValue());
 		assertThat(relationship.getUuid(), equalTo(RELATIONSHIP_UUID));
@@ -57,13 +76,13 @@ public class FhirRelatedPersonDaoImplTest extends BaseFhirContextSensitiveTest {
 	
 	@Test
 	public void getRelationshipWithWrongUuid_shouldReturnNull() {
-		Relationship relationship = relatedPersonDao.get(BAD_RELATIONSHIP_UUID);
+		Relationship relationship = daoImpl.get(BAD_RELATIONSHIP_UUID);
 		assertThat(relationship, nullValue());
 	}
 	
 	@Test
 	public void getRelationshipWithUuid_shouldReturnPersonAAndPersonB() {
-		Relationship relationship = relatedPersonDao.get(RELATIONSHIP_UUID);
+		Relationship relationship = daoImpl.get(RELATIONSHIP_UUID);
 		assertThat(relationship, notNullValue());
 		assertThat(relationship.getPersonA(), notNullValue());
 		assertThat(relationship.getPersonB(), notNullValue());
@@ -71,4 +90,98 @@ public class FhirRelatedPersonDaoImplTest extends BaseFhirContextSensitiveTest {
 		assertThat(relationship.getPersonB().getUuid(), equalTo(PERSON_B_UUID));
 	}
 	
+	@Test
+	public void shouldRequireGetPersonsAndGetRelationshipsPrivilegesForGet() {
+		Context.logout();
+		
+		try {
+			dao.get(RELATIONSHIP_UUID);
+			fail("Expected APIAuthenticationException for missing privileges, but it was not thrown");
+		}
+		catch (APIAuthenticationException e) {
+			assertThat(e.getMessage(), containsString("Privilege"));
+		}
+		
+		try {
+			Context.addProxyPrivilege(GET_PERSONS);
+			Context.addProxyPrivilege(GET_RELATIONSHIPS);
+			assertThat(dao.get(RELATIONSHIP_UUID), notNullValue());
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_PERSONS);
+			Context.removeProxyPrivilege(GET_RELATIONSHIPS);
+		}
+	}
+	
+	@Test
+	public void shouldRequireGetPersonsAndGetRelationshipsPrivilegesForGetByCollection() {
+		Context.logout();
+		
+		try {
+			dao.get(Arrays.asList(RELATIONSHIP_UUID));
+			fail("Expected APIAuthenticationException for missing privileges, but it was not thrown");
+		}
+		catch (APIAuthenticationException e) {
+			assertThat(e.getMessage(), containsString("Privilege"));
+		}
+		
+		try {
+			Context.addProxyPrivilege(GET_PERSONS);
+			Context.addProxyPrivilege(GET_RELATIONSHIPS);
+			List<Relationship> relationships = dao.get(Arrays.asList(RELATIONSHIP_UUID));
+			assertThat(relationships, notNullValue());
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_PERSONS);
+			Context.removeProxyPrivilege(GET_RELATIONSHIPS);
+		}
+	}
+	
+	@Test
+	public void shouldRequireGetPersonsAndGetRelationshipsPrivilegesForGetSearchResults() {
+		Context.logout();
+		
+		try {
+			dao.getSearchResults(new SearchParameterMap());
+			fail("Expected APIAuthenticationException for missing privileges, but it was not thrown");
+		}
+		catch (APIAuthenticationException e) {
+			assertThat(e.getMessage(), containsString("Privilege"));
+		}
+		
+		try {
+			Context.addProxyPrivilege(GET_PERSONS);
+			Context.addProxyPrivilege(GET_RELATIONSHIPS);
+			List<Relationship> relationships = dao.getSearchResults(new SearchParameterMap());
+			assertThat(relationships, notNullValue());
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_PERSONS);
+			Context.removeProxyPrivilege(GET_RELATIONSHIPS);
+		}
+	}
+	
+	@Test
+	public void shouldRequireGetPersonsAndGetRelationshipsPrivilegesForGetSearchResultsCount() {
+		Context.logout();
+		
+		try {
+			dao.getSearchResultsCount(new SearchParameterMap());
+			fail("Expected APIAuthenticationException for missing privileges, but it was not thrown");
+		}
+		catch (APIAuthenticationException e) {
+			assertThat(e.getMessage(), containsString("Privilege"));
+		}
+		
+		try {
+			Context.addProxyPrivilege(GET_PERSONS);
+			Context.addProxyPrivilege(GET_RELATIONSHIPS);
+			int count = dao.getSearchResultsCount(new SearchParameterMap());
+			assertThat(count, notNullValue());
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_PERSONS);
+			Context.removeProxyPrivilege(GET_RELATIONSHIPS);
+		}
+	}
 }

@@ -15,10 +15,13 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.fail;
 import static org.openmrs.test.OpenmrsMatchers.hasId;
+import static org.openmrs.util.PrivilegeConstants.GET_ORDERS;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -31,9 +34,13 @@ import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.DrugOrder;
+import org.openmrs.api.APIAuthenticationException;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.dao.FhirMedicationRequestDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
+import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -55,18 +62,25 @@ public class FhirMedicationRequestDaoImplTest extends BaseFhirContextSensitiveTe
 	@Qualifier("sessionFactory")
 	private SessionFactory sessionFactory;
 	
-	private FhirMedicationRequestDaoImpl medicationRequestDao;
+	@Autowired
+	private ObjectFactory<FhirMedicationRequestDao> daoFactory;
+	
+	private FhirMedicationRequestDao dao;
+	
+	private FhirMedicationRequestDaoImpl daoImpl;
 	
 	@Before
 	public void setup() throws Exception {
-		medicationRequestDao = new FhirMedicationRequestDaoImpl();
-		medicationRequestDao.setSessionFactory(sessionFactory);
 		executeDataSet(MEDICATION_REQUEST_INITIAL_DATA_XML);
+		
+		dao = daoFactory.getObject();
+		daoImpl = new FhirMedicationRequestDaoImpl();
+		daoImpl.setSessionFactory(sessionFactory);
 	}
 	
 	@Test
 	public void getMedicationRequestByUuid_shouldGetByUuid() {
-		DrugOrder drugOrder = medicationRequestDao.get(DRUG_ORDER_UUID);
+		DrugOrder drugOrder = daoImpl.get(DRUG_ORDER_UUID);
 		assertThat(drugOrder, notNullValue());
 		assertThat(drugOrder.getUuid(), notNullValue());
 		assertThat(drugOrder.getUuid(), equalTo(DRUG_ORDER_UUID));
@@ -74,25 +88,25 @@ public class FhirMedicationRequestDaoImplTest extends BaseFhirContextSensitiveTe
 	
 	@Test
 	public void getMedicationRequestByUuid_shouldReturnNullWhenCalledWithBadUuid() {
-		DrugOrder drugOrder = medicationRequestDao.get(BAD_DRUG_ORDER_UUID);
+		DrugOrder drugOrder = daoImpl.get(BAD_DRUG_ORDER_UUID);
 		assertThat(drugOrder, nullValue());
 	}
 	
 	@Test
 	public void getMedicationRequestByUuids_shouldReturnEmptyListWhenCalledWithBadUuid() {
-		List<DrugOrder> drugOrders = medicationRequestDao.get(Collections.singletonList(BAD_DRUG_ORDER_UUID));
+		List<DrugOrder> drugOrders = daoImpl.get(Collections.singletonList(BAD_DRUG_ORDER_UUID));
 		assertThat(drugOrders.size(), is(0));
 	}
 	
 	@Test
 	public void getMedicationRequestByUuid_shouldReturnNullWhenRequestingDiscontinueOrder() {
-		DrugOrder drugOrder = medicationRequestDao.get(DISCONTINUE_ORDER_UUID);
+		DrugOrder drugOrder = daoImpl.get(DISCONTINUE_ORDER_UUID);
 		assertThat(drugOrder, nullValue());
 	}
 	
 	@Test
 	public void getMedicationRequestsByUuid_shouldNotReturnDiscontinueOrders() {
-		List<DrugOrder> drugOrders = medicationRequestDao.get(Arrays.asList(DRUG_ORDER_UUID, DISCONTINUE_ORDER_UUID));
+		List<DrugOrder> drugOrders = daoImpl.get(Arrays.asList(DRUG_ORDER_UUID, DISCONTINUE_ORDER_UUID));
 		assertThat(drugOrders.size(), is(1));
 		assertThat(drugOrders.get(0).getUuid(), is(DRUG_ORDER_UUID));
 	}
@@ -101,7 +115,7 @@ public class FhirMedicationRequestDaoImplTest extends BaseFhirContextSensitiveTe
 	public void getMedicationRequestsBySearchResults_shouldNotReturnDiscontinuedOrders() {
 		SearchParameterMap theParams = new SearchParameterMap();
 		theParams.setToIndex(20);
-		List<DrugOrder> drugOrders = medicationRequestDao.getSearchResults(theParams);
+		List<DrugOrder> drugOrders = daoImpl.getSearchResults(theParams);
 		assertThat(drugOrders, not(hasItems(hasId(DISCONTINUE_ORDER_ID))));
 		assertThat(drugOrders, hasSize(11));
 	}
@@ -116,10 +130,96 @@ public class FhirMedicationRequestDaoImplTest extends BaseFhirContextSensitiveTe
 		SearchParameterMap theParams = new SearchParameterMap();
 		theParams.addParameter(FhirConstants.CODED_SEARCH_HANDLER, code);
 		
-		Collection<DrugOrder> drugOrders = medicationRequestDao.getSearchResults(theParams);
+		Collection<DrugOrder> drugOrders = daoImpl.getSearchResults(theParams);
 		
 		assertThat(drugOrders, notNullValue());
 		assertThat(drugOrders, hasSize(greaterThanOrEqualTo(1)));
 	}
 	
+	@Test
+	public void get_shouldRequireGetOrdersPrivilege() {
+		Context.logout();
+		
+		try {
+			dao.get(DRUG_ORDER_UUID);
+			fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
+		}
+		catch (APIAuthenticationException e) {
+			assertThat(e.getMessage(), containsString("Privilege"));
+		}
+		
+		try {
+			Context.addProxyPrivilege(GET_ORDERS);
+			assertThat(dao.get(DRUG_ORDER_UUID), notNullValue());
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_ORDERS);
+		}
+	}
+	
+	@Test
+	public void getByCollection_shouldRequireGetOrdersPrivilege() {
+		Context.logout();
+		
+		try {
+			dao.get(Arrays.asList(DRUG_ORDER_UUID));
+			fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
+		}
+		catch (APIAuthenticationException e) {
+			assertThat(e.getMessage(), containsString("Privilege"));
+		}
+		
+		try {
+			Context.addProxyPrivilege(GET_ORDERS);
+			List<DrugOrder> drugOrders = dao.get(Arrays.asList(DRUG_ORDER_UUID));
+			assertThat(drugOrders, notNullValue());
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_ORDERS);
+		}
+	}
+	
+	@Test
+	public void getSearchResults_shouldRequireGetOrdersPrivilege() {
+		Context.logout();
+		
+		try {
+			dao.getSearchResults(new SearchParameterMap());
+			fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
+		}
+		catch (APIAuthenticationException e) {
+			assertThat(e.getMessage(), containsString("Privilege"));
+		}
+		
+		try {
+			Context.addProxyPrivilege(GET_ORDERS);
+			List<DrugOrder> drugOrders = dao.getSearchResults(new SearchParameterMap());
+			assertThat(drugOrders, notNullValue());
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_ORDERS);
+		}
+	}
+	
+	@Test
+	public void getSearchResultsCount_shouldRequireGetOrdersPrivilege() {
+		Context.logout();
+		
+		try {
+			dao.getSearchResultsCount(new SearchParameterMap());
+			fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
+		}
+		catch (APIAuthenticationException e) {
+			assertThat(e.getMessage(), containsString("Privilege"));
+		}
+		
+		try {
+			Context.addProxyPrivilege(GET_ORDERS);
+			int count = dao.getSearchResultsCount(new SearchParameterMap());
+			assertThat(count, notNullValue());
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_ORDERS);
+		}
+	}
 }

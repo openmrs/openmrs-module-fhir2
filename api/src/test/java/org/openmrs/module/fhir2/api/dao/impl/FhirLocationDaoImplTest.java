@@ -11,10 +11,14 @@ package org.openmrs.module.fhir2.api.dao.impl;
 
 import static java.util.Collections.singleton;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.fail;
+import static org.openmrs.util.PrivilegeConstants.GET_LOCATIONS;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -24,10 +28,13 @@ import org.openmrs.Location;
 import org.openmrs.LocationAttribute;
 import org.openmrs.LocationAttributeType;
 import org.openmrs.LocationTag;
+import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.LocationService;
+import org.openmrs.api.context.Context;
 import org.openmrs.customdatatype.datatype.FreeTextDatatype;
 import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
+import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class FhirLocationDaoImplTest extends BaseFhirContextSensitiveTest {
@@ -56,7 +63,7 @@ public class FhirLocationDaoImplTest extends BaseFhirContextSensitiveTest {
 	}
 	
 	@Test
-	public void getLocationByUuid_shouldReturnMatchingLocation() {
+	public void get_shouldReturnMatchingLocation() {
 		Location location = fhirLocationDao.get(LOCATION_UUID);
 		
 		assertThat(location, notNullValue());
@@ -64,10 +71,53 @@ public class FhirLocationDaoImplTest extends BaseFhirContextSensitiveTest {
 	}
 	
 	@Test
-	public void getLocationByUuid_shouldReturnNullWithUnknownUuid() {
+	public void get_shouldReturnNullWithUnknownUuid() {
 		Location location = fhirLocationDao.get(UNKNOWN_LOCATION_UUID);
 		
 		assertThat(location, nullValue());
+	}
+	
+	@Test
+	public void get_shouldRequireGetLocationsPrivilege() {
+		Context.logout();
+		
+		try {
+			fhirLocationDao.get(LOCATION_UUID);
+			fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
+		}
+		catch (APIAuthenticationException e) {
+			assertThat(e.getMessage(), containsString("Privilege"));
+		}
+		
+		try {
+			Context.addProxyPrivilege(GET_LOCATIONS);
+			assertThat(fhirLocationDao.get(LOCATION_UUID), notNullValue());
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_LOCATIONS);
+		}
+	}
+	
+	@Test
+	public void get_shouldRequireGetLocationsPrivilegeWithCollection() {
+		Context.logout();
+		
+		try {
+			fhirLocationDao.get(Arrays.asList(LOCATION_UUID));
+			fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
+		}
+		catch (APIAuthenticationException e) {
+			assertThat(e.getMessage(), containsString("Privilege"));
+		}
+		
+		try {
+			Context.addProxyPrivilege(GET_LOCATIONS);
+			List<Location> locations = fhirLocationDao.get(Arrays.asList(LOCATION_UUID));
+			assertThat(locations, notNullValue());
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_LOCATIONS);
+		}
 	}
 	
 	@Test
@@ -107,18 +157,6 @@ public class FhirLocationDaoImplTest extends BaseFhirContextSensitiveTest {
 	}
 	
 	@Test
-	public void createLocationTag_shouldCreateTag() {
-		LocationTag locationTag = new LocationTag();
-		locationTag.setUuid(LOCATION_TAG_UUID);
-		locationTag.setName(LOCATION_TAG_NAME);
-		locationService.saveLocationTag(locationTag);
-		
-		LocationTag result = fhirLocationDao.createLocationTag(locationTag);
-		
-		assertThat(result, notNullValue());
-	}
-	
-	@Test
 	public void getLocationTagByName_shouldGetTag() {
 		LocationTag locationTag = new LocationTag();
 		locationTag.setUuid(LOCATION_TAG_UUID);
@@ -129,5 +167,61 @@ public class FhirLocationDaoImplTest extends BaseFhirContextSensitiveTest {
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getName(), equalTo(LOCATION_TAG_NAME));
+	}
+	
+	@Test
+	public void getSearchResults_shouldRequireGetLocationsPrivilege() {
+		Context.logout();
+		
+		try {
+			fhirLocationDao.getSearchResults(new SearchParameterMap());
+			fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
+		}
+		catch (APIAuthenticationException e) {
+			assertThat(e.getMessage(), containsString("Privilege"));
+		}
+		
+		try {
+			Context.addProxyPrivilege(GET_LOCATIONS);
+			List<Location> locations = fhirLocationDao.getSearchResults(new SearchParameterMap());
+			assertThat(locations, notNullValue());
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_LOCATIONS);
+		}
+	}
+	
+	@Test
+	public void getSearchResultsCount_shouldRequireGetLocationsPrivilege() {
+		Context.logout();
+		
+		try {
+			fhirLocationDao.getSearchResultsCount(new SearchParameterMap());
+			fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
+		}
+		catch (APIAuthenticationException e) {
+			assertThat(e.getMessage(), containsString("Privilege"));
+		}
+		
+		try {
+			Context.addProxyPrivilege(GET_LOCATIONS);
+			int count = fhirLocationDao.getSearchResultsCount(new SearchParameterMap());
+			assertThat(count, notNullValue());
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_LOCATIONS);
+		}
+	}
+	
+	@Test
+	public void createLocationTag_shouldCreateTag() {
+		LocationTag locationTag = new LocationTag();
+		locationTag.setUuid(LOCATION_TAG_UUID);
+		locationTag.setName(LOCATION_TAG_NAME);
+		locationService.saveLocationTag(locationTag);
+		
+		LocationTag result = fhirLocationDao.createLocationTag(locationTag);
+		
+		assertThat(result, notNullValue());
 	}
 }

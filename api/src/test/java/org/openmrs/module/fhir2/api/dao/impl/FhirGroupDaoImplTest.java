@@ -10,16 +10,27 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.fail;
+import static org.openmrs.util.PrivilegeConstants.GET_PATIENT_COHORTS;
+
+import java.util.Arrays;
+import java.util.List;
 
 import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.Cohort;
+import org.openmrs.api.APIAuthenticationException;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
+import org.openmrs.module.fhir2.api.dao.FhirGroupDao;
+import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
+import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -35,21 +46,28 @@ public class FhirGroupDaoImplTest extends BaseFhirContextSensitiveTest {
 	
 	private static final String COHORT_NAME = "Covid19 patients";
 	
-	private FhirGroupDaoImpl dao;
-	
 	@Autowired
 	@Qualifier("sessionFactory")
 	private SessionFactory sessionFactory;
 	
+	@Autowired
+	private ObjectFactory<FhirGroupDao> daoFactory;
+	
+	private FhirGroupDao dao;
+	
+	private FhirGroupDaoImpl daoImpl;
+	
 	@Before
 	public void setup() throws Exception {
-		dao = new FhirGroupDaoImpl();
-		dao.setSessionFactory(sessionFactory);
 		executeDataSet(COHORT_INITIAL_DATA_XML);
+		
+		dao = daoFactory.getObject();
+		daoImpl = new FhirGroupDaoImpl();
+		daoImpl.setSessionFactory(sessionFactory);
 	}
 	
 	@Test
-	public void getByUuid_shouldReturnMatchingCohort() {
+	public void get_shouldReturnMatchingCohort() {
 		Cohort cohort = dao.get(COHORT_UUID);
 		assertThat(cohort, notNullValue());
 		assertThat(cohort.getUuid(), equalTo(COHORT_UUID));
@@ -57,9 +75,96 @@ public class FhirGroupDaoImplTest extends BaseFhirContextSensitiveTest {
 	}
 	
 	@Test
-	public void getByWithWrongUuid_shouldReturnNullCohort() {
+	public void get_shouldReturnNullCohortWithWrongUuid() {
 		Cohort cohort = dao.get(BAD_COHORT_UUID);
 		assertThat(cohort, nullValue());
+	}
+	
+	@Test
+	public void get_shouldRequireGetPatientCohortsPrivilege() {
+		Context.logout();
+		
+		try {
+			dao.get(COHORT_UUID);
+			fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
+		}
+		catch (APIAuthenticationException e) {
+			assertThat(e.getMessage(), containsString("Privilege"));
+		}
+		
+		try {
+			Context.addProxyPrivilege(GET_PATIENT_COHORTS);
+			assertThat(dao.get(COHORT_UUID), notNullValue());
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_PATIENT_COHORTS);
+		}
+	}
+	
+	@Test
+	public void get_shouldRequireGetPatientCohortsPrivilegeWithCollection() {
+		Context.logout();
+		
+		try {
+			dao.get(Arrays.asList(COHORT_UUID));
+			fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
+		}
+		catch (APIAuthenticationException e) {
+			assertThat(e.getMessage(), containsString("Privilege"));
+		}
+		
+		try {
+			Context.addProxyPrivilege(GET_PATIENT_COHORTS);
+			List<Cohort> cohorts = dao.get(Arrays.asList(COHORT_UUID));
+			assertThat(cohorts, notNullValue());
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_PATIENT_COHORTS);
+		}
+	}
+	
+	@Test
+	public void getSearchResults_shouldRequireGetPatientCohortsPrivilege() {
+		Context.logout();
+		
+		try {
+			dao.getSearchResults(new SearchParameterMap());
+			fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
+		}
+		catch (APIAuthenticationException e) {
+			assertThat(e.getMessage(), containsString("Privilege"));
+		}
+		
+		try {
+			Context.addProxyPrivilege(GET_PATIENT_COHORTS);
+			List<Cohort> cohorts = dao.getSearchResults(new SearchParameterMap());
+			assertThat(cohorts, notNullValue());
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_PATIENT_COHORTS);
+		}
+	}
+	
+	@Test
+	public void getSearchResultsCount_shouldRequireGetPatientCohortsPrivilege() {
+		Context.logout();
+		
+		try {
+			dao.getSearchResultsCount(new SearchParameterMap());
+			fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
+		}
+		catch (APIAuthenticationException e) {
+			assertThat(e.getMessage(), containsString("Privilege"));
+		}
+		
+		try {
+			Context.addProxyPrivilege(GET_PATIENT_COHORTS);
+			int count = dao.getSearchResultsCount(new SearchParameterMap());
+			assertThat(count, notNullValue());
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_PATIENT_COHORTS);
+		}
 	}
 	
 	@Test
@@ -96,7 +201,7 @@ public class FhirGroupDaoImplTest extends BaseFhirContextSensitiveTest {
 	
 	@Test
 	public void shouldReturnNullIfGroupToDeleteDoesNotExist() {
-		Cohort result = dao.delete(BAD_COHORT_UUID);
+		Cohort result = daoImpl.delete(BAD_COHORT_UUID);
 		
 		assertThat(result, nullValue());
 	}

@@ -13,24 +13,32 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.fail;
+import static org.openmrs.util.PrivilegeConstants.GET_CONDITIONS;
 
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
-import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.CodedOrFreeText;
 import org.openmrs.Condition;
 import org.openmrs.ConditionClinicalStatus;
 import org.openmrs.ConditionVerificationStatus;
+import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.PatientService;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
+import org.openmrs.module.fhir2.api.dao.FhirConditionDao;
+import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
+import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 
-public class FhirConditionDaoImpl_Test extends BaseFhirContextSensitiveTest {
+public class FhirConditionDaoImplTest extends BaseFhirContextSensitiveTest {
 	
 	private static final String CONDITION_UUID = "2cc6880e-2c46-15e4-9038-a6c5e4d22fb7";
 	
@@ -50,8 +58,7 @@ public class FhirConditionDaoImpl_Test extends BaseFhirContextSensitiveTest {
 	private static final String CONDITION_CONCEPT_UUID = "c607c80f-1ea9-4da3-bb88-6276ce8868dd";
 	
 	@Autowired
-	@Qualifier("sessionFactory")
-	private SessionFactory sessionFactory;
+	private ObjectFactory<FhirConditionDao> daoFactory;
 	
 	@Autowired
 	private PatientService patientService;
@@ -59,13 +66,11 @@ public class FhirConditionDaoImpl_Test extends BaseFhirContextSensitiveTest {
 	@Autowired
 	private ConceptService conceptService;
 	
-	private FhirConditionDaoImpl dao;
+	private FhirConditionDao dao;
 	
 	@Before
-	public void setUp() {
-		dao = new FhirConditionDaoImpl();
-		dao.setSessionFactory(sessionFactory);
-		
+	public void setUp() throws Exception {
+		dao = daoFactory.getObject();
 		executeDataSet(CONDITION_INITIAL_DATA_XML);
 	}
 	
@@ -82,6 +87,94 @@ public class FhirConditionDaoImpl_Test extends BaseFhirContextSensitiveTest {
 		Condition condition = dao.get(WRONG_CONDITION_UUID);
 		assertThat(condition, nullValue());
 	}
+	
+	@Test
+	public void shouldRequireGetConditionsPrivilegeForGet() {
+		Context.logout();
+		
+		try {
+			dao.get(CONDITION_UUID);
+			fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
+		}
+		catch (APIAuthenticationException e) {
+			assertThat(e.getMessage(), containsString("Privilege"));
+		}
+		
+		try {
+			Context.addProxyPrivilege(GET_CONDITIONS);
+			assertThat(dao.get(CONDITION_UUID), notNullValue());
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_CONDITIONS);
+		}
+	}
+	
+	@Test
+	public void shouldRequireGetConditionsPrivilegeForGetWithCollection() {
+		Context.logout();
+		
+		try {
+			dao.get(Arrays.asList(CONDITION_UUID, EXISTING_CONDITION_UUID));
+			fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
+		}
+		catch (APIAuthenticationException e) {
+			assertThat(e.getMessage(), containsString("Privilege"));
+		}
+		
+		try {
+			Context.addProxyPrivilege(GET_CONDITIONS);
+			List<Condition> conditions = dao.get(Arrays.asList(CONDITION_UUID, EXISTING_CONDITION_UUID));
+			assertThat(conditions, notNullValue());
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_CONDITIONS);
+		}
+	}
+
+
+    @Test
+    public void shouldRequireGetConditionsPrivilegeForGetSearchResults() {
+        Context.logout();
+
+        try {
+            dao.getSearchResults(new SearchParameterMap());
+            fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
+        }
+        catch (APIAuthenticationException e) {
+            assertThat(e.getMessage(), containsString("Privilege"));
+        }
+
+        try {
+            Context.addProxyPrivilege(GET_CONDITIONS);
+            List<Condition> conditions = dao.getSearchResults(new SearchParameterMap());
+            assertThat(conditions, notNullValue());
+        }
+        finally {
+            Context.removeProxyPrivilege(GET_CONDITIONS);
+        }
+    }
+
+    @Test
+    public void shouldRequireGetConditionsPrivilegeForGetSearchResultsCount() {
+        Context.logout();
+
+        try {
+            dao.getSearchResultsCount(new SearchParameterMap());
+            fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
+        }
+        catch (APIAuthenticationException e) {
+            assertThat(e.getMessage(), containsString("Privilege"));
+        }
+
+        try {
+            Context.addProxyPrivilege(GET_CONDITIONS);
+            int count = dao.getSearchResultsCount(new SearchParameterMap());
+            assertThat(count, notNullValue());
+        }
+        finally {
+            Context.removeProxyPrivilege(GET_CONDITIONS);
+        }
+    }
 	
 	@Test
 	public void shouldSaveNewCondition() {
@@ -140,4 +233,5 @@ public class FhirConditionDaoImpl_Test extends BaseFhirContextSensitiveTest {
 		assertThat(result.getPatient(), equalTo(patientService.getPatient(PATIENT_ID)));
 		assertThat(result.getEndDate(), nullValue());
 	}
+	
 }

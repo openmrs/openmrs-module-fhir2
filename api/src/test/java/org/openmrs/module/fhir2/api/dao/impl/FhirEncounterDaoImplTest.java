@@ -15,8 +15,12 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.fail;
 import static org.openmrs.test.OpenmrsMatchers.hasId;
+import static org.openmrs.util.PrivilegeConstants.GET_ENCOUNTERS;
 
+import java.util.Arrays;
 import java.util.List;
 
 import ca.uhn.fhir.rest.param.HasAndListParam;
@@ -28,10 +32,13 @@ import org.junit.Test;
 import org.openmrs.DrugOrder;
 import org.openmrs.Encounter;
 import org.openmrs.Order;
+import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.dao.FhirEncounterDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
+import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -63,12 +70,14 @@ public class FhirEncounterDaoImplTest extends BaseFhirContextSensitiveTest {
 	@Qualifier("sessionFactory")
 	private SessionFactory sessionFactory;
 	
-	private FhirEncounterDaoImpl dao;
+	@Autowired
+	private ObjectFactory<FhirEncounterDao> daoFactory;
+	
+	private FhirEncounterDao dao;
 	
 	@Before
 	public void setUp() throws Exception {
-		dao = new FhirEncounterDaoImpl();
-		dao.setSessionFactory(sessionFactory);
+		dao = daoFactory.getObject();
 		
 		executeDataSet(ENCOUNTER_INITIAL_DATA_XML);
 	}
@@ -89,8 +98,50 @@ public class FhirEncounterDaoImplTest extends BaseFhirContextSensitiveTest {
 	}
 	
 	@Test
-	public void shouldOnlyReturnEncountersThatHaveAssociatedActiveMedicationRequests() {
+	public void shouldRequireGetEncountersPrivilegeForGet() {
+		Context.logout();
 		
+		try {
+			dao.get(ENCOUNTER_UUID);
+			fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
+		}
+		catch (APIAuthenticationException e) {
+			assertThat(e.getMessage(), containsString("Privilege"));
+		}
+		
+		try {
+			Context.addProxyPrivilege(GET_ENCOUNTERS);
+			assertThat(dao.get(ENCOUNTER_UUID), notNullValue());
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_ENCOUNTERS);
+		}
+	}
+	
+	@Test
+	public void shouldRequireGetEncountersPrivilegeForGetByCollection() {
+		Context.logout();
+		
+		try {
+			dao.get(Arrays.asList(ENCOUNTER_UUID));
+			fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
+		}
+		catch (APIAuthenticationException e) {
+			assertThat(e.getMessage(), containsString("Privilege"));
+		}
+		
+		try {
+			Context.addProxyPrivilege(GET_ENCOUNTERS);
+			List<Encounter> encounters = dao.get(Arrays.asList(ENCOUNTER_UUID));
+			assertThat(encounters, notNullValue());
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_ENCOUNTERS);
+		}
+	}
+	
+	@Test
+	public void shouldOnlyReturnEncountersThatHaveAssociatedActiveMedicationRequests() {
 		HasOrListParam hasOrListParam = new HasOrListParam();
 		hasOrListParam.add(new HasParam("MedicationRequest", "encounter", "status", "active")); // has parameter with status=active
 		HasAndListParam hasAndListParam = new HasAndListParam();
@@ -111,7 +162,6 @@ public class FhirEncounterDaoImplTest extends BaseFhirContextSensitiveTest {
 	
 	@Test
 	public void shouldOnlyReturnEncountersThatHaveAssociatedMedicationRequestsThatDoNotHaveCancelledStatus() {
-		
 		HasOrListParam hasOrListParam = new HasOrListParam();
 		hasOrListParam.add(new HasParam("MedicationRequest", "encounter", "status:not", "cancelled")); // has parameter with status!=cancelled
 		HasAndListParam hasAndListParam = new HasAndListParam();
@@ -132,9 +182,7 @@ public class FhirEncounterDaoImplTest extends BaseFhirContextSensitiveTest {
 	
 	@Test
 	public void shouldIgnoreCompletedStatus() {
-		
 		// the completed status is not available until OpenMRS Core 2.2, and is tested in FhirEncounterDaoImpl_2_2Test... this test just makes sure we simply ignore this param prior to 2.2
-		
 		HasOrListParam hasOrListParam = new HasOrListParam();
 		hasOrListParam.add(new HasParam("MedicationRequest", "encounter", "status:not", "completed")); // has parameter with status!=completed
 		HasAndListParam hasAndListParam = new HasAndListParam();
@@ -165,6 +213,50 @@ public class FhirEncounterDaoImplTest extends BaseFhirContextSensitiveTest {
 		List<Encounter> matchingResources = dao.getSearchResults(theParams);
 		assertThat("Encounter with only Discontinue Order is not returned", matchingResources,
 		    not(hasItem(hasId(ENCOUNTER_WITH_ONLY_DISCONTINUE_DRUG_ORDER))));
+	}
+	
+	@Test
+	public void shouldRequireGetEncountersPrivilegeForGetSearchResults() {
+		Context.logout();
+		
+		try {
+			dao.getSearchResults(new SearchParameterMap());
+			fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
+		}
+		catch (APIAuthenticationException e) {
+			assertThat(e.getMessage(), containsString("Privilege"));
+		}
+		
+		try {
+			Context.addProxyPrivilege(GET_ENCOUNTERS);
+			List<Encounter> encounters = dao.getSearchResults(new SearchParameterMap());
+			assertThat(encounters, notNullValue());
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_ENCOUNTERS);
+		}
+	}
+	
+	@Test
+	public void shouldRequireGetEncountersPrivilegeForGetSearchResultsCount() {
+		Context.logout();
+		
+		try {
+			dao.getSearchResultsCount(new SearchParameterMap());
+			fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
+		}
+		catch (APIAuthenticationException e) {
+			assertThat(e.getMessage(), containsString("Privilege"));
+		}
+		
+		try {
+			Context.addProxyPrivilege(GET_ENCOUNTERS);
+			int count = dao.getSearchResultsCount(new SearchParameterMap());
+			assertThat(count, notNullValue());
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_ENCOUNTERS);
+		}
 	}
 	
 	@Test

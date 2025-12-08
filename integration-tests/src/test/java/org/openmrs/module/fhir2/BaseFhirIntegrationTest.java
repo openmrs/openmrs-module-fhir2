@@ -134,6 +134,10 @@ public abstract class BaseFhirIntegrationTest<T extends IResourceProvider, U ext
 		return statusEquals(HttpStatus.BAD_REQUEST);
 	}
 	
+	public Matcher<MockHttpServletResponse> isForbidden() {
+		return statusEquals(HttpStatus.FORBIDDEN);
+	}
+	
 	public Matcher<MockHttpServletResponse> isMethodNotAllowed() {
 		return statusEquals(HttpStatus.METHOD_NOT_ALLOWED);
 	}
@@ -259,7 +263,12 @@ public abstract class BaseFhirIntegrationTest<T extends IResourceProvider, U ext
 	}
 	
 	public IBaseOperationOutcome readOperationOutcome(MockHttpServletResponse response) throws UnsupportedEncodingException {
-		MediaType mediaType = MediaType.parseMediaType(response.getContentType());
+		String contentType = response.getContentType();
+		if (contentType == null) {
+			return null;
+		}
+		
+		MediaType mediaType = MediaType.parseMediaType(contentType);
 		if (mediaType.isCompatibleWith(FhirMediaTypes.XML) || mediaType.isCompatibleWith(MediaType.APPLICATION_XML)
 		        || mediaType.isCompatibleWith(MediaType.TEXT_XML)) {
 			return xmlParser.parseResource(getOperationOutcomeClass(), response.getContentAsString());
@@ -306,13 +315,15 @@ public abstract class BaseFhirIntegrationTest<T extends IResourceProvider, U ext
 		@SneakyThrows
 		@Override
 		protected void describeMismatchSafely(MockHttpServletResponse item, Description mismatchDescription) {
-			IBaseOperationOutcome operationOutcome = readOperationOutcome(item);
-			
 			mismatchDescription.appendText("response with status code ").appendValue(item.getStatus());
 			
-			if (operationOutcome != null) {
-				describeOperationOutcome(mismatchDescription, operationOutcome);
+			try {
+				IBaseOperationOutcome operationOutcome = readOperationOutcome(item);
+				if (operationOutcome != null) {
+					describeOperationOutcome(mismatchDescription, operationOutcome);
+				}
 			}
+			catch (DataFormatException ignored) {}
 		}
 	}
 	

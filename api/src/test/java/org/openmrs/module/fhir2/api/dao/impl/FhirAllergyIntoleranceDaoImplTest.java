@@ -13,6 +13,12 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.fail;
+import static org.openmrs.util.PrivilegeConstants.GET_ALLERGIES;
+
+import java.util.Arrays;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -21,9 +27,12 @@ import org.openmrs.AllergenType;
 import org.openmrs.Allergy;
 import org.openmrs.AllergyReaction;
 import org.openmrs.Concept;
+import org.openmrs.api.APIAuthenticationException;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.openmrs.module.fhir2.api.dao.FhirAllergyIntoleranceDao;
 import org.openmrs.module.fhir2.api.dao.FhirConceptDao;
+import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class FhirAllergyIntoleranceDaoImplTest extends BaseFhirContextSensitiveTest {
@@ -59,6 +68,93 @@ public class FhirAllergyIntoleranceDaoImplTest extends BaseFhirContextSensitiveT
 	public void getAllergyIntoleranceByUuid_shouldReturnNullWhenCalledWithUnknownUuid() {
 		Allergy allergy = allergyDao.get(NEW_ALLERGY_UUID);
 		assertThat(allergy, nullValue());
+	}
+	
+	@Test
+	public void getAllergyIntoleranceByUuid_shouldRequireGetAllergiesPrivilege() {
+		Context.logout();
+		
+		try {
+			allergyDao.get(ALLERGY_UUID);
+			fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
+		}
+		catch (APIAuthenticationException e) {
+			assertThat(e.getMessage(), containsString("Privilege"));
+		}
+		
+		try {
+			Context.addProxyPrivilege(GET_ALLERGIES);
+			assertThat(allergyDao.get(ALLERGY_UUID), notNullValue());
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_ALLERGIES);
+		}
+	}
+	
+	@Test
+	public void getAllergyIntoleranceByUuid_shouldRequireGetAllergiesPrivilegeWithCollection() {
+		Context.logout();
+		
+		try {
+			allergyDao.get(Arrays.asList(ALLERGY_UUID));
+			fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
+		}
+		catch (APIAuthenticationException e) {
+			assertThat(e.getMessage(), containsString("Privilege"));
+		}
+		
+		try {
+			Context.addProxyPrivilege(GET_ALLERGIES);
+			List<Allergy> allergies = allergyDao.get(Arrays.asList(ALLERGY_UUID));
+			assertThat(allergies, notNullValue());
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_ALLERGIES);
+		}
+	}
+	
+	@Test
+	public void getSearchResults_shouldRequireGetAllergiesPrivilege() {
+		Context.logout();
+		
+		try {
+			allergyDao.getSearchResults(new SearchParameterMap());
+			fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
+		}
+		catch (APIAuthenticationException e) {
+			assertThat(e.getMessage(), containsString("Privilege"));
+		}
+		
+		try {
+			Context.addProxyPrivilege(GET_ALLERGIES);
+			List<Allergy> allergies = allergyDao.getSearchResults(new SearchParameterMap());
+			assertThat(allergies, notNullValue());
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_ALLERGIES);
+		}
+	}
+	
+	@Test
+	public void getSearchResultsCount_shouldRequireGetAllergiesPrivilege() {
+		Context.logout();
+		
+		try {
+			allergyDao.getSearchResultsCount(new SearchParameterMap());
+			fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
+		}
+		catch (APIAuthenticationException e) {
+			assertThat(e.getMessage(), containsString("Privilege"));
+		}
+		
+		try {
+			Context.addProxyPrivilege(GET_ALLERGIES);
+			int count = allergyDao.getSearchResultsCount(new SearchParameterMap());
+			assertThat(count, notNullValue());
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_ALLERGIES);
+		}
 	}
 	
 	@Test
