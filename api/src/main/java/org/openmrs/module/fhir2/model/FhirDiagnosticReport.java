@@ -80,7 +80,7 @@ public class FhirDiagnosticReport extends BaseOpenmrsData {
 	private Set<Obs> results = new HashSet<>();
 
 	/**
-	 * @Since 2.8.0
+	 * @Since 2.8.1
 	 * @param order reference to the order.
 	 * @return the order the report is based on
 	 */
@@ -89,7 +89,7 @@ public class FhirDiagnosticReport extends BaseOpenmrsData {
 	private Order order;
 
 	/**
-	 * @Since 2.8.0
+	 * @Since 2.8.1
 	 * @param conclusion of results
 	 * @return conclusion of results
 	 */
