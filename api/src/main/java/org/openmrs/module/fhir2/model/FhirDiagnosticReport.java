@@ -78,11 +78,21 @@ public class FhirDiagnosticReport extends BaseOpenmrsData {
 	@OneToMany
 	@JoinTable(name = "fhir_diagnostic_report_results", joinColumns = @JoinColumn(name = "diagnostic_report_id"), inverseJoinColumns = @JoinColumn(name = "obs_id"))
 	private Set<Obs> results = new HashSet<>();
-	
+
+	/**
+	 * @Since 2.8.0
+	 * @param order reference to the order.
+	 * @return the order the report is based on
+	 */
 	@OneToOne
 	@JoinColumn(name = "order_id", referencedColumnName = "order_id")
 	private Order order;
-	
+
+	/**
+	 * @Since 2.8.0
+	 * @param conclusion of results
+	 * @return conclusion of results
+	 */
 	@Column(name = "conclusion", length = 1020)
 	private String conclusion;
 	

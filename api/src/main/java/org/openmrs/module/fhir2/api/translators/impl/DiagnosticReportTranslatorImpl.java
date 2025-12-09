@@ -102,7 +102,6 @@ public class DiagnosticReportTranslatorImpl implements DiagnosticReportTranslato
 		for (Obs obs : fhirDiagnosticReport.getResults()) {
 			diagnosticReport.addResult(observationReferenceTranslator.toFhirResource(obs));
 		}
-		
 		diagnosticReport.setConclusion(fhirDiagnosticReport.getConclusion());
 		Optional.ofNullable(fhirDiagnosticReport.getOrder()).ifPresent((value -> {
 			diagnosticReport.addBasedOn(orderReferenceTranslator.toFhirResource(value));
