@@ -1144,7 +1144,7 @@
             </not>
         </preConditions>
         <addColumn tableName="fhir_diagnostic_report">
-            <column name="conclusion" type="VARCHAR(1020)"/>
+            <column name="conclusion" type="VARCHAR(1024)"/>
         </addColumn>
     </changeSet>
 

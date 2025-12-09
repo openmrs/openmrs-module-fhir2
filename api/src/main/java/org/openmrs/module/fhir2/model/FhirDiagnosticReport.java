@@ -93,7 +93,7 @@ public class FhirDiagnosticReport extends BaseOpenmrsData {
 	 * @param conclusion of results
 	 * @return conclusion of results
 	 */
-	@Column(name = "conclusion", length = 1020)
+	@Column(name = "conclusion", length = 1024)
 	private String conclusion;
 	
 	public enum DiagnosticReportStatus {
