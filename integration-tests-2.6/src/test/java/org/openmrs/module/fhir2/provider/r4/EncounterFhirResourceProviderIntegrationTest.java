@@ -1147,6 +1147,87 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 	}
 	
 	@Test
+	public void shouldReturnEncountersWithMedicationRequestShouldRestrictByEncounterType() throws Exception {
+		
+		executeDataSet(MEDICATION_REQUEST_QUERY_INITIAL_DATA_XML); // additional test data from the fhe FHIR Encounter DAO test we use to test the encountersWithMedicationRequests query
+		
+		MockHttpServletResponse response = get(
+		    "/Encounter/?_query=encountersWithMedicationRequests&type=02c533ab-b74b-4ee4-b6e5-ffb6d09a0ac8") // encounter type 6
+		            .accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle result = readBundleResponse(response);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(result, hasProperty("total", equalTo(1))); // only 1 encounter in the the our FHIR Encounter DAO test data with encounter type = 7
+		assertThat(result.getEntry(), hasSize(2)); // 1 encounter + 1 request
+		
+		List<Bundle.BundleEntryComponent> entries = result.getEntry();
+		
+		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R4/"))));
+		assertThat(entries,
+		    everyItem(hasResource(hasProperty("resourceType", in(getEncounterWithMedicationRequestsValidResourceTypes())))));
+		;
+	}
+	
+	@Test
+	public void shouldReturnEncountersWithMedicationRequestShouldSupportMultipleEncounterTypes() throws Exception {
+		
+		executeDataSet(MEDICATION_REQUEST_QUERY_INITIAL_DATA_XML); // additional test data from the fhe FHIR Encounter DAO test we use to test the encountersWithMedicationRequests query
+		
+		MockHttpServletResponse response = get(
+		    "/Encounter/?_query=encountersWithMedicationRequests&type=02c533ab-b74b-4ee4-b6e5-ffb6d09a0ac8,07000be2-26b6-4cce-8b40-866d8435b613") // encounter types 6 and 2
+		            .accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle result = readBundleResponse(response);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(result, hasProperty("total", equalTo(2))); // 1 encounter with orders is encounter type 2, and another is encounter type 6, the rest are type 1 so are excluded
+		assertThat(result.getEntry(), hasSize(5)); // these two encounter have 3 requests between them so 3 + 2 = 5
+		
+		List<Bundle.BundleEntryComponent> entries = result.getEntry();
+		
+		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R4/"))));
+		assertThat(entries,
+		    everyItem(hasResource(hasProperty("resourceType", in(getEncounterWithMedicationRequestsValidResourceTypes())))));
+	}
+	
+	@Test
+	public void shouldReturnEncountersWithMedicationRequestShouldIgnoreNullParameters() throws Exception {
+		
+		executeDataSet(MEDICATION_REQUEST_QUERY_INITIAL_DATA_XML); // additional test data from the fhe FHIR Enocounter DAO test we use to test the encountersWithMedicationRequests query
+		
+		MockHttpServletResponse response = get("/Encounter/?_query=encountersWithMedicationRequests&type=&location=")
+		        .accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle result = readBundleResponse(response);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(result, hasProperty("total", equalTo(5))); // 3 encounters in FhirEncounterDaoImplTest_initial_data that have associated medication request (not discontinued), and two encounter (3 and 6) with orders in standard test data set, so total = 5
+		assertThat(result.getEntry(), hasSize(16)); // there are 8 requests associated  encounter 3 and 6 in the test data, 3 with the 3 encounters from the test data so total elements should be 8 + 3 + 5 =
+		
+		List<Bundle.BundleEntryComponent> entries = result.getEntry();
+		
+		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R4/"))));
+		assertThat(entries,
+		    everyItem(hasResource(hasProperty("resourceType", in(getEncounterWithMedicationRequestsValidResourceTypes())))));
+	}
+	
+	@Test
 	public void shouldReturnAnEtagHeaderWhenRetrievingAnExistingEncounter() throws Exception {
 		MockHttpServletResponse response = get("/Encounter/" + ENCOUNTER_UUID).accept(FhirMediaTypes.JSON).go();
 		

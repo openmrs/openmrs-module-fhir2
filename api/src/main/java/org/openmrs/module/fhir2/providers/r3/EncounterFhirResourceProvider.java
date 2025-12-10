@@ -171,15 +171,17 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 	 * @param date restrict by encounter date
 	 * @param status if set to active, when determined encounters to include, exclude encounters that
 	 *            *only* have completed, cancelled or declined medication requests
-	 * @param patientSearchTerm restrict to encounters for patients who name or identifier matches the
+	 * @param patientSearchTerm restrict to encounters for patients whose name or identifier matches the
 	 *            search term
-	 * @param location restrict to encounters at a certain location
+	 * @param location restrict to encounters at certain location(s)
+	 * @param type restrict to encounters of certain (encounter) type(s)
 	 * @return bundle that includes the medication requests and any medication dispenses that reference
 	 *         those requests
 	 */
 	@Search(queryName = "encountersWithMedicationRequests")
 	public IBundleProvider getEncountersWithMedicationRequestsSearch(
 	        @OptionalParam(name = Encounter.SP_DATE) DateRangeParam date, @OptionalParam(name = "status") TokenParam status,
+	        @OptionalParam(name = Encounter.SP_TYPE) TokenAndListParam type,
 	        @OptionalParam(name = "patientSearchTerm") TokenParam patientSearchTerm,
 	        @OptionalParam(name = "location") ReferenceAndListParam location) {
 		
@@ -190,6 +192,7 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 		        .addAnd(new TokenParam().setSystem(OPENMRS_FHIR_EXT_ENCOUNTER_TAG).setValue("encounter")));
 		
 		if (date != null && !date.isEmpty()) {
+			// encounter must be equal to or after the configured (expire) date
 			params.setDate(date);
 		}
 		
@@ -223,8 +226,21 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 			params.setSubject(new ReferenceAndListParam().addAnd(subjectReference));
 		}
 		
-		// search by location
-		params.setLocation(location);
+		// search by location if specified
+		// all this convoluted testing is a null-safe way to make sure if "location=" is passed in, it is ignored
+		if (location != null && !location.getValuesAsQueryTokens().isEmpty()
+		        && !location.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().isEmpty()
+		        && !location.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue().isEmpty()) {
+			params.setLocation(location);
+		}
+		
+		// search by encounter type, if specified
+		// all this convoluted testing is a null-safe way to make sure if "type=" is passed in, it is ignored
+		if (type != null && !type.getValuesAsQueryTokens().isEmpty()
+		        && !type.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().isEmpty()
+		        && !type.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue().isEmpty()) {
+			params.setEncounterType(type);
+		}
 		
 		// include all medication requests associated with the encounter, and then all dispenses associated with those requests
 		HashSet<Include> revIncludes = new HashSet<>();
