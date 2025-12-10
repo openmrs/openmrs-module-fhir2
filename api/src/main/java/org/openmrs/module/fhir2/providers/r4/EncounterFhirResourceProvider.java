@@ -252,7 +252,7 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 		}
 		
 		// search by encounter type, if specified
-        // all this convoluted testing is just a null/empty check (so "type=empty_string" is ignored)
+		// all this convoluted testing is just a null/empty check (so "type=empty_string" is ignored)
 		if (type != null && !type.getValuesAsQueryTokens().isEmpty()
 		        && !type.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().isEmpty()
 		        && !type.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue().isEmpty()) {
