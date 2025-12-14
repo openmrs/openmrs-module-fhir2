@@ -1,0 +1,49 @@
+{
+  "resourceType": "DiagnosticReport",
+  "status": "final",
+  "category": [
+    {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/v2-0074",
+          "code": "LAB"
+        }
+      ]
+    }
+  ],
+  "code": {
+    "coding": [
+      {
+        "code": "1019AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "display": "Complete blood count"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/83f3c829-06db-4ad0-9dab-ed60489ef031"
+  },
+  "encounter": {
+    "reference": "Encounter/e421144c-46b3-4417-a2c7-2164317175ea"
+  },
+  "issued": "2011-03-04T11:45:33+11:00",
+  "basedOn": [
+    {
+      "reference" : "ServiceRequest/ad6b8df0-9d99-45ba-9be1-d9f46f82f004"
+    },
+    {
+      "reference" : "ServiceRequest/f95634fa-ecd7-44a4-99c1-b9b09e5835ed"
+    }
+  ],
+  "result": [
+    {
+      "reference": "Observation/66218784-04dc-4fba-a539-fd3d7ef41327"
+    },
+    {
+      "reference": "Observation/5192d8cf-c248-49e5-88dd-8b91e6e8445d"
+    },
+    {
+      "reference": "Observation/a8f5183c-b710-47f9-adf7-52bc565a0bbd"
+    }
+  ],
+  "conclusion" : "Normal Study"
+}

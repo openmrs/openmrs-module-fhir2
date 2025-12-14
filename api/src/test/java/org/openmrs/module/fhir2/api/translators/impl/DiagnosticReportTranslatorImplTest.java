@@ -326,14 +326,14 @@ public class DiagnosticReportTranslatorImplTest {
 		Order radiologyOrder = new Order();
 		when(orderReferenceTranslator.toOpenmrsType(radiologyOrderRef)).thenReturn(radiologyOrder);
 		FhirDiagnosticReport result = translator.toOpenmrsType(diagnosticReport);
-		Assert.assertEquals(radiologyOrder, result.getOrder());
+		Assert.assertEquals(radiologyOrder, result.getOrders().iterator().next());
 	}
 	
 	@Test
 	public void toFhirResource_shouldReturnOrderRef() {
 		Order radiologyOrder = new Order();
 		radiologyOrder.setUuid(RADIOLOGY_ORDER_REFERENCE.substring(RADIOLOGY_ORDER_REFERENCE.indexOf("/")));
-		fhirDiagnosticReport.setOrder(radiologyOrder);
+		fhirDiagnosticReport.setOrders(Collections.singleton(radiologyOrder));
 		when(orderReferenceTranslator.toFhirResource(radiologyOrder)).thenReturn(new Reference(RADIOLOGY_ORDER_REFERENCE));
 		DiagnosticReport result = translator.toFhirResource(fhirDiagnosticReport);
 		Assert.assertEquals(RADIOLOGY_ORDER_REFERENCE, result.getBasedOn().get(0).getReference());

@@ -53,7 +53,7 @@ public class ObservationBasedOnReferenceTranslatorImpl implements ObservationBas
 		if (reference == null) {
 			return null;
 		}
-
+		
 		if (getReferenceType(reference)
 		        .map(ref -> !(ref.equals(FhirConstants.SERVICE_REQUEST) || ref.equals(FhirConstants.MEDICATION_REQUEST)))
 		        .orElse(true)) {

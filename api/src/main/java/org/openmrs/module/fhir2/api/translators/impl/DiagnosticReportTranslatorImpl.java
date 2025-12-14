@@ -17,15 +17,18 @@ import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.
 import javax.annotation.Nonnull;
 
 import java.util.Date;
-import java.util.Optional;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.openmrs.Concept;
 import org.openmrs.Encounter;
 import org.openmrs.Obs;
+import org.openmrs.Order;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.DiagnosticReportTranslator;
@@ -103,9 +106,10 @@ public class DiagnosticReportTranslatorImpl implements DiagnosticReportTranslato
 			diagnosticReport.addResult(observationReferenceTranslator.toFhirResource(obs));
 		}
 		diagnosticReport.setConclusion(fhirDiagnosticReport.getConclusion());
-		Optional.ofNullable(fhirDiagnosticReport.getOrder()).ifPresent((value -> {
-			diagnosticReport.addBasedOn(orderReferenceTranslator.toFhirResource(value));
-		}));
+		if (fhirDiagnosticReport.getOrders() != null) {
+			fhirDiagnosticReport.getOrders()
+			        .forEach(order -> diagnosticReport.addBasedOn(orderReferenceTranslator.toFhirResource(order)));
+		}
 		
 		diagnosticReport.getMeta().setLastUpdated(getLastUpdated(fhirDiagnosticReport));
 		diagnosticReport.getMeta().setVersionId(getVersionId(fhirDiagnosticReport));
@@ -168,8 +172,15 @@ public class DiagnosticReportTranslatorImpl implements DiagnosticReportTranslato
 		}
 		
 		if (diagnosticReport.hasBasedOn()) {
-			Optional.ofNullable(orderReferenceTranslator.toOpenmrsType(diagnosticReport.getBasedOn().get(0)))
-			        .ifPresent(value -> existingDiagnosticReport.setOrder(value));
+			Set<Order> orders = new HashSet<>();
+			diagnosticReport.getBasedOn().forEach(reference -> {
+				Order aOrder = orderReferenceTranslator.toOpenmrsType(reference);
+				if (aOrder == null) {
+					throw new InvalidRequestException("Invalid Service Request Reference for Diagnostic Report");
+				}
+				orders.add(aOrder);
+			});
+			existingDiagnosticReport.setOrders(orders);
 		}
 		
 		existingDiagnosticReport.setResults(diagnosticReport.getResult().stream()

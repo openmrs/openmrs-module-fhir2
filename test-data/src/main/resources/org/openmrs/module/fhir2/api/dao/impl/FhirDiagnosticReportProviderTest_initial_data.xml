@@ -1,0 +1,60 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!--
+    This Source Code Form is subject to the terms of the Mozilla Public License,
+    v. 2.0. If a copy of the MPL was not distributed with this file, You can
+    obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+    the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+
+    Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+    graphic logo is a trademark of OpenMRS Inc.
+-->
+<dataset>
+<!--	<concept_reference_source concept_source_id="6" name="DiagnosticServiceSectionCodes" description="DiagnosticServiceSectionCodes" creator="1" date_created="2005-01-01 00:00:00.0" retired="0" uuid="2b3c1ff8-768a-102f-83f4-12313b04a615" />-->
+<!--	<fhir_concept_source fhir_concept_source_id="1" name="CIEL" url="https://openconceptlab.org/orgs/CIEL/sources/CIEL" concept_source_id="6" creator="1" date_created="2005-01-01 00:00:00.0" retired="0" uuid="0d30bea3-4ba2-4ab4-ac7b-5525840bde20" />-->
+<!--	<concept_numeric concept_id="5085" hi_normal="[NULL]" low_critical="[NULL]" units="units" allow_decimal="false" display_precision="[NULL]" />-->
+
+<!--	<concept_reference_term concept_reference_term_id="12" concept_source_id="6" code="5085" name="" description="" retired="0" creator="1" date_created="2004-08-12 00:00:00.0" uuid="23d2e1cd-58d2-4972-bc86-fb21f6f81c06"/>-->
+<!--	<concept_reference_map concept_map_id="11" concept_id="5085" concept_reference_term_id="12" concept_map_type_id="2" creator="1" date_created="2004-08-12 00:00:00.0" uuid="221038c1-8c9f-481a-93c0-0255ac765e48"/>-->
+
+
+	<location location_id="110" name="Hospital 1" description="Clinic 1" uuid="02831583-339e-4431-8dec-fade07a440e7" retired="false" date_created="2004-01-01 00:00:00.0" />
+	<location location_id="120" name="Department Lab 1" description="Lab 1" uuid="43e4f443-d23a-448f-b6fd-59aed7ea166f" retired="false" date_created="2004-01-01 00:00:00.0" />
+
+	<patient_identifier_type patient_identifier_type_id="100" name="Example Identifier Type" description="Example identifier description" creator="1" date_created="2005-01-01 00:00:00.0" required="false" retired="false"  uuid="83efec0d-6b4e-4fd4-86df-5bc2190be9d7"/>
+	<person person_id="200" dead="false" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" gender="M"  uuid="83f3c829-06db-4ad0-9dab-ed60489ef031"/>
+	<person_name person_id="200" person_name_id="200" preferred="1" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" given_name="Rutgar" middle_name=" " family_name="Ragos"  uuid="0b95f6bf-cf9b-41a9-ad1e-8d1b18140962"/>
+
+	<patient patient_id="200" creator="1" date_created="2005-01-01 00:00:00.0" voided="false"/>
+	<patient_identifier patient_identifier_id="2001" patient_id="200" creator="1" date_created="2005-01-01 00:00:00.0" identifier="2000BC" identifier_type="100" preferred="1" voided="false" location_id="1"  uuid="db132240-6e76-474e-96c7-793b6f223758"/>
+	<encounter_type encounter_type_id="20" name="Consultation" description="Consultation Encounter" creator="1" date_created="2005-02-24 00:00:00.0" retired="false" uuid="c35a16d3-201c-4ffb-bf42-afd114071518"/>
+	<encounter_type encounter_type_id="21" name="Results" description="Consultation Encounter" creator="1" date_created="2005-02-24 00:00:00.0" retired="false" uuid="81eb779f-406c-4faf-8e8f-9bbbfde66b25"/>
+	<encounter encounter_id="3001" encounter_type="20" patient_id="200" location_id="110" encounter_datetime="2008-08-01 00:00:00.0" creator="1" date_created="2008-08-18 14:09:05.0" voided="false" uuid="66c907d6-948e-478b-9180-b67ddcf90ae3"/>
+	<encounter encounter_id="3002" encounter_type="21" patient_id="200" location_id="120" encounter_datetime="2008-08-01 00:00:00.0" creator="1" date_created="2008-08-18 14:09:05.0" voided="false" uuid="e421144c-46b3-4417-a2c7-2164317175ea"/>
+
+
+	<concept concept_id="55767" retired="false" datatype_id="1" class_id="1" is_set="false" creator="1" date_created="2004-08-12 00:00:00.0" version="" changed_by="1" date_changed="2005-02-25 11:43:43.0" uuid="1019AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+	<concept_name concept_name_id="5576701"  concept_id="55767" name="Complete blood count" locale="en_GB" creator="1" date_created="2004-08-12 00:00:00.0" concept_name_type="FULLY_SPECIFIED" locale_preferred="1" voided="false" uuid="0909b460-2275-4b84-8727-b83a868a1e6e"/>
+	<concept concept_id="7534" retired="false" datatype_id="1" class_id="1" is_set="false" creator="1" date_created="2004-08-12 00:00:00.0" version="" changed_by="1" date_changed="2005-02-25 11:43:43.0" uuid="678AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+	<concept_name concept_name_id="753401"  concept_id="7534" name="White blood cells" locale="en_GB" creator="1" date_created="2004-08-12 00:00:00.0" concept_name_type="FULLY_SPECIFIED" locale_preferred="1" voided="false" uuid="00eea869-5453-47f5-a005-ac54230813d1"/>
+	<concept concept_id="7463" retired="false" datatype_id="1" class_id="1" is_set="true" creator="1" date_created="2004-08-12 00:00:00.0" version="" changed_by="1" date_changed="2005-02-25 11:43:43.0" uuid="679AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+	<concept_name concept_name_id="746301"  concept_id="7463" name="Red blood cells" locale="en_GB" creator="1" date_created="2004-08-12 00:00:00.0" concept_name_type="FULLY_SPECIFIED" locale_preferred="1" voided="false" uuid="c32cdfaa-7fa3-4166-9781-57960c1a3147"/>
+
+
+	<order_type order_type_id="1011" name="Pathology Order" parent="2" java_class_name="org.openmrs.Order" description="Path lab order" creator="1" date_created="2008-08-15 15:49:04.0" retired="1" retired_by="1" retire_reason="None" date_retired="2008-08-15 00:00:00.0" uuid="dd3fb1d0-ae06-22e3-a5e2-0800211c9a66"/>
+	<orders order_id="100100" order_type_id="1011" order_number="ORD-100100" concept_id="7534" urgency="ROUTINE" order_action="NEW"  orderer="1" date_activated="2008-11-19 09:24:10.0" date_stopped="2008-12-17 00:00:00.0" patient_id="200" care_setting="1" encounter_id="3001" date_created="2008-11-19 09:24:10.0" creator="1" voided="0" uuid="ad6b8df0-9d99-45ba-9be1-d9f46f82f004"  />
+	<orders order_id="100101" order_type_id="1011" order_number="ORD-100101" concept_id="7463" urgency="ROUTINE" order_action="NEW"  orderer="1" date_activated="2008-11-19 09:24:10.0" date_stopped="2008-12-17 00:00:00.0" patient_id="200" care_setting="1" encounter_id="3001" date_created="2008-11-19 09:24:10.0" creator="1" voided="0" uuid="f95634fa-ecd7-44a4-99c1-b9b09e5835ed"  />
+
+	<obs obs_id="20251212" person_id="200" concept_id="7534" status="FINAL" encounter_id="3002" order_id="100100" obs_datetime="2008-06-01 00:00:00.0" location_id="2" value_numeric="3" comments="" creator="1" date_created="2018-08-18 14:09:35.0" voided="false" value_coded="[NULL]" value_coded_name_id="[NULL]" value_complex="[NULL]" value_text="[NULL]" value_datetime="[NULL]" value_drug="[NULL]" uuid="66218784-04dc-4fba-a539-fd3d7ef41327"/>
+	<obs obs_id="20251214" person_id="200" concept_id="7463" status="FINAL" encounter_id="3002" order_id="100101"  obs_datetime="2008-06-01 00:00:00.0" location_id="2" value_numeric="3" comments="" creator="1" date_created="2008-08-18 14:09:35.0" voided="false" value_coded="[NULL]" value_coded_name_id="[NULL]" value_complex="[NULL]" value_text="[NULL]" value_datetime="[NULL]" value_drug="[NULL]" uuid="5192d8cf-c248-49e5-88dd-8b91e6e8445d"/>
+	<obs obs_id="20251216" person_id="200" concept_id="55767" status="FINAL" encounter_id="3002" obs_datetime="2008-06-01 00:00:00.0" location_id="2" value_numeric="[NULL]" comments="" creator="1" date_created="2008-08-18 14:09:35.0" voided="false" value_coded="[NULL]" value_coded_name_id="[NULL]" value_complex="[NULL]" value_text="Both tests are normal" value_datetime="[NULL]" value_drug="[NULL]" uuid="a8f5183c-b710-47f9-adf7-52bc565a0bbd"/>
+
+	<fhir_diagnostic_report diagnostic_report_id="4055767" concept_id="55767" status="FINAL" subject_id="200" encounter_id="3002" issued="2008-07-01 00:00:00.0" conclusion="Both tests normal" creator="1" date_created="2008-08-18 14:09:35.0" voided="false" uuid="5798a2d8-9b3f-4afd-9958-cd60181011db"/>
+	<fhir_diagnostic_report_results diagnostic_report_id="4055767" obs_id="20251212"/>
+	<fhir_diagnostic_report_results diagnostic_report_id="4055767" obs_id="20251214"/>
+
+	<fhir_diagnostic_report_service_request diagnostic_report_id="4055767" order_id="100100"/>
+	<fhir_diagnostic_report_service_request diagnostic_report_id="4055767" order_id="100101"/>
+
+
+
+</dataset>

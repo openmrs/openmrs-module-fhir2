@@ -1,0 +1,39 @@
+{
+  "resourceType": "DiagnosticReport",
+  "status": "final",
+  "category": [
+    {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/v2-0074",
+          "code": "LAB"
+        }
+      ]
+    }
+  ],
+  "code": {
+    "coding": [
+      {
+        "code": "1019AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "display": "Complete blood count"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/83f3c829-06db-4ad0-9dab-ed60489ef031"
+  },
+  "encounter": {
+    "reference": "Encounter/e421144c-46b3-4417-a2c7-2164317175ea"
+  },
+  "issued": "2011-03-04T11:45:33+11:00",
+  "basedOn": [
+    {
+      "reference" : "ServiceRequest/invalid-service-request-id"
+    }
+  ],
+  "result": [
+    {
+      "reference": "Observation/66218784-04dc-4fba-a539-fd3d7ef41327"
+    }
+  ]
+}
