@@ -25,8 +25,8 @@
     <orders order_id="2003" order_type_id="1" order_number="2003" urgency="ROUTINE" patient_id="2" encounter_id="2003" date_activated="2012-08-19 00:00:00.0" date_stopped="2012-08-19 00:00:00.0" concept_id="792" orderer="1" creator="1" date_created="2006-03-11 15:57:35.0" voided="false" uuid="4d2f8b6a-beb7-4f1a-ab9a-8aed2c875321" order_action="NEW" care_setting="1"/>
     <drug_order order_id="2003" drug_inventory_id="3" dose="325.0" dose_units="50" as_needed="false" frequency="1" dosing_type="org.openmrs.SimpleDosingInstructions" route="22" quantity="1.0" quantity_units="51" num_refills="10" dispense_as_written="0" />
 
-    <!-- encounter with expired order -->
-    <encounter encounter_id="2004" encounter_type="1" form_id="1" encounter_datetime="2010-01-01 00:00:00.0" patient_id="2" location_id="1" creator="1" date_created="2005-01-01 00:00:00.0" voided="0" uuid="ed19b329-9ac6-4271-b730-906a27dd2d2c"/>
+    <!-- encounter with expired order, different encounter type -->
+    <encounter encounter_id="2004" encounter_type="6" form_id="1" encounter_datetime="2010-01-01 00:00:00.0" patient_id="2" location_id="1" creator="1" date_created="2005-01-01 00:00:00.0" voided="0" uuid="ed19b329-9ac6-4271-b730-906a27dd2d2c"/>
     <orders order_id="2004" order_type_id="1" order_number="2004" urgency="ROUTINE" patient_id="2" encounter_id="2004" date_activated="2012-08-19 00:00:00.0" auto_expire_date="2012-08-19 00:00:00.0" concept_id="792" orderer="1" creator="1" date_created="2006-03-11 15:57:35.0" voided="false" uuid="cbf3f654-f2d5-4306-89aa-bc02cdd29f34" order_action="NEW" care_setting="1"/>
     <drug_order order_id="2004" drug_inventory_id="3" dose="325.0" dose_units="50" as_needed="false" frequency="1" dosing_type="org.openmrs.SimpleDosingInstructions" route="22" quantity="1.0" quantity_units="51" num_refills="10" dispense_as_written="0" />
 
