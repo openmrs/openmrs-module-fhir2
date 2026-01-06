@@ -18,7 +18,6 @@ import static org.mockito.Mockito.when;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -91,16 +90,16 @@ public class ObservationBasedOnReferenceTranslatorImplTest {
 		assertThat(result.getType(), equalTo(FhirConstants.MEDICATION_REQUEST));
 	}
 	
-	@Ignore("this test case is not valid as the underlying implementation does not check against order.orderType")
 	@Test
 	public void toFhirResource_shouldReturnNullIfOrderTypeIsNull() {
 		Order order = new Order();
 		order.setUuid(ORDER_UUID);
+		
 		Reference result = translator.toFhirResource(order);
+		
 		assertThat(result, nullValue());
 	}
 	
-	@Ignore("this test case is not valid as the underlying implementation does not check against order.orderType")
 	@Test
 	public void toFhirType_shouldReturnNullForUnknownOrderType() {
 		Order order = new Order() {};
