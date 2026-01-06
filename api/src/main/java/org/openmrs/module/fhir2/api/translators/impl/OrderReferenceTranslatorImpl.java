@@ -24,6 +24,7 @@ import org.openmrs.Order;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirMedicationRequestDao;
 import org.openmrs.module.fhir2.api.dao.FhirOrderDao;
+import org.openmrs.module.fhir2.api.translators.OrderIdentifierTranslator;
 import org.openmrs.module.fhir2.api.translators.OrderReferenceTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -38,6 +39,10 @@ public class OrderReferenceTranslatorImpl implements OrderReferenceTranslator {
 	@Getter(PROTECTED)
 	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private FhirOrderDao orderDao;
+	
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
+	private OrderIdentifierTranslator orderIdentifierTranslator;
 	
 	@Override
 	public Reference toFhirResource(@Nonnull Order order) {
@@ -73,6 +78,13 @@ public class OrderReferenceTranslatorImpl implements OrderReferenceTranslator {
 	}
 	
 	private Reference getServiceRequestReference(Order order) {
-		return ReferenceHandlingTranslator.createOrderReference(order);
+		Reference orderReference = ReferenceHandlingTranslator.createOrderReference(order);
+		if (orderReference != null) {
+			return orderReference;
+		}
+		Reference reference = new Reference().setReference(FhirConstants.SERVICE_REQUEST + "/" + order.getUuid())
+		        .setType(FhirConstants.SERVICE_REQUEST);
+		reference.setIdentifier(orderIdentifierTranslator.toFhirResource(order));
+		return reference;
 	}
 }

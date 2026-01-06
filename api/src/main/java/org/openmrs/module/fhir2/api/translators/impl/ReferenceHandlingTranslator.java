@@ -144,17 +144,12 @@ public final class ReferenceHandlingTranslator {
 		
 		if (order instanceof TestOrder) {
 			return createTestOrderReference((TestOrder) order, orderIdentifierTranslator);
-		}
-		
-		if (order instanceof DrugOrder) {
+		} else if (order instanceof DrugOrder) {
 			return createDrugOrderReference((DrugOrder) order, orderIdentifierTranslator);
+		} else {
+			log.warn("Could not determine order type for order {}", order);
+			return null;
 		}
-		
-		Reference reference = createReferenceOfType(order, FhirConstants.SERVICE_REQUEST);
-		if (orderIdentifierTranslator != null) {
-			reference.setIdentifier(orderIdentifierTranslator.toFhirResource(order));
-		}
-		return reference;
 	}
 	
 	public static Reference createDrugOrderReference(@Nonnull DrugOrder drugOrder) {

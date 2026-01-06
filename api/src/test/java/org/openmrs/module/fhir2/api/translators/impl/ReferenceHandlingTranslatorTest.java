@@ -16,7 +16,6 @@ import static org.hamcrest.Matchers.nullValue;
 
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -336,16 +335,15 @@ public class ReferenceHandlingTranslatorTest {
 	}
 	
 	@Test
-	public void shouldReturnReferenceForRawOrder() {
+	public void shouldReturnNullForRawOrder() {
 		Order order = new Order();
 		order.setUuid(ORDER_UUID);
 		
 		Reference reference = ReferenceHandlingTranslator.createOrderReference(order);
 		
-		assertThat(reference, notNullValue());
+		assertThat(reference, nullValue());
 	}
 	
-	@Ignore("this test case is no longer valid, as all other order subclasses now return a reference to ServiceRequest")
 	@Test
 	public void shouldReturnNullForUnknownOrderSubclass() {
 		Order order = new Order() {};

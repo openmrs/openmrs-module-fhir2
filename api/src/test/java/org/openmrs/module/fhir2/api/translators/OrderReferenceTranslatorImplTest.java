@@ -44,6 +44,7 @@ public class OrderReferenceTranslatorImplTest {
 		OrderReferenceTranslatorImpl orderReferenceTranslator = new OrderReferenceTranslatorImpl();
 		orderReferenceTranslator.setMedicationRequestDao(medicationRequestDao);
 		orderReferenceTranslator.setOrderDao(fhirOrderDao);
+		orderReferenceTranslator.setOrderIdentifierTranslator(new OrderIdentifierTranslatorImpl());
 		translator = orderReferenceTranslator;
 	}
 	
