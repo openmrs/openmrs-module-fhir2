@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static lombok.AccessLevel.PROTECTED;
 import static org.apache.commons.lang3.Validate.notNull;
 import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getLastUpdated;
 import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getVersionId;
@@ -21,7 +22,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang.math.NumberUtils;
 import org.hl7.fhir.r4.model.Coding;
@@ -36,6 +37,7 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
 import org.openmrs.module.fhir2.api.translators.LocationAddressTranslator;
+import org.openmrs.module.fhir2.api.translators.LocationReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.LocationTagTranslator;
 import org.openmrs.module.fhir2.api.translators.LocationTranslator;
 import org.openmrs.module.fhir2.api.translators.LocationTypeTranslator;
@@ -44,25 +46,34 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-@Setter(AccessLevel.PACKAGE)
-public class LocationTranslatorImpl extends BaseReferenceHandlingTranslator implements LocationTranslator {
+public class LocationTranslatorImpl implements LocationTranslator {
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private LocationAddressTranslator locationAddressTranslator;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private LocationTagTranslator locationTagTranslator;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
+	private LocationReferenceTranslator locationReferenceTranslator;
+	
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private TelecomTranslator<BaseOpenmrsData> telecomTranslator;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private LocationTypeTranslator locationTypeTranslator;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private FhirGlobalPropertyService propertyService;
 	
-	@Autowired
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private FhirLocationDao fhirLocationDao;
 	
 	//TODO: Move this to a global property
@@ -120,7 +131,7 @@ public class LocationTranslatorImpl extends BaseReferenceHandlingTranslator impl
 			}
 		}
 		if (openmrsLocation.getParentLocation() != null) {
-			fhirLocation.setPartOf(createLocationReference(openmrsLocation.getParentLocation()));
+			fhirLocation.setPartOf(locationReferenceTranslator.toFhirResource(openmrsLocation.getParentLocation()));
 		}
 		
 		fhirLocation.getMeta().setLastUpdated(getLastUpdated(openmrsLocation));
@@ -142,6 +153,15 @@ public class LocationTranslatorImpl extends BaseReferenceHandlingTranslator impl
 		}
 		
 		return fhirLocation;
+	}
+	
+	@Override
+	public List<Location> toFhirResources(Collection<org.openmrs.Location> openmrsLocations) {
+		if (openmrsLocations == null) {
+			return null;
+		}
+		
+		return openmrsLocations.stream().map(this::toFhirResource).collect(Collectors.toList());
 	}
 	
 	protected List<ContactPoint> getLocationContactDetails(@Nonnull org.openmrs.Location location) {
@@ -222,6 +242,6 @@ public class LocationTranslatorImpl extends BaseReferenceHandlingTranslator impl
 			throw new IllegalArgumentException("Reference must be to a Location not a " + location.getType());
 		}
 		
-		return getReferenceId(location).map(uuid -> fhirLocationDao.get(uuid)).orElse(null);
+		return locationReferenceTranslator.toOpenmrsType(location);
 	}
 }
