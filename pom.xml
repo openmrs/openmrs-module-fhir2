@@ -70,6 +70,11 @@
             <name>Maven Repository Switchboard</name>
             <url>https://repo1.maven.org/maven2</url>
         </repository>
+        <repository>
+            <id>repsy</id>
+            <name>Maven Repository on Repsy</name>
+            <url>https://repo.repsy.io/mvn/intellisoftdev/default</url>
+        </repository>
     </repositories>
     <pluginRepositories>
         <pluginRepository>
@@ -96,16 +101,16 @@
     </pluginRepositories>
 
     <distributionManagement>
-        <repository>
-            <id>openmrs-repo-modules</id>
-            <name>OpenMRS Nexus Modules</name>
-            <url>https://mavenrepo.openmrs.org/modules</url>
-        </repository>
-        <snapshotRepository>
-            <id>openmrs-repo-snapshots</id>
-            <name>OpenMRS Nexus Snapshots</name>
-            <url>https://mavenrepo.openmrs.org/snapshots</url>
-        </snapshotRepository>
+               <snapshotRepository>
+                       <id>repsy</id>
+                       <name>My Private Maven Repository on Repsy</name>
+                       <url>https://repo.repsy.io/mvn/intellisoftdev/default</url>
+       </snapshotRepository>
+               <repository>
+                       <id>repsy</id>
+                       <name>My Private Maven Repository on Repsy</name>
+                       <url>https://repo.repsy.io/mvn/intellisoftdev/default</url>
+               </repository>
     </distributionManagement>
 
     <dependencyManagement>
