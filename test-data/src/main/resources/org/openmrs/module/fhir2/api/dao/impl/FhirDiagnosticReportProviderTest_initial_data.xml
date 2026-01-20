@@ -9,14 +9,6 @@
     graphic logo is a trademark of OpenMRS Inc.
 -->
 <dataset>
-<!--	<concept_reference_source concept_source_id="6" name="DiagnosticServiceSectionCodes" description="DiagnosticServiceSectionCodes" creator="1" date_created="2005-01-01 00:00:00.0" retired="0" uuid="2b3c1ff8-768a-102f-83f4-12313b04a615" />-->
-<!--	<fhir_concept_source fhir_concept_source_id="1" name="CIEL" url="https://openconceptlab.org/orgs/CIEL/sources/CIEL" concept_source_id="6" creator="1" date_created="2005-01-01 00:00:00.0" retired="0" uuid="0d30bea3-4ba2-4ab4-ac7b-5525840bde20" />-->
-<!--	<concept_numeric concept_id="5085" hi_normal="[NULL]" low_critical="[NULL]" units="units" allow_decimal="false" display_precision="[NULL]" />-->
-
-<!--	<concept_reference_term concept_reference_term_id="12" concept_source_id="6" code="5085" name="" description="" retired="0" creator="1" date_created="2004-08-12 00:00:00.0" uuid="23d2e1cd-58d2-4972-bc86-fb21f6f81c06"/>-->
-<!--	<concept_reference_map concept_map_id="11" concept_id="5085" concept_reference_term_id="12" concept_map_type_id="2" creator="1" date_created="2004-08-12 00:00:00.0" uuid="221038c1-8c9f-481a-93c0-0255ac765e48"/>-->
-
-
 	<location location_id="110" name="Hospital 1" description="Clinic 1" uuid="02831583-339e-4431-8dec-fade07a440e7" retired="false" date_created="2004-01-01 00:00:00.0" />
 	<location location_id="120" name="Department Lab 1" description="Lab 1" uuid="43e4f443-d23a-448f-b6fd-59aed7ea166f" retired="false" date_created="2004-01-01 00:00:00.0" />
 
@@ -54,7 +46,5 @@
 
 	<fhir_diagnostic_report_service_request diagnostic_report_id="4055767" order_id="100100"/>
 	<fhir_diagnostic_report_service_request diagnostic_report_id="4055767" order_id="100101"/>
-
-
 
 </dataset>
