@@ -725,8 +725,6 @@
                     <artifactId>maven-release-plugin</artifactId>
                     <version>3.1.1</version>
                     <configuration>
-                        <goals>install</goals>
-                        <useReleaseProfile>false</useReleaseProfile>
                         <autoVersionSubmodules>true</autoVersionSubmodules>
                         <tagNameFormat>@{project.version}</tagNameFormat>
                         <allowTimestampedSnapshots>true</allowTimestampedSnapshots>
