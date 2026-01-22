@@ -43,7 +43,6 @@ import org.apache.commons.lang.time.DateUtils;
 import org.hamcrest.MatcherAssert;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Practitioner;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -55,7 +54,6 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.FhirPractitionerService;
 import org.openmrs.module.fhir2.api.search.param.PractitionerSearchParams;
-import org.powermock.reflect.Whitebox;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -108,13 +106,8 @@ public class PractitionerFhirResourceProviderWebTest extends BaseFhirR4ResourceP
 	public void setup() throws ServletException {
 		resourceProvider = new PractitionerFhirResourceProvider();
 		resourceProvider.setPractitionerService(practitionerService);
-		Whitebox.setInternalState(BaseUpsertFhirResourceProvider.class, "globalPropsService", fhirGpService);
+		resourceProvider.setGlobalPropsService(fhirGpService);
 		super.setup();
-	}
-	
-	@After
-	public void tearDown() {
-		Whitebox.setInternalState(BaseUpsertFhirResourceProvider.class, "globalPropsService", (Object) null);
 	}
 	
 	@Test

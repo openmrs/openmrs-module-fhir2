@@ -15,8 +15,12 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.fail;
 import static org.openmrs.test.OpenmrsMatchers.hasId;
+import static org.openmrs.util.PrivilegeConstants.GET_ENCOUNTERS;
 
+import java.util.Arrays;
 import java.util.List;
 
 import ca.uhn.fhir.rest.param.HasAndListParam;
@@ -27,6 +31,7 @@ import org.junit.Test;
 import org.openmrs.DrugOrder;
 import org.openmrs.Encounter;
 import org.openmrs.Order;
+import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.openmrs.module.fhir2.FhirConstants;
@@ -61,7 +66,7 @@ public class FhirEncounterDaoImplTest extends BaseFhirContextSensitiveTest {
 	
 	@Autowired
 	private ObjectProvider<FhirEncounterDao> daoProvider;
-	
+
 	private FhirEncounterDao dao;
 	
 	@Before
@@ -83,6 +88,49 @@ public class FhirEncounterDaoImplTest extends BaseFhirContextSensitiveTest {
 	public void shouldReturnNullWithUnknownEncounterUuid() {
 		Encounter encounter = dao.get(UNKNOWN_ENCOUNTER_UUID);
 		assertThat(encounter, nullValue());
+	}
+	
+	@Test
+	public void shouldRequireGetEncountersPrivilegeForGet() {
+		Context.logout();
+		
+		try {
+			dao.get(ENCOUNTER_UUID);
+			fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
+		}
+		catch (APIAuthenticationException e) {
+			assertThat(e.getMessage(), containsString("Privilege"));
+		}
+		
+		try {
+			Context.addProxyPrivilege(GET_ENCOUNTERS);
+			assertThat(dao.get(ENCOUNTER_UUID), notNullValue());
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_ENCOUNTERS);
+		}
+	}
+	
+	@Test
+	public void shouldRequireGetEncountersPrivilegeForGetByCollection() {
+		Context.logout();
+		
+		try {
+			dao.get(Arrays.asList(ENCOUNTER_UUID));
+			fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
+		}
+		catch (APIAuthenticationException e) {
+			assertThat(e.getMessage(), containsString("Privilege"));
+		}
+		
+		try {
+			Context.addProxyPrivilege(GET_ENCOUNTERS);
+			List<Encounter> encounters = dao.get(Arrays.asList(ENCOUNTER_UUID));
+			assertThat(encounters, notNullValue());
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_ENCOUNTERS);
+		}
 	}
 	
 	@Test
@@ -161,6 +209,50 @@ public class FhirEncounterDaoImplTest extends BaseFhirContextSensitiveTest {
 		List<Encounter> matchingResources = dao.getSearchResults(theParams);
 		assertThat("Encounter with only Discontinue Order is not returned", matchingResources,
 		    not(hasItem(hasId(ENCOUNTER_WITH_ONLY_DISCONTINUE_DRUG_ORDER))));
+	}
+	
+	@Test
+	public void shouldRequireGetEncountersPrivilegeForGetSearchResults() {
+		Context.logout();
+		
+		try {
+			dao.getSearchResults(new SearchParameterMap());
+			fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
+		}
+		catch (APIAuthenticationException e) {
+			assertThat(e.getMessage(), containsString("Privilege"));
+		}
+		
+		try {
+			Context.addProxyPrivilege(GET_ENCOUNTERS);
+			List<Encounter> encounters = dao.getSearchResults(new SearchParameterMap());
+			assertThat(encounters, notNullValue());
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_ENCOUNTERS);
+		}
+	}
+	
+	@Test
+	public void shouldRequireGetEncountersPrivilegeForGetSearchResultsCount() {
+		Context.logout();
+		
+		try {
+			dao.getSearchResultsCount(new SearchParameterMap());
+			fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
+		}
+		catch (APIAuthenticationException e) {
+			assertThat(e.getMessage(), containsString("Privilege"));
+		}
+		
+		try {
+			Context.addProxyPrivilege(GET_ENCOUNTERS);
+			int count = dao.getSearchResultsCount(new SearchParameterMap());
+			assertThat(count, notNullValue());
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_ENCOUNTERS);
+		}
 	}
 	
 	@Test

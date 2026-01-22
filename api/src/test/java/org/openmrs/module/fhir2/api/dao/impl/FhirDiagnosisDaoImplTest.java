@@ -10,13 +10,17 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.fail;
+import static org.openmrs.util.PrivilegeConstants.GET_DIAGNOSES;
 
+import java.util.Arrays;
 import java.util.List;
 
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
@@ -28,7 +32,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.Diagnosis;
 import org.openmrs.Encounter;
+import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.EncounterService;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirDiagnosisDao;
@@ -49,12 +55,12 @@ public class FhirDiagnosisDaoImplTest extends BaseFhirContextSensitiveTest {
 	private static final String BIPOLAR_CODE = "115924";
 	
 	@Autowired
-	private EncounterService encounterService;
-	
-	@Autowired
 	private ObjectFactory<FhirDiagnosisDao> daoFactory;
 	
 	private FhirDiagnosisDao dao;
+
+    @Autowired
+    private EncounterService encounterService;
 	
 	@Before
 	public void setUp() {
@@ -77,6 +83,91 @@ public class FhirDiagnosisDaoImplTest extends BaseFhirContextSensitiveTest {
 		assertThat(result, notNullValue());
 		assertThat(result.getUuid(), equalTo(DIAGNOSIS_UUID));
 	}
+
+    @Test
+    public void get_shouldRequireGetDiagnosesPrivilege() {
+        Context.logout();
+
+        try {
+            dao.get(DIAGNOSIS_UUID);
+            fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
+        }
+        catch (APIAuthenticationException e) {
+            assertThat(e.getMessage(), containsString("Privilege"));
+        }
+
+        try {
+            Context.addProxyPrivilege(GET_DIAGNOSES);
+            dao.get(DIAGNOSIS_UUID);
+        }
+        finally {
+            Context.removeProxyPrivilege(GET_DIAGNOSES);
+        }
+    }
+
+    @Test
+    public void get_shouldRequireGetDiagnosesPrivilegeWithCollection() {
+        Context.logout();
+
+        try {
+            dao.get(Arrays.asList(DIAGNOSIS_UUID));
+            fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
+        }
+        catch (APIAuthenticationException e) {
+            assertThat(e.getMessage(), containsString("Privilege"));
+        }
+
+        try {
+            Context.addProxyPrivilege(GET_DIAGNOSES);
+            List<Diagnosis> diagnoses = dao.get(Arrays.asList(DIAGNOSIS_UUID));
+            assertThat(diagnoses, notNullValue());
+        }
+        finally {
+            Context.removeProxyPrivilege(GET_DIAGNOSES);
+        }
+    }
+
+    @Test
+    public void getSearchResults_shouldRequireGetDiagnosesPrivilege() {
+        Context.logout();
+
+        try {
+            dao.getSearchResults(new SearchParameterMap());
+            fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
+        }
+        catch (APIAuthenticationException e) {
+            assertThat(e.getMessage(), containsString("Privilege"));
+        }
+
+        try {
+            Context.addProxyPrivilege(GET_DIAGNOSES);
+            List<Diagnosis> diagnoses = dao.getSearchResults(new SearchParameterMap());
+            assertThat(diagnoses, notNullValue());
+        }
+        finally {
+            Context.removeProxyPrivilege(GET_DIAGNOSES);
+        }
+    }
+
+    @Test
+    public void getSearchResultsCount_shouldRequireGetDiagnosesPrivilege() {
+        Context.logout();
+
+        try {
+            dao.getSearchResultsCount(new SearchParameterMap());
+            fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
+        } catch (APIAuthenticationException e) {
+            assertThat(e.getMessage(), containsString("Privilege"));
+        }
+
+        try {
+            Context.addProxyPrivilege(GET_DIAGNOSES);
+            int count = dao.getSearchResultsCount(new SearchParameterMap());
+            assertThat(count, notNullValue());
+        } finally {
+            Context.removeProxyPrivilege(GET_DIAGNOSES);
+        }
+    }
 	
 	@Test
 	public void search_shouldWorkWithNoParameters() {
@@ -91,7 +182,6 @@ public class FhirDiagnosisDaoImplTest extends BaseFhirContextSensitiveTest {
 		SearchParameterMap params = new SearchParameterMap()
 		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, new ReferenceAndListParam())
 		        .addParameter(FhirConstants.CODED_SEARCH_HANDLER, new TokenAndListParam());
-		
 		List<Diagnosis> diagnoses = dao.getSearchResults(params);
 		
 		assertThat(diagnoses, notNullValue());
@@ -104,7 +194,7 @@ public class FhirDiagnosisDaoImplTest extends BaseFhirContextSensitiveTest {
 		    new TokenAndListParam().addAnd(new TokenParam(CIEL_URN, BIPOLAR_CODE)));
 		
 		List<Diagnosis> diagnoses = dao.getSearchResults(params);
-		
+
 		assertThat(diagnoses, notNullValue());
 		assertThat(diagnoses, hasSize(equalTo(1)));
 		assertThat(diagnoses, everyItem(hasProperty("diagnosis",
@@ -114,9 +204,9 @@ public class FhirDiagnosisDaoImplTest extends BaseFhirContextSensitiveTest {
 	@Test
 	public void search_shouldSkipDiagnosisCodeWhenParamNull() {
 		SearchParameterMap params = new SearchParameterMap().addParameter(FhirConstants.CODED_SEARCH_HANDLER, null);
-		
+
 		List<Diagnosis> diagnoses = dao.getSearchResults(params);
-		
+
 		assertThat(diagnoses, notNullValue());
 		assertThat(diagnoses, hasSize(greaterThanOrEqualTo(1)));
 	}
@@ -125,9 +215,9 @@ public class FhirDiagnosisDaoImplTest extends BaseFhirContextSensitiveTest {
 	public void search_shouldHandlePatientReferenceParam() {
 		SearchParameterMap params = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
 		    new ReferenceAndListParam().addAnd(new ReferenceOrListParam().add(new ReferenceParam(PATIENT_UUID))));
-		
+
 		List<Diagnosis> diagnoses = dao.getSearchResults(params);
-		
+
 		assertThat(diagnoses, notNullValue());
 		assertThat(diagnoses, hasSize(equalTo(1)));
 		assertThat(diagnoses, everyItem(hasProperty("patient", hasProperty("uuid", equalTo(PATIENT_UUID)))));
@@ -137,9 +227,9 @@ public class FhirDiagnosisDaoImplTest extends BaseFhirContextSensitiveTest {
 	public void setupSearchParams_shouldHandleEncounterReferenceParam() {
 		SearchParameterMap params = new SearchParameterMap().addParameter(FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER,
 		    new ReferenceAndListParam().addAnd(new ReferenceOrListParam().add(new ReferenceParam(ENCOUNTER_UUID))));
-		
+
 		List<Diagnosis> diagnoses = dao.getSearchResults(params);
-		
+
 		assertThat(diagnoses, notNullValue());
 		assertThat(diagnoses, hasSize(equalTo(1)));
 		assertThat(diagnoses, everyItem(hasProperty("encounter", hasProperty("uuid", equalTo(ENCOUNTER_UUID)))));

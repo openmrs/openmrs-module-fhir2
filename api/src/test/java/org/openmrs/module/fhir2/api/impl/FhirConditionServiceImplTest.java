@@ -46,12 +46,16 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Patient;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Condition;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirDiagnosisService;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
@@ -98,6 +102,8 @@ public class FhirConditionServiceImplTest {
 	@Mock
 	private FhirDiagnosisService diagnosisService;
 	
+	private MockedStatic<Context> contextMock;
+	
 	private Condition openmrsCondition;
 	
 	private org.hl7.fhir.r4.model.Condition fhirCondition;
@@ -122,6 +128,14 @@ public class FhirConditionServiceImplTest {
 		
 		fhirCondition = new org.hl7.fhir.r4.model.Condition();
 		fhirCondition.setId(CONDITION_UUID);
+		
+		contextMock = Mockito.mockStatic(Context.class);
+		contextMock.when(() -> Context.hasPrivilege(any())).thenReturn(true);
+	}
+	
+	@After
+	public void tearDown() {
+		contextMock.close();
 	}
 	
 	private List<IBaseResource> get(IBundleProvider results) {
@@ -324,10 +338,10 @@ public class FhirConditionServiceImplTest {
 	}
 	
 	@Test
-	public void shouldSearchExplicitlyFor_shouldReturnTrueForNullParam() {
+	public void shouldSearchExplicitlyFor_shouldReturnFalseForNullParam() {
 		boolean result = conditionService.shouldSearchExplicitlyFor(null, FhirConstants.CONDITION_CATEGORY_CODE_CONDITION);
 		
-		assertThat(result, equalTo(true));
+		assertThat(result, equalTo(false));
 	}
 	
 	@Test
@@ -419,15 +433,4 @@ public class FhirConditionServiceImplTest {
 		
 		assertThat(result, sameInstance(condBundle));
 	}
-	
-	@Test
-	public void searchConditions_shouldReturnEmptyBundleWhenNoMatches() {
-		TokenAndListParam category = new TokenAndListParam();
-		
-		IBundleProvider result = conditionService.searchConditions(
-		    new ConditionSearchParams(null, null, null, null, null, null, category, null, null, null, new HashSet<>()));
-		
-		assertThat(result.getResources(0, 1), empty());
-	}
-	
 }

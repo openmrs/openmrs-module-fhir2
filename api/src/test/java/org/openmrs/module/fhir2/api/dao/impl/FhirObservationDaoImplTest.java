@@ -10,17 +10,24 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.fail;
+import static org.openmrs.util.PrivilegeConstants.GET_OBS;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.Obs;
+import org.openmrs.api.APIAuthenticationException;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirObservationDao;
@@ -73,6 +80,93 @@ public class FhirObservationDaoImplTest extends BaseFhirContextSensitiveTest {
 		Collection<Obs> obs = dao.getSearchResults(theParams);
 		
 		assertThat(obs, notNullValue());
+	}
+	
+	@Test
+	public void shouldRequireGetObsPrivilegeForGet() {
+		Context.logout();
+		
+		try {
+			dao.get(OBS_UUID);
+			fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
+		}
+		catch (APIAuthenticationException e) {
+			assertThat(e.getMessage(), containsString("Privilege"));
+		}
+		
+		try {
+			Context.addProxyPrivilege(GET_OBS);
+			assertThat(dao.get(OBS_UUID), notNullValue());
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_OBS);
+		}
+	}
+	
+	@Test
+	public void shouldRequireGetObsPrivilegeForGetByCollection() {
+		Context.logout();
+		
+		try {
+			dao.get(Arrays.asList(OBS_UUID));
+			fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
+		}
+		catch (APIAuthenticationException e) {
+			assertThat(e.getMessage(), containsString("Privilege"));
+		}
+		
+		try {
+			Context.addProxyPrivilege(GET_OBS);
+			List<Obs> observations = dao.get(Arrays.asList(OBS_UUID));
+			assertThat(observations, notNullValue());
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_OBS);
+		}
+	}
+	
+	@Test
+	public void shouldRequireGetObsPrivilegeForGetSearchResults() {
+		Context.logout();
+		
+		try {
+			dao.getSearchResults(new SearchParameterMap());
+			fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
+		}
+		catch (APIAuthenticationException e) {
+			assertThat(e.getMessage(), containsString("Privilege"));
+		}
+		
+		try {
+			Context.addProxyPrivilege(GET_OBS);
+			List<Obs> observations = dao.getSearchResults(new SearchParameterMap());
+			assertThat(observations, notNullValue());
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_OBS);
+		}
+	}
+	
+	@Test
+	public void shouldRequireGetObsPrivilegeForGetSearchResultsCount() {
+		Context.logout();
+		
+		try {
+			dao.getSearchResultsCount(new SearchParameterMap());
+			fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
+		}
+		catch (APIAuthenticationException e) {
+			assertThat(e.getMessage(), containsString("Privilege"));
+		}
+		
+		try {
+			Context.addProxyPrivilege(GET_OBS);
+			int count = dao.getSearchResultsCount(new SearchParameterMap());
+			assertThat(count, notNullValue());
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_OBS);
+		}
 	}
 	
 }

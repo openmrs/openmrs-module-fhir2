@@ -22,19 +22,19 @@ import org.openmrs.util.PrivilegeConstants;
 public interface FhirConditionDao extends FhirDao<Condition> {
 	
 	@Override
-	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+	@Authorized(PrivilegeConstants.GET_CONDITIONS)
 	Condition get(@Nonnull String uuid);
 	
 	@Override
-	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+	@Authorized(PrivilegeConstants.GET_CONDITIONS)
 	List<Condition> get(@Nonnull Collection<String> uuids);
 	
 	@Override
-	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+	@Authorized(PrivilegeConstants.GET_CONDITIONS)
 	List<Condition> getSearchResults(@Nonnull SearchParameterMap theParams);
 	
 	@Override
-	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+	@Authorized(PrivilegeConstants.GET_CONDITIONS)
 	int getSearchResultsCount(@Nonnull SearchParameterMap theParams);
 	
 	@Override
@@ -42,7 +42,7 @@ public interface FhirConditionDao extends FhirDao<Condition> {
 	Condition createOrUpdate(@Nonnull Condition newCondition);
 	
 	@Override
-	@Authorized(PrivilegeConstants.DELETE_CONDITIONS)
+	@Authorized(PrivilegeConstants.EDIT_CONDITIONS)
 	Condition delete(@Nonnull String uuid);
 	
 }
