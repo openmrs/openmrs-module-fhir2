@@ -18,7 +18,9 @@ import static org.openmrs.module.fhir2.api.util.FhirUtils.getMetadataTranslation
 import javax.annotation.Nonnull;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -165,10 +167,15 @@ public class LocationTranslatorImpl implements LocationTranslator {
 	}
 	
 	protected List<ContactPoint> getLocationContactDetails(@Nonnull org.openmrs.Location location) {
-		return fhirLocationDao
-		        .getActiveAttributesByLocationAndAttributeTypeUuid(location,
-		            propertyService.getGlobalProperty(FhirConstants.LOCATION_CONTACT_POINT_ATTRIBUTE_TYPE))
-		        .stream().map(telecomTranslator::toFhirResource).collect(Collectors.toList());
+		String attributeTypeUuid = propertyService.getGlobalProperty(FhirConstants.LOCATION_CONTACT_POINT_ATTRIBUTE_TYPE);
+		if (attributeTypeUuid == null) {
+			return Collections.emptyList();
+		}
+		Map<org.openmrs.Location, List<LocationAttribute>> activeAttributeMap = fhirLocationDao
+		        .getActiveAttributesByLocationsAndAttributeTypeUuid(Collections.singletonList(location), attributeTypeUuid);
+		List<LocationAttribute> activeAttributes = activeAttributeMap == null ? Collections.emptyList()
+		        : activeAttributeMap.getOrDefault(location, Collections.emptyList());
+		return activeAttributes.stream().map(telecomTranslator::toFhirResource).collect(Collectors.toList());
 	}
 	
 	/**
