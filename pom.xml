@@ -509,6 +509,11 @@
                 <version>1.1.1</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>org.openmrs.module</groupId>
+                <artifactId>patientflags-api</artifactId>
+                <version>${patinetflagversion}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -528,6 +533,10 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.openmrs.module</groupId>
+            <artifactId>patientflags-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.hamcrest</groupId>
@@ -928,6 +937,7 @@
         <openmrsPlatformToolsVersion>2.4.1</openmrsPlatformToolsVersion>
         <hapifhirVersion>5.7.9</hapifhirVersion>
         <ucumVersion>1.0.3</ucumVersion>
+        <patinetflagversion>3.0.8-SNAPSHOT</patinetflagversion>
     </properties>
 
     <profiles>
