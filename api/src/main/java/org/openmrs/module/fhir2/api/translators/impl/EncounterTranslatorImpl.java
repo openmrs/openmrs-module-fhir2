@@ -40,107 +40,101 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class EncounterTranslatorImpl extends BaseEncounterTranslator implements EncounterTranslator<org.openmrs.Encounter> {
-	
+
 	@Getter(PROTECTED)
 	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private EncounterParticipantTranslator participantTranslator;
-	
+
 	@Getter(PROTECTED)
 	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private EncounterLocationTranslator encounterLocationTranslator;
-	
+
 	@Getter(PROTECTED)
 	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private PatientReferenceTranslator patientReferenceTranslator;
-	
+
 	@Getter(PROTECTED)
 	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private EncounterReferenceTranslator<Visit> visitReferenceTranlator;
-	
+
 	@Getter(PROTECTED)
 	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private EncounterTypeTranslator<EncounterType> encounterTypeTranslator;
-	
+
 	@Getter(PROTECTED)
 	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private EncounterPeriodTranslator<org.openmrs.Encounter> encounterPeriodTranslator;
-	
+
 	@Override
 	public Encounter toFhirResource(@Nonnull org.openmrs.Encounter openmrsEncounter) {
 		notNull(openmrsEncounter, "The Openmrs Encounter object should not be null");
-		
+
 		Encounter encounter = new Encounter();
 		encounter.setId(openmrsEncounter.getUuid());
 		encounter.setStatus(Encounter.EncounterStatus.UNKNOWN);
 		encounter.setType(encounterTypeTranslator.toFhirResource(openmrsEncounter.getEncounterType()));
-		
+
 		encounter.setSubject(patientReferenceTranslator.toFhirResource(openmrsEncounter.getPatient()));
 		encounter.setParticipant(openmrsEncounter.getEncounterProviders().stream().map(participantTranslator::toFhirResource)
 		        .collect(Collectors.toList()));
-		
+
 		// add visit as part of encounter
 		encounter.setPartOf(visitReferenceTranlator.toFhirResource(openmrsEncounter.getVisit()));
-		
+
 		if (openmrsEncounter.getLocation() != null) {
 			encounter.setLocation(
 			    Collections.singletonList(encounterLocationTranslator.toFhirResource(openmrsEncounter.getLocation())));
 		}
-		
+
 		encounter.setPeriod(encounterPeriodTranslator.toFhirResource(openmrsEncounter));
-		
+
 		encounter.getMeta().addTag(FhirConstants.OPENMRS_FHIR_EXT_ENCOUNTER_TAG, "encounter", "Encounter");
 		encounter.getMeta().setLastUpdated(getLastUpdated(openmrsEncounter));
 		encounter.getMeta().setVersionId(getVersionId(openmrsEncounter));
 		encounter.setClass_(mapLocationToClass(openmrsEncounter.getLocation()));
-		
+
 		return encounter;
 	}
-	
+
 	@Override
 	public org.openmrs.Encounter toOpenmrsType(@Nonnull Encounter fhirEncounter) {
 		notNull(fhirEncounter, "The Encounter object should not be null");
 		return this.toOpenmrsType(new org.openmrs.Encounter(), fhirEncounter);
 	}
-	
+
 	@Override
 	public org.openmrs.Encounter toOpenmrsType(@Nonnull org.openmrs.Encounter existingEncounter,
 	        @Nonnull Encounter encounter) {
 		notNull(existingEncounter, "The existing Openmrs Encounter object should not be null");
 		notNull(encounter, "The Encounter object should not be null");
-		
+
 		if (encounter.hasId()) {
 			existingEncounter.setUuid(encounter.getIdElement().getIdPart());
 		}
-		
+
 		EncounterType encounterType = encounterTypeTranslator.toOpenmrsType(encounter.getType());
 		if (encounterType != null) {
 			existingEncounter.setEncounterType(encounterType);
 		}
-		
+
 		existingEncounter.setPatient(patientReferenceTranslator.toOpenmrsType(encounter.getSubject()));
-		
+
 		// TODO Improve this to do actual diffing
-		Set<EncounterProvider> existingProviders = existingEncounter.getEncounterProviders();
-		if (existingProviders != null && !existingProviders.isEmpty()) {
-			existingProviders.clear();
-		}
-		
-		if (existingProviders == null) {
-			existingProviders = new LinkedHashSet<>(encounter.getParticipant().size());
-		}
-		
-		existingProviders.addAll(encounter.getParticipant().stream()
-		        .map(encounterParticipantComponent -> participantTranslator.toOpenmrsType(new EncounterProvider(),
-		            encounterParticipantComponent))
-		        .peek(ep -> ep.setEncounter(existingEncounter)).collect(Collectors.toCollection(LinkedHashSet::new)));
-		
-		existingEncounter.setEncounterProviders(existingProviders);
-		
+		// Replaces encounter providers with updated values from FHIR participant field
+		// Fixes FM2-660: Previous logic failed to persist updates to encounter participants
+		Set<EncounterProvider> updatedProviders = encounter.getParticipant().stream()
+				.map(participant -> participantTranslator.toOpenmrsType(new EncounterProvider(), participant))
+				.peek(provider -> provider.setEncounter(existingEncounter))
+				.collect(Collectors.toCollection(LinkedHashSet::new));
+
+		existingEncounter.setEncounterProviders(updatedProviders);
+
+
 		existingEncounter.setLocation(encounterLocationTranslator.toOpenmrsType(encounter.getLocationFirstRep()));
 		existingEncounter.setVisit(visitReferenceTranlator.toOpenmrsType(encounter.getPartOf()));
-		
+
 		encounterPeriodTranslator.toOpenmrsType(existingEncounter, encounter.getPeriod());
-		
+
 		return existingEncounter;
 	}
 }
