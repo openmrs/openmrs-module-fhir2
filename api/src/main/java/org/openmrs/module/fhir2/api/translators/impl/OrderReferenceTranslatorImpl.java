@@ -49,7 +49,7 @@ public class OrderReferenceTranslatorImpl implements OrderReferenceTranslator {
 		if (order == null) {
 			return null;
 		}
-		return getServiceRequestReference(order);
+		return getRequestReference(order);
 	}
 	
 	@Override
@@ -77,7 +77,7 @@ public class OrderReferenceTranslatorImpl implements OrderReferenceTranslator {
 		}).orElse(null);
 	}
 	
-	private Reference getServiceRequestReference(Order order) {
+	private Reference getRequestReference(Order order) {
 		Reference orderReference = ReferenceHandlingTranslator.createOrderReference(order);
 		if (orderReference != null) {
 			return orderReference;

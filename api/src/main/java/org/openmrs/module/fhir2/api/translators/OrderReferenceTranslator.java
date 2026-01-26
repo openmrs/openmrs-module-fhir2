@@ -12,4 +12,10 @@ package org.openmrs.module.fhir2.api.translators;
 import org.hl7.fhir.r4.model.Reference;
 import org.openmrs.Order;
 
+/**
+ * This interface represents a generic means of resolving an Openmrs order to either a service
+ * request or medication request reference.
+ * 
+ * @Since 2.8.1
+ */
 public interface OrderReferenceTranslator extends OpenmrsFhirTranslator<Order, Reference> {}
