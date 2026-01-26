@@ -1121,4 +1121,39 @@
                                  referencedColumnNames="reference_id"/>
     </changeSet>
 
+    <changeSet id="add_col_diagnostic_report_status_conclusion_202511" author="angshu">
+        <preConditions onFail="MARK_RAN" onError="WARN">
+            <tableExists tableName="fhir_diagnostic_report"/>
+            <not>
+                <columnExists tableName="fhir_diagnostic_report" columnName="conclusion"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="fhir_diagnostic_report">
+            <column name="conclusion" type="VARCHAR(1024)"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="add_table_diagnostic_report_service_request_251212" author="angshu">
+        <preConditions onFail="MARK_RAN" onError="WARN">
+            <not>
+                <tableExists tableName="fhir_diagnostic_report_service_request"/>
+            </not>
+            <tableExists tableName="fhir_diagnostic_report"/>
+        </preConditions>
+        <createTable tableName="fhir_diagnostic_report_service_request">
+            <column name="diagnostic_report_id" type="int">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="order_id" type="int">
+                <constraints primaryKey="true"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint constraintName="fhir_diagnostic_report_service_request_diagnostic_report"
+                                 baseTableName="fhir_diagnostic_report_service_request" baseColumnNames="diagnostic_report_id"
+                                 referencedTableName="fhir_diagnostic_report" referencedColumnNames="diagnostic_report_id"/>
+        <addForeignKeyConstraint constraintName="fhir_diagnostic_report_service_request_order"
+                                 baseTableName="fhir_diagnostic_report_service_request" baseColumnNames="order_id"
+                                 referencedTableName="orders" referencedColumnNames="order_id"/>
+    </changeSet>
+
 </databaseChangeLog>

@@ -17,19 +17,24 @@ import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.
 import javax.annotation.Nonnull;
 
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.openmrs.Concept;
 import org.openmrs.Encounter;
 import org.openmrs.Obs;
+import org.openmrs.Order;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.DiagnosticReportTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationReferenceTranslator;
+import org.openmrs.module.fhir2.api.translators.OrderReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.util.FhirUtils;
 import org.openmrs.module.fhir2.model.FhirDiagnosticReport;
@@ -54,6 +59,10 @@ public class DiagnosticReportTranslatorImpl implements DiagnosticReportTranslato
 	@Getter(PROTECTED)
 	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private ConceptTranslator conceptTranslator;
+	
+	@Getter(PROTECTED)
+	@Setter(value = PROTECTED, onMethod_ = @Autowired)
+	private OrderReferenceTranslator orderReferenceTranslator;
 	
 	@Override
 	public DiagnosticReport toFhirResource(@Nonnull FhirDiagnosticReport fhirDiagnosticReport) {
@@ -95,6 +104,11 @@ public class DiagnosticReportTranslatorImpl implements DiagnosticReportTranslato
 		
 		for (Obs obs : fhirDiagnosticReport.getResults()) {
 			diagnosticReport.addResult(observationReferenceTranslator.toFhirResource(obs));
+		}
+		diagnosticReport.setConclusion(fhirDiagnosticReport.getConclusion());
+		if (fhirDiagnosticReport.getOrders() != null) {
+			fhirDiagnosticReport.getOrders()
+			        .forEach(order -> diagnosticReport.addBasedOn(orderReferenceTranslator.toFhirResource(order)));
 		}
 		
 		diagnosticReport.getMeta().setLastUpdated(getLastUpdated(fhirDiagnosticReport));
@@ -141,7 +155,6 @@ public class DiagnosticReportTranslatorImpl implements DiagnosticReportTranslato
 					        .setSubject(patientReferenceTranslator.toOpenmrsType(diagnosticReport.getSubject()));
 				}
 			});
-			
 		}
 		
 		if (diagnosticReport.hasCode()) {
@@ -152,6 +165,22 @@ public class DiagnosticReportTranslatorImpl implements DiagnosticReportTranslato
 			existingDiagnosticReport.setIssued(diagnosticReport.getIssued());
 		} else if (existingDiagnosticReport.getIssued() == null) {
 			existingDiagnosticReport.setIssued(new Date());
+		}
+		
+		if (diagnosticReport.hasConclusion()) {
+			existingDiagnosticReport.setConclusion(diagnosticReport.getConclusion());
+		}
+		
+		if (diagnosticReport.hasBasedOn()) {
+			Set<Order> orders = new HashSet<>();
+			diagnosticReport.getBasedOn().forEach(reference -> {
+				Order aOrder = orderReferenceTranslator.toOpenmrsType(reference);
+				if (aOrder == null) {
+					throw new InvalidRequestException("Invalid Service Request Reference for Diagnostic Report");
+				}
+				orders.add(aOrder);
+			});
+			existingDiagnosticReport.setOrders(orders);
 		}
 		
 		existingDiagnosticReport.setResults(diagnosticReport.getResult().stream()

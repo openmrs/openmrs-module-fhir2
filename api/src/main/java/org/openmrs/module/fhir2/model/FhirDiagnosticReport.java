@@ -33,6 +33,7 @@ import org.openmrs.BaseOpenmrsData;
 import org.openmrs.Concept;
 import org.openmrs.Encounter;
 import org.openmrs.Obs;
+import org.openmrs.Order;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
 
@@ -78,10 +79,29 @@ public class FhirDiagnosticReport extends BaseOpenmrsData {
 	@JoinTable(name = "fhir_diagnostic_report_results", joinColumns = @JoinColumn(name = "diagnostic_report_id"), inverseJoinColumns = @JoinColumn(name = "obs_id"))
 	private Set<Obs> results = new HashSet<>();
 	
+	/**
+	 * @Since 2.8.1
+	 * @param conclusion of results
+	 * @return conclusion of results
+	 */
+	@Column(name = "conclusion", length = 1024)
+	private String conclusion;
+	
+	/**
+	 * @Since 2.8.1
+	 * @param orders references to service requests the report is based on
+	 * @return orders the report is based on
+	 */
+	@OneToMany
+	@JoinTable(name = "fhir_diagnostic_report_service_request", joinColumns = @JoinColumn(name = "diagnostic_report_id"), inverseJoinColumns = @JoinColumn(name = "order_id"))
+	private Set<Order> orders = new HashSet<>();
+	
 	public enum DiagnosticReportStatus {
 		REGISTERED,
 		PARTIAL,
 		PRELIMINARY,
+		AMENDED,
+		CANCELLED,
 		FINAL,
 		UNKNOWN
 	}
