@@ -33,4 +33,7 @@
     <orders order_id="2005" order_type_id="1" order_number="2005" urgency="ROUTINE" patient_id="2" encounter_id="2005" date_activated="2012-08-19 00:00:00.0" concept_id="792" orderer="1" creator="1" date_created="2006-03-11 15:57:35.0" fulfiller_status="COMPLETED" voided="false" uuid="ac463525-9b1a-44f2-99f1-0d6a10d5b60d" order_action="NEW" care_setting="1"/>
     <drug_order order_id="2005" drug_inventory_id="3" dose="325.0" dose_units="50" as_needed="false" frequency="1" dosing_type="org.openmrs.SimpleDosingInstructions" route="22" quantity="1.0" quantity_units="51" num_refills="10" dispense_as_written="0" />
 
+    <!-- encounter with only a non-drug order (plain Order, not DrugOrder) -->
+    <encounter encounter_id="2006" encounter_type="1" form_id="1" encounter_datetime="2010-01-01 00:00:00.0" patient_id="2" location_id="1" creator="1" date_created="2005-01-01 00:00:00.0" voided="0" uuid="a0f8219e-4de2-4c12-b45a-e5e9b6c3d2a1"/>
+    <orders order_id="2006" order_type_id="1" order_number="2006" urgency="ROUTINE" patient_id="2" encounter_id="2006" date_activated="2012-08-19 00:00:00.0" concept_id="792" orderer="1" creator="1" date_created="2006-03-11 15:57:35.0" voided="false" uuid="b2c4e6f8-1a3b-5c7d-9e0f-2a4b6c8d0e1f" order_action="NEW" care_setting="1"/>
 </dataset>

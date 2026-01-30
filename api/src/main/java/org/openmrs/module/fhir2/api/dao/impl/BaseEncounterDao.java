@@ -28,6 +28,7 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.openmrs.Auditable;
+import org.openmrs.DrugOrder;
 import org.openmrs.Encounter;
 import org.openmrs.OpenmrsObject;
 import org.openmrs.Order;
@@ -121,7 +122,8 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 							}
 							
 							// Constrain only on non-voided Drug Orders
-							// TODO Do these criteria still work?
+							criteriaContext.addPredicate(
+							    criteriaContext.getCriteriaBuilder().equal(ordersJoin.get().type(), DrugOrder.class));
 							criteriaContext.addPredicate(
 							    criteriaContext.getCriteriaBuilder().equal(ordersJoin.get().get("voided"), false));
 							criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder()

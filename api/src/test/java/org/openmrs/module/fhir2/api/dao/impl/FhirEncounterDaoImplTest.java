@@ -57,6 +57,8 @@ public class FhirEncounterDaoImplTest extends BaseFhirContextSensitiveTest {
 	
 	private static final Integer ENCOUNTER_WITH_ONLY_COMPLETED_DRUG_ORDER = 2005;
 	
+	private static final Integer ENCOUNTER_WITH_ONLY_NON_DRUG_ORDER = 2006;
+	
 	private static final String ENCOUNTER_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirEncounterDaoImpl_2_2Test_initial_data.xml";
 	
 	@Autowired
@@ -307,5 +309,25 @@ public class FhirEncounterDaoImplTest extends BaseFhirContextSensitiveTest {
 		    hasItem(hasId(ENCOUNTER_WITH_ONLY_COMPLETED_DRUG_ORDER)));
 		assertThat("Encounter without Drug Orders is not returned", matchingResources,
 		    not(hasItem(hasId(ENCOUNTER_WITH_NO_DRUG_ORDERS_ID))));
+	}
+	
+	@Test
+	public void shouldNotReturnEncounterWithOnlyNonDrugOrder() {
+		// given
+		HasOrListParam hasOrListParam = new HasOrListParam();
+		hasOrListParam.add(new HasParam("MedicationRequest", "encounter", "intent", "order"));
+		HasAndListParam hasAndListParam = new HasAndListParam();
+		hasAndListParam.addAnd(hasOrListParam);
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.HAS_SEARCH_HANDLER,
+		    hasAndListParam);
+		
+		// when
+		List<Encounter> matchingResources = dao.getSearchResults(theParams);
+		
+		// then
+		assertThat("Encounter with only non-drug Order should not be returned", matchingResources,
+		    not(hasItem(hasId(ENCOUNTER_WITH_ONLY_NON_DRUG_ORDER))));
+		assertThat("Encounter with Drug Orders should still be returned", matchingResources,
+		    hasItem(hasId(ENCOUNTER_WITH_DRUG_ORDERS_ID)));
 	}
 }
