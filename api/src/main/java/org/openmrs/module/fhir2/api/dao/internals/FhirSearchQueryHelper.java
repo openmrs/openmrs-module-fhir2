@@ -211,14 +211,21 @@ public class FhirSearchQueryHelper extends BaseDao {
 			// its center is `offsetSeconds` in the past.
 			final long offset;
 			
-			// Duration only supports hours as a chunk of seconds
+			// Duration.get() only supports SECONDS and NANOS; Period.get() only
+			// supports YEARS, MONTHS, and DAYS. Convert to the target unit manually
+			// where needed. Math.max(1, ...) prevents integer division from
+			// collapsing the range to a single instant for small values (e.g. 1/2=0).
 			if (temporalUnit == ChronoUnit.HOURS) {
-				offset = temporalAmount.get(ChronoUnit.SECONDS) / (2 * 3600);
+				offset = Math.max(1, temporalAmount.get(ChronoUnit.SECONDS) / (2 * 3600));
+			} else if (temporalUnit == ChronoUnit.MINUTES) {
+				offset = Math.max(1, temporalAmount.get(ChronoUnit.SECONDS) / (2 * 60));
+			} else if (temporalUnit == ChronoUnit.WEEKS) {
+				offset = Math.max(1, temporalAmount.get(ChronoUnit.DAYS) / (2 * 7));
 			} else {
-				offset = temporalAmount.get(temporalUnit) / 2;
+				offset = Math.max(1, temporalAmount.get(temporalUnit) / 2);
 			}
 			
-			LocalDateTime lowerBoundDateTime = localDateTime.minus(Duration.of(offset, temporalUnit));
+			LocalDateTime lowerBoundDateTime = localDateTime.minus(offset, temporalUnit);
 			Date lowerBound = Date.from(lowerBoundDateTime.atZone(ZoneId.systemDefault()).toInstant());
 			
 			LocalDateTime upperBoundDateTime = localDateTime.plus(offset, temporalUnit);

@@ -692,6 +692,198 @@ public class ConditionSearchQueryTest extends BaseFhirContextSensitiveTest {
 	}
 	
 	@Test
+	public void searchForConditions_shouldReturnConditionByOnsetAgeEqualOneSecond() {
+		Condition condition = conditionService.getConditionByUuid(CONDITION_UUID);
+		Date onsetDate = DateUtils.addSeconds(new Date(), -1);
+		condition.setOnsetDate(onsetDate);
+		conditionService.saveCondition(condition);
+		
+		QuantityOrListParam orList = new QuantityOrListParam();
+		orList.addOr(new QuantityParam(ParamPrefixEnum.EQUAL, 1, "", "s"));
+		QuantityAndListParam onsetAgeParam = new QuantityAndListParam().addAnd(orList);
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER,
+		    onsetAgeParam);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
+		assertThat(((org.hl7.fhir.r4.model.Condition) resultList.iterator().next()).getIdElement().getIdPart(),
+		    equalTo(CONDITION_UUID));
+	}
+	
+	@Test
+	public void searchForConditions_shouldReturnConditionByOnsetAgeEqualOneMinute() {
+		Condition condition = conditionService.getConditionByUuid(CONDITION_UUID);
+		Date onsetDate = DateUtils.addMinutes(new Date(), -1);
+		condition.setOnsetDate(onsetDate);
+		conditionService.saveCondition(condition);
+		
+		QuantityOrListParam orList = new QuantityOrListParam();
+		orList.addOr(new QuantityParam(ParamPrefixEnum.EQUAL, 1, "", "min"));
+		QuantityAndListParam onsetAgeParam = new QuantityAndListParam().addAnd(orList);
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER,
+		    onsetAgeParam);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
+		assertThat(((org.hl7.fhir.r4.model.Condition) resultList.iterator().next()).getIdElement().getIdPart(),
+		    equalTo(CONDITION_UUID));
+	}
+	
+	@Test
+	public void searchForConditions_shouldReturnConditionByOnsetAgeEqualMinutes() {
+		Condition condition = conditionService.getConditionByUuid(CONDITION_UUID);
+		Date onsetDate = DateUtils.addMinutes(new Date(), -45);
+		condition.setOnsetDate(onsetDate);
+		conditionService.saveCondition(condition);
+		
+		QuantityOrListParam orList = new QuantityOrListParam();
+		orList.addOr(new QuantityParam(ParamPrefixEnum.EQUAL, 45, "", "min"));
+		QuantityAndListParam onsetAgeParam = new QuantityAndListParam().addAnd(orList);
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER,
+		    onsetAgeParam);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
+		assertThat(((org.hl7.fhir.r4.model.Condition) resultList.iterator().next()).getIdElement().getIdPart(),
+		    equalTo(CONDITION_UUID));
+	}
+	
+	@Test
+	public void searchForConditions_shouldReturnConditionByOnsetAgeEqualOneHour() {
+		Condition condition = conditionService.getConditionByUuid(CONDITION_UUID);
+		Date onsetDate = DateUtils.addHours(new Date(), -1);
+		condition.setOnsetDate(onsetDate);
+		conditionService.saveCondition(condition);
+		
+		QuantityOrListParam orList = new QuantityOrListParam();
+		orList.addOr(new QuantityParam(ParamPrefixEnum.EQUAL, 1, "", "h"));
+		QuantityAndListParam onsetAgeParam = new QuantityAndListParam().addAnd(orList);
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER,
+		    onsetAgeParam);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
+		assertThat(((org.hl7.fhir.r4.model.Condition) resultList.iterator().next()).getIdElement().getIdPart(),
+		    equalTo(CONDITION_UUID));
+	}
+	
+	@Test
+	public void searchForConditions_shouldReturnConditionByOnsetAgeEqualOneDay() {
+		Condition condition = conditionService.getConditionByUuid(CONDITION_UUID);
+		Date onsetDate = DateUtils.addDays(new Date(), -1);
+		condition.setOnsetDate(onsetDate);
+		conditionService.saveCondition(condition);
+		
+		QuantityOrListParam orList = new QuantityOrListParam();
+		orList.addOr(new QuantityParam(ParamPrefixEnum.EQUAL, 1, "", "d"));
+		QuantityAndListParam onsetAgeParam = new QuantityAndListParam().addAnd(orList);
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER,
+		    onsetAgeParam);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
+		assertThat(((org.hl7.fhir.r4.model.Condition) resultList.iterator().next()).getIdElement().getIdPart(),
+		    equalTo(CONDITION_UUID));
+	}
+	
+	@Test
+	public void searchForConditions_shouldReturnConditionByOnsetAgeEqualOneWeek() {
+		Condition condition = conditionService.getConditionByUuid(CONDITION_UUID);
+		Date onsetDate = DateUtils.addWeeks(new Date(), -1);
+		condition.setOnsetDate(onsetDate);
+		conditionService.saveCondition(condition);
+		
+		QuantityOrListParam orList = new QuantityOrListParam();
+		orList.addOr(new QuantityParam(ParamPrefixEnum.EQUAL, 1, "", "wk"));
+		QuantityAndListParam onsetAgeParam = new QuantityAndListParam().addAnd(orList);
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER,
+		    onsetAgeParam);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
+		assertThat(((org.hl7.fhir.r4.model.Condition) resultList.iterator().next()).getIdElement().getIdPart(),
+		    equalTo(CONDITION_UUID));
+	}
+	
+	@Test
+	public void searchForConditions_shouldReturnConditionByOnsetAgeEqualOneMonth() {
+		Condition condition = conditionService.getConditionByUuid(CONDITION_UUID);
+		Date onsetDate = DateUtils.addMonths(new Date(), -1);
+		condition.setOnsetDate(onsetDate);
+		conditionService.saveCondition(condition);
+		
+		QuantityOrListParam orList = new QuantityOrListParam();
+		orList.addOr(new QuantityParam(ParamPrefixEnum.EQUAL, 1, "", "mo"));
+		QuantityAndListParam onsetAgeParam = new QuantityAndListParam().addAnd(orList);
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER,
+		    onsetAgeParam);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
+		assertThat(((org.hl7.fhir.r4.model.Condition) resultList.iterator().next()).getIdElement().getIdPart(),
+		    equalTo(CONDITION_UUID));
+	}
+	
+	@Test
+	public void searchForConditions_shouldReturnConditionByOnsetAgeEqualOneYear() {
+		Condition condition = conditionService.getConditionByUuid(CONDITION_UUID);
+		Date onsetDate = DateUtils.addYears(new Date(), -1);
+		condition.setOnsetDate(onsetDate);
+		conditionService.saveCondition(condition);
+		
+		QuantityOrListParam orList = new QuantityOrListParam();
+		orList.addOr(new QuantityParam(ParamPrefixEnum.EQUAL, 1, "", "a"));
+		QuantityAndListParam onsetAgeParam = new QuantityAndListParam().addAnd(orList);
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER,
+		    onsetAgeParam);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
+		assertThat(((org.hl7.fhir.r4.model.Condition) resultList.iterator().next()).getIdElement().getIdPart(),
+		    equalTo(CONDITION_UUID));
+	}
+	
+	@Test
 	public void searchForConditions_shouldReturnConditionByOnsetAgeIntervalDay() {
 		Condition condition = conditionService.getConditionByUuid(CONDITION_UUID);
 		Date onsetDate = DateUtils.addDays(new Date(), -9);
