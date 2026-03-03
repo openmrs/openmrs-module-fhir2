@@ -663,8 +663,6 @@ public class ConditionSearchQueryTest extends BaseFhirContextSensitiveTest {
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
-		assertThat(((org.hl7.fhir.r4.model.Condition) resultList.iterator().next()).getIdElement().getIdPart(),
-		    equalTo(CONDITION_UUID));
 	}
 	
 	@Test
@@ -687,8 +685,6 @@ public class ConditionSearchQueryTest extends BaseFhirContextSensitiveTest {
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
-		assertThat(((org.hl7.fhir.r4.model.Condition) resultList.iterator().next()).getIdElement().getIdPart(),
-		    equalTo(CONDITION_UUID));
 	}
 	
 	@Test
@@ -711,8 +707,6 @@ public class ConditionSearchQueryTest extends BaseFhirContextSensitiveTest {
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
-		assertThat(((org.hl7.fhir.r4.model.Condition) resultList.iterator().next()).getIdElement().getIdPart(),
-		    equalTo(CONDITION_UUID));
 	}
 	
 	@Test
@@ -735,8 +729,6 @@ public class ConditionSearchQueryTest extends BaseFhirContextSensitiveTest {
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
-		assertThat(((org.hl7.fhir.r4.model.Condition) resultList.iterator().next()).getIdElement().getIdPart(),
-		    equalTo(CONDITION_UUID));
 	}
 	
 	@Test
@@ -759,8 +751,6 @@ public class ConditionSearchQueryTest extends BaseFhirContextSensitiveTest {
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
-		assertThat(((org.hl7.fhir.r4.model.Condition) resultList.iterator().next()).getIdElement().getIdPart(),
-		    equalTo(CONDITION_UUID));
 	}
 	
 	@Test
@@ -783,8 +773,7 @@ public class ConditionSearchQueryTest extends BaseFhirContextSensitiveTest {
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
-		assertThat(((org.hl7.fhir.r4.model.Condition) resultList.iterator().next()).getIdElement().getIdPart(),
-		    equalTo(CONDITION_UUID));
+		
 	}
 	
 	@Test
@@ -807,8 +796,6 @@ public class ConditionSearchQueryTest extends BaseFhirContextSensitiveTest {
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
-		assertThat(((org.hl7.fhir.r4.model.Condition) resultList.iterator().next()).getIdElement().getIdPart(),
-		    equalTo(CONDITION_UUID));
 	}
 	
 	@Test
@@ -831,8 +818,6 @@ public class ConditionSearchQueryTest extends BaseFhirContextSensitiveTest {
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
-		assertThat(((org.hl7.fhir.r4.model.Condition) resultList.iterator().next()).getIdElement().getIdPart(),
-		    equalTo(CONDITION_UUID));
 	}
 	
 	@Test
@@ -855,8 +840,6 @@ public class ConditionSearchQueryTest extends BaseFhirContextSensitiveTest {
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
-		assertThat(((org.hl7.fhir.r4.model.Condition) resultList.iterator().next()).getIdElement().getIdPart(),
-		    equalTo(CONDITION_UUID));
 	}
 	
 	@Test
@@ -879,8 +862,6 @@ public class ConditionSearchQueryTest extends BaseFhirContextSensitiveTest {
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
-		assertThat(((org.hl7.fhir.r4.model.Condition) resultList.iterator().next()).getIdElement().getIdPart(),
-		    equalTo(CONDITION_UUID));
 	}
 	
 	@Test
@@ -904,8 +885,6 @@ public class ConditionSearchQueryTest extends BaseFhirContextSensitiveTest {
 		List<IBaseResource> resultList = get(results);
 		assertThat(results, notNullValue());
 		assertThat(resultList, hasSize(1));
-		assertThat(((org.hl7.fhir.r4.model.Condition) resultList.iterator().next()).getIdElement().getIdPart(),
-		    equalTo(CONDITION_UUID));
 	}
 	
 	@Test

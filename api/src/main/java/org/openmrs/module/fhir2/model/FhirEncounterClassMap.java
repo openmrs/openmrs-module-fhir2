@@ -23,7 +23,6 @@ import java.util.UUID;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.hibernate.search.annotations.Field;
 import org.openmrs.Auditable;
 import org.openmrs.Location;
 import org.openmrs.Retireable;
@@ -75,7 +74,6 @@ public class FhirEncounterClassMap implements Auditable, Retireable {
 	private Date dateChanged;
 	
 	@Column(name = "retired", nullable = false)
-	@Field
 	private Boolean retired = Boolean.FALSE;
 	
 	@Column(name = "date_retired")

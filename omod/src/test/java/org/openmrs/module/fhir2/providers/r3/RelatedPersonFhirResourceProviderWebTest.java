@@ -16,6 +16,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.startsWith;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -103,7 +104,7 @@ public class RelatedPersonFhirResourceProviderWebTest extends BaseFhirR3Resource
 		MockHttpServletResponse response = get("/RelatedPerson/" + RELATED_PERSON_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		
 		RelatedPerson resource = readResponse(response);
 		assertThat(resource.getIdElement().getIdPart(), equalTo(RELATED_PERSON_UUID));
@@ -374,7 +375,7 @@ public class RelatedPersonFhirResourceProviderWebTest extends BaseFhirR3Resource
 		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		
 		Bundle results = readBundleResponse(response);
 		assertThat(results.hasEntry(), is(true));

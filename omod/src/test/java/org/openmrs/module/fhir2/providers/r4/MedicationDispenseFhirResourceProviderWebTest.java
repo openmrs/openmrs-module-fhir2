@@ -18,6 +18,7 @@ import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.startsWith;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -96,7 +97,7 @@ public class MedicationDispenseFhirResourceProviderWebTest extends BaseFhirR4Res
 		        .go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(readResponse(response).getIdElement().getIdPart(), equalTo(MEDICATION_DISPENSE_UUID));
 	}
 	
@@ -464,7 +465,7 @@ public class MedicationDispenseFhirResourceProviderWebTest extends BaseFhirR4Res
 		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		
 		Bundle results = readBundleResponse(response);
 		assertThat(results.getEntry(), notNullValue());

@@ -36,7 +36,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-@OpenmrsProfile(openmrsPlatformVersion = "2.* - 2.4.*")
+@OpenmrsProfile(openmrsPlatformVersion = "2.* - 9.*")
 public class LocationTypeTranslatorImpl implements LocationTypeTranslator {
 	
 	@Getter(PROTECTED)

@@ -87,7 +87,7 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		MockHttpServletResponse response = get("/Immunization/" + IMMUNIZATION_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Immunization Immunization = readResponse(response);
@@ -103,7 +103,7 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		        .go();
 		
 		assertThat(response, isNotFound());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		OperationOutcome operationOutcome = readOperationOutcome(response);
@@ -117,7 +117,7 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		MockHttpServletResponse response = get("/Immunization/" + IMMUNIZATION_UUID).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Immunization Immunization = readResponse(response);
@@ -132,7 +132,7 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		MockHttpServletResponse response = get("/Immunization/" + UNKNOWN_IMMUNIZATION_UUID).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isNotFound());
-		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		OperationOutcome operationOutcome = readOperationOutcome(response);
@@ -156,7 +156,7 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		
 		// verify created correctly
 		assertThat(response, isCreated());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Immunization immunization = readResponse(response);
@@ -173,8 +173,7 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		assertThat(immunization.hasManufacturer(), is(true));
 		assertThat(immunization.getManufacturer().getDisplay(), equalTo("ACME"));
 		assertThat(immunization.getLotNumber(), equalTo("FOO1234"));
-		assertThat(immunization.getExpirationDate(),
-		    sameDay(Date.from(ZonedDateTime.parse("2022-07-31T18:30:00.000Z").toInstant())));
+		assertThat(immunization.getExpirationDate(), sameDay(LocalDate.parse("2022-07-31")));
 		assertThat(immunization.getPerformer().get(0).getActor().getReferenceElement().getIdPart(),
 		    equalTo("6f763a67-2bd1-451c-93b9-95caeb36cc24"));
 		assertThat(immunization, validResource());
@@ -205,7 +204,7 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		
 		// verify created correctly
 		assertThat(response, isCreated());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Immunization immunization = readResponse(response);
@@ -251,7 +250,7 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		
 		// verify created correctly
 		assertThat(response, isCreated());
-		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Immunization immunization = readResponse(response);
@@ -268,8 +267,7 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		assertThat(immunization.hasManufacturer(), is(true));
 		assertThat(immunization.getManufacturer().getDisplay(), equalTo("ACME"));
 		assertThat(immunization.getLotNumber(), equalTo("FOO1234"));
-		assertThat(immunization.getExpirationDate(),
-		    sameDay(Date.from(ZonedDateTime.parse("2022-07-31T18:30:00.000Z").toInstant())));
+		assertThat(immunization.getExpirationDate(), sameDay(LocalDate.parse("2022-07-31")));
 		assertThat(immunization.getPerformer().get(0).getActor().getReferenceElement().getIdPart(),
 		    equalTo("6f763a67-2bd1-451c-93b9-95caeb36cc24"));
 		assertThat(immunization, validResource());
@@ -299,7 +297,7 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		
 		// verify created correctly
 		assertThat(response, isCreated());
-		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Immunization immunization = readResponse(response);
@@ -346,7 +344,7 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		        .go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		// read the updated record
@@ -378,7 +376,7 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		        .go();
 		
 		assertThat(response, isBadRequest());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		OperationOutcome operationOutcome = readOperationOutcome(response);
@@ -401,7 +399,7 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		        .accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isNotFound());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		OperationOutcome operationOutcome = readOperationOutcome(response);
@@ -424,7 +422,7 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		response = put("/Immunization/" + IMMUNIZATION_UUID).xmlContent(toXML(immunization)).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		// read the updated record
@@ -455,7 +453,7 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		response = put("/Immunization/" + IMMUNIZATION_UUID).xmlContent(toXML(immunization)).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isBadRequest());
-		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		OperationOutcome operationOutcome = readOperationOutcome(response);
@@ -478,7 +476,7 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		        .accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isNotFound());
-		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		OperationOutcome operationOutcome = readOperationOutcome(response);
@@ -500,7 +498,7 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		
 		assertThat(response, isOk());
 		assertThat(response, notNullValue());
-		assertThat(response.getContentType(), is(BaseFhirIntegrationTest.FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(BaseFhirIntegrationTest.FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Immunization immunization = readResponse(response);
@@ -524,7 +522,7 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		
 		assertThat(response, isOk());
 		assertThat(response, notNullValue());
-		assertThat(response.getContentType(), is(BaseFhirIntegrationTest.FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(BaseFhirIntegrationTest.FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Immunization immunization = readResponse(response);
@@ -548,7 +546,7 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		
 		assertThat(response, isOk());
 		assertThat(response, notNullValue());
-		assertThat(response.getContentType(), is(BaseFhirIntegrationTest.FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(BaseFhirIntegrationTest.FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Immunization immunization = readResponse(response);
@@ -576,7 +574,7 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		        .go();
 		
 		assertThat(response, isNotFound());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		OperationOutcome operationOutcome = readOperationOutcome(response);
@@ -602,7 +600,7 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		        .go();
 		
 		assertThat(response, isNotFound());
-		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		OperationOutcome operationOutcome = readOperationOutcome(response);
@@ -616,7 +614,7 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		MockHttpServletResponse response = get("/Immunization").accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Bundle results = readBundleResponse(response);
@@ -634,7 +632,7 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		response = get("/Immunization?patient.identifier=M4001-1&_sort=status").accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		results = readBundleResponse(response);
@@ -655,7 +653,7 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		MockHttpServletResponse response = get("/Immunization").accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Bundle results = readBundleResponse(response);
@@ -673,7 +671,7 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		response = get("/Immunization?patient.identifier=M4001-1&_sort=status").accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		results = readBundleResponse(response);
@@ -694,7 +692,7 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		MockHttpServletResponse response = get("/Immunization/" + IMMUNIZATION_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		
 		assertThat(response.getHeader("etag"), notNullValue());
 		assertThat(response.getHeader("etag"), startsWith("W/"));
@@ -713,7 +711,7 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		MockHttpServletResponse response = get("/Immunization/" + IMMUNIZATION_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		assertThat(response.getHeader("etag"), notNullValue());
 		

@@ -63,7 +63,7 @@ public class ServiceRequestFhirResourceProviderIntegrationTest extends BaseFhirR
 		MockHttpServletResponse response = get("/ServiceRequest/" + SERVICE_REQUEST_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		ServiceRequest serviceRequest = readResponse(response);
@@ -79,7 +79,7 @@ public class ServiceRequestFhirResourceProviderIntegrationTest extends BaseFhirR
 		        .go();
 		
 		assertThat(response, isNotFound());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 	}
 	
@@ -88,7 +88,7 @@ public class ServiceRequestFhirResourceProviderIntegrationTest extends BaseFhirR
 		MockHttpServletResponse response = get("/ServiceRequest/" + SERVICE_REQUEST_UUID).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		ServiceRequest serviceRequest = readResponse(response);
@@ -104,7 +104,7 @@ public class ServiceRequestFhirResourceProviderIntegrationTest extends BaseFhirR
 		        .go();
 		
 		assertThat(response, isNotFound());
-		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 	}
 	
@@ -113,7 +113,7 @@ public class ServiceRequestFhirResourceProviderIntegrationTest extends BaseFhirR
 		MockHttpServletResponse response = get("/ServiceRequest").accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Bundle results = readBundleResponse(response);
@@ -132,7 +132,7 @@ public class ServiceRequestFhirResourceProviderIntegrationTest extends BaseFhirR
 		        .accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		results = readBundleResponse(response);
@@ -155,7 +155,7 @@ public class ServiceRequestFhirResourceProviderIntegrationTest extends BaseFhirR
 		MockHttpServletResponse response = get("/ServiceRequest").accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Bundle results = readBundleResponse(response);
@@ -174,7 +174,7 @@ public class ServiceRequestFhirResourceProviderIntegrationTest extends BaseFhirR
 		        .accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		results = readBundleResponse(response);
@@ -197,7 +197,7 @@ public class ServiceRequestFhirResourceProviderIntegrationTest extends BaseFhirR
 		MockHttpServletResponse response = get("/ServiceRequest?_summary=count").accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Bundle result = readBundleResponse(response);
@@ -212,7 +212,7 @@ public class ServiceRequestFhirResourceProviderIntegrationTest extends BaseFhirR
 		MockHttpServletResponse response = get("/ServiceRequest?_summary=count").accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Bundle result = readBundleResponse(response);
@@ -227,7 +227,7 @@ public class ServiceRequestFhirResourceProviderIntegrationTest extends BaseFhirR
 		MockHttpServletResponse response = get("/ServiceRequest/" + SERVICE_REQUEST_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		
 		assertThat(response.getHeader("etag"), notNullValue());
 		assertThat(response.getHeader("etag"), startsWith("W/"));
@@ -246,7 +246,7 @@ public class ServiceRequestFhirResourceProviderIntegrationTest extends BaseFhirR
 		MockHttpServletResponse response = get("/ServiceRequest/" + SERVICE_REQUEST_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		assertThat(response.getHeader("etag"), notNullValue());
 		
@@ -265,7 +265,7 @@ public class ServiceRequestFhirResourceProviderIntegrationTest extends BaseFhirR
 		MockHttpServletResponse response = get("/ServiceRequest/" + SERVICE_REQUEST_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		assertThat(response.getHeader("etag"), notNullValue());
 		

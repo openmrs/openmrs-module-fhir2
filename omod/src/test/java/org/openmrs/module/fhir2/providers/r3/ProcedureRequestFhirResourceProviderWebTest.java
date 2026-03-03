@@ -17,6 +17,7 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.startsWith;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.verify;
@@ -128,7 +129,7 @@ public class ProcedureRequestFhirResourceProviderWebTest extends BaseFhirR3Resou
 		MockHttpServletResponse response = get("/ProcedureRequest/" + SERVICE_REQUEST_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(readResponse(response).getIdElement().getIdPart(), equalTo(SERVICE_REQUEST_UUID));
 	}
 	
@@ -577,7 +578,7 @@ public class ProcedureRequestFhirResourceProviderWebTest extends BaseFhirR3Resou
 		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		
 		Bundle results = readBundleResponse(response);
 		assertThat(results.getEntry(), notNullValue());

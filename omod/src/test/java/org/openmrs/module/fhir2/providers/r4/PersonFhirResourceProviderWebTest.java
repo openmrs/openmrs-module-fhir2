@@ -18,6 +18,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.startsWith;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
@@ -107,7 +108,7 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirR4ResourceProvide
 		MockHttpServletResponse response = get("/Person/" + PERSON_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		MatcherAssert.assertThat(response, isOk());
-		MatcherAssert.assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+		MatcherAssert.assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		
 		Person resource = readResponse(response);
 		assertThat(resource.getIdElement().getIdPart(), equalTo(PERSON_UUID));
@@ -388,7 +389,7 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirR4ResourceProvide
 		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.JSON).go();
 		
 		MatcherAssert.assertThat(response, isOk());
-		MatcherAssert.assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+		MatcherAssert.assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		
 		Bundle results = readBundleResponse(response);
 		assertThat(results.hasEntry(), is(true));
@@ -468,7 +469,7 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirR4ResourceProvide
 		MockHttpServletResponse response = delete("/Person/" + PERSON_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 	}
 	
 	@Test
@@ -478,6 +479,6 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirR4ResourceProvide
 		MockHttpServletResponse response = delete("/Person/" + WRONG_PERSON_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isNotFound());
-		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 	}
 }
