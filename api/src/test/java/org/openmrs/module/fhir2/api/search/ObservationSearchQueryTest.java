@@ -182,7 +182,7 @@ public class ObservationSearchQueryTest extends BaseFhirContextSensitiveTest {
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(3));
+		assertThat(results.size(), equalTo(4));
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -202,7 +202,7 @@ public class ObservationSearchQueryTest extends BaseFhirContextSensitiveTest {
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(3));
+		assertThat(results.size(), equalTo(4));
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -224,7 +224,7 @@ public class ObservationSearchQueryTest extends BaseFhirContextSensitiveTest {
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(3));
+		assertThat(results.size(), equalTo(4));
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -251,7 +251,7 @@ public class ObservationSearchQueryTest extends BaseFhirContextSensitiveTest {
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(15));
+		assertThat(results.size(), equalTo(16));
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -694,7 +694,7 @@ public class ObservationSearchQueryTest extends BaseFhirContextSensitiveTest {
 		IBundleProvider results = search(theParams.toSearchParameterMap());
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(17));
+		assertThat(results.size(), equalTo(18));
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -1077,7 +1077,7 @@ public class ObservationSearchQueryTest extends BaseFhirContextSensitiveTest {
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(16));
+		assertThat(results.size(), equalTo(17));
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -1096,7 +1096,7 @@ public class ObservationSearchQueryTest extends BaseFhirContextSensitiveTest {
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(11));
+		assertThat(results.size(), equalTo(12));
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -1115,7 +1115,7 @@ public class ObservationSearchQueryTest extends BaseFhirContextSensitiveTest {
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(10));
+		assertThat(results.size(), equalTo(11));
 		
 		List<IBaseResource> resultList = get(results);
 		

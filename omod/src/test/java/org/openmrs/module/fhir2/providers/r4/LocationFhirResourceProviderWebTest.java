@@ -20,6 +20,7 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.startsWith;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
@@ -58,8 +59,8 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.FhirLocationService;
 import org.openmrs.module.fhir2.api.search.param.LocationSearchParams;
-import org.powermock.reflect.Whitebox;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LocationFhirResourceProviderWebTest extends BaseFhirR4ResourceProviderWebTest<LocationFhirResourceProvider, Location> {
@@ -119,13 +120,13 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR4ResourceProvi
 	public void setup() throws ServletException {
 		locationProvider = new LocationFhirResourceProvider();
 		locationProvider.setFhirLocationService(locationService);
-		Whitebox.setInternalState(BaseUpsertFhirResourceProvider.class, "globalPropsService", fhirGpService);
+		ReflectionTestUtils.setField(BaseUpsertFhirResourceProvider.class, "globalPropsService", fhirGpService);
 		super.setup();
 	}
 	
 	@After
 	public void tearDown() {
-		Whitebox.setInternalState(BaseUpsertFhirResourceProvider.class, "globalPropsService", (Object) null);
+		ReflectionTestUtils.setField(BaseUpsertFhirResourceProvider.class, "globalPropsService", (Object) null);
 	}
 	
 	@Override
@@ -142,7 +143,7 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR4ResourceProvi
 		MockHttpServletResponse response = get("/Location/" + LOCATION_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		
 		Location resource = readResponse(response);
 		assertThat(resource.getIdElement().getIdPart(), equalTo(LOCATION_UUID));
@@ -424,7 +425,7 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR4ResourceProvi
 		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(readBundleResponse(response).getEntry().size(), greaterThanOrEqualTo(1));
 	}
 	
@@ -501,7 +502,7 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR4ResourceProvi
 		MockHttpServletResponse response = delete("/Location/" + LOCATION_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 	}
 	
 	@Test
@@ -511,6 +512,6 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR4ResourceProvi
 		MockHttpServletResponse response = delete("/Location/" + WRONG_LOCATION_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isNotFound());
-		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 	}
 }

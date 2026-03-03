@@ -648,7 +648,7 @@ public class ConditionSearchQueryTest extends BaseFhirContextSensitiveTest {
 		Condition condition = conditionService.getConditionByUuid(CONDITION_UUID);
 		Date onsetDate = DateUtils.addMinutes(new Date(), -45);
 		condition.setOnsetDate(onsetDate);
-		conditionService.saveCondition(condition);
+		Condition savedCondition = conditionService.saveCondition(condition);
 		
 		QuantityOrListParam orList = new QuantityOrListParam();
 		orList.addOr(new QuantityParam(ParamPrefixEnum.LESSTHAN, 1, "", "h"));
@@ -664,7 +664,7 @@ public class ConditionSearchQueryTest extends BaseFhirContextSensitiveTest {
 		assertThat(results, notNullValue());
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(((org.hl7.fhir.r4.model.Condition) resultList.iterator().next()).getIdElement().getIdPart(),
-		    equalTo(CONDITION_UUID));
+		    equalTo(savedCondition.getUuid()));
 	}
 	
 	@Test
@@ -672,7 +672,7 @@ public class ConditionSearchQueryTest extends BaseFhirContextSensitiveTest {
 		Condition condition = conditionService.getConditionByUuid(CONDITION_UUID);
 		Date onsetDate = DateUtils.addHours(new Date(), -3);
 		condition.setOnsetDate(onsetDate);
-		conditionService.saveCondition(condition);
+		Condition savedCondition = conditionService.saveCondition(condition);
 		
 		QuantityOrListParam orList = new QuantityOrListParam();
 		orList.addOr(new QuantityParam(ParamPrefixEnum.EQUAL, 3, "", "h"));
@@ -688,7 +688,7 @@ public class ConditionSearchQueryTest extends BaseFhirContextSensitiveTest {
 		assertThat(results, notNullValue());
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(((org.hl7.fhir.r4.model.Condition) resultList.iterator().next()).getIdElement().getIdPart(),
-		    equalTo(CONDITION_UUID));
+		    equalTo(savedCondition.getUuid()));
 	}
 	
 	@Test
@@ -696,7 +696,7 @@ public class ConditionSearchQueryTest extends BaseFhirContextSensitiveTest {
 		Condition condition = conditionService.getConditionByUuid(CONDITION_UUID);
 		Date onsetDate = DateUtils.addSeconds(new Date(), -1);
 		condition.setOnsetDate(onsetDate);
-		conditionService.saveCondition(condition);
+		Condition savedCondition = conditionService.saveCondition(condition);
 		
 		QuantityOrListParam orList = new QuantityOrListParam();
 		orList.addOr(new QuantityParam(ParamPrefixEnum.EQUAL, 1, "", "s"));
@@ -712,7 +712,7 @@ public class ConditionSearchQueryTest extends BaseFhirContextSensitiveTest {
 		assertThat(results, notNullValue());
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(((org.hl7.fhir.r4.model.Condition) resultList.iterator().next()).getIdElement().getIdPart(),
-		    equalTo(CONDITION_UUID));
+		    equalTo(savedCondition.getUuid()));
 	}
 	
 	@Test
@@ -720,7 +720,7 @@ public class ConditionSearchQueryTest extends BaseFhirContextSensitiveTest {
 		Condition condition = conditionService.getConditionByUuid(CONDITION_UUID);
 		Date onsetDate = DateUtils.addMinutes(new Date(), -1);
 		condition.setOnsetDate(onsetDate);
-		conditionService.saveCondition(condition);
+		Condition savedCondition = conditionService.saveCondition(condition);
 		
 		QuantityOrListParam orList = new QuantityOrListParam();
 		orList.addOr(new QuantityParam(ParamPrefixEnum.EQUAL, 1, "", "min"));
@@ -736,7 +736,7 @@ public class ConditionSearchQueryTest extends BaseFhirContextSensitiveTest {
 		assertThat(results, notNullValue());
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(((org.hl7.fhir.r4.model.Condition) resultList.iterator().next()).getIdElement().getIdPart(),
-		    equalTo(CONDITION_UUID));
+		    equalTo(savedCondition.getUuid()));
 	}
 	
 	@Test
@@ -744,7 +744,7 @@ public class ConditionSearchQueryTest extends BaseFhirContextSensitiveTest {
 		Condition condition = conditionService.getConditionByUuid(CONDITION_UUID);
 		Date onsetDate = DateUtils.addMinutes(new Date(), -45);
 		condition.setOnsetDate(onsetDate);
-		conditionService.saveCondition(condition);
+		Condition savedCondition = conditionService.saveCondition(condition);
 		
 		QuantityOrListParam orList = new QuantityOrListParam();
 		orList.addOr(new QuantityParam(ParamPrefixEnum.EQUAL, 45, "", "min"));
@@ -760,7 +760,7 @@ public class ConditionSearchQueryTest extends BaseFhirContextSensitiveTest {
 		assertThat(results, notNullValue());
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(((org.hl7.fhir.r4.model.Condition) resultList.iterator().next()).getIdElement().getIdPart(),
-		    equalTo(CONDITION_UUID));
+		    equalTo(savedCondition.getUuid()));
 	}
 	
 	@Test
@@ -768,7 +768,7 @@ public class ConditionSearchQueryTest extends BaseFhirContextSensitiveTest {
 		Condition condition = conditionService.getConditionByUuid(CONDITION_UUID);
 		Date onsetDate = DateUtils.addHours(new Date(), -1);
 		condition.setOnsetDate(onsetDate);
-		conditionService.saveCondition(condition);
+		Condition savedCondition = conditionService.saveCondition(condition);
 		
 		QuantityOrListParam orList = new QuantityOrListParam();
 		orList.addOr(new QuantityParam(ParamPrefixEnum.EQUAL, 1, "", "h"));
@@ -784,7 +784,7 @@ public class ConditionSearchQueryTest extends BaseFhirContextSensitiveTest {
 		assertThat(results, notNullValue());
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(((org.hl7.fhir.r4.model.Condition) resultList.iterator().next()).getIdElement().getIdPart(),
-		    equalTo(CONDITION_UUID));
+		    equalTo(savedCondition.getUuid()));
 	}
 	
 	@Test
@@ -792,7 +792,7 @@ public class ConditionSearchQueryTest extends BaseFhirContextSensitiveTest {
 		Condition condition = conditionService.getConditionByUuid(CONDITION_UUID);
 		Date onsetDate = DateUtils.addDays(new Date(), -1);
 		condition.setOnsetDate(onsetDate);
-		conditionService.saveCondition(condition);
+		Condition savedCondition = conditionService.saveCondition(condition);
 		
 		QuantityOrListParam orList = new QuantityOrListParam();
 		orList.addOr(new QuantityParam(ParamPrefixEnum.EQUAL, 1, "", "d"));
@@ -808,7 +808,7 @@ public class ConditionSearchQueryTest extends BaseFhirContextSensitiveTest {
 		assertThat(results, notNullValue());
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(((org.hl7.fhir.r4.model.Condition) resultList.iterator().next()).getIdElement().getIdPart(),
-		    equalTo(CONDITION_UUID));
+		    equalTo(savedCondition.getUuid()));
 	}
 	
 	@Test
@@ -816,7 +816,7 @@ public class ConditionSearchQueryTest extends BaseFhirContextSensitiveTest {
 		Condition condition = conditionService.getConditionByUuid(CONDITION_UUID);
 		Date onsetDate = DateUtils.addWeeks(new Date(), -1);
 		condition.setOnsetDate(onsetDate);
-		conditionService.saveCondition(condition);
+		Condition savedCondition = conditionService.saveCondition(condition);
 		
 		QuantityOrListParam orList = new QuantityOrListParam();
 		orList.addOr(new QuantityParam(ParamPrefixEnum.EQUAL, 1, "", "wk"));
@@ -832,7 +832,7 @@ public class ConditionSearchQueryTest extends BaseFhirContextSensitiveTest {
 		assertThat(results, notNullValue());
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(((org.hl7.fhir.r4.model.Condition) resultList.iterator().next()).getIdElement().getIdPart(),
-		    equalTo(CONDITION_UUID));
+		    equalTo(savedCondition.getUuid()));
 	}
 	
 	@Test
@@ -840,7 +840,7 @@ public class ConditionSearchQueryTest extends BaseFhirContextSensitiveTest {
 		Condition condition = conditionService.getConditionByUuid(CONDITION_UUID);
 		Date onsetDate = DateUtils.addMonths(new Date(), -1);
 		condition.setOnsetDate(onsetDate);
-		conditionService.saveCondition(condition);
+		Condition savedCondition = conditionService.saveCondition(condition);
 		
 		QuantityOrListParam orList = new QuantityOrListParam();
 		orList.addOr(new QuantityParam(ParamPrefixEnum.EQUAL, 1, "", "mo"));
@@ -856,7 +856,7 @@ public class ConditionSearchQueryTest extends BaseFhirContextSensitiveTest {
 		assertThat(results, notNullValue());
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(((org.hl7.fhir.r4.model.Condition) resultList.iterator().next()).getIdElement().getIdPart(),
-		    equalTo(CONDITION_UUID));
+		    equalTo(savedCondition.getUuid()));
 	}
 	
 	@Test
@@ -864,7 +864,7 @@ public class ConditionSearchQueryTest extends BaseFhirContextSensitiveTest {
 		Condition condition = conditionService.getConditionByUuid(CONDITION_UUID);
 		Date onsetDate = DateUtils.addYears(new Date(), -1);
 		condition.setOnsetDate(onsetDate);
-		conditionService.saveCondition(condition);
+		Condition savedCondition = conditionService.saveCondition(condition);
 		
 		QuantityOrListParam orList = new QuantityOrListParam();
 		orList.addOr(new QuantityParam(ParamPrefixEnum.EQUAL, 1, "", "a"));
@@ -880,7 +880,7 @@ public class ConditionSearchQueryTest extends BaseFhirContextSensitiveTest {
 		assertThat(results, notNullValue());
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(((org.hl7.fhir.r4.model.Condition) resultList.iterator().next()).getIdElement().getIdPart(),
-		    equalTo(CONDITION_UUID));
+		    equalTo(savedCondition.getUuid()));
 	}
 	
 	@Test
@@ -888,7 +888,7 @@ public class ConditionSearchQueryTest extends BaseFhirContextSensitiveTest {
 		Condition condition = conditionService.getConditionByUuid(CONDITION_UUID);
 		Date onsetDate = DateUtils.addDays(new Date(), -9);
 		condition.setOnsetDate(onsetDate);
-		conditionService.saveCondition(condition);
+		Condition savedCondition = conditionService.saveCondition(condition);
 		
 		QuantityOrListParam orListLower = new QuantityOrListParam();
 		QuantityOrListParam orListUpper = new QuantityOrListParam();
@@ -905,7 +905,7 @@ public class ConditionSearchQueryTest extends BaseFhirContextSensitiveTest {
 		assertThat(results, notNullValue());
 		assertThat(resultList, hasSize(1));
 		assertThat(((org.hl7.fhir.r4.model.Condition) resultList.iterator().next()).getIdElement().getIdPart(),
-		    equalTo(CONDITION_UUID));
+		    equalTo(savedCondition.getUuid()));
 	}
 	
 	@Test

@@ -35,7 +35,7 @@ public class FhirPractitionerDaoImpl extends BasePractitionerDao<Provider> imple
 		handleAndListParam(criteriaContext.getCriteriaBuilder(), identifier,
 		    param -> Optional.of(
 		        criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("identifier"), param.getValue())))
-		                .ifPresent(criteriaContext::addPredicate);
+		        .ifPresent(criteriaContext::addPredicate);
 	}
 	
 	@Override

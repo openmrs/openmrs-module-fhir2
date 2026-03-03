@@ -597,7 +597,7 @@ public class ServiceRequestTranslatorImplTest {
 	
 	private void setOrderNumberByReflection(TestOrder order, String orderNumber) throws Exception {
 		Class<? extends TestOrder> clazz = order.getClass();
-		Field orderNumberField = clazz.getSuperclass().getDeclaredField("orderNumber");
+		Field orderNumberField = Order.class.getDeclaredField("orderNumber");
 		boolean isAccessible = orderNumberField.isAccessible();
 		if (!isAccessible) {
 			orderNumberField.setAccessible(true);
