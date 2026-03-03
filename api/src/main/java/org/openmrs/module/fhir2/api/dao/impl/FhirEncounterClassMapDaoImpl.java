@@ -13,6 +13,8 @@ import javax.annotation.Nonnull;
 import javax.persistence.PersistenceException;
 import javax.persistence.criteria.Join;
 
+import java.util.List;
+
 import lombok.extern.slf4j.Slf4j;
 import org.openmrs.module.fhir2.api.dao.internals.OpenmrsFhirCriteriaContext;
 import org.openmrs.module.fhir2.model.FhirEncounterClassMap;
@@ -36,9 +38,16 @@ public class FhirEncounterClassMapDaoImpl extends BaseDao {
 		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().equal(locationJoin.get("uuid"), locationUuid));
 		
 		try {
-			return criteriaContext.getEntityManager()
+			List<String> resultsList = criteriaContext.getEntityManager()
 			        .createQuery(criteriaContext.finalizeQuery().select(criteriaContext.getRoot().get("encounterClass")))
-			        .getSingleResult();
+			        .getResultList();
+			
+			if (resultsList != null && resultsList.size() > 1) {
+				log.error("Encounter type for location '{}' is not unique", locationUuid);
+				return null;
+			}
+			
+			return resultsList != null && !resultsList.isEmpty() ? resultsList.get(0) : null;
 		}
 		catch (PersistenceException e) {
 			log.error("Exception caught while trying to load encounter type for location '{}'", locationUuid);
