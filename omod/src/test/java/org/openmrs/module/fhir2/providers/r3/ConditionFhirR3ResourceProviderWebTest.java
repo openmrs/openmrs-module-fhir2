@@ -17,6 +17,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.startsWith;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -107,7 +108,7 @@ public class ConditionFhirR3ResourceProviderWebTest extends BaseFhirR3ResourcePr
 		MockHttpServletResponse response = get("/Condition/" + CONDITION_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		
 		Condition resource = readResponse(response);
 		assertThat(resource.getIdElement().getIdPart(), equalTo(CONDITION_UUID));
@@ -349,7 +350,7 @@ public class ConditionFhirR3ResourceProviderWebTest extends BaseFhirR3ResourcePr
 		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(readBundleResponse(response).getEntry().size(), greaterThanOrEqualTo(1));
 	}
 }

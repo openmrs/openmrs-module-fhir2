@@ -120,8 +120,18 @@ public class DelegatingWebApplicationContext implements WebApplicationContext {
 	}
 	
 	@Override
+	public <T> ObjectProvider<T> getBeanProvider(Class<T> requiredType, boolean allowEagerInit) {
+		return applicationContext.getBeanProvider(requiredType, allowEagerInit);
+	}
+	
+	@Override
 	public <T> ObjectProvider<T> getBeanProvider(ResolvableType resolvableType) {
 		return applicationContext.getBeanProvider(resolvableType);
+	}
+	
+	@Override
+	public <T> ObjectProvider<T> getBeanProvider(ResolvableType resolvableType, boolean allowEagerInit) {
+		return applicationContext.getBeanProvider(resolvableType, allowEagerInit);
 	}
 	
 	@Override
@@ -269,5 +279,11 @@ public class DelegatingWebApplicationContext implements WebApplicationContext {
 	public <A extends Annotation> A findAnnotationOnBean(String beanName, Class<A> annotationType)
 	        throws NoSuchBeanDefinitionException {
 		return applicationContext.findAnnotationOnBean(beanName, annotationType);
+	}
+	
+	@Override
+	public <A extends Annotation> A findAnnotationOnBean(String beanName, Class<A> annotationType,
+	        boolean allowFactoryBeanInit) throws NoSuchBeanDefinitionException {
+		return applicationContext.findAnnotationOnBean(beanName, annotationType, allowFactoryBeanInit);
 	}
 }

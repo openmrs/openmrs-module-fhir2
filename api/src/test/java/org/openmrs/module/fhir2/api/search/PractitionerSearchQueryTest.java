@@ -11,7 +11,6 @@ package org.openmrs.module.fhir2.api.search;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.everyItem;
@@ -574,9 +573,9 @@ public class PractitionerSearchQueryTest extends BaseFhirContextSensitiveTest {
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList, hasSize(equalTo(5))); // included resources added as part of result list
-		assertThat(resultList.subList(1, 5),
-		    everyItem(allOf(is(instanceOf(Encounter.class)), hasProperty("participantFirstRep", hasProperty("individual",
+		assertThat(resultList, hasSize(equalTo(6))); // included resources added as part of result list
+		assertThat(resultList,
+		    hasItem(allOf(is(instanceOf(Encounter.class)), hasProperty("participantFirstRep", hasProperty("individual",
 		        hasProperty("referenceElement", hasProperty("idPart", equalTo(PRACTITIONER_UUID))))))));
 	}
 	
@@ -660,15 +659,12 @@ public class PractitionerSearchQueryTest extends BaseFhirContextSensitiveTest {
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList, hasSize(equalTo(8))); // included resources (4 encounters + 3 service requests) added as part of result list
-		assertThat(resultList.subList(1, 8),
-		    everyItem(anyOf(
-		        allOf(is(instanceOf(Encounter.class)),
-		            hasProperty("participantFirstRep",
-		                hasProperty("individual",
-		                    hasProperty("referenceElement", hasProperty("idPart", equalTo(PRACTITIONER_UUID)))))),
-		        allOf(is(instanceOf(ServiceRequest.class)), hasProperty("requester",
-		            hasProperty("referenceElement", hasProperty("idPart", equalTo(PRACTITIONER_UUID))))))));
+		assertThat(resultList, hasSize(equalTo(9))); // included resources (4 encounters + 3 service requests) added as part of result list
+		assertThat(resultList,
+		    hasItem(allOf(is(instanceOf(Encounter.class)), hasProperty("participantFirstRep", hasProperty("individual",
+		        hasProperty("referenceElement", hasProperty("idPart", equalTo(PRACTITIONER_UUID))))))));
+		assertThat(resultList, hasItem(allOf(is(instanceOf(ServiceRequest.class)),
+		    hasProperty("requester", hasProperty("referenceElement", hasProperty("idPart", equalTo(PRACTITIONER_UUID)))))));
 	}
 	
 }

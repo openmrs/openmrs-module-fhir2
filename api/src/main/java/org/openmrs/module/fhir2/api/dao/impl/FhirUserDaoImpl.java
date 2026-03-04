@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
+import javax.annotation.Nonnull;
+
 import java.util.Optional;
 
 import ca.uhn.fhir.rest.param.TokenAndListParam;
@@ -20,6 +22,17 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class FhirUserDaoImpl extends BasePractitionerDao<User> implements FhirUserDao {
+	
+	@Override
+	protected User deproxyResult(@Nonnull User result) {
+		User user = super.deproxyResult(result);
+		if (user.getPerson() != null) {
+			// Force reload from DB to bypass stale Hibernate L2 cache entries
+			// (Person.addresses is eager but may be cached before test data is inserted via JDBC)
+			getSessionFactory().getCurrentSession().refresh(user.getPerson());
+		}
+		return user;
+	}
 	
 	@Override
 	@Transactional(readOnly = true)
@@ -37,6 +50,6 @@ public class FhirUserDaoImpl extends BasePractitionerDao<User> implements FhirUs
 		handleAndListParam(criteriaContext.getCriteriaBuilder(), identifier,
 		    param -> Optional.of(
 		        criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("username"), param.getValue())))
-		                .ifPresent(criteriaContext::addPredicate);
+		        .ifPresent(criteriaContext::addPredicate);
 	}
 }
