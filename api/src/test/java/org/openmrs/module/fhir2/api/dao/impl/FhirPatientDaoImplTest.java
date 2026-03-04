@@ -10,11 +10,15 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.fail;
+import static org.openmrs.util.PrivilegeConstants.GET_PATIENTS;
 
+import java.util.Arrays;
 import java.util.List;
 
 import ca.uhn.fhir.rest.param.HasAndListParam;
@@ -24,9 +28,13 @@ import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.Patient;
+import org.openmrs.api.APIAuthenticationException;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.dao.FhirPatientDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
+import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class FhirPatientDaoImplTest extends BaseFhirContextSensitiveTest {
@@ -55,15 +63,21 @@ public class FhirPatientDaoImplTest extends BaseFhirContextSensitiveTest {
 	        "org/openmrs/module/fhir2/api/dao/impl/FhirPatientDaoImplTest_initial_data.xml",
 	        "org/openmrs/module/fhir2/api/dao/impl/FhirPatientDaoImplTest_address_data.xml" };
 	
-	private FhirPatientDaoImpl dao;
-	
 	@Autowired
 	private SessionFactory sessionFactory;
 	
+	@Autowired
+	private ObjectFactory<FhirPatientDao> daoFactory;
+	
+	private FhirPatientDao dao;
+	
+	private FhirPatientDaoImpl daoImpl;
+	
 	@Before
 	public void setup() throws Exception {
-		dao = new FhirPatientDaoImpl();
-		dao.setSessionFactory(sessionFactory);
+		dao = daoFactory.getObject();
+		daoImpl = new FhirPatientDaoImpl();
+		daoImpl.setSessionFactory(sessionFactory);
 		for (String search_data : PATIENT_SEARCH_DATA_FILES) {
 			executeDataSet(search_data);
 		}
@@ -141,5 +155,92 @@ public class FhirPatientDaoImplTest extends BaseFhirContextSensitiveTest {
 		
 		assertThat(result, notNullValue());
 		assertThat(result, empty());
+	}
+	
+	@Test
+	public void shouldRequireGetPatientsPrivilegeForGet() {
+		Context.logout();
+		
+		try {
+			dao.get(PATIENT_UUID);
+			fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
+		}
+		catch (APIAuthenticationException e) {
+			assertThat(e.getMessage(), containsString("Privilege"));
+		}
+		
+		try {
+			Context.addProxyPrivilege(GET_PATIENTS);
+			assertThat(dao.get(PATIENT_UUID), notNullValue());
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_PATIENTS);
+		}
+	}
+	
+	@Test
+	public void shouldRequireGetPatientsPrivilegeForGetByCollection() {
+		Context.logout();
+		
+		try {
+			dao.get(Arrays.asList(PATIENT_UUID));
+			fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
+		}
+		catch (APIAuthenticationException e) {
+			assertThat(e.getMessage(), containsString("Privilege"));
+		}
+		
+		try {
+			Context.addProxyPrivilege(GET_PATIENTS);
+			List<Patient> patients = dao.get(Arrays.asList(PATIENT_UUID));
+			assertThat(patients, notNullValue());
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_PATIENTS);
+		}
+	}
+	
+	@Test
+	public void shouldRequireGetPatientsPrivilegeForGetSearchResults() {
+		Context.logout();
+		
+		try {
+			dao.getSearchResults(new SearchParameterMap());
+			fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
+		}
+		catch (APIAuthenticationException e) {
+			assertThat(e.getMessage(), containsString("Privilege"));
+		}
+		
+		try {
+			Context.addProxyPrivilege(GET_PATIENTS);
+			List<Patient> patients = dao.getSearchResults(new SearchParameterMap());
+			assertThat(patients, notNullValue());
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_PATIENTS);
+		}
+	}
+	
+	@Test
+	public void shouldRequireGetPatientsPrivilegeForGetSearchResultsCount() {
+		Context.logout();
+		
+		try {
+			dao.getSearchResultsCount(new SearchParameterMap());
+			fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
+		}
+		catch (APIAuthenticationException e) {
+			assertThat(e.getMessage(), containsString("Privilege"));
+		}
+		
+		try {
+			Context.addProxyPrivilege(GET_PATIENTS);
+			int count = dao.getSearchResultsCount(new SearchParameterMap());
+			assertThat(count, notNullValue());
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_PATIENTS);
+		}
 	}
 }

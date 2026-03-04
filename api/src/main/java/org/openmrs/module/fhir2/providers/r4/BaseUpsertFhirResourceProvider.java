@@ -9,6 +9,9 @@
  */
 package org.openmrs.module.fhir2.providers.r4;
 
+import static lombok.AccessLevel.PACKAGE;
+import static lombok.AccessLevel.PROTECTED;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -20,12 +23,14 @@ import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.r4.model.IdType;
-import org.openmrs.api.context.Context;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * An instance of this base resource provider class permits upsert operations if enabled.
@@ -34,7 +39,9 @@ public abstract class BaseUpsertFhirResourceProvider<T extends IAnyResource> imp
 	
 	protected static final String GP_NAME_SUPPORTED_RESOURCES = "fhir2.upsert.supported.resources";
 	
-	private static FhirGlobalPropertyService globalPropsService;
+	@Getter(PROTECTED)
+	@Setter(value = PACKAGE, onMethod_ = @Autowired)
+	private FhirGlobalPropertyService globalPropsService;
 	
 	@Update
 	public MethodOutcome upsert(@IdParam IdType id, @ResourceParam T resource, RequestDetails requestDetails) {
@@ -64,17 +71,13 @@ public abstract class BaseUpsertFhirResourceProvider<T extends IAnyResource> imp
 	        boolean createIfNotExists);
 	
 	private List<String> getSupportedResources() {
-		if (globalPropsService == null) {
-			globalPropsService = Context.getRegisteredComponents(FhirGlobalPropertyService.class).get(0);
-		}
-		
 		String value = globalPropsService.getGlobalProperty(GP_NAME_SUPPORTED_RESOURCES);
 		if (value != null) {
-			return Arrays.stream(StringUtils.split(value, ',')).filter(v -> v.trim().length() > 0)
+			return Arrays.stream(StringUtils.split(value, ',')).filter(v -> !v.trim().isEmpty())
 			        .collect(Collectors.toList());
 		}
 		
-		return Collections.EMPTY_LIST;
+		return Collections.emptyList();
 	}
 	
 }

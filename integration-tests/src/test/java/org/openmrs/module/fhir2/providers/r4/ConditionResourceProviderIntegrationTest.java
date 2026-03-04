@@ -24,6 +24,8 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.startsWith;
 import static org.openmrs.module.fhir2.api.util.GeneralUtils.inputStreamToString;
+import static org.openmrs.util.PrivilegeConstants.GET_CONCEPT_SOURCES;
+import static org.openmrs.util.PrivilegeConstants.GET_CONDITIONS;
 
 import java.io.InputStream;
 import java.sql.Date;
@@ -39,6 +41,12 @@ import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.junit.Before;
 import org.junit.Test;
+import org.openmrs.Person;
+import org.openmrs.PersonName;
+import org.openmrs.Role;
+import org.openmrs.User;
+import org.openmrs.api.UserService;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -72,11 +80,40 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR4Integrat
 	@Autowired
 	private ConditionFhirResourceProvider resourceProvider;
 	
+	private static final String LIMITED_USER_USERNAME = "limitedUser";
+	
+	private static final String LIMITED_USER_PASSWORD = "TestPassword123";
+	
 	@Before
 	@Override
 	public void setup() throws Exception {
 		super.setup();
 		executeDataSet(CONDITION_DATA_SET_FILE);
+	}
+	
+	private void createUserWithoutGetConditionsPrivilege() {
+		UserService userService = Context.getUserService();
+		
+		// Create a role without GET_CONDITIONS privilege
+		Role limitedRole = new Role("Limited Role", "Role without GET_CONDITIONS privilege");
+		// Add some basic privileges but not GET_CONDITIONS
+		limitedRole.addPrivilege(userService.getPrivilege("View Patients"));
+		userService.saveRole(limitedRole);
+		
+		// Create a person for the user
+		Person person = new Person();
+		PersonName name = new PersonName("Limited", null, "User");
+		person.addName(name);
+		person.setGender("M");
+		Context.getPersonService().savePerson(person);
+		
+		// Create the user
+		User user = new User(person);
+		user.setUsername(LIMITED_USER_USERNAME);
+		user.addRole(limitedRole);
+		
+		// Save new user with password using UserService.createUser
+		userService.createUser(user, LIMITED_USER_PASSWORD);
 	}
 	
 	@Test
@@ -123,6 +160,33 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR4Integrat
 		
 		assertThat(operationOutcome, notNullValue());
 		assertThat(operationOutcome.hasIssue(), is(true));
+	}
+	
+	@Test
+	public void shouldRequireGetConditionsPrivilegeToReadConditionAsJson() throws Exception {
+		// Create and authenticate as user without GET_CONDITIONS privilege
+		createUserWithoutGetConditionsPrivilege();
+		Context.authenticate(LIMITED_USER_USERNAME, LIMITED_USER_PASSWORD);
+		
+		MockHttpServletResponse response = get("/Condition/" + CONDITION_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isForbidden());
+		
+		Context.addProxyPrivilege(GET_CONDITIONS);
+		try {
+			response = get("/Condition/" + CONDITION_UUID).accept(FhirMediaTypes.JSON).go();
+			
+			assertThat(response, isOk());
+			assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+			
+			Condition condition = readResponse(response);
+			
+			assertThat(condition, notNullValue());
+			assertThat(condition.getIdElement().getIdPart(), equalTo(CONDITION_UUID));
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_CONDITIONS);
+		}
 	}
 	
 	@Test
@@ -675,6 +739,35 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR4Integrat
 		                    LocalDateTime.of(2020, 3, 13, 19, 0, 0).atZone(ZoneId.systemDefault()).toInstant()))))),
 		        hasResource(hasProperty("onsetDateTimeType", hasProperty("value", equalTo(
 		            Date.from(LocalDateTime.of(2020, 3, 5, 19, 0, 0).atZone(ZoneId.systemDefault()).toInstant())))))));
+	}
+	
+	@Test
+	public void shouldRequireGetConditionsPrivilegeToSearchConditionsAsJson() throws Exception {
+		// Create and authenticate as user without GET_CONDITIONS privilege
+		createUserWithoutGetConditionsPrivilege();
+		Context.authenticate(LIMITED_USER_USERNAME, LIMITED_USER_PASSWORD);
+		
+		MockHttpServletResponse response = get("/Condition").accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isForbidden());
+		
+		Context.addProxyPrivilege(GET_CONDITIONS);
+		Context.addProxyPrivilege(GET_CONCEPT_SOURCES);
+		try {
+			response = get("/Condition").accept(FhirMediaTypes.JSON).go();
+			
+			assertThat(response, isOk());
+			assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+			
+			Bundle results = readBundleResponse(response);
+			
+			assertThat(results, notNullValue());
+			assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_CONDITIONS);
+			Context.removeProxyPrivilege(GET_CONCEPT_SOURCES);
+		}
 	}
 	
 	@Test

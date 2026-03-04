@@ -46,6 +46,7 @@ import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.annotations.R4Provider;
 import org.openmrs.module.fhir2.api.spi.ModuleLifecycleListener;
 import org.openmrs.module.fhir2.narrative.OpenmrsThymeleafNarrativeGenerator;
+import org.openmrs.module.fhir2.web.authentication.AuthorizationInterceptor;
 import org.openmrs.module.fhir2.web.authentication.RequireAuthenticationInterceptor;
 import org.openmrs.module.fhir2.web.util.DisableCacheInterceptor;
 import org.openmrs.module.fhir2.web.util.NarrativeUtils;
@@ -148,6 +149,7 @@ public class FhirRestServlet extends RestfulServer implements ModuleLifecycleLis
 
 		registerInterceptor(loggingInterceptor);
 		registerInterceptor(new RequireAuthenticationInterceptor());
+		registerInterceptor(new AuthorizationInterceptor());
 		registerInterceptor(new DisableCacheInterceptor());
 		registerInterceptor(new SummaryInterceptor());
 		registerInterceptor(new SupportMergePatchInterceptor());
@@ -258,6 +260,7 @@ public class FhirRestServlet extends RestfulServer implements ModuleLifecycleLis
 				
 				registerInterceptor(ctx.getBean("hapiLoggingInterceptor", LoggingInterceptor.class));
 				registerInterceptor(new RequireAuthenticationInterceptor());
+				registerInterceptor(new AuthorizationInterceptor());
 				registerInterceptor(new DisableCacheInterceptor());
 				registerInterceptor(new SummaryInterceptor());
 				registerInterceptor(new SupportMergePatchInterceptor());

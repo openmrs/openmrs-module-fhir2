@@ -18,9 +18,12 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.openmrs.Provider;
 import org.openmrs.User;
+import org.openmrs.api.APIAuthenticationException;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.FhirPractitionerService;
 import org.openmrs.module.fhir2.api.FhirUserService;
@@ -30,8 +33,8 @@ import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.TwoSearchQueryBundleProvider;
 import org.openmrs.module.fhir2.api.search.param.PractitionerSearchParams;
-import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.PractitionerTranslator;
+import org.openmrs.util.PrivilegeConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -70,7 +73,7 @@ public class FhirPractitionerServiceImpl extends BaseFhirService<Practitioner, P
 	@Override
 	public Practitioner get(@Nonnull String uuid) {
 		if (uuid == null) {
-			throw new InvalidRequestException("Uuid cannot be null.");
+			throw new InvalidRequestException("Uuid cannot be null");
 		}
 		
 		Practitioner result;
@@ -96,14 +99,30 @@ public class FhirPractitionerServiceImpl extends BaseFhirService<Practitioner, P
 	@Override
 	@Transactional(readOnly = true)
 	public IBundleProvider searchForPractitioners(PractitionerSearchParams practitionerSearchParams) {
-		IBundleProvider providerBundle = searchQuery.getQueryResults(practitionerSearchParams.toSearchParameterMap(), dao,
-		    translator, searchQueryInclude);
-		SearchParameterMap theParams = new SearchParameterMap();
-		IBundleProvider userBundle = userService.searchForUsers(theParams);
+		IBundleProvider providerBundle = null;
+		IBundleProvider userBundle = null;
 		
-		if (!providerBundle.isEmpty() && !userBundle.isEmpty()) {
+		boolean canSearchProviders = Context.hasPrivilege(PrivilegeConstants.GET_PROVIDERS);
+		boolean canSearchUsers = Context.hasPrivilege(PrivilegeConstants.GET_USERS);
+		
+		if (!canSearchProviders && !canSearchUsers) {
+			throw new APIAuthenticationException(Context.getMessageSourceService().getMessage("error.privilegesRequired",
+			    new Object[] { StringUtils.join(PrivilegeConstants.GET_PROVIDERS, PrivilegeConstants.GET_USERS, ',') },
+			    Context.getLocale()));
+		}
+		
+		if (canSearchProviders) {
+			providerBundle = searchQuery.getQueryResults(practitionerSearchParams.toSearchParameterMap(), dao, translator,
+			    searchQueryInclude);
+		}
+		
+		if (canSearchUsers) {
+			userBundle = userService.searchForUsers(practitionerSearchParams.toSearchParameterMap());
+		}
+		
+		if (providerBundle != null && userBundle != null) {
 			return new TwoSearchQueryBundleProvider(providerBundle, userBundle, globalPropertyService);
-		} else if (providerBundle.isEmpty() && !userBundle.isEmpty()) {
+		} else if (providerBundle == null && userBundle != null) {
 			return userBundle;
 		}
 		

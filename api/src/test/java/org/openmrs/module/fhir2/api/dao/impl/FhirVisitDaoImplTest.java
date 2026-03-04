@@ -10,11 +10,15 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.fail;
 import static org.openmrs.util.PrivilegeConstants.GET_VISITS;
+
+import java.util.Arrays;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -23,6 +27,7 @@ import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.openmrs.module.fhir2.api.dao.FhirVisitDao;
+import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -46,7 +51,7 @@ public class FhirVisitDaoImplTest extends BaseFhirContextSensitiveTest {
 	}
 	
 	@Test
-	public void get_shouldReturnVisitByUuid() {
+	public void shouldReturnVisitByUuidForGet() {
 		Visit visit = dao.get(VISIT_UUID);
 		
 		assertThat(visit, notNullValue());
@@ -54,27 +59,93 @@ public class FhirVisitDaoImplTest extends BaseFhirContextSensitiveTest {
 	}
 	
 	@Test
-	public void get_shouldReturnNullIfVisitNotFoundByUuid() {
+	public void shouldReturnNullIfVisitNotFoundByUuidForGet() {
 		Visit visit = dao.get(BAD_VISIT_UUID);
 		
 		assertThat(visit, nullValue());
 	}
 	
 	@Test
-	public void get_shouldRequireGetVisitPrivilege() {
+	public void shouldRequireGetVisitPrivilegeForGet() {
 		Context.logout();
 		
 		try {
 			dao.get(VISIT_UUID);
 			fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
 		}
-		catch (APIAuthenticationException ignored) {
-			// this is the happy path
+		catch (APIAuthenticationException e) {
+			assertThat(e.getMessage(), containsString("Privilege"));
 		}
 		
 		try {
 			Context.addProxyPrivilege(GET_VISITS);
 			assertThat(dao.get(VISIT_UUID), notNullValue());
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_VISITS);
+		}
+	}
+	
+	@Test
+	public void shouldRequireGetVisitsPrivilegeForGetByCollection() {
+		Context.logout();
+		
+		try {
+			dao.get(Arrays.asList(VISIT_UUID));
+			fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
+		}
+		catch (APIAuthenticationException e) {
+			assertThat(e.getMessage(), containsString("Privilege"));
+		}
+		
+		try {
+			Context.addProxyPrivilege(GET_VISITS);
+			List<Visit> visits = dao.get(Arrays.asList(VISIT_UUID));
+			assertThat(visits, notNullValue());
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_VISITS);
+		}
+	}
+	
+	@Test
+	public void shouldRequireGetVisitsPrivilegeForGetSearchResults() {
+		Context.logout();
+		
+		try {
+			dao.getSearchResults(new SearchParameterMap());
+			fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
+		}
+		catch (APIAuthenticationException e) {
+			assertThat(e.getMessage(), containsString("Privilege"));
+		}
+		
+		try {
+			Context.addProxyPrivilege(GET_VISITS);
+			List<Visit> visits = dao.getSearchResults(new SearchParameterMap());
+			assertThat(visits, notNullValue());
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_VISITS);
+		}
+	}
+	
+	@Test
+	public void shouldRequireGetVisitsPrivilegeForGetSearchResultsCount() {
+		Context.logout();
+		
+		try {
+			dao.getSearchResultsCount(new SearchParameterMap());
+			fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
+		}
+		catch (APIAuthenticationException e) {
+			assertThat(e.getMessage(), containsString("Privilege"));
+		}
+		
+		try {
+			Context.addProxyPrivilege(GET_VISITS);
+			int count = dao.getSearchResultsCount(new SearchParameterMap());
+			assertThat(count, notNullValue());
 		}
 		finally {
 			Context.removeProxyPrivilege(GET_VISITS);
