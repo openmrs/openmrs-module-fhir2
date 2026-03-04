@@ -17,6 +17,7 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -470,5 +471,26 @@ public class ObservationTranslatorImplTest {
 		assertThat(result, notNullValue());
 		assertThat(result.getOrder(), notNullValue());
 		assertThat(result.getOrder(), equalTo(order));
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldMapHasMemberToObsGroup() {
+		Observation fhirObs = new Observation();
+		
+		Reference memberRef = new Reference();
+		memberRef.setReference("Observation/" + OBS_UUID);
+		fhirObs.addHasMember(memberRef);
+		
+		Obs childObs = new Obs();
+		childObs.setUuid(OBS_UUID);
+		
+		when(observationReferenceTranslator.toOpenmrsType(any(Reference.class))).thenReturn(childObs);
+		
+		Obs result = observationTranslator.toOpenmrsType(fhirObs);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.hasGroupMembers(), is(true));
+		assertThat(result.getGroupMembers().size(), equalTo(1));
+		assertThat(result.getGroupMembers(), hasItem(childObs));
 	}
 }
