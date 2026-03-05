@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+    This Source Code Form is subject to the terms of the Mozilla Public License,
+    v. 2.0. If a copy of the MPL was not distributed with this file, You can
+    obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+    the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+
+    Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+    graphic logo is a trademark of OpenMRS Inc.
+-->
+<dataset>
+	<!-- Location with a single mapping -->
+	<location location_id="2" name="Xanadu" description="A metaphor for opulence" address1="800 Boylston Street" address2="" city_village="Boston" state_province="MA" postal_code="02115" country="USA" latitude="" longitude="" creator="1" date_created="2008-08-15 13:46:50.0" retired="false" uuid="9356400c-a5a2-4532-8f2b-2361b3446eb8"/>
+	<fhir_encounter_class_map encounter_class_map_id="1" location_id="2" encounter_class="AMB" creator="1" date_created="2023-08-07 12:34:56" retired="false" uuid="e7453f34-3134-49c9-80d1-2527f82ba149"/>
+
+	<!-- Location with multiple mappings -->
+	<location location_id="3" name="Duplicate Location" description="Location with multiple mappings" address1="123 Test Street" address2="" city_village="TestCity" state_province="TS" postal_code="12345" country="USA" latitude="" longitude="" creator="1" date_created="2008-08-15 13:46:50.0" retired="false" uuid="167ce20c-4785-4285-9119-d197268f7f4a"/>
+	<fhir_encounter_class_map encounter_class_map_id="2" location_id="3" encounter_class="AMB" creator="1" date_created="2023-08-07 12:34:56" retired="false" uuid="348da134-efe1-4e58-b61a-c4d99e192eba"/>
+	<fhir_encounter_class_map encounter_class_map_id="3" location_id="3" encounter_class="EMER" creator="1" date_created="2023-08-07 12:34:56" retired="false" uuid="398b14b0-2437-47a3-b709-fdd6b150e5fe"/>
+</dataset>
