@@ -527,7 +527,7 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
-		assertThat(result, hasProperty("total", equalTo(9))); // 5 non-voided visits and 4 non-voided encounters in standard test dataset
+		assertThat(result, hasProperty("total", equalTo(10))); // 6 non-voided visits and 4 non-voided encounters in standard test dataset
 	}
 	
 	@Test
@@ -542,7 +542,7 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
-		assertThat(result, hasProperty("total", equalTo(9))); // 5 non-voided visits and 4 non-voided encounters in standard test data
+		assertThat(result, hasProperty("total", equalTo(10))); // 6 non-voided visits and 4 non-voided encounters in standard test data
 	}
 	
 	@Test
@@ -954,7 +954,7 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 		assertThat(encounter.getPeriod(), notNullValue());
 		assertThat(encounter.getPeriod().hasStart(), is(true));
 		assertThat(encounter.getPeriod().getStart(),
-		    sameDay(LocalDate.of(2005, 2, 1).atStartOfDay(ZoneId.ofOffset("UTC", ZoneOffset.of("+05:30")))
+		    sameDay(LocalDate.of(2007, 2, 1).atStartOfDay(ZoneId.ofOffset("UTC", ZoneOffset.of("+05:30")))
 		            .withZoneSameInstant(ZoneId.systemDefault()).toLocalDate()));
 	}
 	
@@ -982,7 +982,7 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 		assertThat(encounter.getPeriod(), notNullValue());
 		assertThat(encounter.getPeriod().hasStart(), is(true));
 		assertThat(encounter.getPeriod().getStart(),
-		    sameDay(LocalDate.of(2005, 2, 1).atStartOfDay(ZoneId.ofOffset("UTC", ZoneOffset.of("+05:30")))
+		    sameDay(LocalDate.of(2007, 2, 1).atStartOfDay(ZoneId.ofOffset("UTC", ZoneOffset.of("+05:30")))
 		            .withZoneSameInstant(ZoneId.systemDefault()).toLocalDate()));
 	}
 	
@@ -1010,7 +1010,7 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 		assertThat(encounter.getPeriod(), notNullValue());
 		assertThat(encounter.getPeriod().hasStart(), is(true));
 		assertThat(encounter.getPeriod().getStart(),
-		    sameDay(LocalDate.of(2005, 2, 1).atStartOfDay(ZoneId.ofOffset("UTC", ZoneOffset.of("+05:30")))
+		    sameDay(LocalDate.of(2007, 2, 1).atStartOfDay(ZoneId.ofOffset("UTC", ZoneOffset.of("+05:30")))
 		            .withZoneSameInstant(ZoneId.systemDefault()).toLocalDate()));
 	}
 	

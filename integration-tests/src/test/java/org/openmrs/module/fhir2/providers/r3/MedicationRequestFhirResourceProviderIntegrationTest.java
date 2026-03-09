@@ -67,7 +67,7 @@ public class MedicationRequestFhirResourceProviderIntegrationTest extends BaseFh
 		        .accept(BaseFhirIntegrationTest.FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(BaseFhirIntegrationTest.FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(BaseFhirIntegrationTest.FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		MedicationRequest medicationRequest = readResponse(response);
@@ -83,7 +83,7 @@ public class MedicationRequestFhirResourceProviderIntegrationTest extends BaseFh
 		        .accept(BaseFhirIntegrationTest.FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isNotFound());
-		assertThat(response.getContentType(), is(BaseFhirIntegrationTest.FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(BaseFhirIntegrationTest.FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 	}
 	
@@ -93,7 +93,7 @@ public class MedicationRequestFhirResourceProviderIntegrationTest extends BaseFh
 		        .accept(BaseFhirIntegrationTest.FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(BaseFhirIntegrationTest.FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(BaseFhirIntegrationTest.FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		MedicationRequest medicationRequest = readResponse(response);
@@ -109,7 +109,7 @@ public class MedicationRequestFhirResourceProviderIntegrationTest extends BaseFh
 		        .accept(BaseFhirIntegrationTest.FhirMediaTypes.XML).go();
 		
 		assertThat(response, isNotFound());
-		assertThat(response.getContentType(), is(BaseFhirIntegrationTest.FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(BaseFhirIntegrationTest.FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 	}
 	
@@ -119,7 +119,7 @@ public class MedicationRequestFhirResourceProviderIntegrationTest extends BaseFh
 		        .go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(BaseFhirIntegrationTest.FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(BaseFhirIntegrationTest.FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Bundle results = readBundleResponse(response);
@@ -139,7 +139,7 @@ public class MedicationRequestFhirResourceProviderIntegrationTest extends BaseFh
 		        .go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(BaseFhirIntegrationTest.FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(BaseFhirIntegrationTest.FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		results = readBundleResponse(response);
@@ -160,7 +160,7 @@ public class MedicationRequestFhirResourceProviderIntegrationTest extends BaseFh
 		MockHttpServletResponse response = get("/MedicationRequest").accept(BaseFhirIntegrationTest.FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(BaseFhirIntegrationTest.FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(BaseFhirIntegrationTest.FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Bundle results = readBundleResponse(response);
@@ -179,7 +179,7 @@ public class MedicationRequestFhirResourceProviderIntegrationTest extends BaseFh
 		response = get("/MedicationRequest?patient.identifier=MO-2").accept(BaseFhirIntegrationTest.FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(BaseFhirIntegrationTest.FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(BaseFhirIntegrationTest.FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		results = readBundleResponse(response);

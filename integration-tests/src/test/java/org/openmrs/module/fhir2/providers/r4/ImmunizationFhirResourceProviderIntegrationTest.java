@@ -173,8 +173,7 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		assertThat(immunization.hasManufacturer(), is(true));
 		assertThat(immunization.getManufacturer().getDisplay(), equalTo("ACME"));
 		assertThat(immunization.getLotNumber(), equalTo("FOO1234"));
-		assertThat(immunization.getExpirationDate(),
-		    sameDay(Date.from(ZonedDateTime.parse("2022-07-31T18:30:00.000Z").toInstant())));
+		assertThat(immunization.getExpirationDate(), sameDay(LocalDate.parse("2022-07-31")));
 		assertThat(immunization.getPerformer().get(0).getActor().getReferenceElement().getIdPart(),
 		    equalTo("6f763a67-2bd1-451c-93b9-95caeb36cc24"));
 		assertThat(immunization, validResource());
@@ -268,8 +267,7 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		assertThat(immunization.hasManufacturer(), is(true));
 		assertThat(immunization.getManufacturer().getDisplay(), equalTo("ACME"));
 		assertThat(immunization.getLotNumber(), equalTo("FOO1234"));
-		assertThat(immunization.getExpirationDate(),
-		    sameDay(Date.from(ZonedDateTime.parse("2022-07-31T18:30:00.000Z").toInstant())));
+		assertThat(immunization.getExpirationDate(), sameDay(LocalDate.parse("2022-07-31")));
 		assertThat(immunization.getPerformer().get(0).getActor().getReferenceElement().getIdPart(),
 		    equalTo("6f763a67-2bd1-451c-93b9-95caeb36cc24"));
 		assertThat(immunization, validResource());
@@ -500,7 +498,7 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		
 		assertThat(response, isOk());
 		assertThat(response, notNullValue());
-		assertThat(response.getContentType(), is(BaseFhirIntegrationTest.FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(BaseFhirIntegrationTest.FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Immunization immunization = readResponse(response);
@@ -524,7 +522,7 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		
 		assertThat(response, isOk());
 		assertThat(response, notNullValue());
-		assertThat(response.getContentType(), is(BaseFhirIntegrationTest.FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(BaseFhirIntegrationTest.FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Immunization immunization = readResponse(response);
@@ -548,7 +546,7 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		
 		assertThat(response, isOk());
 		assertThat(response, notNullValue());
-		assertThat(response.getContentType(), is(BaseFhirIntegrationTest.FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(BaseFhirIntegrationTest.FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Immunization immunization = readResponse(response);

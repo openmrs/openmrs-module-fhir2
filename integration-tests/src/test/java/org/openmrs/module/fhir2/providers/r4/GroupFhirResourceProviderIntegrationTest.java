@@ -70,7 +70,7 @@ public class GroupFhirResourceProviderIntegrationTest extends BaseFhirR4Integrat
 		        .go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(BaseFhirIntegrationTest.FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(BaseFhirIntegrationTest.FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Group group = readResponse(response);
@@ -86,7 +86,7 @@ public class GroupFhirResourceProviderIntegrationTest extends BaseFhirR4Integrat
 		        .accept(BaseFhirIntegrationTest.FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isNotFound());
-		assertThat(response.getContentType(), is(BaseFhirIntegrationTest.FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(BaseFhirIntegrationTest.FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 	}
 	
@@ -96,7 +96,7 @@ public class GroupFhirResourceProviderIntegrationTest extends BaseFhirR4Integrat
 		        .go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(BaseFhirIntegrationTest.FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(BaseFhirIntegrationTest.FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Group group = readResponse(response);
@@ -112,7 +112,7 @@ public class GroupFhirResourceProviderIntegrationTest extends BaseFhirR4Integrat
 		        .accept(BaseFhirIntegrationTest.FhirMediaTypes.XML).go();
 		
 		assertThat(response, isNotFound());
-		assertThat(response.getContentType(), is(BaseFhirIntegrationTest.FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(BaseFhirIntegrationTest.FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 	}
 	

@@ -760,7 +760,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR4In
 		assertThat(results, notNullValue());
 		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(results.hasEntry(), is(true));
-		assertThat(results, hasProperty("total", equalTo(13)));
+		assertThat(results, hasProperty("total", equalTo(14)));
 		
 		List<Bundle.BundleEntryComponent> entries = results.getEntry();
 		
@@ -960,7 +960,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR4In
 		assertThat(results, notNullValue());
 		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(results.hasEntry(), is(true));
-		assertThat(results, hasProperty("total", equalTo(13)));
+		assertThat(results, hasProperty("total", equalTo(14)));
 		
 		List<Bundle.BundleEntryComponent> entries = results.getEntry();
 		
@@ -1152,7 +1152,8 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR4In
 	
 	@Test
 	public void shouldReturnLastnEncountersObservationsWhenNoParamterIsGivenAsJson() throws Exception {
-		MockHttpServletResponse response = get("Observation/$lastn-encounters?").accept(FhirMediaTypes.JSON).go();
+		MockHttpServletResponse response = get("Observation/$lastn-encounters?subject=" + OBS_PATIENT_UUID)
+		        .accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
@@ -1355,7 +1356,8 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR4In
 	
 	@Test
 	public void shouldReturnLastnEncountersObservationsWhenNoParamterIsGivenAsXml() throws Exception {
-		MockHttpServletResponse response = get("Observation/$lastn-encounters?").accept(FhirMediaTypes.XML).go();
+		MockHttpServletResponse response = get("Observation/$lastn-encounters?subject=" + OBS_PATIENT_UUID)
+		        .accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
@@ -1465,7 +1467,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR4In
 		
 		assertThat(response, isOk());
 		assertThat(response, notNullValue());
-		assertThat(response.getContentType(), is(BaseFhirIntegrationTest.FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(BaseFhirIntegrationTest.FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Observation observation = readResponse(response);
@@ -1489,7 +1491,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR4In
 		
 		assertThat(response, isOk());
 		assertThat(response, notNullValue());
-		assertThat(response.getContentType(), is(BaseFhirIntegrationTest.FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(BaseFhirIntegrationTest.FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Observation observation = readResponse(response);

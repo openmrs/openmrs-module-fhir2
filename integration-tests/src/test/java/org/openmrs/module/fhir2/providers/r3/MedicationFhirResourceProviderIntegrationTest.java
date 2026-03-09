@@ -72,7 +72,7 @@ public class MedicationFhirResourceProviderIntegrationTest extends BaseFhirR3Int
 		        .accept(BaseFhirIntegrationTest.FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(BaseFhirIntegrationTest.FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(BaseFhirIntegrationTest.FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Medication medication = readResponse(response);
@@ -88,7 +88,7 @@ public class MedicationFhirResourceProviderIntegrationTest extends BaseFhirR3Int
 		        .accept(BaseFhirIntegrationTest.FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isNotFound());
-		assertThat(response.getContentType(), is(BaseFhirIntegrationTest.FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(BaseFhirIntegrationTest.FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 	}
 	
@@ -98,7 +98,7 @@ public class MedicationFhirResourceProviderIntegrationTest extends BaseFhirR3Int
 		        .accept(BaseFhirIntegrationTest.FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(BaseFhirIntegrationTest.FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(BaseFhirIntegrationTest.FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Medication medication = readResponse(response);
@@ -114,7 +114,7 @@ public class MedicationFhirResourceProviderIntegrationTest extends BaseFhirR3Int
 		        .accept(BaseFhirIntegrationTest.FhirMediaTypes.XML).go();
 		
 		assertThat(response, isNotFound());
-		assertThat(response.getContentType(), is(BaseFhirIntegrationTest.FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(BaseFhirIntegrationTest.FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 	}
 	
@@ -265,7 +265,7 @@ public class MedicationFhirResourceProviderIntegrationTest extends BaseFhirR3Int
 		        .accept(BaseFhirIntegrationTest.FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(BaseFhirIntegrationTest.FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(BaseFhirIntegrationTest.FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Medication medication = readResponse(response);

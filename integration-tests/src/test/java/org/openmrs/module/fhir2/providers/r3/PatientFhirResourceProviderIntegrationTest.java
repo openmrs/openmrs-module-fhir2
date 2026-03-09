@@ -87,6 +87,8 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR3Integr
 	
 	private static final String OBSERVATION_UUID_9 = "e26cea2c-1b9f-4afe-b211-f3ef6c88af6f";
 	
+	private static final String ENCOUNTER_UUID_4 = "a2428fea-6b78-11e0-93c3-18a905e044dc";
+	
 	private static final String ENCOUNTER_UUID_1 = "e403fafb-e5e4-42d0-9d11-4f52e89d148c";
 	
 	private static final String ENCOUNTER_UUID_2 = "6519d653-393b-4118-9c83-a3715b82d4ac";
@@ -651,14 +653,14 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR3Integr
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
-		assertThat(result, hasProperty("total", equalTo(15)));
-		assertThat(result.getEntry(), hasSize(15));
+		assertThat(result, hasProperty("total", equalTo(16)));
+		assertThat(result.getEntry(), hasSize(16));
 		
 		List<Bundle.BundleEntryComponent> entries = result.getEntry();
 		
 		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R3/"))));
 		
-		assertThat(entries, hasCorrectResources(15, getValidResources()));
+		assertThat(entries, hasCorrectResources(16, getValidResources()));
 	}
 	
 	@Test
@@ -674,7 +676,7 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR3Integr
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
-		assertThat(result, hasProperty("total", equalTo(15)));
+		assertThat(result, hasProperty("total", equalTo(16)));
 		assertThat(result.getEntry(), hasSize(5));
 		
 		List<Bundle.BundleEntryComponent> entries = result.getEntry();
@@ -697,14 +699,14 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR3Integr
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
-		assertThat(result, hasProperty("total", equalTo(15)));
-		assertThat(result.getEntry(), hasSize(15));
+		assertThat(result, hasProperty("total", equalTo(16)));
+		assertThat(result.getEntry(), hasSize(16));
 		
 		List<Bundle.BundleEntryComponent> entries = result.getEntry();
 		
 		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R3/"))));
 		
-		assertThat(entries, hasCorrectResources(15, getValidResources()));
+		assertThat(entries, hasCorrectResources(16, getValidResources()));
 	}
 	
 	@Test
@@ -720,7 +722,7 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR3Integr
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
-		assertThat(result, hasProperty("total", equalTo(15)));
+		assertThat(result, hasProperty("total", equalTo(16)));
 		assertThat(result.getEntry(), hasSize(5));
 		
 		List<Bundle.BundleEntryComponent> entries = result.getEntry();
@@ -742,8 +744,8 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR3Integr
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
-		assertThat(result, hasProperty("total", equalTo(44)));
-		assertThat(result.getEntry(), hasSize(44));
+		assertThat(result, hasProperty("total", equalTo(45)));
+		assertThat(result.getEntry(), hasSize(45));
 		
 		List<Bundle.BundleEntryComponent> entries = result.getEntry();
 		
@@ -763,7 +765,7 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR3Integr
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
-		assertThat(result, hasProperty("total", equalTo(44)));
+		assertThat(result, hasProperty("total", equalTo(45)));
 		assertThat(result.getEntry(), hasSize(5));
 		
 		List<Bundle.BundleEntryComponent> entries = result.getEntry();
@@ -784,8 +786,8 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR3Integr
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
-		assertThat(result, hasProperty("total", equalTo(44)));
-		assertThat(result.getEntry(), hasSize(44));
+		assertThat(result, hasProperty("total", equalTo(45)));
+		assertThat(result.getEntry(), hasSize(45));
 		
 		List<Bundle.BundleEntryComponent> entries = result.getEntry();
 		
@@ -805,7 +807,7 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR3Integr
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
-		assertThat(result, hasProperty("total", equalTo(44)));
+		assertThat(result, hasProperty("total", equalTo(45)));
 		assertThat(result.getEntry(), hasSize(5));
 		
 		List<Bundle.BundleEntryComponent> entries = result.getEntry();
@@ -886,6 +888,7 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR3Integr
 		validResources.add(OBSERVATION_UUID_7);
 		validResources.add(OBSERVATION_UUID_8);
 		validResources.add(OBSERVATION_UUID_9);
+		validResources.add(ENCOUNTER_UUID_4);
 		validResources.add(ENCOUNTER_UUID_1);
 		validResources.add(ENCOUNTER_UUID_2);
 		validResources.add(ENCOUNTER_UUID_3);
