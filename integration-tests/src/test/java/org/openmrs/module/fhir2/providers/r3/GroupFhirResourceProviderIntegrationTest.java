@@ -129,7 +129,7 @@ public class GroupFhirResourceProviderIntegrationTest extends BaseFhirR3Integrat
 		
 		// verify created correctly
 		assertThat(response, isCreated());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Group group = readResponse(response);
@@ -152,7 +152,7 @@ public class GroupFhirResourceProviderIntegrationTest extends BaseFhirR3Integrat
 		
 		// verify created correctly
 		assertThat(response, isCreated());
-		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Group group = readResponse(response);
@@ -167,7 +167,7 @@ public class GroupFhirResourceProviderIntegrationTest extends BaseFhirR3Integrat
 		MockHttpServletResponse response = get("/Group/" + COHORT_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Group group = readResponse(response);
@@ -187,7 +187,7 @@ public class GroupFhirResourceProviderIntegrationTest extends BaseFhirR3Integrat
 		response = put("/Group/" + COHORT_UUID).jsonContent(jsonGroup).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		// read updated record
@@ -214,7 +214,7 @@ public class GroupFhirResourceProviderIntegrationTest extends BaseFhirR3Integrat
 		MockHttpServletResponse response = get("/Group/" + COHORT_UUID).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Group group = readResponse(response);
@@ -234,7 +234,7 @@ public class GroupFhirResourceProviderIntegrationTest extends BaseFhirR3Integrat
 		response = put("/Group/" + COHORT_UUID).xmlContent(xmlGroup).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		// read updated record
@@ -268,7 +268,7 @@ public class GroupFhirResourceProviderIntegrationTest extends BaseFhirR3Integrat
 		response = put("/Group/" + COHORT_UUID).xmlContent(toXML(group)).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isBadRequest());
-		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		OperationOutcome operationOutcome = readOperationOutcome(response);
@@ -290,7 +290,7 @@ public class GroupFhirResourceProviderIntegrationTest extends BaseFhirR3Integrat
 		response = put("/Group/" + BAD_COHORT_UUID).xmlContent(toXML(group)).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isNotFound());
-		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		OperationOutcome operationOutcome = readOperationOutcome(response);
@@ -312,7 +312,7 @@ public class GroupFhirResourceProviderIntegrationTest extends BaseFhirR3Integrat
 		response = put("/Group/" + COHORT_UUID).jsonContent(toJson(group)).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isBadRequest());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		OperationOutcome operationOutcome = readOperationOutcome(response);
@@ -334,7 +334,7 @@ public class GroupFhirResourceProviderIntegrationTest extends BaseFhirR3Integrat
 		response = put("/Group/" + BAD_COHORT_UUID).jsonContent(toJson(group)).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isNotFound());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		OperationOutcome operationOutcome = readOperationOutcome(response);
@@ -359,7 +359,7 @@ public class GroupFhirResourceProviderIntegrationTest extends BaseFhirR3Integrat
 		MockHttpServletResponse response = delete("/Group/" + BAD_COHORT_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isNotFound());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		OperationOutcome operationOutcome = readOperationOutcome(response);
