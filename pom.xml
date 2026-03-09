@@ -181,6 +181,14 @@
                         <artifactId>mockito-all</artifactId>
                     </exclusion>
                     <exclusion>
+                        <groupId>org.powermock</groupId>
+                        <artifactId>powermock-module-junit4</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.powermock</groupId>
+                        <artifactId>powermock-api-mockito</artifactId>
+                    </exclusion>
+                    <exclusion>
                         <groupId>org.hamcrest</groupId>
                         <artifactId>hamcrest-all</artifactId>
                     </exclusion>
