@@ -13,10 +13,14 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.fail;
+import static org.openmrs.util.PrivilegeConstants.GET_VISITS;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.Visit;
+import org.openmrs.api.APIAuthenticationException;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.openmrs.module.fhir2.api.dao.FhirVisitDao;
 import org.springframework.beans.factory.ObjectFactory;
@@ -56,4 +60,24 @@ public class FhirVisitDaoImplTest extends BaseFhirContextSensitiveTest {
 		assertThat(visit, nullValue());
 	}
 	
+	@Test
+	public void get_shouldRequireGetVisitPrivilege() {
+		Context.logout();
+		
+		try {
+			dao.get(VISIT_UUID);
+			fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
+		}
+		catch (APIAuthenticationException ignored) {
+			// this is the happy path
+		}
+		
+		try {
+			Context.addProxyPrivilege(GET_VISITS);
+			assertThat(dao.get(VISIT_UUID), notNullValue());
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_VISITS);
+		}
+	}
 }
