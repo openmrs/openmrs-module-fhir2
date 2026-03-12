@@ -181,7 +181,7 @@ public class ConditionFhirResourceProviderTest extends BaseFhirProvenanceResourc
 		
 		when(conditionService.searchConditions(new ConditionSearchParams(patientReference, codeList, clinicalList, onsetDate,
 		        onsetAge, recordDate, category, uuid, lastUpdated, sort, null)))
-		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(condition), 10, 1));
+		                .thenReturn(new MockIBundleProvider<>(Collections.singletonList(condition), 10, 1));
 		
 		IBundleProvider result = resourceProvider.searchConditions(patientReference, subjectReference, codeList,
 		    clinicalList, onsetDate, onsetAge, recordDate, category, uuid, lastUpdated, sort, includes);
@@ -224,7 +224,7 @@ public class ConditionFhirResourceProviderTest extends BaseFhirProvenanceResourc
 		
 		when(conditionService.searchConditions(new ConditionSearchParams(subjectReference, codeList, clinicalList, onsetDate,
 		        onsetAge, recordDate, category, uuid, lastUpdated, sort, null)))
-		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(condition), 10, 1));
+		                .thenReturn(new MockIBundleProvider<>(Collections.singletonList(condition), 10, 1));
 		
 		IBundleProvider result = resourceProvider.searchConditions(subjectReference, subjectReference, codeList,
 		    clinicalList, onsetDate, onsetAge, recordDate, category, uuid, lastUpdated, sort, includes);
@@ -270,7 +270,7 @@ public class ConditionFhirResourceProviderTest extends BaseFhirProvenanceResourc
 		
 		when(conditionService.searchConditions(new ConditionSearchParams(patientReference, codeList, clinicalList, onsetDate,
 		        onsetAge, recordDate, category, uuid, lastUpdated, sort, null)))
-		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(condition), 10, 1));
+		                .thenReturn(new MockIBundleProvider<>(Collections.singletonList(condition), 10, 1));
 		
 		IBundleProvider result = resourceProvider.searchConditions(patientReference, subjectReference, codeList,
 		    clinicalList, onsetDate, onsetAge, recordDate, category, uuid, lastUpdated, sort, includes);
@@ -313,7 +313,7 @@ public class ConditionFhirResourceProviderTest extends BaseFhirProvenanceResourc
 		
 		when(conditionService.searchConditions(new ConditionSearchParams(subjectReference, codeList, clinicalList, onsetDate,
 		        onsetAge, recordDate, category, uuid, lastUpdated, sort, null)))
-		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(condition), 10, 1));
+		                .thenReturn(new MockIBundleProvider<>(Collections.singletonList(condition), 10, 1));
 		
 		IBundleProvider result = resourceProvider.searchConditions(subjectReference, subjectReference, codeList,
 		    clinicalList, onsetDate, onsetAge, recordDate, category, uuid, lastUpdated, sort, includes);

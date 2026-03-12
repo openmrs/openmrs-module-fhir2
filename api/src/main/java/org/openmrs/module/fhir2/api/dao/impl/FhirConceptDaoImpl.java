@@ -124,7 +124,7 @@ public class FhirConceptDaoImpl extends BaseFhirDao<Concept> implements FhirConc
 		Join<?, ?> conceptNamesJoin = criteriaContext.addJoin("names", "cn");
 		handleAndListParam(criteriaContext.getCriteriaBuilder(), titlePattern,
 		    (title) -> getSearchQueryHelper().propertyLike(criteriaContext, conceptNamesJoin, "name", title))
-		        .ifPresent(criteriaContext::addPredicate);
+		            .ifPresent(criteriaContext::addPredicate);
 	}
 	
 	protected OpenmrsFhirCriteriaContext<ConceptMap, Concept> createConceptMapCriteriaBuilder(
