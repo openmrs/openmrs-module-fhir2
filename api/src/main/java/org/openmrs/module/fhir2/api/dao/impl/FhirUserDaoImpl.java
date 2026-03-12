@@ -50,6 +50,6 @@ public class FhirUserDaoImpl extends BasePractitionerDao<User> implements FhirUs
 		handleAndListParam(criteriaContext.getCriteriaBuilder(), identifier,
 		    param -> Optional.of(
 		        criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("username"), param.getValue())))
-		        .ifPresent(criteriaContext::addPredicate);
+		                .ifPresent(criteriaContext::addPredicate);
 	}
 }
