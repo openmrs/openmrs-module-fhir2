@@ -9,35 +9,16 @@ on:
 
 jobs:
   build:
-    strategy:
-      matrix:
-        platform: [ ubuntu-latest ]
-        java-version: [ 8 ]
+    uses: openmrs/openmrs-contrib-gha-workflows/.github/workflows/build-backend-module.yml@main
+    with:
+      java_versions: '[8, 11, 17, 21]'
+      main_java_version: '8'
+      maven_args: 'clean verify -P integration-test'
+    secrets:
+      MAVEN_REPO_USERNAME: ${{ secrets.MAVEN_REPO_USERNAME }}
+      MAVEN_REPO_API_KEY: ${{ secrets.MAVEN_REPO_API_KEY }}
+      NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
 
-    runs-on: ${{ matrix.platform }}
-    env:
-      PLATFORM: ${{ matrix.platform }}
-      JAVA_VERSION: ${{ matrix.java-version }}
-
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up JDK
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: ${{ matrix.java-version }}
-      - name: Build with Maven
-        id: build_with_maven
-        run: |
-          mvn clean verify --batch-mode -P integration-test --file pom.xml
-      - uses: actions/upload-artifact@v4
-        with:
-          name: build_artifact
-          path: ${{ github.workspace }}/omod/target/*.omod
-      - name: Send data to Codecov
-        uses: codecov/codecov-action@v4
-        with:
-          env_vars: PLATFORM, JAVA_VERSION
   test:
     name: Run e2e tests
     needs: build

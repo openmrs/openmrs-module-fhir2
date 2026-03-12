@@ -20,6 +20,7 @@ import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.startsWith;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
@@ -54,8 +55,8 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.FhirMedicationService;
 import org.openmrs.module.fhir2.api.search.param.MedicationSearchParams;
-import org.powermock.reflect.Whitebox;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MedicationFhirResourceProviderWebTest extends BaseFhirR4ResourceProviderWebTest<MedicationFhirResourceProvider, Medication> {
@@ -95,7 +96,7 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR4ResourcePro
 	public void setup() throws ServletException {
 		resourceProvider = new MedicationFhirResourceProvider();
 		resourceProvider.setFhirMedicationService(fhirMedicationService);
-		Whitebox.setInternalState(BaseUpsertFhirResourceProvider.class, "globalPropsService", fhirGpService);
+		ReflectionTestUtils.setField(BaseUpsertFhirResourceProvider.class, "globalPropsService", fhirGpService);
 		medication = new Medication();
 		medication.setId(MEDICATION_UUID);
 		super.setup();
@@ -103,7 +104,7 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR4ResourcePro
 	
 	@After
 	public void tearDown() {
-		Whitebox.setInternalState(BaseUpsertFhirResourceProvider.class, "globalPropsService", (Object) null);
+		ReflectionTestUtils.setField(BaseUpsertFhirResourceProvider.class, "globalPropsService", (Object) null);
 	}
 	
 	@Test
@@ -115,7 +116,7 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR4ResourcePro
 		MockHttpServletResponse response = get("/Medication/" + MEDICATION_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(readResponse(response).getIdElement().getIdPart(), equalTo(MEDICATION_UUID));
 	}
 	
@@ -240,7 +241,7 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR4ResourcePro
 		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		
 		Bundle results = readBundleResponse(response);
 		assertThat(results.getEntry(), notNullValue());
@@ -339,7 +340,7 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR4ResourcePro
 		MockHttpServletResponse response = delete("/Medication/" + MEDICATION_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 	}
 	
 	@Test

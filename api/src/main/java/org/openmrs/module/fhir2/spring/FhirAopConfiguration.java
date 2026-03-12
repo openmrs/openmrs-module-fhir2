@@ -12,12 +12,14 @@ package org.openmrs.module.fhir2.spring;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
+import org.openmrs.annotation.Authorized;
 import org.openmrs.aop.AuthorizationAdvice;
 import org.openmrs.module.fhir2.api.FhirHelperService;
 import org.openmrs.module.fhir2.api.FhirService;
 import org.openmrs.module.fhir2.api.dao.FhirDaoAop;
 import org.openmrs.module.fhir2.api.translators.FhirTranslator;
 import org.springframework.aop.Advisor;
+import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
@@ -30,6 +32,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.transaction.interceptor.TransactionInterceptor;
+import org.springframework.util.ClassUtils;
 
 /**
  * This is a Spring AOP configuration that add advices to beans that implement the FhirDao marker
@@ -44,13 +47,36 @@ public class FhirAopConfiguration {
 	
 	@Bean
 	public Advisor createFhirAuthorizationAdvisor(@Autowired AuthorizationAdvice authorizationAdvice) {
-		return new StaticMethodMatcherPointcutAdvisor(authorizationAdvice) {
+		MethodBeforeAdvice advice = (method, args, target) -> {
+			if (AnnotationUtils.findAnnotation(method, Authorized.class) == null) {
+				Method resolved = findAuthorizedInterfaceMethod(method, target.getClass());
+				if (resolved != null) {
+					method = resolved;
+				}
+			}
+			authorizationAdvice.before(method, args, target);
+		};
+		
+		return new StaticMethodMatcherPointcutAdvisor(advice) {
 			
 			@Override
 			public boolean matches(Method method, Class<?> targetClass) {
 				return FhirDaoAop.class.isAssignableFrom(targetClass);
 			}
 		};
+	}
+	
+	private static Method findAuthorizedInterfaceMethod(Method method, Class<?> targetClass) {
+		for (Class<?> iface : ClassUtils.getAllInterfacesForClassAsSet(targetClass)) {
+			try {
+				Method ifaceMethod = iface.getMethod(method.getName(), method.getParameterTypes());
+				if (AnnotationUtils.findAnnotation(ifaceMethod, Authorized.class) != null) {
+					return ifaceMethod;
+				}
+			}
+			catch (NoSuchMethodException e) {}
+		}
+		return null;
 	}
 	
 	@Bean
