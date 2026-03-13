@@ -1,0 +1,19 @@
+name: Build
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    uses: openmrs/openmrs-contrib-gha-workflows/.github/workflows/build-backend-module.yml@main
+    with:
+      java_versions: '["8"]'
+      main_java_version: '8'
+    secrets:
+      NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+      MAVEN_REPO_USERNAME: ${{ secrets.MAVEN_REPO_USERNAME }}
+      MAVEN_REPO_API_KEY: ${{ secrets.MAVEN_REPO_API_KEY }}
