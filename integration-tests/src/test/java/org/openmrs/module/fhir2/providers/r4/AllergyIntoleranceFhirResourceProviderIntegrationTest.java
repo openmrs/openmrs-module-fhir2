@@ -41,6 +41,8 @@ public class AllergyIntoleranceFhirResourceProviderIntegrationTest extends BaseF
 	
 	private static final String ALLERGY_INTOLERANCE_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirAllergyIntoleranceDaoImplTest_initial_data.xml";
 	
+	private static final String ALLERGY_SHARED_CONCEPT_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirAllergyIntoleranceDaoImplTest_shared_concept_data.xml";
+	
 	private static final String JSON_MERGE_PATCH_ALLERGY_PATH = "org/openmrs/module/fhir2/providers/AllergyIntolerance_json_merge_patch.json";
 	
 	private static final String JSON_PATCH_ALLERGY_PATH = "org/openmrs/module/fhir2/providers/AllergyIntolerance_json_patch.json";
@@ -54,6 +56,10 @@ public class AllergyIntoleranceFhirResourceProviderIntegrationTest extends BaseF
 	private static final String ALLERGY_UUID = "1085AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	
 	private static final String UNKNOWN_ALLERGY_UUID = "1080AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	
+	private static final String SHARED_CONCEPT_ALLERGY_UUID_1 = "2001AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	
+	private static final String SHARED_CONCEPT_ALLERGY_UUID_2 = "2002AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	
 	@Getter(AccessLevel.PUBLIC)
 	@Autowired
@@ -658,6 +664,29 @@ public class AllergyIntoleranceFhirResourceProviderIntegrationTest extends BaseF
 		assertThat(allergyIntolerance, notNullValue());
 		assertThat(allergyIntolerance.getMeta().getVersionId(), notNullValue());
 		assertThat(allergyIntolerance, validResource());
+	}
+	
+	@Test
+	public void shouldReturnDistinctCodeableConceptsForAllergiesWithSameCodedAllergen() throws Exception {
+		// given - two allergies sharing the same coded allergen but with different non-coded text
+		executeDataSet(ALLERGY_SHARED_CONCEPT_DATA_XML);
+		
+		// when
+		MockHttpServletResponse response1 = get("/AllergyIntolerance/" + SHARED_CONCEPT_ALLERGY_UUID_1)
+		        .accept(FhirMediaTypes.JSON).go();
+		assertThat(response1, isOk());
+		AllergyIntolerance allergy1 = readResponse(response1);
+		
+		MockHttpServletResponse response2 = get("/AllergyIntolerance/" + SHARED_CONCEPT_ALLERGY_UUID_2)
+		        .accept(FhirMediaTypes.JSON).go();
+		assertThat(response2, isOk());
+		AllergyIntolerance allergy2 = readResponse(response2);
+		
+		// then - both share the same coded allergen but each has its own non-coded text
+		assertThat(allergy1.getCode().getCodingFirstRep().getCode(),
+		    equalTo(allergy2.getCode().getCodingFirstRep().getCode()));
+		assertThat(allergy1.getCode().getText(), equalTo("Peanut butter"));
+		assertThat(allergy2.getCode().getText(), equalTo("Peanut oil"));
 	}
 	
 	@Test

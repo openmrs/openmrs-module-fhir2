@@ -36,12 +36,15 @@ import org.openmrs.module.fhir2.api.FhirConceptSourceService;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.model.FhirConceptSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Component;
 
 @Component
 @Slf4j
 public class ConceptTranslatorImpl implements ConceptTranslator {
+	
+	private static final String CACHE_NAME = "fhir2ConceptToCodeableConcept";
 	
 	@Getter(PROTECTED)
 	@Setter(value = PROTECTED, onMethod_ = @Autowired)
@@ -51,13 +54,33 @@ public class ConceptTranslatorImpl implements ConceptTranslator {
 	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private FhirConceptSourceService conceptSourceService;
 	
+	@Setter(value = PROTECTED, onMethod_ = { @Autowired(required = false) })
+	private CacheManager cacheManager;
+	
 	@Override
-	@Cacheable(value = "fhir2ConceptToCodeableConcept")
 	public CodeableConcept toFhirResource(@Nonnull Concept concept) {
 		if (concept == null) {
 			return null;
 		}
 		
+		Cache cache = cacheManager != null ? cacheManager.getCache(CACHE_NAME) : null;
+		if (cache != null) {
+			CodeableConcept cached = cache.get(concept, CodeableConcept.class);
+			if (cached != null) {
+				return cached.copy();
+			}
+		}
+		
+		CodeableConcept codeableConcept = buildCodeableConcept(concept);
+		
+		if (cache != null) {
+			cache.put(concept, codeableConcept);
+		}
+		
+		return codeableConcept.copy();
+	}
+	
+	private CodeableConcept buildCodeableConcept(Concept concept) {
 		Collection<FhirConceptSource> allFhirConceptSources = conceptSourceService.getFhirConceptSources();
 		CodeableConcept codeableConcept = new CodeableConcept();
 		codeableConcept.setText(concept.getDisplayString());
