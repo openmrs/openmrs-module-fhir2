@@ -25,6 +25,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.ConceptNumeric;
 import org.openmrs.Obs;
+import org.openmrs.ObsReferenceRange;
 import org.openmrs.module.fhir2.FhirConstants;
 
 public class ObservationReferenceRangeTranslatorImplTest {
@@ -214,6 +215,120 @@ public class ObservationReferenceRangeTranslatorImplTest {
 		assertThat(result, hasItem(hasProperty("low", hasProperty("value", equalTo(LOW_CRITICAL_VALUE)))));
 	}
 	
+	@Test
+	public void toFhirType_shouldUseObsReferenceRangeNormalValues() {
+		ObsReferenceRange referenceRange = new ObsReferenceRange();
+		referenceRange.setLowNormal(LOW_NORMAL_VALUE.doubleValue());
+		referenceRange.setHiNormal(HIGH_NORMAL_VALUE.doubleValue());
+
+		Obs obs = getObs(new ConceptNumeric());
+		obs.setReferenceRange(referenceRange);
+
+		List<Observation.ObservationReferenceRangeComponent> result = observationReferenceRangeTranslator
+		        .toFhirResource(obs);
+
+		assertThat(result, not(empty()));
+
+		Observation.ObservationReferenceRangeComponent component = result.get(0);
+
+		assertThat(component.getType().hasCoding(), is(true));
+		assertThat(component.getType().getCodingFirstRep().getCode(), equalTo(FhirConstants.OBSERVATION_REFERENCE_NORMAL));
+		assertThat(component.hasLow(), is(true));
+		assertThat(component.getLow().getValue(), equalTo(LOW_NORMAL_VALUE));
+		assertThat(component.hasHigh(), is(true));
+		assertThat(component.getHigh().getValue(), equalTo(HIGH_NORMAL_VALUE));
+	}
+
+	@Test
+	public void toFhirType_shouldUseObsReferenceRangeCriticalValues() {
+		ObsReferenceRange referenceRange = new ObsReferenceRange();
+		referenceRange.setLowCritical(LOW_CRITICAL_VALUE.doubleValue());
+		referenceRange.setHiCritical(HIGH_CRITICAL_VALUE.doubleValue());
+
+		Obs obs = getObs(new ConceptNumeric());
+		obs.setReferenceRange(referenceRange);
+
+		List<Observation.ObservationReferenceRangeComponent> result = observationReferenceRangeTranslator
+		        .toFhirResource(obs);
+
+		assertThat(result, not(empty()));
+
+		Observation.ObservationReferenceRangeComponent component = result.get(0);
+
+		assertThat(component.getType().getCodingFirstRep().getCode(),
+		    equalTo(FhirConstants.OBSERVATION_REFERENCE_TREATMENT));
+		assertThat(component.getLow().getValue(), equalTo(LOW_CRITICAL_VALUE));
+		assertThat(component.getHigh().getValue(), equalTo(HIGH_CRITICAL_VALUE));
+	}
+
+	@Test
+	public void toFhirType_shouldUseObsReferenceRangeAbsoluteValues() {
+		ObsReferenceRange referenceRange = new ObsReferenceRange();
+		referenceRange.setLowAbsolute(LOW_ABSOLUTE_VALUE.doubleValue());
+		referenceRange.setHiAbsolute(HIGH_ABSOLUTE_VALUE.doubleValue());
+
+		Obs obs = getObs(new ConceptNumeric());
+		obs.setReferenceRange(referenceRange);
+
+		List<Observation.ObservationReferenceRangeComponent> result = observationReferenceRangeTranslator
+		        .toFhirResource(obs);
+
+		assertThat(result, not(empty()));
+
+		Observation.ObservationReferenceRangeComponent component = result.get(0);
+
+		assertThat(component.getType().getCodingFirstRep().getSystem(),
+		    equalTo(FhirConstants.OPENMRS_FHIR_EXT_OBSERVATION_REFERENCE_RANGE));
+		assertThat(component.getType().getCodingFirstRep().getCode(), equalTo(FhirConstants.OBSERVATION_REFERENCE_ABSOLUTE));
+		assertThat(component.getLow().getValue(), equalTo(LOW_ABSOLUTE_VALUE));
+		assertThat(component.getHigh().getValue(), equalTo(HIGH_ABSOLUTE_VALUE));
+	}
+
+	@Test
+	public void toFhirType_shouldOverrideConceptNumericWithObsReferenceRange() {
+		BigDecimal obsLow = BigDecimal.valueOf(10L);
+		BigDecimal obsHigh = BigDecimal.valueOf(20L);
+
+		ConceptNumeric conceptNumeric = new ConceptNumeric();
+		conceptNumeric.setUuid(CONCEPT_UUID);
+		conceptNumeric.setLowNormal(LOW_NORMAL_VALUE.doubleValue());
+		conceptNumeric.setHiNormal(HIGH_NORMAL_VALUE.doubleValue());
+
+		ObsReferenceRange referenceRange = new ObsReferenceRange();
+		referenceRange.setLowNormal(obsLow.doubleValue());
+		referenceRange.setHiNormal(obsHigh.doubleValue());
+
+		Obs obs = getObs(conceptNumeric);
+		obs.setReferenceRange(referenceRange);
+
+		List<Observation.ObservationReferenceRangeComponent> result = observationReferenceRangeTranslator
+		        .toFhirResource(obs);
+
+		assertThat(result, not(empty()));
+
+		Observation.ObservationReferenceRangeComponent component = result.get(0);
+
+		assertThat(component.getLow().getValue(), equalTo(obsLow));
+		assertThat(component.getHigh().getValue(), equalTo(obsHigh));
+	}
+
+	@Test
+	public void toFhirType_shouldHandleObsReferenceRangeWithPartialNullValues() {
+		ObsReferenceRange referenceRange = new ObsReferenceRange();
+		referenceRange.setLowNormal(null);
+		referenceRange.setHiNormal(HIGH_NORMAL_VALUE.doubleValue());
+
+		Obs obs = getObs(new ConceptNumeric());
+		obs.setReferenceRange(referenceRange);
+
+		List<Observation.ObservationReferenceRangeComponent> result = observationReferenceRangeTranslator
+		        .toFhirResource(obs);
+
+		assertThat(result, not(empty()));
+		assertThat(result.get(0).hasLow(), equalTo(false));
+		assertThat(result, hasItem(hasProperty("high", hasProperty("value", equalTo(HIGH_NORMAL_VALUE)))));
+	}
+
 	private Obs getObs(ConceptNumeric concept) {
 		Obs obs = new Obs();
 		obs.setConcept(concept);
