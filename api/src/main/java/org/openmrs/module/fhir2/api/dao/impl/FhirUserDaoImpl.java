@@ -24,17 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class FhirUserDaoImpl extends BasePractitionerDao<User> implements FhirUserDao {
 	
 	@Override
-	protected User deproxyResult(@Nonnull User result) {
-		User user = super.deproxyResult(result);
-		if (user.getPerson() != null) {
-			// Force reload from DB to bypass stale Hibernate L2 cache entries
-			// (Person.addresses is eager but may be cached before test data is inserted via JDBC)
-			getSessionFactory().getCurrentSession().refresh(user.getPerson());
-		}
-		return user;
-	}
-	
-	@Override
 	@Transactional(readOnly = true)
 	public User getUserByUserName(String username) {
 		OpenmrsFhirCriteriaContext<User, User> criteriaContext = createCriteriaContext(User.class);
