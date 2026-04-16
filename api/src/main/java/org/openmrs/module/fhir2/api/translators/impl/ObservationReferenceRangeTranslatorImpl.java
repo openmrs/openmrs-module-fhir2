@@ -27,7 +27,6 @@ import org.openmrs.module.fhir2.api.translators.ObservationReferenceRangeTransla
 import org.springframework.stereotype.Component;
 
 @Component
-@OpenmrsProfile(openmrsPlatformVersion = "2.7.* - 9.*")
 public class ObservationReferenceRangeTranslatorImpl implements ObservationReferenceRangeTranslator {
 	
 	@Override
@@ -75,9 +74,9 @@ public class ObservationReferenceRangeTranslatorImpl implements ObservationRefer
 			}
 			
 			return observationReferenceRangeComponentList;
-		} else {
-			return null;
 		}
+
+		return null;
 	}
 	
 	private Observation.ObservationReferenceRangeComponent createObservationReferenceRange(Double hiValue, Double lowValue,
