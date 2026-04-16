@@ -44,8 +44,8 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import org.hl7.fhir.r4.model.Practitioner;
 import org.hibernate.SessionFactory;
+import org.hl7.fhir.r4.model.Practitioner;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.User;
@@ -106,7 +106,7 @@ public class UserSearchQueryTest extends BaseFhirContextSensitiveTest {
 	@Autowired
 	@Qualifier("sessionFactory")
 	private SessionFactory sessionFactory;
-
+	
 	@Autowired
 	private FhirUserDao dao;
 	

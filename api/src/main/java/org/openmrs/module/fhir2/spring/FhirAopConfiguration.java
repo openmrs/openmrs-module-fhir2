@@ -44,7 +44,7 @@ import org.springframework.transaction.interceptor.TransactionInterceptor;
 @Configuration
 @EnableAspectJAutoProxy
 public class FhirAopConfiguration {
-
+	
 	@Bean
 	public Advisor createFhirAuthorizationAdvisor(@Autowired AuthorizationAdvice authorizationAdvice) {
 		MethodBeforeAdvice advice = (method, args, target) -> {
@@ -56,16 +56,16 @@ public class FhirAopConfiguration {
 			}
 			authorizationAdvice.before(method, args, target);
 		};
-
+		
 		return new StaticMethodMatcherPointcutAdvisor(advice) {
-
+			
 			@Override
 			public boolean matches(Method method, Class<?> targetClass) {
 				return FhirDaoAop.class.isAssignableFrom(targetClass);
 			}
 		};
 	}
-
+	
 	private static Method findAuthorizedInterfaceMethod(Method method, Class<?> targetClass) {
 		for (Class<?> iface : ClassUtils.getAllInterfaces(targetClass)) {
 			try {
@@ -78,13 +78,13 @@ public class FhirAopConfiguration {
 		}
 		return null;
 	}
-
+	
 	@Bean
 	public Advisor createFhirTransactionAdvisor(@Autowired(required = false) TransactionInterceptor transactionInterceptor) {
 		if (transactionInterceptor != null) {
 			// TransactionInterceptor is not available since core 2.8 as it is done via tx:annotation-driven on all beans
 			return new StaticMethodMatcherPointcutAdvisor(transactionInterceptor) {
-
+				
 				@Override
 				public boolean matches(Method method, Class<?> targetClass) {
 					return FhirDaoAop.class.isAssignableFrom(targetClass);
@@ -93,7 +93,7 @@ public class FhirAopConfiguration {
 		}
 		return null;
 	}
-
+	
 	/**
 	 * Creates advisors for FHIR beans using Spring caching. It is required before OpenMRS core 2.8.
 	 *
@@ -105,7 +105,7 @@ public class FhirAopConfiguration {
 		if (cacheInterceptor != null) {
 			// CacheInterceptor is not available since core 2.8 as it is done via cache:annotation-driven on all beans
 			return new StaticMethodMatcherPointcutAdvisor(cacheInterceptor) {
-
+				
 				@Override
 				public boolean matches(Method method, Class<?> targetClass) {
 					return (FhirTranslator.class.isAssignableFrom(targetClass)

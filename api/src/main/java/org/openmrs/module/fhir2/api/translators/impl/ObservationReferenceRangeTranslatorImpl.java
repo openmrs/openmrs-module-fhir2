@@ -21,7 +21,6 @@ import org.hl7.fhir.r4.model.Quantity;
 import org.openmrs.ConceptNumeric;
 import org.openmrs.Obs;
 import org.openmrs.ObsReferenceRange;
-import org.openmrs.annotation.OpenmrsProfile;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.ObservationReferenceRangeTranslator;
 import org.springframework.stereotype.Component;
@@ -75,7 +74,7 @@ public class ObservationReferenceRangeTranslatorImpl implements ObservationRefer
 			
 			return observationReferenceRangeComponentList;
 		}
-
+		
 		return null;
 	}
 	

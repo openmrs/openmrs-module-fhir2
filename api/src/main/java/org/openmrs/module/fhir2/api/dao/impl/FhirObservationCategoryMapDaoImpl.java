@@ -38,7 +38,7 @@ public class FhirObservationCategoryMapDaoImpl extends BaseDao {
 		catch (PersistenceException e) {
 			log.error("Exception caught while trying to load category for concept class '{}'", conceptClassUuid, e);
 		}
-
+		
 		return null;
 	}
 }

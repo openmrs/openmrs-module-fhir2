@@ -421,16 +421,16 @@ public class ConceptTranslatorImplTest {
 	public void shouldReturnNullWhenCodeableConceptNull() {
 		assertThat(conceptTranslator.toOpenmrsType(null), nullValue());
 	}
-
+	
 	@Test
 	public void shouldReturnDifferentInstancesForSameConceptWhenCached() {
 		// given
 		conceptTranslator.setCacheManager(new ConcurrentMapCacheManager("fhir2ConceptToCodeableConcept"));
-
+		
 		// when
 		CodeableConcept result1 = conceptTranslator.toFhirResource(concept);
 		CodeableConcept result2 = conceptTranslator.toFhirResource(concept);
-
+		
 		// then
 		assertThat(result1, notNullValue());
 		assertThat(result2, notNullValue());
@@ -438,22 +438,22 @@ public class ConceptTranslatorImplTest {
 		assertThat(result1.getCoding().size(), equalTo(result2.getCoding().size()));
 		assertThat(result1, not(sameInstance(result2)));
 	}
-
+	
 	@Test
 	public void shouldNotShareMutationsBetweenCachedInstances() {
 		// given
 		conceptTranslator.setCacheManager(new ConcurrentMapCacheManager("fhir2ConceptToCodeableConcept"));
-
+		
 		// when
 		CodeableConcept result1 = conceptTranslator.toFhirResource(concept);
 		result1.setText("modified text");
 		CodeableConcept result2 = conceptTranslator.toFhirResource(concept);
-
+		
 		// then - the second result should have the original text, not the modified text
 		assertThat(result2.getText(), equalTo(CONCEPT_NAME));
 		assertThat(result2.getText(), not(equalTo("modified text")));
 	}
-
+	
 	private void addMapping(ConceptMapType mapType, ConceptSource conceptSource, String code) {
 		ConceptMap m = new ConceptMap();
 		m.setConceptMapType(mapType);

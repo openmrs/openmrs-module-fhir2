@@ -35,139 +35,144 @@ import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FhirAopConfigurationTest {
-
+	
 	@Mock
 	private AuthorizationAdvice authorizationAdvice;
-
+	
 	private FhirAopConfiguration configuration;
-
+	
 	private Advisor advisor;
-
+	
 	@Before
 	public void setup() {
 		configuration = new FhirAopConfiguration();
 		advisor = configuration.createFhirAuthorizationAdvisor(authorizationAdvice);
 	}
-
+	
 	@Test
 	public void matches_shouldMatchClassesImplementingFhirDaoAop() throws Exception {
 		StaticMethodMatcherPointcutAdvisor pointcutAdvisor = (StaticMethodMatcherPointcutAdvisor) advisor;
-		assertThat(pointcutAdvisor.matches(
-		    DaoWithAuthorizedInterface.class.getMethod("authorizedMethod"), DaoImplWithoutAnnotation.class), is(true));
+		assertThat(pointcutAdvisor.matches(DaoWithAuthorizedInterface.class.getMethod("authorizedMethod"),
+		    DaoImplWithoutAnnotation.class), is(true));
 	}
-
+	
 	@Test
 	public void matches_shouldNotMatchClassesNotImplementingFhirDaoAop() throws Exception {
 		StaticMethodMatcherPointcutAdvisor pointcutAdvisor = (StaticMethodMatcherPointcutAdvisor) advisor;
-		assertThat(pointcutAdvisor.matches(
-		    NotADao.class.getMethod("someMethod"), NotADao.class), is(false));
+		assertThat(pointcutAdvisor.matches(NotADao.class.getMethod("someMethod"), NotADao.class), is(false));
 	}
-
+	
 	@Test
 	public void before_shouldDelegateToAuthorizationAdvice() throws Throwable {
 		doNothing().when(authorizationAdvice).before(any(Method.class), any(), any());
-
+		
 		Method concreteMethod = DaoImplWithAnnotation.class.getMethod("authorizedMethod");
 		Object target = new DaoImplWithAnnotation();
 		Object[] args = new Object[0];
-
+		
 		MethodBeforeAdvice advice = (MethodBeforeAdvice) advisor.getAdvice();
 		advice.before(concreteMethod, args, target);
-
+		
 		verify(authorizationAdvice).before(any(Method.class), eq(args), eq(target));
 	}
-
+	
 	@Test
 	public void before_shouldDelegateWithOriginalMethodWhenNoAuthorizedAnnotationExists() throws Throwable {
 		doNothing().when(authorizationAdvice).before(any(Method.class), any(), any());
-
+		
 		Method concreteMethod = DaoImplNoAuthAnywhere.class.getMethod("unannotatedMethod");
 		Object target = new DaoImplNoAuthAnywhere();
 		Object[] args = new Object[0];
-
+		
 		MethodBeforeAdvice advice = (MethodBeforeAdvice) advisor.getAdvice();
 		advice.before(concreteMethod, args, target);
-
+		
 		verify(authorizationAdvice).before(eq(concreteMethod), eq(args), eq(target));
 	}
-
+	
 	@Test
 	public void findAuthorizedInterfaceMethod_shouldFindAnnotatedInterfaceMethod() throws Exception {
 		Method implMethod = DaoImplWithoutAnnotation.class.getMethod("authorizedMethod");
-
+		
 		Method resolved = invokeFindAuthorizedInterfaceMethod(implMethod, DaoImplWithoutAnnotation.class);
-
+		
 		assertThat(resolved, notNullValue());
 		assertThat(resolved.getDeclaringClass(), equalTo(DaoWithAuthorizedInterface.class));
 	}
-
+	
 	@Test
 	public void findAuthorizedInterfaceMethod_shouldReturnNullWhenNoInterfaceHasAnnotation() throws Exception {
 		Method implMethod = DaoImplNoAuthAnywhere.class.getMethod("unannotatedMethod");
-
+		
 		Method resolved = invokeFindAuthorizedInterfaceMethod(implMethod, DaoImplNoAuthAnywhere.class);
-
+		
 		assertThat(resolved, nullValue());
 	}
-
+	
 	@Test
 	public void findAuthorizedInterfaceMethod_shouldReturnNullWhenInterfaceDoesNotDeclareMethod() throws Exception {
 		Method implMethod = DaoImplWithExtraMethod.class.getMethod("extraMethod");
-
+		
 		Method resolved = invokeFindAuthorizedInterfaceMethod(implMethod, DaoImplWithExtraMethod.class);
-
+		
 		assertThat(resolved, nullValue());
 	}
-
+	
 	private Method invokeFindAuthorizedInterfaceMethod(Method method, Class<?> targetClass) throws Exception {
 		Method findMethod = FhirAopConfiguration.class.getDeclaredMethod("findAuthorizedInterfaceMethod", Method.class,
 		    Class.class);
 		findMethod.setAccessible(true);
 		return (Method) findMethod.invoke(null, method, targetClass);
 	}
-
+	
 	// --- Test fixtures ---
-
+	
 	interface DaoWithAuthorizedInterface {
-
+		
 		@Authorized
 		void authorizedMethod();
 	}
-
+	
 	interface DaoWithoutAuthorizedInterface {
-
+		
 		void unannotatedMethod();
 	}
-
+	
 	static class DaoImplWithAnnotation implements DaoWithAuthorizedInterface, FhirDaoAop {
-
+		
 		@Override
 		@Authorized
-		public void authorizedMethod() {}
+		public void authorizedMethod() {
+		}
 	}
-
+	
 	static class DaoImplWithoutAnnotation implements DaoWithAuthorizedInterface, FhirDaoAop {
-
+		
 		@Override
-		public void authorizedMethod() {}
+		public void authorizedMethod() {
+		}
 	}
-
+	
 	static class DaoImplNoAuthAnywhere implements DaoWithoutAuthorizedInterface, FhirDaoAop {
-
+		
 		@Override
-		public void unannotatedMethod() {}
+		public void unannotatedMethod() {
+		}
 	}
-
+	
 	static class DaoImplWithExtraMethod implements DaoWithAuthorizedInterface, FhirDaoAop {
-
+		
 		@Override
-		public void authorizedMethod() {}
-
-		public void extraMethod() {}
+		public void authorizedMethod() {
+		}
+		
+		public void extraMethod() {
+		}
 	}
-
+	
 	static class NotADao {
-
-		public void someMethod() {}
+		
+		public void someMethod() {
+		}
 	}
 }

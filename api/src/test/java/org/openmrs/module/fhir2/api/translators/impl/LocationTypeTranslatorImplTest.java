@@ -33,66 +33,66 @@ import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LocationTypeTranslatorImplTest {
-
+	
 	private static final String TYPE_CONCEPT_UUID = "91df3897-1066-46a1-a403-714b737af00b";
-
+	
 	private static final String FHIR_TYPE_CONCEPT_UUID = "693a6e1f-7026-4406-adf9-c7ea3b1e8d6e";
-
+	
 	@Mock
 	private ConceptTranslator conceptTranslator;
-
+	
 	private Location omrsLocation;
-
+	
 	private LocationTypeTranslatorImpl locationTypeTranslator;
-
+	
 	@Before
 	public void setup() {
 		omrsLocation = new Location();
 		locationTypeTranslator = new LocationTypeTranslatorImpl();
 		locationTypeTranslator.setConceptTranslator(conceptTranslator);
 	}
-
+	
 	@Test
 	public void toFhirResource_shouldTranslateLocationTypeConceptToFhir() {
 		Concept typeConcept = new Concept();
 		CodeableConcept fhirTypeConcept = new CodeableConcept();
-
+		
 		fhirTypeConcept.setId(FHIR_TYPE_CONCEPT_UUID);
 		typeConcept.setUuid(TYPE_CONCEPT_UUID);
-
+		
 		omrsLocation.setType(typeConcept);
-
+		
 		when(conceptTranslator.toFhirResource(eq(typeConcept))).thenReturn(fhirTypeConcept);
-
+		
 		List<CodeableConcept> result = locationTypeTranslator.toFhirResource(omrsLocation);
-
+		
 		assertThat(result, notNullValue());
 		assertThat(result, hasSize(greaterThan(0)));
 		assertThat(result.get(0).getId(), equalTo(FHIR_TYPE_CONCEPT_UUID));
 	}
-
+	
 	@Test
 	public void toFhirResource_shouldReturnEmptyListForNullType() {
 		List<CodeableConcept> result = locationTypeTranslator.toFhirResource(omrsLocation);
-
+		
 		assertThat(result, hasSize(equalTo(0)));
 	}
-
+	
 	@Test
 	public void toOpenmrsType_shouldTranslateFhirTypeCodeableConceptToLocationType() {
 		Concept typeConcept = new Concept();
 		Coding typeCoding = new Coding();
 		CodeableConcept fhirTypeConcept = new CodeableConcept();
-
+		
 		typeCoding.setId(FHIR_TYPE_CONCEPT_UUID);
 		fhirTypeConcept.setId(FHIR_TYPE_CONCEPT_UUID);
 		fhirTypeConcept.setCoding(Collections.singletonList(typeCoding));
 		typeConcept.setUuid(TYPE_CONCEPT_UUID);
-
+		
 		when(conceptTranslator.toOpenmrsType(eq(fhirTypeConcept))).thenReturn(typeConcept);
-
+		
 		Location result = locationTypeTranslator.toOpenmrsType(omrsLocation, Collections.singletonList(fhirTypeConcept));
-
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), notNullValue());
 		assertThat(result.getType(), equalTo(typeConcept));

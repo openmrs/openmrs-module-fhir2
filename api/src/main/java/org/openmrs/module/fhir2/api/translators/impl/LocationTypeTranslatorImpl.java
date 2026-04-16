@@ -30,33 +30,33 @@ import org.springframework.stereotype.Component;
 @Component
 @OpenmrsProfile(openmrsPlatformVersion = "2.* - 9.*")
 public class LocationTypeTranslatorImpl implements LocationTypeTranslator {
-
+	
 	@Getter(value = AccessLevel.PROTECTED)
 	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
 	private ConceptTranslator conceptTranslator;
-
+	
 	@Override
 	public List<CodeableConcept> toFhirResource(@Nonnull Location location) {
 		CodeableConcept type = null;
-
+		
 		if (location.getType() != null) {
 			type = conceptTranslator.toFhirResource(location.getType());
 		}
-
+		
 		if (type != null) {
 			return Collections.singletonList(type);
 		} else {
 			return Collections.emptyList();
 		}
 	}
-
+	
 	@Override
 	public Location toOpenmrsType(@Nonnull Location location, @Nonnull List<CodeableConcept> types) {
 		Optional<CodeableConcept> typeConcept = types.stream().filter(Objects::nonNull).filter(CodeableConcept::hasCoding)
 		        .findFirst();
-
+		
 		typeConcept.ifPresent(codeableConcept -> location.setType(conceptTranslator.toOpenmrsType(codeableConcept)));
-
+		
 		return location;
 	}
 }

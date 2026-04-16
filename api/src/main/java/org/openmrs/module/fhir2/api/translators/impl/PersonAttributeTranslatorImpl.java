@@ -178,7 +178,7 @@ public class PersonAttributeTranslatorImpl implements PersonAttributeTranslator 
 			}
 			return null;
 		}
-
+		
 		return valueExtension;
 	}
 	
