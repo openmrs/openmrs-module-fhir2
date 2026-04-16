@@ -43,7 +43,6 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.RelatedPerson;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.Task;
-import org.openmrs.annotation.OpenmrsProfile;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirAllergyIntoleranceService;
 import org.openmrs.module.fhir2.api.FhirDiagnosticReportService;
@@ -70,7 +69,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 @NoArgsConstructor
-@OpenmrsProfile(openmrsPlatformVersion = "2.* - 9.*")
 public class SearchQueryIncludeImpl<U extends IBaseResource> implements SearchQueryInclude<U> {
 	
 	@Getter(AccessLevel.PROTECTED)

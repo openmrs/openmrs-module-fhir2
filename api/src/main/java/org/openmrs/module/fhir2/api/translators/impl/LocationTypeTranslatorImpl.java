@@ -21,14 +21,12 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.openmrs.Location;
-import org.openmrs.annotation.OpenmrsProfile;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.LocationTypeTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-@OpenmrsProfile(openmrsPlatformVersion = "2.* - 9.*")
 public class LocationTypeTranslatorImpl implements LocationTypeTranslator {
 	
 	@Getter(value = AccessLevel.PROTECTED)
