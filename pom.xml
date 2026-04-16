@@ -837,6 +837,49 @@
                 </plugin>
             </plugins>
         </pluginManagement>
+
+        <plugins>
+            <plugin>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+                <version>2.30.0</version>
+                <configuration>
+                    <java>
+                        <!-- Eclipse formatter from openmrs-tools dependency -->
+                        <eclipse>
+                            <file>eclipse/OpenMRSFormatter.xml</file>
+                        </eclipse>
+                        <!-- Import ordering -->
+                        <importOrder>
+                            <order>javax,java,</order>
+                        </importOrder>
+                        <removeUnusedImports />
+                        <includes>
+                            <include>**/*.java</include>
+                        </includes>
+                        <excludes>
+                            <exclude>**/target/**</exclude>
+                        </excludes>
+                    </java>
+                </configuration>
+                <dependencies>
+                    <!-- Eclipse formatter configuration from openmrs-tools -->
+                    <dependency>
+                        <groupId>org.openmrs.tools</groupId>
+                        <artifactId>openmrs-tools</artifactId>
+                        <version>${openmrsPlatformToolsVersion}</version>
+                    </dependency>
+                </dependencies>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>apply</goal>
+                        </goals>
+                        <phase>process-sources</phase>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
     </build>
 
     <properties>
@@ -908,6 +951,21 @@
             </build>
         </profile>
         <profile>
+            <id>java11plus-spotless</id>
+            <activation>
+                <jdk>[11,)</jdk>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.diffplug.spotless</groupId>
+                        <artifactId>spotless-maven-plugin</artifactId>
+                        <version>2.43.0</version>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
             <id>artifactory</id>
             <activation>
                 <property>
@@ -948,56 +1006,6 @@
                         </plugin>
                     </plugins>
                 </pluginManagement>
-            </build>
-        </profile>
-        <profile>
-            <id>java11plus-spotless</id>
-            <activation>
-                <jdk>[11,)</jdk>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>com.diffplug.spotless</groupId>
-                        <artifactId>spotless-maven-plugin</artifactId>
-                        <version>2.43.0</version>
-                        <configuration>
-                            <java>
-                                <!-- Eclipse formatter from openmrs-tools dependency -->
-                                <eclipse>
-                                    <file>eclipse/OpenMRSFormatter.xml</file>
-                                </eclipse>
-                                <!-- Import ordering -->
-                                <importOrder>
-                                    <order>javax,java,</order>
-                                </importOrder>
-                                <removeUnusedImports />
-                                <includes>
-                                    <include>**/*.java</include>
-                                </includes>
-                                <excludes>
-                                    <exclude>**/target/**</exclude>
-                                </excludes>
-                            </java>
-                        </configuration>
-                        <dependencies>
-                            <!-- Eclipse formatter configuration from openmrs-tools -->
-                            <dependency>
-                                <groupId>org.openmrs.tools</groupId>
-                                <artifactId>openmrs-tools</artifactId>
-                                <version>${openmrsPlatformToolsVersion}</version>
-                            </dependency>
-                        </dependencies>
-                        <executions>
-                            <execution>
-                                <goals>
-                                    <goal>apply</goal>
-                                </goals>
-                                <phase>process-sources</phase>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
             </build>
         </profile>
     </profiles>
