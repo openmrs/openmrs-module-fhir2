@@ -817,6 +817,46 @@
                     </executions>
                 </plugin>
                 <plugin>
+                    <groupId>com.diffplug.spotless</groupId>
+                    <artifactId>spotless-maven-plugin</artifactId>
+                    <version>2.30.0</version>
+                    <configuration>
+                        <java>
+                            <!-- Eclipse formatter from openmrs-tools dependency -->
+                            <eclipse>
+                                <file>eclipse/OpenMRSFormatter.xml</file>
+                            </eclipse>
+                            <!-- Import ordering -->
+                            <importOrder>
+                                <order>javax,java,</order>
+                            </importOrder>
+                            <removeUnusedImports />
+                            <includes>
+                                <include>**/*.java</include>
+                            </includes>
+                            <excludes>
+                                <exclude>**/target/**</exclude>
+                            </excludes>
+                        </java>
+                    </configuration>
+                    <dependencies>
+                        <!-- Eclipse formatter configuration from openmrs-tools -->
+                        <dependency>
+                            <groupId>org.openmrs.tools</groupId>
+                            <artifactId>openmrs-tools</artifactId>
+                            <version>${openmrsPlatformToolsVersion}</version>
+                        </dependency>
+                    </dependencies>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>apply</goal>
+                            </goals>
+                            <phase>process-sources</phase>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
                     <version>0.8.12</version>
@@ -837,49 +877,6 @@
                 </plugin>
             </plugins>
         </pluginManagement>
-
-        <plugins>
-            <plugin>
-                <groupId>com.diffplug.spotless</groupId>
-                <artifactId>spotless-maven-plugin</artifactId>
-                <version>2.30.0</version>
-                <configuration>
-                    <java>
-                        <!-- Eclipse formatter from openmrs-tools dependency -->
-                        <eclipse>
-                            <file>eclipse/OpenMRSFormatter.xml</file>
-                        </eclipse>
-                        <!-- Import ordering -->
-                        <importOrder>
-                            <order>javax,java,</order>
-                        </importOrder>
-                        <removeUnusedImports />
-                        <includes>
-                            <include>**/*.java</include>
-                        </includes>
-                        <excludes>
-                            <exclude>**/target/**</exclude>
-                        </excludes>
-                    </java>
-                </configuration>
-                <dependencies>
-                    <!-- Eclipse formatter configuration from openmrs-tools -->
-                    <dependency>
-                        <groupId>org.openmrs.tools</groupId>
-                        <artifactId>openmrs-tools</artifactId>
-                        <version>${openmrsPlatformToolsVersion}</version>
-                    </dependency>
-                </dependencies>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>apply</goal>
-                        </goals>
-                        <phase>process-sources</phase>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
     </build>
 
     <properties>
