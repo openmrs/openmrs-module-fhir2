@@ -33,12 +33,12 @@ public class FhirObservationCategoryMapDaoImpl extends BaseDao {
 			return criteriaContext.getEntityManager()
 			        .createQuery(
 			            criteriaContext.finalizeQuery().select(criteriaContext.getRoot().get("observationCategory")))
-			        .getSingleResult();
+			        .getResultList().stream().findFirst().orElse(null);
 		}
 		catch (PersistenceException e) {
 			log.error("Exception caught while trying to load category for concept class '{}'", conceptClassUuid, e);
 		}
-		
+
 		return null;
 	}
 }

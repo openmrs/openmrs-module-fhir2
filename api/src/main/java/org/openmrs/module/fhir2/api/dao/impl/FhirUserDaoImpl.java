@@ -9,8 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
-import javax.annotation.Nonnull;
-
 import java.util.Optional;
 
 import ca.uhn.fhir.rest.param.TokenAndListParam;

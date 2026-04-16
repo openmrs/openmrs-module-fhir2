@@ -12,6 +12,7 @@ package org.openmrs.module.fhir2.spring;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
+import org.apache.commons.lang3.ClassUtils;
 import org.openmrs.annotation.Authorized;
 import org.openmrs.aop.AuthorizationAdvice;
 import org.openmrs.module.fhir2.api.FhirHelperService;
@@ -32,7 +33,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.transaction.interceptor.TransactionInterceptor;
-import org.springframework.util.ClassUtils;
 
 /**
  * This is a Spring AOP configuration that add advices to beans that implement the FhirDao marker
@@ -44,7 +44,7 @@ import org.springframework.util.ClassUtils;
 @Configuration
 @EnableAspectJAutoProxy
 public class FhirAopConfiguration {
-	
+
 	@Bean
 	public Advisor createFhirAuthorizationAdvisor(@Autowired AuthorizationAdvice authorizationAdvice) {
 		MethodBeforeAdvice advice = (method, args, target) -> {
@@ -56,18 +56,18 @@ public class FhirAopConfiguration {
 			}
 			authorizationAdvice.before(method, args, target);
 		};
-		
+
 		return new StaticMethodMatcherPointcutAdvisor(advice) {
-			
+
 			@Override
 			public boolean matches(Method method, Class<?> targetClass) {
 				return FhirDaoAop.class.isAssignableFrom(targetClass);
 			}
 		};
 	}
-	
+
 	private static Method findAuthorizedInterfaceMethod(Method method, Class<?> targetClass) {
-		for (Class<?> iface : ClassUtils.getAllInterfacesForClassAsSet(targetClass)) {
+		for (Class<?> iface : ClassUtils.getAllInterfaces(targetClass)) {
 			try {
 				Method ifaceMethod = iface.getMethod(method.getName(), method.getParameterTypes());
 				if (AnnotationUtils.findAnnotation(ifaceMethod, Authorized.class) != null) {
@@ -78,13 +78,13 @@ public class FhirAopConfiguration {
 		}
 		return null;
 	}
-	
+
 	@Bean
 	public Advisor createFhirTransactionAdvisor(@Autowired(required = false) TransactionInterceptor transactionInterceptor) {
 		if (transactionInterceptor != null) {
 			// TransactionInterceptor is not available since core 2.8 as it is done via tx:annotation-driven on all beans
 			return new StaticMethodMatcherPointcutAdvisor(transactionInterceptor) {
-				
+
 				@Override
 				public boolean matches(Method method, Class<?> targetClass) {
 					return FhirDaoAop.class.isAssignableFrom(targetClass);
@@ -93,10 +93,10 @@ public class FhirAopConfiguration {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Creates advisors for FHIR beans using Spring caching. It is required before OpenMRS core 2.8.
-	 * 
+	 *
 	 * @param cacheInterceptor the cache interceptor
 	 * @return the cache advisor
 	 */
@@ -105,7 +105,7 @@ public class FhirAopConfiguration {
 		if (cacheInterceptor != null) {
 			// CacheInterceptor is not available since core 2.8 as it is done via cache:annotation-driven on all beans
 			return new StaticMethodMatcherPointcutAdvisor(cacheInterceptor) {
-				
+
 				@Override
 				public boolean matches(Method method, Class<?> targetClass) {
 					return (FhirTranslator.class.isAssignableFrom(targetClass)

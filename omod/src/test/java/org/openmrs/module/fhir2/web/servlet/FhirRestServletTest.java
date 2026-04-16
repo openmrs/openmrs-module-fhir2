@@ -60,8 +60,12 @@ public class FhirRestServletTest {
 	public void testServiceSetsContextClassLoader() throws ServletException, IOException {
 		// setup
 		when(mockRequest.getMethod()).thenReturn("GET");
-		when(mockRequest.getRequestURI()).thenReturn("/fhir");
-		
+		when(mockRequest.getRequestURI()).thenReturn("/fhir2Servlet/metadata");
+		when(mockRequest.getRequestURL()).thenReturn(new StringBuffer("http://localhost/fhir2Servlet/metadata"));
+		when(mockRequest.getServletPath()).thenReturn("");
+		when(mockRequest.getContextPath()).thenReturn("");
+		when(mockRequest.getQueryString()).thenReturn("");
+
 		Thread.currentThread().setContextClassLoader(null);
 		assertNull(Thread.currentThread().getContextClassLoader());
 		servlet.service(mockRequest, mockResponse);

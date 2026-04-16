@@ -36,28 +36,51 @@ import org.openmrs.module.fhir2.api.FhirConceptSourceService;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.model.FhirConceptSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Component;
 
 @Component
 @Slf4j
 public class ConceptTranslatorImpl implements ConceptTranslator {
-	
+
+	private static final String CACHE_NAME = "fhir2ConceptToCodeableConcept";
+
 	@Getter(PROTECTED)
 	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private FhirConceptService conceptService;
-	
+
 	@Getter(PROTECTED)
 	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private FhirConceptSourceService conceptSourceService;
-	
+
+	@Setter(value = PROTECTED, onMethod_ = { @Autowired(required = false) })
+	private CacheManager cacheManager;
+
 	@Override
-	@Cacheable(value = "fhir2ConceptToCodeableConcept")
 	public CodeableConcept toFhirResource(@Nonnull Concept concept) {
 		if (concept == null) {
 			return null;
 		}
-		
+
+		Cache cache = cacheManager != null ? cacheManager.getCache(CACHE_NAME) : null;
+		if (cache != null) {
+			CodeableConcept cached = cache.get(concept, CodeableConcept.class);
+			if (cached != null) {
+				return cached.copy();
+			}
+		}
+
+		CodeableConcept codeableConcept = buildCodeableConcept(concept);
+
+		if (cache != null) {
+			cache.put(concept, codeableConcept);
+		}
+
+		return codeableConcept.copy();
+	}
+
+	private CodeableConcept buildCodeableConcept(Concept concept) {
 		Collection<FhirConceptSource> allFhirConceptSources = conceptSourceService.getFhirConceptSources();
 		CodeableConcept codeableConcept = new CodeableConcept();
 		codeableConcept.setText(concept.getDisplayString());
@@ -80,7 +103,7 @@ public class ConceptTranslatorImpl implements ConceptTranslator {
 				}
 			}
 		}
-		
+
 		for (String systemUrl : systemUrlToCodeMap.keySet()) {
 			Map<String, String> mapTypeToCodeMap = systemUrlToCodeMap.get(systemUrl);
 			if (mapTypeToCodeMap != null) {
@@ -95,7 +118,7 @@ public class ConceptTranslatorImpl implements ConceptTranslator {
 		}
 		return codeableConcept;
 	}
-	
+
 	@Override
 	public Concept toOpenmrsType(@Nonnull CodeableConcept concept) {
 		if (concept != null) {
@@ -129,10 +152,10 @@ public class ConceptTranslatorImpl implements ConceptTranslator {
 				}
 			}
 		}
-		
+
 		return null;
 	}
-	
+
 	private void addConceptCoding(Coding coding, String system, String code, Concept concept) {
 		coding.setSystem(system);
 		coding.setCode(code);
@@ -140,7 +163,7 @@ public class ConceptTranslatorImpl implements ConceptTranslator {
 			coding.setDisplay(concept.getDisplayString());
 		}
 	}
-	
+
 	private void addSystemToCodeMap(Map<String, Map<String, String>> systemUrlToCodeMap, String systemUrl, String mapType,
 	        String code) {
 		if (systemUrlToCodeMap.containsKey(systemUrl)) {
@@ -151,7 +174,7 @@ public class ConceptTranslatorImpl implements ConceptTranslator {
 			systemUrlToCodeMap.put(systemUrl, mapTypeToCodeMap);
 		}
 	}
-	
+
 	private void addConceptsToMap(Map<String, Concept> mapTypeToConceptMap, List<Concept> allMatchingConcepts,
 	        ConceptSource conceptSource, String code) {
 		allMatchingConcepts.forEach(concept -> {
@@ -171,14 +194,14 @@ public class ConceptTranslatorImpl implements ConceptTranslator {
 			}
 		});
 	}
-	
+
 	private String getSourceUrl(ConceptSource conceptSource, Collection<FhirConceptSource> fhirConceptSources) {
 		String sourceUrl = null;
 		if (conceptSource != null) {
 			FhirConceptSource fhirConceptSource = fhirConceptSources.stream().filter(fcs -> fcs.getConceptSource() != null)
 			        .filter(fcs -> fcs.getConceptSource().getUuid().equals(conceptSource.getUuid())).findFirst()
 			        .orElse(null);
-			
+
 			if (fhirConceptSource != null && fhirConceptSource.getUrl() != null) {
 				sourceUrl = fhirConceptSource.getUrl();
 			} else {
@@ -187,7 +210,7 @@ public class ConceptTranslatorImpl implements ConceptTranslator {
 				        : null;
 			}
 		}
-		
+
 		return sourceUrl;
 	}
 }
