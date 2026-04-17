@@ -44,7 +44,6 @@ import lombok.Getter;
 import org.apache.commons.lang.time.DateUtils;
 import org.hamcrest.MatcherAssert;
 import org.hl7.fhir.r4.model.Task;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -56,7 +55,6 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.FhirTaskService;
 import org.openmrs.module.fhir2.api.search.param.TaskSearchParams;
-import org.powermock.reflect.Whitebox;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -96,18 +94,13 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirR4ResourceProviderW
 	public void setup() throws ServletException {
 		resourceProvider = new TaskFhirResourceProvider();
 		resourceProvider.setService(service);
-		Whitebox.setInternalState(BaseUpsertFhirResourceProvider.class, "globalPropsService", fhirGpService);
+		resourceProvider.setGlobalPropsService(fhirGpService);
 		
 		super.setup();
 		
 		task = new Task();
 		task.setId(TASK_UUID);
 		when(service.get(TASK_UUID)).thenReturn(task);
-	}
-	
-	@After
-	public void tearDown() {
-		Whitebox.setInternalState(BaseUpsertFhirResourceProvider.class, "globalPropsService", (Object) null);
 	}
 	
 	@Test

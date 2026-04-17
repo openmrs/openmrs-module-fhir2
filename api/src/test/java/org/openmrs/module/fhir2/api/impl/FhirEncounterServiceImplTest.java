@@ -50,12 +50,16 @@ import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Encounter;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.FhirVisitService;
@@ -111,6 +115,8 @@ public class FhirEncounterServiceImplTest {
 	@Mock
 	private SearchQuery<Encounter, org.hl7.fhir.r4.model.Encounter, FhirEncounterDao, EncounterTranslator<Encounter>, SearchQueryInclude<org.hl7.fhir.r4.model.Encounter>> searchQuery;
 	
+	private MockedStatic<Context> contextMock;
+	
 	private FhirEncounterServiceImpl encounterService;
 	
 	private org.openmrs.Encounter openMrsEncounter;
@@ -136,6 +142,14 @@ public class FhirEncounterServiceImplTest {
 		
 		fhirEncounter = new org.hl7.fhir.r4.model.Encounter();
 		fhirEncounter.setId(ENCOUNTER_UUID);
+		
+		contextMock = Mockito.mockStatic(Context.class);
+		contextMock.when(() -> Context.hasPrivilege(any())).thenReturn(true);
+	}
+	
+	@After
+	public void tearDown() {
+		contextMock.close();
 	}
 	
 	private List<IBaseResource> get(IBundleProvider results) {

@@ -19,13 +19,15 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.InternalCodingDt;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.Encounter;
+import org.openmrs.api.APIAuthenticationException;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirEncounterService;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
@@ -38,6 +40,7 @@ import org.openmrs.module.fhir2.api.search.param.EncounterSearchParams;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.EncounterTranslator;
 import org.openmrs.module.fhir2.api.util.FhirUtils;
+import org.openmrs.util.PrivilegeConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -84,7 +87,6 @@ public class FhirEncounterServiceImpl extends BaseFhirService<Encounter, org.ope
 	
 	@Override
 	public Encounter create(@Nonnull Encounter encounter) {
-		
 		if (encounter == null) {
 			throw new InvalidRequestException("Encounter cannot be null");
 		}
@@ -151,11 +153,28 @@ public class FhirEncounterServiceImpl extends BaseFhirService<Encounter, org.ope
 		IBundleProvider visitBundle = null;
 		IBundleProvider encounterBundle = null;
 		
-		if (shouldSearchExplicitlyFor(searchParameters.getTag(), "visit")) {
+		boolean isSearchingForVisits = shouldSearchExplicitlyFor(searchParameters.getTag(), "visit");
+		boolean canSearchForVisits = Context.hasPrivilege(PrivilegeConstants.GET_VISITS);
+		boolean isSearchingForEncounters = shouldSearchExplicitlyFor(searchParameters.getTag(), "encounter");
+		boolean canSearchForEncounters = Context.hasPrivilege(PrivilegeConstants.GET_ENCOUNTERS);
+		
+		if (isSearchingForVisits && !canSearchForVisits && isSearchingForEncounters && !canSearchForEncounters) {
+			throw new APIAuthenticationException(Context.getMessageSourceService().getMessage("error.privilegesRequired",
+			    new Object[] { StringUtils.join(PrivilegeConstants.GET_CONDITIONS, PrivilegeConstants.GET_DIAGNOSES, ',') },
+			    Context.getLocale()));
+		} else if (isSearchingForVisits && !canSearchForVisits) {
+			throw new APIAuthenticationException(Context.getMessageSourceService().getMessage("error.privilegesRequired",
+			    new Object[] { PrivilegeConstants.GET_DIAGNOSES }, Context.getLocale()));
+		} else if (isSearchingForEncounters && !canSearchForEncounters) {
+			throw new APIAuthenticationException(Context.getMessageSourceService().getMessage("error.privilegesRequired",
+			    new Object[] { PrivilegeConstants.GET_CONDITIONS }, Context.getLocale()));
+		}
+		
+		if ((isSearchingForVisits || !isSearchingForEncounters) && canSearchForVisits) {
 			visitBundle = visitService.searchForVisits(theParams);
 		}
 		
-		if (shouldSearchExplicitlyFor(searchParameters.getTag(), "encounter")) {
+		if ((isSearchingForEncounters || !isSearchingForVisits) && canSearchForEncounters) {
 			encounterBundle = searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 		}
 		
@@ -165,7 +184,7 @@ public class FhirEncounterServiceImpl extends BaseFhirService<Encounter, org.ope
 			return visitBundle;
 		}
 		
-		return encounterBundle == null ? new SimpleBundleProvider() : encounterBundle;
+		return encounterBundle;
 	}
 	
 	/**
@@ -173,7 +192,7 @@ public class FhirEncounterServiceImpl extends BaseFhirService<Encounter, org.ope
 	 */
 	protected boolean shouldSearchExplicitlyFor(TokenAndListParam tokenAndListParam, @Nonnull String valueToCheck) {
 		if (tokenAndListParam == null || tokenAndListParam.size() == 0 || valueToCheck.isEmpty()) {
-			return true;
+			return false;
 		}
 		
 		return tokenAndListParam.getValuesAsQueryTokens().stream()

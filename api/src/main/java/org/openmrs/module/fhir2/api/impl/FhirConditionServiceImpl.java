@@ -17,13 +17,15 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.Condition;
+import org.openmrs.api.APIAuthenticationException;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirConditionService;
 import org.openmrs.module.fhir2.api.FhirDiagnosisService;
@@ -37,6 +39,7 @@ import org.openmrs.module.fhir2.api.search.param.DiagnosisSearchParams;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.ConditionTranslator;
 import org.openmrs.module.fhir2.api.util.FhirUtils;
+import org.openmrs.util.PrivilegeConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -104,7 +107,6 @@ public class FhirConditionServiceImpl extends BaseFhirService<Condition, org.ope
 	
 	@Override
 	public Condition update(@Nonnull String uuid, @Nonnull Condition condition) {
-		
 		if (uuid == null) {
 			throw new InvalidRequestException("Uuid cannot be null.");
 		}
@@ -156,23 +158,42 @@ public class FhirConditionServiceImpl extends BaseFhirService<Condition, org.ope
 		IBundleProvider diagnosisBundle = null;
 		IBundleProvider conditionBundle = null;
 		
-		if (shouldSearchExplicitlyFor(conditionSearchParams.getCategory(),
-		    FhirConstants.CONDITION_CATEGORY_CODE_DIAGNOSIS)) {
+		boolean isSearchingForDiagnoses = shouldSearchExplicitlyFor(conditionSearchParams.getCategory(),
+		    FhirConstants.CONDITION_CATEGORY_CODE_DIAGNOSIS);
+		boolean canSearchForDiagnoses = Context.hasPrivilege(PrivilegeConstants.GET_DIAGNOSES);
+		boolean isSearchingForConditions = shouldSearchExplicitlyFor(conditionSearchParams.getCategory(),
+		    FhirConstants.CONDITION_CATEGORY_CODE_CONDITION);
+		boolean canSearchForConditions = Context.hasPrivilege(PrivilegeConstants.GET_CONDITIONS);
+		
+		if ((isSearchingForDiagnoses && !canSearchForDiagnoses && isSearchingForConditions && !canSearchForConditions)
+		        || (!isSearchingForDiagnoses && !isSearchingForConditions && !canSearchForDiagnoses
+		                && !canSearchForConditions)) {
+			throw new APIAuthenticationException(Context.getMessageSourceService().getMessage("error.privilegesRequired",
+			    new Object[] { StringUtils.join(PrivilegeConstants.GET_CONDITIONS, PrivilegeConstants.GET_DIAGNOSES, ',') },
+			    Context.getLocale()));
+		} else if (isSearchingForDiagnoses && !canSearchForDiagnoses) {
+			throw new APIAuthenticationException(Context.getMessageSourceService().getMessage("error.privilegesRequired",
+			    new Object[] { PrivilegeConstants.GET_DIAGNOSES }, Context.getLocale()));
+		} else if (isSearchingForConditions && !canSearchForConditions) {
+			throw new APIAuthenticationException(Context.getMessageSourceService().getMessage("error.privilegesRequired",
+			    new Object[] { PrivilegeConstants.GET_CONDITIONS }, Context.getLocale()));
+		}
+		
+		if ((isSearchingForDiagnoses || !isSearchingForConditions) && canSearchForDiagnoses) {
 			diagnosisBundle = diagnosisService.searchDiagnoses(diagnosisSearchParams);
 		}
 		
-		if (shouldSearchExplicitlyFor(conditionSearchParams.getCategory(),
-		    FhirConstants.CONDITION_CATEGORY_CODE_CONDITION)) {
+		if ((isSearchingForConditions || !isSearchingForDiagnoses) && canSearchForConditions) {
 			conditionBundle = searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 		}
 		
 		if (conditionBundle != null && diagnosisBundle != null) {
-			return new TwoSearchQueryBundleProvider(diagnosisBundle, conditionBundle, globalPropertyService);
+			return new TwoSearchQueryBundleProvider(conditionBundle, diagnosisBundle, globalPropertyService);
 		} else if (conditionBundle == null && diagnosisBundle != null) {
 			return diagnosisBundle;
 		}
 		
-		return conditionBundle == null ? new SimpleBundleProvider() : conditionBundle;
+		return conditionBundle;
 	}
 	
 	/**
@@ -181,7 +202,7 @@ public class FhirConditionServiceImpl extends BaseFhirService<Condition, org.ope
 	 */
 	protected boolean shouldSearchExplicitlyFor(TokenAndListParam tokenAndListParam, @Nonnull String valueToCheck) {
 		if (tokenAndListParam == null || tokenAndListParam.size() == 0 || valueToCheck.isEmpty()) {
-			return true;
+			return false;
 		}
 		
 		for (TokenOrListParam orList : tokenAndListParam.getValuesAsQueryTokens()) {

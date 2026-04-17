@@ -10,16 +10,26 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.fail;
+import static org.openmrs.util.PrivilegeConstants.GET_PROVIDERS;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
+import org.openmrs.Provider;
 import org.openmrs.ProviderAttribute;
+import org.openmrs.api.APIAuthenticationException;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
+import org.openmrs.module.fhir2.api.dao.FhirPractitionerDao;
+import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
+import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -35,12 +45,18 @@ public class FhirPractitionerDaoImplTest extends BaseFhirContextSensitiveTest {
 	@Qualifier("sessionFactory")
 	private SessionFactory sessionFactory;
 	
-	private FhirPractitionerDaoImpl dao;
+	@Autowired
+	private ObjectFactory<FhirPractitionerDao> daoFactory;
+	
+	private FhirPractitionerDao dao;
+	
+	private FhirPractitionerDaoImpl daoImpl;
 	
 	@Before
 	public void setUp() throws Exception {
-		dao = new FhirPractitionerDaoImpl();
-		dao.setSessionFactory(sessionFactory);
+		dao = daoFactory.getObject();
+		daoImpl = new FhirPractitionerDaoImpl();
+		daoImpl.setSessionFactory(sessionFactory);
 		executeDataSet(PRACTITIONER_INITIAL_DATA_XML);
 	}
 	
@@ -61,5 +77,92 @@ public class FhirPractitionerDaoImplTest extends BaseFhirContextSensitiveTest {
 		    PERSON_ATTRIBUTE_TYPE_UUID);
 		
 		assertThat(attributeList, notNullValue());
+	}
+	
+	@Test
+	public void shouldRequireGetProvidersPrivilegeForGet() {
+		Context.logout();
+		
+		try {
+			dao.get(PRACTITIONER_UUID);
+			fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
+		}
+		catch (APIAuthenticationException e) {
+			assertThat(e.getMessage(), containsString("Privilege"));
+		}
+		
+		try {
+			Context.addProxyPrivilege(GET_PROVIDERS);
+			assertThat(dao.get(PRACTITIONER_UUID), notNullValue());
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_PROVIDERS);
+		}
+	}
+	
+	@Test
+	public void shouldRequireGetProvidersPrivilegeForGetByCollection() {
+		Context.logout();
+		
+		try {
+			dao.get(Arrays.asList(PRACTITIONER_UUID));
+			fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
+		}
+		catch (APIAuthenticationException e) {
+			assertThat(e.getMessage(), containsString("Privilege"));
+		}
+		
+		try {
+			Context.addProxyPrivilege(GET_PROVIDERS);
+			List<Provider> providers = dao.get(Arrays.asList(PRACTITIONER_UUID));
+			assertThat(providers, notNullValue());
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_PROVIDERS);
+		}
+	}
+	
+	@Test
+	public void shouldRequireGetProvidersPrivilegeForGetSearchResults() {
+		Context.logout();
+		
+		try {
+			dao.getSearchResults(new SearchParameterMap());
+			fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
+		}
+		catch (APIAuthenticationException e) {
+			assertThat(e.getMessage(), containsString("Privilege"));
+		}
+		
+		try {
+			Context.addProxyPrivilege(GET_PROVIDERS);
+			List<Provider> providers = dao.getSearchResults(new SearchParameterMap());
+			assertThat(providers, notNullValue());
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_PROVIDERS);
+		}
+	}
+	
+	@Test
+	public void shouldRequireGetProvidersPrivilegeForGetSearchResultsCount() {
+		Context.logout();
+		
+		try {
+			dao.getSearchResultsCount(new SearchParameterMap());
+			fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
+		}
+		catch (APIAuthenticationException e) {
+			assertThat(e.getMessage(), containsString("Privilege"));
+		}
+		
+		try {
+			Context.addProxyPrivilege(GET_PROVIDERS);
+			int count = dao.getSearchResultsCount(new SearchParameterMap());
+			assertThat(count, notNullValue());
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_PROVIDERS);
+		}
 	}
 }

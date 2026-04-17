@@ -10,21 +10,30 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.fail;
+import static org.openmrs.util.PrivilegeConstants.GET_OBS;
 
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
-import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.Obs;
+import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.ObsService;
 import org.openmrs.api.PatientService;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
+import org.openmrs.module.fhir2.api.dao.FhirDiagnosticReportDao;
+import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.model.FhirDiagnosticReport;
+import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -36,10 +45,8 @@ public class FhirDiagnosticReportDaoImplTest extends BaseFhirContextSensitiveTes
 	
 	private static final String OBS_UUID = "dc386962-1c42-49ea-bed2-97650c66f742";
 	
-	private FhirDiagnosticReportDaoImpl dao;
-	
 	@Autowired
-	private SessionFactory sessionFactory;
+	private ObjectFactory<FhirDiagnosticReportDao> daoFactory;
 	
 	@Autowired
 	@Qualifier("patientService")
@@ -53,10 +60,11 @@ public class FhirDiagnosticReportDaoImplTest extends BaseFhirContextSensitiveTes
 	@Qualifier("obsService")
 	private ObsService obsService;
 	
+	private FhirDiagnosticReportDao dao;
+	
 	@Before
 	public void setup() throws Exception {
-		dao = new FhirDiagnosticReportDaoImpl();
-		dao.setSessionFactory(sessionFactory);
+		dao = daoFactory.getObject();
 		executeDataSet(DATA_XML);
 	}
 	
@@ -66,6 +74,93 @@ public class FhirDiagnosticReportDaoImplTest extends BaseFhirContextSensitiveTes
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getUuid(), equalTo(DIAGNOSTIC_REPORT_UUID));
+	}
+	
+	@Test
+	public void get_shouldRequireGetObsPrivilege() {
+		Context.logout();
+		
+		try {
+			dao.get(DIAGNOSTIC_REPORT_UUID);
+			fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
+		}
+		catch (APIAuthenticationException e) {
+			assertThat(e.getMessage(), containsString("Privilege"));
+		}
+		
+		try {
+			Context.addProxyPrivilege(GET_OBS);
+			assertThat(dao.get(DIAGNOSTIC_REPORT_UUID), notNullValue());
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_OBS);
+		}
+	}
+	
+	@Test
+	public void get_shouldRequireGetObsPrivilegeWithCollection() {
+		Context.logout();
+		
+		try {
+			dao.get(Arrays.asList(DIAGNOSTIC_REPORT_UUID));
+			fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
+		}
+		catch (APIAuthenticationException e) {
+			assertThat(e.getMessage(), containsString("Privilege"));
+		}
+		
+		try {
+			Context.addProxyPrivilege(GET_OBS);
+			List<FhirDiagnosticReport> reports = dao.get(Arrays.asList(DIAGNOSTIC_REPORT_UUID));
+			assertThat(reports, notNullValue());
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_OBS);
+		}
+	}
+	
+	@Test
+	public void getSearchResults_shouldRequireGetObsPrivilegeFor() {
+		Context.logout();
+		
+		try {
+			dao.getSearchResults(new SearchParameterMap());
+			fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
+		}
+		catch (APIAuthenticationException e) {
+			assertThat(e.getMessage(), containsString("Privilege"));
+		}
+		
+		try {
+			Context.addProxyPrivilege(GET_OBS);
+			List<FhirDiagnosticReport> reports = dao.getSearchResults(new SearchParameterMap());
+			assertThat(reports, notNullValue());
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_OBS);
+		}
+	}
+	
+	@Test
+	public void getSearchResultsCount_shouldRequireGetObsPrivilege() {
+		Context.logout();
+		
+		try {
+			dao.getSearchResultsCount(new SearchParameterMap());
+			fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
+		}
+		catch (APIAuthenticationException e) {
+			assertThat(e.getMessage(), containsString("Privilege"));
+		}
+		
+		try {
+			Context.addProxyPrivilege(GET_OBS);
+			int count = dao.getSearchResultsCount(new SearchParameterMap());
+			assertThat(count, notNullValue());
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_OBS);
+		}
 	}
 	
 	@Test

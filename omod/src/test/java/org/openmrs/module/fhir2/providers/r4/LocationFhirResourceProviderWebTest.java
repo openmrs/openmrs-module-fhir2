@@ -46,7 +46,6 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import org.apache.commons.lang.time.DateUtils;
 import org.hl7.fhir.r4.model.Location;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -58,7 +57,6 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.FhirLocationService;
 import org.openmrs.module.fhir2.api.search.param.LocationSearchParams;
-import org.powermock.reflect.Whitebox;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -119,13 +117,8 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR4ResourceProvi
 	public void setup() throws ServletException {
 		locationProvider = new LocationFhirResourceProvider();
 		locationProvider.setFhirLocationService(locationService);
-		Whitebox.setInternalState(BaseUpsertFhirResourceProvider.class, "globalPropsService", fhirGpService);
+		locationProvider.setGlobalPropsService(fhirGpService);
 		super.setup();
-	}
-	
-	@After
-	public void tearDown() {
-		Whitebox.setInternalState(BaseUpsertFhirResourceProvider.class, "globalPropsService", (Object) null);
 	}
 	
 	@Override
