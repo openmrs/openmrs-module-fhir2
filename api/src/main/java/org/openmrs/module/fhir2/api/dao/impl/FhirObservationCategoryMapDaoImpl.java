@@ -10,8 +10,11 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import javax.annotation.Nonnull;
+import javax.persistence.NonUniqueResultException;
 import javax.persistence.PersistenceException;
 import javax.persistence.criteria.Join;
+
+import java.util.List;
 
 import lombok.extern.slf4j.Slf4j;
 import org.openmrs.module.fhir2.api.dao.internals.OpenmrsFhirCriteriaContext;
@@ -30,10 +33,15 @@ public class FhirObservationCategoryMapDaoImpl extends BaseDao {
 		        .addPredicate(criteriaContext.getCriteriaBuilder().equal(conceptClassJoin.get("uuid"), conceptClassUuid));
 		
 		try {
-			return criteriaContext.getEntityManager()
+			List<String> results = criteriaContext.getEntityManager()
 			        .createQuery(
 			            criteriaContext.finalizeQuery().select(criteriaContext.getRoot().get("observationCategory")))
-			        .getResultList().stream().findFirst().orElse(null);
+			        .setMaxResults(2).getResultList();
+			if (results.size() > 1) {
+				throw new NonUniqueResultException(
+				        "Multiple observation categories mapped to concept class '" + conceptClassUuid + "'");
+			}
+			return results.isEmpty() ? null : results.get(0);
 		}
 		catch (PersistenceException e) {
 			log.error("Exception caught while trying to load category for concept class '{}'", conceptClassUuid, e);

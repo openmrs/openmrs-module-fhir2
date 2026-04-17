@@ -663,6 +663,7 @@ public class ConditionSearchQueryTest extends BaseFhirContextSensitiveTest {
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
+		assertThat(resultList, hasItem(hasProperty("idElement", hasProperty("idPart", equalTo(CONDITION_UUID)))));
 	}
 	
 	@Test
@@ -685,6 +686,7 @@ public class ConditionSearchQueryTest extends BaseFhirContextSensitiveTest {
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
+		assertThat(resultList, hasItem(hasProperty("idElement", hasProperty("idPart", equalTo(CONDITION_UUID)))));
 	}
 	
 	@Test
@@ -707,6 +709,7 @@ public class ConditionSearchQueryTest extends BaseFhirContextSensitiveTest {
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
+		assertThat(resultList, hasItem(hasProperty("idElement", hasProperty("idPart", equalTo(CONDITION_UUID)))));
 	}
 	
 	@Test
@@ -729,6 +732,7 @@ public class ConditionSearchQueryTest extends BaseFhirContextSensitiveTest {
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
+		assertThat(resultList, hasItem(hasProperty("idElement", hasProperty("idPart", equalTo(CONDITION_UUID)))));
 	}
 	
 	@Test
@@ -751,6 +755,7 @@ public class ConditionSearchQueryTest extends BaseFhirContextSensitiveTest {
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
+		assertThat(resultList, hasItem(hasProperty("idElement", hasProperty("idPart", equalTo(CONDITION_UUID)))));
 	}
 	
 	@Test
@@ -773,6 +778,7 @@ public class ConditionSearchQueryTest extends BaseFhirContextSensitiveTest {
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
+		assertThat(resultList, hasItem(hasProperty("idElement", hasProperty("idPart", equalTo(CONDITION_UUID)))));
 		
 	}
 	
@@ -796,6 +802,7 @@ public class ConditionSearchQueryTest extends BaseFhirContextSensitiveTest {
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
+		assertThat(resultList, hasItem(hasProperty("idElement", hasProperty("idPart", equalTo(CONDITION_UUID)))));
 	}
 	
 	@Test
@@ -818,6 +825,7 @@ public class ConditionSearchQueryTest extends BaseFhirContextSensitiveTest {
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
+		assertThat(resultList, hasItem(hasProperty("idElement", hasProperty("idPart", equalTo(CONDITION_UUID)))));
 	}
 	
 	@Test
@@ -840,6 +848,7 @@ public class ConditionSearchQueryTest extends BaseFhirContextSensitiveTest {
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
+		assertThat(resultList, hasItem(hasProperty("idElement", hasProperty("idPart", equalTo(CONDITION_UUID)))));
 	}
 	
 	@Test
@@ -862,6 +871,7 @@ public class ConditionSearchQueryTest extends BaseFhirContextSensitiveTest {
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
+		assertThat(resultList, hasItem(hasProperty("idElement", hasProperty("idPart", equalTo(CONDITION_UUID)))));
 	}
 	
 	@Test
@@ -885,6 +895,7 @@ public class ConditionSearchQueryTest extends BaseFhirContextSensitiveTest {
 		List<IBaseResource> resultList = get(results);
 		assertThat(results, notNullValue());
 		assertThat(resultList, hasSize(1));
+		assertThat(resultList, hasItem(hasProperty("idElement", hasProperty("idPart", equalTo(CONDITION_UUID)))));
 	}
 	
 	@Test
