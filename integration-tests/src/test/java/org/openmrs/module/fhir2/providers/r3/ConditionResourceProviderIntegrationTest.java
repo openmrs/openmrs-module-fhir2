@@ -77,7 +77,7 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR3Integrat
 		MockHttpServletResponse response = get("/Condition/" + CONDITION_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Condition condition = readResponse(response);
@@ -109,7 +109,7 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR3Integrat
 		MockHttpServletResponse response = get("/Condition/" + WRONG_CONDITION_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isNotFound());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		OperationOutcome operationOutcome = readOperationOutcome(response);
@@ -123,7 +123,7 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR3Integrat
 		MockHttpServletResponse response = get("/Condition/" + CONDITION_UUID).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Condition condition = readResponse(response);
@@ -155,7 +155,7 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR3Integrat
 		MockHttpServletResponse response = get("/Condition/" + WRONG_CONDITION_UUID).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isNotFound());
-		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		OperationOutcome operationOutcome = readOperationOutcome(response);
@@ -177,7 +177,7 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR3Integrat
 		
 		assertThat(response, isCreated());
 		assertThat(response.getHeader("Location"), containsString("/Condition/"));
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentType(), notNullValue());
 		
 		Condition condition = readResponse(response);
@@ -217,7 +217,7 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR3Integrat
 		
 		assertThat(response, isCreated());
 		assertThat(response.getHeader("Location"), containsString("/Condition/"));
-		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentType(), notNullValue());
 		
 		Condition condition = readResponse(response);
@@ -255,7 +255,7 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR3Integrat
 		
 		assertThat(response, isCreated());
 		assertThat(response.getHeader("Location"), containsString("/Condition/"));
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentType(), notNullValue());
 		
 		Condition condition = readResponse(response);
@@ -287,7 +287,7 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR3Integrat
 		
 		assertThat(response, isCreated());
 		assertThat(response.getHeader("Location"), containsString("/Condition/"));
-		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		
 		Condition condition = readResponse(response);
 		assertThat(condition, notNullValue());
@@ -309,7 +309,7 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR3Integrat
 		MockHttpServletResponse response = get("/Condition/" + CONDITION_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Condition condition = readResponse(response);
@@ -321,7 +321,7 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR3Integrat
 		response = put("/Condition/" + CONDITION_UUID).jsonContent(toJson(condition)).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Condition updatedCondition = readResponse(response);
@@ -346,7 +346,7 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR3Integrat
 		MockHttpServletResponse response = get("/Condition/" + CONDITION_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Condition condition = readResponse(response);
@@ -356,7 +356,7 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR3Integrat
 		response = put("/Condition/" + CONDITION_UUID).jsonContent(toJson(condition)).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isBadRequest());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		OperationOutcome operationOutcome = readOperationOutcome(response);
@@ -370,7 +370,7 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR3Integrat
 		MockHttpServletResponse response = get("/Condition/" + CONDITION_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Condition condition = readResponse(response);
@@ -380,7 +380,7 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR3Integrat
 		response = put("/Condition/" + WRONG_CONDITION_UUID).jsonContent(toJson(condition)).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isNotFound());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		OperationOutcome operationOutcome = readOperationOutcome(response);
@@ -394,7 +394,7 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR3Integrat
 		MockHttpServletResponse response = get("/Condition/" + CONDITION_UUID).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), equalTo(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Condition condition = readResponse(response);
@@ -406,7 +406,7 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR3Integrat
 		response = put("/Condition/" + CONDITION_UUID).xmlContent(toXML(condition)).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Condition updatedCondition = readResponse(response);
@@ -431,7 +431,7 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR3Integrat
 		MockHttpServletResponse response = get("/Condition/" + CONDITION_UUID).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), equalTo(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Condition condition = readResponse(response);
@@ -441,7 +441,7 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR3Integrat
 		response = put("/Condition/" + CONDITION_UUID).xmlContent(toXML(condition)).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isBadRequest());
-		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		OperationOutcome operationOutcome = readOperationOutcome(response);
@@ -455,7 +455,7 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR3Integrat
 		MockHttpServletResponse response = get("/Condition/" + CONDITION_UUID).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), equalTo(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Condition condition = readResponse(response);
@@ -465,7 +465,7 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR3Integrat
 		response = put("/Condition/" + WRONG_CONDITION_UUID).xmlContent(toXML(condition)).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isNotFound());
-		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		OperationOutcome operationOutcome = readOperationOutcome(response);
@@ -490,7 +490,7 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR3Integrat
 		MockHttpServletResponse response = delete("/Condition/" + WRONG_CONDITION_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isNotFound());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		OperationOutcome operationOutcome = readOperationOutcome(response);
@@ -504,7 +504,7 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR3Integrat
 		MockHttpServletResponse response = get("/Condition").accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Bundle results = readBundleResponse(response);
@@ -526,7 +526,7 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR3Integrat
 		        .accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Bundle results = readBundleResponse(response);
@@ -556,7 +556,7 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR3Integrat
 		MockHttpServletResponse response = get("/Condition").accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Bundle results = readBundleResponse(response);
@@ -578,7 +578,7 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR3Integrat
 		        .accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Bundle results = readBundleResponse(response);

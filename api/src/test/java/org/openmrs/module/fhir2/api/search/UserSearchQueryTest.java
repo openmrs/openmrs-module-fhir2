@@ -44,6 +44,7 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import org.hibernate.SessionFactory;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.junit.Before;
 import org.junit.Test;
@@ -54,6 +55,7 @@ import org.openmrs.module.fhir2.api.dao.FhirUserDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.PractitionerTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 public class UserSearchQueryTest extends BaseFhirContextSensitiveTest {
 	
@@ -102,6 +104,10 @@ public class UserSearchQueryTest extends BaseFhirContextSensitiveTest {
 	private static final int END_INDEX = 10;
 	
 	@Autowired
+	@Qualifier("sessionFactory")
+	private SessionFactory sessionFactory;
+	
+	@Autowired
 	private FhirUserDao dao;
 	
 	@Autowired
@@ -125,6 +131,8 @@ public class UserSearchQueryTest extends BaseFhirContextSensitiveTest {
 	@Before
 	public void setUp() throws Exception {
 		executeDataSet(USER_INITIAL_DATA_XML);
+		// Evict Hibernate L2 cache so entities loaded via JDBC/DbUnit are re-read from DB
+		sessionFactory.getCache().evictAllRegions();
 	}
 	
 	@Test

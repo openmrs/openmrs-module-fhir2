@@ -229,7 +229,7 @@ public class RelatedPersonTranslatorImplTest {
 		address.setCity(ADDRESS_CITY);
 		when(addressTranslator.toFhirResource(
 		    argThat(allOf(hasProperty("uuid", equalTo(ADDRESS_UUID)), hasProperty("cityVillage", equalTo(ADDRESS_CITY))))))
-		            .thenReturn(address);
+		        .thenReturn(address);
 		PersonAddress personAddress = new PersonAddress();
 		personAddress.setUuid(ADDRESS_UUID);
 		personAddress.setCityVillage(ADDRESS_CITY);

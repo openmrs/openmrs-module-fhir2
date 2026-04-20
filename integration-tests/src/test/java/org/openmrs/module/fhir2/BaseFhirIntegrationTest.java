@@ -92,7 +92,8 @@ public abstract class BaseFhirIntegrationTest<T extends IResourceProvider, U ext
 	@Before
 	public void setup() throws Exception {
 		// Needed until TRUNK-6299 in place
-		cacheConfig.cacheManager().getCacheNames().forEach(name -> cacheConfig.cacheManager().getCache(name).clear());
+		org.springframework.cache.CacheManager cm = cacheConfig.apiCacheManager();
+		cm.getCacheNames().forEach(name -> cm.getCache(name).clear());
 		
 		FhirGlobalPropertyHolder.reset();
 		jsonParser = getFhirContext().newJsonParser();

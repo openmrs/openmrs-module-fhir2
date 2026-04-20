@@ -16,5 +16,5 @@
     <concept_reference_term concept_reference_term_id="115924" concept_source_id="21" code="115924" name="" description="" retired="0" creator="1" date_created="2004-08-12 00:00:00.0" uuid="50ae33dd-27c6-48d9-9b5b-16c504fde565"/>
     <concept_reference_map concept_map_id="115924" concept_id="115924" concept_reference_term_id="115924" concept_map_type_id="2" creator="1" date_created="2004-08-12 00:00:00.0" uuid="d029126a-269e-4c1a-9da0-04e5e211cf05"/>
     <concept_name concept_id="115924" name="Bipolar affective disorder, manic" locale="en_GB" creator="1" date_created="2004-08-12 00:00:00.0" concept_name_id="115924" concept_name_type="FULLY_SPECIFIED" locale_preferred="1" voided="false" uuid="49838aba-0967-4bfd-86a7-f55faeae4143"/>
-    <encounter_diagnosis diagnosis_id="1" patient_id="2" encounter_id="6" diagnosis_coded="115924" rank="1" creator="1" date_created="2017-01-12 00:00:00" voided="false" certainty="CONFIRMED" uuid="9f1e6734-4935-4abb-9dda-ace8331d4d2f" />
+    <encounter_diagnosis diagnosis_id="1" patient_id="2" encounter_id="6" diagnosis_coded="115924" dx_rank="1" creator="1" date_created="2017-01-12 00:00:00" voided="false" certainty="CONFIRMED" uuid="9f1e6734-4935-4abb-9dda-ace8331d4d2f" />
 </dataset>

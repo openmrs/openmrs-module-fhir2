@@ -43,12 +43,12 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.RelatedPerson;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.Task;
-import org.openmrs.annotation.OpenmrsProfile;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirAllergyIntoleranceService;
 import org.openmrs.module.fhir2.api.FhirDiagnosticReportService;
 import org.openmrs.module.fhir2.api.FhirEncounterService;
 import org.openmrs.module.fhir2.api.FhirLocationService;
+import org.openmrs.module.fhir2.api.FhirMedicationDispenseService;
 import org.openmrs.module.fhir2.api.FhirMedicationRequestService;
 import org.openmrs.module.fhir2.api.FhirMedicationService;
 import org.openmrs.module.fhir2.api.FhirObservationService;
@@ -59,6 +59,7 @@ import org.openmrs.module.fhir2.api.search.param.DiagnosticReportSearchParams;
 import org.openmrs.module.fhir2.api.search.param.EncounterSearchParams;
 import org.openmrs.module.fhir2.api.search.param.FhirAllergyIntoleranceSearchParams;
 import org.openmrs.module.fhir2.api.search.param.LocationSearchParams;
+import org.openmrs.module.fhir2.api.search.param.MedicationDispenseSearchParams;
 import org.openmrs.module.fhir2.api.search.param.MedicationRequestSearchParams;
 import org.openmrs.module.fhir2.api.search.param.ObservationSearchParams;
 import org.openmrs.module.fhir2.api.search.param.PropParam;
@@ -68,7 +69,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 @NoArgsConstructor
-@OpenmrsProfile(openmrsPlatformVersion = "2.* - 2.5.*")
 public class SearchQueryIncludeImpl<U extends IBaseResource> implements SearchQueryInclude<U> {
 	
 	@Getter(AccessLevel.PROTECTED)
@@ -110,6 +110,10 @@ public class SearchQueryIncludeImpl<U extends IBaseResource> implements SearchQu
 	@Getter(AccessLevel.PROTECTED)
 	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
 	private FhirAllergyIntoleranceService allergyIntoleranceService;
+	
+	@Getter(AccessLevel.PROTECTED)
+	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
+	private FhirMedicationDispenseService medicationDispenseService;
 	
 	@SuppressWarnings("unchecked")
 	@Override
@@ -235,6 +239,8 @@ public class SearchQueryIncludeImpl<U extends IBaseResource> implements SearchQu
 			case FhirConstants.INCLUDE_PARTICIPANT_PARAM:
 				return handlePractitionerReverseInclude(referenceParams, revIncludeParam.getParamType(),
 				    getRecursiveIncludes(includeSet), getRecursiveIncludes(revIncludeSet));
+			case FhirConstants.INCLUDE_PRESCRIPTION_PARAM:
+				return handlePrescriptionReverseInclude(referenceParams, revIncludeParam.getParamType());
 		}
 		
 		return null;
@@ -609,6 +615,17 @@ public class SearchQueryIncludeImpl<U extends IBaseResource> implements SearchQu
 			case FhirConstants.PROCEDURE_REQUEST:
 			case FhirConstants.SERVICE_REQUEST:
 				return serviceRequestService.searchForServiceRequests(null, null, null, params, null, null, null, null);
+		}
+		
+		return null;
+	}
+	
+	protected IBundleProvider handlePrescriptionReverseInclude(ReferenceAndListParam params, String targetType) {
+		switch (targetType) {
+			case FhirConstants.MEDICATION_DISPENSE:
+				MedicationDispenseSearchParams medicationDispenseSearchParams = new MedicationDispenseSearchParams();
+				medicationDispenseSearchParams.setMedicationRequest(params);
+				return medicationDispenseService.searchMedicationDispenses(medicationDispenseSearchParams);
 		}
 		
 		return null;

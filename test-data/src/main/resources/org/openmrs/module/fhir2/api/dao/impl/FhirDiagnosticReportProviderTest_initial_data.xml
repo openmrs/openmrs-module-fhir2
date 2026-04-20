@@ -9,8 +9,8 @@
     graphic logo is a trademark of OpenMRS Inc.
 -->
 <dataset>
-	<location location_id="110" name="Hospital 1" description="Clinic 1" uuid="02831583-339e-4431-8dec-fade07a440e7" retired="false" date_created="2004-01-01 00:00:00.0" />
-	<location location_id="120" name="Department Lab 1" description="Lab 1" uuid="43e4f443-d23a-448f-b6fd-59aed7ea166f" retired="false" date_created="2004-01-01 00:00:00.0" />
+	<location location_id="110" name="Hospital 1" description="Clinic 1" creator="1" uuid="02831583-339e-4431-8dec-fade07a440e7" retired="false" date_created="2004-01-01 00:00:00.0" />
+	<location location_id="120" name="Department Lab 1" description="Lab 1" creator="1" uuid="43e4f443-d23a-448f-b6fd-59aed7ea166f" retired="false" date_created="2004-01-01 00:00:00.0" />
 
 	<patient_identifier_type patient_identifier_type_id="100" name="Example Identifier Type" description="Example identifier description" creator="1" date_created="2005-01-01 00:00:00.0" required="false" retired="false"  uuid="83efec0d-6b4e-4fd4-86df-5bc2190be9d7"/>
 	<person person_id="200" dead="false" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" gender="M"  uuid="83f3c829-06db-4ad0-9dab-ed60489ef031"/>

@@ -20,6 +20,7 @@ import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.startsWith;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
@@ -55,8 +56,8 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.FhirPractitionerService;
 import org.openmrs.module.fhir2.api.search.param.PractitionerSearchParams;
-import org.powermock.reflect.Whitebox;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PractitionerFhirResourceProviderWebTest extends BaseFhirR4ResourceProviderWebTest<PractitionerFhirResourceProvider, Practitioner> {
@@ -108,13 +109,13 @@ public class PractitionerFhirResourceProviderWebTest extends BaseFhirR4ResourceP
 	public void setup() throws ServletException {
 		resourceProvider = new PractitionerFhirResourceProvider();
 		resourceProvider.setPractitionerService(practitionerService);
-		Whitebox.setInternalState(BaseUpsertFhirResourceProvider.class, "globalPropsService", fhirGpService);
+		ReflectionTestUtils.setField(BaseUpsertFhirResourceProvider.class, "globalPropsService", fhirGpService);
 		super.setup();
 	}
 	
 	@After
 	public void tearDown() {
-		Whitebox.setInternalState(BaseUpsertFhirResourceProvider.class, "globalPropsService", (Object) null);
+		ReflectionTestUtils.setField(BaseUpsertFhirResourceProvider.class, "globalPropsService", (Object) null);
 	}
 	
 	@Test
@@ -126,7 +127,7 @@ public class PractitionerFhirResourceProviderWebTest extends BaseFhirR4ResourceP
 		MockHttpServletResponse response = get("/Practitioner/" + PRACTITIONER_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		MatcherAssert.assertThat(response, isOk());
-		MatcherAssert.assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+		MatcherAssert.assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		MatcherAssert.assertThat(readResponse(response).getIdElement().getIdPart(), equalTo(PRACTITIONER_UUID));
 	}
 	
@@ -374,7 +375,7 @@ public class PractitionerFhirResourceProviderWebTest extends BaseFhirR4ResourceP
 		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.JSON).go();
 		
 		MatcherAssert.assertThat(response, isOk());
-		MatcherAssert.assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+		MatcherAssert.assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 		
 		Bundle results = readBundleResponse(response);
 		assertThat(results.hasEntry(), is(true));
@@ -456,7 +457,7 @@ public class PractitionerFhirResourceProviderWebTest extends BaseFhirR4ResourceP
 		MockHttpServletResponse response = delete("/Practitioner/" + PRACTITIONER_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 	}
 	
 	@Test
@@ -467,6 +468,6 @@ public class PractitionerFhirResourceProviderWebTest extends BaseFhirR4ResourceP
 		        .go();
 		
 		assertThat(response, isNotFound());
-		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
 	}
 }

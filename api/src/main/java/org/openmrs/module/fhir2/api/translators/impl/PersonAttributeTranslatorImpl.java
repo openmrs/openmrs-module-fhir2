@@ -172,7 +172,10 @@ public class PersonAttributeTranslatorImpl implements PersonAttributeTranslator 
 				log.warn("extension has unsupported patient attribute type format: {}", format);
 		}
 		if (!valueExtension.hasValue()) {
-			log.warn("Could not create a FHIR value for attribute '{}' with format '{}'", personAttribute.getUuid(), format); // Or some other identifier
+			if (value != null) {
+				log.warn("Could not create a FHIR value for attribute '{}' with format '{}'", personAttribute.getUuid(),
+				    format);
+			}
 			return null;
 		}
 		
