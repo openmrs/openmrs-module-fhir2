@@ -86,6 +86,18 @@ public class TaskTranslatorImplTest {
 	
 	private static final FhirTask.TaskStatus OPENMRS_NEW_TASK_STATUS = FhirTask.TaskStatus.ACCEPTED;
 	
+	private static final Task.TaskStatus FHIR_TASK_STATUS_READY = Task.TaskStatus.READY;
+	
+	private static final Task.TaskStatus FHIR_TASK_STATUS_ONHOLD = Task.TaskStatus.ONHOLD;
+	
+	private static final Task.TaskStatus FHIR_TASK_STATUS_CANCELLED = Task.TaskStatus.CANCELLED;
+	
+	private static final FhirTask.TaskStatus OPENMRS_TASK_STATUS_READY = FhirTask.TaskStatus.READY;
+	
+	private static final FhirTask.TaskStatus OPENMRS_TASK_STATUS_ONHOLD = FhirTask.TaskStatus.ONHOLD;
+	
+	private static final FhirTask.TaskStatus OPENMRS_TASK_STATUS_CANCELLED = FhirTask.TaskStatus.CANCELLED;
+	
 	private static final Task.TaskIntent FHIR_TASK_INTENT = Task.TaskIntent.ORDER;
 	
 	private static final FhirTask.TaskIntent OPENMRS_TASK_INTENT = FhirTask.TaskIntent.ORDER;
@@ -232,6 +244,15 @@ public class TaskTranslatorImplTest {
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getStatus(), equalTo(FHIR_TASK_STATUS));
+		
+		task.setStatus(OPENMRS_TASK_STATUS_READY);
+		assertThat(taskTranslator.toFhirResource(task).getStatus(), equalTo(FHIR_TASK_STATUS_READY));
+		
+		task.setStatus(OPENMRS_TASK_STATUS_ONHOLD);
+		assertThat(taskTranslator.toFhirResource(task).getStatus(), equalTo(FHIR_TASK_STATUS_ONHOLD));
+		
+		task.setStatus(OPENMRS_TASK_STATUS_CANCELLED);
+		assertThat(taskTranslator.toFhirResource(task).getStatus(), equalTo(FHIR_TASK_STATUS_CANCELLED));
 	}
 	
 	@Test
@@ -243,6 +264,15 @@ public class TaskTranslatorImplTest {
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getStatus(), equalTo(OPENMRS_TASK_STATUS));
+		
+		task.setStatus(FHIR_TASK_STATUS_READY);
+		assertThat(taskTranslator.toOpenmrsType(task).getStatus(), equalTo(OPENMRS_TASK_STATUS_READY));
+		
+		task.setStatus(FHIR_TASK_STATUS_ONHOLD);
+		assertThat(taskTranslator.toOpenmrsType(task).getStatus(), equalTo(OPENMRS_TASK_STATUS_ONHOLD));
+		
+		task.setStatus(FHIR_TASK_STATUS_CANCELLED);
+		assertThat(taskTranslator.toOpenmrsType(task).getStatus(), equalTo(OPENMRS_TASK_STATUS_CANCELLED));
 	}
 	
 	@Test
