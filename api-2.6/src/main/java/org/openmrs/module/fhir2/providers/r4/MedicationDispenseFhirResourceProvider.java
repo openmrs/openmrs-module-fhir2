@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.providers.r4;
 
 import static lombok.AccessLevel.PACKAGE;
+import static lombok.AccessLevel.PROTECTED;
 
 import javax.annotation.Nonnull;
 
@@ -26,7 +27,6 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Sort;
-import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
@@ -35,9 +35,9 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
-import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.collections.CollectionUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -56,8 +56,9 @@ import org.springframework.stereotype.Component;
 
 @Component("medicationDispenseFhirR4ResourceProvider")
 @R4Provider
-public class MedicationDispenseFhirResourceProvider implements IResourceProvider {
+public class MedicationDispenseFhirResourceProvider extends BaseUpsertFhirResourceProvider<MedicationDispense> {
 	
+	@Getter(PROTECTED)
 	@Setter(value = PACKAGE, onMethod_ = @Autowired)
 	private FhirMedicationDispenseService fhirMedicationDispenseService;
 	
@@ -81,14 +82,15 @@ public class MedicationDispenseFhirResourceProvider implements IResourceProvider
 		return FhirProviderUtils.buildCreate(medicationDispense);
 	}
 	
-	@Update
-	public MethodOutcome updateMedicationDispense(@IdParam IdType id, @ResourceParam MedicationDispense mDispense) {
+	@Override
+	protected MethodOutcome doUpsert(IdType id, MedicationDispense mDispense, RequestDetails requestDetails,
+	        boolean createIfNotExists) {
 		if (id == null || id.getIdPart() == null) {
 			throw new InvalidRequestException("id must be specified to update resource");
 		}
 		mDispense.setId(id.getIdPart());
-		MedicationDispense medicationDispense = fhirMedicationDispenseService.update(id.getIdPart(), mDispense);
-		return FhirProviderUtils.buildUpdate(medicationDispense);
+		return FhirProviderUtils.buildUpdate(
+		    fhirMedicationDispenseService.update(id.getIdPart(), mDispense, requestDetails, createIfNotExists));
 	}
 	
 	@Patch

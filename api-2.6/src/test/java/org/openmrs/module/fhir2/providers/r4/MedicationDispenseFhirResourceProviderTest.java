@@ -26,6 +26,7 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
@@ -54,6 +55,9 @@ public class MedicationDispenseFhirResourceProviderTest {
 	private static final String MEDICATION_DISPENSE_UUID = "d7f5a4dd-019e-4221-85fa-e084505b9695";
 	
 	private static final String WRONG_MEDICATION_DISPENSE_UUID = "862e20a1-e73c-4c92-a4e8-9f922e0cd7f4";
+	
+	@Mock
+	private RequestDetails mockRequestDetails;
 	
 	@Mock
 	private FhirMedicationDispenseService fhirMedicationDispenseService;
@@ -134,12 +138,12 @@ public class MedicationDispenseFhirResourceProviderTest {
 	}
 	
 	@Test
-	public void updateMedicationDispense_shouldUpdateMedicationDispense() {
-		when(fhirMedicationDispenseService.update(eq(MEDICATION_DISPENSE_UUID), any(MedicationDispense.class)))
-		        .thenReturn(medicationDispense);
+	public void doUpsert_shouldUpdateMedicationDispense() {
+		when(fhirMedicationDispenseService.update(eq(MEDICATION_DISPENSE_UUID), any(MedicationDispense.class),
+		    eq(mockRequestDetails), eq(false))).thenReturn(medicationDispense);
 		
-		MethodOutcome result = resourceProvider.updateMedicationDispense(new IdType().setValue(MEDICATION_DISPENSE_UUID),
-		    medicationDispense);
+		MethodOutcome result = resourceProvider.doUpsert(new IdType().setValue(MEDICATION_DISPENSE_UUID), medicationDispense,
+		    mockRequestDetails, false);
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getResource(), notNullValue());
@@ -147,33 +151,31 @@ public class MedicationDispenseFhirResourceProviderTest {
 	}
 	
 	@Test(expected = InvalidRequestException.class)
-	public void updateMedicationDispense_shouldThrowInvalidRequestForUuidMismatch() {
-		when(fhirMedicationDispenseService.update(eq(WRONG_MEDICATION_DISPENSE_UUID), any(MedicationDispense.class)))
-		        .thenThrow(InvalidRequestException.class);
+	public void doUpsert_shouldThrowInvalidRequestForUuidMismatch() {
+		when(fhirMedicationDispenseService.update(eq(WRONG_MEDICATION_DISPENSE_UUID), any(MedicationDispense.class),
+		    eq(mockRequestDetails), eq(false))).thenThrow(InvalidRequestException.class);
 		
-		resourceProvider.updateMedicationDispense(new IdType().setValue(WRONG_MEDICATION_DISPENSE_UUID), medicationDispense);
+		resourceProvider.doUpsert(new IdType().setValue(WRONG_MEDICATION_DISPENSE_UUID), medicationDispense,
+		    mockRequestDetails, false);
 	}
 	
 	@Test(expected = InvalidRequestException.class)
-	public void updateMedicationDispense_shouldThrowInvalidRequestForMissingId() {
+	public void doUpsert_shouldThrowInvalidRequestForMissingId() {
 		MedicationDispense noIdMedicationDispense = new MedicationDispense();
 		
-		when(fhirMedicationDispenseService.update(eq(MEDICATION_DISPENSE_UUID), any(MedicationDispense.class)))
-		        .thenThrow(InvalidRequestException.class);
-		
-		resourceProvider.updateMedicationDispense(new IdType().setValue(MEDICATION_DISPENSE_UUID), noIdMedicationDispense);
+		resourceProvider.doUpsert(new IdType(), noIdMedicationDispense, mockRequestDetails, false);
 	}
 	
 	@Test(expected = MethodNotAllowedException.class)
-	public void updateMedicationShouldThrowMethodNotAllowedIfDoesNotExist() {
+	public void doUpsert_shouldThrowMethodNotAllowedIfDoesNotExist() {
 		MedicationDispense wrongMedicationDispense = new MedicationDispense();
 		wrongMedicationDispense.setId(WRONG_MEDICATION_DISPENSE_UUID);
 		
-		when(fhirMedicationDispenseService.update(eq(WRONG_MEDICATION_DISPENSE_UUID), any(MedicationDispense.class)))
-		        .thenThrow(MethodNotAllowedException.class);
+		when(fhirMedicationDispenseService.update(eq(WRONG_MEDICATION_DISPENSE_UUID), any(MedicationDispense.class),
+		    eq(mockRequestDetails), eq(false))).thenThrow(MethodNotAllowedException.class);
 		
-		resourceProvider.updateMedicationDispense(new IdType().setValue(WRONG_MEDICATION_DISPENSE_UUID),
-		    wrongMedicationDispense);
+		resourceProvider.doUpsert(new IdType().setValue(WRONG_MEDICATION_DISPENSE_UUID), wrongMedicationDispense,
+		    mockRequestDetails, false);
 	}
 	
 	@Test

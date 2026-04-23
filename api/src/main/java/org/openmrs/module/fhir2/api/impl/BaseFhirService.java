@@ -143,7 +143,7 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 		U existingObject = getDao().get(uuid);
 		
 		if (existingObject == null) {
-			if (!handlesOpenmrsMetadata || !createIfNotExists) {
+			if (!createIfNotExists) {
 				throw resourceNotFound(uuid);
 			}
 			
