@@ -26,6 +26,7 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QuantityAndListParam;
 import ca.uhn.fhir.rest.param.QuantityOrListParam;
@@ -36,6 +37,8 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -68,6 +71,9 @@ public class ConditionFhirResourceProviderTest extends BaseFhirProvenanceResourc
 	
 	@Mock
 	private FhirConditionService conditionService;
+	
+	@Mock
+	private RequestDetails mockRequestDetails;
 	
 	private Condition condition;
 	
@@ -127,13 +133,43 @@ public class ConditionFhirResourceProviderTest extends BaseFhirProvenanceResourc
 	}
 	
 	@Test
-	public void updateCondition_shouldUpdateRequestedCondition() {
-		when(conditionService.update(CONDITION_UUID, condition)).thenReturn(condition);
+	public void doUpsert_shouldUpdateRequestedCondition() {
+		when(conditionService.update(CONDITION_UUID, condition, mockRequestDetails, false)).thenReturn(condition);
 		
-		MethodOutcome result = resourceProvider.updateCondition(new IdType().setValue(CONDITION_UUID), condition);
+		MethodOutcome result = resourceProvider.doUpsert(new IdType().setValue(CONDITION_UUID), condition,
+		    mockRequestDetails, false);
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getResource(), equalTo(condition));
+	}
+	
+	@Test(expected = InvalidRequestException.class)
+	public void doUpsert_shouldThrowInvalidRequestForUuidMismatch() {
+		when(conditionService.update(WRONG_CONDITION_UUID, condition, mockRequestDetails, false))
+		        .thenThrow(InvalidRequestException.class);
+		
+		resourceProvider.doUpsert(new IdType().setValue(WRONG_CONDITION_UUID), condition, mockRequestDetails, false);
+	}
+	
+	@Test(expected = InvalidRequestException.class)
+	public void doUpsert_shouldThrowInvalidRequestForMissingId() {
+		Condition noIdCondition = new Condition();
+		
+		when(conditionService.update(CONDITION_UUID, noIdCondition, mockRequestDetails, false))
+		        .thenThrow(InvalidRequestException.class);
+		
+		resourceProvider.doUpsert(new IdType().setValue(CONDITION_UUID), noIdCondition, mockRequestDetails, false);
+	}
+	
+	@Test(expected = MethodNotAllowedException.class)
+	public void doUpsert_shouldThrowMethodNotAllowedIfConditionDoesNotExist() {
+		Condition wrongCondition = new Condition();
+		wrongCondition.setId(WRONG_CONDITION_UUID);
+		
+		when(conditionService.update(WRONG_CONDITION_UUID, wrongCondition, mockRequestDetails, false))
+		        .thenThrow(MethodNotAllowedException.class);
+		
+		resourceProvider.doUpsert(new IdType().setValue(WRONG_CONDITION_UUID), wrongCondition, mockRequestDetails, false);
 	}
 	
 	@Test

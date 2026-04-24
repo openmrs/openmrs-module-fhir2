@@ -23,14 +23,12 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Sort;
-import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
-import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.Getter;
@@ -48,7 +46,7 @@ import org.springframework.stereotype.Component;
 
 @Component("ImmunizationFhirR4ResourceProvider")
 @R4Provider
-public class ImmunizationFhirResourceProvider implements IResourceProvider {
+public class ImmunizationFhirResourceProvider extends BaseUpsertFhirResourceProvider<Immunization> {
 	
 	@Getter(PROTECTED)
 	@Setter(value = PACKAGE, onMethod_ = @Autowired)
@@ -74,16 +72,17 @@ public class ImmunizationFhirResourceProvider implements IResourceProvider {
 		return FhirProviderUtils.buildCreate(immunizationService.create(newImmunization));
 	}
 	
-	@Update
-	@SuppressWarnings("unused")
-	public MethodOutcome updateImmunization(@IdParam IdType id, @ResourceParam Immunization existingImmunization) {
+	@Override
+	protected MethodOutcome doUpsert(IdType id, Immunization existingImmunization, RequestDetails requestDetails,
+	        boolean createIfNotExists) {
 		if (id == null || id.getIdPart() == null) {
 			throw new InvalidRequestException("id must be specified to update resource");
 		}
 		
 		existingImmunization.setId(id.getIdPart());
 		
-		return FhirProviderUtils.buildUpdate(immunizationService.update(id.getIdPart(), existingImmunization));
+		return FhirProviderUtils.buildUpdate(
+		    immunizationService.update(id.getIdPart(), existingImmunization, requestDetails, createIfNotExists));
 	}
 	
 	@Patch

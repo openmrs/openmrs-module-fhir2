@@ -27,7 +27,6 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Sort;
-import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
@@ -36,7 +35,6 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
-import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.Getter;
@@ -57,7 +55,7 @@ import org.springframework.stereotype.Component;
 
 @Component("allergyIntoleranceFhirR4ResourceProvider")
 @R4Provider
-public class AllergyIntoleranceFhirResourceProvider implements IResourceProvider {
+public class AllergyIntoleranceFhirResourceProvider extends BaseUpsertFhirResourceProvider<AllergyIntolerance> {
 	
 	@Getter(PROTECTED)
 	@Setter(value = PACKAGE, onMethod_ = @Autowired)
@@ -113,16 +111,17 @@ public class AllergyIntoleranceFhirResourceProvider implements IResourceProvider
 		return FhirProviderUtils.buildCreate(fhirAllergyIntoleranceService.create(allergy));
 	}
 	
-	@Update
-	@SuppressWarnings("unused")
-	public MethodOutcome updateAllergy(@IdParam IdType id, @ResourceParam AllergyIntolerance allergy) {
+	@Override
+	protected MethodOutcome doUpsert(IdType id, AllergyIntolerance allergy, RequestDetails requestDetails,
+	        boolean createIfNotExists) {
 		if (id == null || id.getIdPart() == null) {
 			throw new InvalidRequestException("id must be specified to update");
 		}
 		
 		allergy.setId(id.getIdPart());
 		
-		return FhirProviderUtils.buildUpdate(fhirAllergyIntoleranceService.update(id.getIdPart(), allergy));
+		return FhirProviderUtils.buildUpdate(
+		    fhirAllergyIntoleranceService.update(id.getIdPart(), allergy, requestDetails, createIfNotExists));
 	}
 	
 	@Patch

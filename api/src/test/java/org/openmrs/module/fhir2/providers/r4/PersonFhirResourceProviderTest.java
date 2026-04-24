@@ -26,6 +26,7 @@ import java.util.List;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
@@ -88,6 +89,9 @@ public class PersonFhirResourceProviderTest extends BaseFhirProvenanceResourceTe
 	
 	@Mock
 	private FhirPersonService fhirPersonService;
+	
+	@Mock
+	private RequestDetails mockRequestDetails;
 	
 	private PersonFhirResourceProvider resourceProvider;
 	
@@ -340,39 +344,41 @@ public class PersonFhirResourceProviderTest extends BaseFhirProvenanceResourceTe
 	}
 	
 	@Test
-	public void updatePerson_shouldUpdatePerson() {
+	public void doUpsert_shouldUpdatePerson() {
+		when(fhirPersonService.update(PERSON_UUID, person, mockRequestDetails, false)).thenReturn(person);
 		
-		when(fhirPersonService.update(PERSON_UUID, person)).thenReturn(person);
-		
-		MethodOutcome result = resourceProvider.updatePerson(new IdType().setValue(PERSON_UUID), person);
+		MethodOutcome result = resourceProvider.doUpsert(new IdType().setValue(PERSON_UUID), person, mockRequestDetails,
+		    false);
 		assertThat(result, notNullValue());
 		assertThat(result.getResource(), equalTo(person));
 	}
 	
 	@Test(expected = InvalidRequestException.class)
-	public void updatePerson_shouldThrowInvalidRequestExceptionForUuidMismatch() {
-		when(fhirPersonService.update(WRONG_PERSON_UUID, person)).thenThrow(InvalidRequestException.class);
+	public void doUpsert_shouldThrowInvalidRequestExceptionForUuidMismatch() {
+		when(fhirPersonService.update(WRONG_PERSON_UUID, person, mockRequestDetails, false))
+		        .thenThrow(InvalidRequestException.class);
 		
-		resourceProvider.updatePerson(new IdType().setValue(WRONG_PERSON_UUID), person);
+		resourceProvider.doUpsert(new IdType().setValue(WRONG_PERSON_UUID), person, mockRequestDetails, false);
 	}
 	
 	@Test(expected = InvalidRequestException.class)
-	public void updatePerson_shouldThrowInvalidRequestForMissingId() {
+	public void doUpsert_shouldThrowInvalidRequestForMissingId() {
 		Person noIdPerson = new Person();
 		
-		when(fhirPersonService.update(PERSON_UUID, noIdPerson)).thenThrow(InvalidRequestException.class);
+		when(fhirPersonService.update(PERSON_UUID, noIdPerson, mockRequestDetails, false))
+		        .thenThrow(InvalidRequestException.class);
 		
-		resourceProvider.updatePerson(new IdType().setValue(PERSON_UUID), noIdPerson);
+		resourceProvider.doUpsert(new IdType().setValue(PERSON_UUID), noIdPerson, mockRequestDetails, false);
 	}
 	
 	@Test(expected = MethodNotAllowedException.class)
-	public void updatePerson_ShouldThrowMethodNotAllowedIfDoesNotExist() {
-		
+	public void doUpsert_shouldThrowMethodNotAllowedIfDoesNotExist() {
 		person.setId(WRONG_PERSON_UUID);
 		
-		when(fhirPersonService.update(WRONG_PERSON_UUID, person)).thenThrow(MethodNotAllowedException.class);
+		when(fhirPersonService.update(WRONG_PERSON_UUID, person, mockRequestDetails, false))
+		        .thenThrow(MethodNotAllowedException.class);
 		
-		resourceProvider.updatePerson(new IdType().setValue(WRONG_PERSON_UUID), person);
+		resourceProvider.doUpsert(new IdType().setValue(WRONG_PERSON_UUID), person, mockRequestDetails, false);
 	}
 	
 	@Test

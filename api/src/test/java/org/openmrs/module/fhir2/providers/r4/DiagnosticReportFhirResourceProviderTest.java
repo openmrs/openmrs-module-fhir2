@@ -26,6 +26,7 @@ import java.util.List;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -65,6 +66,9 @@ public class DiagnosticReportFhirResourceProviderTest {
 	
 	@Mock
 	private FhirDiagnosticReportService service;
+	
+	@Mock
+	private RequestDetails mockRequestDetails;
 	
 	@Getter(AccessLevel.PUBLIC)
 	private DiagnosticReportFhirResourceProvider resourceProvider;
@@ -128,40 +132,42 @@ public class DiagnosticReportFhirResourceProviderTest {
 	}
 	
 	@Test
-	public void updateDiagnosticReport_shouldUpdateExistingDiagnosticReport() {
-		when(service.update(UUID, diagnosticReport)).thenReturn(diagnosticReport);
+	public void doUpsert_shouldUpdateExistingDiagnosticReport() {
+		when(service.update(UUID, diagnosticReport, mockRequestDetails, false)).thenReturn(diagnosticReport);
 		
-		MethodOutcome result = resourceProvider.updateDiagnosticReport(new IdType().setValue(UUID), diagnosticReport);
+		MethodOutcome result = resourceProvider.doUpsert(new IdType().setValue(UUID), diagnosticReport, mockRequestDetails,
+		    false);
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getResource(), equalTo(diagnosticReport));
 	}
 	
 	@Test(expected = InvalidRequestException.class)
-	public void updateDiagnosticReport_shouldThrowInvalidRequestForUuidMismatch() {
-		when(service.update(WRONG_UUID, diagnosticReport)).thenThrow(InvalidRequestException.class);
+	public void doUpsert_shouldThrowInvalidRequestForUuidMismatch() {
+		when(service.update(WRONG_UUID, diagnosticReport, mockRequestDetails, false))
+		        .thenThrow(InvalidRequestException.class);
 		
-		resourceProvider.updateDiagnosticReport(new IdType().setValue(WRONG_UUID), diagnosticReport);
+		resourceProvider.doUpsert(new IdType().setValue(WRONG_UUID), diagnosticReport, mockRequestDetails, false);
 	}
 	
 	@Test(expected = InvalidRequestException.class)
-	public void updateDiagnosticReport_shouldThrowInvalidRequestForMissingId() {
+	public void doUpsert_shouldThrowInvalidRequestForMissingId() {
 		DiagnosticReport noIdDiagnosticReport = new DiagnosticReport();
 		
-		when(service.update(UUID, noIdDiagnosticReport)).thenThrow(InvalidRequestException.class);
+		when(service.update(UUID, noIdDiagnosticReport, mockRequestDetails, false)).thenThrow(InvalidRequestException.class);
 		
-		resourceProvider.updateDiagnosticReport(new IdType().setValue(UUID), noIdDiagnosticReport);
+		resourceProvider.doUpsert(new IdType().setValue(UUID), noIdDiagnosticReport, mockRequestDetails, false);
 	}
 	
 	@Test(expected = MethodNotAllowedException.class)
-	public void updateDiagnosticReport_shouldThrowMethodNotAllowedIfDoesNotExist() {
+	public void doUpsert_shouldThrowMethodNotAllowedIfDoesNotExist() {
 		DiagnosticReport wrongDiagnosticReport = new DiagnosticReport();
-		
 		wrongDiagnosticReport.setId(WRONG_UUID);
 		
-		when(service.update(WRONG_UUID, wrongDiagnosticReport)).thenThrow(MethodNotAllowedException.class);
+		when(service.update(WRONG_UUID, wrongDiagnosticReport, mockRequestDetails, false))
+		        .thenThrow(MethodNotAllowedException.class);
 		
-		resourceProvider.updateDiagnosticReport(new IdType().setValue(WRONG_UUID), wrongDiagnosticReport);
+		resourceProvider.doUpsert(new IdType().setValue(WRONG_UUID), wrongDiagnosticReport, mockRequestDetails, false);
 	}
 	
 	@Test

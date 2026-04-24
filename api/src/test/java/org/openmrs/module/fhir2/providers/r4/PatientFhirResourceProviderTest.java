@@ -28,6 +28,7 @@ import java.util.List;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.HasAndListParam;
 import ca.uhn.fhir.rest.param.HasOrListParam;
@@ -102,6 +103,9 @@ public class PatientFhirResourceProviderTest extends BaseFhirProvenanceResourceT
 	@Mock
 	private FhirPatientService patientService;
 	
+	@Mock
+	private RequestDetails mockRequestDetails;
+	
 	private PatientFhirResourceProvider resourceProvider;
 	
 	private Patient patient;
@@ -165,38 +169,42 @@ public class PatientFhirResourceProviderTest extends BaseFhirProvenanceResourceT
 	}
 	
 	@Test
-	public void updatePatient_shouldUpdateRequestedPatient() {
-		when(patientService.update(PATIENT_UUID, patient)).thenReturn(patient);
+	public void doUpsert_shouldUpdateRequestedPatient() {
+		when(patientService.update(PATIENT_UUID, patient, mockRequestDetails, false)).thenReturn(patient);
 		
-		MethodOutcome result = resourceProvider.updatePatient(new IdType().setValue(PATIENT_UUID), patient);
+		MethodOutcome result = resourceProvider.doUpsert(new IdType().setValue(PATIENT_UUID), patient, mockRequestDetails,
+		    false);
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getResource(), equalTo(patient));
 	}
 	
 	@Test(expected = InvalidRequestException.class)
-	public void updatePatient_shouldThrowInvalidRequestExceptionForUuidMismatch() {
-		when(patientService.update(WRONG_PATIENT_UUID, patient)).thenThrow(InvalidRequestException.class);
+	public void doUpsert_shouldThrowInvalidRequestExceptionForUuidMismatch() {
+		when(patientService.update(WRONG_PATIENT_UUID, patient, mockRequestDetails, false))
+		        .thenThrow(InvalidRequestException.class);
 		
-		resourceProvider.updatePatient(new IdType().setValue(WRONG_PATIENT_UUID), patient);
+		resourceProvider.doUpsert(new IdType().setValue(WRONG_PATIENT_UUID), patient, mockRequestDetails, false);
 	}
 	
 	@Test(expected = InvalidRequestException.class)
-	public void updatePatient_shouldThrowInvalidRequestExceptionForMissingId() {
+	public void doUpsert_shouldThrowInvalidRequestExceptionForMissingId() {
 		Patient noIdPatient = new Patient();
 		
-		when(patientService.update(PATIENT_UUID, noIdPatient)).thenThrow(InvalidRequestException.class);
+		when(patientService.update(PATIENT_UUID, noIdPatient, mockRequestDetails, false))
+		        .thenThrow(InvalidRequestException.class);
 		
-		resourceProvider.updatePatient(new IdType().setValue(PATIENT_UUID), noIdPatient);
+		resourceProvider.doUpsert(new IdType().setValue(PATIENT_UUID), noIdPatient, mockRequestDetails, false);
 	}
 	
 	@Test(expected = MethodNotAllowedException.class)
-	public void updatePatient_shouldThrowMethodNotAllowedIfDoesNotExist() {
+	public void doUpsert_shouldThrowMethodNotAllowedIfDoesNotExist() {
 		patient.setId(WRONG_PATIENT_UUID);
 		
-		when(patientService.update(WRONG_PATIENT_UUID, patient)).thenThrow(MethodNotAllowedException.class);
+		when(patientService.update(WRONG_PATIENT_UUID, patient, mockRequestDetails, false))
+		        .thenThrow(MethodNotAllowedException.class);
 		
-		resourceProvider.updatePatient(new IdType().setValue(WRONG_PATIENT_UUID), patient);
+		resourceProvider.doUpsert(new IdType().setValue(WRONG_PATIENT_UUID), patient, mockRequestDetails, false);
 	}
 	
 	@Test

@@ -27,7 +27,6 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Sort;
-import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
@@ -36,7 +35,6 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
-import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.Getter;
@@ -55,7 +53,7 @@ import org.springframework.stereotype.Component;
 
 @Component("personFhirR4ResourceProvider")
 @R4Provider
-public class PersonFhirResourceProvider implements IResourceProvider {
+public class PersonFhirResourceProvider extends BaseUpsertFhirResourceProvider<Person> {
 	
 	@Getter(PROTECTED)
 	@Setter(value = PACKAGE, onMethod_ = @Autowired)
@@ -81,16 +79,16 @@ public class PersonFhirResourceProvider implements IResourceProvider {
 		return FhirProviderUtils.buildCreate(fhirPersonService.create(person));
 	}
 	
-	@Update
-	@SuppressWarnings("unused")
-	public MethodOutcome updatePerson(@IdParam IdType id, @ResourceParam Person person) {
+	@Override
+	protected MethodOutcome doUpsert(IdType id, Person person, RequestDetails requestDetails, boolean createIfNotExists) {
 		if (id == null || id.getIdPart() == null) {
 			throw new InvalidRequestException("id must be specified to update");
 		}
 		
 		person.setId(id.getIdPart());
 		
-		return FhirProviderUtils.buildUpdate(fhirPersonService.update(id.getIdPart(), person));
+		return FhirProviderUtils
+		        .buildUpdate(fhirPersonService.update(id.getIdPart(), person, requestDetails, createIfNotExists));
 	}
 	
 	@Patch

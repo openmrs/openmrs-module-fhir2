@@ -30,7 +30,6 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Sort;
-import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
@@ -42,7 +41,6 @@ import ca.uhn.fhir.rest.param.QuantityAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
-import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.Getter;
@@ -65,7 +63,7 @@ import org.springframework.stereotype.Component;
 @Component("observationFhirR4ResourceProvider")
 @R4Provider
 @SuppressWarnings("unused")
-public class ObservationFhirResourceProvider implements IResourceProvider {
+public class ObservationFhirResourceProvider extends BaseUpsertFhirResourceProvider<Observation> {
 	
 	@Getter(PROTECTED)
 	@Setter(value = PACKAGE, onMethod_ = @Autowired)
@@ -90,16 +88,17 @@ public class ObservationFhirResourceProvider implements IResourceProvider {
 		return FhirProviderUtils.buildCreate(observationService.create(observation));
 	}
 	
-	@Update
-	@SuppressWarnings("unused")
-	public MethodOutcome updateObservation(@IdParam IdType id, @ResourceParam Observation observation) {
+	@Override
+	protected MethodOutcome doUpsert(IdType id, Observation observation, RequestDetails requestDetails,
+	        boolean createIfNotExists) {
 		if (id == null || id.getIdPart() == null) {
 			throw new InvalidRequestException("id must be specified to update");
 		}
 		
 		observation.setId(id.getIdPart());
 		
-		return FhirProviderUtils.buildUpdate(observationService.update(id.getIdPart(), observation));
+		return FhirProviderUtils
+		        .buildUpdate(observationService.update(id.getIdPart(), observation, requestDetails, createIfNotExists));
 	}
 	
 	@Patch

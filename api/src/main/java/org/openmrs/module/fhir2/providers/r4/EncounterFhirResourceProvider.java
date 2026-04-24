@@ -29,7 +29,6 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Sort;
-import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
@@ -37,7 +36,6 @@ import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.*;
-import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.Getter;
@@ -65,7 +63,7 @@ import org.springframework.stereotype.Component;
 
 @Component("encounterFhirR4ResourceProvider")
 @R4Provider
-public class EncounterFhirResourceProvider implements IResourceProvider {
+public class EncounterFhirResourceProvider extends BaseUpsertFhirResourceProvider<Encounter> {
 	
 	@Getter(PROTECTED)
 	@Setter(value = PROTECTED, onMethod_ = @Autowired)
@@ -91,14 +89,15 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 		return FhirProviderUtils.buildCreate(encounterService.create(encounter));
 	}
 	
-	@Update
-	@SuppressWarnings("unused")
-	public MethodOutcome updateEncounter(@IdParam IdType id, @ResourceParam Encounter encounter) {
+	@Override
+	protected MethodOutcome doUpsert(IdType id, Encounter encounter, RequestDetails requestDetails,
+	        boolean createIfNotExists) {
 		if (id == null || id.getIdPart() == null) {
 			throw new InvalidRequestException("id must be specified to update");
 		}
 		
-		return FhirProviderUtils.buildUpdate(encounterService.update(id.getIdPart(), encounter));
+		return FhirProviderUtils
+		        .buildUpdate(encounterService.update(id.getIdPart(), encounter, requestDetails, createIfNotExists));
 	}
 	
 	@Patch

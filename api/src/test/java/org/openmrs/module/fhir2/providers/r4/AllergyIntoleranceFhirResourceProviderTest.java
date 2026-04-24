@@ -26,6 +26,7 @@ import java.util.List;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
@@ -76,6 +77,9 @@ public class AllergyIntoleranceFhirResourceProviderTest extends BaseFhirProvenan
 	
 	@Mock
 	private FhirAllergyIntoleranceService service;
+	
+	@Mock
+	private RequestDetails mockRequestDetails;
 	
 	private AllergyIntoleranceFhirResourceProvider resourceProvider;
 	
@@ -430,38 +434,43 @@ public class AllergyIntoleranceFhirResourceProviderTest extends BaseFhirProvenan
 	}
 	
 	@Test
-	public void updateAllergyIntolerance_shouldUpdateRequestedAllergyIntolerance() {
-		when(service.update(ALLERGY_UUID, allergyIntolerance)).thenReturn(allergyIntolerance);
+	public void doUpsert_shouldUpdateRequestedAllergyIntolerance() {
+		when(service.update(ALLERGY_UUID, allergyIntolerance, mockRequestDetails, false)).thenReturn(allergyIntolerance);
 		
-		MethodOutcome result = resourceProvider.updateAllergy(new IdType().setValue(ALLERGY_UUID), allergyIntolerance);
+		MethodOutcome result = resourceProvider.doUpsert(new IdType().setValue(ALLERGY_UUID), allergyIntolerance,
+		    mockRequestDetails, false);
 		assertThat(result, notNullValue());
 		assertThat(result.getResource(), equalTo(allergyIntolerance));
 	}
 	
 	@Test(expected = InvalidRequestException.class)
-	public void updateAllergyIntolerance_shouldThrowInvalidRequestForUuidMismatchException() {
-		when(service.update(WRONG_ALLERGY_UUID, allergyIntolerance)).thenThrow(InvalidRequestException.class);
+	public void doUpsert_shouldThrowInvalidRequestForUuidMismatch() {
+		when(service.update(WRONG_ALLERGY_UUID, allergyIntolerance, mockRequestDetails, false))
+		        .thenThrow(InvalidRequestException.class);
 		
-		resourceProvider.updateAllergy(new IdType().setValue(WRONG_ALLERGY_UUID), allergyIntolerance);
+		resourceProvider.doUpsert(new IdType().setValue(WRONG_ALLERGY_UUID), allergyIntolerance, mockRequestDetails, false);
 	}
 	
 	@Test(expected = InvalidRequestException.class)
-	public void updateAllergyIntolerance_shouldThrowInvalidRequestForMissingId() {
+	public void doUpsert_shouldThrowInvalidRequestForMissingId() {
 		AllergyIntolerance noIdAllergyIntolerance = new AllergyIntolerance();
 		
-		when(service.update(ALLERGY_UUID, noIdAllergyIntolerance)).thenThrow(InvalidRequestException.class);
+		when(service.update(ALLERGY_UUID, noIdAllergyIntolerance, mockRequestDetails, false))
+		        .thenThrow(InvalidRequestException.class);
 		
-		resourceProvider.updateAllergy(new IdType().setValue(ALLERGY_UUID), noIdAllergyIntolerance);
+		resourceProvider.doUpsert(new IdType().setValue(ALLERGY_UUID), noIdAllergyIntolerance, mockRequestDetails, false);
 	}
 	
 	@Test(expected = MethodNotAllowedException.class)
-	public void updateAllergyIntolerance_shouldThrowMethodNotAllowedIfDoesNotExist() {
+	public void doUpsert_shouldThrowMethodNotAllowedIfDoesNotExist() {
 		AllergyIntolerance wrongAllergyIntolerance = new AllergyIntolerance();
 		wrongAllergyIntolerance.setId(WRONG_ALLERGY_UUID);
 		
-		when(service.update(WRONG_ALLERGY_UUID, wrongAllergyIntolerance)).thenThrow(MethodNotAllowedException.class);
+		when(service.update(WRONG_ALLERGY_UUID, wrongAllergyIntolerance, mockRequestDetails, false))
+		        .thenThrow(MethodNotAllowedException.class);
 		
-		resourceProvider.updateAllergy(new IdType().setValue(WRONG_ALLERGY_UUID), wrongAllergyIntolerance);
+		resourceProvider.doUpsert(new IdType().setValue(WRONG_ALLERGY_UUID), wrongAllergyIntolerance, mockRequestDetails,
+		    false);
 	}
 	
 	@Test

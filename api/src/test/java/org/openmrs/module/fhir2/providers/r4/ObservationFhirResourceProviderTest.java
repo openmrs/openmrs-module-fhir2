@@ -28,6 +28,7 @@ import java.util.Set;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
@@ -78,6 +79,9 @@ public class ObservationFhirResourceProviderTest extends BaseFhirProvenanceResou
 	
 	@Mock
 	private FhirObservationService observationService;
+	
+	@Mock
+	private RequestDetails mockRequestDetails;
 	
 	@Getter(AccessLevel.PUBLIC)
 	private ObservationFhirResourceProvider resourceProvider;
@@ -290,38 +294,42 @@ public class ObservationFhirResourceProviderTest extends BaseFhirProvenanceResou
 	}
 	
 	@Test
-	public void updateObservation_shouldUpdateObservation() {
-		when(observationService.update(OBSERVATION_UUID, observation)).thenReturn(observation);
+	public void doUpsert_shouldUpdateObservation() {
+		when(observationService.update(OBSERVATION_UUID, observation, mockRequestDetails, false)).thenReturn(observation);
 		
-		MethodOutcome result = resourceProvider.updateObservation(new IdType().setValue(OBSERVATION_UUID), observation);
+		MethodOutcome result = resourceProvider.doUpsert(new IdType().setValue(OBSERVATION_UUID), observation,
+		    mockRequestDetails, false);
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getResource(), equalTo(observation));
 	}
 	
 	@Test(expected = InvalidRequestException.class)
-	public void updateObservation_shouldThrowInvalidRequestExceptionForUuidMismatch() {
-		when(observationService.update(WRONG_OBSERVATION_UUID, observation)).thenThrow(InvalidRequestException.class);
+	public void doUpsert_shouldThrowInvalidRequestExceptionForUuidMismatch() {
+		when(observationService.update(WRONG_OBSERVATION_UUID, observation, mockRequestDetails, false))
+		        .thenThrow(InvalidRequestException.class);
 		
-		resourceProvider.updateObservation(new IdType().setValue(WRONG_OBSERVATION_UUID), observation);
+		resourceProvider.doUpsert(new IdType().setValue(WRONG_OBSERVATION_UUID), observation, mockRequestDetails, false);
 	}
 	
 	@Test(expected = InvalidRequestException.class)
-	public void updateObservation_shouldThrowInvalidRequestExceptionForMissingId() {
+	public void doUpsert_shouldThrowInvalidRequestExceptionForMissingId() {
 		Observation noObservation = new Observation();
 		
-		when(observationService.update(WRONG_OBSERVATION_UUID, noObservation)).thenThrow(InvalidRequestException.class);
+		when(observationService.update(WRONG_OBSERVATION_UUID, noObservation, mockRequestDetails, false))
+		        .thenThrow(InvalidRequestException.class);
 		
-		resourceProvider.updateObservation(new IdType().setValue(WRONG_OBSERVATION_UUID), noObservation);
+		resourceProvider.doUpsert(new IdType().setValue(WRONG_OBSERVATION_UUID), noObservation, mockRequestDetails, false);
 	}
 	
 	@Test(expected = MethodNotAllowedException.class)
-	public void updateObservation_shouldThrowMethodNotAllowedIfDoesNotExist() {
+	public void doUpsert_shouldThrowMethodNotAllowedIfDoesNotExist() {
 		observation.setId(WRONG_OBSERVATION_UUID);
 		
-		when(observationService.update(WRONG_OBSERVATION_UUID, observation)).thenThrow(MethodNotAllowedException.class);
+		when(observationService.update(WRONG_OBSERVATION_UUID, observation, mockRequestDetails, false))
+		        .thenThrow(MethodNotAllowedException.class);
 		
-		resourceProvider.updateObservation(new IdType().setValue(WRONG_OBSERVATION_UUID), observation);
+		resourceProvider.doUpsert(new IdType().setValue(WRONG_OBSERVATION_UUID), observation, mockRequestDetails, false);
 	}
 	
 	@Test

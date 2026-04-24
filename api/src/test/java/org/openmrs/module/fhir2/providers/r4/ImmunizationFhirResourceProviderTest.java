@@ -23,6 +23,7 @@ import java.util.List;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -53,6 +54,9 @@ public class ImmunizationFhirResourceProviderTest extends BaseFhirProvenanceReso
 	
 	@Mock
 	private FhirImmunizationService immunizationService;
+	
+	@Mock
+	private RequestDetails mockRequestDetails;
 	
 	private ImmunizationFhirResourceProvider resourceProvider;
 	
@@ -115,38 +119,43 @@ public class ImmunizationFhirResourceProviderTest extends BaseFhirProvenanceReso
 	}
 	
 	@Test
-	public void updateImmunization_shouldUpdateRequestedImmunization() {
-		when(immunizationService.update(IMMUNIZATION_UUID, immunization)).thenReturn(immunization);
+	public void doUpsert_shouldUpdateRequestedImmunization() {
+		when(immunizationService.update(IMMUNIZATION_UUID, immunization, mockRequestDetails, false))
+		        .thenReturn(immunization);
 		
-		MethodOutcome result = resourceProvider.updateImmunization(new IdType().setValue(IMMUNIZATION_UUID), immunization);
+		MethodOutcome result = resourceProvider.doUpsert(new IdType().setValue(IMMUNIZATION_UUID), immunization,
+		    mockRequestDetails, false);
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getResource(), equalTo(immunization));
 	}
 	
 	@Test(expected = InvalidRequestException.class)
-	public void updatePatient_shouldThrowInvalidRequestExceptionForUuidMismatch() {
-		when(immunizationService.update(WRONG_IMMUNIZATION_UUID, immunization)).thenThrow(InvalidRequestException.class);
+	public void doUpsert_shouldThrowInvalidRequestExceptionForUuidMismatch() {
+		when(immunizationService.update(WRONG_IMMUNIZATION_UUID, immunization, mockRequestDetails, false))
+		        .thenThrow(InvalidRequestException.class);
 		
-		resourceProvider.updateImmunization(new IdType().setValue(WRONG_IMMUNIZATION_UUID), immunization);
+		resourceProvider.doUpsert(new IdType().setValue(WRONG_IMMUNIZATION_UUID), immunization, mockRequestDetails, false);
 	}
 	
 	@Test(expected = InvalidRequestException.class)
-	public void updateImmunization_shouldThrowInvalidRequestExceptionForMissingId() {
+	public void doUpsert_shouldThrowInvalidRequestExceptionForMissingId() {
 		Immunization noIdImmunization = new Immunization();
 		
-		when(immunizationService.update(IMMUNIZATION_UUID, noIdImmunization)).thenThrow(InvalidRequestException.class);
+		when(immunizationService.update(IMMUNIZATION_UUID, noIdImmunization, mockRequestDetails, false))
+		        .thenThrow(InvalidRequestException.class);
 		
-		resourceProvider.updateImmunization(new IdType().setValue(IMMUNIZATION_UUID), noIdImmunization);
+		resourceProvider.doUpsert(new IdType().setValue(IMMUNIZATION_UUID), noIdImmunization, mockRequestDetails, false);
 	}
 	
 	@Test(expected = MethodNotAllowedException.class)
-	public void updateImmunization_shouldThrowMethodNotAllowedIfDoesNotExist() {
+	public void doUpsert_shouldThrowMethodNotAllowedIfDoesNotExist() {
 		immunization.setId(WRONG_IMMUNIZATION_UUID);
 		
-		when(immunizationService.update(WRONG_IMMUNIZATION_UUID, immunization)).thenThrow(MethodNotAllowedException.class);
+		when(immunizationService.update(WRONG_IMMUNIZATION_UUID, immunization, mockRequestDetails, false))
+		        .thenThrow(MethodNotAllowedException.class);
 		
-		resourceProvider.updateImmunization(new IdType().setValue(WRONG_IMMUNIZATION_UUID), immunization);
+		resourceProvider.doUpsert(new IdType().setValue(WRONG_IMMUNIZATION_UUID), immunization, mockRequestDetails, false);
 	}
 	
 	@Test

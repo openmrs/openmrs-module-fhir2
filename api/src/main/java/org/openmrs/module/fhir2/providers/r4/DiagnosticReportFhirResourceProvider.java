@@ -27,7 +27,6 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Sort;
-import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
@@ -36,7 +35,6 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
-import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.Getter;
@@ -57,7 +55,7 @@ import org.springframework.stereotype.Component;
 
 @Component("diagnosticReportFhirR4ResourceProvider")
 @R4Provider
-public class DiagnosticReportFhirResourceProvider implements IResourceProvider {
+public class DiagnosticReportFhirResourceProvider extends BaseUpsertFhirResourceProvider<DiagnosticReport> {
 	
 	@Getter(PROTECTED)
 	@Setter(value = PACKAGE, onMethod_ = @Autowired)
@@ -84,13 +82,15 @@ public class DiagnosticReportFhirResourceProvider implements IResourceProvider {
 		return FhirProviderUtils.buildCreate(service.create(diagnosticReport));
 	}
 	
-	@Update
-	public MethodOutcome updateDiagnosticReport(@IdParam IdType id, @ResourceParam DiagnosticReport diagnosticReport) {
+	@Override
+	protected MethodOutcome doUpsert(IdType id, DiagnosticReport diagnosticReport, RequestDetails requestDetails,
+	        boolean createIfNotExists) {
 		if (id == null || id.getIdPart() == null) {
 			throw new InvalidRequestException("id must be specified to update");
 		}
 		
-		return FhirProviderUtils.buildUpdate(service.update(id.getIdPart(), diagnosticReport));
+		return FhirProviderUtils
+		        .buildUpdate(service.update(id.getIdPart(), diagnosticReport, requestDetails, createIfNotExists));
 	}
 	
 	@Patch

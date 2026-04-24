@@ -29,6 +29,7 @@ import java.util.List;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.HasAndListParam;
 import ca.uhn.fhir.rest.param.HasOrListParam;
 import ca.uhn.fhir.rest.param.HasParam;
@@ -75,6 +76,9 @@ public class EncounterFhirResourceProviderTest extends BaseFhirProvenanceResourc
 	
 	@Mock
 	private FhirEncounterService encounterService;
+	
+	@Mock
+	private RequestDetails mockRequestDetails;
 	
 	@Captor
 	private ArgumentCaptor<EncounterSearchParams> paramCaptor;
@@ -295,38 +299,42 @@ public class EncounterFhirResourceProviderTest extends BaseFhirProvenanceResourc
 	}
 	
 	@Test
-	public void updateEncounter_shouldUpdateEncounter() {
-		when(encounterService.update(ENCOUNTER_UUID, encounter)).thenReturn(encounter);
+	public void doUpsert_shouldUpdateEncounter() {
+		when(encounterService.update(ENCOUNTER_UUID, encounter, mockRequestDetails, false)).thenReturn(encounter);
 		
-		MethodOutcome result = resourceProvider.updateEncounter(new IdType().setValue(ENCOUNTER_UUID), encounter);
+		MethodOutcome result = resourceProvider.doUpsert(new IdType().setValue(ENCOUNTER_UUID), encounter,
+		    mockRequestDetails, false);
 		assertThat(result, notNullValue());
 		assertThat(result.getResource(), equalTo(encounter));
 	}
 	
 	@Test(expected = InvalidRequestException.class)
-	public void updateEncounter_shouldThrowInvalidRequestForUuidMismatch() {
-		when(encounterService.update(WRONG_ENCOUNTER_UUID, encounter)).thenThrow(InvalidRequestException.class);
+	public void doUpsert_shouldThrowInvalidRequestForUuidMismatch() {
+		when(encounterService.update(WRONG_ENCOUNTER_UUID, encounter, mockRequestDetails, false))
+		        .thenThrow(InvalidRequestException.class);
 		
-		resourceProvider.updateEncounter(new IdType().setValue(WRONG_ENCOUNTER_UUID), encounter);
+		resourceProvider.doUpsert(new IdType().setValue(WRONG_ENCOUNTER_UUID), encounter, mockRequestDetails, false);
 	}
 	
 	@Test(expected = InvalidRequestException.class)
-	public void updateEncounter_shouldThrowInvalidRequestForMissingId() {
+	public void doUpsert_shouldThrowInvalidRequestForMissingId() {
 		Encounter noIdEncounter = new Encounter();
 		
-		when(encounterService.update(ENCOUNTER_UUID, noIdEncounter)).thenThrow(InvalidRequestException.class);
+		when(encounterService.update(ENCOUNTER_UUID, noIdEncounter, mockRequestDetails, false))
+		        .thenThrow(InvalidRequestException.class);
 		
-		resourceProvider.updateEncounter(new IdType().setValue(ENCOUNTER_UUID), noIdEncounter);
+		resourceProvider.doUpsert(new IdType().setValue(ENCOUNTER_UUID), noIdEncounter, mockRequestDetails, false);
 	}
 	
 	@Test(expected = MethodNotAllowedException.class)
-	public void updateEncounter_shouldThrowMethodNotAllowedIfDoesNotExist() {
+	public void doUpsert_shouldThrowMethodNotAllowedIfDoesNotExist() {
 		Encounter wrongEncounter = new Encounter();
 		wrongEncounter.setId(WRONG_ENCOUNTER_UUID);
 		
-		when(encounterService.update(WRONG_ENCOUNTER_UUID, wrongEncounter)).thenThrow(MethodNotAllowedException.class);
+		when(encounterService.update(WRONG_ENCOUNTER_UUID, wrongEncounter, mockRequestDetails, false))
+		        .thenThrow(MethodNotAllowedException.class);
 		
-		resourceProvider.updateEncounter(new IdType().setValue(WRONG_ENCOUNTER_UUID), wrongEncounter);
+		resourceProvider.doUpsert(new IdType().setValue(WRONG_ENCOUNTER_UUID), wrongEncounter, mockRequestDetails, false);
 	}
 	
 	@Test

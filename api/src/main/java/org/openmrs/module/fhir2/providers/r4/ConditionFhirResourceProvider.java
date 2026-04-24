@@ -27,7 +27,6 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Sort;
-import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
@@ -37,7 +36,6 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QuantityAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
-import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.Getter;
@@ -57,7 +55,7 @@ import org.springframework.stereotype.Component;
 
 @Component("conditionFhirR4ResourceProvider")
 @R4Provider
-public class ConditionFhirResourceProvider implements IResourceProvider {
+public class ConditionFhirResourceProvider extends BaseUpsertFhirResourceProvider<Condition> {
 	
 	@Getter(PROTECTED)
 	@Setter(value = PACKAGE, onMethod_ = @Autowired)
@@ -82,15 +80,17 @@ public class ConditionFhirResourceProvider implements IResourceProvider {
 		return FhirProviderUtils.buildCreate(conditionService.create(newCondition));
 	}
 	
-	@Update
-	public MethodOutcome updateCondition(@IdParam IdType id, @ResourceParam Condition updatedCondition) {
+	@Override
+	protected MethodOutcome doUpsert(IdType id, Condition updatedCondition, RequestDetails requestDetails,
+	        boolean createIfNotExists) {
 		if (id == null || id.getIdPart() == null) {
 			throw new InvalidRequestException("id must be specified to update");
 		}
 		
 		updatedCondition.setId(id);
 		
-		return FhirProviderUtils.buildUpdate(conditionService.update(id.getIdPart(), updatedCondition));
+		return FhirProviderUtils
+		        .buildUpdate(conditionService.update(id.getIdPart(), updatedCondition, requestDetails, createIfNotExists));
 	}
 	
 	@Patch

@@ -22,11 +22,10 @@ import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
-import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
-import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.Getter;
@@ -45,7 +44,7 @@ import org.springframework.stereotype.Component;
 
 @Component("GroupFhirR4ResourceProvider")
 @R4Provider
-public class GroupFhirResourceProvider implements IResourceProvider {
+public class GroupFhirResourceProvider extends BaseUpsertFhirResourceProvider<Group> {
 	
 	@Getter(PROTECTED)
 	@Setter(value = PACKAGE, onMethod_ = @Autowired)
@@ -75,16 +74,15 @@ public class GroupFhirResourceProvider implements IResourceProvider {
 		return FhirProviderUtils.buildCreate(groupService.create(group));
 	}
 	
-	@Update
-	@SuppressWarnings("unused")
-	public MethodOutcome updateGroup(@IdParam IdType id, @ResourceParam Group group) {
+	@Override
+	protected MethodOutcome doUpsert(IdType id, Group group, RequestDetails requestDetails, boolean createIfNotExists) {
 		if (id == null || id.getIdPart() == null) {
 			throw new InvalidRequestException("id must be specified to update");
 		}
 		
 		group.setId(id.getIdPart());
 		
-		return FhirProviderUtils.buildUpdate(groupService.update(id.getIdPart(), group));
+		return FhirProviderUtils.buildUpdate(groupService.update(id.getIdPart(), group, requestDetails, createIfNotExists));
 	}
 	
 	@Delete

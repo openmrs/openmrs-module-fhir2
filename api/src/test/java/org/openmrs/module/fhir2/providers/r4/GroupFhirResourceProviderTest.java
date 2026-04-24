@@ -15,12 +15,12 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -47,6 +47,9 @@ public class GroupFhirResourceProviderTest {
 	
 	@Mock
 	private FhirGroupMemberService groupMemberService;
+	
+	@Mock
+	private RequestDetails mockRequestDetails;
 	
 	GroupFhirResourceProvider resourceProvider;
 	
@@ -102,15 +105,16 @@ public class GroupFhirResourceProviderTest {
 	}
 	
 	@Test
-	public void shouldUpdateExistingGroup() {
+	public void doUpsert_shouldUpdateExistingGroup() {
 		Group.GroupMemberComponent groupMemberComponent = mock(Group.GroupMemberComponent.class);
 		
 		group.setActual(false);
 		group.addMember(groupMemberComponent);
 		
-		when(fhirGroupService.update(eq(COHORT_UUID), any(org.hl7.fhir.r4.model.Group.class))).thenReturn(group);
+		when(fhirGroupService.update(COHORT_UUID, group, mockRequestDetails, false)).thenReturn(group);
 		
-		MethodOutcome result = resourceProvider.updateGroup(new IdType().setValue(COHORT_UUID), group);
+		MethodOutcome result = resourceProvider.doUpsert(new IdType().setValue(COHORT_UUID), group, mockRequestDetails,
+		    false);
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getResource(), notNullValue());
@@ -119,32 +123,32 @@ public class GroupFhirResourceProviderTest {
 	}
 	
 	@Test(expected = InvalidRequestException.class)
-	public void updateGroupShouldThrowInvalidRequestForUuidMismatch() {
-		when(fhirGroupService.update(eq(BAD_COHORT_UUID), any(org.hl7.fhir.r4.model.Group.class)))
+	public void doUpsert_shouldThrowInvalidRequestForUuidMismatch() {
+		when(fhirGroupService.update(BAD_COHORT_UUID, group, mockRequestDetails, false))
 		        .thenThrow(InvalidRequestException.class);
 		
-		resourceProvider.updateGroup(new IdType().setValue(BAD_COHORT_UUID), group);
+		resourceProvider.doUpsert(new IdType().setValue(BAD_COHORT_UUID), group, mockRequestDetails, false);
 	}
 	
 	@Test(expected = InvalidRequestException.class)
-	public void ShouldThrowInvalidRequestForMissingIdInGroupToUpdate() {
+	public void doUpsert_shouldThrowInvalidRequestForMissingIdInGroupToUpdate() {
 		org.hl7.fhir.r4.model.Group noIdGroup = new org.hl7.fhir.r4.model.Group();
 		
-		when(fhirGroupService.update(eq(COHORT_UUID), any(org.hl7.fhir.r4.model.Group.class)))
+		when(fhirGroupService.update(COHORT_UUID, noIdGroup, mockRequestDetails, false))
 		        .thenThrow(InvalidRequestException.class);
 		
-		resourceProvider.updateGroup(new IdType().setValue(COHORT_UUID), noIdGroup);
+		resourceProvider.doUpsert(new IdType().setValue(COHORT_UUID), noIdGroup, mockRequestDetails, false);
 	}
 	
 	@Test(expected = MethodNotAllowedException.class)
-	public void shouldThrowMethodNotAllowedIfGroupToUpdateDoesNotExist() {
+	public void doUpsert_shouldThrowMethodNotAllowedIfGroupToUpdateDoesNotExist() {
 		org.hl7.fhir.r4.model.Group wrongGroup = new org.hl7.fhir.r4.model.Group();
 		wrongGroup.setId(BAD_COHORT_UUID);
 		
-		when(fhirGroupService.update(eq(BAD_COHORT_UUID), any(org.hl7.fhir.r4.model.Group.class)))
+		when(fhirGroupService.update(BAD_COHORT_UUID, wrongGroup, mockRequestDetails, false))
 		        .thenThrow(MethodNotAllowedException.class);
 		
-		resourceProvider.updateGroup(new IdType().setValue(BAD_COHORT_UUID), wrongGroup);
+		resourceProvider.doUpsert(new IdType().setValue(BAD_COHORT_UUID), wrongGroup, mockRequestDetails, false);
 	}
 	
 	@Test
