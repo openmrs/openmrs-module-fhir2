@@ -173,7 +173,7 @@ public class MedicationDispenseFhirResourceProviderTest {
 		
 		when(fhirMedicationDispenseService.update(ArgumentMatchers.eq(WRONG_MEDICATION_DISPENSE_UUID),
 		    ArgumentMatchers.any(org.hl7.fhir.r4.model.MedicationDispense.class)))
-		        .thenThrow(MethodNotAllowedException.class);
+		            .thenThrow(MethodNotAllowedException.class);
 		
 		resourceProvider.updateMedicationDispense(new IdType().setValue(WRONG_MEDICATION_DISPENSE_UUID),
 		    wrongMedicationDispense);

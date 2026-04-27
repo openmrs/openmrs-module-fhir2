@@ -65,7 +65,7 @@ public class FhirRestServletTest {
 		when(mockRequest.getServletPath()).thenReturn("");
 		when(mockRequest.getContextPath()).thenReturn("");
 		when(mockRequest.getQueryString()).thenReturn("");
-
+		
 		Thread.currentThread().setContextClassLoader(null);
 		assertNull(Thread.currentThread().getContextClassLoader());
 		servlet.service(mockRequest, mockResponse);
