@@ -403,11 +403,6 @@
                     </exclusion>
                 </exclusions>
             </dependency>
-            <dependency>
-                <groupId>com.github.dnault</groupId>
-                <artifactId>xml-patch</artifactId>
-                <version>0.3.1</version>
-            </dependency>
             <!-- https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api -->
             <dependency>
                 <groupId>javax.servlet</groupId>

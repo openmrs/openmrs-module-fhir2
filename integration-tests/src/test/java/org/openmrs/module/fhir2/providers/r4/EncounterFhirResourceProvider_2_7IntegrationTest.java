@@ -7,7 +7,7 @@
  * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
  * graphic logo is a trademark of OpenMRS Inc.
  */
-package org.openmrs.module.fhir2.provider.r3;
+package org.openmrs.module.fhir2.providers.r4;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.endsWith;
@@ -26,17 +26,16 @@ import java.util.Set;
 
 import lombok.AccessLevel;
 import lombok.Getter;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Encounter;
-import org.hl7.fhir.dstu3.model.ResourceType;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.junit.Before;
 import org.junit.Test;
-import org.openmrs.module.fhir2.providers.r3.BaseFhirR3IntegrationTest;
-import org.openmrs.module.fhir2.providers.r4.EncounterFhirResourceProvider;
+import org.openmrs.module.fhir2.BaseFhirIntegrationTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletResponse;
 
-public class EncounterFhirResourceProvider_2_7IntegrationTest extends BaseFhirR3IntegrationTest<EncounterFhirResourceProvider, Encounter> {
+public class EncounterFhirResourceProvider_2_7IntegrationTest extends BaseFhirR4IntegrationTest<EncounterFhirResourceProvider, Encounter> {
 	
 	private static final String MEDICATION_REQUEST_QUERY_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirEncounterDaoImpl_2_2Test_initial_data.xml";
 	
@@ -57,7 +56,7 @@ public class EncounterFhirResourceProvider_2_7IntegrationTest extends BaseFhirR3
 		// note that we restrict by date to rule out encounters from standard test data set
 		MockHttpServletResponse response = get(
 		    "/Encounter/?_query=encountersWithMedicationRequests&date=ge2009-01-01&status=active")
-		        .accept(FhirMediaTypes.JSON).go();
+		            .accept(BaseFhirIntegrationTest.FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentAsString(), notNullValue());
@@ -71,7 +70,7 @@ public class EncounterFhirResourceProvider_2_7IntegrationTest extends BaseFhirR3
 		
 		List<Bundle.BundleEntryComponent> entries = result.getEntry();
 		
-		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R3/"))));
+		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R4/"))));
 		assertThat(entries,
 		    everyItem(hasResource(hasProperty("resourceType", in(getEncounterWithMedicationRequestsValidResourceTypes())))));
 		assertThat(entries, hasItem(hasProperty("fullUrl", endsWith("430bbb70-6a9c-4e1e-badb-9d1034b1b5e9")))); // encounter 1001 from custom test data
