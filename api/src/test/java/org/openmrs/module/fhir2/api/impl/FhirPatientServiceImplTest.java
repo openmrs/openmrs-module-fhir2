@@ -47,7 +47,6 @@ import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import com.github.dnault.xmlpatch.repackaged.joptsimple.internal.Strings;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.HumanName;
@@ -983,7 +982,7 @@ public class FhirPatientServiceImplTest {
 	@Test
 	public void getPatientIdentifierTypeByIdentifier_shouldReturnNullWhenIdentifierTypeTextEmpty() {
 		Identifier identifier = new Identifier();
-		identifier.setType(new CodeableConcept().setText(Strings.EMPTY));
+		identifier.setType(new CodeableConcept().setText(""));
 		
 		PatientIdentifierType result = patientService.getPatientIdentifierTypeByIdentifier(identifier);
 		assertNull(identifier.getSystem());

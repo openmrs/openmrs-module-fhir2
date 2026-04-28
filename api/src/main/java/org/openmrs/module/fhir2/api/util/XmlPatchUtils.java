@@ -18,8 +18,9 @@ import java.io.IOException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import com.github.dnault.xmlpatch.Patcher;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.openmrs.module.fhir2.api.util.xmlpatch.XmlPatchException;
+import org.openmrs.module.fhir2.api.util.xmlpatch.XmlPatcher;
 
 public class XmlPatchUtils {
 	
@@ -40,10 +41,10 @@ public class XmlPatchUtils {
 		
 		ByteArrayOutputStream result = new ByteArrayOutputStream();
 		try {
-			Patcher.patch(new ByteArrayInputStream(inputResource.getBytes(Constants.CHARSET_UTF8)),
+			XmlPatcher.patch(new ByteArrayInputStream(inputResource.getBytes(Constants.CHARSET_UTF8)),
 			    new ByteArrayInputStream(thePatchBody.getBytes(Constants.CHARSET_UTF8)), result);
 		}
-		catch (IOException e) {
+		catch (IOException | XmlPatchException e) {
 			throw new InvalidRequestException(e);
 		}
 		
