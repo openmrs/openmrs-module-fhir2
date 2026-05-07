@@ -121,6 +121,15 @@ public class FhirTask extends BaseOpenmrsMetadata {
 	private FhirReference ownerReference;
 	
 	/**
+	 * The request being actioned or the resource being manipulated by this task. This is the
+	 * Observation or other resource that the task is focused on (e.g., the Observation that triggered
+	 * the creation of this nursing task).
+	 */
+	@OneToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name = "focus_reference_id", referencedColumnName = "reference_id")
+	private FhirReference focusReference;
+	
+	/**
 	 * Additional information that may be needed in the execution of the task. see
 	 * <a href="https://www.hl7.org/fhir/task-definitions.html#Task.input">...</a>
 	 */
