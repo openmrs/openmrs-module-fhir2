@@ -23,7 +23,11 @@ import java.time.Month;
 import java.time.ZoneId;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.ReferenceOrListParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,6 +36,7 @@ import org.openmrs.api.ConceptService;
 import org.openmrs.api.db.hibernate.HibernateConceptDAO;
 import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.model.FhirReference;
 import org.openmrs.module.fhir2.model.FhirTask;
 import org.openmrs.module.fhir2.model.FhirTaskInput;
@@ -67,6 +72,12 @@ public class FhirTaskDaoImplTest extends BaseFhirContextSensitiveTest {
 	private static final String CONCEPT_UUID = "957eba27-2b38-43e8-91a9-4dfe3956a32d";
 	
 	private static final String DIAGNOSTIC_REPORT_UUID = "584ebe74-eb7e-4dc2-ae0d-af941a163279";
+	
+	private static final String OBSERVATION_UUID = "f1937b1a-dfff-43ac-ba9c-a62a48620b28";
+	
+	private static final String FOCUS_OBSERVATION_UUID = "5085AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	
+	private static final String TASK_WITH_FOCUS_UUID = "aa1bb2cc-3dd4-4ee5-8ff6-a1b2c3d4e5f6";
 	
 	private FhirTaskDaoImpl dao;
 	
@@ -379,6 +390,57 @@ public class FhirTaskDaoImplTest extends BaseFhirContextSensitiveTest {
 		assertThat(updatedOutput.getOutput(), hasItem(hasProperty("type", hasProperty("uuid", equalTo(CONCEPT_UUID)))));
 		assertThat(updatedOutput.getOutput(),
 		    hasItem(hasProperty("valueReference", hasProperty("reference", equalTo(DIAGNOSTIC_REPORT_UUID)))));
+	}
+	
+	@Test
+	public void saveTask_shouldUpdateFocusReference() {
+		//given
+		FhirTask toUpdate = dao.get(TASK_UUID);
+		
+		FhirReference focusReference = new FhirReference();
+		focusReference.setType(FhirConstants.OBSERVATION);
+		focusReference.setReference(OBSERVATION_UUID);
+		focusReference.setName("TEMP");
+		
+		toUpdate.setFocusReference(focusReference);
+		
+		//when
+		dao.createOrUpdate(toUpdate);
+		
+		//then
+		FhirTask result = dao.get(TASK_UUID);
+		
+		assertThat(result.getFocusReference(), notNullValue());
+		assertThat(result.getFocusReference().getId(), notNullValue());
+		assertThat(result.getFocusReference().getType(), equalTo(FhirConstants.OBSERVATION));
+		assertThat(result.getFocusReference().getReference(), equalTo(OBSERVATION_UUID));
+	}
+	
+	@Test
+	public void searchForTasks_shouldReturnTasksByFocusReference() {
+		//given — save a task with a focus reference, then search by it
+		FhirTask toUpdate = dao.get(TASK_UUID);
+		
+		FhirReference focusRef = new FhirReference();
+		focusRef.setType(FhirConstants.OBSERVATION);
+		focusRef.setReference(FOCUS_OBSERVATION_UUID);
+		focusRef.setName("TEMP");
+		toUpdate.setFocusReference(focusRef);
+		dao.createOrUpdate(toUpdate);
+		
+		ReferenceAndListParam focusParam = new ReferenceAndListParam().addAnd(
+		    new ReferenceOrListParam().add(new ReferenceParam(FhirConstants.OBSERVATION, null, FOCUS_OBSERVATION_UUID)));
+		
+		SearchParameterMap searchParams = new SearchParameterMap().addParameter(FhirConstants.FOCUS_REFERENCE_SEARCH_HANDLER,
+		    focusParam);
+		
+		//when
+		List<FhirTask> results = dao.getSearchResults(searchParams);
+		
+		//then
+		assertThat(results, notNullValue());
+		assertThat(results, not(empty()));
+		assertThat(results, hasItem(hasProperty("uuid", equalTo(TASK_UUID))));
 	}
 	
 	@Test

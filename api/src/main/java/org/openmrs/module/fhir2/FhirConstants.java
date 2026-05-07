@@ -299,6 +299,8 @@ public final class FhirConstants {
 	
 	public static final String FOR_REFERENCE_SEARCH_HANDLER = "for.reference.search.handler";
 	
+	public static final String FOCUS_REFERENCE_SEARCH_HANDLER = "focus.reference.search.handler";
+	
 	public static final String RESULT_SEARCH_HANDLER = "result.search.handler";
 	
 	public static final String COMMON_SEARCH_HANDLER = "common.search.handler";
