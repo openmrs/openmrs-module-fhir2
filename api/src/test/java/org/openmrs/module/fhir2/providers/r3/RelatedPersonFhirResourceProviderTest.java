@@ -144,8 +144,7 @@ public class RelatedPersonFhirResourceProviderTest extends BaseFhirR3ProvenanceR
 		        .addAnd(new StringOrListParam().add(new StringParam(GIVEN_NAME)));
 		when(relatedPersonService.searchForRelatedPeople(
 		    new RelatedPersonSearchParams(nameParam, null, null, null, null, null, null, null, null, null, null)))
-		            .thenReturn(
-		                new MockIBundleProvider<>(Collections.singletonList(relatedPerson), PREFERRED_PAGE_SIZE, COUNT));
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(relatedPerson), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchRelatedPerson(nameParam, null, null, null, null, null, null, null,
 		    null, null, null);
@@ -162,8 +161,7 @@ public class RelatedPersonFhirResourceProviderTest extends BaseFhirR3ProvenanceR
 		TokenAndListParam genderParam = new TokenAndListParam().addAnd(new TokenOrListParam().add(GENDER));
 		when(relatedPersonService.searchForRelatedPeople(
 		    new RelatedPersonSearchParams(null, genderParam, null, null, null, null, null, null, null, null, null)))
-		            .thenReturn(
-		                new MockIBundleProvider<>(Collections.singletonList(relatedPerson), PREFERRED_PAGE_SIZE, COUNT));
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(relatedPerson), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchRelatedPerson(null, genderParam, null, null, null, null, null, null,
 		    null, null, null);
@@ -180,8 +178,7 @@ public class RelatedPersonFhirResourceProviderTest extends BaseFhirR3ProvenanceR
 		DateRangeParam birthDateParam = new DateRangeParam().setLowerBound(BIRTH_DATE).setUpperBound(BIRTH_DATE);
 		when(relatedPersonService.searchForRelatedPeople(
 		    new RelatedPersonSearchParams(null, null, birthDateParam, null, null, null, null, null, null, null, null)))
-		            .thenReturn(
-		                new MockIBundleProvider<>(Collections.singletonList(relatedPerson), PREFERRED_PAGE_SIZE, COUNT));
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(relatedPerson), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchRelatedPerson(null, null, birthDateParam, null, null, null, null,
 		    null, null, null, null);
@@ -198,8 +195,7 @@ public class RelatedPersonFhirResourceProviderTest extends BaseFhirR3ProvenanceR
 		StringAndListParam cityParam = new StringAndListParam().addAnd(new StringOrListParam().add(new StringParam(CITY)));
 		when(relatedPersonService.searchForRelatedPeople(
 		    new RelatedPersonSearchParams(null, null, null, cityParam, null, null, null, null, null, null, null)))
-		            .thenReturn(
-		                new MockIBundleProvider<>(Collections.singletonList(relatedPerson), PREFERRED_PAGE_SIZE, COUNT));
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(relatedPerson), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchRelatedPerson(null, null, null, cityParam, null, null, null, null,
 		    null, null, null);
@@ -216,8 +212,7 @@ public class RelatedPersonFhirResourceProviderTest extends BaseFhirR3ProvenanceR
 		StringAndListParam stateParam = new StringAndListParam().addAnd(new StringOrListParam().add(new StringParam(STATE)));
 		when(relatedPersonService.searchForRelatedPeople(
 		    new RelatedPersonSearchParams(null, null, null, null, stateParam, null, null, null, null, null, null)))
-		            .thenReturn(
-		                new MockIBundleProvider<>(Collections.singletonList(relatedPerson), PREFERRED_PAGE_SIZE, COUNT));
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(relatedPerson), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchRelatedPerson(null, null, null, null, stateParam, null, null, null,
 		    null, null, null);
@@ -235,8 +230,7 @@ public class RelatedPersonFhirResourceProviderTest extends BaseFhirR3ProvenanceR
 		        .addAnd(new StringOrListParam().add(new StringParam(POSTAL_CODE)));
 		when(relatedPersonService.searchForRelatedPeople(
 		    new RelatedPersonSearchParams(null, null, null, null, null, postalCodeParam, null, null, null, null, null)))
-		            .thenReturn(
-		                new MockIBundleProvider<>(Collections.singletonList(relatedPerson), PREFERRED_PAGE_SIZE, COUNT));
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(relatedPerson), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchRelatedPerson(null, null, null, null, null, postalCodeParam, null,
 		    null, null, null, null);
@@ -254,8 +248,7 @@ public class RelatedPersonFhirResourceProviderTest extends BaseFhirR3ProvenanceR
 		        .addAnd(new StringOrListParam().add(new StringParam(COUNTRY)));
 		when(relatedPersonService.searchForRelatedPeople(
 		    new RelatedPersonSearchParams(null, null, null, null, null, null, countryParam, null, null, null, null)))
-		            .thenReturn(
-		                new MockIBundleProvider<>(Collections.singletonList(relatedPerson), PREFERRED_PAGE_SIZE, COUNT));
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(relatedPerson), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchRelatedPerson(null, null, null, null, null, null, countryParam,
 		    null, null, null, null);
@@ -271,8 +264,8 @@ public class RelatedPersonFhirResourceProviderTest extends BaseFhirR3ProvenanceR
 	public void searchForRelatedPeople_shouldReturnMatchingBundleOfRelatedPeopleByUUID() {
 		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(RELATED_PERSON_UUID));
 		when(relatedPersonService.searchForRelatedPeople(
-		    new RelatedPersonSearchParams(null, null, null, null, null, null, null, uuid, null, null, null))).thenReturn(
-		        new MockIBundleProvider<>(Collections.singletonList(relatedPerson), PREFERRED_PAGE_SIZE, COUNT));
+		    new RelatedPersonSearchParams(null, null, null, null, null, null, null, uuid, null, null, null)))
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(relatedPerson), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchRelatedPerson(null, null, null, null, null, null, null, uuid, null,
 		    null, null);
@@ -289,8 +282,7 @@ public class RelatedPersonFhirResourceProviderTest extends BaseFhirR3ProvenanceR
 		DateRangeParam lastUpdated = new DateRangeParam().setLowerBound(LAST_UPDATED_DATE).setUpperBound(LAST_UPDATED_DATE);
 		when(relatedPersonService.searchForRelatedPeople(
 		    new RelatedPersonSearchParams(null, null, null, null, null, null, null, null, lastUpdated, null, null)))
-		            .thenReturn(
-		                new MockIBundleProvider<>(Collections.singletonList(relatedPerson), PREFERRED_PAGE_SIZE, COUNT));
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(relatedPerson), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchRelatedPerson(null, null, null, null, null, null, null, null,
 		    lastUpdated, null, null);
@@ -327,8 +319,8 @@ public class RelatedPersonFhirResourceProviderTest extends BaseFhirR3ProvenanceR
 		HashSet<Include> includes = new HashSet<>();
 		
 		when(relatedPersonService.searchForRelatedPeople(
-		    new RelatedPersonSearchParams(null, null, null, null, null, null, null, null, null, null, null))).thenReturn(
-		        new MockIBundleProvider<>(Collections.singletonList(relatedPerson), PREFERRED_PAGE_SIZE, COUNT));
+		    new RelatedPersonSearchParams(null, null, null, null, null, null, null, null, null, null, null)))
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(relatedPerson), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchRelatedPerson(null, null, null, null, null, null, null, null, null,
 		    null, includes);
