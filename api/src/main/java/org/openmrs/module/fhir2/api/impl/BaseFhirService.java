@@ -97,6 +97,11 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 	}
 	
 	@Override
+	public boolean exists(@Nonnull String uuid) {
+		return getDao().exists(uuid);
+	}
+	
+	@Override
 	public T create(@Nonnull T newResource) {
 		if (newResource == null) {
 			throw new InvalidRequestException("A resource of type " + resourceClass.getSimpleName() + " must be supplied");

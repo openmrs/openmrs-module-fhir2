@@ -128,6 +128,26 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	
 	@Override
 	@Transactional(readOnly = true)
+	public T get(@Nonnull String uuid) {
+		@SuppressWarnings({ "UnstableApiUsage", "unchecked" })
+		OpenmrsFhirCriteriaContext<T, T> criteriaContext = createCriteriaContext((Class<T>) typeToken.getRawType());
+		
+		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot());
+		criteriaContext
+		        .addPredicate(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("uuid"), uuid));
+		
+		// try-catch phrase is a workaround for https://github.com/jakartaee/persistence/issues/298
+		try {
+			return deproxyResult(
+			    criteriaContext.getEntityManager().createQuery(criteriaContext.finalizeQuery()).getSingleResult());
+		}
+		catch (NoResultException e) {
+			return null;
+		}
+	}
+	
+	@Override
+	@Transactional(readOnly = true)
 	public List<T> get(@Nonnull Collection<String> uuids) {
 		if (uuids == null || uuids.isEmpty()) {
 			return Collections.emptyList();
@@ -151,22 +171,16 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	
 	@Override
 	@Transactional(readOnly = true)
-	public T get(@Nonnull String uuid) {
+	public boolean exists(@Nonnull String uuid) {
 		@SuppressWarnings({ "UnstableApiUsage", "unchecked" })
-		OpenmrsFhirCriteriaContext<T, T> criteriaContext = createCriteriaContext((Class<T>) typeToken.getRawType());
+		OpenmrsFhirCriteriaContext<T, Long> criteriaContext = createCriteriaContext((Class<T>) typeToken.getRawType(),
+		    Long.class);
 		
-		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot());
-		criteriaContext
-		        .addPredicate(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("uuid"), uuid));
+		CriteriaBuilder cb = criteriaContext.getCriteriaBuilder();
+		criteriaContext.getCriteriaQuery().select(cb.count(criteriaContext.getRoot()));
+		criteriaContext.addPredicate(cb.equal(criteriaContext.getRoot().get("uuid"), uuid));
 		
-		// try-catch phrase is a workaround for https://github.com/jakartaee/persistence/issues/298
-		try {
-			return deproxyResult(
-			    criteriaContext.getEntityManager().createQuery(criteriaContext.finalizeQuery()).getSingleResult());
-		}
-		catch (NoResultException e) {
-			return null;
-		}
+		return criteriaContext.getEntityManager().createQuery(criteriaContext.finalizeQuery()).getSingleResult() > 0;
 	}
 	
 	@Override
