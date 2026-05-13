@@ -479,7 +479,7 @@ public class TaskTranslatorImplTest {
 		//given
 		FhirTask task = new FhirTask();
 		
-		//when / //then — delegate to shared helper
+		//when / //then
 		shouldTranslateReferenceToFhir(task, FhirConstants.OBSERVATION, DIAGNOSTIC_REPORT_UUID, task::setFocusReference,
 		    Task::getFocus);
 	}
