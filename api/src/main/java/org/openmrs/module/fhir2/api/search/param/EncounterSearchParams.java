@@ -66,6 +66,7 @@ public class EncounterSearchParams extends BaseResourceSearchParams {
 		        .addParameter(FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER, getParticipant())
 		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, getSubject())
 		        .addParameter(FhirConstants.ENCOUNTER_TYPE_REFERENCE_SEARCH_HANDLER, getEncounterType())
+		        .addParameter(FhirConstants.TAG_SEARCH_HANDLER, getTag())
 		        .addParameter(FhirConstants.HAS_SEARCH_HANDLER, getHasAndListParam());
 	}
 }

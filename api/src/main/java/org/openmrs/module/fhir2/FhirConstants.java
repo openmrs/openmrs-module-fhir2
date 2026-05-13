@@ -127,9 +127,17 @@ public final class FhirConstants {
 	
 	public static final String OPENMRS_FHIR_EXT_DIAGNOSIS_RANK = OPENMRS_FHIR_EXT_PREFIX + "/diagnosis-rank";
 	
+	public static final String OPENMRS_FHIR_STRUCTURE_DEFINITION_PREFIX = OPENMRS_FHIR_PREFIX + "/StructureDefinition";
+	
 	public static final String OPENMRS_FHIR_DEFAULT_PAGE_SIZE = "fhir2.paging.default";
 	
 	public static final String OPENMRS_FHIR_MAXIMUM_PAGE_SIZE = "fhir2.paging.maximum";
+	
+	/** The default handler for Encounters mapped from the Encounter table */
+	public static final String OPENMRS_HANDLER_ENCOUNTER_ENCOUNTER_BACKING_KEY = "openmrs.encounter";
+	
+	/** The default handler for Encounters mapped from the Visit table */
+	public static final String OPENMRS_HANDLER_ENCOUNTER_VISIT_BACKING_KEY = "openmrs.visit";
 	
 	public static final String ALLERGY_INTOLERANCE = "AllergyIntolerance";
 	
