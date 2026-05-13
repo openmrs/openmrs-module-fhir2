@@ -125,6 +125,8 @@ public final class FhirConstants {
 	public static final String OPENMRS_FHIR_EXT_MEDICATION_REQUEST_FULFILLER_STATUS = OPENMRS_FHIR_EXT_PREFIX
 	        + "/medicationrequest/fulfillerstatus";
 	
+	public static final String OPENMRS_FHIR_EXT_DIAGNOSIS_RANK = OPENMRS_FHIR_EXT_PREFIX + "/diagnosis-rank";
+	
 	public static final String OPENMRS_FHIR_DEFAULT_PAGE_SIZE = "fhir2.paging.default";
 	
 	public static final String OPENMRS_FHIR_MAXIMUM_PAGE_SIZE = "fhir2.paging.maximum";
@@ -384,8 +386,6 @@ public final class FhirConstants {
 	public static final String CONDITION_CATEGORY_CODE_CONDITION = "problem-list-item";
 	
 	public static final String CONDITION_CATEGORY_CODE_DIAGNOSIS = "encounter-diagnosis";
-	
-	public static final String DIAGNOSIS_RANK_EXTENSION_URI = "http://fhir.openmrs.org/R4/StructureDefinition/diagnosis-rank";
 	
 	public static final String CONDITION_CLINICAL_SYSTEM_URI = HL7_FHIR_CODE_SYSTEM_PREFIX + "/condition-clinical";
 	
