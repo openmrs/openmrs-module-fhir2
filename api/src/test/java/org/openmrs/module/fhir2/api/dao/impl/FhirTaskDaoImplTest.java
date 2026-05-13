@@ -79,8 +79,6 @@ public class FhirTaskDaoImplTest extends BaseFhirContextSensitiveTest {
 
 	private static final String FOCUS_OBSERVATION_UUID = "5085AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 
-	private static final String TASK_WITH_FOCUS_UUID = "aa1bb2cc-3dd4-4ee5-8ff6-a1b2c3d4e5f6";
-
 	private FhirTaskDaoImpl dao;
 
 	@Autowired

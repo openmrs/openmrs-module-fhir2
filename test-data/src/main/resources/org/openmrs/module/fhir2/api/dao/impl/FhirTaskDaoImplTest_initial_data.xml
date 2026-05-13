@@ -53,7 +53,6 @@
 	<fhir_reference reference_id="3" name="owner reference" target_type="Practitioner" reference="7f8aec9d-8269-4bb4-8bc5-1820bb31092c" uuid="2fcc13f9-8b72-4fba-9997-50eebd73f3c5" creator="1" date_created="2012-01-01 00:00:00.0" retired="false"/>
 	<fhir_reference reference_id="4" name="location reference" target_type="Location" reference="58ab6cf9-ea12-43bc-98a6-40353423331e" uuid="4fd5425a-6aca-418d-b92c-23e07e164080" creator="1" date_created="2012-01-01 00:00:00.0" retired="false"/>
 	<fhir_reference reference_id="5" name="patient reference" target_type="Patient" reference="f1937b1a-dfff-43ac-ba9c-a62a48620b28" uuid="b6085b4b-94ac-4235-ad01-25d331bdd98f" creator="1" date_created="2024-01-01 00:00:00.0" retired="false"/>
-	<fhir_reference reference_id="7" name="focus observation reference" target_type="Observation" reference="5085AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" uuid="a7b3c4d5-e6f7-4809-b123-c456d789e012" creator="1" date_created="2024-01-01 00:00:00.0" retired="false"/>
 
 	<!--Task -->
 	<fhir_task task_id="1" name="Accepted Order Task" status="ACCEPTED" location_reference_id="4" intent="ORDER" creator="1" date_created="2012-01-01 00:00:00.0" date_changed="2012-09-01 00:00:00.0" retired="false" uuid="d899333c-5bd4-45cc-b1e7-2f9542dbcbf6"/>
@@ -93,8 +92,5 @@
 	<fhir_task task_id="17" name="Failed Task" status="FAILED" intent="ORDER" creator="1" date_created="2024-04-14 00:00:00.0" date_changed="2024-04-14 00:00:00.0" retired="false" uuid="d4e5f6a7-44de-4d44-dd44-d4e5f6a7b8c9"/>
 	<fhir_task task_id="18" name="Cancelled Task" status="CANCELLED" intent="ORDER" creator="1" date_created="2024-04-15 00:00:00.0" date_changed="2024-04-15 00:00:00.0" retired="false" uuid="e5f6a7b8-55ef-4e55-ee55-e5f6a7b8c9d0"/>
 	<fhir_task task_id="19" name="Completed Task" status="COMPLETED" intent="ORDER" creator="1" date_created="2024-04-16 00:00:00.0" date_changed="2024-04-16 00:00:00.0" retired="false" uuid="f6a7b8c9-66fa-4f66-ff66-f6a7b8c9d0e1"/>
-
-	<!-- Task.focus -->
-	<fhir_task task_id="11" name="Task with focus reference" status="REQUESTED" focus_reference_id="7" intent="ORDER" creator="1" date_created="2024-05-07 00:00:00.0" date_changed="2024-05-07 00:00:00.0" retired="false" uuid="aa1bb2cc-3dd4-4ee5-8ff6-a1b2c3d4e5f6"/>
 
 </dataset>
