@@ -11,11 +11,10 @@ package org.openmrs.module.fhir2.web.util;
 
 import static org.openmrs.module.fhir2.web.util.FhirVersionUtils.FhirVersion.UNKNOWN;
 
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-
 import ca.uhn.fhir.rest.server.IServerAddressStrategy;
-import org.apache.commons.lang.StringUtils;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpServletRequest;
+import org.apache.commons.lang3.StringUtils;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.util.FhirGlobalPropertyHolder;
 import org.springframework.stereotype.Component;

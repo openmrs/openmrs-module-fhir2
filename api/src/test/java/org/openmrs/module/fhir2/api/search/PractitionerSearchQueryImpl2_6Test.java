@@ -30,15 +30,15 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.MedicationDispense;
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.hl7.fhir.r4.model.Practitioner;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.Provider;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.module.fhir2.api.dao.FhirPractitionerDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.PractitionerTranslator;
-import org.openmrs.test.BaseModuleContextSensitiveTest;
+import org.openmrs.test.jupiter.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -73,7 +73,7 @@ public class PractitionerSearchQueryImpl2_6Test extends BaseModuleContextSensiti
 		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		executeDataSet(PRACTITIONER_INITIAL_DATA_XML);
 		executeDataSet("org/openmrs/api/include/MedicationDispenseServiceTest-initialData.xml");

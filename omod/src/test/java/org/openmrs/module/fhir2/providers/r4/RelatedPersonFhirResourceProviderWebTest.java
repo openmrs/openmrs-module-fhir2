@@ -21,11 +21,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import javax.servlet.ServletException;
-
 import java.util.Calendar;
 import java.util.Collections;
 
+import jakarta.servlet.ServletException;
 import lombok.AccessLevel;
 import lombok.Getter;
 import org.apache.commons.lang3.time.DateUtils;

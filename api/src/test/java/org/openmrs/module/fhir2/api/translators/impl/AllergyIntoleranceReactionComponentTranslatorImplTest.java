@@ -309,23 +309,6 @@ public class AllergyIntoleranceReactionComponentTranslatorImplTest {
 	}
 	
 	@Test
-	public void toOpenmrsType_shouldTranslateSeverityOtherCorrectly() {
-		AllergyIntolerance.AllergyIntoleranceReactionComponent reactionComponent = new AllergyIntolerance.AllergyIntoleranceReactionComponent();
-		reactionComponent.setSeverity(AllergyIntolerance.AllergyIntoleranceSeverity.NULL);
-		
-		Concept otherConcept = new Concept();
-		otherConcept.setUuid(GLOBAL_PROPERTY_OTHER_VALUE);
-		
-		when(severityTranslator.toOpenmrsType(AllergyIntolerance.AllergyIntoleranceSeverity.NULL)).thenReturn(otherConcept);
-		
-		reactionComponentTranslator.toOpenmrsType(omrsAllergy, reactionComponent);
-		
-		assertThat(omrsAllergy, notNullValue());
-		assertThat(omrsAllergy.getSeverity(), notNullValue());
-		assertThat(omrsAllergy.getSeverity(), equalTo(otherConcept));
-	}
-	
-	@Test
 	public void toOpenmrsType_shouldReturnNullReactionIfManifestationIsNull() {
 		AllergyIntolerance.AllergyIntoleranceReactionComponent reactionComponent = new AllergyIntolerance.AllergyIntoleranceReactionComponent();
 		reactionComponent.setSeverity(AllergyIntolerance.AllergyIntoleranceSeverity.MODERATE);

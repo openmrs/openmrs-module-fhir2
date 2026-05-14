@@ -9,8 +9,7 @@
  */
 package org.openmrs.module.fhir2.web.util;
 
-import javax.servlet.http.HttpServletRequest;
-
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.openmrs.module.fhir2.FhirConstants;
 

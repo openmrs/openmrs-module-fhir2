@@ -9,15 +9,14 @@
  */
 package org.openmrs.module.fhir2.model;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
-
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -38,7 +37,7 @@ public class FhirContactPointMap extends BaseOpenmrsData {
 	
 	@EqualsAndHashCode.Include
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "fhir_contact_point_map_id")
 	private Integer id;
 	
@@ -49,11 +48,11 @@ public class FhirContactPointMap extends BaseOpenmrsData {
 	private Integer attributeTypeId;
 	
 	@Enumerated(EnumType.STRING)
-	@Column(length = 50)
+	@Column(length = 50, columnDefinition = "varchar(50)")
 	private ContactPointSystem system;
 	
 	@Enumerated(EnumType.STRING)
-	@Column(length = 50)
+	@Column(length = 50, columnDefinition = "varchar(50)")
 	private ContactPointUse use;
 	
 	private Integer rank;

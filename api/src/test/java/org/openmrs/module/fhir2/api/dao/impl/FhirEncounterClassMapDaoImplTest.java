@@ -15,8 +15,8 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 
 import org.hibernate.SessionFactory;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -37,7 +37,7 @@ public class FhirEncounterClassMapDaoImplTest extends BaseFhirContextSensitiveTe
 	
 	private static final String EXPECTED_ENCOUNTER_CLASS = "AMB";
 	
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		dao = new FhirEncounterClassMapDaoImpl();
 		dao.setSessionFactory(sessionFactory);

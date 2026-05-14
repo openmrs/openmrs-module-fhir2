@@ -26,7 +26,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationOutcome;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.openmrs.module.fhir2.BaseFhirIntegrationTest;
 import org.openmrs.module.fhir2.model.GroupMember;
 import org.openmrs.module.fhir2.web.servlet.FhirRestServlet;
@@ -51,7 +51,7 @@ public abstract class BaseFhirR4IntegrationTest<T extends IResourceProvider, U e
 		return new FhirRestServlet();
 	}
 	
-	@Before
+	@BeforeEach
 	@Override
 	public void setup() throws Exception {
 		getFhirContext().registerCustomType(GroupMember.class);

@@ -22,14 +22,13 @@ import static org.hamcrest.Matchers.startsWith;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import javax.servlet.ServletException;
-
 import java.util.Calendar;
 import java.util.Collections;
 
+import jakarta.servlet.ServletException;
 import lombok.AccessLevel;
 import lombok.Getter;
-import org.apache.commons.lang.time.DateUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.MedicationDispense;
 import org.hl7.fhir.r4.model.Patient;

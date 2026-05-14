@@ -18,8 +18,8 @@ import java.util.Collection;
 
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.Obs;
 import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.openmrs.module.fhir2.FhirConstants;
@@ -40,7 +40,7 @@ public class FhirObservationDaoImplTest extends BaseFhirContextSensitiveTest {
 	@Autowired
 	private FhirObservationDao dao;
 	
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		executeDataSet(OBS_DATA_XML);
 	}

@@ -16,8 +16,8 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 
 import org.hibernate.SessionFactory;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.OrderType;
 import org.openmrs.TestOrder;
 import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
@@ -40,7 +40,7 @@ public class FhirServiceRequestDaoImplTest extends BaseFhirContextSensitiveTest 
 	@Qualifier("sessionFactory")
 	private SessionFactory sessionFactory;
 	
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		executeDataSet(TEST_ORDER_INITIAL_DATA);
 		

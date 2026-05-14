@@ -46,7 +46,7 @@ public class FhirPractitionerDaoImpl extends BasePractitionerDao<Provider> imple
 		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot());
 		
 		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().and(
-		    criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().join("provider").get("providerId"),
+		    criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().join("owner").get("providerId"),
 		        provider.getId()),
 		    criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().join("attributeType").get("uuid"),
 		        providerAttributeTypeUuid),

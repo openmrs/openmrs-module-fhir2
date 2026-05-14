@@ -15,8 +15,8 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.notNullValue;
 
 import org.hibernate.SessionFactory;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.Order;
 import org.openmrs.OrderType;
 import org.openmrs.TestOrder;
@@ -36,7 +36,7 @@ public class FhirOrderDaoImplTest extends BaseFhirContextSensitiveTest {
 	
 	private FhirOrderDaoImpl dao;
 	
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		executeDataSet(ORDER_INITIAL_DATA);
 		

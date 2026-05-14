@@ -26,8 +26,8 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.Practitioner;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirGroupDao;
@@ -79,7 +79,7 @@ public class GroupSearchQueryTest extends BaseFhirContextSensitiveTest {
 		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}
 	
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		executeDataSet(COHORT_INITIAL_DATA_XML);
 	}

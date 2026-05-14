@@ -9,9 +9,6 @@
  */
 package org.openmrs.module.fhir2.web.util;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
-
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -20,7 +17,9 @@ import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import org.apache.commons.lang.StringUtils;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequestWrapper;
+import org.apache.commons.lang3.StringUtils;
 
 @Interceptor
 public class SupportMergePatchInterceptor {
@@ -47,8 +46,8 @@ public class SupportMergePatchInterceptor {
 	
 	@Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLER_SELECTED)
 	public boolean handleIncomingPatchRequest(RequestDetails requestDetails) {
-		if (requestDetails.getRequestType() == RequestTypeEnum.PATCH && requestDetails instanceof ServletRequestDetails) {
-			ServletRequestDetails srd = (ServletRequestDetails) requestDetails;
+		if (requestDetails.getRequestType() == RequestTypeEnum.PATCH
+		        && requestDetails instanceof ServletRequestDetails srd) {
 			
 			String originalContentType = StringUtils.defaultString(srd.getHeader(Constants.HEADER_CONTENT_TYPE));
 			int semiColonIdx = originalContentType.indexOf(';');

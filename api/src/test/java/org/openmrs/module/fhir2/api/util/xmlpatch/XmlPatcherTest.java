@@ -42,8 +42,7 @@ public class XmlPatcherTest {
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			dbf.setNamespaceAware(true);
 			return dbf.newDocumentBuilder().parse(new InputSource(new StringReader(xml)));
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			throw new IOException("Failed to parse result XML", e);
 		}
 	}

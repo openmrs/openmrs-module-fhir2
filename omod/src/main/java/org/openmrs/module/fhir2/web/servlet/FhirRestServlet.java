@@ -11,10 +11,6 @@ package org.openmrs.module.fhir2.web.servlet;
 
 import static org.openmrs.module.fhir2.FhirConstants.FHIR2_MODULE_ID;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
@@ -33,6 +29,9 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.IServerAddressStrategy;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.openmrs.GlobalProperty;
@@ -94,8 +93,7 @@ public class FhirRestServlet extends RestfulServer implements ModuleLifecycleLis
 			int value;
 			try {
 				value = Integer.parseInt(newValue.getPropertyValue());
-			}
-			catch (NumberFormatException e) {
+			} catch (NumberFormatException e) {
 				globalPropertyDeleted(newValue.getProperty());
 				return;
 			}
@@ -283,8 +281,7 @@ public class FhirRestServlet extends RestfulServer implements ModuleLifecycleLis
 	public void destroy() {
 		try {
 			administrationService.removeGlobalPropertyListener(fhirRestServletListener);
-		}
-		catch (Exception ignored) {
+		} catch (Exception ignored) {
 			
 		}
 		
@@ -293,8 +290,7 @@ public class FhirRestServlet extends RestfulServer implements ModuleLifecycleLis
 			if (activator != null) {
 				activator.removeModuleLifecycleLister(this);
 			}
-		}
-		catch (Exception ignored) {
+		} catch (Exception ignored) {
 			
 		}
 		

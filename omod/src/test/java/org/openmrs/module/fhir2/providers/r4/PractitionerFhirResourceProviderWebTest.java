@@ -29,8 +29,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.openmrs.module.fhir2.api.util.GeneralUtils.inputStreamToString;
 
-import javax.servlet.ServletException;
-
 import java.io.InputStream;
 import java.util.Calendar;
 import java.util.Collections;
@@ -38,9 +36,10 @@ import java.util.Objects;
 
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import jakarta.servlet.ServletException;
 import lombok.AccessLevel;
 import lombok.Getter;
-import org.apache.commons.lang.time.DateUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.hamcrest.MatcherAssert;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Practitioner;

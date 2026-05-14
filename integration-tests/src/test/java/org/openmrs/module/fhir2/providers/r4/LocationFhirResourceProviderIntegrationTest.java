@@ -30,8 +30,8 @@ import lombok.Getter;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.OperationOutcome;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.LocationTag;
 import org.openmrs.api.LocationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,7 +67,7 @@ public class LocationFhirResourceProviderIntegrationTest extends BaseFhirR4Integ
 	@Autowired
 	private LocationService locationService;
 	
-	@Before
+	@BeforeEach
 	@Override
 	public void setup() throws Exception {
 		super.setup();

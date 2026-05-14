@@ -108,8 +108,7 @@ public class PersonAttributeTranslatorImpl implements PersonAttributeTranslator 
 				//PersonAttribute should not be created without an attribute type.
 				return null;
 			}
-		}
-		catch (Exception ignored) {}
+		} catch (Exception ignored) {}
 		
 		Extension valueExtension = personAttributeExtension
 		        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_PERSON_ATTRIBUTE_VALUE);
@@ -190,8 +189,7 @@ public class PersonAttributeTranslatorImpl implements PersonAttributeTranslator 
 		Location openmrsLocation;
 		try {
 			openmrsLocation = locationService.get(Integer.parseInt(locationId));
-		}
-		catch (NumberFormatException e) {
+		} catch (NumberFormatException e) {
 			return null;
 		}
 		
@@ -210,8 +208,7 @@ public class PersonAttributeTranslatorImpl implements PersonAttributeTranslator 
 		Concept concept;
 		try {
 			concept = conceptService.get(Integer.parseInt(conceptId));
-		}
-		catch (NumberFormatException e) {
+		} catch (NumberFormatException e) {
 			return null;
 		}
 		

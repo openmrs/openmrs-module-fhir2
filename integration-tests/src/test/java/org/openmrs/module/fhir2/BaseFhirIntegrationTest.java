@@ -15,8 +15,6 @@ import static org.springframework.http.HttpHeaders.IF_MATCH;
 import static org.springframework.http.HttpHeaders.IF_NONE_MATCH;
 
 import javax.annotation.Nonnull;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -32,6 +30,8 @@ import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.SingleValidationMessage;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletException;
 import lombok.SneakyThrows;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -40,11 +40,11 @@ import org.hamcrest.TypeSafeMatcher;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IDomainResource;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.openmrs.api.cache.CacheConfig;
 import org.openmrs.module.fhir2.api.util.FhirGlobalPropertyHolder;
 import org.openmrs.module.fhir2.web.servlet.FhirRestServlet;
-import org.openmrs.web.test.BaseModuleWebContextSensitiveTest;
+import org.openmrs.web.test.jupiter.BaseModuleWebContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.http.HttpStatus;
@@ -89,7 +89,7 @@ public abstract class BaseFhirIntegrationTest<T extends IResourceProvider, U ext
 	
 	public abstract U removeNarrativeAndContained(U item);
 	
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		// Needed until TRUNK-6299 in place
 		org.springframework.cache.CacheManager cm = cacheConfig.apiCacheManager();
@@ -206,8 +206,7 @@ public abstract class BaseFhirIntegrationTest<T extends IResourceProvider, U ext
 				    response.getContentAsString());
 				return result;
 			}
-		}
-		catch (DataFormatException e) {
+		} catch (DataFormatException e) {
 			handleDataFormatException(response, e);
 			throw e;
 		}
@@ -222,8 +221,7 @@ public abstract class BaseFhirIntegrationTest<T extends IResourceProvider, U ext
 			} else {
 				return (IBaseBundle) jsonParser.parseResource(response.getContentAsString());
 			}
-		}
-		catch (DataFormatException e) {
+		} catch (DataFormatException e) {
 			handleDataFormatException(response, e);
 			throw e;
 		}
@@ -246,8 +244,7 @@ public abstract class BaseFhirIntegrationTest<T extends IResourceProvider, U ext
 		IBaseOperationOutcome operationOutcome;
 		try {
 			operationOutcome = readOperationOutcome(response);
-		}
-		catch (Exception ignored) {
+		} catch (Exception ignored) {
 			return;
 		}
 		
