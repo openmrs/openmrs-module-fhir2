@@ -10,16 +10,16 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import javax.annotation.Nonnull;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
 
 import java.util.Map;
 import java.util.Optional;
 
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Predicate;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -27,7 +27,6 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
 import org.openmrs.AllergenType;
 import org.openmrs.Allergy;
-import org.openmrs.AllergyReaction;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirAllergyIntoleranceDao;
@@ -45,13 +44,7 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implemen
 	
 	@Override
 	public Allergy createOrUpdate(@Nonnull Allergy allergy) {
-		Allergy savedAllergy = super.createOrUpdate(allergy);
-		
-		for (AllergyReaction reaction : allergy.getReactions()) {
-			getSessionFactory().getCurrentSession().saveOrUpdate(reaction);
-		}
-		
-		return savedAllergy;
+		return (Allergy) getSessionFactory().getCurrentSession().merge(allergy);
 	}
 	
 	@Override
@@ -143,8 +136,7 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implemen
 						return Optional.of(criteriaContext.getCriteriaBuilder().equal(severeJoin.get("uuid"),
 						    severityConceptUuids.get(FhirConstants.GLOBAL_PROPERTY_OTHER)));
 				}
-			}
-			catch (FHIRException ignored) {}
+			} catch (FHIRException ignored) {}
 			return Optional.empty();
 		}).ifPresent(criteriaContext::addPredicate);
 	}
@@ -173,8 +165,7 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implemen
 						return Optional.of(
 						    criteriaContext.getCriteriaBuilder().equal(allergyJoin.get(propertyName), AllergenType.OTHER));
 				}
-			}
-			catch (FHIRException ignored) {}
+			} catch (FHIRException ignored) {}
 			return Optional.empty();
 		});
 		

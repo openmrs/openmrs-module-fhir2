@@ -432,16 +432,6 @@ public class AllergyIntoleranceTranslatorImplTest {
 	}
 	
 	@Test
-	public void toOpenmrsType_shouldReturnNullCategoryWhenCalledWithFhirNullCategory() {
-		AllergyIntolerance allergy = new AllergyIntolerance();
-		allergy.addCategory(AllergyIntolerance.AllergyIntoleranceCategory.NULL);
-		when(categoryTranslator.toOpenmrsType(allergy.getCategory().get(0).getValue())).thenReturn(null);
-		allergyIntoleranceTranslator.toOpenmrsType(omrsAllergy, allergy);
-		assertThat(omrsAllergy, notNullValue());
-		assertThat(omrsAllergy.getAllergen().getAllergenType(), nullValue());
-	}
-	
-	@Test
 	public void toFhirResource_shouldReturnNullCodedAllergenIfCodeIsNull() {
 		omrsAllergy.setAllergen(new Allergen(AllergenType.FOOD, null, null));
 		

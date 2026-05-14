@@ -70,8 +70,7 @@ public class ServiceClassLoader<C> {
 		final Enumeration<URL> urls;
 		try {
 			urls = classLoader.getResources(SERVICE_LOCATION + service.getName());
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			throw new ServiceConfigurationError(service.getName() + ": Error locating configuration files", e);
 		}
 		
@@ -92,8 +91,7 @@ public class ServiceClassLoader<C> {
 					Class<?> c;
 					try {
 						c = Class.forName(className, false, classLoader);
-					}
-					catch (ClassNotFoundException e) {
+					} catch (ClassNotFoundException e) {
 						throw new ServiceConfigurationError(service.getName() + ": Provider " + className + " not found");
 					}
 					
@@ -110,8 +108,7 @@ public class ServiceClassLoader<C> {
 				
 				line = reader.readLine();
 			}
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			throw new ServiceConfigurationError(service.getName() + ": Error reading configuration file");
 		}
 	}

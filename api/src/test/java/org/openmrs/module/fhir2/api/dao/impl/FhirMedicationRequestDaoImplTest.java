@@ -30,8 +30,8 @@ import java.util.List;
 
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.DrugOrder;
 import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.context.Context;
@@ -61,7 +61,7 @@ public class FhirMedicationRequestDaoImplTest extends BaseFhirContextSensitiveTe
 	
 	private FhirMedicationRequestDao dao;
 	
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		dao = daoProvider.getObject();
 		executeDataSet(MEDICATION_REQUEST_INITIAL_DATA_XML);

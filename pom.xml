@@ -4,7 +4,7 @@
 
     <groupId>org.openmrs.module</groupId>
     <artifactId>fhir2</artifactId>
-    <version>4.3.0-SNAPSHOT</version>
+    <version>5.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>FHIR2</name>
     <description>Implementation of FHIR R4 for OpenMRS</description>
@@ -197,6 +197,11 @@
                         <artifactId>stax-api</artifactId>
                     </exclusion>
                 </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>ca.uhn.hapi.fhir</groupId>
+                <artifactId>hapi-fhir-caching-caffeine</artifactId>
+                <version>${hapifhirVersion}</version>
             </dependency>
             <dependency>
                 <groupId>ca.uhn.hapi.fhir</groupId>
@@ -490,6 +495,18 @@
             <artifactId>openmrs-api</artifactId>
             <type>test-jar</type>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.36</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.openmrs.test</groupId>
@@ -875,15 +892,15 @@
     </build>
 
     <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.build.outputEncoding>UTF-8</project.build.outputEncoding>
         <lombokVersion>1.18.38</lombokVersion>
-        <openmrsPlatformVersion>2.8.0</openmrsPlatformVersion>
-        <openmrsPlatformToolsVersion>2.8.0</openmrsPlatformToolsVersion>
-        <hapifhirVersion>5.7.9</hapifhirVersion>
-        <ucumVersion>1.0.3</ucumVersion>
+        <openmrsPlatformVersion>3.0.0-SNAPSHOT</openmrsPlatformVersion>
+        <openmrsPlatformToolsVersion>3.0.0-SNAPSHOT</openmrsPlatformToolsVersion>
+        <hapifhirVersion>7.6.0</hapifhirVersion>
+        <ucumVersion>1.0.10</ucumVersion>
     </properties>
 
     <profiles>

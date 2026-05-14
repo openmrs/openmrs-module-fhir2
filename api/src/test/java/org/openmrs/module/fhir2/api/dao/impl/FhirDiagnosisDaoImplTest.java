@@ -24,8 +24,8 @@ import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.Diagnosis;
 import org.openmrs.Encounter;
 import org.openmrs.api.EncounterService;
@@ -56,7 +56,7 @@ public class FhirDiagnosisDaoImplTest extends BaseFhirContextSensitiveTest {
 	
 	private FhirDiagnosisDao dao;
 	
-	@Before
+	@BeforeEach
 	public void setUp() {
 		executeDataSet("org/openmrs/module/fhir2/api/dao/impl/FhirDiagnosisDaoImplTest_initial_dataset.xml");
 		dao = daoFactory.getObject();

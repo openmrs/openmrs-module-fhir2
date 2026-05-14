@@ -14,16 +14,6 @@ import static org.openmrs.module.fhir2.FhirConstants.COUNT_QUERY_CACHE;
 import static org.openmrs.module.fhir2.FhirConstants.EXACT_TOTAL_SEARCH_PARAMETER;
 
 import javax.annotation.Nonnull;
-import javax.persistence.CacheRetrieveMode;
-import javax.persistence.CacheStoreMode;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -39,6 +29,16 @@ import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import com.google.common.reflect.TypeToken;
+import jakarta.persistence.CacheRetrieveMode;
+import jakarta.persistence.CacheStoreMode;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Predicate;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -100,14 +100,14 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	
 	@Override
 	@Transactional
+	@SuppressWarnings("unchecked")
 	public T createOrUpdate(@Nonnull T object) {
-		getSessionFactory().getCurrentSession().saveOrUpdate(object);
-		
-		return object;
+		return (T) getSessionFactory().getCurrentSession().merge(object);
 	}
 	
 	@Override
 	@Transactional
+	@SuppressWarnings("unchecked")
 	public T delete(@Nonnull String uuid) {
 		T existing = get(uuid);
 		
@@ -121,9 +121,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 			existing = retireObject(existing);
 		}
 		
-		getSessionFactory().getCurrentSession().saveOrUpdate(existing);
-		
-		return existing;
+		return (T) getSessionFactory().getCurrentSession().merge(existing);
 	}
 	
 	@Override
@@ -163,8 +161,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 		try {
 			return deproxyResult(
 			    criteriaContext.getEntityManager().createQuery(criteriaContext.finalizeQuery()).getSingleResult());
-		}
-		catch (NoResultException e) {
+		} catch (NoResultException e) {
 			return null;
 		}
 	}
@@ -280,11 +277,11 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 		if (!exactTotal.isEmpty()) {
 			PropParam<Boolean> propParam = exactTotal.get(0);
 			if (propParam.getParam()) {
-				manager.setProperty("javax.persistence.cache.retrieveMode", CacheRetrieveMode.BYPASS);
+				manager.setProperty("jakarta.persistence.cache.retrieveMode", CacheRetrieveMode.BYPASS);
 			}
 		} else {
-			manager.setProperty("javax.persistence.cache.storeMode", CacheStoreMode.USE);
-			manager.setProperty("javax.persistence.cache.region", COUNT_QUERY_CACHE);
+			manager.setProperty("jakarta.persistence.cache.storeMode", CacheStoreMode.USE);
+			manager.setProperty("jakarta.persistence.cache.region", COUNT_QUERY_CACHE);
 		}
 	}
 	
@@ -306,7 +303,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	}
 	
 	/**
-	 * Gets the name of the property annotated as the {@link javax.persistence.Id} for the persistent
+	 * Gets the name of the property annotated as the {@link jakarta.persistence.Id} for the persistent
 	 * class this manages.
 	 *
 	 * @param entityManager The current entity manager
@@ -430,17 +427,17 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 		handleSort(criteriaContext, sort, this::paramToProps).ifPresent(l -> l.forEach(criteriaContext::addOrder));
 	}
 	
-	protected <V, U> Optional<List<javax.persistence.criteria.Order>> handleSort(
+	protected <V, U> Optional<List<jakarta.persistence.criteria.Order>> handleSort(
 	        OpenmrsFhirCriteriaContext<V, U> criteriaContext, SortSpec sort,
-	        BiFunction<OpenmrsFhirCriteriaContext<V, U>, SortState<V>, Collection<javax.persistence.criteria.Order>> paramToProp) {
+	        BiFunction<OpenmrsFhirCriteriaContext<V, U>, SortState<V>, Collection<jakarta.persistence.criteria.Order>> paramToProp) {
 		
-		List<javax.persistence.criteria.Order> orderings = new ArrayList<>();
+		List<jakarta.persistence.criteria.Order> orderings = new ArrayList<>();
 		SortSpec sortSpec = sort;
 		while (sortSpec != null) {
 			SortState<V> state = SortState.<V> builder().context(criteriaContext).sortOrder(sortSpec.getOrder())
 			        .parameter(sortSpec.getParamName().toLowerCase()).build();
 			
-			Collection<javax.persistence.criteria.Order> orders = paramToProp.apply(criteriaContext, state);
+			Collection<jakarta.persistence.criteria.Order> orders = paramToProp.apply(criteriaContext, state);
 			if (orders != null) {
 				orderings.addAll(orders);
 			}
@@ -491,7 +488,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	 * @param sortState a {@link SortState} object describing the current sort state
 	 * @return the corresponding ordering(s) needed for this property
 	 */
-	protected <V, U> Collection<javax.persistence.criteria.Order> paramToProps(
+	protected <V, U> Collection<jakarta.persistence.criteria.Order> paramToProps(
 	        @Nonnull OpenmrsFhirCriteriaContext<V, U> criteriaContext, @Nonnull SortState<V> sortState) {
 		String param = sortState.getParameter();
 		CriteriaBuilder cb = criteriaContext.getCriteriaBuilder();

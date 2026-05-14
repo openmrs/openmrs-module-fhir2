@@ -128,7 +128,8 @@ public class ConditionFhirR3ResourceProviderTest extends BaseFhirR3ProvenanceRes
 	
 	@Test
 	public void getConditionByUuid_shouldRetainClinicalStatusWhenNotDiagnosis() {
-		condition.setClinicalStatus(new CodeableConcept().addCoding(new Coding().setCode("active")));
+		condition.setClinicalStatus(new CodeableConcept()
+		        .addCoding(new Coding().setSystem(FhirConstants.CONDITION_CLINICAL_STATUS_SYSTEM_URI).setCode("active")));
 		condition.addCategory(
 		    new CodeableConcept().addCoding(new Coding().setSystem(FhirConstants.CONDITION_CATEGORY_SYSTEM_URI)
 		            .setCode(FhirConstants.CONDITION_CATEGORY_CODE_CONDITION)));

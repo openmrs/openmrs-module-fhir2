@@ -11,13 +11,6 @@ package org.openmrs.module.fhir2.api.dao.impl;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -36,6 +29,14 @@ import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.TokenParam;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.metamodel.EntityType;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -43,8 +44,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Hibernate;
 import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Criterion;
-import org.hibernate.metamodel.spi.MetamodelImplementor;
 import org.hibernate.proxy.HibernateProxy;
 import org.openmrs.module.fhir2.api.dao.internals.BaseFhirCriteriaHolder;
 import org.openmrs.module.fhir2.api.dao.internals.OpenmrsFhirCriteriaContext;
@@ -252,8 +251,8 @@ public abstract class BaseDao {
 	 * @param <V> A persistent class
 	 */
 	protected <V> String getIdPropertyName(@Nonnull EntityManager entityManager, @Nonnull Class<V> clazz) {
-		return ((MetamodelImplementor) entityManager.getEntityManagerFactory().getMetamodel()).entityPersister(clazz)
-		        .getIdentifierPropertyName();
+		EntityType<V> entityType = entityManager.getMetamodel().entity(clazz);
+		return entityType.getId(entityType.getIdType().getJavaType()).getName();
 	}
 	
 	/**
@@ -406,7 +405,7 @@ public abstract class BaseDao {
 	 * @param criteriaBuilder the active {@link CriteriaBuilder} for the current query
 	 * @param andListParam the {@link IQueryParameterAnd} to handle
 	 * @param systemTokenHandler a {@link BiFunction} taking the system and associated list of
-	 *            {@link TokenParam}s and returning a {@link Criterion}
+	 *            {@link TokenParam}s and returning a {@link Predicate}
 	 * @return a {@link Predicate} representing the intersection of all produced {@link Predicate}s
 	 */
 	protected <T extends IQueryParameterOr<TokenParam>> Optional<Predicate> handleAndListParamBySystem(
@@ -437,9 +436,9 @@ public abstract class BaseDao {
 	 *
 	 * @param criteriaBuilder the active {@link CriteriaBuilder} for the current query
 	 * @param orListParam the {@link IQueryParameterOr} to handle
-	 * @param handler a {@link Function} which maps a parameter to a {@link Criterion}
+	 * @param handler a {@link Function} which maps a parameter to a {@link Predicate}
 	 * @param <T> the subtype of {@link IQueryParameterType} for this parameter
-	 * @return the resulting criterion, which is the union of all contained parameters
+	 * @return the resulting predicate, which is the union of all contained parameters
 	 */
 	protected <T extends IQueryParameterType> Optional<Predicate> handleOrListParam(CriteriaBuilder criteriaBuilder,
 	        IQueryParameterOr<T> orListParam, Function<T, Optional<Predicate>> handler) {
@@ -465,7 +464,7 @@ public abstract class BaseDao {
 	 *
 	 * @param criteriaBuilder the active {@link CriteriaBuilder} for the current query
 	 * @param orListParam the {@link IQueryParameterOr} to handle
-	 * @param handler a {@link Function} which maps a parameter to a {@link Criterion}
+	 * @param handler a {@link Function} which maps a parameter to a {@link Predicate}
 	 * @param <T> the subtype of {@link IQueryParameterType} for this parameter
 	 * @return the resulting {@link Predicate}, which is the union of all contained parameters
 	 */
@@ -492,8 +491,8 @@ public abstract class BaseDao {
 	 * @param criteriaBuilder the active {@link CriteriaBuilder} for the current query
 	 * @param orListParam the {@link IQueryParameterOr} to handle
 	 * @param systemTokenHandler a {@link BiFunction} taking the system and associated list of
-	 *            {@link TokenParam}s and returning a {@link Criterion}
-	 * @return a {@link Criterion} representing the union of all produced {@link Criterion}
+	 *            {@link TokenParam}s and returning a {@link Predicate}
+	 * @return a {@link Predicate} representing the union of all produced {@link Predicate}s
 	 */
 	protected Optional<Predicate> handleOrListParamBySystem(CriteriaBuilder criteriaBuilder,
 	        IQueryParameterOr<TokenParam> orListParam,

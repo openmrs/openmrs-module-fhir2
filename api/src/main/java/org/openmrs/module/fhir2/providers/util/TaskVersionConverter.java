@@ -129,8 +129,7 @@ public class TaskVersionConverter {
 			if (src.hasOutput()) {
 				convertTaskOutput(src, tgt);
 			}
-		}
-		finally {
+		} finally {
 			ConversionContext30_40.INSTANCE.close(src.fhirType());
 		}
 		
@@ -238,8 +237,7 @@ public class TaskVersionConverter {
 			if (src.hasOutput()) {
 				convertTaskOutput(src, tgt);
 			}
-		}
-		finally {
+		} finally {
 			ConversionContext30_40.INSTANCE.close(src.fhirType());
 		}
 		

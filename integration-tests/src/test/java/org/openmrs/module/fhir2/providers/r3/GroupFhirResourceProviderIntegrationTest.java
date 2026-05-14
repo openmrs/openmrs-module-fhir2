@@ -25,8 +25,8 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.dstu3.model.Group;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.module.fhir2.BaseFhirIntegrationTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -55,7 +55,7 @@ public class GroupFhirResourceProviderIntegrationTest extends BaseFhirR3Integrat
 	@Getter(AccessLevel.PUBLIC)
 	private GroupFhirResourceProvider resourceProvider;
 	
-	@Before
+	@BeforeEach
 	@Override
 	public void setup() throws Exception {
 		super.setup();

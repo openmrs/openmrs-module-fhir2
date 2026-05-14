@@ -32,8 +32,7 @@ public class OpenmrsMessageResolver extends AbstractMessageResolver {
 		
 		try {
 			return messageSource.getMessage(key, messageParameters, context != null ? context.getLocale() : null);
-		}
-		catch (NoSuchMessageException ignored) {}
+		} catch (NoSuchMessageException ignored) {}
 		
 		if (origin != null) {
 			return standardMessageResolver.resolveMessage(context, origin, key, messageParameters, false, true, true);

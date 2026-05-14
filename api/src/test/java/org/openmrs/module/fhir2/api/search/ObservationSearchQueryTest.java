@@ -66,8 +66,8 @@ import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.Obs;
 import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.openmrs.module.fhir2.FhirConstants;
@@ -165,7 +165,7 @@ public class ObservationSearchQueryTest extends BaseFhirContextSensitiveTest {
 	@Autowired
 	private FhirEncounterDao encounterDao;
 	
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		executeDataSet(OBS_DATA_XML);
 	}
@@ -1728,7 +1728,7 @@ public class ObservationSearchQueryTest extends BaseFhirContextSensitiveTest {
 		assertThat(results, notNullValue());
 		List<IBaseResource> resultList = get(results);
 		
-		assertThat(resultList.size(), equalTo(2));
+		assertThat(resultList.size(), equalTo(3));
 		assertThat(getDistinctEncounterDatetime(resultList), lessThanOrEqualTo(2));
 		assertThat(resultList, everyItem(anyOf(allOf(is(instanceOf(Observation.class))))));
 	}

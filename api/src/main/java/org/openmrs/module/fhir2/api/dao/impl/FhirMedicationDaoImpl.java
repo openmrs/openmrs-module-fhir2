@@ -10,10 +10,10 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import javax.annotation.Nonnull;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Join;
 
 import ca.uhn.fhir.rest.param.TokenAndListParam;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Join;
 import org.openmrs.Concept;
 import org.openmrs.Drug;
 import org.openmrs.module.fhir2.FhirConstants;

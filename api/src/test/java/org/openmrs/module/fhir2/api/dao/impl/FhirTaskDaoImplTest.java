@@ -32,11 +32,10 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import org.hibernate.SessionFactory;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.Concept;
 import org.openmrs.api.ConceptService;
-import org.openmrs.api.db.hibernate.HibernateConceptDAO;
 import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
@@ -46,7 +45,7 @@ import org.openmrs.module.fhir2.model.FhirTaskInput;
 import org.openmrs.module.fhir2.model.FhirTaskOutput;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class FhirTaskDaoImplTest extends BaseFhirContextSensitiveTest {
+class FhirTaskDaoImplTest extends BaseFhirContextSensitiveTest {
 	
 	private static final String TASK_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirTaskDaoImplTest_initial_data.xml";
 	
@@ -88,7 +87,7 @@ public class FhirTaskDaoImplTest extends BaseFhirContextSensitiveTest {
 	@Autowired
 	private ConceptService conceptService;
 	
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		dao = new FhirTaskDaoImpl();
 		dao.setSessionFactory(sessionFactory);
@@ -96,7 +95,7 @@ public class FhirTaskDaoImplTest extends BaseFhirContextSensitiveTest {
 	}
 	
 	@Test
-	public void getTaskByUuid_shouldRetrieveTaskByUuid() {
+	void getTaskByUuid_shouldRetrieveTaskByUuid() {
 		FhirTask result = dao.get(TASK_UUID);
 		
 		assertThat(result, notNullValue());
@@ -104,7 +103,7 @@ public class FhirTaskDaoImplTest extends BaseFhirContextSensitiveTest {
 	}
 	
 	@Test
-	public void saveTask_shouldCreateNewTask() {
+	void saveTask_shouldCreateNewTask() {
 		FhirTask newTask = new FhirTask();
 		newTask.setStatus(NEW_STATUS);
 		newTask.setName(TASK_INTENT.toString());
@@ -119,7 +118,7 @@ public class FhirTaskDaoImplTest extends BaseFhirContextSensitiveTest {
 	}
 	
 	@Test
-	public void saveTask_shouldUpdateTaskStatus() {
+	void saveTask_shouldUpdateTaskStatus() {
 		FhirTask toUpdate = dao.get(TASK_UUID);
 		toUpdate.setStatus(NEW_STATUS);
 		
@@ -129,7 +128,7 @@ public class FhirTaskDaoImplTest extends BaseFhirContextSensitiveTest {
 	}
 	
 	@Test
-	public void saveTask_shouldUpdateOwnerReference() {
+	void saveTask_shouldUpdateOwnerReference() {
 		FhirTask toUpdate = dao.get(TASK_UUID);
 		
 		FhirReference ownerReference = new FhirReference();
@@ -150,7 +149,7 @@ public class FhirTaskDaoImplTest extends BaseFhirContextSensitiveTest {
 	}
 	
 	@Test
-	public void saveTask_shouldUpdateForReference() {
+	void saveTask_shouldUpdateForReference() {
 		FhirTask toUpdate = dao.get(TASK_UUID);
 		
 		FhirReference forReference = new FhirReference();
@@ -171,7 +170,7 @@ public class FhirTaskDaoImplTest extends BaseFhirContextSensitiveTest {
 	}
 	
 	@Test
-	public void saveTask_shouldUpdateEncounterReference() {
+	void saveTask_shouldUpdateEncounterReference() {
 		FhirTask toUpdate = dao.get(TASK_UUID);
 		
 		FhirReference encounterReference = new FhirReference();
@@ -192,7 +191,7 @@ public class FhirTaskDaoImplTest extends BaseFhirContextSensitiveTest {
 	}
 	
 	@Test
-	public void saveTask_shouldUpdateLocationReference() {
+	void saveTask_shouldUpdateLocationReference() {
 		FhirTask toUpdate = dao.get(TASK_UUID);
 		
 		FhirReference locationReference = new FhirReference();
@@ -213,7 +212,7 @@ public class FhirTaskDaoImplTest extends BaseFhirContextSensitiveTest {
 	}
 	
 	@Test
-	public void saveTask_shouldUpdateBasedOnReferences() {
+	void saveTask_shouldUpdateBasedOnReferences() {
 		FhirTask toUpdate = dao.get(TASK_UUID);
 		
 		FhirReference basedOnReference = new FhirReference();
@@ -234,7 +233,7 @@ public class FhirTaskDaoImplTest extends BaseFhirContextSensitiveTest {
 	}
 	
 	@Test
-	public void saveTask_shouldUpdateTaskCode() {
+	void saveTask_shouldUpdateTaskCode() {
 		FhirTask toUpdate = dao.get(TASK_UUID);
 		
 		Concept taskCode = conceptService.getConceptByUuid(TASK_CODE_CONCEPT_UUID);
@@ -250,7 +249,7 @@ public class FhirTaskDaoImplTest extends BaseFhirContextSensitiveTest {
 	}
 	
 	@Test
-	public void saveTask_shouldUpdatePartOfReferences() {
+	void saveTask_shouldUpdatePartOfReferences() {
 		FhirTask toUpdate = dao.get(TASK_UUID);
 		
 		FhirReference partOfReference = new FhirReference();
@@ -271,7 +270,7 @@ public class FhirTaskDaoImplTest extends BaseFhirContextSensitiveTest {
 	}
 	
 	@Test
-	public void saveTask_shouldUpdateExecutionStartTime() {
+	void saveTask_shouldUpdateExecutionStartTime() {
 		FhirTask toUpdate = dao.get(TASK_UUID);
 		
 		LocalDateTime localDateTime = LocalDateTime.of(2024, Month.APRIL, 12, 10, 0);
@@ -288,7 +287,7 @@ public class FhirTaskDaoImplTest extends BaseFhirContextSensitiveTest {
 	}
 	
 	@Test
-	public void saveTask_shouldUpdateExecutionEndTime() {
+	void saveTask_shouldUpdateExecutionEndTime() {
 		FhirTask toUpdate = dao.get(TASK_UUID);
 		
 		LocalDateTime localDateTime = LocalDateTime.of(2024, Month.APRIL, 12, 17, 0);
@@ -305,7 +304,7 @@ public class FhirTaskDaoImplTest extends BaseFhirContextSensitiveTest {
 	}
 	
 	@Test
-	public void saveTask_shouldUpdateComment() {
+	void saveTask_shouldUpdateComment() {
 		FhirTask toUpdate = dao.get(TASK_UUID);
 		
 		String comment = "Test task comment";
@@ -320,16 +319,13 @@ public class FhirTaskDaoImplTest extends BaseFhirContextSensitiveTest {
 	}
 	
 	@Test
-	public void saveTask_shouldUpdateInput() throws Exception {
+	void saveTask_shouldUpdateInput() throws Exception {
 		executeDataSet(CONCEPT_DATA_XML);
-		
-		HibernateConceptDAO cd = new HibernateConceptDAO();
-		cd.setSessionFactory(sessionFactory);
 		
 		FhirTask toUpdate = dao.get(TASK_UUID);
 		Double someNumericVal = 123123.11;
 		
-		Concept type = cd.getConceptByUuid(CONCEPT_UUID);
+		Concept type = conceptService.getConceptByUuid(CONCEPT_UUID);
 		
 		assertThat(type, notNullValue());
 		
@@ -337,9 +333,6 @@ public class FhirTaskDaoImplTest extends BaseFhirContextSensitiveTest {
 		input.setValueNumeric(someNumericVal);
 		input.setType(type);
 		input.setName("TEMP");
-		
-		// TODO: why is this not autogenerated?
-		input.setId(23423);
 		
 		toUpdate.setInput(Collections.singleton(input));
 		
@@ -353,12 +346,8 @@ public class FhirTaskDaoImplTest extends BaseFhirContextSensitiveTest {
 	}
 	
 	@Test
-	
-	public void saveTask_shouldUpdateOutput() throws Exception {
+	void saveTask_shouldUpdateOutput() throws Exception {
 		executeDataSet(CONCEPT_DATA_XML);
-		
-		HibernateConceptDAO cd = new HibernateConceptDAO();
-		cd.setSessionFactory(sessionFactory);
 		
 		FhirTask toUpdate = dao.get(TASK_UUID);
 		
@@ -369,7 +358,7 @@ public class FhirTaskDaoImplTest extends BaseFhirContextSensitiveTest {
 		outputReference.setReference(DIAGNOSTIC_REPORT_UUID);
 		outputReference.setName("TEMP");
 		
-		Concept type = cd.getConceptByUuid(CONCEPT_UUID);
+		Concept type = conceptService.getConceptByUuid(CONCEPT_UUID);
 		
 		assertThat(type, notNullValue());
 		
@@ -377,9 +366,6 @@ public class FhirTaskDaoImplTest extends BaseFhirContextSensitiveTest {
 		output.setValueReference(outputReference);
 		output.setType(type);
 		output.setName("TEMP");
-		
-		// TODO: why is this not autogenerated?
-		output.setId(23423);
 		
 		toUpdate.setOutput(Collections.singleton(output));
 		
@@ -394,7 +380,7 @@ public class FhirTaskDaoImplTest extends BaseFhirContextSensitiveTest {
 	}
 	
 	@Test
-	public void searchForTasks_shouldReturnAllTasksForEmptyStatus() {
+	void searchForTasks_shouldReturnAllTasksForEmptyStatus() {
 		TokenAndListParam status = new TokenAndListParam()
 		        .addAnd(new TokenOrListParam().add(FhirConstants.TASK_STATUS_VALUE_SET_URI, ""));
 		
@@ -405,9 +391,9 @@ public class FhirTaskDaoImplTest extends BaseFhirContextSensitiveTest {
 		assertThat(results, notNullValue());
 		assertThat(results, not(empty()));
 	}
-	
+		
 	@Test
-	public void searchForTasks_shouldHandleNullBasedOnRefs() {
+	void searchForTasks_shouldHandleNullBasedOnRefs() {
 		FhirTask toUpdate = dao.get(TASK_UUID);
 		
 		FhirReference nullTypeRef = new FhirReference();

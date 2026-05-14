@@ -76,8 +76,7 @@ public class DiagnosticReportTranslatorImpl implements DiagnosticReportTranslato
 			try {
 				diagnosticReport.setStatus(
 				    DiagnosticReport.DiagnosticReportStatus.valueOf(fhirDiagnosticReport.getStatus().toString()));
-			}
-			catch (IllegalArgumentException e) {
+			} catch (IllegalArgumentException e) {
 				diagnosticReport.setStatus(DiagnosticReport.DiagnosticReportStatus.UNKNOWN);
 			}
 		} else {
@@ -136,8 +135,7 @@ public class DiagnosticReportTranslatorImpl implements DiagnosticReportTranslato
 			FhirDiagnosticReport.DiagnosticReportStatus status;
 			try {
 				status = FhirDiagnosticReport.DiagnosticReportStatus.valueOf(diagnosticReport.getStatus().toString());
-			}
-			catch (IllegalArgumentException | NullPointerException ignored) {
+			} catch (IllegalArgumentException | NullPointerException ignored) {
 				status = FhirDiagnosticReport.DiagnosticReportStatus.UNKNOWN;
 			}
 			existingDiagnosticReport.setStatus(status);

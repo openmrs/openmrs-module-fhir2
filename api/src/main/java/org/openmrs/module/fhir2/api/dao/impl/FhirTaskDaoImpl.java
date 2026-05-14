@@ -10,9 +10,6 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import javax.annotation.Nonnull;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.Predicate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +18,9 @@ import java.util.Optional;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Predicate;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Task;
 import org.openmrs.api.db.DAOException;
@@ -77,14 +77,7 @@ public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDa
 	
 	@Override
 	public FhirTask createOrUpdate(@Nonnull FhirTask task) throws DAOException {
-		// TODO: Refactor - and figure out why CascadeType.ALL does not take care of this.
-		if (task.getOwnerReference() != null && task.getOwnerReference().getReference() != null) {
-			getSessionFactory().getCurrentSession().saveOrUpdate(task.getOwnerReference());
-		}
-		
-		getSessionFactory().getCurrentSession().saveOrUpdate(task);
-		
-		return task;
+		return getSessionFactory().getCurrentSession().merge(task);
 	}
 	
 	private Boolean validReferenceParam(ReferenceParam ref) {

@@ -74,8 +74,7 @@ public class FhirEncounterServiceImpl extends BaseFhirService<Encounter, org.ope
 		Encounter result;
 		try {
 			result = super.get(uuid);
-		}
-		catch (ResourceNotFoundException e) {
+		} catch (ResourceNotFoundException e) {
 			result = visitService.get(uuid);
 		}
 		
@@ -138,8 +137,7 @@ public class FhirEncounterServiceImpl extends BaseFhirService<Encounter, org.ope
 		
 		try {
 			super.delete(uuid);
-		}
-		catch (ResourceNotFoundException e) {
+		} catch (ResourceNotFoundException e) {
 			visitService.delete(uuid);
 		}
 	}

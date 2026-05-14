@@ -24,8 +24,8 @@ import java.util.Optional;
 
 import co.unruly.matchers.OptionalMatchers;
 import org.hibernate.SessionFactory;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.ConceptSource;
 import org.openmrs.api.ConceptService;
 import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
@@ -45,7 +45,7 @@ public class FhirConceptSourceDaoImplTest extends BaseFhirContextSensitiveTest {
 	
 	private FhirConceptSourceDaoImpl fhirConceptSourceDao;
 	
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		executeDataSet(CONCEPT_SOURCE_FHIR_DATA);
 		
