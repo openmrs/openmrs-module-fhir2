@@ -17,8 +17,6 @@ import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.
 
 import javax.annotation.Nonnull;
 
-import java.util.Collections;
-
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
@@ -128,15 +126,10 @@ public class MedicationRequestTranslatorImpl implements MedicationRequestTransla
 		
 		medicationRequest.setDispenseRequest(medicationRequestDispenseRequestComponentTranslator.toFhirResource(drugOrder));
 		
-		if (drugOrder.getPreviousOrder() != null
-		        && (drugOrder.getAction() == Order.Action.DISCONTINUE || drugOrder.getAction() == Order.Action.REVISE)) {
+		if (drugOrder.getPreviousOrder() != null) {
 			medicationRequest.setPriorPrescription(
 			    medicationRequestReferenceTranslator.toFhirResource((DrugOrder) drugOrder.getPreviousOrder())
 			            .setIdentifier(orderIdentifierTranslator.toFhirResource(drugOrder.getPreviousOrder())));
-		} else if (drugOrder.getPreviousOrder() != null && drugOrder.getAction() == Order.Action.RENEW) {
-			medicationRequest.setBasedOn(Collections.singletonList(
-			    medicationRequestReferenceTranslator.toFhirResource((DrugOrder) drugOrder.getPreviousOrder())
-			            .setIdentifier(orderIdentifierTranslator.toFhirResource(drugOrder.getPreviousOrder()))));
 		}
 		
 		if (drugOrder.getFulfillerStatus() != null) {

@@ -220,7 +220,7 @@ public class MedicationRequestTranslatorImplTest {
 	}
 	
 	@Test
-	public void toFhirResource_shouldTranslateToFhirResourceWithBasedOnFieldGivenRenewOrder() {
+	public void toFhirResource_shouldTranslateToFhirResourceWithPriorPrescriptionGivenRenewOrder() {
 		discontinuedDrugOrder.setAction(Order.Action.RENEW);
 		
 		MedicationRequest result = medicationRequestTranslator.toFhirResource(discontinuedDrugOrder);
@@ -228,8 +228,21 @@ public class MedicationRequestTranslatorImplTest {
 		assertThat(result, notNullValue());
 		assertThat(result.getId(), notNullValue());
 		assertThat(result.getId(), equalTo(DISCONTINUED_DRUG_ORDER_UUID));
-		assertThat(result.getBasedOn().get(0).getReference(), equalTo(PRIOR_MEDICATION_REQUEST_REFERENCE));
-		assertThat(result.getBasedOn().get(0).getIdentifier().getValue(), equalTo(DRUG_ORDER_NUMBER));
+		assertThat(result.getPriorPrescription().getReference(), equalTo(PRIOR_MEDICATION_REQUEST_REFERENCE));
+		assertThat(result.getPriorPrescription().getIdentifier().getValue(), equalTo(DRUG_ORDER_NUMBER));
+	}
+	
+	@Test
+	public void toFhirResource_shouldTranslateToFhirResourceWithPriorPrescriptionGivenNewOrderWithPreviousOrder() {
+		discontinuedDrugOrder.setAction(Order.Action.NEW);
+		
+		MedicationRequest result = medicationRequestTranslator.toFhirResource(discontinuedDrugOrder);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getId(), notNullValue());
+		assertThat(result.getId(), equalTo(DISCONTINUED_DRUG_ORDER_UUID));
+		assertThat(result.getPriorPrescription().getReference(), equalTo(PRIOR_MEDICATION_REQUEST_REFERENCE));
+		assertThat(result.getPriorPrescription().getIdentifier().getValue(), equalTo(DRUG_ORDER_NUMBER));
 	}
 	
 	@Test(expected = NullPointerException.class)
