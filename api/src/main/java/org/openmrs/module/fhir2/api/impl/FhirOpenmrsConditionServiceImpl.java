@@ -15,26 +15,25 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Condition;
-import org.openmrs.Diagnosis;
-import org.openmrs.module.fhir2.api.FhirDiagnosisService;
-import org.openmrs.module.fhir2.api.dao.FhirDiagnosisDao;
+import org.openmrs.module.fhir2.api.FhirOpenmrsConditionService;
+import org.openmrs.module.fhir2.api.dao.FhirConditionDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
-import org.openmrs.module.fhir2.api.translators.DiagnosisTranslator;
+import org.openmrs.module.fhir2.api.translators.ConditionTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class FhirDiagnosisServiceImpl extends BaseFhirService<Condition, Diagnosis> implements FhirDiagnosisService {
+public class FhirOpenmrsConditionServiceImpl extends BaseFhirService<Condition, org.openmrs.Condition> implements FhirOpenmrsConditionService {
 	
 	@Getter(value = PROTECTED)
 	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private FhirDiagnosisDao dao;
+	private FhirConditionDao dao;
 	
 	@Getter(value = PROTECTED)
 	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private DiagnosisTranslator translator;
+	private ConditionTranslator<org.openmrs.Condition> translator;
 	
 	@Getter(value = PROTECTED)
 	@Setter(value = PROTECTED, onMethod_ = @Autowired)
@@ -42,10 +41,10 @@ public class FhirDiagnosisServiceImpl extends BaseFhirService<Condition, Diagnos
 	
 	@Getter(value = PROTECTED)
 	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private SearchQuery<Diagnosis, Condition, FhirDiagnosisDao, DiagnosisTranslator, SearchQueryInclude<Condition>> searchQuery;
+	private SearchQuery<org.openmrs.Condition, Condition, FhirConditionDao, ConditionTranslator<org.openmrs.Condition>, SearchQueryInclude<Condition>> searchQuery;
 	
 	@Override
-	public IBundleProvider searchDiagnoses(SearchParameterMap theParams) {
+	public IBundleProvider searchForConditions(SearchParameterMap theParams) {
 		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}
 }
