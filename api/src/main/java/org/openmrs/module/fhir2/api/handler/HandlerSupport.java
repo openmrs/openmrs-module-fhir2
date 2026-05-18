@@ -24,11 +24,11 @@ import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 /**
  * Static helpers for {@link FhirResourceHandler} implementations.
  * <p>
- * The main use today is the tag-based search-routing convention. Two handlers backing the same FHIR
- * resource type (e.g. encounter and visit) share a routing coding system (the
- * {@code OPENMRS_FHIR_EXT_ENCOUNTER_TAG} system) with distinct codes; each handler opts out of a
- * search when {@code _tag} contains a coding in that shared system whose code isn't its own. Tags
- * from unrelated coding systems are treated as content filters and never cause opt-out.
+ * The main use today is search-routing via a coding system shared by handlers backing the same FHIR
+ * resource type. Each handler declares its routing code in that system and opts out of a search
+ * whenever a routing token (read from {@code _tag} or from a domain-specific token search param
+ * such as {@code category}) references the shared system but doesn't include the caller's code.
+ * Tokens in unrelated coding systems are treated as content filters and never cause opt-out.
  */
 public final class HandlerSupport {
 	
@@ -53,12 +53,37 @@ public final class HandlerSupport {
 	 */
 	public static boolean routingTagExcludes(@Nonnull SearchParameterMap params, @Nonnull String routingSystem,
 	        @Nonnull String routingCode) {
-		TokenAndListParam tagParam = extractTagParam(params);
-		if (tagParam == null || tagParam.size() == 0) {
+		return tokenParamExcludes(extractTokenAndListParam(params, FhirConstants.TAG_SEARCH_HANDLER), routingSystem,
+		    routingCode);
+	}
+	
+	/**
+	 * Returns whether a {@code category} parameter on the search request routes the request to a
+	 * different handler than the caller. Semantics mirror {@link #routingTagExcludes}: an AND clause
+	 * excludes the caller when it references the given coding system but none of its OR alternatives
+	 * carry the caller's code.
+	 *
+	 * @param params the search parameter map; the {@code category} parameter is read from the entry
+	 *            stored under {@link FhirConstants#CATEGORY_SEARCH_HANDLER}
+	 * @param routingSystem the coding system that handlers in this resource family use to discriminate
+	 *            categories (e.g. {@code CONDITION_CATEGORY_SYSTEM_URI})
+	 * @param routingCode the calling handler's code in the routing system (e.g.
+	 *            {@code "problem-list-item"} or {@code "encounter-diagnosis"})
+	 * @return {@code true} if any AND clause of {@code category} references the routing system but
+	 *         doesn't include the caller's code
+	 */
+	public static boolean routingCategoryExcludes(@Nonnull SearchParameterMap params, @Nonnull String routingSystem,
+	        @Nonnull String routingCode) {
+		return tokenParamExcludes(extractTokenAndListParam(params, FhirConstants.CATEGORY_SEARCH_HANDLER), routingSystem,
+		    routingCode);
+	}
+	
+	private static boolean tokenParamExcludes(TokenAndListParam tokenParam, String routingSystem, String routingCode) {
+		if (tokenParam == null || tokenParam.size() == 0) {
 			return false;
 		}
 		
-		for (TokenOrListParam orList : tagParam.getValuesAsQueryTokens()) {
+		for (TokenOrListParam orList : tokenParam.getValuesAsQueryTokens()) {
 			if (orList == null) {
 				continue;
 			}
@@ -86,9 +111,9 @@ public final class HandlerSupport {
 		return false;
 	}
 	
-	private static TokenAndListParam extractTagParam(SearchParameterMap params) {
+	private static TokenAndListParam extractTokenAndListParam(SearchParameterMap params, String handlerKey) {
 		for (Map.Entry<String, List<PropParam<?>>> entry : params.getParameters()) {
-			if (!FhirConstants.TAG_SEARCH_HANDLER.equals(entry.getKey())) {
+			if (!handlerKey.equals(entry.getKey())) {
 				continue;
 			}
 			for (PropParam<?> propParam : entry.getValue()) {

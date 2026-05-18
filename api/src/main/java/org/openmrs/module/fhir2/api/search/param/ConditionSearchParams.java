@@ -61,11 +61,15 @@ public class ConditionSearchParams extends BaseResourceSearchParams {
 	
 	@Override
 	public SearchParameterMap toSearchParameterMap() {
+		// category is included so the composite orchestrator's handlers can decide via acceptsSearch
+		// whether to participate in the fan-out. The condition/diagnosis DAOs ignore CATEGORY_SEARCH_HANDLER
+		// today; if a backing ever needs to filter by category at the DAO level, it can add a case.
 		return baseSearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, getPatientParam())
 		        .addParameter(FhirConstants.CODED_SEARCH_HANDLER, getCode())
 		        .addParameter(FhirConstants.CONDITION_CLINICAL_STATUS_HANDLER, getClinicalStatus())
 		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, "onsetDate", getOnsetDate())
 		        .addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER, getOnsetAge())
-		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, "dateCreated", getRecordedDate());
+		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, "dateCreated", getRecordedDate())
+		        .addParameter(FhirConstants.CATEGORY_SEARCH_HANDLER, getCategory());
 	}
 }

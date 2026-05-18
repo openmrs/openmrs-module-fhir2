@@ -120,4 +120,52 @@ public class HandlerSupportTest {
 		return new SearchParameterMap().addParameter(FhirConstants.TAG_SEARCH_HANDLER,
 		    new TokenAndListParam().addAnd(token));
 	}
+	
+	// ---- routingCategoryExcludes mirrors routingTagExcludes; one test per branch ----
+	
+	@Test
+	public void categoryShouldNotExcludeWhenNoCategoryParamPresent() {
+		assertFalse(HandlerSupport.routingCategoryExcludes(new SearchParameterMap(),
+		    FhirConstants.CONDITION_CATEGORY_SYSTEM_URI, FhirConstants.CONDITION_CATEGORY_CODE_CONDITION));
+	}
+	
+	@Test
+	public void categoryShouldNotExcludeWhenSystemAndCodeBothMatch() {
+		SearchParameterMap params = new SearchParameterMap().addParameter(FhirConstants.CATEGORY_SEARCH_HANDLER,
+		    new TokenAndListParam().addAnd(new TokenParam(FhirConstants.CONDITION_CATEGORY_SYSTEM_URI,
+		            FhirConstants.CONDITION_CATEGORY_CODE_CONDITION)));
+		assertFalse(HandlerSupport.routingCategoryExcludes(params, FhirConstants.CONDITION_CATEGORY_SYSTEM_URI,
+		    FhirConstants.CONDITION_CATEGORY_CODE_CONDITION));
+	}
+	
+	@Test
+	public void categoryShouldExcludeWhenSystemMatchesButCodeDiffers() {
+		SearchParameterMap params = new SearchParameterMap().addParameter(FhirConstants.CATEGORY_SEARCH_HANDLER,
+		    new TokenAndListParam().addAnd(new TokenParam(FhirConstants.CONDITION_CATEGORY_SYSTEM_URI,
+		            FhirConstants.CONDITION_CATEGORY_CODE_DIAGNOSIS)));
+		assertTrue(HandlerSupport.routingCategoryExcludes(params, FhirConstants.CONDITION_CATEGORY_SYSTEM_URI,
+		    FhirConstants.CONDITION_CATEGORY_CODE_CONDITION));
+	}
+	
+	@Test
+	public void categoryShouldNotExcludeWhenOrListContainsMyCode() {
+		TokenOrListParam orList = new TokenOrListParam();
+		orList.add(FhirConstants.CONDITION_CATEGORY_SYSTEM_URI, FhirConstants.CONDITION_CATEGORY_CODE_DIAGNOSIS);
+		orList.add(FhirConstants.CONDITION_CATEGORY_SYSTEM_URI, FhirConstants.CONDITION_CATEGORY_CODE_CONDITION);
+		SearchParameterMap params = new SearchParameterMap().addParameter(FhirConstants.CATEGORY_SEARCH_HANDLER,
+		    new TokenAndListParam().addAnd(orList));
+		
+		assertFalse(HandlerSupport.routingCategoryExcludes(params, FhirConstants.CONDITION_CATEGORY_SYSTEM_URI,
+		    FhirConstants.CONDITION_CATEGORY_CODE_CONDITION));
+	}
+	
+	@Test
+	public void categoryShouldIgnoreUnrelatedTagParam() {
+		// Even if a _tag clause routes against us, routingCategoryExcludes only reads CATEGORY_SEARCH_HANDLER.
+		SearchParameterMap params = new SearchParameterMap().addParameter(FhirConstants.TAG_SEARCH_HANDLER,
+		    new TokenAndListParam().addAnd(new TokenParam(FhirConstants.CONDITION_CATEGORY_SYSTEM_URI,
+		            FhirConstants.CONDITION_CATEGORY_CODE_DIAGNOSIS)));
+		assertFalse(HandlerSupport.routingCategoryExcludes(params, FhirConstants.CONDITION_CATEGORY_SYSTEM_URI,
+		    FhirConstants.CONDITION_CATEGORY_CODE_CONDITION));
+	}
 }
