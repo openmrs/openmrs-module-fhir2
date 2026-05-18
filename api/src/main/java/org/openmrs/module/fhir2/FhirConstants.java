@@ -139,6 +139,12 @@ public final class FhirConstants {
 	/** The default handler for Encounters mapped from the Visit table */
 	public static final String OPENMRS_HANDLER_ENCOUNTER_VISIT_BACKING_KEY = "openmrs.visit";
 	
+	/** The default handler for Practitioners mapped from the Provider table */
+	public static final String OPENMRS_HANDLER_PRACTITIONER_PROVIDER_BACKING_KEY = "openmrs.provider";
+	
+	/** The default handler for Practitioners mapped from the User table */
+	public static final String OPENMRS_HANDLER_PRACTITIONER_USER_BACKING_KEY = "openmrs.user";
+	
 	public static final String ALLERGY_INTOLERANCE = "AllergyIntolerance";
 	
 	public static final String CONDITION = "Condition";
