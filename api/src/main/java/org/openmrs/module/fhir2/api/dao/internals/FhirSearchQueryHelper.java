@@ -547,19 +547,20 @@ public class FhirSearchQueryHelper extends BaseDao {
 			                propertyLike(criteriaContext, personNameAliasJoin, "givenName", tokenParam),
 			                propertyLike(criteriaContext, personNameAliasJoin, "middleName", tokenParam),
 			                propertyLike(criteriaContext, personNameAliasJoin, "familyName", tokenParam)))
-			            .flatMap(Collection::stream)).ifPresent(criteriaContext::addPredicate);
+			            .flatMap(Collection::stream))
+			        .ifPresent(criteriaContext::addPredicate);
 		}
 		
 		if (given != null) {
 			handleAndListParam(criteriaContext.getCriteriaBuilder(), given,
 			    (givenName) -> propertyLike(criteriaContext, personNameAliasJoin, "givenName", givenName))
-			            .ifPresent(criteriaContext::addPredicate);
+			        .ifPresent(criteriaContext::addPredicate);
 		}
 		
 		if (family != null) {
 			handleAndListParam(criteriaContext.getCriteriaBuilder(), family,
 			    (familyName) -> propertyLike(criteriaContext, personNameAliasJoin, "familyName", familyName))
-			            .ifPresent(criteriaContext::addPredicate);
+			        .ifPresent(criteriaContext::addPredicate);
 		}
 	}
 	
