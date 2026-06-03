@@ -171,8 +171,7 @@ public class FhirActivator extends BaseModuleActivator implements ApplicationCon
 			        boolean result;
 			        try {
 				        result = c.getAnnotation(Component.class) != null;
-			        }
-			        catch (NullPointerException e) {
+			        } catch (NullPointerException e) {
 				        result = false;
 			        }
 			        

@@ -10,9 +10,6 @@
 package org.openmrs.module.fhir2.api.dao.internals;
 
 import javax.annotation.Nonnull;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.Predicate;
 
 import java.math.BigDecimal;
 import java.time.Duration;
@@ -42,6 +39,9 @@ import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Predicate;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -55,6 +55,7 @@ import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.codesystems.AdministrativeGender;
+import org.openmrs.ConceptSource;
 import org.openmrs.Person;
 import org.openmrs.module.fhir2.api.dao.impl.BaseDao;
 import org.openmrs.module.fhir2.api.util.LocalDateTimeFactory;
@@ -321,11 +322,9 @@ public class FhirSearchQueryHelper extends BaseDao {
 		
 		return handleAndListParamBySystem(criteriaContext.getCriteriaBuilder(), concepts, (system, tokens) -> {
 			if (system.isEmpty()) {
-				Predicate inConceptId = criteriaContext.getCriteriaBuilder().in(conceptAlias.get("conceptId"))
-				        .value(criteriaContext.getCriteriaBuilder()
-				                .literal(tokensToParams(tokens).map(NumberUtils::toInt).collect(Collectors.toList())));
-				Predicate inUuid = criteriaContext.getCriteriaBuilder().in(conceptAlias.get("uuid"))
-				        .value(criteriaContext.getCriteriaBuilder().literal(tokensToList(tokens)));
+				Predicate inConceptId = conceptAlias.get("conceptId")
+				        .in(tokensToParams(tokens).map(NumberUtils::toInt).collect(Collectors.toList()));
+				Predicate inUuid = conceptAlias.get("uuid").in(tokensToList(tokens));
 				
 				return Optional.of(criteriaContext.getCriteriaBuilder().or(inConceptId, inUuid));
 			} else {
@@ -470,8 +469,7 @@ public class FhirSearchQueryHelper extends BaseDao {
 					case NULL:
 						return Optional.of(criteriaContext.getCriteriaBuilder().isNull(from.get(propertyName)));
 				}
-			}
-			catch (FHIRException ignored) {}
+			} catch (FHIRException ignored) {}
 			return Optional.of(criteriaContext.getCriteriaBuilder().like(from.get(propertyName), token.getValue()));
 		});
 	}
@@ -893,17 +891,18 @@ public class FhirSearchQueryHelper extends BaseDao {
 	
 	public <V, U> Optional<Predicate> handleQueryForSystem(OpenmrsFhirCriteriaContext<V, U> criteriaContext, String system,
 	        List<String> codes, String conceptReferenceTermAlias) {
-		OpenmrsFhirCriteriaSubquery<FhirConceptSource, String> conceptSourceSubquery = criteriaContext
-		        .addSubquery(FhirConceptSource.class, String.class);
+		OpenmrsFhirCriteriaSubquery<FhirConceptSource, ConceptSource> conceptSourceSubquery = criteriaContext
+		        .addSubquery(FhirConceptSource.class, ConceptSource.class);
 		conceptSourceSubquery.addPredicate(
 		    conceptSourceSubquery.getCriteriaBuilder().equal(conceptSourceSubquery.getRoot().get("url"), system));
 		conceptSourceSubquery.getSubquery().select(conceptSourceSubquery.getRoot().get("conceptSource"));
 		
 		return criteriaContext.getJoin(conceptReferenceTermAlias)
-		        .map((conceptReferenceTermJoin) -> criteriaContext.getCriteriaBuilder().and(
-		            criteriaContext.getCriteriaBuilder().in(conceptReferenceTermJoin.get("conceptSource"))
-		                    .value(conceptSourceSubquery.finalizeQuery()),
-		            criteriaContext.getCriteriaBuilder().in(conceptReferenceTermJoin.get("code")).value(codes)));
+		        .map(
+		            (conceptReferenceTermJoin) -> criteriaContext.getCriteriaBuilder()
+		                    .and(criteriaContext.getCriteriaBuilder().in(conceptReferenceTermJoin.get("conceptSource"))
+		                            .value(conceptSourceSubquery.finalizeQuery()),
+		                        conceptReferenceTermJoin.get("code").in(codes)));
 	}
 	
 	// ========== String Matching ==========

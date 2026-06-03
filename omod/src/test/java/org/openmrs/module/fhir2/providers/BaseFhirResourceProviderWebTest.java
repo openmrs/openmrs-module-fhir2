@@ -14,8 +14,6 @@ import static org.springframework.http.HttpHeaders.ACCEPT;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 
 import javax.annotation.Nonnull;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -27,6 +25,8 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletException;
 import lombok.SneakyThrows;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;

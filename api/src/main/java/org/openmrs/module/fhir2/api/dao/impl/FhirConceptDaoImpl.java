@@ -12,8 +12,6 @@ package org.openmrs.module.fhir2.api.dao.impl;
 import static org.openmrs.module.fhir2.FhirConstants.TITLE_SEARCH_HANDLER;
 
 import javax.annotation.Nonnull;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.Join;
 
 import java.util.Collections;
 import java.util.List;
@@ -21,6 +19,8 @@ import java.util.Optional;
 
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.Join;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -132,8 +132,9 @@ public class FhirConceptDaoImpl extends BaseFhirDao<Concept> implements FhirConc
 		OpenmrsFhirCriteriaContext<ConceptMap, Concept> criteriaContext = createCriteriaContext(ConceptMap.class,
 		    Concept.class);
 		criteriaContext.addJoin("conceptMapType", "mapType");
-		Join<?, ?> conceptJoin = criteriaContext.addJoin("concept", "concept");
-		criteriaContext.getCriteriaQuery().select(conceptJoin.as(Concept.class));
+		@SuppressWarnings("unchecked")
+		Join<ConceptMap, Concept> conceptJoin = (Join<ConceptMap, Concept>) criteriaContext.addJoin("concept", "concept");
+		criteriaContext.getCriteriaQuery().select(conceptJoin);
 		
 		Join<?, ?> conceptReferenceTermJoin = criteriaContext.addJoin("conceptReferenceTerm", "term");
 		if (Context.getAdministrationService().isDatabaseStringComparisonCaseSensitive()) {

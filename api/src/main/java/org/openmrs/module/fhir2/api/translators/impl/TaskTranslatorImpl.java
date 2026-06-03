@@ -172,16 +172,14 @@ public class TaskTranslatorImpl implements TaskTranslator {
 		if (fhirTask.hasStatus()) {
 			try {
 				openmrsTask.setStatus(FhirTask.TaskStatus.valueOf(fhirTask.getStatus().name()));
-			}
-			catch (IllegalArgumentException ex) {
+			} catch (IllegalArgumentException ex) {
 				openmrsTask.setStatus(FhirTask.TaskStatus.UNKNOWN);
 			}
 		}
 		if (fhirTask.hasIntent()) {
 			try {
 				openmrsTask.setIntent(FhirTask.TaskIntent.valueOf(fhirTask.getIntent().name()));
-			}
-			catch (IllegalArgumentException ex) {
+			} catch (IllegalArgumentException ex) {
 				openmrsTask.setIntent(FhirTask.TaskIntent.ORDER);
 			}
 		}

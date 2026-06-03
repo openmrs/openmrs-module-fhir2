@@ -41,8 +41,8 @@ import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.DrugOrder;
 import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.openmrs.module.fhir2.FhirConstants;
@@ -144,7 +144,7 @@ public class MedicationRequestSearchQueryTest extends BaseFhirContextSensitiveTe
 	@Autowired
 	private SearchQuery<DrugOrder, MedicationRequest, FhirMedicationRequestDao, MedicationRequestTranslator, SearchQueryInclude<MedicationRequest>> searchQuery;
 	
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		executeDataSet(MEDICATION_REQUEST_DATA_XMLS);
 	}

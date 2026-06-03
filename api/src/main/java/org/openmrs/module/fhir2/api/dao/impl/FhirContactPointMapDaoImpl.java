@@ -10,17 +10,17 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import javax.annotation.Nonnull;
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 
 import java.util.Optional;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.SessionFactory;
 import org.openmrs.LocationAttributeType;
 import org.openmrs.PersonAttributeType;
@@ -119,11 +119,9 @@ public class FhirContactPointMapDaoImpl implements FhirContactPointMapDao {
 			existingContactPointMap.setSystem(contactPointMap.getSystem());
 			existingContactPointMap.setUse(contactPointMap.getUse());
 			existingContactPointMap.setRank(contactPointMap.getRank());
-			sessionFactory.getCurrentSession().merge(existingContactPointMap);
-			return existingContactPointMap;
+			return (FhirContactPointMap) sessionFactory.getCurrentSession().merge(existingContactPointMap);
 		} else {
-			sessionFactory.getCurrentSession().saveOrUpdate(contactPointMap);
-			return contactPointMap;
+			return (FhirContactPointMap) sessionFactory.getCurrentSession().merge(contactPointMap);
 		}
 	}
 	

@@ -49,8 +49,7 @@ public class MedicationDispenseStatusTranslatorImpl implements MedicationDispens
 			if (conceptCode.isPresent()) {
 				try {
 					return MedicationDispense.MedicationDispenseStatus.fromCode(conceptCode.get());
-				}
-				catch (FHIRException ignored) {
+				} catch (FHIRException ignored) {
 					// unknown status code
 				}
 			}

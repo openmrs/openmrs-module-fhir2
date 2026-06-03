@@ -36,8 +36,7 @@ public class JsonPatchUtilTest {
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_PATCH_MEDICATION_REQUEST_PATH)) {
 			Objects.requireNonNull(is);
 			medicationRequestPatchJson = inputStreamToString(is, UTF_8);
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 		

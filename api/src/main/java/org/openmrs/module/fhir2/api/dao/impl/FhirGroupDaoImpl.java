@@ -10,14 +10,14 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import javax.annotation.Nonnull;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.Predicate;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Predicate;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.openmrs.Cohort;

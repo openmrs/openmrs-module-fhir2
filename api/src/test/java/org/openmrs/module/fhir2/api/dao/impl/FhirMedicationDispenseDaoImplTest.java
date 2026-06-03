@@ -22,8 +22,8 @@ import java.util.List;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.MedicationDispense;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.EncounterService;
@@ -33,7 +33,7 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.module.fhir2.api.dao.FhirMedicationDispenseDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
-import org.openmrs.test.BaseModuleContextSensitiveTest;
+import org.openmrs.test.jupiter.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -64,7 +64,7 @@ public class FhirMedicationDispenseDaoImplTest extends BaseModuleContextSensitiv
 	
 	private FhirMedicationDispenseDao<MedicationDispense> dao;
 	
-	@Before
+	@BeforeEach
 	public void setUp() {
 		dao = daoProvider.getObject();
 		executeDataSet("org/openmrs/api/include/MedicationDispenseServiceTest-initialData.xml");

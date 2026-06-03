@@ -14,14 +14,14 @@ import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Collections;
 
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -50,7 +50,7 @@ public class FhirRestServletTest {
 		
 		servlet = new TestableFhirRestServlet();
 		
-		when(mockServletConfig.getServletContext()).thenReturn(mock(javax.servlet.ServletContext.class));
+		when(mockServletConfig.getServletContext()).thenReturn(mock(jakarta.servlet.ServletContext.class));
 		when(mockResponse.getWriter()).thenReturn(mockWriter);
 		
 		servlet.init(mockServletConfig);
@@ -65,6 +65,7 @@ public class FhirRestServletTest {
 		when(mockRequest.getServletPath()).thenReturn("");
 		when(mockRequest.getContextPath()).thenReturn("");
 		when(mockRequest.getQueryString()).thenReturn("");
+		when(mockRequest.getHeaderNames()).thenReturn(Collections.emptyEnumeration());
 		
 		Thread.currentThread().setContextClassLoader(null);
 		assertNull(Thread.currentThread().getContextClassLoader());

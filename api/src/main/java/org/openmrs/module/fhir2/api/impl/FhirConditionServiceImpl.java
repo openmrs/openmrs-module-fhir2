@@ -72,8 +72,7 @@ public class FhirConditionServiceImpl extends BaseFhirService<Condition, org.ope
 		Condition result;
 		try {
 			result = super.get(uuid);
-		}
-		catch (ResourceNotFoundException e) {
+		} catch (ResourceNotFoundException e) {
 			result = diagnosisService.get(uuid);
 		}
 		
@@ -131,8 +130,7 @@ public class FhirConditionServiceImpl extends BaseFhirService<Condition, org.ope
 		
 		try {
 			super.delete(uuid);
-		}
-		catch (ResourceNotFoundException e) {
+		} catch (ResourceNotFoundException e) {
 			diagnosisService.delete(uuid);
 		}
 	}

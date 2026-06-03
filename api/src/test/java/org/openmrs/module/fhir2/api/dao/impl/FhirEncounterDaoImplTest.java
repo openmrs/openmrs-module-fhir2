@@ -22,8 +22,8 @@ import java.util.List;
 import ca.uhn.fhir.rest.param.HasAndListParam;
 import ca.uhn.fhir.rest.param.HasOrListParam;
 import ca.uhn.fhir.rest.param.HasParam;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.DrugOrder;
 import org.openmrs.Encounter;
 import org.openmrs.Order;
@@ -66,7 +66,7 @@ public class FhirEncounterDaoImplTest extends BaseFhirContextSensitiveTest {
 	
 	private FhirEncounterDao dao;
 	
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		dao = daoProvider.getObject();
 		executeDataSet(ENCOUNTER_INITIAL_DATA_XML);

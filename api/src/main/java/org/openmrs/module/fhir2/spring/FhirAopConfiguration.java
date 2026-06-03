@@ -73,8 +73,7 @@ public class FhirAopConfiguration {
 				if (AnnotationUtils.findAnnotation(ifaceMethod, Authorized.class) != null) {
 					return ifaceMethod;
 				}
-			}
-			catch (NoSuchMethodException e) {}
+			} catch (NoSuchMethodException e) {}
 		}
 		return null;
 	}

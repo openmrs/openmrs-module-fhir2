@@ -9,10 +9,10 @@
  */
 package org.openmrs.module.fhir2;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.openmrs.api.cache.CacheConfig;
 import org.openmrs.module.fhir2.api.util.FhirGlobalPropertyHolder;
-import org.openmrs.test.BaseModuleContextSensitiveTest;
+import org.openmrs.test.jupiter.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
 import org.springframework.test.context.ContextConfiguration;
@@ -23,7 +23,7 @@ public abstract class BaseFhirContextSensitiveTest extends BaseModuleContextSens
 	@Autowired
 	CacheConfig cacheConfig;
 	
-	@Before
+	@BeforeEach
 	public void setupBaseFhirContextSensitive() throws Exception {
 		// Needed until TRUNK-6299 in place
 		CacheManager cm = cacheConfig.apiCacheManager();

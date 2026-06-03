@@ -9,24 +9,23 @@
  */
 package org.openmrs.module.fhir2.model;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-
 import java.util.Date;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -62,14 +61,14 @@ public class FhirTask extends BaseOpenmrsMetadata {
 	
 	@EqualsAndHashCode.Include
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "task_id")
 	private Integer id;
 	
 	/**
 	 * The current status of the task.
 	 */
-	@Column(name = "status", nullable = false)
+	@Column(name = "status", nullable = false, columnDefinition = "varchar(255)")
 	@Enumerated(EnumType.STRING)
 	private TaskStatus status;
 	
@@ -77,7 +76,7 @@ public class FhirTask extends BaseOpenmrsMetadata {
 	 * Indicates the "level" of actionability associated with the Task, i.e. i+R[9]Cs this a proposed
 	 * task, a planned task, an actionable task, etc.
 	 */
-	@Column(name = "intent", nullable = false)
+	@Column(name = "intent", nullable = false, columnDefinition = "varchar(255)")
 	@Enumerated(EnumType.STRING)
 	private TaskIntent intent;
 	
@@ -90,13 +89,20 @@ public class FhirTask extends BaseOpenmrsMetadata {
 	 */
 	@OneToMany(cascade = CascadeType.ALL)
 	@JoinTable(name = "fhir_task_based_on_reference", joinColumns = @JoinColumn(name = "task_id"), inverseJoinColumns = @JoinColumn(name = "reference_id"))
-	private Set<FhirReference> basedOnReferences;
+	private final Set<FhirReference> basedOnReferences = new LinkedHashSet<>();
+	
+	public void setBasedOnReferences(Set<FhirReference> basedOnReferences) {
+		this.basedOnReferences.clear();
+		if (basedOnReferences != null) {
+			this.basedOnReferences.addAll(basedOnReferences);
+		}
+	}
 	
 	/**
 	 * The entity who benefits from the performance of the service specified in the task (e.g., the
 	 * patient).
 	 */
-	@OneToOne(cascade = CascadeType.ALL)
+	@ManyToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "for_reference_id", referencedColumnName = "reference_id")
 	private FhirReference forReference;
 	
@@ -104,14 +110,14 @@ public class FhirTask extends BaseOpenmrsMetadata {
 	 * The healthcare event (e.g. a patient and healthcare provider interaction) during which this task
 	 * was created.
 	 */
-	@OneToOne(cascade = CascadeType.ALL)
+	@ManyToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "encounter_reference_id", referencedColumnName = "reference_id")
 	private FhirReference encounterReference;
 	
 	/**
 	 * Individual organization or Device currently responsible for task execution.
 	 */
-	@OneToOne(cascade = CascadeType.ALL)
+	@ManyToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "owner_reference_id", referencedColumnName = "reference_id")
 	private FhirReference ownerReference;
 	
@@ -121,7 +127,14 @@ public class FhirTask extends BaseOpenmrsMetadata {
 	 */
 	@OneToMany(cascade = CascadeType.ALL)
 	@JoinColumn(name = "task_id")
-	private Set<FhirTaskInput> input;
+	private final Set<FhirTaskInput> input = new LinkedHashSet<>();
+	
+	public void setInput(Set<FhirTaskInput> input) {
+		this.input.clear();
+		if (input != null) {
+			this.input.addAll(input);
+		}
+	}
 	
 	/**
 	 * Outputs produced by the Task. see
@@ -129,13 +142,19 @@ public class FhirTask extends BaseOpenmrsMetadata {
 	 */
 	@OneToMany(cascade = CascadeType.ALL)
 	@JoinColumn(name = "task_id")
+	private final Set<FhirTaskOutput> output = new LinkedHashSet<>();
 	
-	private Set<FhirTaskOutput> output;
+	public void setOutput(Set<FhirTaskOutput> output) {
+		this.output.clear();
+		if (output != null) {
+			this.output.addAll(output);
+		}
+	}
 	
 	/**
 	 * The location Where task occurs
 	 */
-	@OneToOne(cascade = CascadeType.ALL)
+	@ManyToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "location_reference_id", referencedColumnName = "reference_id")
 	private FhirReference locationReference;
 	
@@ -151,7 +170,14 @@ public class FhirTask extends BaseOpenmrsMetadata {
 	 */
 	@OneToMany(cascade = CascadeType.ALL)
 	@JoinTable(name = "fhir_task_part_of_reference", joinColumns = @JoinColumn(name = "task_id"), inverseJoinColumns = @JoinColumn(name = "reference_id"))
-	private Set<FhirReference> partOfReferences;
+	private final Set<FhirReference> partOfReferences = new LinkedHashSet<>();
+	
+	public void setPartOfReferences(Set<FhirReference> partOfReferences) {
+		this.partOfReferences.clear();
+		if (partOfReferences != null) {
+			this.partOfReferences.addAll(partOfReferences);
+		}
+	}
 	
 	/**
 	 * Actual start time of the execution

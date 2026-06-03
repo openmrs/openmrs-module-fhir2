@@ -44,8 +44,8 @@ import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.ServiceRequest;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.Provider;
 import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.openmrs.module.fhir2.FhirConstants;
@@ -112,7 +112,7 @@ public class PractitionerSearchQueryTest extends BaseFhirContextSensitiveTest {
 	@Autowired
 	private SearchQuery<Provider, Practitioner, FhirPractitionerDao, PractitionerTranslator<Provider>, SearchQueryInclude<Practitioner>> searchQuery;
 	
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		executeDataSet(PRACTITIONER_INITIAL_DATA_XML);
 	}

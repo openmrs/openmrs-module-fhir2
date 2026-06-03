@@ -42,8 +42,8 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.Allergy;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
@@ -132,7 +132,7 @@ public class AllergyIntoleranceSearchQueryTest extends BaseFhirContextSensitiveT
 	@Qualifier("adminService")
 	private AdministrationService administrationService;
 	
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		executeDataSet(ALLERGY_INTOLERANCE_INITIAL_DATA_XML);
 		administrationService.setGlobalProperty(FhirConstants.GLOBAL_PROPERTY_MILD, SEVERITY_MILD_CONCEPT_UUID);

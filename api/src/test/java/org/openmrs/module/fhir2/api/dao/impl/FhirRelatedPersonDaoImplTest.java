@@ -15,8 +15,8 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 
 import org.hibernate.SessionFactory;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.Relationship;
 import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +40,7 @@ public class FhirRelatedPersonDaoImplTest extends BaseFhirContextSensitiveTest {
 	
 	private FhirRelatedPersonDaoImpl relatedPersonDao;
 	
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		relatedPersonDao = new FhirRelatedPersonDaoImpl();
 		relatedPersonDao.setSessionFactory(sessionFactory);
