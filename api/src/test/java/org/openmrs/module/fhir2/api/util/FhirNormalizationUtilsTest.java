@@ -7,9 +7,6 @@
  * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
  * graphic logo is a trademark of OpenMRS Inc.
  */
-/*
- * Rights Reserved, Unlicensed
- */
 package org.openmrs.module.fhir2.api.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
