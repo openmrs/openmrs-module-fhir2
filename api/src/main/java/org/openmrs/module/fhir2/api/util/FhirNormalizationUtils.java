@@ -13,7 +13,10 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 
 public class FhirNormalizationUtils {
-	
+
+	private FhirNormalizationUtils() {
+	}
+
 	/**
 	 * Normalize a CodeableConcept by trimming code/system/display and decoding HL7 v2 escape sequences.
 	 */
