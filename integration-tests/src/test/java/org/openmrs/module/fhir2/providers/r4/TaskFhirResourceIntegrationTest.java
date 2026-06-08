@@ -58,6 +58,8 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 	
 	private static final String JSON_CREATE_TASK_DOCUMENT = "org/openmrs/module/fhir2/providers/Task_create.json";
 	
+	private static final String FOCUS_OBSERVATION_UUID = "5085AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	
 	private static final String JSON_MERGE_PATCH_TASK_PATH = "org/openmrs/module/fhir2/providers/Task_merge_json_patch.json";
 	
 	private static final String JSON_PATCH_TASK_PATH = "org/openmrs/module/fhir2/providers/Task_json_patch.json";
@@ -798,45 +800,42 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		newTask.setStatus(Task.TaskStatus.REQUESTED);
 		newTask.setIntent(Task.TaskIntent.ORDER);
 		
-		String observationUuid = "5085AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-		Reference focusRef = new Reference().setReference("Observation/" + observationUuid).setType("Observation");
+		Reference focusRef = new Reference().setReference("Observation/" + FOCUS_OBSERVATION_UUID).setType("Observation");
 		newTask.setFocus(focusRef);
-		
+
 		//when — POST the task
 		MockHttpServletResponse createResponse = post("/Task").accept(FhirMediaTypes.JSON).jsonContent(toJson(newTask)).go();
-		
+
 		assertThat(createResponse, isCreated());
-		
+
 		Task createdTask = readResponse(createResponse);
 		String createdTaskUuid = createdTask.getIdElement().getIdPart();
-		
+
 		//then — GET it back and verify focus is persisted
 		MockHttpServletResponse getResponse = get("/Task/" + createdTaskUuid).accept(FhirMediaTypes.JSON).go();
-		
+
 		assertThat(getResponse, isOk());
-		
+
 		Task retrievedTask = readResponse(getResponse);
-		
+
 		assertThat(retrievedTask, notNullValue());
 		assertThat(retrievedTask.hasFocus(), is(true));
-		assertThat(retrievedTask.getFocus().getReference(), equalTo("Observation/" + observationUuid));
+		assertThat(retrievedTask.getFocus().getReference(), equalTo("Observation/" + FOCUS_OBSERVATION_UUID));
 	}
 	
 	@Test
 	public void shouldSearchTasksByFocusReferenceAsJson() throws Exception {
 		//given — create a task with a focus reference
-		String observationUuid = "5085AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-		
 		Task newTask = new Task();
 		newTask.setStatus(Task.TaskStatus.REQUESTED);
 		newTask.setIntent(Task.TaskIntent.ORDER);
-		newTask.setFocus(new Reference().setReference("Observation/" + observationUuid).setType("Observation"));
-		
+		newTask.setFocus(new Reference().setReference("Observation/" + FOCUS_OBSERVATION_UUID).setType("Observation"));
+
 		MockHttpServletResponse createResponse = post("/Task").accept(FhirMediaTypes.JSON).jsonContent(toJson(newTask)).go();
 		assertThat(createResponse, isCreated());
-		
+
 		//when — search by focus
-		MockHttpServletResponse searchResponse = get("/Task?focus=Observation/" + observationUuid)
+		MockHttpServletResponse searchResponse = get("/Task?focus=Observation/" + FOCUS_OBSERVATION_UUID)
 		        .accept(FhirMediaTypes.JSON).go();
 		
 		//then

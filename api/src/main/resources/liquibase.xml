@@ -1095,7 +1095,7 @@
                                  referencedColumnNames="concept_id"/>
     </changeSet>
 
-    <changeSet id="add_fhir_task_focus_reference_20260507" author="cure-dev" dbms="mysql,mariadb,postgresql,h2">
+    <changeSet id="add_fhir_task_focus_reference_20260507" author="vvkpd" dbms="mysql,mariadb,postgresql">
         <preConditions onFail="MARK_RAN" onError="WARN">
             <tableExists tableName="fhir_task"/>
             <not>
