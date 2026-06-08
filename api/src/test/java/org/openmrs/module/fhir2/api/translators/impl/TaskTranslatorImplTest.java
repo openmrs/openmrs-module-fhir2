@@ -473,6 +473,37 @@ public class TaskTranslatorImplTest {
 		    FhirTask::getLocationReference);
 	}
 	
+	// Task.focus
+	@Test
+	public void toFhirResource_shouldTranslateFocus() {
+		//given
+		FhirTask task = new FhirTask();
+		
+		//when / //then
+		shouldTranslateReferenceToFhir(task, FhirConstants.OBSERVATION, DIAGNOSTIC_REPORT_UUID, task::setFocusReference,
+		    Task::getFocus);
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldTranslateFocus() {
+		//given
+		Task task = new Task();
+		
+		//when / //then
+		shouldTranslateReferenceToOpenmrs(task, FhirConstants.OBSERVATION, DIAGNOSTIC_REPORT_UUID, task::setFocus,
+		    FhirTask::getFocusReference);
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldUpdateFocus() {
+		//given
+		Task task = new Task();
+		
+		//when / //then
+		shouldUpdateReferenceInOpenmrs(task, FhirConstants.OBSERVATION, DIAGNOSTIC_REPORT_UUID, task::setFocus,
+		    FhirTask::getFocusReference);
+	}
+	
 	// Task.output
 	@Test
 	public void toFhirResource_shouldTranslateOutputReference() {

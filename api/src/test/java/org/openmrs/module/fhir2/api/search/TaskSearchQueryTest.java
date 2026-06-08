@@ -410,7 +410,7 @@ public class TaskSearchQueryTest extends BaseFhirContextSensitiveTest {
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(7));
+		assertThat(resultList.size(), equalTo(7)); // tasks 1,2,3,4,8,9,10 with ACCEPTED or REQUESTED status
 		assertThat(resultList, hasItem(hasProperty("id", equalTo(TASK_UUID))));
 		assertThat(resultList, hasItem(hasProperty("status", equalTo(Task.TaskStatus.ACCEPTED))));
 		assertThat(resultList, hasItem(hasProperty("status", equalTo(Task.TaskStatus.REQUESTED))));

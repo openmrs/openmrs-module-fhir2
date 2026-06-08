@@ -1095,6 +1095,22 @@
                                  referencedColumnNames="concept_id"/>
     </changeSet>
 
+    <changeSet id="add_fhir_task_focus_reference_20260507" author="vvkpd" dbms="mysql,mariadb,postgresql">
+        <preConditions onFail="MARK_RAN" onError="WARN">
+            <tableExists tableName="fhir_task"/>
+            <not>
+                <columnExists tableName="fhir_task" columnName="focus_reference_id"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="fhir_task">
+            <column name="focus_reference_id" type="int"/>
+        </addColumn>
+        <addForeignKeyConstraint baseTableName="fhir_task" baseColumnNames="focus_reference_id"
+                                 constraintName="task_focus_reference_fk"
+                                 referencedTableName="fhir_reference"
+                                 referencedColumnNames="reference_id"/>
+    </changeSet>
+
     <changeSet id="add_part_of_reference_join_table_20200311" author="r.kalai">
         <preConditions onFail="MARK_RAN" onError="WARN">
             <not>
