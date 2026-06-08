@@ -66,7 +66,7 @@ public class TaskFhirResourceProviderTest extends BaseFhirProvenanceResourceTest
 	private static final String WRONG_TASK_UUID = "df34a1c1-f57b-4c33-bee5-e601b56b9d5b";
 	
 	private static final String OBSERVATION_UUID = "f1937b1a-dfff-43ac-ba9c-a62a48620b28";
-
+	
 	private static final int START_INDEX = 0;
 	
 	private static final int END_INDEX = 10;
@@ -80,7 +80,7 @@ public class TaskFhirResourceProviderTest extends BaseFhirProvenanceResourceTest
 	
 	@Mock
 	private RequestDetails mockRequestDetails;
-
+	
 	@Getter(AccessLevel.PUBLIC)
 	private TaskFhirResourceProvider resourceProvider;
 	
@@ -299,24 +299,24 @@ public class TaskFhirResourceProviderTest extends BaseFhirProvenanceResourceTest
 		//given
 		List<Task> tasks = new ArrayList<>();
 		tasks.add(task);
-
+		
 		ReferenceAndListParam focusReference = new ReferenceAndListParam()
-		        .addAnd(new ReferenceOrListParam().add(new ReferenceParam("Observation", null, OBSERVATION_UUID)));
-
+		        .addAnd(new ReferenceOrListParam().add(new ReferenceParam(FhirConstants.OBSERVATION, null, OBSERVATION_UUID)));
+		
 		when(taskService.searchForTasks(any())).thenReturn(new MockIBundleProvider<>(tasks, PREFERRED_PAGE_SIZE, COUNT));
-
+		
 		//when
 		IBundleProvider results = resourceProvider.searchTasks(null, null, null, focusReference, null, null, null, null,
 		    null, null);
-
+		
 		//then
 		List<IBaseResource> resultList = get(results);
-
+		
 		assertThat(results, notNullValue());
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(resultList.iterator().next().fhirType(), equalTo(FhirConstants.TASK));
 	}
-
+	
 	private List<IBaseResource> getResources(IBundleProvider results) {
 		return results.getResources(START_INDEX, END_INDEX);
 	}

@@ -55,7 +55,7 @@ public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDa
 				case FhirConstants.FOCUS_REFERENCE_SEARCH_HANDLER:
 					entry.getValue()
 					        .forEach(param -> handleReference(criteriaContext, (ReferenceAndListParam) param.getParam(),
-					            "focusReference", "focr").ifPresent(criteriaContext::addPredicate));
+					            "focusReference", "fo").ifPresent(criteriaContext::addPredicate));
 					break;
 				case FhirConstants.TASK_CODE_SEARCH_HANDLER:
 					entry.getValue()
