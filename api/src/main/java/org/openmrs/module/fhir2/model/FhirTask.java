@@ -44,8 +44,10 @@ public class FhirTask extends BaseOpenmrsMetadata {
 	 * Based on <a href="https://www.hl7.org/fhir/task.html">...</a> v4.0.1
 	 */
 	public enum TaskStatus {
+		DRAFT,
 		REQUESTED,
 		READY,
+		INPROGRESS,
 		ONHOLD,
 		CANCELLED,
 		REJECTED,
