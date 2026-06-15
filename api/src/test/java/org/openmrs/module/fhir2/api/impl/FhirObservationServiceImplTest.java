@@ -16,449 +16,147 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyCollection;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.NumberParam;
-import ca.uhn.fhir.rest.param.ReferenceAndListParam;
-import ca.uhn.fhir.rest.param.ReferenceOrListParam;
-import ca.uhn.fhir.rest.param.ReferenceParam;
-import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.rest.param.TokenAndListParam;
-import ca.uhn.fhir.rest.param.TokenParam;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Observation;
-import org.hl7.fhir.r4.model.Patient;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.openmrs.Obs;
 import org.openmrs.module.fhir2.FhirConstants;
-import org.openmrs.module.fhir2.FhirTestConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
-import org.openmrs.module.fhir2.api.dao.FhirObservationDao;
-import org.openmrs.module.fhir2.api.search.SearchQuery;
-import org.openmrs.module.fhir2.api.search.SearchQueryBundleProvider;
-import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
+import org.openmrs.module.fhir2.api.handler.FhirResourceHandler;
 import org.openmrs.module.fhir2.api.search.param.ObservationSearchParams;
+import org.openmrs.module.fhir2.api.search.param.PropParam;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
-import org.openmrs.module.fhir2.api.translators.ObservationTranslator;
+import org.openmrs.module.fhir2.providers.r3.MockIBundleProvider;
 
+/**
+ * Orchestrator-level tests for {@link FhirObservationServiceImpl}. Dispatch mechanics
+ * (probe-by-uuid, profile/canHandle routing, fan-out merge) are covered in
+ * {@link BaseCompositeFhirServiceTest}; backing-specific CRUD/search lives in
+ * {@code ObservationBackedObservationHandlerTest}. What this class covers is the special-method
+ * orchestration: that the typed entry points build the right {@link SearchParameterMap} and forward
+ * through {@code doSearch}.
+ */
 @RunWith(MockitoJUnitRunner.class)
 public class FhirObservationServiceImplTest {
 	
-	private static final Integer OBS_ID = 123;
+	private static final int START_INDEX = 0;
 	
-	private static final String OBS_UUID = "12345-abcde-12345";
-	
-	private static final String PATIENT_GIVEN_NAME = "Clement";
-	
-	private static final String PATIENT_UUID = "5946f880-b197-400b-9caa-a3c661d23041";
-	
-	private static final String CIEL_DIASTOLIC_BP = "5086";
-	
-	private static final String LOINC_SYSTOLIC_BP = "8480-6";
+	private static final int END_INDEX = 10;
 	
 	@Mock
-	private FhirObservationDao dao;
+	private FhirResourceHandler<Observation> observationHandler;
 	
 	@Mock
 	private FhirGlobalPropertyService globalPropertyService;
 	
-	@Mock
-	private SearchQueryInclude<Observation> searchQueryInclude;
-	
-	@Mock
-	private SearchQuery<Obs, Observation, FhirObservationDao, ObservationTranslator, SearchQueryInclude<Observation>> searchQuery;
-	
-	@Mock
-	private ObservationTranslator translator;
-	
-	private FhirObservationServiceImpl fhirObservationService;
+	private FhirObservationServiceImpl service;
 	
 	@Before
 	public void setup() {
-		fhirObservationService = new FhirObservationServiceImpl() {
-			
-			@Override
-			protected void validateObject(Obs object) {
-			}
-		};
+		lenient().when(observationHandler.getImplicitProfile())
+		        .thenReturn("http://fhir.openmrs.org/StructureDefinition/openmrs-observation");
+		lenient().when(observationHandler.getBackingKey()).thenReturn("openmrs.observation");
+		lenient().when(observationHandler.acceptsSearch(any())).thenReturn(true);
 		
-		fhirObservationService.setDao(dao);
-		fhirObservationService.setSearchQuery(searchQuery);
-		fhirObservationService.setTranslator(translator);
-		fhirObservationService.setSearchQueryInclude(searchQueryInclude);
+		service = new FhirObservationServiceImpl();
+		service.setHandlers(Collections.singletonList(observationHandler));
+		service.setGlobalPropertyService(globalPropertyService);
 	}
 	
-	@Test
-	public void getObservationByUuid_shouldReturnObservationByUuid() {
-		Obs obs = new Obs();
-		obs.setUuid(OBS_UUID);
-		Observation observation = new Observation();
-		observation.setId(OBS_UUID);
-		when(dao.get(OBS_UUID)).thenReturn(obs);
-		when(translator.toFhirResource(obs)).thenReturn(observation);
-		
-		Observation result = fhirObservationService.get(OBS_UUID);
-		
-		assertThat(result, notNullValue());
-		assertThat(result.getId(), equalTo(OBS_UUID));
-	}
+	// ---- searchForObservations ----
 	
 	@Test
-	public void searchForObservations_shouldReturnObservationsByParameters() {
-		Obs obs = new Obs();
-		obs.setUuid(OBS_UUID);
+	public void searchForObservations_shouldFanOutAndReturnHandlerResults() {
+		when(observationHandler.search(any())).thenReturn(bundleOf(3));
 		
-		Observation observation = new Observation();
-		observation.setId(OBS_UUID);
-		
-		ReferenceAndListParam patientReference = new ReferenceAndListParam();
-		ReferenceParam patient = new ReferenceParam();
-		
-		patient.setValue(PATIENT_GIVEN_NAME);
-		patient.setChain(Patient.SP_GIVEN);
-		
-		patientReference.addValue(new ReferenceOrListParam().add(patient));
-		SearchParameterMap theParams = new SearchParameterMap();
-		theParams.addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientReference);
-		
-		when(globalPropertyService.getGlobalPropertyAsInteger(anyString(), anyInt())).thenReturn(10);
-		when(dao.getSearchResults(any())).thenReturn(Collections.singletonList(obs));
-		when(dao.getSearchResultsCount(any())).thenReturn(1);
-		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
-		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
-		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
-		when(translator.toFhirResource(obs)).thenReturn(observation);
-		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
-		
-		ObservationSearchParams observationSearchParams = new ObservationSearchParams();
-		observationSearchParams.setPatient(patientReference);
-		IBundleProvider results = fhirObservationService.searchForObservations(observationSearchParams);
+		ObservationSearchParams params = new ObservationSearchParams();
+		IBundleProvider results = service.searchForObservations(params);
+		List<IBaseResource> resultList = results.getResources(START_INDEX, END_INDEX);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(1));
-		assertThat(results.preferredPageSize(), equalTo(10));
-		
-		List<IBaseResource> resultList = results.getResources(1, 10);
-		
 		assertThat(resultList, not(empty()));
-		assertThat(resultList, hasSize(equalTo(1)));
+		assertThat(resultList, hasSize(3));
+		verify(observationHandler).search(any());
+	}
+	
+	// ---- getLastnObservations ----
+	
+	@Test
+	public void getLastnObservations_shouldStampLastnHandlerKeyOnSearchParams() {
+		when(observationHandler.search(any())).thenReturn(bundleOf(1));
+		
+		service.getLastnObservations(new NumberParam(2), new ObservationSearchParams());
+		
+		SearchParameterMap captured = captureSearchParams();
+		assertHandlerEntry(captured, FhirConstants.LASTN_OBSERVATION_SEARCH_HANDLER);
+		assertHandlerEntry(captured, FhirConstants.MAX_SEARCH_HANDLER);
 	}
 	
 	@Test
-	public void getLastnObservations_shouldReturnRecentNObservations() {
-		Obs obs = new Obs();
-		obs.setUuid(OBS_UUID);
+	public void getLastnObservations_shouldDefaultMaxToOneWhenNull() {
+		when(observationHandler.search(any())).thenReturn(bundleOf(1));
 		
-		Observation observation = new Observation();
-		observation.setId(OBS_UUID);
+		service.getLastnObservations(null, new ObservationSearchParams());
 		
-		NumberParam max = new NumberParam(2);
-		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
-		ReferenceParam patient = new ReferenceParam();
+		SearchParameterMap captured = captureSearchParams();
+		PropParam<?> max = captured.getParameters(FhirConstants.MAX_SEARCH_HANDLER).iterator().next();
+		assertThat(((NumberParam) max.getParam()).getValue().intValue(), equalTo(1));
+	}
+	
+	// ---- getLastnEncountersObservations ----
+	
+	@Test
+	public void getLastnEncountersObservations_shouldStampLastnEncountersHandlerKeyOnSearchParams() {
+		when(observationHandler.search(any())).thenReturn(bundleOf(1));
 		
-		patient.setValue(PATIENT_UUID);
+		service.getLastnEncountersObservations(new NumberParam(3), new ObservationSearchParams());
 		
-		referenceParam.addValue(new ReferenceOrListParam().add(patient));
-		
-		TokenAndListParam categories = new TokenAndListParam().addAnd(new TokenParam().setValue("laboratory"));
-		
-		TokenAndListParam code = new TokenAndListParam().addAnd(
-		    new TokenParam().setSystem(FhirTestConstants.LOINC_SYSTEM_URL).setValue(LOINC_SYSTOLIC_BP),
-		    new TokenParam().setSystem(FhirTestConstants.CIEL_SYSTEM_URN).setValue(CIEL_DIASTOLIC_BP));
-		
-		SearchParameterMap theParams = new SearchParameterMap()
-		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, referenceParam)
-		        .addParameter(FhirConstants.CODED_SEARCH_HANDLER, code)
-		        .addParameter(FhirConstants.CATEGORY_SEARCH_HANDLER, categories)
-		        .addParameter(FhirConstants.MAX_SEARCH_HANDLER, max)
-		        .addParameter(FhirConstants.LASTN_OBSERVATION_SEARCH_HANDLER, new StringParam());
-		
-		when(globalPropertyService.getGlobalPropertyAsInteger(anyString(), anyInt())).thenReturn(10);
-		when(dao.getSearchResults(any())).thenReturn(Collections.singletonList(obs));
-		when(dao.getSearchResultsCount(any())).thenReturn(1);
-		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
-		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
-		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
-		when(translator.toFhirResource(obs)).thenReturn(observation);
-		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
-		
-		ObservationSearchParams searchParams = new ObservationSearchParams();
-		searchParams.setPatient(referenceParam);
-		searchParams.setCategory(categories);
-		searchParams.setCode(code);
-		IBundleProvider results = fhirObservationService.getLastnObservations(max, searchParams);
-		
-		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(1));
-		assertThat(results.preferredPageSize(), equalTo(10));
-		
-		List<IBaseResource> resultList = results.getResources(1, 10);
-		
-		assertThat(resultList, not(empty()));
-		assertThat(resultList, hasSize(equalTo(1)));
+		SearchParameterMap captured = captureSearchParams();
+		assertHandlerEntry(captured, FhirConstants.LASTN_ENCOUNTERS_SEARCH_HANDLER);
+		assertHandlerEntry(captured, FhirConstants.MAX_SEARCH_HANDLER);
 	}
 	
 	@Test
-	public void getLastn_shouldReturnFirstRecentObservationsWhenMaxIsMissing() {
-		Obs obs = new Obs();
-		obs.setUuid(OBS_UUID);
+	public void getLastnEncountersObservations_shouldDefaultMaxToOneWhenNull() {
+		when(observationHandler.search(any())).thenReturn(bundleOf(1));
 		
-		Observation observation = new Observation();
-		observation.setId(OBS_UUID);
+		service.getLastnEncountersObservations(null, new ObservationSearchParams());
 		
-		NumberParam max = new NumberParam(1);
-		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
-		ReferenceParam patient = new ReferenceParam();
-		
-		patient.setValue(PATIENT_UUID);
-		
-		referenceParam.addValue(new ReferenceOrListParam().add(patient));
-		
-		TokenAndListParam categories = new TokenAndListParam().addAnd(new TokenParam().setValue("laboratory"));
-		
-		TokenAndListParam code = new TokenAndListParam().addAnd(
-		    new TokenParam().setSystem(FhirTestConstants.LOINC_SYSTEM_URL).setValue(LOINC_SYSTOLIC_BP),
-		    new TokenParam().setSystem(FhirTestConstants.CIEL_SYSTEM_URN).setValue(CIEL_DIASTOLIC_BP));
-		
-		SearchParameterMap theParams = new SearchParameterMap()
-		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, referenceParam)
-		        .addParameter(FhirConstants.CODED_SEARCH_HANDLER, code)
-		        .addParameter(FhirConstants.CATEGORY_SEARCH_HANDLER, categories)
-		        .addParameter(FhirConstants.MAX_SEARCH_HANDLER, max)
-		        .addParameter(FhirConstants.LASTN_OBSERVATION_SEARCH_HANDLER, new StringParam());
-		
-		when(globalPropertyService.getGlobalPropertyAsInteger(anyString(), anyInt())).thenReturn(10);
-		when(dao.getSearchResults(any())).thenReturn(Collections.singletonList(obs));
-		when(dao.getSearchResultsCount(any())).thenReturn(1);
-		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
-		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
-		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
-		when(translator.toFhirResource(obs)).thenReturn(observation);
-		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
-		
-		ObservationSearchParams searchParams = new ObservationSearchParams();
-		searchParams.setPatient(referenceParam);
-		searchParams.setCategory(categories);
-		searchParams.setCode(code);
-		IBundleProvider results = fhirObservationService.getLastnObservations(null, searchParams);
-		
-		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(1));
-		assertThat(results.preferredPageSize(), equalTo(10));
-		
-		List<IBaseResource> resultList = results.getResources(1, 10);
-		
-		assertThat(resultList, not(empty()));
-		assertThat(resultList, hasSize(equalTo(1)));
+		SearchParameterMap captured = captureSearchParams();
+		PropParam<?> max = captured.getParameters(FhirConstants.MAX_SEARCH_HANDLER).iterator().next();
+		assertThat(((NumberParam) max.getParam()).getValue().intValue(), equalTo(1));
 	}
 	
-	@Test
-	public void getLastnObservations_shouldReturnRecentNObservationsForAllPatientsWhenNoPatientIsSpecified() {
-		Obs obs = new Obs();
-		obs.setUuid(OBS_UUID);
-		
-		Observation observation = new Observation();
-		observation.setId(OBS_UUID);
-		
-		NumberParam max = new NumberParam(2);
-		
-		TokenAndListParam categories = new TokenAndListParam().addAnd(new TokenParam().setValue("laboratory"));
-		
-		TokenAndListParam code = new TokenAndListParam().addAnd(
-		    new TokenParam().setSystem(FhirTestConstants.LOINC_SYSTEM_URL).setValue(LOINC_SYSTOLIC_BP),
-		    new TokenParam().setSystem(FhirTestConstants.CIEL_SYSTEM_URN).setValue(CIEL_DIASTOLIC_BP));
-		
-		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.CODED_SEARCH_HANDLER, code)
-		        .addParameter(FhirConstants.CATEGORY_SEARCH_HANDLER, categories)
-		        .addParameter(FhirConstants.MAX_SEARCH_HANDLER, max)
-		        .addParameter(FhirConstants.LASTN_OBSERVATION_SEARCH_HANDLER, new StringParam());
-		
-		when(globalPropertyService.getGlobalPropertyAsInteger(anyString(), anyInt())).thenReturn(10);
-		when(dao.getSearchResults(any())).thenReturn(Collections.singletonList(obs));
-		when(dao.getSearchResultsCount(any())).thenReturn(1);
-		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
-		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
-		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
-		when(translator.toFhirResource(obs)).thenReturn(observation);
-		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
-		
-		ObservationSearchParams searchParams = new ObservationSearchParams();
-		searchParams.setCategory(categories);
-		searchParams.setCode(code);
-		IBundleProvider results = fhirObservationService.getLastnObservations(max, searchParams);
-		
-		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(1));
-		assertThat(results.preferredPageSize(), equalTo(10));
-		
-		List<IBaseResource> resultList = results.getResources(1, 10);
-		
-		assertThat(resultList, not(empty()));
-		assertThat(resultList, hasSize(equalTo(1)));
+	private SearchParameterMap captureSearchParams() {
+		ArgumentCaptor<SearchParameterMap> captor = ArgumentCaptor.forClass(SearchParameterMap.class);
+		verify(observationHandler).search(captor.capture());
+		return captor.getValue();
 	}
 	
-	@Test
-	public void getLastnEncountersObservations_shouldReturnRecentNEncountersObservations() {
-		Obs obs = new Obs();
-		obs.setUuid(OBS_UUID);
-		
-		Observation observation = new Observation();
-		observation.setId(OBS_UUID);
-		
-		NumberParam max = new NumberParam(2);
-		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
-		ReferenceParam patient = new ReferenceParam();
-		
-		patient.setValue(PATIENT_UUID);
-		
-		referenceParam.addValue(new ReferenceOrListParam().add(patient));
-		
-		TokenAndListParam categories = new TokenAndListParam().addAnd(new TokenParam().setValue("laboratory"));
-		
-		TokenAndListParam code = new TokenAndListParam().addAnd(
-		    new TokenParam().setSystem(FhirTestConstants.LOINC_SYSTEM_URL).setValue(LOINC_SYSTOLIC_BP),
-		    new TokenParam().setSystem(FhirTestConstants.CIEL_SYSTEM_URN).setValue(CIEL_DIASTOLIC_BP));
-		
-		SearchParameterMap theParams = new SearchParameterMap()
-		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, referenceParam)
-		        .addParameter(FhirConstants.CODED_SEARCH_HANDLER, code)
-		        .addParameter(FhirConstants.CATEGORY_SEARCH_HANDLER, categories)
-		        .addParameter(FhirConstants.MAX_SEARCH_HANDLER, max)
-		        .addParameter(FhirConstants.LASTN_OBSERVATION_SEARCH_HANDLER, new StringParam());
-		
-		when(globalPropertyService.getGlobalPropertyAsInteger(anyString(), anyInt())).thenReturn(10);
-		when(dao.getSearchResults(any())).thenReturn(Collections.singletonList(obs));
-		when(dao.getSearchResultsCount(any())).thenReturn(1);
-		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
-		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
-		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
-		when(translator.toFhirResource(obs)).thenReturn(observation);
-		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
-		
-		ObservationSearchParams searchParams = new ObservationSearchParams();
-		searchParams.setPatient(referenceParam);
-		searchParams.setCategory(categories);
-		searchParams.setCode(code);
-		IBundleProvider results = fhirObservationService.getLastnEncountersObservations(max, searchParams);
-		
-		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(1));
-		assertThat(results.preferredPageSize(), equalTo(10));
-		
-		List<IBaseResource> resultList = results.getResources(1, 10);
-		
-		assertThat(resultList, not(empty()));
-		assertThat(resultList, hasSize(equalTo(1)));
+	private static void assertHandlerEntry(SearchParameterMap params, String key) {
+		boolean found = params.getParameters().stream().anyMatch(e -> key.equals(e.getKey()));
+		assertThat("expected SearchParameterMap to contain entry for handler key " + key, found, equalTo(true));
 	}
 	
-	@Test
-	public void getLastnEncountersObservations_shouldReturnFirstRecentEncountersObservationsWhenMaxIsMissing() {
-		Obs obs = new Obs();
-		obs.setUuid(OBS_UUID);
-		
-		Observation observation = new Observation();
-		observation.setId(OBS_UUID);
-		
-		NumberParam max = new NumberParam(1);
-		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
-		ReferenceParam patient = new ReferenceParam();
-		
-		patient.setValue(PATIENT_UUID);
-		
-		referenceParam.addValue(new ReferenceOrListParam().add(patient));
-		
-		TokenAndListParam categories = new TokenAndListParam().addAnd(new TokenParam().setValue("laboratory"));
-		
-		TokenAndListParam code = new TokenAndListParam().addAnd(
-		    new TokenParam().setSystem(FhirTestConstants.LOINC_SYSTEM_URL).setValue(LOINC_SYSTOLIC_BP),
-		    new TokenParam().setSystem(FhirTestConstants.CIEL_SYSTEM_URN).setValue(CIEL_DIASTOLIC_BP));
-		
-		SearchParameterMap theParams = new SearchParameterMap()
-		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, referenceParam)
-		        .addParameter(FhirConstants.CODED_SEARCH_HANDLER, code)
-		        .addParameter(FhirConstants.CATEGORY_SEARCH_HANDLER, categories)
-		        .addParameter(FhirConstants.MAX_SEARCH_HANDLER, max)
-		        .addParameter(FhirConstants.LASTN_OBSERVATION_SEARCH_HANDLER, new StringParam());
-		
-		when(globalPropertyService.getGlobalPropertyAsInteger(anyString(), anyInt())).thenReturn(10);
-		when(dao.getSearchResults(any())).thenReturn(Collections.singletonList(obs));
-		when(dao.getSearchResultsCount(any())).thenReturn(1);
-		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
-		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
-		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
-		when(translator.toFhirResource(obs)).thenReturn(observation);
-		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
-		
-		ObservationSearchParams searchParams = new ObservationSearchParams();
-		searchParams.setPatient(referenceParam);
-		searchParams.setCategory(categories);
-		searchParams.setCode(code);
-		IBundleProvider results = fhirObservationService.getLastnEncountersObservations(null, searchParams);
-		
-		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(1));
-		assertThat(results.preferredPageSize(), equalTo(10));
-		
-		List<IBaseResource> resultList = results.getResources(1, 10);
-		
-		assertThat(resultList, not(empty()));
-		assertThat(resultList, hasSize(equalTo(1)));
+	private static IBundleProvider bundleOf(int n) {
+		List<Observation> rows = new ArrayList<>(n);
+		for (int i = 0; i < n; i++) {
+			rows.add(new Observation());
+		}
+		return new MockIBundleProvider<>(rows, 10, 1);
 	}
-	
-	@Test
-	public void getLastnEncountersObservations_shouldReturnRecentNEncountersObservationsForAllPatientsWhenNoPatientIsSpecified() {
-		Obs obs = new Obs();
-		obs.setUuid(OBS_UUID);
-		
-		Observation observation = new Observation();
-		observation.setId(OBS_UUID);
-		
-		NumberParam max = new NumberParam(2);
-		
-		TokenAndListParam categories = new TokenAndListParam().addAnd(new TokenParam().setValue("laboratory"));
-		
-		TokenAndListParam code = new TokenAndListParam().addAnd(
-		    new TokenParam().setSystem(FhirTestConstants.LOINC_SYSTEM_URL).setValue(LOINC_SYSTOLIC_BP),
-		    new TokenParam().setSystem(FhirTestConstants.CIEL_SYSTEM_URN).setValue(CIEL_DIASTOLIC_BP));
-		
-		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.CODED_SEARCH_HANDLER, code)
-		        .addParameter(FhirConstants.CATEGORY_SEARCH_HANDLER, categories)
-		        .addParameter(FhirConstants.MAX_SEARCH_HANDLER, max)
-		        .addParameter(FhirConstants.LASTN_OBSERVATION_SEARCH_HANDLER, new StringParam());
-		
-		when(globalPropertyService.getGlobalPropertyAsInteger(anyString(), anyInt())).thenReturn(10);
-		when(dao.getSearchResults(any())).thenReturn(Collections.singletonList(obs));
-		when(dao.getSearchResultsCount(any())).thenReturn(1);
-		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
-		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
-		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
-		when(translator.toFhirResource(obs)).thenReturn(observation);
-		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
-		
-		ObservationSearchParams searchParams = new ObservationSearchParams();
-		searchParams.setCategory(categories);
-		searchParams.setCode(code);
-		IBundleProvider results = fhirObservationService.getLastnEncountersObservations(max, searchParams);
-		
-		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(1));
-		assertThat(results.preferredPageSize(), equalTo(10));
-		
-		List<IBaseResource> resultList = results.getResources(1, 10);
-		
-		assertThat(resultList, not(empty()));
-		assertThat(resultList, hasSize(equalTo(1)));
-	}
-	
 }
