@@ -46,13 +46,16 @@ public class FhirTask extends BaseOpenmrsMetadata {
 	public enum TaskStatus {
 		DRAFT,
 		REQUESTED,
+		RECEIVED,
+		ACCEPTED,
+		REJECTED,
 		READY,
+		CANCELLED,
 		INPROGRESS,
 		ONHOLD,
-		CANCELLED,
-		REJECTED,
-		ACCEPTED,
+		FAILED,
 		COMPLETED,
+		ENTEREDINERROR,
 		UNKNOWN
 	}
 	
