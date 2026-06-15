@@ -66,9 +66,9 @@ public class TaskSearchQueryTest extends BaseFhirContextSensitiveTest {
 	
 	private static final String INPROGRESS_TASK_UUID = "b3c9f4a7-44dc-4b29-adfd-a8b297a41f44";
 	
-	private static final String ONHOLD_TASK_UUID = "c4d0e5b8-55ed-4c30-beae-b9c308b52g55";
+	private static final String ONHOLD_TASK_UUID = "c4d0e5b8-55ed-4c30-beae-b9c308b520c5";
 	
-	private static final String ENTEREDINERROR_TASK_UUID = "f7g3h8e1-88hg-4f63-e1d1-e2f631e85j88";
+	private static final String ENTEREDINERROR_TASK_UUID = "f703b8e1-88f6-4f63-e1d1-e2f631e85388";
 	
 	private static final String BASED_ON_TASK_UUID = "3dc9f4a7-44dc-4b29-adfd-a8b297a41f33";
 	
