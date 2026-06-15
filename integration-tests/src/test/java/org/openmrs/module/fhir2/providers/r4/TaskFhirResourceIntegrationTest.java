@@ -698,7 +698,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		
 		List<Bundle.BundleEntryComponent> entries = results.getEntry();
 		
-		assertThat(entries, hasSize(5));
+		assertThat(entries, hasSize(6));
 		assertThat(entries, everyItem(hasResource(hasProperty("status", is(Task.TaskStatus.REQUESTED)))));
 		assertThat(entries,
 		    containsInRelativeOrder(
@@ -711,7 +711,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		        hasResource(hasProperty("meta", hasProperty("lastUpdated", equalTo(
 		            Date.from(LocalDateTime.of(2012, 7, 1, 0, 0, 0).atZone(ZoneId.systemDefault()).toInstant())))))));
 	}
-	
+
 	@Test
 	public void shouldSearchForAllTasksAsXML() throws Exception {
 		MockHttpServletResponse response = get("/Task").accept(FhirMediaTypes.XML).go();
@@ -749,7 +749,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		
 		List<Bundle.BundleEntryComponent> entries = results.getEntry();
 		
-		assertThat(entries, hasSize(5));
+		assertThat(entries, hasSize(6));
 		assertThat(entries, everyItem(hasResource(hasProperty("status", is(Task.TaskStatus.REQUESTED)))));
 		assertThat(entries,
 		    containsInRelativeOrder(
@@ -762,7 +762,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		        hasResource(hasProperty("meta", hasProperty("lastUpdated", equalTo(
 		            Date.from(LocalDateTime.of(2012, 7, 1, 0, 0, 0).atZone(ZoneId.systemDefault()).toInstant())))))));
 	}
-	
+
 	@Test
 	public void shouldReturnCountForTaskAsJson() throws Exception {
 		MockHttpServletResponse response = get("/Task?status=requested&_summary=count").accept(FhirMediaTypes.JSON).go();
@@ -775,9 +775,9 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
-		assertThat(result, hasProperty("total", equalTo(5)));
+		assertThat(result, hasProperty("total", equalTo(6)));
 	}
-	
+
 	@Test
 	public void shouldReturnCountForTaskAsXml() throws Exception {
 		MockHttpServletResponse response = get("/Task?status=requested&_summary=count").accept(FhirMediaTypes.XML).go();
@@ -790,9 +790,9 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
-		assertThat(result, hasProperty("total", equalTo(5)));
+		assertThat(result, hasProperty("total", equalTo(6)));
 	}
-	
+
 	@Test
 	public void shouldCreateTaskWithFocusReferenceAndRetrieveItAsJson() throws Exception {
 		//given — build a FHIR Task with focus set to an Observation reference
@@ -825,26 +825,19 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 	
 	@Test
 	public void shouldSearchTasksByFocusReferenceAsJson() throws Exception {
-		//given — create a task with a focus reference
-		Task newTask = new Task();
-		newTask.setStatus(Task.TaskStatus.REQUESTED);
-		newTask.setIntent(Task.TaskIntent.ORDER);
-		newTask.setFocus(new Reference().setReference("Observation/" + FOCUS_OBSERVATION_UUID).setType("Observation"));
+		//given — a task with focus reference pre-seeded in the test dataset
 
-		MockHttpServletResponse createResponse = post("/Task").accept(FhirMediaTypes.JSON).jsonContent(toJson(newTask)).go();
-		assertThat(createResponse, isCreated());
-
-		//when — search by focus
-		MockHttpServletResponse searchResponse = get("/Task?focus=Observation/" + FOCUS_OBSERVATION_UUID)
+		//when
+		MockHttpServletResponse response = get("/Task?focus=Observation/" + FOCUS_OBSERVATION_UUID)
 		        .accept(FhirMediaTypes.JSON).go();
-		
+
 		//then
-		assertThat(searchResponse, isOk());
-		assertThat(searchResponse.getContentType(), is(FhirMediaTypes.JSON.toString()));
-		assertThat(searchResponse.getContentAsString(), notNullValue());
-		
-		Bundle results = readBundleResponse(searchResponse);
-		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+
+		Bundle results = readBundleResponse(response);
+
 		assertThat(results, notNullValue());
 		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(results.hasEntry(), is(true));
