@@ -151,6 +151,9 @@ public final class FhirConstants {
 	/** The default handler for Conditions mapped from the Diagnosis table */
 	public static final String OPENMRS_HANDLER_CONDITION_DIAGNOSIS_BACKING_KEY = "openmrs.diagnosis";
 	
+	/** The default handler for Observations mapped from the Obs table */
+	public static final String OPENMRS_HANDLER_OBSERVATION_OBSERVATION_BACKING_KEY = "openmrs.observation";
+	
 	public static final String ALLERGY_INTOLERANCE = "AllergyIntolerance";
 	
 	public static final String CONDITION = "Condition";
