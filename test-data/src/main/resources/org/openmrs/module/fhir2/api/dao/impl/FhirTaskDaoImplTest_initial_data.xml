@@ -93,8 +93,5 @@
 	<fhir_task task_id="18" name="Cancelled Task" status="CANCELLED" intent="ORDER" creator="1" date_created="2024-04-15 00:00:00.0" date_changed="2024-04-15 00:00:00.0" retired="false" uuid="e5f6a7b8-55ef-4e55-ee55-e5f6a7b8c9d0"/>
 	<fhir_task task_id="19" name="Completed Task" status="COMPLETED" intent="ORDER" creator="1" date_created="2024-04-16 00:00:00.0" date_changed="2024-04-16 00:00:00.0" retired="false" uuid="f6a7b8c9-66fa-4f66-ff66-f6a7b8c9d0e1"/>
 
-	<!-- Task.focus -->
-	<fhir_reference reference_id="7" name="focus reference" target_type="Observation" reference="5085AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" uuid="a1b2c3d4-e5f6-7890-abcd-ef1234567890" creator="1" date_created="2024-01-01 00:00:00.0" retired="false"/>
-	<fhir_task task_id="11" name="Task with focus reference" status="REQUESTED" focus_reference_id="7" intent="ORDER" creator="1" date_created="2024-04-07 00:00:00.0" date_changed="2024-04-07 00:00:00.0" retired="false" uuid="a1b2c3d4-e5f6-7890-abcd-ef1234567891"/>
 
 </dataset>

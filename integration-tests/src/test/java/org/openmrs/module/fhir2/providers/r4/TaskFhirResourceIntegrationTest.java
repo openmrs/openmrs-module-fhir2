@@ -698,7 +698,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		
 		List<Bundle.BundleEntryComponent> entries = results.getEntry();
 		
-		assertThat(entries, hasSize(6));
+		assertThat(entries, hasSize(5));
 		assertThat(entries, everyItem(hasResource(hasProperty("status", is(Task.TaskStatus.REQUESTED)))));
 		assertThat(entries,
 		    containsInRelativeOrder(
@@ -749,7 +749,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		
 		List<Bundle.BundleEntryComponent> entries = results.getEntry();
 		
-		assertThat(entries, hasSize(6));
+		assertThat(entries, hasSize(5));
 		assertThat(entries, everyItem(hasResource(hasProperty("status", is(Task.TaskStatus.REQUESTED)))));
 		assertThat(entries,
 		    containsInRelativeOrder(
@@ -775,7 +775,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
-		assertThat(result, hasProperty("total", equalTo(6)));
+		assertThat(result, hasProperty("total", equalTo(5)));
 	}
 
 	@Test
@@ -790,7 +790,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
-		assertThat(result, hasProperty("total", equalTo(6)));
+		assertThat(result, hasProperty("total", equalTo(5)));
 	}
 
 	@Test
@@ -825,7 +825,14 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 	
 	@Test
 	public void shouldSearchTasksByFocusReferenceAsJson() throws Exception {
-		//given — a task with focus reference pre-seeded in the test dataset
+		//given — create a task with focus via the API
+		Task newTask = new Task();
+		newTask.setStatus(Task.TaskStatus.REQUESTED);
+		newTask.setIntent(Task.TaskIntent.ORDER);
+		newTask.setFocus(new Reference().setReference("Observation/" + FOCUS_OBSERVATION_UUID).setType("Observation"));
+
+		MockHttpServletResponse createResponse = post("/Task").accept(FhirMediaTypes.JSON).jsonContent(toJson(newTask)).go();
+		assertThat(createResponse, isCreated());
 
 		//when
 		MockHttpServletResponse response = get("/Task?focus=Observation/" + FOCUS_OBSERVATION_UUID)
