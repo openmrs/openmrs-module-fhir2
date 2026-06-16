@@ -439,6 +439,21 @@ public class TaskSearchQueryTest extends BaseFhirContextSensitiveTest {
 	}
 	
 	@Test
+	public void searchForTasks_shouldReturnAllTasksForEmptyStatus() {
+		TokenAndListParam status = new TokenAndListParam()
+		        .addAnd(new TokenOrListParam().add(FhirConstants.TASK_STATUS_VALUE_SET_URI, ""));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.STATUS_SEARCH_HANDLER, status);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+	}
+	
+	@Test
 	public void searchForTasks_shouldReturnEmptyTaskListByMultipleStatusAnd() {
 		TokenAndListParam status = new TokenAndListParam()
 		        .addAnd(
