@@ -90,7 +90,7 @@ public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDa
 	        TokenAndListParam tokenAndListParam) {
 		
 		return handleAndListParam(criteriaContext.getCriteriaBuilder(), tokenAndListParam, token -> {
-			if (token.getValue() != null) {
+			if (token.getValue() != null && !token.getValue().isEmpty()) {
 				try {
 					return Optional.of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("status"),
 					    FhirTask.TaskStatus.valueOf(Task.TaskStatus.fromCode(token.getValue().toLowerCase()).name())));
