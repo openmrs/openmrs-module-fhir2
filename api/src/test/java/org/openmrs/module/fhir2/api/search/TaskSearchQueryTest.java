@@ -64,6 +64,12 @@ public class TaskSearchQueryTest extends BaseFhirContextSensitiveTest {
 	
 	private static final String TASK_UUID = "d899333c-5bd4-45cc-b1e7-2f9542dbcbf6";
 	
+	private static final String INPROGRESS_TASK_UUID = "b3c9f4a7-44dc-4b29-adfd-a8b297a41f44";
+	
+	private static final String ONHOLD_TASK_UUID = "c4d0e5b8-55ed-4c30-beae-b9c308b520c5";
+	
+	private static final String ENTEREDINERROR_TASK_UUID = "f703b8e1-88f6-4f63-e1d1-e2f631e85388";
+	
 	private static final String BASED_ON_TASK_UUID = "3dc9f4a7-44dc-4b29-adfd-a8b297a41f33";
 	
 	private static final String BASED_ON_ORDER_UUID = "7d96f25c-4949-4f72-9931-d808fbc226de";
@@ -418,6 +424,36 @@ public class TaskSearchQueryTest extends BaseFhirContextSensitiveTest {
 	}
 	
 	@Test
+	public void searchForTasks_shouldReturnAllTasksForUnrecognizedStatus() {
+		TokenAndListParam status = new TokenAndListParam()
+		        .addAnd(new TokenOrListParam().add(FhirConstants.TASK_STATUS_VALUE_SET_URI, "not-a-real-status"));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.STATUS_SEARCH_HANDLER, status);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+	}
+	
+	@Test
+	public void searchForTasks_shouldReturnAllTasksForEmptyStatus() {
+		TokenAndListParam status = new TokenAndListParam()
+		        .addAnd(new TokenOrListParam().add(FhirConstants.TASK_STATUS_VALUE_SET_URI, ""));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.STATUS_SEARCH_HANDLER, status);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+	}
+	
+	@Test
 	public void searchForTasks_shouldReturnEmptyTaskListByMultipleStatusAnd() {
 		TokenAndListParam status = new TokenAndListParam()
 		        .addAnd(
@@ -432,6 +468,60 @@ public class TaskSearchQueryTest extends BaseFhirContextSensitiveTest {
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, empty());
+	}
+	
+	@Test
+	public void searchForTasks_shouldReturnTasksByWireCodeInProgress() {
+		TokenAndListParam status = new TokenAndListParam()
+		        .addAnd(new TokenOrListParam().add(FhirConstants.TASK_STATUS_VALUE_SET_URI, "in-progress"));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.STATUS_SEARCH_HANDLER, status);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList, hasSize(equalTo(1)));
+		assertThat(resultList, hasItem(hasProperty("id", equalTo(INPROGRESS_TASK_UUID))));
+		assertThat(resultList, everyItem(hasProperty("status", equalTo(Task.TaskStatus.INPROGRESS))));
+	}
+	
+	@Test
+	public void searchForTasks_shouldReturnTasksByWireCodeOnHold() {
+		TokenAndListParam status = new TokenAndListParam()
+		        .addAnd(new TokenOrListParam().add(FhirConstants.TASK_STATUS_VALUE_SET_URI, "on-hold"));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.STATUS_SEARCH_HANDLER, status);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList, hasSize(equalTo(1)));
+		assertThat(resultList, hasItem(hasProperty("id", equalTo(ONHOLD_TASK_UUID))));
+		assertThat(resultList, everyItem(hasProperty("status", equalTo(Task.TaskStatus.ONHOLD))));
+	}
+	
+	@Test
+	public void searchForTasks_shouldReturnTasksByWireCodeEnteredInError() {
+		TokenAndListParam status = new TokenAndListParam()
+		        .addAnd(new TokenOrListParam().add(FhirConstants.TASK_STATUS_VALUE_SET_URI, "entered-in-error"));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.STATUS_SEARCH_HANDLER, status);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList, hasSize(equalTo(1)));
+		assertThat(resultList, hasItem(hasProperty("id", equalTo(ENTEREDINERROR_TASK_UUID))));
+		assertThat(resultList, everyItem(hasProperty("status", equalTo(Task.TaskStatus.ENTEREDINERROR))));
 	}
 	
 	@Test

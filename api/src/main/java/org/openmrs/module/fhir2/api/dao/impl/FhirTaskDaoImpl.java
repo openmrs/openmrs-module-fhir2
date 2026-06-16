@@ -21,6 +21,8 @@ import java.util.Optional;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
+import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.r4.model.Task;
 import org.openmrs.api.db.DAOException;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirTaskDao;
@@ -88,12 +90,12 @@ public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDa
 	        TokenAndListParam tokenAndListParam) {
 		
 		return handleAndListParam(criteriaContext.getCriteriaBuilder(), tokenAndListParam, token -> {
-			if (token.getValue() != null) {
+			if (token.getValue() != null && !token.getValue().isEmpty()) {
 				try {
 					return Optional.of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("status"),
-					    FhirTask.TaskStatus.valueOf(token.getValue().toUpperCase())));
+					    FhirTask.TaskStatus.valueOf(Task.TaskStatus.fromCode(token.getValue().toLowerCase()).name())));
 				}
-				catch (IllegalArgumentException e) {
+				catch (IllegalArgumentException | FHIRException e) {
 					return Optional.empty();
 				}
 			}
