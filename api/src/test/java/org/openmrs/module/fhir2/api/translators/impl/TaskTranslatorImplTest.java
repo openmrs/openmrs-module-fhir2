@@ -92,11 +92,31 @@ public class TaskTranslatorImplTest {
 	
 	private static final Task.TaskStatus FHIR_TASK_STATUS_CANCELLED = Task.TaskStatus.CANCELLED;
 	
+	private static final Task.TaskStatus FHIR_TASK_STATUS_DRAFT = Task.TaskStatus.DRAFT;
+	
+	private static final Task.TaskStatus FHIR_TASK_STATUS_INPROGRESS = Task.TaskStatus.INPROGRESS;
+	
+	private static final Task.TaskStatus FHIR_TASK_STATUS_RECEIVED = Task.TaskStatus.RECEIVED;
+	
+	private static final Task.TaskStatus FHIR_TASK_STATUS_FAILED = Task.TaskStatus.FAILED;
+	
+	private static final Task.TaskStatus FHIR_TASK_STATUS_ENTEREDINERROR = Task.TaskStatus.ENTEREDINERROR;
+	
 	private static final FhirTask.TaskStatus OPENMRS_TASK_STATUS_READY = FhirTask.TaskStatus.READY;
 	
 	private static final FhirTask.TaskStatus OPENMRS_TASK_STATUS_ONHOLD = FhirTask.TaskStatus.ONHOLD;
 	
 	private static final FhirTask.TaskStatus OPENMRS_TASK_STATUS_CANCELLED = FhirTask.TaskStatus.CANCELLED;
+	
+	private static final FhirTask.TaskStatus OPENMRS_TASK_STATUS_DRAFT = FhirTask.TaskStatus.DRAFT;
+	
+	private static final FhirTask.TaskStatus OPENMRS_TASK_STATUS_INPROGRESS = FhirTask.TaskStatus.INPROGRESS;
+	
+	private static final FhirTask.TaskStatus OPENMRS_TASK_STATUS_RECEIVED = FhirTask.TaskStatus.RECEIVED;
+	
+	private static final FhirTask.TaskStatus OPENMRS_TASK_STATUS_FAILED = FhirTask.TaskStatus.FAILED;
+	
+	private static final FhirTask.TaskStatus OPENMRS_TASK_STATUS_ENTEREDINERROR = FhirTask.TaskStatus.ENTEREDINERROR;
 	
 	private static final Task.TaskIntent FHIR_TASK_INTENT = Task.TaskIntent.ORDER;
 	
@@ -253,6 +273,21 @@ public class TaskTranslatorImplTest {
 		
 		task.setStatus(OPENMRS_TASK_STATUS_CANCELLED);
 		assertThat(taskTranslator.toFhirResource(task).getStatus(), equalTo(FHIR_TASK_STATUS_CANCELLED));
+		
+		task.setStatus(OPENMRS_TASK_STATUS_DRAFT);
+		assertThat(taskTranslator.toFhirResource(task).getStatus(), equalTo(FHIR_TASK_STATUS_DRAFT));
+		
+		task.setStatus(OPENMRS_TASK_STATUS_INPROGRESS);
+		assertThat(taskTranslator.toFhirResource(task).getStatus(), equalTo(FHIR_TASK_STATUS_INPROGRESS));
+		
+		task.setStatus(OPENMRS_TASK_STATUS_RECEIVED);
+		assertThat(taskTranslator.toFhirResource(task).getStatus(), equalTo(FHIR_TASK_STATUS_RECEIVED));
+		
+		task.setStatus(OPENMRS_TASK_STATUS_FAILED);
+		assertThat(taskTranslator.toFhirResource(task).getStatus(), equalTo(FHIR_TASK_STATUS_FAILED));
+		
+		task.setStatus(OPENMRS_TASK_STATUS_ENTEREDINERROR);
+		assertThat(taskTranslator.toFhirResource(task).getStatus(), equalTo(FHIR_TASK_STATUS_ENTEREDINERROR));
 	}
 	
 	@Test
@@ -273,17 +308,21 @@ public class TaskTranslatorImplTest {
 		
 		task.setStatus(FHIR_TASK_STATUS_CANCELLED);
 		assertThat(taskTranslator.toOpenmrsType(task).getStatus(), equalTo(OPENMRS_TASK_STATUS_CANCELLED));
-	}
-	
-	@Test
-	public void toOpenmrsType_shouldTranslateUnsupportedStatusToUnknown() {
-		Task task = new Task();
-		task.setStatus(Task.TaskStatus.ENTEREDINERROR);
 		
-		FhirTask result = taskTranslator.toOpenmrsType(task);
+		task.setStatus(FHIR_TASK_STATUS_DRAFT);
+		assertThat(taskTranslator.toOpenmrsType(task).getStatus(), equalTo(OPENMRS_TASK_STATUS_DRAFT));
 		
-		assertThat(result, notNullValue());
-		assertThat(result.getStatus(), equalTo(FhirTask.TaskStatus.UNKNOWN));
+		task.setStatus(FHIR_TASK_STATUS_INPROGRESS);
+		assertThat(taskTranslator.toOpenmrsType(task).getStatus(), equalTo(OPENMRS_TASK_STATUS_INPROGRESS));
+		
+		task.setStatus(FHIR_TASK_STATUS_RECEIVED);
+		assertThat(taskTranslator.toOpenmrsType(task).getStatus(), equalTo(OPENMRS_TASK_STATUS_RECEIVED));
+		
+		task.setStatus(FHIR_TASK_STATUS_FAILED);
+		assertThat(taskTranslator.toOpenmrsType(task).getStatus(), equalTo(OPENMRS_TASK_STATUS_FAILED));
+		
+		task.setStatus(FHIR_TASK_STATUS_ENTEREDINERROR);
+		assertThat(taskTranslator.toOpenmrsType(task).getStatus(), equalTo(OPENMRS_TASK_STATUS_ENTEREDINERROR));
 	}
 	
 	@Test
