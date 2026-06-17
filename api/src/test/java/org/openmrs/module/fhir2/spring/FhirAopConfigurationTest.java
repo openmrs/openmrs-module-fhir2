@@ -77,6 +77,24 @@ public class FhirAopConfigurationTest {
 	}
 	
 	@Test
+	public void before_shouldResolveInterfaceMethodWhenConcreteMethodOnlyInheritsAnnotation() throws Throwable {
+		doNothing().when(authorizationAdvice).before(any(Method.class), any(), any());
+		
+		Method concreteMethod = DaoImplWithoutAnnotation.class.getMethod("authorizedMethod");
+		Method interfaceMethod = DaoWithAuthorizedInterface.class.getMethod("authorizedMethod");
+		Object target = new DaoImplWithoutAnnotation();
+		Object[] args = new Object[0];
+		
+		MethodBeforeAdvice advice = (MethodBeforeAdvice) advisor.getAdvice();
+		advice.before(concreteMethod, args, target);
+		
+		// The core AuthorizationAdvice only reads an @Authorized annotation declared directly on the method it
+		// receives, so an overriding method that merely inherits the annotation must be substituted with the
+		// interface method that declares it; otherwise the privilege check is silently skipped.
+		verify(authorizationAdvice).before(eq(interfaceMethod), eq(args), eq(target));
+	}
+	
+	@Test
 	public void before_shouldDelegateWithOriginalMethodWhenNoAuthorizedAnnotationExists() throws Throwable {
 		doNothing().when(authorizationAdvice).before(any(Method.class), any(), any());
 		
