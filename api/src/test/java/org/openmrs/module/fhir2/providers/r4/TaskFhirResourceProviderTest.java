@@ -17,6 +17,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -51,6 +52,7 @@ import org.hl7.fhir.r4.model.Task;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.FhirConstants;
@@ -300,8 +302,8 @@ public class TaskFhirResourceProviderTest extends BaseFhirProvenanceResourceTest
 		List<Task> tasks = new ArrayList<>();
 		tasks.add(task);
 		
-		ReferenceAndListParam focusReference = new ReferenceAndListParam()
-		        .addAnd(new ReferenceOrListParam().add(new ReferenceParam(FhirConstants.OBSERVATION, null, OBSERVATION_UUID)));
+		ReferenceAndListParam focusReference = new ReferenceAndListParam().addAnd(
+		    new ReferenceOrListParam().add(new ReferenceParam(FhirConstants.OBSERVATION, null, OBSERVATION_UUID)));
 		
 		when(taskService.searchForTasks(any())).thenReturn(new MockIBundleProvider<>(tasks, PREFERRED_PAGE_SIZE, COUNT));
 		
@@ -310,8 +312,11 @@ public class TaskFhirResourceProviderTest extends BaseFhirProvenanceResourceTest
 		    null, null);
 		
 		//then
-		List<IBaseResource> resultList = get(results);
+		ArgumentCaptor<TaskSearchParams> captor = ArgumentCaptor.forClass(TaskSearchParams.class);
+		verify(taskService).searchForTasks(captor.capture());
+		assertThat(captor.getValue().getFocusReference(), equalTo(focusReference));
 		
+		List<IBaseResource> resultList = get(results);
 		assertThat(results, notNullValue());
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(resultList.iterator().next().fhirType(), equalTo(FhirConstants.TASK));

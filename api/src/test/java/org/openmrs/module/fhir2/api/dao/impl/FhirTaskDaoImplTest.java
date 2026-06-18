@@ -15,6 +15,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 
@@ -470,7 +471,7 @@ public class FhirTaskDaoImplTest extends BaseFhirContextSensitiveTest {
 		
 		//then
 		assertThat(results, notNullValue());
-		assertThat(results, not(empty()));
+		assertThat(results, hasSize(1));
 		assertThat(results, hasItem(hasProperty("uuid", equalTo(TASK_UUID))));
 	}
 	
