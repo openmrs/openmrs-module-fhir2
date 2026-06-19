@@ -609,7 +609,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR3IntegrationTest<T
 		        hasResource(hasProperty("meta", hasProperty("lastUpdated", equalTo(
 		            Date.from(LocalDateTime.of(2012, 7, 1, 0, 0, 0).atZone(ZoneId.systemDefault()).toInstant())))))));
 	}
-
+	
 	@Test
 	public void shouldSearchForAllTasksAsXML() throws Exception {
 		MockHttpServletResponse response = get("/Task").accept(FhirMediaTypes.XML).go();
@@ -660,7 +660,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR3IntegrationTest<T
 		        hasResource(hasProperty("meta", hasProperty("lastUpdated", equalTo(
 		            Date.from(LocalDateTime.of(2012, 7, 1, 0, 0, 0).atZone(ZoneId.systemDefault()).toInstant())))))));
 	}
-
+	
 	@Test
 	public void shouldReturnCountForTaskAsJson() throws Exception {
 		MockHttpServletResponse response = get("/Task?status=requested&_summary=count").accept(FhirMediaTypes.JSON).go();

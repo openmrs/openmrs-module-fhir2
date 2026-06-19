@@ -33,7 +33,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDao {
-
+	
 	@Override
 	protected <U> void setupSearchParams(@Nonnull OpenmrsFhirCriteriaContext<FhirTask, U> criteriaContext,
 	        @Nonnull SearchParameterMap theParams) {
@@ -74,26 +74,26 @@ public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDa
 			}
 		});
 	}
-
+	
 	@Override
 	public FhirTask createOrUpdate(@Nonnull FhirTask task) throws DAOException {
 		// TODO: Refactor - and figure out why CascadeType.ALL does not take care of this.
 		if (task.getOwnerReference() != null && task.getOwnerReference().getReference() != null) {
 			getSessionFactory().getCurrentSession().saveOrUpdate(task.getOwnerReference());
 		}
-
+		
 		getSessionFactory().getCurrentSession().saveOrUpdate(task);
-
+		
 		return task;
 	}
-
+	
 	private Boolean validReferenceParam(ReferenceParam ref) {
 		return (ref != null && ref.getIdPart() != null && ref.getResourceType() != null);
 	}
-
+	
 	private <U> Optional<Predicate> handleStatus(OpenmrsFhirCriteriaContext<FhirTask, U> criteriaContext,
 	        TokenAndListParam tokenAndListParam) {
-
+		
 		return handleAndListParam(criteriaContext.getCriteriaBuilder(), tokenAndListParam, token -> {
 			if (token.getValue() != null && !token.getValue().isEmpty()) {
 				try {
@@ -104,17 +104,17 @@ public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDa
 					return Optional.empty();
 				}
 			}
-
+			
 			return Optional.empty();
 		});
 	}
-
+	
 	private <U> Optional<Predicate> handleReference(@Nonnull OpenmrsFhirCriteriaContext<FhirTask, U> criteriaContext,
 	        ReferenceAndListParam reference, String property, String alias) {
 		return handleAndListParam(criteriaContext.getCriteriaBuilder(), reference, param -> {
 			if (validReferenceParam(param)) {
 				Join<?, ?> taskAliasJoin = criteriaContext.addJoin(property, alias);
-
+				
 				List<Optional<? extends Predicate>> predicateList = new ArrayList<>();
 				predicateList.add(Optional
 				        .of(criteriaContext.getCriteriaBuilder().equal(taskAliasJoin.get("targetUuid"), param.getIdPart())));
@@ -122,17 +122,17 @@ public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDa
 				        .of(criteriaContext.getCriteriaBuilder().equal(taskAliasJoin.get("type"), param.getResourceType())));
 				return Optional.of(criteriaContext.getCriteriaBuilder().and(toCriteriaArray(predicateList)));
 			}
-
+			
 			return Optional.empty();
 		});
 	}
-
+	
 	private <U> Optional<Predicate> handleTaskCodeConcept(@Nonnull OpenmrsFhirCriteriaContext<FhirTask, U> criteriaContext,
 	        TokenAndListParam code) {
 		if (code == null) {
 			return Optional.empty();
 		}
-
+		
 		From<?, ?> join = criteriaContext.addJoin("taskCode", "tc");
 		return getSearchQueryHelper().handleCodeableConcept(criteriaContext, code, join, "tcm", "tcrt");
 	}
