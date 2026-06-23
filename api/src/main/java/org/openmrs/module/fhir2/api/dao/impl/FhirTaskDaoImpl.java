@@ -49,6 +49,10 @@ public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDa
 					entry.getValue().forEach(
 					    param -> handleReference(criteria, (ReferenceAndListParam) param.getParam(), "forReference", "f"));
 					break;
+				case FhirConstants.FOCUS_REFERENCE_SEARCH_HANDLER:
+					entry.getValue().forEach(param -> handleReference(criteria, (ReferenceAndListParam) param.getParam(),
+					    "focusReference", "fo"));
+					break;
 				case FhirConstants.TASK_CODE_SEARCH_HANDLER:
 					entry.getValue().forEach(code -> handleTaskCodeConcept(criteria, (TokenAndListParam) code.getParam()));
 					break;
@@ -102,7 +106,7 @@ public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDa
 				}
 				
 				List<Optional<? extends Criterion>> criterionList = new ArrayList<>();
-				criterionList.add(Optional.of(eq(String.format("%s.reference", alias), param.getIdPart())));
+				criterionList.add(Optional.of(eq(String.format("%s.targetUuid", alias), param.getIdPart())));
 				criterionList.add(Optional.of(eq(String.format("%s.type", alias), param.getResourceType())));
 				return Optional.of(and(toCriteriaArray(criterionList)));
 			}
