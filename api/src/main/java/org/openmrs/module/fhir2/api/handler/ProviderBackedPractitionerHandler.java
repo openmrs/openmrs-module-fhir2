@@ -10,7 +10,6 @@
 package org.openmrs.module.fhir2.api.handler;
 
 import static org.openmrs.module.fhir2.FhirConstants.OPENMRS_FHIR_STRUCTURE_DEFINITION_PREFIX;
-import static org.openmrs.module.fhir2.FhirConstants.OPENMRS_HANDLER_PRACTITIONER_PROVIDER_BACKING_KEY;
 
 import javax.annotation.Nonnull;
 
@@ -47,8 +46,6 @@ public class ProviderBackedPractitionerHandler implements FhirResourceHandler<Pr
 	
 	private static final String IMPLICIT_PROFILE = OPENMRS_FHIR_STRUCTURE_DEFINITION_PREFIX + "/openmrs-provider";
 	
-	private static final String BACKING_KEY = OPENMRS_HANDLER_PRACTITIONER_PROVIDER_BACKING_KEY;
-	
 	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
 	private FhirOpenmrsProviderService providerService;
 	
@@ -56,12 +53,6 @@ public class ProviderBackedPractitionerHandler implements FhirResourceHandler<Pr
 	@Override
 	public String getImplicitProfile() {
 		return IMPLICIT_PROFILE;
-	}
-	
-	@Nonnull
-	@Override
-	public String getBackingKey() {
-		return BACKING_KEY;
 	}
 	
 	@Override

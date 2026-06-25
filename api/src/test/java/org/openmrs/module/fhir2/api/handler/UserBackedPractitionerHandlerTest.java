@@ -64,14 +64,9 @@ public class UserBackedPractitionerHandlerTest {
 	}
 	
 	@Test
-	public void shouldExposeUserBackingKey() {
-		assertThat(handler.getBackingKey(), equalTo("openmrs.user"));
-	}
-	
-	@Test
 	public void canHandle_shouldAlwaysReturnFalse() {
 		// Preserves OLD behaviour: the previous orchestrator never created a User from a FHIR
-		// Practitioner write. An override handler with the same backing key could enable this.
+		// Practitioner write. An override handler with the same implicit profile could enable this.
 		assertFalse(handler.canHandle(new Practitioner()));
 		assertFalse(handler.canHandle(practitioner));
 	}

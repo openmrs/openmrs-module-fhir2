@@ -67,8 +67,6 @@ public class FhirPractitionerServiceImplTest {
 		        .thenReturn("http://fhir.openmrs.org/StructureDefinition/openmrs-provider");
 		lenient().when(userHandler.getImplicitProfile())
 		        .thenReturn("http://fhir.openmrs.org/StructureDefinition/openmrs-user");
-		lenient().when(providerHandler.getBackingKey()).thenReturn("openmrs.provider");
-		lenient().when(userHandler.getBackingKey()).thenReturn("openmrs.user");
 		lenient().when(providerHandler.acceptsSearch(any())).thenReturn(true);
 		lenient().when(userHandler.acceptsSearch(any())).thenReturn(true);
 		lenient().when(providerHandler.canHandle(any())).thenReturn(true);

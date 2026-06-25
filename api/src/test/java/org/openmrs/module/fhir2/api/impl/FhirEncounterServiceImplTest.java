@@ -79,8 +79,6 @@ public class FhirEncounterServiceImplTest {
 		        .thenReturn("http://fhir.openmrs.org/StructureDefinition/openmrs-encounter");
 		lenient().when(visitHandler.getImplicitProfile())
 		        .thenReturn("http://fhir.openmrs.org/StructureDefinition/openmrs-visit");
-		lenient().when(encounterHandler.getBackingKey()).thenReturn("openmrs.encounter");
-		lenient().when(visitHandler.getBackingKey()).thenReturn("openmrs.visit");
 		// Each handler's acceptsSearch decides participation based on the tag in params (mirrors
 		// what the real handlers do — orchestrator just calls acceptsSearch and respects it).
 		lenient().when(encounterHandler.acceptsSearch(any()))

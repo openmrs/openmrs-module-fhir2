@@ -16,14 +16,19 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.param.UriAndListParam;
+import ca.uhn.fhir.rest.param.UriOrListParam;
+import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
@@ -35,10 +40,12 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.FhirService;
 import org.openmrs.module.fhir2.api.handler.FhirResourceHandler;
 import org.openmrs.module.fhir2.api.search.CompositeBundleProvider;
+import org.openmrs.module.fhir2.api.search.param.PropParam;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,10 +83,14 @@ import org.springframework.beans.factory.annotation.Autowired;
  * logic.
  * <li>{@code patch(uuid, ...)} — {@code exists()} probe → {@code handler.patch(uuid, ...)}.
  * <li>{@code delete(uuid)} — {@code exists()} probe → {@code handler.delete(uuid)}.
- * <li>{@code search(params)} — fan out to handlers whose
- * {@link FhirResourceHandler#acceptsSearch(SearchParameterMap) acceptsSearch} returns true; merge
- * results via {@link CompositeBundleProvider}. Tag-based routing logic is the handler's own
- * concern, embedded in {@code acceptsSearch} — the orchestrator stays agnostic.
+ * <li>{@code search(params)} — if {@code _profile} names at least one handler's
+ * {@link FhirResourceHandler#getImplicitProfile() implicit profile}, route only to the matching
+ * handler(s) (the same profile that identifies a handler for {@code create} also selects it for
+ * search). Otherwise fan out to handlers whose
+ * {@link FhirResourceHandler#acceptsSearch(SearchParameterMap) acceptsSearch} returns true. Either
+ * way, results merge via {@link CompositeBundleProvider}. Any other routing protocol (e.g.
+ * {@code _tag}) is the handler's own concern, embedded in {@code acceptsSearch} — the orchestrator
+ * stays agnostic about it.
  * </ul>
  * Resources returned by handlers have the handler's implicit profile stamped onto
  * {@code meta.profile} (deduped if already present) so clients can discover the routing key, both
@@ -92,8 +103,6 @@ public abstract class BaseCompositeFhirService<R extends IAnyResource> implement
 	protected final Class<? super R> resourceClass;
 	
 	private List<FhirResourceHandler<R>> handlers = Collections.emptyList();
-	
-	private Map<String, List<FhirResourceHandler<R>>> overriddenByKey = Collections.emptyMap();
 	
 	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
 	private FhirGlobalPropertyService globalPropertyService;
@@ -228,23 +237,34 @@ public abstract class BaseCompositeFhirService<R extends IAnyResource> implement
 	protected void setHandlers(List<FhirResourceHandler<R>> rawHandlers) {
 		if (rawHandlers == null || rawHandlers.isEmpty()) {
 			this.handlers = Collections.emptyList();
-			this.overriddenByKey = Collections.emptyMap();
 			return;
 		}
 		
+		// Collapse handlers that declare the same implicit profile down to the highest-priority one
+		// (lowest numerical @Order); this is the seam by which an external module replaces a built-in
+		// backing without both running on fan-out operations. Distinct profiles (the common case) all
+		// survive. The implicit profile is the handler's single identity — for clients (CRUD + search
+		// routing) and here for override-dedup.
 		Map<String, FhirResourceHandler<R>> winners = new LinkedHashMap<>();
-		Map<String, List<FhirResourceHandler<R>>> losers = new LinkedHashMap<>();
 		for (FhirResourceHandler<R> handler : rawHandlers) {
-			String key = handler.getBackingKey();
-			if (winners.containsKey(key)) {
-				losers.computeIfAbsent(key, k -> new ArrayList<>()).add(handler);
+			String profile = handler.getImplicitProfile();
+			FhirResourceHandler<R> winner = winners.get(profile);
+			if (winner == null) {
+				winners.put(profile, handler);
 			} else {
-				winners.put(key, handler);
+				// A handler lost the priority race for a shared profile. WARN because it's almost always
+				// either a deliberate override (operator should confirm the right one won) or a
+				// misconfigured @Order on a handler that meant to override but didn't. Computed and
+				// logged here at startup; nothing downstream needs to remember it.
+				log.warn(
+				    "Handler {} for {} profile '{}' was overridden by {} (lower numerical @Order wins). "
+				            + "If this is unintended, raise the priority of {} (smaller @Order value) above {}'s.",
+				    handler.getClass().getName(), resourceClass.getSimpleName(), profile, winner.getClass().getName(),
+				    handler.getClass().getName(), winner.getClass().getName());
 			}
 		}
 		
 		this.handlers = new ArrayList<>(winners.values());
-		this.overriddenByKey = losers;
 	}
 	
 	@PostConstruct
@@ -260,47 +280,28 @@ public abstract class BaseCompositeFhirService<R extends IAnyResource> implement
 		
 		log.info("{} handlers for {}: active = {}", FhirResourceHandler.class.getSimpleName(), resourceClass.getSimpleName(),
 		    describe(handlers));
-		
-		// Each entry here means: a handler declared the same backing key as another but lost the
-		// priority race. Logged as WARN because it's nearly always one of two things — a
-		// legitimate override (the operator should confirm the right handler won) or a
-		// configuration mistake (an external handler that *meant* to override the built-in but
-		// has the wrong @Order). Either way the operator needs to see it.
-		overriddenByKey.forEach((key, losers) -> {
-			FhirResourceHandler<R> winner = winnerForKey(key);
-			for (FhirResourceHandler<R> loser : losers) {
-				log.warn(
-				    "Handler {} for {} backing key '{}' was overridden by {} (lower numerical @Order wins). "
-				            + "If this is unintended, raise the priority of {} (smaller @Order value) above {}'s.",
-				    loser.getClass().getName(), resourceClass.getSimpleName(), key, winner.getClass().getName(),
-				    loser.getClass().getName(), winner.getClass().getName());
-			}
-		});
-	}
-	
-	private FhirResourceHandler<R> winnerForKey(String key) {
-		for (FhirResourceHandler<R> h : handlers) {
-			if (key.equals(h.getBackingKey())) {
-				return h;
-			}
-		}
-		return null;
 	}
 	
 	private static <R extends IAnyResource> String describe(Collection<FhirResourceHandler<R>> handlers) {
-		return handlers.stream().map(h -> h.getBackingKey() + " (" + h.getClass().getSimpleName() + ")")
+		return handlers.stream().map(h -> h.getImplicitProfile() + " (" + h.getClass().getSimpleName() + ")")
 		        .collect(Collectors.joining(", ", "[", "]"));
 	}
 	
 	/**
-	 * Runs a fan-out search across handlers whose {@link FhirResourceHandler#acceptsSearch} returns
-	 * true and merges the result bundles via {@link CompositeBundleProvider}. Tag-based routing is the
-	 * handler's own concern, embedded in {@code acceptsSearch} — the orchestrator stays agnostic about
-	 * the routing protocol.
+	 * Runs a fan-out search across the selected handlers and merges the result bundles via
+	 * {@link CompositeBundleProvider}.
+	 * <p>
+	 * Handler selection has two modes. If the request carries a {@code _profile} parameter naming at
+	 * least one handler's {@link FhirResourceHandler#getImplicitProfile() implicit profile}, the search
+	 * is routed only to the matching handler(s) — the same profile that identifies a handler for CRUD
+	 * also selects it for search, and {@code acceptsSearch} is not consulted. Otherwise (no
+	 * {@code _profile}, or a {@code _profile} that matches no handler — e.g. an unrelated conformance
+	 * profile) the orchestrator falls back to a fan-out across every handler whose
+	 * {@link FhirResourceHandler#acceptsSearch} returns true; any handler-specific routing (e.g. by
+	 * {@code _tag}) lives there.
 	 */
 	protected IBundleProvider doSearch(@Nonnull SearchParameterMap params) {
-		List<FhirResourceHandler<R>> targets = handlers.stream().filter(h -> h.acceptsSearch(params))
-		        .collect(Collectors.toList());
+		List<FhirResourceHandler<R>> targets = selectSearchTargets(params);
 		
 		if (targets.isEmpty()) {
 			return new SimpleBundleProvider();
@@ -323,6 +324,52 @@ public abstract class BaseCompositeFhirService<R extends IAnyResource> implement
 		}
 		
 		return new CompositeBundleProvider(bundles, globalPropertyService);
+	}
+	
+	/**
+	 * Chooses which handlers a search fans out to. A {@code _profile} that names at least one handler's
+	 * implicit profile routes the search to exactly those handlers (skipping {@code acceptsSearch});
+	 * otherwise every handler whose {@code acceptsSearch} accepts the params participates.
+	 */
+	private List<FhirResourceHandler<R>> selectSearchTargets(SearchParameterMap params) {
+		Set<String> requestedProfiles = requestedProfiles(params);
+		if (!requestedProfiles.isEmpty()) {
+			List<FhirResourceHandler<R>> byProfile = handlers.stream()
+			        .filter(h -> requestedProfiles.contains(h.getImplicitProfile())).collect(Collectors.toList());
+			if (!byProfile.isEmpty()) {
+				return byProfile;
+			}
+			// _profile named only profiles no handler claims (e.g. an unrelated conformance profile);
+			// treat it as a non-routing filter and fall through to the acceptsSearch fan-out.
+		}
+		
+		return handlers.stream().filter(h -> h.acceptsSearch(params)).collect(Collectors.toList());
+	}
+	
+	private Set<String> requestedProfiles(SearchParameterMap params) {
+		Set<String> profiles = new HashSet<>();
+		for (Map.Entry<String, List<PropParam<?>>> entry : params.getParameters()) {
+			if (!FhirConstants.PROFILE_SEARCH_HANDLER.equals(entry.getKey())) {
+				continue;
+			}
+			for (PropParam<?> propParam : entry.getValue()) {
+				Object value = propParam.getParam();
+				if (!(value instanceof UriAndListParam)) {
+					continue;
+				}
+				for (UriOrListParam orList : ((UriAndListParam) value).getValuesAsQueryTokens()) {
+					if (orList == null) {
+						continue;
+					}
+					for (UriParam uri : orList.getValuesAsQueryTokens()) {
+						if (uri != null && uri.getValue() != null && !uri.getValue().isEmpty()) {
+							profiles.add(uri.getValue());
+						}
+					}
+				}
+			}
+		}
+		return profiles;
 	}
 	
 	private FhirResourceHandler<R> resolveForCreate(R resource) {

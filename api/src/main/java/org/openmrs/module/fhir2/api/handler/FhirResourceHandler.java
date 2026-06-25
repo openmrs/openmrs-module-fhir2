@@ -47,12 +47,19 @@ import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
  * claim a {@code canHandle} / first probed by {@code exists}.
  * <p>
  * Built-in handlers shipped by this module register at
- * {@link org.springframework.core.Ordered#LOWEST_PRECEDENCE} (or close to it) on purpose, so any
- * external module's handler with an unspecified or lower-valued {@code @Order} runs first and can
- * override the built-in mapping. External modules that want to <em>complement</em> rather than
- * override should still use a value lower than {@code LOWEST_PRECEDENCE} so the ordering is
- * deterministic — beans without an explicit {@code @Order} are tied at {@code LOWEST_PRECEDENCE}
- * and their relative order is undefined.
+ * {@link org.springframework.core.Ordered#LOWEST_PRECEDENCE} on purpose, so any external module's
+ * handler with an unspecified or lower-valued {@code @Order} runs first and can override the
+ * built-in mapping. External modules that want to <em>complement</em> rather than override should
+ * still use a value lower than {@code LOWEST_PRECEDENCE} so the ordering is deterministic — beans
+ * without an explicit {@code @Order} are tied at {@code LOWEST_PRECEDENCE} and their relative order
+ * is undefined.
+ * <p>
+ * <b>Replacing a backing.</b> Two handlers that return the same {@link #getImplicitProfile()
+ * implicit profile} are treated as the same backing: at startup the orchestrator keeps only the
+ * highest-priority one (lowest {@code @Order}) and drops the rest, logging a warning. This is how
+ * an external module replaces a built-in mapping — return the built-in's profile URL and a higher
+ * priority. Handlers with distinct profiles all coexist (e.g. the encounter and visit mappings for
+ * {@code Encounter}); a new backing should expose its own profile URL, namespaced by module id.
  * <p>
  * Tie-breaking semantics on {@code canHandle}: when two handlers both claim the same incoming
  * resource (e.g. an {@code Encounter} body carrying both encounter-type and visit-type codings),
@@ -99,8 +106,9 @@ import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
  * <ul>
  * <li>{@link #getImplicitProfile()} — a stable canonical URL identifying this handler. Clients can
  * discover it from {@code meta.profile} on returned resources, and use it to target this handler on
- * a write. The URL itself doesn't need to resolve to a published {@code StructureDefinition}, but
- * it must be unique across all registered handlers for the same resource type. URLs under
+ * a write (via {@code meta.profile}) or on a search (via the {@code _profile} search parameter).
+ * The URL itself doesn't need to resolve to a published {@code StructureDefinition}, but it must be
+ * unique across all registered handlers for the same resource type. URLs under
  * {@code http://fhir.openmrs.org/StructureDefinition/openmrs-*} are reserved for built-in handlers;
  * external modules should namespace by module id.
  * <li>{@link #canHandle(IAnyResource)} — the dispatch predicate for content-bearing writes when
@@ -154,40 +162,16 @@ public interface FhirResourceHandler<R extends IAnyResource> extends FhirService
 	boolean canHandle(@Nonnull R resource);
 	
 	/**
-	 * Stable, opaque identifier for the mapping this handler implements — distinct from
-	 * {@link #getImplicitProfile()} in that it is <em>not</em> exposed to FHIR clients. Two handlers
-	 * that return the same backing key are treated by the orchestrator as overrides of the same
-	 * mapping: only the highest-priority one (by {@code @Order}) participates in any dispatch —
-	 * single-result reads, content-based writes, and fan-out search alike. The lower-priority one is
-	 * dropped at startup, and the orchestrator logs a warning so operators can confirm the override is
-	 * the one they intended.
-	 * <p>
-	 * The default is {@link Class#getName() getClass().getName()}, which keeps unrelated handlers
-	 * independent without any extra configuration. Built-in handlers shipped by this module override
-	 * the default with short stable strings (e.g. {@code "openmrs.encounter"},
-	 * {@code "openmrs.visit"}); an external module that wants to replace a built-in returns the same
-	 * string. New backings introduced by external modules should namespace by module id (e.g.
-	 * {@code "myModule.imagingOrder"}) so they don't collide with built-ins.
-	 * <p>
-	 * This is the only mechanism by which two handlers for the same FHIR resource type can coordinate
-	 * "I replace you" semantics. Without it, two handlers scanning the same backing would both run on
-	 * fan-out operations (search, {@link #get(java.util.Collection)}) — the default's results would
-	 * interleave with the override's, producing duplicate scans and surprising output.
-	 *
-	 * @return the backing-key identifier for this handler, never {@code null}
-	 */
-	@Nonnull
-	default String getBackingKey() {
-		return getClass().getName();
-	}
-	
-	/**
 	 * Returns whether this handler should participate in a search with the given parameters. The
 	 * default returns {@code true}; override to opt out when the parameters target a different handler
 	 * (e.g. via {@code _tag}-based routing) or reference fields this handler cannot honor.
 	 * <p>
-	 * The orchestrator runs the search against every handler whose {@code acceptsSearch} returns
-	 * {@code true} and merges the results via
+	 * This is the <em>fallback</em> routing mechanism. The preferred way for a client to target a
+	 * specific backing is the standard {@code _profile} search parameter naming this handler's
+	 * {@link #getImplicitProfile() implicit profile}: when a request carries such a {@code _profile},
+	 * the orchestrator routes directly to the matching handler(s) and {@code acceptsSearch} is not
+	 * consulted. {@code acceptsSearch} governs the no-{@code _profile} case, where the orchestrator
+	 * runs the search against every handler that accepts and merges the results via
 	 * {@link org.openmrs.module.fhir2.api.search.CompositeBundleProvider}.
 	 *
 	 * @param params the search parameter map, never {@code null}

@@ -66,11 +66,6 @@ public class DiagnosisBackedConditionHandlerTest {
 	}
 	
 	@Test
-	public void shouldExposeDiagnosisBackingKey() {
-		assertThat(handler.getBackingKey(), equalTo("openmrs.diagnosis"));
-	}
-	
-	@Test
 	public void canHandle_shouldReturnTrueForEncounterDiagnosisCategory() {
 		Condition condition = withCategory(FhirConstants.CONDITION_CATEGORY_CODE_DIAGNOSIS);
 		assertTrue(handler.canHandle(condition));

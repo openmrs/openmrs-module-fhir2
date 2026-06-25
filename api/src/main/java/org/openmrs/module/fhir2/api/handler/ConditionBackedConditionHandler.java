@@ -10,7 +10,6 @@
 package org.openmrs.module.fhir2.api.handler;
 
 import static org.openmrs.module.fhir2.FhirConstants.OPENMRS_FHIR_STRUCTURE_DEFINITION_PREFIX;
-import static org.openmrs.module.fhir2.FhirConstants.OPENMRS_HANDLER_CONDITION_CONDITION_BACKING_KEY;
 
 import javax.annotation.Nonnull;
 
@@ -50,8 +49,6 @@ public class ConditionBackedConditionHandler implements FhirResourceHandler<Cond
 	
 	private static final String IMPLICIT_PROFILE = OPENMRS_FHIR_STRUCTURE_DEFINITION_PREFIX + "/openmrs-condition";
 	
-	private static final String BACKING_KEY = OPENMRS_HANDLER_CONDITION_CONDITION_BACKING_KEY;
-	
 	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
 	private FhirOpenmrsConditionService conditionService;
 	
@@ -59,12 +56,6 @@ public class ConditionBackedConditionHandler implements FhirResourceHandler<Cond
 	@Override
 	public String getImplicitProfile() {
 		return IMPLICIT_PROFILE;
-	}
-	
-	@Nonnull
-	@Override
-	public String getBackingKey() {
-		return BACKING_KEY;
 	}
 	
 	@Override

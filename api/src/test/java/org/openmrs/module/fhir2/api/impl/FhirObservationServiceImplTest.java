@@ -69,7 +69,6 @@ public class FhirObservationServiceImplTest {
 	public void setup() {
 		lenient().when(observationHandler.getImplicitProfile())
 		        .thenReturn("http://fhir.openmrs.org/StructureDefinition/openmrs-observation");
-		lenient().when(observationHandler.getBackingKey()).thenReturn("openmrs.observation");
 		lenient().when(observationHandler.acceptsSearch(any())).thenReturn(true);
 		
 		service = new FhirObservationServiceImpl();

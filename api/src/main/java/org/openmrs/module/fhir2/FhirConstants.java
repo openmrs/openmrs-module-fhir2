@@ -133,27 +133,6 @@ public final class FhirConstants {
 	
 	public static final String OPENMRS_FHIR_MAXIMUM_PAGE_SIZE = "fhir2.paging.maximum";
 	
-	/** The default handler for Encounters mapped from the Encounter table */
-	public static final String OPENMRS_HANDLER_ENCOUNTER_ENCOUNTER_BACKING_KEY = "openmrs.encounter";
-	
-	/** The default handler for Encounters mapped from the Visit table */
-	public static final String OPENMRS_HANDLER_ENCOUNTER_VISIT_BACKING_KEY = "openmrs.visit";
-	
-	/** The default handler for Practitioners mapped from the Provider table */
-	public static final String OPENMRS_HANDLER_PRACTITIONER_PROVIDER_BACKING_KEY = "openmrs.provider";
-	
-	/** The default handler for Practitioners mapped from the User table */
-	public static final String OPENMRS_HANDLER_PRACTITIONER_USER_BACKING_KEY = "openmrs.user";
-	
-	/** The default handler for Conditions mapped from the Condition table */
-	public static final String OPENMRS_HANDLER_CONDITION_CONDITION_BACKING_KEY = "openmrs.condition";
-	
-	/** The default handler for Conditions mapped from the Diagnosis table */
-	public static final String OPENMRS_HANDLER_CONDITION_DIAGNOSIS_BACKING_KEY = "openmrs.diagnosis";
-	
-	/** The default handler for Observations mapped from the Obs table */
-	public static final String OPENMRS_HANDLER_OBSERVATION_OBSERVATION_BACKING_KEY = "openmrs.observation";
-	
 	public static final String ALLERGY_INTOLERANCE = "AllergyIntolerance";
 	
 	public static final String CONDITION = "Condition";
@@ -297,6 +276,8 @@ public final class FhirConstants {
 	public static final String INGREDIENT_SEARCH_HANDLER = "ingredient.search.handler";
 	
 	public static final String TAG_SEARCH_HANDLER = "tag.search.handler";
+	
+	public static final String PROFILE_SEARCH_HANDLER = "profile.search.handler";
 	
 	public static final String GROUP_MEMBERS_SEARCH_HANDLER = "group.members.search.handler";
 	

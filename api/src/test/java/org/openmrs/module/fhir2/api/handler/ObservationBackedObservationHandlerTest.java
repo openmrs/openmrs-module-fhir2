@@ -106,11 +106,6 @@ public class ObservationBackedObservationHandlerTest {
 	}
 	
 	@Test
-	public void shouldExposeObservationBackingKey() {
-		assertThat(handler.getBackingKey(), equalTo("openmrs.observation"));
-	}
-	
-	@Test
 	public void canHandle_shouldAlwaysReturnTrue() {
 		// Single backing today — handler claims every incoming Observation.
 		assertTrue(handler.canHandle(new Observation()));

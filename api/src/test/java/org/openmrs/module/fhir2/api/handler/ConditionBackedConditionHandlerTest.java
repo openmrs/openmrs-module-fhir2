@@ -70,11 +70,6 @@ public class ConditionBackedConditionHandlerTest {
 	}
 	
 	@Test
-	public void shouldExposeConditionBackingKey() {
-		assertThat(handler.getBackingKey(), equalTo("openmrs.condition"));
-	}
-	
-	@Test
 	public void canHandle_shouldReturnTrueForProblemListCategory() {
 		Condition condition = withCategory(FhirConstants.CONDITION_CATEGORY_CODE_CONDITION);
 		assertTrue(handler.canHandle(condition));

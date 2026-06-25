@@ -10,7 +10,6 @@
 package org.openmrs.module.fhir2.api.handler;
 
 import static org.openmrs.module.fhir2.FhirConstants.OPENMRS_FHIR_STRUCTURE_DEFINITION_PREFIX;
-import static org.openmrs.module.fhir2.FhirConstants.OPENMRS_HANDLER_ENCOUNTER_VISIT_BACKING_KEY;
 
 import javax.annotation.Nonnull;
 
@@ -47,8 +46,6 @@ public class VisitBackedEncounterHandler implements FhirResourceHandler<Encounte
 	
 	private static final String IMPLICIT_PROFILE = OPENMRS_FHIR_STRUCTURE_DEFINITION_PREFIX + "/openmrs-visit";
 	
-	private static final String BACKING_KEY = OPENMRS_HANDLER_ENCOUNTER_VISIT_BACKING_KEY;
-	
 	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
 	private FhirVisitService visitService;
 	
@@ -56,12 +53,6 @@ public class VisitBackedEncounterHandler implements FhirResourceHandler<Encounte
 	@Override
 	public String getImplicitProfile() {
 		return IMPLICIT_PROFILE;
-	}
-	
-	@Nonnull
-	@Override
-	public String getBackingKey() {
-		return BACKING_KEY;
 	}
 	
 	@Override

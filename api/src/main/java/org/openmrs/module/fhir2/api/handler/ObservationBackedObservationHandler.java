@@ -10,7 +10,6 @@
 package org.openmrs.module.fhir2.api.handler;
 
 import static org.openmrs.module.fhir2.FhirConstants.OPENMRS_FHIR_STRUCTURE_DEFINITION_PREFIX;
-import static org.openmrs.module.fhir2.FhirConstants.OPENMRS_HANDLER_OBSERVATION_OBSERVATION_BACKING_KEY;
 
 import javax.annotation.Nonnull;
 
@@ -43,8 +42,6 @@ public class ObservationBackedObservationHandler extends BaseFhirResourceHandler
 	
 	private static final String IMPLICIT_PROFILE = OPENMRS_FHIR_STRUCTURE_DEFINITION_PREFIX + "/openmrs-observation";
 	
-	private static final String BACKING_KEY = OPENMRS_HANDLER_OBSERVATION_OBSERVATION_BACKING_KEY;
-	
 	@Getter(value = AccessLevel.PROTECTED)
 	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
 	private FhirObservationDao dao;
@@ -69,12 +66,6 @@ public class ObservationBackedObservationHandler extends BaseFhirResourceHandler
 	@Override
 	public String getImplicitProfile() {
 		return IMPLICIT_PROFILE;
-	}
-	
-	@Nonnull
-	@Override
-	public String getBackingKey() {
-		return BACKING_KEY;
 	}
 	
 	@Override

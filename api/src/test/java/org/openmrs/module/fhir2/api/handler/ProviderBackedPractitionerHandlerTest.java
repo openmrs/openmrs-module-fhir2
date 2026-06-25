@@ -63,11 +63,6 @@ public class ProviderBackedPractitionerHandlerTest {
 	}
 	
 	@Test
-	public void shouldExposeProviderBackingKey() {
-		assertThat(handler.getBackingKey(), equalTo("openmrs.provider"));
-	}
-	
-	@Test
 	public void canHandle_shouldAlwaysReturnTrue() {
 		// Provider is the default backing for new Practitioner resources — claims every input.
 		assertTrue(handler.canHandle(new Practitioner()));

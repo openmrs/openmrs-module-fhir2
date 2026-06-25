@@ -76,8 +76,6 @@ public class FhirConditionServiceImplTest {
 		        .thenReturn("http://fhir.openmrs.org/StructureDefinition/openmrs-condition");
 		lenient().when(diagnosisHandler.getImplicitProfile())
 		        .thenReturn("http://fhir.openmrs.org/StructureDefinition/openmrs-diagnosis");
-		lenient().when(conditionHandler.getBackingKey()).thenReturn("openmrs.condition");
-		lenient().when(diagnosisHandler.getBackingKey()).thenReturn("openmrs.diagnosis");
 		// Mirror handler acceptsSearch — opt-in unless category names the other side.
 		lenient().when(conditionHandler.acceptsSearch(any())).thenAnswer(
 		    inv -> participatesByCategory(inv.getArgument(0), FhirConstants.CONDITION_CATEGORY_CODE_CONDITION));

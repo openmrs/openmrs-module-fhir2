@@ -69,11 +69,6 @@ public class EncounterBackedEncounterHandlerTest {
 	}
 	
 	@Test
-	public void shouldExposeEncounterBackingKey() {
-		assertThat(handler.getBackingKey(), equalTo("openmrs.encounter"));
-	}
-	
-	@Test
 	public void canHandle_shouldReturnTrueWhenTypeCodingHasEncounterSystem() {
 		CodeableConcept type = new CodeableConcept();
 		type.addCoding().setSystem(FhirConstants.ENCOUNTER_TYPE_SYSTEM_URI).setCode("1");

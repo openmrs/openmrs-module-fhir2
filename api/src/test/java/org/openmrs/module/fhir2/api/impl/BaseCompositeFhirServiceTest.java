@@ -37,6 +37,9 @@ import java.util.stream.Collectors;
 
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.UriAndListParam;
+import ca.uhn.fhir.rest.param.UriOrListParam;
+import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
@@ -48,6 +51,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.handler.FhirResourceHandler;
 import org.openmrs.module.fhir2.api.search.CompositeBundleProvider;
@@ -79,14 +83,11 @@ public class BaseCompositeFhirServiceTest {
 	
 	@Before
 	public void setUp() {
-		// lenient — most tests only exercise a subset of the handler API
+		// lenient — most tests only exercise a subset of the handler API. Distinct implicit profiles
+		// keep the two handlers independent: the orchestrator's collapse drops same-profile handlers,
+		// so stubbing distinct profiles (also the routing identity) ensures both stay active.
 		lenient().when(primaryHandler.getImplicitProfile()).thenReturn(PROFILE_PRIMARY);
 		lenient().when(secondaryHandler.getImplicitProfile()).thenReturn(PROFILE_SECONDARY);
-		// Mockito mocks return null for getBackingKey() by default — the orchestrator's collapse
-		// would then treat both handlers as the same backing and drop one. Stub distinct keys so
-		// the tests see both handlers as independent.
-		lenient().when(primaryHandler.getBackingKey()).thenReturn("test.primary");
-		lenient().when(secondaryHandler.getBackingKey()).thenReturn("test.secondary");
 		lenient().when(primaryHandler.acceptsSearch(any())).thenReturn(true);
 		lenient().when(secondaryHandler.acceptsSearch(any())).thenReturn(true);
 		// Default UUID probe: nothing is owned. Tests that need ownership stub exists() per UUID.
@@ -428,18 +429,88 @@ public class BaseCompositeFhirServiceTest {
 		assertThat(profileUrlsOf(stamped), contains(PROFILE_PRIMARY));
 	}
 	
-	// ---- backing-key collapse ----
+	// ---- _profile-based search routing ----
 	
 	@Test
-	public void collapseShouldDropLowerPriorityHandlerWithDuplicateBackingKey() {
-		// given — both handlers declare the same backing key; primary has higher priority by
+	public void searchShouldRouteToHandlerNamedByProfile() {
+		IBundleProvider primaryBundle = emptyBundle();
+		when(primaryHandler.search(any())).thenReturn(primaryBundle);
+		
+		service.exposedSearch(profileParams(PROFILE_PRIMARY));
+		
+		verify(primaryHandler).search(any());
+		verify(secondaryHandler, never()).search(any());
+	}
+	
+	@Test
+	public void searchByProfileShouldNotConsultAcceptsSearch() {
+		// An explicit _profile is authoritative: the orchestrator routes by profile without ever
+		// asking any handler's acceptsSearch.
+		IBundleProvider primaryBundle = emptyBundle();
+		when(primaryHandler.search(any())).thenReturn(primaryBundle);
+		
+		service.exposedSearch(profileParams(PROFILE_PRIMARY));
+		
+		verify(primaryHandler).search(any());
+		verify(secondaryHandler, never()).search(any());
+		verify(primaryHandler, never()).acceptsSearch(any());
+		verify(secondaryHandler, never()).acceptsSearch(any());
+	}
+	
+	@Test
+	public void searchByProfileShouldRouteToAllMatchingHandlersWhenMultipleNamed() {
+		IBundleProvider primaryBundle = emptyBundle();
+		IBundleProvider secondaryBundle = emptyBundle();
+		when(primaryHandler.search(any())).thenReturn(primaryBundle);
+		when(secondaryHandler.search(any())).thenReturn(secondaryBundle);
+		
+		service.exposedSearch(profileParams(PROFILE_PRIMARY, PROFILE_SECONDARY));
+		
+		verify(primaryHandler).search(any());
+		verify(secondaryHandler).search(any());
+	}
+	
+	@Test
+	public void searchShouldFallBackToAcceptsSearchWhenProfileMatchesNoHandler() {
+		// An unrelated conformance profile (e.g. US Core) matches no backing → treat as a non-routing
+		// filter and fan out via acceptsSearch, exactly as if no _profile were supplied.
+		IBundleProvider primaryBundle = emptyBundle();
+		IBundleProvider secondaryBundle = emptyBundle();
+		when(primaryHandler.search(any())).thenReturn(primaryBundle);
+		when(secondaryHandler.search(any())).thenReturn(secondaryBundle);
+		
+		service.exposedSearch(profileParams("http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter"));
+		
+		verify(primaryHandler).search(any());
+		verify(secondaryHandler).search(any());
+	}
+	
+	@Test
+	public void searchByProfileShouldStillStampProfileOnResults() {
+		IBundleProvider primaryBundle = mock(IBundleProvider.class);
+		Encounter raw = encounter("e1");
+		when(primaryBundle.getResources(anyInt(), anyInt())).thenReturn(Collections.singletonList((IBaseResource) raw));
+		when(primaryHandler.search(any())).thenReturn(primaryBundle);
+		
+		IBundleProvider result = service.exposedSearch(profileParams(PROFILE_PRIMARY));
+		List<IBaseResource> page = result.getResources(0, 10);
+		
+		assertThat(page, hasSize(1));
+		assertThat(profileUrlsOf((Encounter) page.get(0)), contains(PROFILE_PRIMARY));
+	}
+	
+	// ---- profile-based collapse ----
+	
+	@Test
+	public void collapseShouldDropLowerPriorityHandlerWithDuplicateProfile() {
+		// given — both handlers declare the same implicit profile; primary has higher priority by
 		// virtue of being first in the injected list.
 		FhirResourceHandler<Encounter> overridePrimary = primaryHandler;
 		FhirResourceHandler<Encounter> overrideSecondary = secondaryHandler;
-		lenient().when(overridePrimary.getBackingKey()).thenReturn("shared.key");
-		lenient().when(overrideSecondary.getBackingKey()).thenReturn("shared.key");
+		lenient().when(overridePrimary.getImplicitProfile()).thenReturn("http://example.org/StructureDefinition/shared");
+		lenient().when(overrideSecondary.getImplicitProfile()).thenReturn("http://example.org/StructureDefinition/shared");
 		
-		// Re-inject so the setter re-runs the collapse with the new keys.
+		// Re-inject so the setter re-runs the collapse with the new profiles.
 		TestCompositeService localService = new TestCompositeService();
 		localService.setHandlers(Arrays.asList(overridePrimary, overrideSecondary));
 		localService.setGlobalPropertyService(globalPropertyService);
@@ -451,9 +522,9 @@ public class BaseCompositeFhirServiceTest {
 	}
 	
 	@Test
-	public void collapseShouldKeepHandlersWithDistinctBackingKeys() {
-		// default setUp uses distinct keys ("test.primary", "test.secondary"); both should remain
-		// in the active list. We verify by exercising fan-out search: both handlers participate.
+	public void collapseShouldKeepHandlersWithDistinctProfiles() {
+		// default setUp uses distinct profiles (PROFILE_PRIMARY, PROFILE_SECONDARY); both should
+		// remain in the active list. We verify by exercising fan-out search: both handlers participate.
 		IBundleProvider primaryBundle = emptyBundle();
 		IBundleProvider secondaryBundle = emptyBundle();
 		when(primaryHandler.search(any())).thenReturn(primaryBundle);
@@ -475,6 +546,14 @@ public class BaseCompositeFhirServiceTest {
 	
 	private static List<String> profileUrlsOf(Encounter e) {
 		return e.getMeta().getProfile().stream().map(p -> p.getValue()).collect(Collectors.toList());
+	}
+	
+	private static SearchParameterMap profileParams(String... profileUrls) {
+		UriAndListParam profile = new UriAndListParam();
+		for (String url : profileUrls) {
+			profile.addAnd(new UriOrListParam().add(new UriParam(url)));
+		}
+		return new SearchParameterMap().addParameter(FhirConstants.PROFILE_SEARCH_HANDLER, profile);
 	}
 	
 	private static IBundleProvider emptyBundle() {
