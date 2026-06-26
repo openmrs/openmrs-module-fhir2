@@ -38,7 +38,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Order(Ordered.LOWEST_PRECEDENCE)
-public class ObservationBackedObservationHandler extends BaseFhirResourceHandler<Observation, Obs> implements FhirResourceHandler<Observation> {
+public class ObsBackedObservationHandler extends BaseFhirResourceHandler<Observation, Obs> implements FhirResourceHandler<Observation> {
 	
 	private static final String IMPLICIT_PROFILE = OPENMRS_FHIR_STRUCTURE_DEFINITION_PREFIX + "/openmrs-observation";
 	

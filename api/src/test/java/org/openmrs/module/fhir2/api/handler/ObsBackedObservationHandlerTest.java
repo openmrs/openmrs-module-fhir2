@@ -56,7 +56,7 @@ import org.openmrs.module.fhir2.api.translators.ObservationTranslator;
  * {@code getLastn…Observations} entry points) live in {@code FhirObservationServiceImplTest}.
  */
 @RunWith(MockitoJUnitRunner.class)
-public class ObservationBackedObservationHandlerTest {
+public class ObsBackedObservationHandlerTest {
 	
 	private static final String OBS_UUID = "12345-abcde-12345";
 	
@@ -80,11 +80,11 @@ public class ObservationBackedObservationHandlerTest {
 	@Mock
 	private ObsService obsService;
 	
-	private ObservationBackedObservationHandler handler;
+	private ObsBackedObservationHandler handler;
 	
 	@Before
 	public void setup() {
-		handler = new ObservationBackedObservationHandler() {
+		handler = new ObsBackedObservationHandler() {
 			
 			@Override
 			protected void validateObject(Obs object) {
