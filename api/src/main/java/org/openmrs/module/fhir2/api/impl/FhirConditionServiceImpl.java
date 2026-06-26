@@ -113,14 +113,12 @@ public class FhirConditionServiceImpl extends BaseFhirService<Condition, org.ope
 			throw new InvalidRequestException("Condition cannot be null");
 		}
 		
-		FhirUtils.OpenmrsConditionType result = FhirUtils.getOpenmrsConditionType(condition).orElse(null);
-		
-		if (result.equals(FhirUtils.OpenmrsConditionType.DIAGNOSIS)) {
-			return diagnosisService.update(uuid, condition);
-		} else {
+		try {
 			return super.update(uuid, condition);
 		}
-		
+		catch (ResourceNotFoundException e) {
+			return diagnosisService.update(uuid, condition);
+		}
 	}
 	
 	@Override
