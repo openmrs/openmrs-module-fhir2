@@ -9,252 +9,114 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
-import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 
-import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.ReferenceAndListParam;
-import ca.uhn.fhir.rest.param.ReferenceOrListParam;
-import ca.uhn.fhir.rest.param.ReferenceParam;
-import ca.uhn.fhir.rest.param.TokenAndListParam;
-import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.MedicationDispense;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.openmrs.MedicationDispense;
-import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
-import org.openmrs.module.fhir2.api.dao.FhirMedicationDispenseDao;
-import org.openmrs.module.fhir2.api.search.SearchQuery;
-import org.openmrs.module.fhir2.api.search.SearchQueryBundleProvider;
-import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
+import org.openmrs.module.fhir2.api.handler.FhirResourceHandler;
 import org.openmrs.module.fhir2.api.search.param.MedicationDispenseSearchParams;
-import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
-import org.openmrs.module.fhir2.api.translators.MedicationDispenseTranslator;
+import org.openmrs.module.fhir2.providers.r4.MockIBundleProvider;
 
+/**
+ * Orchestrator-level tests for {@link FhirMedicationDispenseServiceImpl}. Dispatch mechanics are
+ * covered in {@link BaseCompositeFhirServiceTest}; backing-specific CRUD/search lives in
+ * {@code MedicationDispenseBackedMedicationDispenseHandlerTest}. What this class covers is that
+ * create/update/search reach the handler through the composite.
+ */
 @RunWith(MockitoJUnitRunner.class)
 public class FhirMedicationDispenseServiceImplTest {
 	
-	private static final Integer MEDICATION_DISPENSE_ID = 123;
-	
 	private static final String MEDICATION_DISPENSE_UUID = "43578769-f1a4-46af-b08b-d9fe8a07066f";
 	
-	private static final String NEW_DISPENSE_UUID = "a15e4988-d07a-11ec-8307-0242ac110002";
+	private static final int START_INDEX = 0;
+	
+	private static final int END_INDEX = 100;
 	
 	@Mock
-	private FhirMedicationDispenseDao<MedicationDispense> dao;
-	
-	@Mock
-	private MedicationDispenseTranslator<MedicationDispense> translator;
+	private FhirResourceHandler<MedicationDispense> handler;
 	
 	@Mock
 	private FhirGlobalPropertyService globalPropertyService;
 	
-	@Mock
-	private SearchQueryInclude<org.hl7.fhir.r4.model.MedicationDispense> searchQueryInclude;
-	
-	@Mock
-	private SearchQuery<MedicationDispense, org.hl7.fhir.r4.model.MedicationDispense, FhirMedicationDispenseDao<MedicationDispense>, MedicationDispenseTranslator<MedicationDispense>, SearchQueryInclude<org.hl7.fhir.r4.model.MedicationDispense>> searchQuery;
-	
-	private FhirMedicationDispenseServiceImpl dispenseService;
-	
-	private MedicationDispense openmrsDispense;
-	
-	private org.hl7.fhir.r4.model.MedicationDispense fhirDispense;
+	private FhirMedicationDispenseServiceImpl service;
 	
 	@Before
 	public void setup() {
-		dispenseService = new FhirMedicationDispenseServiceImpl() {
-			
-			@Override
-			protected void validateObject(MedicationDispense object) {
-			}
-		};
-		dispenseService.setDao(dao);
-		dispenseService.setTranslator(translator);
-		dispenseService.setSearchQuery(searchQuery);
-		dispenseService.setSearchQueryInclude(searchQueryInclude);
+		lenient().when(handler.getImplicitProfile())
+		        .thenReturn("http://fhir.openmrs.org/StructureDefinition/openmrs-medicationdispense");
+		lenient().when(handler.acceptsSearch(any())).thenReturn(true);
 		
-		openmrsDispense = new MedicationDispense();
-		openmrsDispense.setUuid(MEDICATION_DISPENSE_UUID);
-		
-		fhirDispense = new org.hl7.fhir.r4.model.MedicationDispense();
-		fhirDispense.setId(MEDICATION_DISPENSE_UUID);
+		service = new FhirMedicationDispenseServiceImpl();
+		service.setHandlers(Collections.singletonList(handler));
+		service.setGlobalPropertyService(globalPropertyService);
 	}
 	
 	@Test
-	public void shouldGetMedicationDispenseByUuid() {
-		when(dao.get(MEDICATION_DISPENSE_UUID)).thenReturn(openmrsDispense);
-		when(translator.toFhirResource(openmrsDispense)).thenReturn(fhirDispense);
+	public void searchMedicationDispenses_shouldFanOutAndReturnHandlerResults() {
+		when(handler.search(any())).thenReturn(bundleOf(2));
 		
-		org.hl7.fhir.r4.model.MedicationDispense dispense = dispenseService.get(MEDICATION_DISPENSE_UUID);
+		IBundleProvider results = service.searchMedicationDispenses(new MedicationDispenseSearchParams());
+		List<IBaseResource> resultList = results.getResources(START_INDEX, END_INDEX);
 		
-		assertThat(dispense, notNullValue());
-		assertThat(dispense.getId(), notNullValue());
-		assertThat(dispense.getId(), equalTo(MEDICATION_DISPENSE_UUID));
-	}
-	
-	@Test
-	public void shouldThrowExceptionWhenGetMissingUuid() {
-		assertThrows(ResourceNotFoundException.class, () -> dispenseService.get(NEW_DISPENSE_UUID));
-	}
-	
-	@Test
-	public void create_shouldCreateNewMedicationDispense() {
-		MedicationDispense openmrsDispense = new MedicationDispense();
-		openmrsDispense.setUuid(NEW_DISPENSE_UUID);
-		
-		org.hl7.fhir.r4.model.MedicationDispense fhirDispense = new org.hl7.fhir.r4.model.MedicationDispense();
-		fhirDispense.setId(NEW_DISPENSE_UUID);
-		
-		when(translator.toFhirResource(openmrsDispense)).thenReturn(fhirDispense);
-		when(dao.createOrUpdate(openmrsDispense)).thenReturn(openmrsDispense);
-		when(translator.toOpenmrsType(fhirDispense)).thenReturn(openmrsDispense);
-		
-		org.hl7.fhir.r4.model.MedicationDispense result = dispenseService.create(fhirDispense);
-		
-		assertThat(result, notNullValue());
-		assertThat(result.getId(), notNullValue());
-		assertThat(result.getId(), equalTo(NEW_DISPENSE_UUID));
-	}
-	
-	@Test
-	public void update_shouldUpdateExistingMedicationDispense() {
-		MedicationDispense openmrsDispense = new MedicationDispense();
-		openmrsDispense.setUuid(MEDICATION_DISPENSE_UUID);
-		
-		org.hl7.fhir.r4.model.MedicationDispense fhirDispense = new org.hl7.fhir.r4.model.MedicationDispense();
-		fhirDispense.setId(MEDICATION_DISPENSE_UUID);
-		
-		when(dao.get(MEDICATION_DISPENSE_UUID)).thenReturn(openmrsDispense);
-		when(translator.toFhirResource(openmrsDispense)).thenReturn(fhirDispense);
-		when(dao.createOrUpdate(openmrsDispense)).thenReturn(openmrsDispense);
-		when(translator.toOpenmrsType(any(MedicationDispense.class), any(org.hl7.fhir.r4.model.MedicationDispense.class)))
-		        .thenReturn(openmrsDispense);
-		
-		org.hl7.fhir.r4.model.MedicationDispense result = dispenseService.update(MEDICATION_DISPENSE_UUID, fhirDispense);
-		
-		assertThat(result, notNullValue());
-		assertThat(result.getId(), notNullValue());
-		assertThat(result.getId(), equalTo(MEDICATION_DISPENSE_UUID));
-	}
-	
-	@Test
-	public void update_shouldThrowExceptionWhenIdIsNull() {
-		org.hl7.fhir.r4.model.MedicationDispense fhirDispense = new org.hl7.fhir.r4.model.MedicationDispense();
-		assertThrows(InvalidRequestException.class, () -> dispenseService.update(null, fhirDispense));
-	}
-	
-	@Test
-	public void update_shouldThrowExceptionWhenMedicationDispenseIsNull() {
-		assertThrows(InvalidRequestException.class, () -> dispenseService.update(MEDICATION_DISPENSE_UUID, null));
-	}
-	
-	@Test
-	public void update_shouldThrowExceptionWhenMedicationDispenseIdIsNull() {
-		org.hl7.fhir.r4.model.MedicationDispense fhirDispense = new org.hl7.fhir.r4.model.MedicationDispense();
-		assertThrows(InvalidRequestException.class, () -> dispenseService.update(MEDICATION_DISPENSE_UUID, fhirDispense));
-	}
-	
-	@Test
-	public void update_shouldThrowExceptionWhenMedicationDispenseIdDoesNotMatchCurrentId() {
-		org.hl7.fhir.r4.model.MedicationDispense fhirDispense = new org.hl7.fhir.r4.model.MedicationDispense();
-		fhirDispense.setId(NEW_DISPENSE_UUID);
-		assertThrows(InvalidRequestException.class, () -> dispenseService.update(MEDICATION_DISPENSE_UUID, fhirDispense));
-	}
-	
-	@Test
-	public void delete_shouldDeleteExistingMedicationDispense() {
-		MedicationDispense openmrsDispense = new MedicationDispense();
-		openmrsDispense.setUuid(MEDICATION_DISPENSE_UUID);
-		
-		org.hl7.fhir.r4.model.MedicationDispense fhirDispense = new org.hl7.fhir.r4.model.MedicationDispense();
-		fhirDispense.setId(MEDICATION_DISPENSE_UUID);
-		
-		when(dao.delete(MEDICATION_DISPENSE_UUID)).thenReturn(openmrsDispense);
-		dispenseService.delete(MEDICATION_DISPENSE_UUID);
-	}
-	
-	@Test
-	public void delete_shouldThrowExceptionWhenIdIsNull() {
-		assertThrows(InvalidRequestException.class, () -> dispenseService.delete(null));
-	}
-	
-	@Test
-	public void searchMedicationDispenses_shouldGetSearchResults() {
-		String patientReference = "patient-ref";
-		String encounterReference = "encounter-ref";
-		String medicationRequestRef = "medication-request-ref";
-		String lastUpdatedDate = "2020-09-03";
-		
-		ReferenceAndListParam patientParam = new ReferenceAndListParam();
-		patientParam.addValue(new ReferenceOrListParam().add(new ReferenceParam(patientReference)));
-		
-		ReferenceAndListParam encounterParam = new ReferenceAndListParam();
-		encounterParam.addValue(new ReferenceOrListParam().addOr(new ReferenceParam(encounterReference)));
-		
-		ReferenceAndListParam medicationRequestParam = new ReferenceAndListParam();
-		encounterParam.addValue(new ReferenceOrListParam().addOr(new ReferenceParam(medicationRequestRef)));
-		
-		TokenAndListParam idParam = new TokenAndListParam().addAnd(new TokenParam(MEDICATION_DISPENSE_UUID));
-		
-		DateRangeParam lastUpdatedParam = new DateRangeParam().setLowerBound(lastUpdatedDate).setUpperBound(lastUpdatedDate);
-		
-		SortSpec sortParam = new SortSpec("sort param");
-		
-		HashSet<Include> includes = new HashSet<>();
-		
-		SearchParameterMap theParams = new SearchParameterMap()
-		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, idParam)
-		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdatedParam)
-		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientParam)
-		        .addParameter(FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER, encounterParam)
-		        .addParameter(FhirConstants.MEDICATION_REQUEST_REFERENCE_SEARCH_HANDLER, medicationRequestParam)
-		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes).setSortSpec(sortParam);
-		
-		when(dao.getSearchResults(any())).thenReturn(Collections.singletonList(openmrsDispense));
-		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
-		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
-		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
-		when(translator.toFhirResource(openmrsDispense)).thenReturn(fhirDispense);
-		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
-		
-		MedicationDispenseSearchParams params = new MedicationDispenseSearchParams();
-		params.setId(idParam);
-		params.setLastUpdated(lastUpdatedParam);
-		params.setPatient(patientParam);
-		params.setEncounter(encounterParam);
-		params.setMedicationRequest(medicationRequestParam);
-		params.setIncludes(includes);
-		params.setSort(sortParam);
-		
-		IBundleProvider result = dispenseService.searchMedicationDispenses(params);
-		
-		List<IBaseResource> resultList = result.getResources(0, 10);
-		
-		assertThat(result, notNullValue());
+		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
+		assertThat(resultList, hasSize(2));
+		verify(handler).search(any());
+	}
+	
+	@Test
+	public void create_shouldDispatchToHandler() {
+		MedicationDispense input = new MedicationDispense();
+		MedicationDispense created = new MedicationDispense();
+		created.setId(MEDICATION_DISPENSE_UUID);
+		when(handler.canHandle(input)).thenReturn(true);
+		when(handler.create(input)).thenReturn(created);
+		
+		MedicationDispense result = service.create(input);
+		
+		assertThat(result, notNullValue());
+		verify(handler).create(input);
+	}
+	
+	@Test
+	public void update_shouldDispatchToHandler() {
+		MedicationDispense input = new MedicationDispense();
+		input.setId(MEDICATION_DISPENSE_UUID);
+		MedicationDispense updated = new MedicationDispense();
+		updated.setId(MEDICATION_DISPENSE_UUID);
+		when(handler.exists(MEDICATION_DISPENSE_UUID)).thenReturn(true);
+		when(handler.update(MEDICATION_DISPENSE_UUID, input, null, false)).thenReturn(updated);
+		
+		MedicationDispense result = service.update(MEDICATION_DISPENSE_UUID, input);
+		
+		assertThat(result, notNullValue());
+		verify(handler).update(MEDICATION_DISPENSE_UUID, input, null, false);
+	}
+	
+	private static IBundleProvider bundleOf(int n) {
+		List<MedicationDispense> rows = new ArrayList<>(n);
+		for (int i = 0; i < n; i++) {
+			rows.add(new MedicationDispense());
+		}
+		return new MockIBundleProvider<>(rows, 10, 1);
 	}
 }
