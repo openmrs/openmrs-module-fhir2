@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+    This Source Code Form is subject to the terms of the Mozilla Public License,
+    v. 2.0. If a copy of the MPL was not distributed with this file, You can
+    obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+    the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+
+    Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+    graphic logo is a trademark of OpenMRS Inc.
+-->
+
+<dataset>
+	<!-- UCUM concept source, identified by name as real dictionaries register it -->
+	<concept_reference_source concept_source_id="9002" name="UCUM" description="The Unified Code for Units of Measure" creator="1" date_created="2026-07-06 00:00:00" retired="0" uuid="900200aa-b67d-11ec-8065-0242ac110002" />
+
+	<!-- Minutes mapped only to the SNOMED CT code that is active since the 2021-07-31 release -->
+	<concept concept_id = "91733" retired= "0" datatype_id= "4" class_id= "11" is_set= "0" creator= "1" date_created= "2026-07-06 00:00:00" uuid= "917330aa-b67d-11ec-8065-0242ac110002" />
+	<concept_name concept_name_id="91733" uuid="917331aa-b67d-11ec-8065-0242ac110002" concept_id="91733" name="Minutes" locale="en" creator="1" date_created="2026-07-06 00:00:00" concept_name_type="FULLY_SPECIFIED" locale_preferred="1" voided="false" />
+	<concept_reference_term concept_reference_term_id="91733" uuid="917332aa-b67d-11ec-8065-0242ac110002" concept_source_id="2" code="1156209001" retired="0" creator="1" date_created="2026-07-06 00:00:00" />
+	<concept_reference_map concept_map_id="91733" uuid="917333aa-b67d-11ec-8065-0242ac110002" concept_id="91733" concept_reference_term_id="91733" concept_map_type_id="2" creator="1" date_created="2026-07-06 00:00:00" />
+
+	<!-- Hours mapped only to UCUM -->
+	<concept concept_id = "91822" retired= "0" datatype_id= "4" class_id= "11" is_set= "0" creator= "1" date_created= "2026-07-06 00:00:00" uuid= "918220aa-b67d-11ec-8065-0242ac110002" />
+	<concept_name concept_name_id="91822" uuid="918221aa-b67d-11ec-8065-0242ac110002" concept_id="91822" name="Hours" locale="en" creator="1" date_created="2026-07-06 00:00:00" concept_name_type="FULLY_SPECIFIED" locale_preferred="1" voided="false" />
+	<concept_reference_term concept_reference_term_id="91822" uuid="918222aa-b67d-11ec-8065-0242ac110002" concept_source_id="9002" code="h" retired="0" creator="1" date_created="2026-07-06 00:00:00" />
+	<concept_reference_map concept_map_id="91822" uuid="918223aa-b67d-11ec-8065-0242ac110002" concept_id="91822" concept_reference_term_id="91822" concept_map_type_id="2" creator="1" date_created="2026-07-06 00:00:00" />
+
+</dataset>
