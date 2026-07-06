@@ -73,6 +73,8 @@ public class ServiceRequestTranslatorImplTest {
 	
 	private static final String LOINC_CODE = "1000-1";
 	
+	private static final String INSTRUCTIONS = "collect before 9am";
+	
 	private static final String PATIENT_UUID = "14d4f066-15f5-102d-96e4-000c29c2a5d7";
 	
 	private static final String ENCOUNTER_UUID = "y403fafb-e5e4-42d0-9d11-4f52e89d123r";
@@ -396,14 +398,28 @@ public class ServiceRequestTranslatorImplTest {
 	public void toFhirResource_shouldTranslateOrderNumberToIdentifier() throws Exception {
 		TestOrder order = new TestOrder();
 		setOrderNumberByReflection(order, TEST_ORDER_NUMBER);
-		
+
 		when(taskService.searchForTasks(any()))
 		        .thenReturn(new MockIBundleProvider<>(Collections.emptyList(), PREFERRED_PAGE_SIZE, COUNT));
-		
+
 		ServiceRequest result = translator.toFhirResource(order);
-		
+
 		assertThat(result.getIdentifier(), hasSize(1));
 		assertThat(result.getIdentifierFirstRep().getValue(), equalTo(TEST_ORDER_NUMBER));
+	}
+
+	@Test
+	public void toFhirResource_shouldTranslateInstructionsToPatientInstruction() {
+		TestOrder order = new TestOrder();
+		order.setInstructions(INSTRUCTIONS);
+
+		when(taskService.searchForTasks(any()))
+		        .thenReturn(new MockIBundleProvider<>(Collections.emptyList(), PREFERRED_PAGE_SIZE, COUNT));
+
+		ServiceRequest result = translator.toFhirResource(order);
+
+		assertThat(result, notNullValue());
+		assertThat(result.getPatientInstruction(), equalTo(INSTRUCTIONS));
 	}
 	
 	@Test
