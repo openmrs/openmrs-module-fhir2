@@ -49,6 +49,11 @@ public class DurationUnitTranslatorImpl implements DurationUnitTranslator {
 	
 	private static final String UCUM_CONCEPT_SOURCE = "UCUM";
 	
+	// Matched as a fallback for dictionaries that register SNOMED CT by name without setting its HL7
+	// code, mirroring UCUM. TODO: replace with Duration.SNOMED_CT_CONCEPT_SOURCE_NAME once the module
+	// depends on a platform release that includes TRUNK-6674.
+	private static final String SNOMED_CT_CONCEPT_SOURCE_NAME = "SNOMED CT";
+	
 	private static final Map<String, Timing.UnitsOfTime> SNOMED_CT_CODE_MAP;
 	
 	private static final Map<String, Timing.UnitsOfTime> UCUM_CODE_MAP;
@@ -112,7 +117,8 @@ public class DurationUnitTranslatorImpl implements DurationUnitTranslator {
 	}
 	
 	private static Timing.UnitsOfTime findUnitsOfTime(ConceptSource conceptSource, String code) {
-		if (Duration.SNOMED_CT_CONCEPT_SOURCE_HL7_CODE.equals(conceptSource.getHl7Code())) {
+		if (Duration.SNOMED_CT_CONCEPT_SOURCE_HL7_CODE.equals(conceptSource.getHl7Code())
+		        || SNOMED_CT_CONCEPT_SOURCE_NAME.equalsIgnoreCase(conceptSource.getName())) {
 			return SNOMED_CT_CODE_MAP.get(code);
 		}
 		if (UCUM_CONCEPT_SOURCE.equalsIgnoreCase(conceptSource.getName())
