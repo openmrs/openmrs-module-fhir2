@@ -36,6 +36,8 @@ public class DurationUnitTranslatorImplCurrentCodesTest extends BaseFhirContextS
 	
 	private static final String UCUM_HOURS_UUID = "918220aa-b67d-11ec-8065-0242ac110002";
 	
+	private static final String NAME_ONLY_SNOMED_DAYS_UUID = "910720aa-b67d-11ec-8065-0242ac110002";
+	
 	@Autowired
 	private DurationUnitTranslator durationUnitTranslator;
 	
@@ -79,5 +81,22 @@ public class DurationUnitTranslatorImplCurrentCodesTest extends BaseFhirContextS
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getUuid(), equalTo(UCUM_HOURS_UUID));
+	}
+	
+	@Test
+	public void toFhirResource_shouldTranslateConceptWhoseSnomedCtSourceIsIdentifiedByNameOnly() {
+		Concept concept = conceptService.getConceptByUuid(NAME_ONLY_SNOMED_DAYS_UUID);
+		
+		Timing.UnitsOfTime result = durationUnitTranslator.toFhirResource(concept);
+		
+		assertThat(result, equalTo(Timing.UnitsOfTime.D));
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldResolveDaysThroughTheNameIdentifiedSnomedCtSource() {
+		Concept result = durationUnitTranslator.toOpenmrsType(Timing.UnitsOfTime.D);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getUuid(), equalTo(NAME_ONLY_SNOMED_DAYS_UUID));
 	}
 }

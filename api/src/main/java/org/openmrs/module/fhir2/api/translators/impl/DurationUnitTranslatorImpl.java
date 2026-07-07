@@ -105,6 +105,9 @@ public class DurationUnitTranslatorImpl implements DurationUnitTranslator {
 			if (entry.getValue() == unitsOfTime) {
 				Concept concept = conceptService.getConceptByMapping(entry.getKey(),
 				    Duration.SNOMED_CT_CONCEPT_SOURCE_HL7_CODE);
+				if (concept == null) {
+					concept = conceptService.getConceptByMapping(entry.getKey(), SNOMED_CT_CONCEPT_SOURCE_NAME);
+				}
 				if (concept != null) {
 					return concept;
 				}
