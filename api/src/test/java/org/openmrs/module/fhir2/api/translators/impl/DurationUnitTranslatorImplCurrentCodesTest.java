@@ -32,9 +32,9 @@ import org.springframework.beans.factory.annotation.Autowired;
  * CT minute code that is active since the 2021-07-31 release, and UCUM mappings. Unlike
  * {@link DurationUnitTranslatorImplTest}, the dataset here deliberately carries no legacy SNOMED CT
  * mappings, so these tests prove the fallbacks rather than the legacy path. Concepts whose mapping
- * sets the dataset must not carry, the current CIEL shape with both minute codes and a miscurated
- * concept whose known codes conflict, are built in memory instead, since persisting a legacy minute
- * mapping would change what {@code toOpenmrsType(MIN)} resolves.
+ * sets the dataset must not carry, such as the current CIEL shape with both minute codes and
+ * concepts whose SNOMED CT and UCUM mappings disagree, are built in memory instead, since
+ * persisting a legacy minute mapping would change what {@code toOpenmrsType(MIN)} resolves.
  */
 public class DurationUnitTranslatorImplCurrentCodesTest extends BaseFhirContextSensitiveTest {
 	
@@ -121,12 +121,21 @@ public class DurationUnitTranslatorImplCurrentCodesTest extends BaseFhirContextS
 	}
 	
 	@Test
-	public void toFhirResource_shouldNotTranslateConceptWhoseKnownCodesDenoteDifferentUnits() {
+	public void toFhirResource_shouldPreferSnomedCtWhenAUcumMappingDenotesADifferentUnit() {
 		Concept concept = conceptMappedSameAsTo(term(snomedCt(), Duration.SNOMED_CT_MINUTES_CODE), term(ucum(), "h"));
 		
 		Timing.UnitsOfTime result = durationUnitTranslator.toFhirResource(concept);
 		
-		assertThat(result, equalTo(Timing.UnitsOfTime.NULL));
+		assertThat(result, equalTo(Timing.UnitsOfTime.MIN));
+	}
+	
+	@Test
+	public void toFhirResource_shouldFallBackToUcumWhenNoSnomedCtMappingCarriesAKnownCode() {
+		Concept concept = conceptMappedSameAsTo(term(snomedCt(), "99999999"), term(ucum(), "wk"));
+		
+		Timing.UnitsOfTime result = durationUnitTranslator.toFhirResource(concept);
+		
+		assertThat(result, equalTo(Timing.UnitsOfTime.WK));
 	}
 	
 	private static Concept conceptMappedSameAsTo(ConceptReferenceTerm... terms) {

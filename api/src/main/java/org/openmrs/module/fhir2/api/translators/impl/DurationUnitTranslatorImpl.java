@@ -20,7 +20,6 @@ import java.util.Map;
 
 import lombok.Getter;
 import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.r4.model.Timing;
 import org.openmrs.Concept;
 import org.openmrs.ConceptMap;
@@ -33,7 +32,6 @@ import org.openmrs.module.fhir2.api.translators.DurationUnitTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-@Slf4j
 @Component
 public class DurationUnitTranslatorImpl implements DurationUnitTranslator {
 	
@@ -88,28 +86,25 @@ public class DurationUnitTranslatorImpl implements DurationUnitTranslator {
 	
 	@Override
 	public Timing.UnitsOfTime toFhirResource(@Nonnull Concept concept) {
-		// mirrors Duration.getDuration in TRUNK-6674: a concept whose known codes denote different
-		// units is miscurated, so refuse to pick one rather than serialize an arbitrary unit
-		Timing.UnitsOfTime knownUnit = null;
+		// SNOMED CT mappings take priority and UCUM only fills gaps, so concepts that resolved
+		// before UCUM support keep resolving identically however their UCUM mappings are curated
+		Timing.UnitsOfTime ucumUnit = null;
 		for (ConceptMap conceptMapping : concept.getConceptMappings()) {
 			if (!ConceptMapType.SAME_AS_MAP_TYPE_UUID.equals(conceptMapping.getConceptMapType().getUuid())) {
 				continue;
 			}
 			ConceptReferenceTerm term = conceptMapping.getConceptReferenceTerm();
-			Timing.UnitsOfTime unitsOfTime = findUnitsOfTime(term.getConceptSource(), term.getCode());
-			if (unitsOfTime == null) {
-				continue;
-			}
-			if (knownUnit == null) {
-				knownUnit = unitsOfTime;
-			} else if (knownUnit != unitsOfTime) {
-				log.warn(
-				    "Not translating duration units concept {} because its SAME-AS mappings denote different units, e.g. {} and {}",
-				    concept.getUuid(), knownUnit, unitsOfTime);
-				return Timing.UnitsOfTime.NULL;
+			ConceptSource source = term.getConceptSource();
+			if (isSnomedCtSource(source)) {
+				Timing.UnitsOfTime snomedCtUnit = SNOMED_CT_CODE_MAP.get(term.getCode());
+				if (snomedCtUnit != null) {
+					return snomedCtUnit;
+				}
+			} else if (ucumUnit == null && isUcumSource(source)) {
+				ucumUnit = UCUM_CODE_MAP.get(term.getCode());
 			}
 		}
-		return knownUnit != null ? knownUnit : Timing.UnitsOfTime.NULL;
+		return ucumUnit != null ? ucumUnit : Timing.UnitsOfTime.NULL;
 	}
 	
 	@Override
@@ -132,15 +127,13 @@ public class DurationUnitTranslatorImpl implements DurationUnitTranslator {
 		return null;
 	}
 	
-	private static Timing.UnitsOfTime findUnitsOfTime(ConceptSource conceptSource, String code) {
-		if (Duration.SNOMED_CT_CONCEPT_SOURCE_HL7_CODE.equals(conceptSource.getHl7Code())
-		        || SNOMED_CT_CONCEPT_SOURCE_NAME.equalsIgnoreCase(conceptSource.getName())) {
-			return SNOMED_CT_CODE_MAP.get(code);
-		}
-		if (UCUM_CONCEPT_SOURCE.equalsIgnoreCase(conceptSource.getName())
-		        || UCUM_CONCEPT_SOURCE.equals(conceptSource.getHl7Code())) {
-			return UCUM_CODE_MAP.get(code);
-		}
-		return null;
+	private static boolean isSnomedCtSource(ConceptSource conceptSource) {
+		return Duration.SNOMED_CT_CONCEPT_SOURCE_HL7_CODE.equals(conceptSource.getHl7Code())
+		        || SNOMED_CT_CONCEPT_SOURCE_NAME.equalsIgnoreCase(conceptSource.getName());
+	}
+	
+	private static boolean isUcumSource(ConceptSource conceptSource) {
+		return UCUM_CONCEPT_SOURCE.equalsIgnoreCase(conceptSource.getName())
+		        || UCUM_CONCEPT_SOURCE.equals(conceptSource.getHl7Code());
 	}
 }
