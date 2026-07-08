@@ -20,6 +20,7 @@ import java.util.Map;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.r4.model.Timing;
 import org.openmrs.Concept;
 import org.openmrs.ConceptMap;
@@ -32,6 +33,7 @@ import org.openmrs.module.fhir2.api.translators.DurationUnitTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 public class DurationUnitTranslatorImpl implements DurationUnitTranslator {
 	
@@ -86,17 +88,28 @@ public class DurationUnitTranslatorImpl implements DurationUnitTranslator {
 	
 	@Override
 	public Timing.UnitsOfTime toFhirResource(@Nonnull Concept concept) {
+		// mirrors Duration.getDuration in TRUNK-6674: a concept whose known codes denote different
+		// units is miscurated, so refuse to pick one rather than serialize an arbitrary unit
+		Timing.UnitsOfTime knownUnit = null;
 		for (ConceptMap conceptMapping : concept.getConceptMappings()) {
 			if (!ConceptMapType.SAME_AS_MAP_TYPE_UUID.equals(conceptMapping.getConceptMapType().getUuid())) {
 				continue;
 			}
 			ConceptReferenceTerm term = conceptMapping.getConceptReferenceTerm();
 			Timing.UnitsOfTime unitsOfTime = findUnitsOfTime(term.getConceptSource(), term.getCode());
-			if (unitsOfTime != null) {
-				return unitsOfTime;
+			if (unitsOfTime == null) {
+				continue;
+			}
+			if (knownUnit == null) {
+				knownUnit = unitsOfTime;
+			} else if (knownUnit != unitsOfTime) {
+				log.warn(
+				    "Not translating duration units concept {} because its SAME-AS mappings denote different units, e.g. {} and {}",
+				    concept.getUuid(), knownUnit, unitsOfTime);
+				return Timing.UnitsOfTime.NULL;
 			}
 		}
-		return Timing.UnitsOfTime.NULL;
+		return knownUnit != null ? knownUnit : Timing.UnitsOfTime.NULL;
 	}
 	
 	@Override
