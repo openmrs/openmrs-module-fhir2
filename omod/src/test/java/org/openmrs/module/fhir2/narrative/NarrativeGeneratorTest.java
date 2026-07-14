@@ -14,6 +14,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -28,6 +29,7 @@ import ca.uhn.fhir.narrative2.TemplateTypeEnum;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.Test;
+import org.openmrs.util.OpenmrsUtil;
 
 /**
  * Tests for Narrative Generator (OpenMRSThymeleafNarrativeGenerator,
@@ -67,6 +69,20 @@ public class NarrativeGeneratorTest {
 		assertEquals(template.getTemplateText().trim(), expectedNarrative.trim());
 	}
 	
+	/**
+	 * Check that an {@code openmrs:} prefixed path is resolved against the OpenMRS application data
+	 * directory before being handed to HAPI (which itself only understands classpath: and file:).
+	 */
+	@Test
+	public void shouldResolveOpenmrsPrefixAgainstApplicationDataDirectory() {
+		String givenPath = "openmrs:some/random/openmrs/path.properties";
+		File expectedFile = new File(OpenmrsUtil.getApplicationDataDirectory(), "some/random/openmrs/path.properties");
+
+		Throwable e = assertThrows(IOException.class, () -> OpenmrsNarrativeTemplateManifest
+		        .forManifestFileLocation(Collections.singletonList(givenPath)));
+		assertThat(e.getMessage(), containsString(expectedFile.getAbsolutePath()));
+	}
+
 	/**
 	 * Check that ConfigurationException is thrown when property name is invalid
 	 */

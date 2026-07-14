@@ -135,8 +135,7 @@ public class FhirMedicationRequestDaoImplTest extends BaseFhirContextSensitiveTe
 		try {
 			Context.addProxyPrivilege(GET_ORDERS);
 			assertThat(dao.get(DRUG_ORDER_UUID), notNullValue());
-		}
-		finally {
+		} finally {
 			Context.removeProxyPrivilege(GET_ORDERS);
 		}
 	}
@@ -152,8 +151,7 @@ public class FhirMedicationRequestDaoImplTest extends BaseFhirContextSensitiveTe
 		try {
 			Context.addProxyPrivilege(GET_ORDERS);
 			assertThat(dao.getSearchResults(theParams), notNullValue());
-		}
-		finally {
+		} finally {
 			Context.removeProxyPrivilege(GET_ORDERS);
 		}
 	}
@@ -169,8 +167,7 @@ public class FhirMedicationRequestDaoImplTest extends BaseFhirContextSensitiveTe
 		try {
 			Context.addProxyPrivilege(GET_ORDERS);
 			assertThat(dao.getSearchResultsCount(theParams), greaterThan(0));
-		}
-		finally {
+		} finally {
 			Context.removeProxyPrivilege(GET_ORDERS);
 		}
 	}

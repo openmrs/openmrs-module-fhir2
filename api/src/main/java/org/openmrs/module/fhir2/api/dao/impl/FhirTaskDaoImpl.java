@@ -92,8 +92,7 @@ public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDa
 				try {
 					return Optional.of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("status"),
 					    FhirTask.TaskStatus.valueOf(Task.TaskStatus.fromCode(token.getValue().toLowerCase()).name())));
-				}
-				catch (IllegalArgumentException | FHIRException e) {
+				} catch (IllegalArgumentException | FHIRException e) {
 					return Optional.empty();
 				}
 			}

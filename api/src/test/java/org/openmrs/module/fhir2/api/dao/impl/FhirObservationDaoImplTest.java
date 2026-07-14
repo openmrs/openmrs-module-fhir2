@@ -83,8 +83,7 @@ public class FhirObservationDaoImplTest extends BaseFhirContextSensitiveTest {
 		try {
 			Context.addProxyPrivilege(GET_OBS);
 			assertThat(dao.getSearchResults(theParams), notNullValue());
-		}
-		finally {
+		} finally {
 			Context.removeProxyPrivilege(GET_OBS);
 		}
 	}
@@ -100,8 +99,7 @@ public class FhirObservationDaoImplTest extends BaseFhirContextSensitiveTest {
 		try {
 			Context.addProxyPrivilege(GET_OBS);
 			assertThat(dao.getSearchResultsCount(theParams), greaterThan(0));
-		}
-		finally {
+		} finally {
 			Context.removeProxyPrivilege(GET_OBS);
 		}
 	}

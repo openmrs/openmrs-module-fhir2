@@ -391,7 +391,7 @@ class FhirTaskDaoImplTest extends BaseFhirContextSensitiveTest {
 		assertThat(results, notNullValue());
 		assertThat(results, not(empty()));
 	}
-		
+	
 	@Test
 	void searchForTasks_shouldHandleNullBasedOnRefs() {
 		FhirTask toUpdate = dao.get(TASK_UUID);
