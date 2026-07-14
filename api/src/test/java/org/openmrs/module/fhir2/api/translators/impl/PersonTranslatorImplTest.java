@@ -37,11 +37,11 @@ import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.BaseOpenmrsData;
 import org.openmrs.Patient;
 import org.openmrs.Person;
@@ -60,7 +60,7 @@ import org.openmrs.module.fhir2.api.translators.PersonAttributeTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonNameTranslator;
 import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class PersonTranslatorImplTest {
 	
 	private static final String PERSON_FAMILY_NAME = "bett";
@@ -116,7 +116,7 @@ public class PersonTranslatorImplTest {
 	
 	private Person personMock;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		personTranslator = new PersonTranslatorImpl();
 		personTranslator.setGenderTranslator(genderTranslator);
@@ -129,7 +129,7 @@ public class PersonTranslatorImplTest {
 		personTranslator.setPersonAttributeTranslator(personAttributeTranslator);
 	}
 	
-	@Before
+	@BeforeEach
 	public void initPersonMock() {
 		User user = new User();
 		user.setUuid(USER_UUID);

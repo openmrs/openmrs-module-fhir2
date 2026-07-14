@@ -54,20 +54,20 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.hamcrest.MatcherAssert;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Observation;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirObservationService;
 import org.openmrs.module.fhir2.api.search.param.ObservationSearchParams;
 import org.openmrs.module.fhir2.providers.r4.MockIBundleProvider;
 import org.springframework.mock.web.MockHttpServletResponse;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ObservationFhirResourceProviderWebTest extends BaseFhirR3ResourceProviderWebTest<ObservationFhirResourceProvider, Observation> {
 	
 	private static final String OBS_UUID = "39fb7f47-e80a-4056-9285-bd798be13c63";
@@ -108,7 +108,7 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR3ResourcePr
 	
 	private org.hl7.fhir.r4.model.Observation observation;
 	
-	@Before
+	@BeforeEach
 	@Override
 	public void setup() throws ServletException {
 		resourceProvider = new ObservationFhirResourceProvider();

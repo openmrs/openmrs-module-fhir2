@@ -13,14 +13,14 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
 import org.hl7.fhir.r4.model.AllergyIntolerance;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class AllergyIntoleranceCriticalityTranslatorImplTest {
 	
 	private AllergyIntoleranceCriticalityTranslatorImpl criticalityTranslator;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		criticalityTranslator = new AllergyIntoleranceCriticalityTranslatorImpl();
 	}

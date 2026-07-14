@@ -24,19 +24,19 @@ import org.exparity.hamcrest.date.DateMatchers;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.Reference;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.Cohort;
 import org.openmrs.User;
 import org.openmrs.module.fhir2.api.translators.GroupMemberTranslator;
 import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
 import org.openmrs.module.fhir2.model.GroupMember;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class GroupTranslatorImplTest {
 	
 	private static final String COHORT_UUID = "787e12bd-314e-4cc4-9b4d-1cdff9be9545";
@@ -51,7 +51,7 @@ public class GroupTranslatorImplTest {
 	
 	private GroupTranslatorImpl groupTranslator;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		groupTranslator = new GroupTranslatorImpl();
 		groupTranslator.setGroupMemberTranslator(groupMemberTranslator);
@@ -150,7 +150,7 @@ public class GroupTranslatorImplTest {
 	}
 	
 	@Test
-	@Ignore
+	@Disabled
 	public void shouldTranslateCohortMembersToFHIRGroupMembers() {
 		Cohort cohort = mock(Cohort.class);
 		Reference patientReference = mock(Reference.class);
@@ -168,7 +168,7 @@ public class GroupTranslatorImplTest {
 	}
 	
 	@Test
-	@Ignore
+	@Disabled
 	public void shouldTranslateFHIRGroupMembersToOpenMRSCohortMembers() {
 		Group group = mock(Group.class);
 		GroupMember groupMember = mock(GroupMember.class);

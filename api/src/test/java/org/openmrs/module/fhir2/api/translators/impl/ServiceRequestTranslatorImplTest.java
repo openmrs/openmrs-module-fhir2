@@ -34,11 +34,11 @@ import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.Task;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.Concept;
 import org.openmrs.Encounter;
 import org.openmrs.Order;
@@ -56,7 +56,7 @@ import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
 import org.openmrs.module.fhir2.providers.r4.MockIBundleProvider;
 import org.openmrs.order.OrderUtilTest;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ServiceRequestTranslatorImplTest {
 	
 	public static final String TEST_ORDER_TYPE_UUID = "52a447d3-a64a-11e3-9aeb-50e549534c5e";
@@ -104,7 +104,7 @@ public class ServiceRequestTranslatorImplTest {
 	
 	private TestOrder discontinuedTestOrder;
 	
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		translator = new ServiceRequestTranslatorImpl();
 		translator.setConceptTranslator(conceptTranslator);

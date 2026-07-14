@@ -17,7 +17,7 @@ import static org.hamcrest.Matchers.hasSize;
 
 import java.util.Set;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.openmrs.module.fhir2.api.FhirService;
 import org.openmrs.module.fhir2.api.impl.FhirObservationServiceImpl;
 

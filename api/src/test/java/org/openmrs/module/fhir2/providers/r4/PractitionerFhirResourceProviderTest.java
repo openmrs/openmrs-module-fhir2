@@ -12,11 +12,11 @@ package org.openmrs.module.fhir2.providers.r4;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
@@ -45,17 +45,17 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Practitioner;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirPractitionerService;
 import org.openmrs.module.fhir2.api.search.param.PractitionerSearchParams;
 import org.openmrs.module.fhir2.providers.BaseFhirProvenanceResourceTest;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceResourceTest<Practitioner> {
 	
 	private static final String PRACTITIONER_UUID = "48fb709b-48aa-4902-b681-926df5156e88";
@@ -118,13 +118,13 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 	
 	private Practitioner practitioner;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		resourceProvider = new PractitionerFhirResourceProvider();
 		resourceProvider.setPractitionerService(practitionerService);
 	}
 	
-	@Before
+	@BeforeEach
 	public void initPractitioner() {
 		HumanName name = new HumanName();
 		name.addGiven(GIVEN_NAME);
@@ -163,12 +163,11 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 		assertThat(result.getId(), equalTo(PRACTITIONER_UUID));
 	}
 	
-	@Test(expected = ResourceNotFoundException.class)
+	@Test
 	public void getPractitionerByWithWrongId_shouldThrowResourceNotFoundException() {
 		IdType idType = new IdType();
 		idType.setValue(WRONG_PRACTITIONER_UUID);
-		assertThat(resourceProvider.getPractitionerById(idType).isResource(), is(true));
-		assertThat(resourceProvider.getPractitionerById(idType), nullValue());
+		assertThrows(ResourceNotFoundException.class, () -> resourceProvider.getPractitionerById(idType));
 	}
 	
 	@Test
@@ -569,25 +568,27 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 		assertThat(result.getResource(), equalTo(newPractitioner));
 	}
 	
-	@Test(expected = InvalidRequestException.class)
+	@Test
 	public void doUpsert_shouldThrowInvalidRequestExceptionForUuidMismatch() {
 		when(practitionerService.update(WRONG_PRACTITIONER_UUID, practitioner, mockRequestDetails, false))
 		        .thenThrow(InvalidRequestException.class);
-		
-		resourceProvider.doUpsert(new IdType().setValue(WRONG_PRACTITIONER_UUID), practitioner, mockRequestDetails, false);
+
+		assertThrows(InvalidRequestException.class, () -> resourceProvider
+		        .doUpsert(new IdType().setValue(WRONG_PRACTITIONER_UUID), practitioner, mockRequestDetails, false));
 	}
 	
-	@Test(expected = InvalidRequestException.class)
+	@Test
 	public void doUpsert_shouldThrowInvalidRequestForMissingId() {
 		Practitioner noIdPractitioner = new Practitioner();
 		
 		when(practitionerService.update(PRACTITIONER_UUID, noIdPractitioner, mockRequestDetails, false))
 		        .thenThrow(InvalidRequestException.class);
 		
-		resourceProvider.doUpsert(new IdType().setValue(PRACTITIONER_UUID), noIdPractitioner, mockRequestDetails, false);
+		assertThrows(InvalidRequestException.class, () -> resourceProvider.doUpsert(new IdType().setValue(PRACTITIONER_UUID),
+		    noIdPractitioner, mockRequestDetails, false));
 	}
 	
-	@Test(expected = MethodNotAllowedException.class)
+	@Test
 	public void doUpsert_shouldThrowMethodNotAllowedIfDoesNotExist() {
 		Practitioner wrongPractitioner = new Practitioner();
 		
@@ -596,8 +597,8 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 		when(practitionerService.update(WRONG_PRACTITIONER_UUID, wrongPractitioner, mockRequestDetails, false))
 		        .thenThrow(MethodNotAllowedException.class);
 		
-		resourceProvider.doUpsert(new IdType().setValue(WRONG_PRACTITIONER_UUID), wrongPractitioner, mockRequestDetails,
-		    false);
+		assertThrows(MethodNotAllowedException.class, () -> resourceProvider
+		        .doUpsert(new IdType().setValue(WRONG_PRACTITIONER_UUID), wrongPractitioner, mockRequestDetails, false));
 	}
 	
 	@Test

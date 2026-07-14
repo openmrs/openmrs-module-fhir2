@@ -16,6 +16,7 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.Mockito.when;
@@ -29,11 +30,11 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Task;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirTaskDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
@@ -44,7 +45,7 @@ import org.openmrs.module.fhir2.api.search.param.TaskSearchParams;
 import org.openmrs.module.fhir2.api.translators.TaskTranslator;
 import org.openmrs.module.fhir2.model.FhirTask;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class FhirTaskServiceImplTest {
 	
 	private static final Integer TASK_ID = 123;
@@ -86,7 +87,7 @@ public class FhirTaskServiceImplTest {
 	
 	private FhirTaskServiceImpl fhirTaskService;
 	
-	@Before
+	@BeforeEach
 	public void setUp() {
 		fhirTaskService = new FhirTaskServiceImpl() {
 			
@@ -172,29 +173,29 @@ public class FhirTaskServiceImplTest {
 		assertThat(result, equalTo(fhirTask));
 	}
 	
-	@Test(expected = InvalidRequestException.class)
+	@Test
 	public void updateTask_shouldThrowInvalidRequestForUuidMismatch() {
 		org.hl7.fhir.r4.model.Task fhirTask = new org.hl7.fhir.r4.model.Task();
 		fhirTask.setId(TASK_UUID);
 		
-		fhirTaskService.update(WRONG_TASK_UUID, fhirTask);
+		assertThrows(InvalidRequestException.class, () -> fhirTaskService.update(WRONG_TASK_UUID, fhirTask));
 	}
 	
-	@Test(expected = InvalidRequestException.class)
+	@Test
 	public void updateTask_shouldThrowInvalidRequestForMissingUuid() {
 		org.hl7.fhir.r4.model.Task fhirTask = new org.hl7.fhir.r4.model.Task();
 		
-		fhirTaskService.update(TASK_UUID, fhirTask);
+		assertThrows(InvalidRequestException.class, () -> fhirTaskService.update(TASK_UUID, fhirTask));
 	}
 	
-	@Test(expected = ResourceNotFoundException.class)
+	@Test
 	public void updateTask_shouldThrowResourceNotFoundIfTaskDoesNotExist() {
 		org.hl7.fhir.r4.model.Task fhirTask = new org.hl7.fhir.r4.model.Task();
 		fhirTask.setId(WRONG_TASK_UUID);
 		
 		when(dao.get(WRONG_TASK_UUID)).thenReturn(null);
 		
-		fhirTaskService.update(WRONG_TASK_UUID, fhirTask);
+		assertThrows(ResourceNotFoundException.class, () -> fhirTaskService.update(WRONG_TASK_UUID, fhirTask));
 	}
 	
 	@Test

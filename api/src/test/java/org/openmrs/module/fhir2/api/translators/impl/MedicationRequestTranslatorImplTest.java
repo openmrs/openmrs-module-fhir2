@@ -16,6 +16,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.openmrs.module.fhir2.FhirConstants.OPENMRS_FHIR_EXT_MEDICATION_REQUEST_FULFILLER_STATUS;
@@ -35,11 +36,13 @@ import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.openmrs.Concept;
 import org.openmrs.Drug;
 import org.openmrs.DrugOrder;
@@ -59,7 +62,8 @@ import org.openmrs.module.fhir2.api.translators.MedicationRequestTimingTranslato
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class MedicationRequestTranslatorImplTest {
 	
 	public static final String DRUG_ORDER_TYPE_UUID = "131168f4-15f5-102d-96e4-000c29c2a5d7";
@@ -129,7 +133,7 @@ public class MedicationRequestTranslatorImplTest {
 	
 	private DrugOrder discontinuedDrugOrder;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		quantityCodingTranslator = new MedicationQuantityCodingTranslatorImpl();
 		quantityCodingTranslator.setConceptTranslator(conceptTranslator);
@@ -245,9 +249,9 @@ public class MedicationRequestTranslatorImplTest {
 		assertThat(result.getPriorPrescription().getIdentifier().getValue(), equalTo(DRUG_ORDER_NUMBER));
 	}
 	
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void toOpenMrsType_shouldThrowExceptionIfMedicationIsNull() {
-		medicationRequestTranslator.toOpenmrsType(new DrugOrder(), null);
+		assertThrows(NullPointerException.class, () -> medicationRequestTranslator.toOpenmrsType(new DrugOrder(), null));
 	}
 	
 	@Test

@@ -11,7 +11,7 @@ package org.openmrs.module.fhir2.narrative;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.File;
@@ -26,9 +26,10 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.narrative2.INarrativeTemplate;
 import ca.uhn.fhir.narrative2.NarrativeTemplateManifest;
 import ca.uhn.fhir.narrative2.TemplateTypeEnum;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.openmrs.util.OpenmrsUtil;
 
 /**
@@ -64,8 +65,8 @@ public class NarrativeGeneratorTest {
 		
 		assertEquals(template.getAppliesToProfiles(), expectedProfiles);
 		assertEquals(template.getAppliesToResourceTypes(), expectedResourceType);
-		assertEquals(template.getTemplateType(), expectedTemplateType);
-		assertEquals(template.getContextPath(), expectedContextPath);
+		assertEquals(expectedTemplateType, template.getTemplateType());
+		assertEquals(expectedContextPath, template.getContextPath());
 		assertEquals(template.getTemplateText().trim(), expectedNarrative.trim());
 	}
 	
@@ -78,7 +79,7 @@ public class NarrativeGeneratorTest {
 		String givenPath = "openmrs:some/random/openmrs/path.properties";
 		File expectedFile = new File(OpenmrsUtil.getApplicationDataDirectory(), "some/random/openmrs/path.properties");
 		
-		Throwable e = assertThrows(IOException.class,
+		Throwable e = assertThrows(InternalErrorException.class,
 		    () -> OpenmrsNarrativeTemplateManifest.forManifestFileLocation(Collections.singletonList(givenPath)));
 		assertThat(e.getMessage(), containsString(expectedFile.getAbsolutePath()));
 	}

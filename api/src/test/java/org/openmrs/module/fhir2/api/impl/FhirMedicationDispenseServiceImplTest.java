@@ -37,11 +37,11 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.MedicationDispense;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
@@ -53,7 +53,7 @@ import org.openmrs.module.fhir2.api.search.param.MedicationDispenseSearchParams;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.MedicationDispenseTranslator;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class FhirMedicationDispenseServiceImplTest {
 	
 	private static final Integer MEDICATION_DISPENSE_ID = 123;
@@ -83,7 +83,7 @@ public class FhirMedicationDispenseServiceImplTest {
 	
 	private org.hl7.fhir.r4.model.MedicationDispense fhirDispense;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		dispenseService = new FhirMedicationDispenseServiceImpl() {
 			

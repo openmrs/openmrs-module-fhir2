@@ -13,6 +13,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -22,7 +23,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -201,28 +202,28 @@ public class XmlPatcherTest {
 		assertThat(result, containsString("<b/>"));
 	}
 	
-	@Test(expected = XmlPatchException.class)
+	@Test
 	public void shouldThrowWhenRemovingDocumentRoot() throws IOException {
 		String target = "<r xmlns=\"http://example.org/r\"/>";
 		String diff = "<diff xmlns:r=\"http://example.org/r\">" + "<remove sel=\"/r:r\"/>" + "</diff>";
 		
-		applyPatch(target, diff);
+		assertThrows(XmlPatchException.class, () -> applyPatch(target, diff));
 	}
 	
-	@Test(expected = XmlPatchException.class)
+	@Test
 	public void shouldThrowWhenSelectorMatchesNothing() throws IOException {
 		String target = "<r xmlns=\"http://example.org/r\"/>";
 		String diff = "<diff xmlns:r=\"http://example.org/r\">" + "<remove sel=\"/r:r/r:missing\"/>" + "</diff>";
 		
-		applyPatch(target, diff);
+		assertThrows(XmlPatchException.class, () -> applyPatch(target, diff));
 	}
 	
-	@Test(expected = XmlPatchException.class)
+	@Test
 	public void shouldThrowWhenSelMatchesMultipleNodes() throws IOException {
 		String target = "<r xmlns=\"http://example.org/r\"><a/><a/></r>";
 		String diff = "<diff xmlns:r=\"http://example.org/r\">" + "<remove sel=\"/r:r/r:a\"/>" + "</diff>";
 		
-		applyPatch(target, diff);
+		assertThrows(XmlPatchException.class, () -> applyPatch(target, diff));
 	}
 	
 	@Test
@@ -247,56 +248,56 @@ public class XmlPatcherTest {
 		assertThat(result, containsString("<note>new</note>"));
 	}
 	
-	@Test(expected = XmlPatchException.class)
+	@Test
 	public void shouldRejectDoctypeInTargetInput() throws IOException {
 		String target = "<?xml version=\"1.0\"?><!DOCTYPE r><r/>";
 		String diff = "<diff><remove sel=\"/r\"/></diff>";
-		applyPatch(target, diff);
+		assertThrows(XmlPatchException.class, () -> applyPatch(target, diff));
 	}
 	
-	@Test(expected = XmlPatchException.class)
+	@Test
 	public void shouldRejectDoctypeInPatchInput() throws IOException {
 		String target = "<r/>";
 		String diff = "<?xml version=\"1.0\"?><!DOCTYPE diff><diff><remove sel=\"/r\"/></diff>";
-		applyPatch(target, diff);
+		assertThrows(XmlPatchException.class, () -> applyPatch(target, diff));
 	}
 	
-	@Test(expected = XmlPatchException.class)
+	@Test
 	public void shouldRejectInternalEntityDeclaration() throws IOException {
 		String target = "<?xml version=\"1.0\"?>" + "<!DOCTYPE r [<!ENTITY xxe \"data\">]>" + "<r>&xxe;</r>";
 		String diff = "<diff><remove sel=\"/r\"/></diff>";
-		applyPatch(target, diff);
+		assertThrows(XmlPatchException.class, () -> applyPatch(target, diff));
 	}
 	
-	@Test(expected = XmlPatchException.class)
+	@Test
 	public void shouldRejectExternalSystemDtdReference() throws IOException {
 		String target = "<?xml version=\"1.0\"?>" + "<!DOCTYPE r SYSTEM \"http://example.invalid/evil.dtd\">" + "<r/>";
 		String diff = "<diff><remove sel=\"/r\"/></diff>";
-		applyPatch(target, diff);
+		assertThrows(XmlPatchException.class, () -> applyPatch(target, diff));
 	}
 	
-	@Test(expected = XmlPatchException.class)
+	@Test
 	public void shouldRejectExternalGeneralEntity() throws IOException {
 		String target = "<?xml version=\"1.0\"?>" + "<!DOCTYPE r [<!ENTITY xxe SYSTEM \"file:///etc/passwd\">]>"
 		        + "<r>&xxe;</r>";
 		String diff = "<diff><remove sel=\"/r\"/></diff>";
-		applyPatch(target, diff);
+		assertThrows(XmlPatchException.class, () -> applyPatch(target, diff));
 	}
 	
-	@Test(expected = XmlPatchException.class)
+	@Test
 	public void shouldRejectAddingAttributeThatAlreadyExists() throws IOException {
 		String target = "<r xmlns=\"http://example.org/r\"><thing id=\"existing\"/></r>";
 		String diff = "<diff xmlns:r=\"http://example.org/r\">" + "<add sel=\"/r:r/r:thing\" type=\"@id\">replacement</add>"
 		        + "</diff>";
-		applyPatch(target, diff);
+		assertThrows(XmlPatchException.class, () -> applyPatch(target, diff));
 	}
 	
-	@Test(expected = XmlPatchException.class)
+	@Test
 	public void shouldRejectTextReplaceWithElementContent() throws IOException {
 		String target = "<r xmlns=\"http://example.org/r\"><note>old</note></r>";
 		String diff = "<diff xmlns:r=\"http://example.org/r\">" + "<replace sel=\"/r:r/r:note/text()\"><foo/></replace>"
 		        + "</diff>";
-		applyPatch(target, diff);
+		assertThrows(XmlPatchException.class, () -> applyPatch(target, diff));
 	}
 	
 	@Test
@@ -371,12 +372,12 @@ public class XmlPatcherTest {
 		assertThat(secondMatch > firstMatch, equalTo(true));
 	}
 	
-	@Test(expected = XmlPatchException.class)
+	@Test
 	public void shouldFailWhenLaterOperationReferencesNodeRemovedByEarlierOperation() throws IOException {
 		String target = "<r xmlns=\"http://example.org/r\"><a/></r>";
 		String diff = "<diff xmlns:r=\"http://example.org/r\">" + "<remove sel=\"/r:r/r:a\"/>"
 		        + "<replace sel=\"/r:r/r:a\"><a value=\"x\"/></replace>" + "</diff>";
-		applyPatch(target, diff);
+		assertThrows(XmlPatchException.class, () -> applyPatch(target, diff));
 	}
 	
 	@Test
@@ -546,28 +547,28 @@ public class XmlPatcherTest {
 		assertThat(piPos < rootPos, equalTo(true));
 	}
 	
-	@Test(expected = XmlPatchException.class)
+	@Test
 	public void shouldRejectAddingElementBeforeDocumentRoot() throws IOException {
 		String target = "<r/>";
 		String diff = "<diff><add sel=\"/r\" pos=\"before\"><intruder/></add></diff>";
 		
-		applyPatch(target, diff);
+		assertThrows(XmlPatchException.class, () -> applyPatch(target, diff));
 	}
 	
-	@Test(expected = XmlPatchException.class)
+	@Test
 	public void shouldRejectAddingElementAfterDocumentRoot() throws IOException {
 		String target = "<r/>";
 		String diff = "<diff><add sel=\"/r\" pos=\"after\"><intruder/></add></diff>";
 		
-		applyPatch(target, diff);
+		assertThrows(XmlPatchException.class, () -> applyPatch(target, diff));
 	}
 	
-	@Test(expected = XmlPatchException.class)
+	@Test
 	public void shouldRejectAddingTextBeforeDocumentRoot() throws IOException {
 		String target = "<r/>";
 		String diff = "<diff><add sel=\"/r\" pos=\"before\">stray text</add></diff>";
 		
-		applyPatch(target, diff);
+		assertThrows(XmlPatchException.class, () -> applyPatch(target, diff));
 	}
 	
 	@Test
@@ -622,13 +623,13 @@ public class XmlPatcherTest {
 		assertThat(result, containsString("value=\"padded\""));
 	}
 	
-	@Test(expected = XmlPatchException.class)
+	@Test
 	public void shouldRejectInvalidTrimValue() throws IOException {
 		String target = "<r xmlns=\"http://example.org/r\"><a value=\"old\"/></r>";
 		String diff = "<diff xmlns:r=\"http://example.org/r\">" + "<replace sel=\"/r:r/r:a/@value\" trim=\"yes\">x</replace>"
 		        + "</diff>";
 		
-		applyPatch(target, diff);
+		assertThrows(XmlPatchException.class, () -> applyPatch(target, diff));
 	}
 	
 	@Test
@@ -653,13 +654,13 @@ public class XmlPatcherTest {
 		assertThat(result, containsString("<note>new</note>"));
 	}
 	
-	@Test(expected = XmlPatchException.class)
+	@Test
 	public void shouldRejectAddingNamespacedAttributeWithUnknownPrefix() throws IOException {
 		String target = "<r xmlns=\"http://example.org/r\"><thing/></r>";
 		// Patch does NOT declare the "x" prefix that the type attribute references.
 		String diff = "<diff xmlns:r=\"http://example.org/r\">" + "<add sel=\"/r:r/r:thing\" type=\"@x:id\">42</add>"
 		        + "</diff>";
 		
-		applyPatch(target, diff);
+		assertThrows(XmlPatchException.class, () -> applyPatch(target, diff));
 	}
 }

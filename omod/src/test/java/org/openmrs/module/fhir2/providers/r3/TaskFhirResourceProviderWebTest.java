@@ -41,20 +41,23 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.dstu3.model.Task;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirTaskService;
 import org.openmrs.module.fhir2.api.search.param.TaskSearchParams;
 import org.openmrs.module.fhir2.providers.r4.MockIBundleProvider;
 import org.springframework.mock.web.MockHttpServletResponse;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class TaskFhirResourceProviderWebTest extends BaseFhirR3ResourceProviderWebTest<TaskFhirResourceProvider, Task> {
 	
 	private static final String TASK_UUID = "55616228-dc6d-446f-ab50-4ec711ea9243";
@@ -84,7 +87,7 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirR3ResourceProviderW
 	@Captor
 	private ArgumentCaptor<TaskSearchParams> taskSearchParamsArgumentCaptor;
 	
-	@Before
+	@BeforeEach
 	public void setup() throws ServletException {
 		resourceProvider = new TaskFhirResourceProvider();
 		resourceProvider.setFhirTaskService(service);

@@ -16,6 +16,7 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -37,17 +38,17 @@ import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Task;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirTaskService;
 import org.openmrs.module.fhir2.providers.r4.MockIBundleProvider;
 import org.openmrs.module.fhir2.providers.util.TaskVersionConverter;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class TaskFhirResourceProviderTest extends BaseFhirR3ProvenanceResourceTest<org.hl7.fhir.r4.model.Task> {
 	
 	private static final String TASK_UUID = "bdd7e368-3d1a-42a9-9538-395391b64adf";
@@ -66,13 +67,13 @@ public class TaskFhirResourceProviderTest extends BaseFhirR3ProvenanceResourceTe
 	
 	private org.hl7.fhir.r4.model.Task task;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		resourceProvider = new TaskFhirResourceProvider();
 		resourceProvider.setFhirTaskService(taskService);
 	}
 	
-	@Before
+	@BeforeEach
 	public void initTask() {
 		task = new org.hl7.fhir.r4.model.Task();
 		task.setId(TASK_UUID);
@@ -103,13 +104,15 @@ public class TaskFhirResourceProviderTest extends BaseFhirR3ProvenanceResourceTe
 		assertThat(result.getId(), equalTo(TASK_UUID));
 	}
 	
-	@Test(expected = ResourceNotFoundException.class)
+	@Test
 	public void getTaskByWithWrongId_shouldThrowResourceNotFoundException() {
 		IdType idType = new IdType();
 		idType.setValue(WRONG_TASK_UUID);
 		
-		assertThat(resourceProvider.getTaskById(idType).isResource(), is(true));
-		assertThat(resourceProvider.getTaskById(idType), nullValue());
+		assertThrows(ResourceNotFoundException.class, () -> {
+			assertThat(resourceProvider.getTaskById(idType).isResource(), is(true));
+			assertThat(resourceProvider.getTaskById(idType), nullValue());
+		});
 	}
 	
 	@Test
@@ -136,25 +139,27 @@ public class TaskFhirResourceProviderTest extends BaseFhirR3ProvenanceResourceTe
 		assertThat(result.getResource().getIdElement().getIdPart(), equalTo(TASK_UUID));
 	}
 	
-	@Test(expected = InvalidRequestException.class)
+	@Test
 	public void updateTask_shouldThrowInvalidRequestForUuidMismatch() {
 		when(taskService.update(eq(WRONG_TASK_UUID), any(org.hl7.fhir.r4.model.Task.class)))
 		        .thenThrow(InvalidRequestException.class);
-		
-		resourceProvider.updateTask(new IdType().setValue(WRONG_TASK_UUID), TaskVersionConverter.convertTask(task));
+
+		assertThrows(InvalidRequestException.class, () -> resourceProvider
+		        .updateTask(new IdType().setValue(WRONG_TASK_UUID), TaskVersionConverter.convertTask(task)));
 	}
 	
-	@Test(expected = InvalidRequestException.class)
+	@Test
 	public void updateTask_shouldThrowInvalidRequestForMissingId() {
 		org.hl7.fhir.r4.model.Task noIdTask = new org.hl7.fhir.r4.model.Task();
 		
 		when(taskService.update(eq(TASK_UUID), any(org.hl7.fhir.r4.model.Task.class)))
 		        .thenThrow(InvalidRequestException.class);
 		
-		resourceProvider.updateTask(new IdType().setValue(TASK_UUID), TaskVersionConverter.convertTask(noIdTask));
+		assertThrows(InvalidRequestException.class,
+		    () -> resourceProvider.updateTask(new IdType().setValue(TASK_UUID), TaskVersionConverter.convertTask(noIdTask)));
 	}
 	
-	@Test(expected = MethodNotAllowedException.class)
+	@Test
 	public void updateTask_shouldThrowMethodNotAllowedIfDoesNotExist() {
 		org.hl7.fhir.r4.model.Task wrongTask = new org.hl7.fhir.r4.model.Task();
 		wrongTask.setId(WRONG_TASK_UUID);
@@ -162,7 +167,8 @@ public class TaskFhirResourceProviderTest extends BaseFhirR3ProvenanceResourceTe
 		when(taskService.update(eq(WRONG_TASK_UUID), any(org.hl7.fhir.r4.model.Task.class)))
 		        .thenThrow(MethodNotAllowedException.class);
 		
-		resourceProvider.updateTask(new IdType().setValue(WRONG_TASK_UUID), TaskVersionConverter.convertTask(wrongTask));
+		assertThrows(MethodNotAllowedException.class, () -> resourceProvider
+		        .updateTask(new IdType().setValue(WRONG_TASK_UUID), TaskVersionConverter.convertTask(wrongTask)));
 	}
 	
 	@Test

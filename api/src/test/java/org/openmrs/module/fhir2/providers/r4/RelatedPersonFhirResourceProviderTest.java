@@ -11,11 +11,11 @@ package org.openmrs.module.fhir2.providers.r4;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
@@ -40,17 +40,17 @@ import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.RelatedPerson;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirRelatedPersonService;
 import org.openmrs.module.fhir2.api.search.param.RelatedPersonSearchParams;
 import org.openmrs.module.fhir2.providers.BaseFhirProvenanceResourceTest;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class RelatedPersonFhirResourceProviderTest extends BaseFhirProvenanceResourceTest<RelatedPerson> {
 	
 	private static final String RELATED_PERSON_UUID = "23f620c3-2ecb-4d80-aea8-44fa1c5ff978";
@@ -90,13 +90,13 @@ public class RelatedPersonFhirResourceProviderTest extends BaseFhirProvenanceRes
 	
 	private RelatedPersonFhirResourceProvider resourceProvider;
 	
-	@Before
+	@BeforeEach
 	public void setUp() {
 		resourceProvider = new RelatedPersonFhirResourceProvider();
 		resourceProvider.setRelatedPersonService(relatedPersonService);
 	}
 	
-	@Before
+	@BeforeEach
 	public void initRelatedPerson() {
 		HumanName name = new HumanName();
 		name.addGiven(GIVEN_NAME);
@@ -130,12 +130,11 @@ public class RelatedPersonFhirResourceProviderTest extends BaseFhirProvenanceRes
 		assertThat(relatedPerson.getId(), equalTo(RELATED_PERSON_UUID));
 	}
 	
-	@Test(expected = ResourceNotFoundException.class)
+	@Test
 	public void getRelatedPersonWithWrongUuid_shouldThrowResourceNotFoundException() {
 		IdType id = new IdType();
 		id.setValue(WRONG_RELATED_PERSON_UUID);
-		RelatedPerson result = resourceProvider.getRelatedPersonById(id);
-		assertThat(result, nullValue());
+		assertThrows(ResourceNotFoundException.class, () -> resourceProvider.getRelatedPersonById(id));
 	}
 	
 	@Test

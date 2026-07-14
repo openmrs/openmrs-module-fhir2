@@ -16,15 +16,15 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import org.hl7.fhir.r4.model.Coding;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.LocationTag;
 import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class LocationTagTranslatorImplTest {
 	
 	private static final String LAB_TAG_NAME = "Lab location";
@@ -36,7 +36,7 @@ public class LocationTagTranslatorImplTest {
 	
 	private LocationTagTranslatorImpl locationTagTranslatorImpl;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		locationTagTranslatorImpl = new LocationTagTranslatorImpl();
 		locationTagTranslatorImpl.setFhirLocationDao(fhirLocationDao);

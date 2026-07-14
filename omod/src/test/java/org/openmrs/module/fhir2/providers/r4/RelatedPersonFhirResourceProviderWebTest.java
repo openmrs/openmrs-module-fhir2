@@ -31,19 +31,19 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.hamcrest.MatcherAssert;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.RelatedPerson;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirRelatedPersonService;
 import org.openmrs.module.fhir2.api.search.param.RelatedPersonSearchParams;
 import org.springframework.mock.web.MockHttpServletResponse;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class RelatedPersonFhirResourceProviderWebTest extends BaseFhirR4ResourceProviderWebTest<RelatedPersonFhirResourceProvider, RelatedPerson> {
 	
 	private static final String RELATED_PERSON_UUID = "8a849d5e-6011-4279-a124-40ada5a687de";
@@ -69,7 +69,7 @@ public class RelatedPersonFhirResourceProviderWebTest extends BaseFhirR4Resource
 	@Captor
 	private ArgumentCaptor<RelatedPersonSearchParams> relatedPersonSearchParamsArgumentCaptor;
 	
-	@Before
+	@BeforeEach
 	@Override
 	public void setup() throws ServletException {
 		resourceProvider = new RelatedPersonFhirResourceProvider();

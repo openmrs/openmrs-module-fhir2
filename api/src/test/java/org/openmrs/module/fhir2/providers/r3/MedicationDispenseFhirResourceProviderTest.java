@@ -13,6 +13,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -38,16 +39,19 @@ import org.hl7.fhir.dstu3.model.MedicationDispense;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirMedicationDispenseService;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class MedicationDispenseFhirResourceProviderTest {
 	
 	private static final String MEDICATION_DISPENSE_UUID = "d7f5a4dd-019e-4221-85fa-e084505b9695";
@@ -77,7 +81,7 @@ public class MedicationDispenseFhirResourceProviderTest {
 	
 	private SortSpec sortParam;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		resourceProvider = new MedicationDispenseFhirResourceProvider();
 		resourceProvider.setFhirMedicationDispenseService(fhirMedicationDispenseService);
@@ -116,11 +120,11 @@ public class MedicationDispenseFhirResourceProviderTest {
 		assertThat(medicationDispense.getId(), equalTo(MEDICATION_DISPENSE_UUID));
 	}
 	
-	@Test(expected = ResourceNotFoundException.class)
+	@Test
 	public void getMedicationDispenseByUuid_shouldThrowResourceNotFoundException() {
 		IdType id = new IdType();
 		id.setValue(WRONG_MEDICATION_DISPENSE_UUID);
-		resourceProvider.getMedicationDispenseByUuid(id);
+		assertThrows(ResourceNotFoundException.class, () -> resourceProvider.getMedicationDispenseByUuid(id));
 	}
 	
 	@Test
@@ -147,26 +151,28 @@ public class MedicationDispenseFhirResourceProviderTest {
 		assertThat(result.getResource().getIdElement().getIdPart(), equalTo(medicationDispense.getId()));
 	}
 	
-	@Test(expected = InvalidRequestException.class)
+	@Test
 	public void updateMedicationDispense_shouldThrowInvalidRequestForUuidMismatch() {
 		when(fhirMedicationDispenseService.update(ArgumentMatchers.eq(WRONG_MEDICATION_DISPENSE_UUID),
 		    ArgumentMatchers.any(org.hl7.fhir.r4.model.MedicationDispense.class))).thenThrow(InvalidRequestException.class);
-		
-		resourceProvider.updateMedicationDispense(new IdType().setValue(WRONG_MEDICATION_DISPENSE_UUID),
-		    (MedicationDispense) VersionConvertorFactory_30_40.convertResource(medicationDispense));
+
+		assertThrows(InvalidRequestException.class,
+		    () -> resourceProvider.updateMedicationDispense(new IdType().setValue(WRONG_MEDICATION_DISPENSE_UUID),
+		        (MedicationDispense) VersionConvertorFactory_30_40.convertResource(medicationDispense)));
 	}
 	
-	@Test(expected = InvalidRequestException.class)
+	@Test
 	public void updateMedicationDispense_shouldThrowInvalidRequestForMissingId() {
 		MedicationDispense noIdMedicationDispense = new MedicationDispense();
 		
 		when(fhirMedicationDispenseService.update(ArgumentMatchers.eq(MEDICATION_DISPENSE_UUID),
 		    ArgumentMatchers.any(org.hl7.fhir.r4.model.MedicationDispense.class))).thenThrow(InvalidRequestException.class);
 		
-		resourceProvider.updateMedicationDispense(new IdType().setValue(MEDICATION_DISPENSE_UUID), noIdMedicationDispense);
+		assertThrows(InvalidRequestException.class, () -> resourceProvider
+		        .updateMedicationDispense(new IdType().setValue(MEDICATION_DISPENSE_UUID), noIdMedicationDispense));
 	}
 	
-	@Test(expected = MethodNotAllowedException.class)
+	@Test
 	public void updateMedicationShouldThrowMethodNotAllowedIfDoesNotExist() {
 		MedicationDispense wrongMedicationDispense = new MedicationDispense();
 		wrongMedicationDispense.setId(WRONG_MEDICATION_DISPENSE_UUID);
@@ -175,8 +181,8 @@ public class MedicationDispenseFhirResourceProviderTest {
 		    ArgumentMatchers.any(org.hl7.fhir.r4.model.MedicationDispense.class)))
 		        .thenThrow(MethodNotAllowedException.class);
 		
-		resourceProvider.updateMedicationDispense(new IdType().setValue(WRONG_MEDICATION_DISPENSE_UUID),
-		    wrongMedicationDispense);
+		assertThrows(MethodNotAllowedException.class, () -> resourceProvider
+		        .updateMedicationDispense(new IdType().setValue(WRONG_MEDICATION_DISPENSE_UUID), wrongMedicationDispense));
 	}
 	
 	@Test

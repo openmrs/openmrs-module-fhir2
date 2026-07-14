@@ -34,8 +34,8 @@ import org.hamcrest.TypeSafeMatcher;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.After;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mock;
 import org.openmrs.User;
 import org.openmrs.api.APIException;
@@ -75,7 +75,7 @@ public abstract class BaseFhirResourceProviderWebTest<T extends IResourceProvide
 	// This must be implemented by subclasses
 	public abstract T getResourceProvider();
 	
-	@Before
+	@BeforeEach
 	public void setup() throws ServletException {
 		when(userContext.getAuthenticatedUser()).thenReturn(user);
 		
@@ -94,7 +94,7 @@ public abstract class BaseFhirResourceProviderWebTest<T extends IResourceProvide
 		setupFhirServlet();
 	}
 	
-	@After
+	@AfterEach
 	public void tearDown() {
 		Context.closeSession();
 	}

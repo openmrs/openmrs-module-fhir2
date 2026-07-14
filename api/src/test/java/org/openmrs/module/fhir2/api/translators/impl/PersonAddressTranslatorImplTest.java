@@ -15,13 +15,13 @@ import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.Extension;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.PersonAddress;
 import org.openmrs.module.fhir2.FhirConstants;
 
@@ -69,7 +69,7 @@ public class PersonAddressTranslatorImplTest {
 	
 	private PersonAddressTranslatorImpl addressTranslator;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		addressTranslator = new PersonAddressTranslatorImpl();
 	}

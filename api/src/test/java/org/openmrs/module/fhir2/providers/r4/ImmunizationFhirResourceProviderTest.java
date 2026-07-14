@@ -15,6 +15,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -33,16 +34,16 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Immunization;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirImmunizationService;
 import org.openmrs.module.fhir2.providers.BaseFhirProvenanceResourceTest;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ImmunizationFhirResourceProviderTest extends BaseFhirProvenanceResourceTest<Immunization> {
 	
 	private static final String IMMUNIZATION_UUID = "017312a1-cf56-43ab-ae87-44070b801d1c";
@@ -60,13 +61,13 @@ public class ImmunizationFhirResourceProviderTest extends BaseFhirProvenanceReso
 	
 	private Patient patient;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		resourceProvider = new ImmunizationFhirResourceProvider();
 		resourceProvider.setImmunizationService(immunizationService);
 	}
 	
-	@Before
+	@BeforeEach
 	public void initImmunization() {
 		patient = new Patient();
 		patient.setId(PATIENT_UUID);
@@ -96,12 +97,14 @@ public class ImmunizationFhirResourceProviderTest extends BaseFhirProvenanceReso
 		assertThat(result.getId(), equalTo(IMMUNIZATION_UUID));
 	}
 	
-	@Test(expected = ResourceNotFoundException.class)
+	@Test
 	public void getImmunizationByWithWrongId_shouldThrowResourceNotFoundException() {
 		IdType idType = new IdType();
 		idType.setValue(WRONG_IMMUNIZATION_UUID);
-		assertThat(resourceProvider.getImmunizationByUuid(idType).isResource(), is(true));
-		assertThat(resourceProvider.getImmunizationByUuid(idType), nullValue());
+		assertThrows(ResourceNotFoundException.class, () -> {
+			assertThat(resourceProvider.getImmunizationByUuid(idType).isResource(), is(true));
+			assertThat(resourceProvider.getImmunizationByUuid(idType), nullValue());
+		});
 	}
 	
 	@Test
@@ -124,29 +127,32 @@ public class ImmunizationFhirResourceProviderTest extends BaseFhirProvenanceReso
 		assertThat(result.getResource(), equalTo(immunization));
 	}
 	
-	@Test(expected = InvalidRequestException.class)
+	@Test
 	public void updatePatient_shouldThrowInvalidRequestExceptionForUuidMismatch() {
 		when(immunizationService.update(WRONG_IMMUNIZATION_UUID, immunization)).thenThrow(InvalidRequestException.class);
-		
-		resourceProvider.updateImmunization(new IdType().setValue(WRONG_IMMUNIZATION_UUID), immunization);
+
+		assertThrows(InvalidRequestException.class,
+		    () -> resourceProvider.updateImmunization(new IdType().setValue(WRONG_IMMUNIZATION_UUID), immunization));
 	}
 	
-	@Test(expected = InvalidRequestException.class)
+	@Test
 	public void updateImmunization_shouldThrowInvalidRequestExceptionForMissingId() {
 		Immunization noIdImmunization = new Immunization();
 		
 		when(immunizationService.update(IMMUNIZATION_UUID, noIdImmunization)).thenThrow(InvalidRequestException.class);
 		
-		resourceProvider.updateImmunization(new IdType().setValue(IMMUNIZATION_UUID), noIdImmunization);
+		assertThrows(InvalidRequestException.class,
+		    () -> resourceProvider.updateImmunization(new IdType().setValue(IMMUNIZATION_UUID), noIdImmunization));
 	}
 	
-	@Test(expected = MethodNotAllowedException.class)
+	@Test
 	public void updateImmunization_shouldThrowMethodNotAllowedIfDoesNotExist() {
 		immunization.setId(WRONG_IMMUNIZATION_UUID);
 		
 		when(immunizationService.update(WRONG_IMMUNIZATION_UUID, immunization)).thenThrow(MethodNotAllowedException.class);
 		
-		resourceProvider.updateImmunization(new IdType().setValue(WRONG_IMMUNIZATION_UUID), immunization);
+		assertThrows(MethodNotAllowedException.class,
+		    () -> resourceProvider.updateImmunization(new IdType().setValue(WRONG_IMMUNIZATION_UUID), immunization));
 	}
 	
 	@Test

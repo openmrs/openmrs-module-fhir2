@@ -33,7 +33,7 @@ import static org.hl7.fhir.r4.model.Person.SP_ADDRESS_POSTALCODE;
 import static org.hl7.fhir.r4.model.Person.SP_ADDRESS_STATE;
 import static org.hl7.fhir.r4.model.Person.SP_BIRTHDATE;
 import static org.hl7.fhir.r4.model.Person.SP_NAME;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

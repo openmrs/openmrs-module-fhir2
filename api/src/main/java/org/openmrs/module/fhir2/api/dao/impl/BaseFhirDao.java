@@ -78,8 +78,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends BaseDao implements FhirDao<T> {
 	
-	protected final TypeToken<@NonNull T> typeToken = new TypeToken<>(getClass()) {
-    };
+	protected final TypeToken<@NonNull T> typeToken = new TypeToken<>(getClass()) {};
 	
 	@Getter(AccessLevel.PROTECTED)
 	@Setter(value = AccessLevel.PROTECTED, onMethod_ = { @Autowired })
@@ -100,7 +99,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	
 	@Override
 	@Transactional
-    public T createOrUpdate(@Nonnull T object) {
+	public T createOrUpdate(@Nonnull T object) {
 		return getSessionFactory().getCurrentSession().merge(object);
 	}
 	
@@ -129,7 +128,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 			return Collections.emptyList();
 		}
 		
-		@SuppressWarnings({"unchecked" })
+		@SuppressWarnings({ "unchecked" })
 		OpenmrsFhirCriteriaContext<T, T> criteriaContext = createCriteriaContext((Class<T>) typeToken.getRawType());
 		
 		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot());
@@ -148,7 +147,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	@Override
 	@Transactional(readOnly = true)
 	public T get(@Nonnull String uuid) {
-		@SuppressWarnings({"unchecked" })
+		@SuppressWarnings({ "unchecked" })
 		OpenmrsFhirCriteriaContext<T, T> criteriaContext = createCriteriaContext((Class<T>) typeToken.getRawType());
 		
 		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot());
@@ -194,7 +193,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 			// 1. Get distinct, sorted, paginated IDs with necessary join conditions
 			// 2. Fetch full objects using those IDs
 			
-			@SuppressWarnings({"unchecked" })
+			@SuppressWarnings({ "unchecked" })
 			OpenmrsFhirCriteriaContext<T, Object> criteriaContext = getSearchResultCriteria(
 			    createCriteriaContext((Class<T>) typeToken.getRawType(), Object.class), theParams);
 			
@@ -234,7 +233,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 			
 			// Use the IDs to fetch full objects
 			// We still need to sort the wrapper query to maintain the order, as IN() doesn't guarantee order
-			@SuppressWarnings({"unchecked" })
+			@SuppressWarnings({ "unchecked" })
 			OpenmrsFhirCriteriaContext<T, T> wrapperQuery = createCriteriaContext((Class<T>) typeToken.getRawType());
 			
 			handleSort(wrapperQuery, theParams.getSortSpec());
@@ -251,7 +250,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	
 	@Override
 	public int getSearchResultsCount(@Nonnull SearchParameterMap theParams) {
-		@SuppressWarnings({"unchecked" })
+		@SuppressWarnings({ "unchecked" })
 		OpenmrsFhirCriteriaContext<T, Long> criteriaContext = getSearchResultCriteria(
 		    createCriteriaContext((Class<T>) typeToken.getRawType(), Long.class), theParams);
 		
@@ -311,7 +310,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 		return getIdPropertyName(entityManager, typeToken.getRawType());
 	}
 	
-	@SuppressWarnings({"unchecked" })
+	@SuppressWarnings({ "unchecked" })
 	protected OpenmrsFhirCriteriaContext<T, T> getSearchResultCriteria(SearchParameterMap theParams) {
 		return getSearchResultCriteria(createCriteriaContext((Class<T>) typeToken.getRawType()), theParams);
 	}
@@ -492,28 +491,27 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 		
 		if (FhirConstants.SP_LAST_UPDATED.equalsIgnoreCase(param)) {
 			if (isImmutable) {
-                return switch (sortState.getSortOrder()) {
-                    case ASC -> Collections.singletonList(cb.asc(criteriaContext.getRoot().get("dateCreated")));
-                    case DESC -> Collections.singletonList(cb.desc(criteriaContext.getRoot().get("dateCreated")));
-                };
+				return switch (sortState.getSortOrder()) {
+					case ASC -> Collections.singletonList(cb.asc(criteriaContext.getRoot().get("dateCreated")));
+					case DESC -> Collections.singletonList(cb.desc(criteriaContext.getRoot().get("dateCreated")));
+				};
 			}
 			
 			Expression<?> coalescedAttributes = cb.coalesce(criteriaContext.getRoot().get("dateChanged"),
 			    criteriaContext.getRoot().get("dateCreated"));
-            return switch (sortState.getSortOrder()) {
-                case ASC -> Collections.singletonList(cb.asc(coalescedAttributes));
-                case DESC -> Collections.singletonList(cb.desc(coalescedAttributes));
-            };
+			return switch (sortState.getSortOrder()) {
+				case ASC -> Collections.singletonList(cb.asc(coalescedAttributes));
+				case DESC -> Collections.singletonList(cb.desc(coalescedAttributes));
+			};
 		}
 		
 		Collection<Path<?>> prop = paramToProps(criteriaContext, sortState.getParameter());
 		if (prop != null) {
-            return switch (sortState.getSortOrder()) {
-                case ASC ->
-                        prop.stream().map(p -> criteriaContext.getCriteriaBuilder().asc(p)).collect(Collectors.toList());
-                case DESC ->
-                        prop.stream().map(p -> criteriaContext.getCriteriaBuilder().desc(p)).collect(Collectors.toList());
-            };
+			return switch (sortState.getSortOrder()) {
+				case ASC -> prop.stream().map(p -> criteriaContext.getCriteriaBuilder().asc(p)).collect(Collectors.toList());
+				case DESC ->
+				    prop.stream().map(p -> criteriaContext.getCriteriaBuilder().desc(p)).collect(Collectors.toList());
+			};
 		}
 		
 		return null;

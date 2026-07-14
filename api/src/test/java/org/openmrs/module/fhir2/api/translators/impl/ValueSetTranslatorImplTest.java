@@ -22,10 +22,10 @@ import java.util.Collection;
 import java.util.Date;
 
 import org.hl7.fhir.r4.model.ValueSet;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.Concept;
 import org.openmrs.ConceptDescription;
 import org.openmrs.ConceptMap;
@@ -38,7 +38,7 @@ import org.openmrs.module.fhir2.FhirTestConstants;
 import org.openmrs.module.fhir2.api.FhirConceptSourceService;
 import org.openmrs.module.fhir2.model.FhirConceptSource;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ValueSetTranslatorImplTest {
 	
 	private static final String CONCEPT_UUID = "0f97e14e-cdc2-49ac-9255-b5126f8a5147";
@@ -49,7 +49,7 @@ public class ValueSetTranslatorImplTest {
 	
 	private final ValueSetTranslatorImpl valueSetTranslator = new ValueSetTranslatorImpl();
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		conceptSourceService = mock(FhirConceptSourceService.class);
 		concept = mock(Concept.class);

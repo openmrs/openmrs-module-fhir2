@@ -23,16 +23,16 @@ import java.util.List;
 
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.EncounterType;
 import org.openmrs.api.EncounterService;
 import org.openmrs.module.fhir2.FhirConstants;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class EncounterTypeTranslatorImplTest {
 	
 	private static final String ENCOUNTER_TYPE_UUID = "9a3e940d-24d4-4f39-b333-f1fe1aea8ed9";
@@ -44,7 +44,7 @@ public class EncounterTypeTranslatorImplTest {
 	
 	private EncounterTypeTranslatorImpl encounterTypeTranslator;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		encounterTypeTranslator = new EncounterTypeTranslatorImpl();
 		encounterTypeTranslator.setEncounterService(encounterService);

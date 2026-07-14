@@ -12,9 +12,9 @@ package org.openmrs.module.fhir2.providers.r4;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
@@ -44,15 +44,15 @@ import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.ServiceRequest;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirServiceRequestService;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ServiceRequestFhirResourceProviderTest {
 	
 	private static final String SERVICE_REQUEST_UUID = "7d13b03b-58c2-43f5-b34d-08750c51aea9";
@@ -86,7 +86,7 @@ public class ServiceRequestFhirResourceProviderTest {
 	
 	private ServiceRequest serviceRequest;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		resourceProvider = new ServiceRequestFhirResourceProvider();
 		resourceProvider.setServiceRequestService(serviceRequestService);
@@ -96,7 +96,7 @@ public class ServiceRequestFhirResourceProviderTest {
 		return results.getResources(START_INDEX, END_INDEX);
 	}
 	
-	@Before
+	@BeforeEach
 	public void initServiceRequest() {
 		serviceRequest = new ServiceRequest();
 		serviceRequest.setId(SERVICE_REQUEST_UUID);
@@ -121,12 +121,11 @@ public class ServiceRequestFhirResourceProviderTest {
 		assertThat(result.getId(), equalTo(SERVICE_REQUEST_UUID));
 	}
 	
-	@Test(expected = ResourceNotFoundException.class)
+	@Test
 	public void getServiceRequestByWithWrongId_shouldThrowResourceNotFoundException() {
 		IdType idType = new IdType();
 		idType.setValue(WRONG_SERVICE_REQUEST_UUID);
-		assertThat(resourceProvider.getServiceRequestById(idType).isResource(), is(true));
-		assertThat(resourceProvider.getServiceRequestById(idType), nullValue());
+		assertThrows(ResourceNotFoundException.class, () -> resourceProvider.getServiceRequestById(idType));
 	}
 	
 	@Test
@@ -302,32 +301,35 @@ public class ServiceRequestFhirResourceProviderTest {
 		assertThat(result.getResource(), equalTo(serviceRequest));
 	}
 	
-	@Test(expected = InvalidRequestException.class)
+	@Test
 	public void updateServiceRequest_shouldThrowInvalidRequestExceptionForUuidMismatch() {
 		when(serviceRequestService.update(WRONG_SERVICE_REQUEST_UUID, serviceRequest))
 		        .thenThrow(InvalidRequestException.class);
-		
-		resourceProvider.updateServiceRequest(new IdType().setValue(WRONG_SERVICE_REQUEST_UUID), serviceRequest);
+
+		assertThrows(InvalidRequestException.class, () -> resourceProvider
+		        .updateServiceRequest(new IdType().setValue(WRONG_SERVICE_REQUEST_UUID), serviceRequest));
 	}
 	
-	@Test(expected = InvalidRequestException.class)
+	@Test
 	public void updateServiceRequest_shouldThrowInvalidRequestExceptionForMissingId() {
 		ServiceRequest noIdServiceRequest = new ServiceRequest();
 		
 		when(serviceRequestService.update(SERVICE_REQUEST_UUID, noIdServiceRequest))
 		        .thenThrow(InvalidRequestException.class);
 		
-		resourceProvider.updateServiceRequest(new IdType().setValue(SERVICE_REQUEST_UUID), noIdServiceRequest);
+		assertThrows(InvalidRequestException.class,
+		    () -> resourceProvider.updateServiceRequest(new IdType().setValue(SERVICE_REQUEST_UUID), noIdServiceRequest));
 	}
 	
-	@Test(expected = MethodNotAllowedException.class)
+	@Test
 	public void updateServiceRequest_ShouldThrowMethodNotAllowedIfDoesNotExist() {
 		serviceRequest.setId(WRONG_SERVICE_REQUEST_UUID);
 		
 		when(serviceRequestService.update(WRONG_SERVICE_REQUEST_UUID, serviceRequest))
 		        .thenThrow(MethodNotAllowedException.class);
 		
-		resourceProvider.updateServiceRequest(new IdType().setValue(WRONG_SERVICE_REQUEST_UUID), serviceRequest);
+		assertThrows(MethodNotAllowedException.class,
+		    () -> resourceProvider.updateServiceRequest(new IdType().setValue(WRONG_SERVICE_REQUEST_UUID), serviceRequest));
 	}
 	
 	@Test

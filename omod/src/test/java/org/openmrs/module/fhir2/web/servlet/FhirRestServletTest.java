@@ -9,8 +9,8 @@
  */
 package org.openmrs.module.fhir2.web.servlet;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -22,8 +22,8 @@ import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.openmrs.util.OpenmrsClassLoader;
@@ -44,7 +44,7 @@ public class FhirRestServletTest {
 	
 	private TestableFhirRestServlet servlet;
 	
-	@Before
+	@BeforeEach
 	public void setUp() throws ServletException, IOException {
 		MockitoAnnotations.initMocks(this);
 		

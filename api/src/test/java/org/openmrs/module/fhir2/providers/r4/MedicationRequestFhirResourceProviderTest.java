@@ -9,11 +9,11 @@
  */
 package org.openmrs.module.fhir2.providers.r4;
 
-import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -40,16 +40,16 @@ import org.hl7.fhir.r4.model.MedicationRequest;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirMedicationRequestService;
 import org.openmrs.module.fhir2.api.search.param.MedicationRequestSearchParams;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class MedicationRequestFhirResourceProviderTest {
 	
 	private static final String MEDICATION_REQUEST_UUID = "d7f5a4dd-019e-4221-85fa-e084505b9695";
@@ -65,7 +65,7 @@ public class MedicationRequestFhirResourceProviderTest {
 	
 	private MedicationRequest medicationRequest;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		resourceProvider = new MedicationRequestFhirResourceProvider();
 		resourceProvider.setFhirMedicationRequestService(fhirMedicationRequestService);
@@ -92,12 +92,11 @@ public class MedicationRequestFhirResourceProviderTest {
 		assertThat(medicationRequest.getId(), equalTo(MEDICATION_REQUEST_UUID));
 	}
 	
-	@Test(expected = ResourceNotFoundException.class)
+	@Test
 	public void getMedicationRequestByUuid_shouldThrowResourceNotFoundException() {
 		IdType id = new IdType();
 		id.setValue(WRONG_MEDICATION_REQUEST_UUID);
-		MedicationRequest medicationRequest = resourceProvider.getMedicationRequestByUuid(id);
-		assertThat(medicationRequest, nullValue());
+		assertThrows(ResourceNotFoundException.class, () -> resourceProvider.getMedicationRequestByUuid(id));
 	}
 	
 	private List<IBaseResource> getResources(IBundleProvider results, int theFromIndex, int theToIndex) {

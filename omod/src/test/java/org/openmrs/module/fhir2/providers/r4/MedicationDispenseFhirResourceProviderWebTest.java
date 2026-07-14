@@ -32,19 +32,19 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.MedicationDispense;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirMedicationDispenseService;
 import org.openmrs.module.fhir2.api.search.param.MedicationDispenseSearchParams;
 import org.springframework.mock.web.MockHttpServletResponse;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class MedicationDispenseFhirResourceProviderWebTest extends BaseFhirR4ResourceProviderWebTest<MedicationDispenseFhirResourceProvider, MedicationDispense> {
 	
 	private static final String MEDICATION_DISPENSE_UUID = "294face4-a498-4ba3-89a1-ffc505837026";
@@ -76,7 +76,7 @@ public class MedicationDispenseFhirResourceProviderWebTest extends BaseFhirR4Res
 	
 	private MedicationDispense medicationDispense;
 	
-	@Before
+	@BeforeEach
 	@Override
 	public void setup() throws ServletException {
 		resourceProvider = new MedicationDispenseFhirResourceProvider();

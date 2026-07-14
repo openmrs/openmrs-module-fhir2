@@ -16,26 +16,25 @@ import static org.hamcrest.Matchers.notNullValue;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import junit.framework.TestCase;
 import lombok.SneakyThrows;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Period;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.Visit;
 import org.openmrs.module.fhir2.api.translators.EncounterPeriodTranslator;
 
-@RunWith(MockitoJUnitRunner.class)
-public class VisitPeriodTranslatorImplTest extends TestCase {
+@ExtendWith(MockitoExtension.class)
+public class VisitPeriodTranslatorImplTest {
 	
 	private EncounterPeriodTranslator<Visit> visitPeriodTranslator;
 	
 	Date periodStart, periodEnd;
 	
 	@SneakyThrows
-	@Before
+	@BeforeEach
 	public void setup() {
 		visitPeriodTranslator = new VisitPeriodTranslatorImpl();
 		

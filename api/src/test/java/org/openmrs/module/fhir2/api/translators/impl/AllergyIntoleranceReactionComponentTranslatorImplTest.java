@@ -22,11 +22,11 @@ import java.util.Collections;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.Allergen;
 import org.openmrs.AllergenType;
 import org.openmrs.Allergy;
@@ -37,7 +37,7 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.AllergyIntoleranceSeverityTranslator;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class AllergyIntoleranceReactionComponentTranslatorImplTest {
 	
 	@Mock
@@ -72,7 +72,7 @@ public class AllergyIntoleranceReactionComponentTranslatorImplTest {
 	
 	private Allergy omrsAllergy;
 	
-	@Before
+	@BeforeEach
 	public void setUp() {
 		reactionComponentTranslator = new AllergyIntoleranceReactionComponentTranslatorImpl();
 		reactionComponentTranslator.setConceptTranslator(conceptTranslator);

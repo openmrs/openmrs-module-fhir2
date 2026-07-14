@@ -15,6 +15,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -46,20 +47,20 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.FhirTestConstants;
 import org.openmrs.module.fhir2.api.FhirObservationService;
 import org.openmrs.module.fhir2.api.search.param.ObservationSearchParams;
 import org.openmrs.module.fhir2.providers.BaseFhirProvenanceResourceTest;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ObservationFhirResourceProviderTest extends BaseFhirProvenanceResourceTest<Observation> {
 	
 	private static final String PATIENT_UUID = "5946f880-b197-400b-9caa-a3c661d23041";
@@ -87,13 +88,13 @@ public class ObservationFhirResourceProviderTest extends BaseFhirProvenanceResou
 	@Captor
 	private ArgumentCaptor<ObservationSearchParams> searchParamsCaptor;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		resourceProvider = new ObservationFhirResourceProvider();
 		resourceProvider.setObservationService(observationService);
 	}
 	
-	@Before
+	@BeforeEach
 	public void initObservation() {
 		observation = new Observation();
 		observation.setId(OBSERVATION_UUID);
@@ -124,12 +125,12 @@ public class ObservationFhirResourceProviderTest extends BaseFhirProvenanceResou
 		assertThat(result.getId(), equalTo(OBSERVATION_UUID));
 	}
 	
-	@Test(expected = ResourceNotFoundException.class)
+	@Test
 	public void getObservationWithWrongUuid_shouldThrowResourceNotFoundException() {
 		IdType id = new IdType();
 		id.setValue(WRONG_OBSERVATION_UUID);
 		
-		resourceProvider.getObservationById(id);
+		assertThrows(ResourceNotFoundException.class, () -> resourceProvider.getObservationById(id));
 	}
 	
 	@Test
@@ -299,29 +300,32 @@ public class ObservationFhirResourceProviderTest extends BaseFhirProvenanceResou
 		assertThat(result.getResource(), equalTo(observation));
 	}
 	
-	@Test(expected = InvalidRequestException.class)
+	@Test
 	public void updateObservation_shouldThrowInvalidRequestExceptionForUuidMismatch() {
 		when(observationService.update(WRONG_OBSERVATION_UUID, observation)).thenThrow(InvalidRequestException.class);
-		
-		resourceProvider.updateObservation(new IdType().setValue(WRONG_OBSERVATION_UUID), observation);
+
+		assertThrows(InvalidRequestException.class,
+		    () -> resourceProvider.updateObservation(new IdType().setValue(WRONG_OBSERVATION_UUID), observation));
 	}
 	
-	@Test(expected = InvalidRequestException.class)
+	@Test
 	public void updateObservation_shouldThrowInvalidRequestExceptionForMissingId() {
 		Observation noObservation = new Observation();
 		
 		when(observationService.update(WRONG_OBSERVATION_UUID, noObservation)).thenThrow(InvalidRequestException.class);
 		
-		resourceProvider.updateObservation(new IdType().setValue(WRONG_OBSERVATION_UUID), noObservation);
+		assertThrows(InvalidRequestException.class,
+		    () -> resourceProvider.updateObservation(new IdType().setValue(WRONG_OBSERVATION_UUID), noObservation));
 	}
 	
-	@Test(expected = MethodNotAllowedException.class)
+	@Test
 	public void updateObservation_shouldThrowMethodNotAllowedIfDoesNotExist() {
 		observation.setId(WRONG_OBSERVATION_UUID);
 		
 		when(observationService.update(WRONG_OBSERVATION_UUID, observation)).thenThrow(MethodNotAllowedException.class);
 		
-		resourceProvider.updateObservation(new IdType().setValue(WRONG_OBSERVATION_UUID), observation);
+		assertThrows(MethodNotAllowedException.class,
+		    () -> resourceProvider.updateObservation(new IdType().setValue(WRONG_OBSERVATION_UUID), observation));
 	}
 	
 	@Test

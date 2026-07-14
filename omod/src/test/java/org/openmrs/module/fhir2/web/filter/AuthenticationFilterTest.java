@@ -20,12 +20,14 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.openmrs.User;
 import org.openmrs.api.context.Authenticated;
 import org.openmrs.api.context.AuthenticationScheme;
@@ -41,7 +43,8 @@ import org.springframework.mock.web.MockFilterChain;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class AuthenticationFilterTest {
 	
 	private static final String USERNAME = "admin";
@@ -78,7 +81,7 @@ public class AuthenticationFilterTest {
 		}
 	}
 	
-	@Before
+	@BeforeEach
 	public void setup() throws NoSuchFieldException, IllegalAccessException {
 		Context.setDAO(contextDAO);
 		
@@ -100,7 +103,7 @@ public class AuthenticationFilterTest {
 		filterChain = new MockFilterChain();
 	}
 	
-	@After
+	@AfterEach
 	public void tearDown() {
 		Context.closeSession();
 	}

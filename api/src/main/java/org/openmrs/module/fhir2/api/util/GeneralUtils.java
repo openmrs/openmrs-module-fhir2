@@ -48,10 +48,10 @@ public final class GeneralUtils {
 		} else if (object instanceof Voidable) {
 			return ((Voidable) object).getVoided();
 		}
-
+		
 		return false;
 	}
-
+	
 	/**
 	 * Replaces the contents of a persistent collection in place, preserving the underlying instance
 	 * (required by Hibernate 6, which manages the collection reference) while tolerating immutable and
@@ -65,7 +65,7 @@ public final class GeneralUtils {
 		if (target == source) {
 			return;
 		}
-
+		
 		target.clear();
 		if (source != null) {
 			target.addAll(source);

@@ -13,20 +13,21 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 import static org.openmrs.module.fhir2.api.translators.impl.ReferenceHandlingTranslator.getReferenceId;
 
 import org.hl7.fhir.r4.model.Reference;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.Drug;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirMedicationDao;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class MedicationReferenceTranslatorImplTest {
 	
 	private static final String MEDICATION_UUID = "12cc917e-920f-4118-aab5-4d6e5e780ad4";
@@ -36,7 +37,7 @@ public class MedicationReferenceTranslatorImplTest {
 	
 	private MedicationReferenceTranslatorImpl medicationReferenceTranslator;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		medicationReferenceTranslator = new MedicationReferenceTranslatorImpl();
 		medicationReferenceTranslator.setMedicationDao(dao);
@@ -92,11 +93,11 @@ public class MedicationReferenceTranslatorImplTest {
 		assertThat(result, nullValue());
 	}
 	
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void toOpenmrsType_shouldThrowExceptionIfReferenceIsntForMedication() {
 		Reference reference = new Reference().setReference("Unknown" + "/" + MEDICATION_UUID).setType("Unknown");
 		
-		medicationReferenceTranslator.toOpenmrsType(reference);
+		assertThrows(IllegalArgumentException.class, () -> medicationReferenceTranslator.toOpenmrsType(reference));
 	}
 	
 }

@@ -12,19 +12,19 @@ package org.openmrs.module.fhir2.api.translators.impl;
 import static org.mockito.Mockito.when;
 
 import org.hl7.fhir.r4.model.Reference;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.DrugOrder;
 import org.openmrs.Order;
 import org.openmrs.module.fhir2.api.dao.FhirMedicationRequestDao;
 import org.openmrs.module.fhir2.api.dao.FhirOrderDao;
 import org.openmrs.module.fhir2.api.translators.OrderReferenceTranslator;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class OrderReferenceTranslatorImplTest {
 	
 	private static final String MEDICATION_REQUEST_TYPE = "MedicationRequest";
@@ -39,7 +39,7 @@ public class OrderReferenceTranslatorImplTest {
 	
 	OrderReferenceTranslator translator;
 	
-	@Before
+	@BeforeEach
 	public void setUp() {
 		OrderReferenceTranslatorImpl orderReferenceTranslator = new OrderReferenceTranslatorImpl();
 		orderReferenceTranslator.setMedicationRequestDao(medicationRequestDao);
@@ -52,14 +52,14 @@ public class OrderReferenceTranslatorImplTest {
 	public void shouldGetReferenceToGenericOrder() {
 		Order order = new Order();
 		Reference reference = translator.toFhirResource(order);
-		Assert.assertEquals((SERVICE_REQUEST_TYPE + "/").concat(order.getUuid()), reference.getReference());
+		Assertions.assertEquals((SERVICE_REQUEST_TYPE + "/").concat(order.getUuid()), reference.getReference());
 	}
 	
 	@Test
 	public void shouldGetReferenceToMedicationRequest() {
 		Order order = new DrugOrder();
 		Reference reference = translator.toFhirResource(order);
-		Assert.assertEquals((MEDICATION_REQUEST_TYPE).concat("/").concat(order.getUuid()), reference.getReference());
+		Assertions.assertEquals((MEDICATION_REQUEST_TYPE).concat("/").concat(order.getUuid()), reference.getReference());
 	}
 	
 	@Test
@@ -67,7 +67,7 @@ public class OrderReferenceTranslatorImplTest {
 		Reference reference = new Reference().setReference(MEDICATION_REQUEST_TYPE + "/123");
 		when(medicationRequestDao.get("123")).thenReturn(new DrugOrder());
 		Order order = translator.toOpenmrsType(reference);
-		Assert.assertTrue(order instanceof DrugOrder);
+		Assertions.assertTrue(order instanceof DrugOrder);
 	}
 	
 	@Test
@@ -75,6 +75,6 @@ public class OrderReferenceTranslatorImplTest {
 		Reference reference = new Reference().setReference(SERVICE_REQUEST_TYPE + "/123");
 		when(fhirOrderDao.get("123")).thenReturn(new Order());
 		Order order = translator.toOpenmrsType(reference);
-		Assert.assertTrue(order instanceof Order);
+		Assertions.assertTrue(order instanceof Order);
 	}
 }

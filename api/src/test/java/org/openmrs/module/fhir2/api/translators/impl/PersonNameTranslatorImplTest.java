@@ -20,14 +20,14 @@ import static org.hamcrest.Matchers.notNullValue;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.StringType;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.PersonName;
 import org.openmrs.module.fhir2.FhirConstants;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class PersonNameTranslatorImplTest {
 	
 	private static final String PERSON_NAME_UUID = "123456-abcdef-123456";
@@ -42,7 +42,7 @@ public class PersonNameTranslatorImplTest {
 	
 	private PersonNameTranslatorImpl personNameTranslator;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		personNameTranslator = new PersonNameTranslatorImpl();
 	}

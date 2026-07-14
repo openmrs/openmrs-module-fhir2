@@ -16,6 +16,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -50,17 +51,17 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirPatientService;
 import org.openmrs.module.fhir2.api.search.param.PatientSearchParams;
 import org.openmrs.module.fhir2.providers.BaseFhirProvenanceResourceTest;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class PatientFhirResourceProviderTest extends BaseFhirProvenanceResourceTest<Patient> {
 	
 	private static final String PATIENT_UUID = "017312a1-cf56-43ab-ae87-44070b801d1c";
@@ -106,13 +107,13 @@ public class PatientFhirResourceProviderTest extends BaseFhirProvenanceResourceT
 	
 	private Patient patient;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		resourceProvider = new PatientFhirResourceProvider();
 		resourceProvider.setPatientService(patientService);
 	}
 	
-	@Before
+	@BeforeEach
 	public void initPatient() {
 		HumanName name = new HumanName();
 		name.addGiven(GIVEN_NAME);
@@ -146,12 +147,11 @@ public class PatientFhirResourceProviderTest extends BaseFhirProvenanceResourceT
 		assertThat(result.getId(), equalTo(PATIENT_UUID));
 	}
 	
-	@Test(expected = ResourceNotFoundException.class)
+	@Test
 	public void getPatientByWithWrongId_shouldThrowResourceNotFoundException() {
 		IdType idType = new IdType();
 		idType.setValue(WRONG_PATIENT_UUID);
-		assertThat(resourceProvider.getPatientById(idType).isResource(), is(true));
-		assertThat(resourceProvider.getPatientById(idType), nullValue());
+		assertThrows(ResourceNotFoundException.class, () -> resourceProvider.getPatientById(idType));
 	}
 	
 	@Test
@@ -174,29 +174,32 @@ public class PatientFhirResourceProviderTest extends BaseFhirProvenanceResourceT
 		assertThat(result.getResource(), equalTo(patient));
 	}
 	
-	@Test(expected = InvalidRequestException.class)
+	@Test
 	public void updatePatient_shouldThrowInvalidRequestExceptionForUuidMismatch() {
 		when(patientService.update(WRONG_PATIENT_UUID, patient)).thenThrow(InvalidRequestException.class);
-		
-		resourceProvider.updatePatient(new IdType().setValue(WRONG_PATIENT_UUID), patient);
+
+		assertThrows(InvalidRequestException.class,
+		    () -> resourceProvider.updatePatient(new IdType().setValue(WRONG_PATIENT_UUID), patient));
 	}
 	
-	@Test(expected = InvalidRequestException.class)
+	@Test
 	public void updatePatient_shouldThrowInvalidRequestExceptionForMissingId() {
 		Patient noIdPatient = new Patient();
 		
 		when(patientService.update(PATIENT_UUID, noIdPatient)).thenThrow(InvalidRequestException.class);
 		
-		resourceProvider.updatePatient(new IdType().setValue(PATIENT_UUID), noIdPatient);
+		assertThrows(InvalidRequestException.class,
+		    () -> resourceProvider.updatePatient(new IdType().setValue(PATIENT_UUID), noIdPatient));
 	}
 	
-	@Test(expected = MethodNotAllowedException.class)
+	@Test
 	public void updatePatient_shouldThrowMethodNotAllowedIfDoesNotExist() {
 		patient.setId(WRONG_PATIENT_UUID);
 		
 		when(patientService.update(WRONG_PATIENT_UUID, patient)).thenThrow(MethodNotAllowedException.class);
 		
-		resourceProvider.updatePatient(new IdType().setValue(WRONG_PATIENT_UUID), patient);
+		assertThrows(MethodNotAllowedException.class,
+		    () -> resourceProvider.updatePatient(new IdType().setValue(WRONG_PATIENT_UUID), patient));
 	}
 	
 	@Test

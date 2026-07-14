@@ -16,6 +16,7 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40.convertResource;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
@@ -47,16 +48,16 @@ import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.dstu3.model.ProcedureRequest;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.ServiceRequest;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirServiceRequestService;
 import org.openmrs.module.fhir2.providers.r4.MockIBundleProvider;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ProcedureRequestFhirResourceProviderTest {
 	
 	private static final String SERVICE_REQUEST_UUID = "7d13b03b-58c2-43f5-b34d-08750c51aea9";
@@ -90,13 +91,13 @@ public class ProcedureRequestFhirResourceProviderTest {
 	
 	private ServiceRequest serviceRequest;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		resourceProvider = new ProcedureRequestFhirResourceProvider();
 		resourceProvider.setServiceRequestService(serviceRequestService);
 	}
 	
-	@Before
+	@BeforeEach
 	public void initServiceRequest() {
 		serviceRequest = new ServiceRequest();
 		serviceRequest.setId(SERVICE_REQUEST_UUID);
@@ -125,12 +126,14 @@ public class ProcedureRequestFhirResourceProviderTest {
 		assertThat(result.getId(), equalTo(SERVICE_REQUEST_UUID));
 	}
 	
-	@Test(expected = ResourceNotFoundException.class)
+	@Test
 	public void getServiceRequestByWithWrongId_shouldThrowResourceNotFoundException() {
 		IdType idType = new IdType();
 		idType.setValue(WRONG_SERVICE_REQUEST_UUID);
-		assertThat(resourceProvider.getProcedureRequestById(idType).isResource(), is(true));
-		assertThat(resourceProvider.getProcedureRequestById(idType), nullValue());
+		assertThrows(ResourceNotFoundException.class, () -> {
+			assertThat(resourceProvider.getProcedureRequestById(idType).isResource(), is(true));
+			assertThat(resourceProvider.getProcedureRequestById(idType), nullValue());
+		});
 	}
 	
 	@Test
@@ -280,27 +283,29 @@ public class ProcedureRequestFhirResourceProviderTest {
 		assertThat(result.getResource().getIdElement().getIdPart(), equalTo(SERVICE_REQUEST_UUID));
 	}
 	
-	@Test(expected = InvalidRequestException.class)
+	@Test
 	public void updateProcedureRequest_shouldThrowInvalidRequestForUuidMismatch() {
 		when(serviceRequestService.update(eq(WRONG_SERVICE_REQUEST_UUID), any(ServiceRequest.class)))
 		        .thenThrow(InvalidRequestException.class);
-		
-		resourceProvider.updateProcedureRequest(new IdType().setValue(WRONG_SERVICE_REQUEST_UUID),
-		    (ProcedureRequest) convertResource(serviceRequest));
+
+		assertThrows(InvalidRequestException.class,
+		    () -> resourceProvider.updateProcedureRequest(new IdType().setValue(WRONG_SERVICE_REQUEST_UUID),
+		        (ProcedureRequest) convertResource(serviceRequest)));
 	}
 	
-	@Test(expected = InvalidRequestException.class)
+	@Test
 	public void updateProcedureRequest_shouldThrowInvalidRequestForMissingId() {
 		ServiceRequest noIdServiceRequest = new ServiceRequest();
 		
 		when(serviceRequestService.update(eq(SERVICE_REQUEST_UUID), any(ServiceRequest.class)))
 		        .thenThrow(InvalidRequestException.class);
 		
-		resourceProvider.updateProcedureRequest(new IdType().setValue(SERVICE_REQUEST_UUID),
-		    (ProcedureRequest) convertResource(noIdServiceRequest));
+		assertThrows(InvalidRequestException.class,
+		    () -> resourceProvider.updateProcedureRequest(new IdType().setValue(SERVICE_REQUEST_UUID),
+		        (ProcedureRequest) convertResource(noIdServiceRequest)));
 	}
 	
-	@Test(expected = MethodNotAllowedException.class)
+	@Test
 	public void updateProcedureRequest_shouldThrowMethodNotAllowedIfDoesNotExist() {
 		ServiceRequest wrongServiceRequest = new ServiceRequest();
 		wrongServiceRequest.setId(WRONG_SERVICE_REQUEST_UUID);
@@ -308,8 +313,9 @@ public class ProcedureRequestFhirResourceProviderTest {
 		when(serviceRequestService.update(eq(WRONG_SERVICE_REQUEST_UUID), any(ServiceRequest.class)))
 		        .thenThrow(MethodNotAllowedException.class);
 		
-		resourceProvider.updateProcedureRequest(new IdType().setValue(WRONG_SERVICE_REQUEST_UUID),
-		    (ProcedureRequest) convertResource(wrongServiceRequest));
+		assertThrows(MethodNotAllowedException.class,
+		    () -> resourceProvider.updateProcedureRequest(new IdType().setValue(WRONG_SERVICE_REQUEST_UUID),
+		        (ProcedureRequest) convertResource(wrongServiceRequest)));
 	}
 	
 	@Test

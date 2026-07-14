@@ -23,7 +23,7 @@ import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.MedicationRequest;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class JsonPatchUtilTest {
 	

@@ -13,21 +13,22 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.hl7.fhir.r4.model.MedicationRequest;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.DrugOrder;
 import org.openmrs.Order;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class MedicationRequestPriorityTranslatorImplTest {
 	
 	private MedicationRequestPriorityTranslatorImpl medicationRequestPriorityTranslator;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		medicationRequestPriorityTranslator = new MedicationRequestPriorityTranslatorImpl();
 	}
@@ -86,10 +87,9 @@ public class MedicationRequestPriorityTranslatorImplTest {
 		assertThat(urgency, nullValue());
 	}
 	
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void toFhirResource_shouldThrowNullPointerException() {
-		MedicationRequest.MedicationRequestPriority priority = medicationRequestPriorityTranslator.toFhirResource(null);
-		assertThat(priority, nullValue());
+		assertThrows(NullPointerException.class, () -> medicationRequestPriorityTranslator.toFhirResource(null));
 	}
 	
 }

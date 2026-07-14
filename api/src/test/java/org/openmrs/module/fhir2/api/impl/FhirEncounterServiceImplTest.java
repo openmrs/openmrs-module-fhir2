@@ -19,6 +19,7 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.Mockito.when;
@@ -50,11 +51,11 @@ import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.Encounter;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
@@ -68,7 +69,7 @@ import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.EncounterTranslator;
 import org.openmrs.module.fhir2.providers.r3.MockIBundleProvider;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class FhirEncounterServiceImplTest {
 	
 	private static final Integer ENCOUNTER_ID = 123;
@@ -117,7 +118,7 @@ public class FhirEncounterServiceImplTest {
 	
 	private org.hl7.fhir.r4.model.Encounter fhirEncounter;
 	
-	@Before
+	@BeforeEach
 	public void setUp() {
 		encounterService = new FhirEncounterServiceImpl() {
 			
@@ -165,9 +166,9 @@ public class FhirEncounterServiceImplTest {
 		assertThat(fhirEncounter.getId(), equalTo(ENCOUNTER_UUID));
 	}
 	
-	@Test(expected = InvalidRequestException.class)
+	@Test
 	public void create_shouldThrowInvalidRequestExceptionWhenEncounterIsMissing() {
-		encounterService.create(null);
+		assertThrows(InvalidRequestException.class, () -> encounterService.create(null));
 	}
 	
 	@Test
@@ -199,18 +200,18 @@ public class FhirEncounterServiceImplTest {
 		assertThat(result.getId(), equalTo(ENCOUNTER_UUID));
 	}
 	
-	@Test(expected = InvalidRequestException.class)
+	@Test
 	public void create_shouldThrowInvalidRequestExceptionWhenTypeIsMissing() {
-		encounterService.create(fhirEncounter);
+		assertThrows(InvalidRequestException.class, () -> encounterService.create(fhirEncounter));
 	}
 	
-	@Test(expected = InvalidRequestException.class)
+	@Test
 	public void create_shouldThrowInvalidRequestExceptionWhenTypeIsNotEncounterOrVisit() {
 		CodeableConcept codeableConcept = new CodeableConcept();
 		codeableConcept.addCoding().setSystem(FhirConstants.VISIT_TYPE_SYSTEM_URI).setCode("1");
 		codeableConcept.addCoding().setSystem(FhirConstants.ENCOUNTER_TYPE_SYSTEM_URI).setCode("2");
 		fhirEncounter.setType(Collections.singletonList(codeableConcept));
-		encounterService.create(fhirEncounter);
+		assertThrows(InvalidRequestException.class, () -> encounterService.create(fhirEncounter));
 	}
 	
 	@Test
@@ -244,41 +245,41 @@ public class FhirEncounterServiceImplTest {
 		assertThat(result.getId(), equalTo(ENCOUNTER_UUID));
 	}
 	
-	@Test(expected = InvalidRequestException.class)
+	@Test
 	public void update_shouldThrowInvalidRequestExceptionIfIdIsNull() {
 		CodeableConcept codeableConcept = new CodeableConcept();
 		codeableConcept.addCoding().setSystem(FhirConstants.ENCOUNTER_TYPE_SYSTEM_URI).setCode("1");
 		fhirEncounter.setType(Collections.singletonList(codeableConcept));
 		
-		encounterService.update(null, fhirEncounter);
+		assertThrows(InvalidRequestException.class, () -> encounterService.update(null, fhirEncounter));
 	}
 	
-	@Test(expected = InvalidRequestException.class)
+	@Test
 	public void update_shouldThrowInvalidRequestException() {
 		CodeableConcept codeableConcept = new CodeableConcept();
 		codeableConcept.addCoding().setSystem(FhirConstants.ENCOUNTER_TYPE_SYSTEM_URI).setCode("1");
 		fhirEncounter.setType(Collections.singletonList(codeableConcept));
 		
-		encounterService.update(WRONG_ENCOUNTER_UUID, fhirEncounter);
+		assertThrows(InvalidRequestException.class, () -> encounterService.update(WRONG_ENCOUNTER_UUID, fhirEncounter));
 	}
 	
-	@Test(expected = InvalidRequestException.class)
+	@Test
 	public void update_shouldThrowInvalidRequestExceptionWhenTypeIsMissing() {
-		encounterService.update(ENCOUNTER_UUID, fhirEncounter);
+		assertThrows(InvalidRequestException.class, () -> encounterService.update(ENCOUNTER_UUID, fhirEncounter));
 	}
 	
-	@Test(expected = InvalidRequestException.class)
+	@Test
 	public void update_shouldThrowInvalidRequestExceptionWhenTypeIsNotEncounterOrVisit() {
 		CodeableConcept codeableConcept = new CodeableConcept();
 		codeableConcept.addCoding().setSystem(FhirConstants.VISIT_TYPE_SYSTEM_URI).setCode("1");
 		codeableConcept.addCoding().setSystem(FhirConstants.ENCOUNTER_TYPE_SYSTEM_URI).setCode("2");
 		fhirEncounter.setType(Collections.singletonList(codeableConcept));
-		encounterService.update(ENCOUNTER_UUID, fhirEncounter);
+		assertThrows(InvalidRequestException.class, () -> encounterService.update(ENCOUNTER_UUID, fhirEncounter));
 	}
 	
-	@Test(expected = InvalidRequestException.class)
+	@Test
 	public void delete_shouldThrowInvalidRequestExceptionWhenUidIsMissing() {
-		encounterService.delete(null);
+		assertThrows(InvalidRequestException.class, () -> encounterService.delete(null));
 	}
 	
 	@Test

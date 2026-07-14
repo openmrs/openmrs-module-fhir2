@@ -16,6 +16,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -46,19 +47,19 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirEncounterService;
 import org.openmrs.module.fhir2.api.search.param.EncounterSearchParams;
 import org.openmrs.module.fhir2.providers.BaseFhirProvenanceResourceTest;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class EncounterFhirResourceProviderTest extends BaseFhirProvenanceResourceTest<Encounter> {
 	
 	private static final String ENCOUNTER_UUID = "123xx34-623hh34-22hj89-23hjy5";
@@ -83,13 +84,13 @@ public class EncounterFhirResourceProviderTest extends BaseFhirProvenanceResourc
 	
 	private Encounter encounter;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		resourceProvider = new EncounterFhirResourceProvider();
 		resourceProvider.setEncounterService(encounterService);
 	}
 	
-	@Before
+	@BeforeEach
 	public void initEncounter() {
 		encounter = new Encounter();
 		encounter.setId(ENCOUNTER_UUID);
@@ -119,12 +120,14 @@ public class EncounterFhirResourceProviderTest extends BaseFhirProvenanceResourc
 		assertThat(result.getStatus(), equalTo(Encounter.EncounterStatus.UNKNOWN));
 	}
 	
-	@Test(expected = ResourceNotFoundException.class)
+	@Test
 	public void getEncounterWithWrongUuid_shouldThrowResourceNotFoundException() {
 		IdType id = new IdType();
 		id.setValue(WRONG_ENCOUNTER_UUID);
-		Encounter result = resourceProvider.getEncounterByUuid(id);
-		assertThat(result, nullValue());
+		assertThrows(ResourceNotFoundException.class, () -> {
+			Encounter result = resourceProvider.getEncounterByUuid(id);
+			assertThat(result, nullValue());
+		});
 	}
 	
 	@Test
@@ -303,30 +306,33 @@ public class EncounterFhirResourceProviderTest extends BaseFhirProvenanceResourc
 		assertThat(result.getResource(), equalTo(encounter));
 	}
 	
-	@Test(expected = InvalidRequestException.class)
+	@Test
 	public void updateEncounter_shouldThrowInvalidRequestForUuidMismatch() {
 		when(encounterService.update(WRONG_ENCOUNTER_UUID, encounter)).thenThrow(InvalidRequestException.class);
-		
-		resourceProvider.updateEncounter(new IdType().setValue(WRONG_ENCOUNTER_UUID), encounter);
+
+		assertThrows(InvalidRequestException.class,
+		    () -> resourceProvider.updateEncounter(new IdType().setValue(WRONG_ENCOUNTER_UUID), encounter));
 	}
 	
-	@Test(expected = InvalidRequestException.class)
+	@Test
 	public void updateEncounter_shouldThrowInvalidRequestForMissingId() {
 		Encounter noIdEncounter = new Encounter();
 		
 		when(encounterService.update(ENCOUNTER_UUID, noIdEncounter)).thenThrow(InvalidRequestException.class);
 		
-		resourceProvider.updateEncounter(new IdType().setValue(ENCOUNTER_UUID), noIdEncounter);
+		assertThrows(InvalidRequestException.class,
+		    () -> resourceProvider.updateEncounter(new IdType().setValue(ENCOUNTER_UUID), noIdEncounter));
 	}
 	
-	@Test(expected = MethodNotAllowedException.class)
+	@Test
 	public void updateEncounter_shouldThrowMethodNotAllowedIfDoesNotExist() {
 		Encounter wrongEncounter = new Encounter();
 		wrongEncounter.setId(WRONG_ENCOUNTER_UUID);
 		
 		when(encounterService.update(WRONG_ENCOUNTER_UUID, wrongEncounter)).thenThrow(MethodNotAllowedException.class);
 		
-		resourceProvider.updateEncounter(new IdType().setValue(WRONG_ENCOUNTER_UUID), wrongEncounter);
+		assertThrows(MethodNotAllowedException.class,
+		    () -> resourceProvider.updateEncounter(new IdType().setValue(WRONG_ENCOUNTER_UUID), wrongEncounter));
 	}
 	
 	@Test

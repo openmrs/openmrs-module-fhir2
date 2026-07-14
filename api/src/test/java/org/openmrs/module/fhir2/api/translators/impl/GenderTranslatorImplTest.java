@@ -15,14 +15,14 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 
 import org.hl7.fhir.r4.model.Enumerations;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class GenderTranslatorImplTest {
 	
 	private GenderTranslatorImpl genderTranslator;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.genderTranslator = new GenderTranslatorImpl();
 	}

@@ -475,12 +475,6 @@
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>pl.pragmatists</groupId>
-                <artifactId>JUnitParams</artifactId>
-                <version>1.1.1</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
                 <groupId>net.bytebuddy</groupId>
                 <artifactId>byte-buddy</artifactId>
                 <version>1.18.5</version>
@@ -529,10 +523,6 @@
         <dependency>
             <groupId>co.unruly</groupId>
             <artifactId>java-8-matchers</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>pl.pragmatists</groupId>
-            <artifactId>JUnitParams</artifactId>
         </dependency>
     </dependencies>
 
