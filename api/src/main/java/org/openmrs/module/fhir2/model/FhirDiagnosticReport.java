@@ -51,7 +51,7 @@ public class FhirDiagnosticReport extends BaseOpenmrsData {
 	@Column(name = "diagnostic_report_id")
 	private Integer id;
 	
-	@Column(nullable = false, columnDefinition = "varchar(255)")
+	@Column(nullable = false, columnDefinition = "varchar(50)")
 	@Enumerated(EnumType.STRING)
 	private DiagnosticReportStatus status;
 	
