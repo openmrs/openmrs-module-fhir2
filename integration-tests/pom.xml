@@ -41,12 +41,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.junit.vintage</groupId>
-            <artifactId>junit-vintage-engine</artifactId>
-            <version>6.1.0</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>ca.uhn.hapi.fhir</groupId>
             <artifactId>hapi-fhir-caching-caffeine</artifactId>
         </dependency>

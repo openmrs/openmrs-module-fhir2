@@ -77,12 +77,12 @@ public class NarrativeGeneratorTest {
 	public void shouldResolveOpenmrsPrefixAgainstApplicationDataDirectory() {
 		String givenPath = "openmrs:some/random/openmrs/path.properties";
 		File expectedFile = new File(OpenmrsUtil.getApplicationDataDirectory(), "some/random/openmrs/path.properties");
-
-		Throwable e = assertThrows(IOException.class, () -> OpenmrsNarrativeTemplateManifest
-		        .forManifestFileLocation(Collections.singletonList(givenPath)));
+		
+		Throwable e = assertThrows(IOException.class,
+		    () -> OpenmrsNarrativeTemplateManifest.forManifestFileLocation(Collections.singletonList(givenPath)));
 		assertThat(e.getMessage(), containsString(expectedFile.getAbsolutePath()));
 	}
-
+	
 	/**
 	 * Check that ConfigurationException is thrown when property name is invalid
 	 */

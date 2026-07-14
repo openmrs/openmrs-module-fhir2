@@ -19,7 +19,7 @@ import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.openmrs.test.OpenmrsMatchers.hasId;
 import static org.openmrs.util.PrivilegeConstants.GET_ORDERS;
 

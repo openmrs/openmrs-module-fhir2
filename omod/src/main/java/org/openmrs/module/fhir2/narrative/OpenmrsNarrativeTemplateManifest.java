@@ -29,12 +29,12 @@ import org.openmrs.util.OpenmrsUtil;
  * application data directory before delegating to HAPI.
  */
 public final class OpenmrsNarrativeTemplateManifest {
-
+	
 	private static final String OPENMRS_PREFIX = "openmrs:";
-
+	
 	private OpenmrsNarrativeTemplateManifest() {
 	}
-
+	
 	public static NarrativeTemplateManifest forManifestFileLocation(Collection<String> propertyFilePaths)
 	        throws IOException {
 		List<String> resolvedPaths = new ArrayList<>(propertyFilePaths.size());
@@ -43,11 +43,11 @@ public final class OpenmrsNarrativeTemplateManifest {
 		}
 		return NarrativeTemplateManifest.forManifestFileLocation(resolvedPaths);
 	}
-
+	
 	public static NarrativeTemplateManifest forManifestFileLocation(String... propertyFilePaths) throws IOException {
 		return forManifestFileLocation(Arrays.asList(propertyFilePaths));
 	}
-
+	
 	/**
 	 * Rewrites an {@code openmrs:<relative path>} location to a {@code file:} location under the
 	 * OpenMRS application data directory. Paths using any other prefix are returned unchanged for HAPI
@@ -58,7 +58,7 @@ public final class OpenmrsNarrativeTemplateManifest {
 			File file = new File(OpenmrsUtil.getApplicationDataDirectory(), path.substring(OPENMRS_PREFIX.length()));
 			return "file:" + file.getAbsolutePath();
 		}
-
+		
 		return path;
 	}
 }
