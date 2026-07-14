@@ -43,11 +43,6 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implemen
 	private FhirGlobalPropertyService globalPropertyService;
 	
 	@Override
-	public Allergy createOrUpdate(@Nonnull Allergy allergy) {
-		return (Allergy) getSessionFactory().getCurrentSession().merge(allergy);
-	}
-	
-	@Override
 	protected <U> void setupSearchParams(@Nonnull OpenmrsFhirCriteriaContext<Allergy, U> criteriaContext,
 	        @Nonnull SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {

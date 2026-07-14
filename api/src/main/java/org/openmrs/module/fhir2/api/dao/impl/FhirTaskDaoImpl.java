@@ -23,7 +23,6 @@ import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Task;
-import org.openmrs.api.db.DAOException;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirTaskDao;
 import org.openmrs.module.fhir2.api.dao.internals.OpenmrsFhirCriteriaContext;
@@ -73,11 +72,6 @@ public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDa
 					break;
 			}
 		});
-	}
-	
-	@Override
-	public FhirTask createOrUpdate(@Nonnull FhirTask task) throws DAOException {
-		return getSessionFactory().getCurrentSession().merge(task);
 	}
 	
 	private Boolean validReferenceParam(ReferenceParam ref) {
