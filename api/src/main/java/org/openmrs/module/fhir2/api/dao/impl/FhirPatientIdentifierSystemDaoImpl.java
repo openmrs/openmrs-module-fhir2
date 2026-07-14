@@ -91,7 +91,7 @@ public class FhirPatientIdentifierSystemDaoImpl implements FhirPatientIdentifier
 	@Transactional
 	public FhirPatientIdentifierSystem saveFhirPatientIdentifierSystem(
 	        @Nonnull FhirPatientIdentifierSystem fhirPatientIdentifierSystem) {
-		return (FhirPatientIdentifierSystem) sessionFactory.getCurrentSession().merge(fhirPatientIdentifierSystem);
+		return sessionFactory.getCurrentSession().merge(fhirPatientIdentifierSystem);
 	}
 	
 	private OpenmrsFhirCriteriaContext<FhirPatientIdentifierSystem, FhirPatientIdentifierSystem> openmrsFhirCriteriaContext() {

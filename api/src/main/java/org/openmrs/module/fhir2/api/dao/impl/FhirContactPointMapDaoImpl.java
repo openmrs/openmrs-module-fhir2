@@ -115,14 +115,15 @@ public class FhirContactPointMapDaoImpl implements FhirContactPointMapDao {
 		        .setParameter("attribute_type_id", contactPointMap.getAttributeTypeId()).getResultList().stream().findFirst()
 		        .orElse(null);
 		
+		FhirContactPointMap target = contactPointMap;
 		if (existingContactPointMap != null) {
 			existingContactPointMap.setSystem(contactPointMap.getSystem());
 			existingContactPointMap.setUse(contactPointMap.getUse());
 			existingContactPointMap.setRank(contactPointMap.getRank());
-			return (FhirContactPointMap) sessionFactory.getCurrentSession().merge(existingContactPointMap);
-		} else {
-			return (FhirContactPointMap) sessionFactory.getCurrentSession().merge(contactPointMap);
+			target = existingContactPointMap;
 		}
+		
+		return sessionFactory.getCurrentSession().merge(target);
 	}
 	
 	private OpenmrsFhirCriteriaContext<FhirContactPointMap, FhirContactPointMap> openmrsFhirCriteriaContext() {

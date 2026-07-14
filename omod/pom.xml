@@ -90,10 +90,6 @@
 			<groupId>com.github.java-json-tools</groupId>
 			<artifactId>json-patch</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-caching-caffeine</artifactId>
-		</dependency>
 	</dependencies>
 
 	<build>
