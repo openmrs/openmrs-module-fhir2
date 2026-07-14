@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.model;
 
+import static org.openmrs.module.fhir2.api.util.GeneralUtils.replaceContents;
+
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -75,10 +77,7 @@ public class FhirDiagnosticReport extends BaseOpenmrsData {
 	private final Set<Provider> performers = new LinkedHashSet<>();
 	
 	public void setPerformers(Set<Provider> performers) {
-		this.performers.clear();
-		if (performers != null) {
-			this.performers.addAll(performers);
-		}
+		replaceContents(this.performers, performers);
 	}
 	
 	@OneToMany
@@ -86,10 +85,7 @@ public class FhirDiagnosticReport extends BaseOpenmrsData {
 	private final Set<Obs> results = new LinkedHashSet<>();
 	
 	public void setResults(Set<Obs> results) {
-		this.results.clear();
-		if (results != null) {
-			this.results.addAll(results);
-		}
+		replaceContents(this.results, results);
 	}
 	
 	/**
@@ -110,10 +106,7 @@ public class FhirDiagnosticReport extends BaseOpenmrsData {
 	private final Set<Order> orders = new LinkedHashSet<>();
 	
 	public void setOrders(Set<Order> orders) {
-		this.orders.clear();
-		if (orders != null) {
-			this.orders.addAll(orders);
-		}
+		replaceContents(this.orders, orders);
 	}
 	
 	public enum DiagnosticReportStatus {

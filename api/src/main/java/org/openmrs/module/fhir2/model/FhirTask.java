@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.model;
 
+import static org.openmrs.module.fhir2.api.util.GeneralUtils.replaceContents;
+
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -98,10 +100,7 @@ public class FhirTask extends BaseOpenmrsMetadata {
 	private final Set<FhirReference> basedOnReferences = new LinkedHashSet<>();
 	
 	public void setBasedOnReferences(Set<FhirReference> basedOnReferences) {
-		this.basedOnReferences.clear();
-		if (basedOnReferences != null) {
-			this.basedOnReferences.addAll(basedOnReferences);
-		}
+		replaceContents(this.basedOnReferences, basedOnReferences);
 	}
 	
 	/**
@@ -145,10 +144,7 @@ public class FhirTask extends BaseOpenmrsMetadata {
 	private final Set<FhirTaskInput> input = new LinkedHashSet<>();
 	
 	public void setInput(Set<FhirTaskInput> input) {
-		this.input.clear();
-		if (input != null) {
-			this.input.addAll(input);
-		}
+		replaceContents(this.input, input);
 	}
 	
 	/**
@@ -160,10 +156,7 @@ public class FhirTask extends BaseOpenmrsMetadata {
 	private final Set<FhirTaskOutput> output = new LinkedHashSet<>();
 	
 	public void setOutput(Set<FhirTaskOutput> output) {
-		this.output.clear();
-		if (output != null) {
-			this.output.addAll(output);
-		}
+		replaceContents(this.output, output);
 	}
 	
 	/**
@@ -188,10 +181,7 @@ public class FhirTask extends BaseOpenmrsMetadata {
 	private final Set<FhirReference> partOfReferences = new LinkedHashSet<>();
 	
 	public void setPartOfReferences(Set<FhirReference> partOfReferences) {
-		this.partOfReferences.clear();
-		if (partOfReferences != null) {
-			this.partOfReferences.addAll(partOfReferences);
-		}
+		replaceContents(this.partOfReferences, partOfReferences);
 	}
 	
 	/**
