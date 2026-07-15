@@ -1,4 +1,4 @@
-name: Build
+name: Build with Maven
 
 on:
   push:
