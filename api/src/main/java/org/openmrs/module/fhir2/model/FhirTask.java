@@ -27,7 +27,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -131,7 +130,7 @@ public class FhirTask extends BaseOpenmrsMetadata {
 	 * Observation or other resource that the task is focused on (e.g., the Observation that triggered
 	 * the creation of this nursing task).
 	 */
-	@OneToOne(cascade = CascadeType.ALL)
+	@ManyToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "focus_reference_id", referencedColumnName = "reference_id")
 	private FhirReference focusReference;
 	
