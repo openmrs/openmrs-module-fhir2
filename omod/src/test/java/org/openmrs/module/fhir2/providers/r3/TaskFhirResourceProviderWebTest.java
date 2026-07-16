@@ -57,7 +57,7 @@ import org.openmrs.module.fhir2.providers.r4.MockIBundleProvider;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 @ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.LENIENT)
+@MockitoSettings(strictness = Strictness.WARN)
 public class TaskFhirResourceProviderWebTest extends BaseFhirR3ResourceProviderWebTest<TaskFhirResourceProvider, Task> {
 	
 	private static final String TASK_UUID = "55616228-dc6d-446f-ab50-4ec711ea9243";

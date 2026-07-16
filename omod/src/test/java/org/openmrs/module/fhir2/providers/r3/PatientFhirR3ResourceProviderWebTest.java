@@ -64,7 +64,7 @@ import org.openmrs.module.fhir2.providers.r4.MockIBundleProvider;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 @ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.LENIENT)
+@MockitoSettings(strictness = Strictness.WARN)
 public class PatientFhirR3ResourceProviderWebTest extends BaseFhirR3ResourceProviderWebTest<PatientFhirResourceProvider, Patient> {
 	
 	private static final String PATIENT_UUID = "0b42f99b-776e-4388-8f6f-84357ae2a8fb";

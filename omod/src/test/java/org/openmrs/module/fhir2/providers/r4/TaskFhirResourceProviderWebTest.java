@@ -62,7 +62,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.LENIENT)
+@MockitoSettings(strictness = Strictness.WARN)
 public class TaskFhirResourceProviderWebTest extends BaseFhirR4ResourceProviderWebTest<TaskFhirResourceProvider, Task> {
 	
 	private static final String TASK_UUID = "55616228-dc6d-446f-ab50-4ec711ea9243";

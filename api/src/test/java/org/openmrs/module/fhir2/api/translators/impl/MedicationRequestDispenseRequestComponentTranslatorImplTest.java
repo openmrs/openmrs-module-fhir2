@@ -40,7 +40,7 @@ import org.openmrs.module.fhir2.api.FhirConceptSourceService;
 import org.openmrs.util.LocaleUtility;
 
 @ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.LENIENT)
+@MockitoSettings(strictness = Strictness.WARN)
 public class MedicationRequestDispenseRequestComponentTranslatorImplTest {
 	
 	@Mock

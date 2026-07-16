@@ -40,7 +40,7 @@ import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.DurationUnitTranslator;
 
 @ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.LENIENT)
+@MockitoSettings(strictness = Strictness.WARN)
 public class MedicationRequestTimingTranslatorImplTest {
 	
 	private MedicationRequestTimingTranslatorImpl timingTranslator;

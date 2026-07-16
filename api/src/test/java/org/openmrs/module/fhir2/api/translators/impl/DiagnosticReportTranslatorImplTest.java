@@ -49,7 +49,7 @@ import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.model.FhirDiagnosticReport;
 
 @ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.LENIENT)
+@MockitoSettings(strictness = Strictness.WARN)
 public class DiagnosticReportTranslatorImplTest {
 	
 	private static final String PARENT_UUID = "249b9094-b812-4b0c-a204-0052a05c657f";

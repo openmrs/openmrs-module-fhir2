@@ -41,7 +41,7 @@ import org.openmrs.module.fhir2.api.FhirConceptSourceService;
 import org.openmrs.util.LocaleUtility;
 
 @ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.LENIENT)
+@MockitoSettings(strictness = Strictness.WARN)
 public class MedicationQuantityCodingTranslatorImplTest {
 	
 	private static final String CONCEPT_UUID = "33fdc8ad-fe4d-499b-93a8-8a991c1d488g";

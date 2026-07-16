@@ -34,7 +34,7 @@ import org.openmrs.module.fhir2.api.util.FhirGlobalPropertyHolder;
 
 // we intentionally have unnecessary stubbings for this class when testing the X-Forwarded headers
 @ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.LENIENT)
+@MockitoSettings(strictness = Strictness.WARN)
 public class OpenmrsFhirAddressStrategyTest {
 	
 	@Mock

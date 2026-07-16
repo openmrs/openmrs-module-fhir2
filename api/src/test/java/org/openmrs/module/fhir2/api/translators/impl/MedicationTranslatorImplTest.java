@@ -39,7 +39,7 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 
 @ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.LENIENT)
+@MockitoSettings(strictness = Strictness.WARN)
 public class MedicationTranslatorImplTest {
 	
 	private static final String MEDICATION_UUID = "aa47108b-9720-45d4-8be3-ba75e4cea8ac";

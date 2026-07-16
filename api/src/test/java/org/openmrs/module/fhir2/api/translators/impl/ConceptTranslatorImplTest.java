@@ -51,7 +51,7 @@ import org.openmrs.util.LocaleUtility;
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 
 @ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.LENIENT)
+@MockitoSettings(strictness = Strictness.WARN)
 public class ConceptTranslatorImplTest {
 	
 	private static final String CONCEPT_UUID = "12345-abcdef-12345";

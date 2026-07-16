@@ -52,7 +52,7 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirMedicationDispenseService;
 
 @ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.LENIENT)
+@MockitoSettings(strictness = Strictness.WARN)
 public class MedicationDispenseFhirResourceProviderTest {
 	
 	private static final String MEDICATION_DISPENSE_UUID = "d7f5a4dd-019e-4221-85fa-e084505b9695";
