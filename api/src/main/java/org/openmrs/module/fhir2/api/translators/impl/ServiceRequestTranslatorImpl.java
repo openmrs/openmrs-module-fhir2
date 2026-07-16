@@ -92,6 +92,8 @@ public class ServiceRequestTranslatorImpl implements ServiceRequestTranslator<Te
 		
 		serviceRequest.setIntent(ServiceRequest.ServiceRequestIntent.ORDER);
 		
+		serviceRequest.setPatientInstruction(order.getInstructions());
+		
 		serviceRequest.setSubject(patientReferenceTranslator.toFhirResource(order.getPatient()));
 		
 		serviceRequest.setEncounter(encounterReferenceTranslator.toFhirResource(order.getEncounter()));
