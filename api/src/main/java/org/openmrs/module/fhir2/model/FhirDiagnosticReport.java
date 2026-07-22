@@ -9,23 +9,24 @@
  */
 package org.openmrs.module.fhir2.model;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
+import static org.openmrs.module.fhir2.api.util.GeneralUtils.replaceContents;
 
 import java.util.Date;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -48,23 +49,23 @@ public class FhirDiagnosticReport extends BaseOpenmrsData {
 	
 	@EqualsAndHashCode.Include
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "diagnostic_report_id")
 	private Integer id;
 	
-	@Column(nullable = false)
+	@Column(nullable = false, columnDefinition = "varchar(50)")
 	@Enumerated(EnumType.STRING)
 	private DiagnosticReportStatus status;
 	
-	@OneToOne
+	@ManyToOne
 	@JoinColumn(name = "concept_id", referencedColumnName = "concept_id", nullable = false)
 	private Concept code;
 	
-	@OneToOne
+	@ManyToOne
 	@JoinColumn(name = "subject_id", referencedColumnName = "patient_id")
 	private Patient subject;
 	
-	@OneToOne
+	@ManyToOne
 	@JoinColumn(name = "encounter_id", referencedColumnName = "encounter_id")
 	private Encounter encounter;
 	
@@ -73,11 +74,19 @@ public class FhirDiagnosticReport extends BaseOpenmrsData {
 	
 	@OneToMany
 	@JoinTable(name = "fhir_diagnostic_report_performers", joinColumns = @JoinColumn(name = "diagnostic_report_id"), inverseJoinColumns = @JoinColumn(name = "provider_id"))
-	private Set<Provider> performers = new HashSet<>();
+	private final Set<Provider> performers = new LinkedHashSet<>();
+	
+	public void setPerformers(Set<Provider> performers) {
+		replaceContents(this.performers, performers);
+	}
 	
 	@OneToMany
 	@JoinTable(name = "fhir_diagnostic_report_results", joinColumns = @JoinColumn(name = "diagnostic_report_id"), inverseJoinColumns = @JoinColumn(name = "obs_id"))
-	private Set<Obs> results = new HashSet<>();
+	private final Set<Obs> results = new LinkedHashSet<>();
+	
+	public void setResults(Set<Obs> results) {
+		replaceContents(this.results, results);
+	}
 	
 	/**
 	 * @Since 2.8.1
@@ -94,7 +103,11 @@ public class FhirDiagnosticReport extends BaseOpenmrsData {
 	 */
 	@OneToMany
 	@JoinTable(name = "fhir_diagnostic_report_service_request", joinColumns = @JoinColumn(name = "diagnostic_report_id"), inverseJoinColumns = @JoinColumn(name = "order_id"))
-	private Set<Order> orders = new HashSet<>();
+	private final Set<Order> orders = new LinkedHashSet<>();
+	
+	public void setOrders(Set<Order> orders) {
+		replaceContents(this.orders, orders);
+	}
 	
 	public enum DiagnosticReportStatus {
 		REGISTERED,

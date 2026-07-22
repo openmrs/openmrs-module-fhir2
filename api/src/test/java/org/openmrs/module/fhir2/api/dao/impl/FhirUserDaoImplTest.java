@@ -14,8 +14,8 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import org.hibernate.SessionFactory;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.User;
 import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +33,7 @@ public class FhirUserDaoImplTest extends BaseFhirContextSensitiveTest {
 	
 	private FhirUserDaoImpl fhirUserDao;
 	
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		fhirUserDao = new FhirUserDaoImpl();
 		fhirUserDao.setSessionFactory(sessionFactory);

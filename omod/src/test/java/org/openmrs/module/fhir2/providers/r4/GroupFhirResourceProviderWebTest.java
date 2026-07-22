@@ -24,8 +24,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.openmrs.module.fhir2.api.util.GeneralUtils.inputStreamToString;
 
-import javax.servlet.ServletException;
-
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
@@ -35,21 +33,22 @@ import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import jakarta.servlet.ServletException;
 import lombok.AccessLevel;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Group;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.module.fhir2.api.FhirGroupService;
 import org.springframework.mock.web.MockHttpServletResponse;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class GroupFhirResourceProviderWebTest extends BaseFhirR4ResourceProviderWebTest<GroupFhirResourceProvider, Group> {
 	
 	private static final String COHORT_UUID = "1d64befb-3b2e-48e5-85f5-353d43e23e46";
@@ -77,7 +76,7 @@ public class GroupFhirResourceProviderWebTest extends BaseFhirR4ResourceProvider
 	@Captor
 	private ArgumentCaptor<ReferenceAndListParam> managingEntityCaptor;
 	
-	@Before
+	@BeforeEach
 	public void setup() throws ServletException {
 		resourceProvider = new GroupFhirResourceProvider();
 		resourceProvider.setGroupService(groupService);

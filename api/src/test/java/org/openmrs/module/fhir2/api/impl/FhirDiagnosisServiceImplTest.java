@@ -18,11 +18,11 @@ import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import org.hl7.fhir.r4.model.Condition;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.Diagnosis;
 import org.openmrs.module.fhir2.api.dao.FhirDiagnosisDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
@@ -31,7 +31,7 @@ import org.openmrs.module.fhir2.api.search.param.DiagnosisSearchParams;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.DiagnosisTranslator;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class FhirDiagnosisServiceImplTest {
 	
 	@Mock
@@ -48,7 +48,7 @@ public class FhirDiagnosisServiceImplTest {
 	
 	private FhirDiagnosisServiceImpl diagnosisService;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		diagnosisService = new FhirDiagnosisServiceImpl() {
 			

@@ -13,6 +13,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.Collection;
 import java.util.Objects;
 
 import lombok.extern.slf4j.Slf4j;
@@ -49,5 +50,25 @@ public final class GeneralUtils {
 		}
 		
 		return false;
+	}
+	
+	/**
+	 * Replaces the contents of a persistent collection in place, preserving the underlying instance
+	 * (required by Hibernate 6, which manages the collection reference) while tolerating immutable and
+	 * {@code null} inputs. Guards against the self-assignment case (source == target), where a naive
+	 * {@code clear()} followed by {@code addAll()} would silently wipe the collection.
+	 *
+	 * @param target the collection to update (must not be {@code null})
+	 * @param source the desired contents, or {@code null} to clear the target
+	 */
+	public static <T> void replaceContents(Collection<T> target, Collection<? extends T> source) {
+		if (target == source) {
+			return;
+		}
+		
+		target.clear();
+		if (source != null) {
+			target.addAll(source);
+		}
 	}
 }

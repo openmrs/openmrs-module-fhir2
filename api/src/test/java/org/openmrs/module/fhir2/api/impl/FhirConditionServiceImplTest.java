@@ -46,11 +46,11 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.Condition;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirDiagnosisService;
@@ -65,7 +65,7 @@ import org.openmrs.module.fhir2.api.search.param.DiagnosisSearchParams;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.ConditionTranslator;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class FhirConditionServiceImplTest {
 	
 	private static final String CONDITION_UUID = "43578769-f1a4-46af-b08b-d9fe8a07066f";
@@ -102,7 +102,7 @@ public class FhirConditionServiceImplTest {
 	
 	private org.hl7.fhir.r4.model.Condition fhirCondition;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		conditionService = new FhirConditionServiceImpl() {
 			

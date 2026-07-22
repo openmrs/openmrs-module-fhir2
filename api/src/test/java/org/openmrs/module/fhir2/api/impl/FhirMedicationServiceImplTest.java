@@ -40,11 +40,11 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.MedicationRequest;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.Drug;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
@@ -56,7 +56,7 @@ import org.openmrs.module.fhir2.api.search.param.MedicationSearchParams;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.MedicationTranslator;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class FhirMedicationServiceImplTest {
 	
 	private static final Integer MEDICATION_ID = 123;
@@ -94,7 +94,7 @@ public class FhirMedicationServiceImplTest {
 	
 	private Drug drug;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		fhirMedicationService = new FhirMedicationServiceImpl() {
 			
@@ -334,28 +334,28 @@ public class FhirMedicationServiceImplTest {
 		assertThat(result.getId(), equalTo(MEDICATION_UUID));
 	}
 	
-	@Test(expected = InvalidRequestException.class)
+	@Test
 	public void updateMedication_shouldThrowInvalidRequestExceptionIfIdIsNull() {
 		Medication medication = new Medication();
 		medication.setId(MEDICATION_UUID);
 		
-		fhirMedicationService.update(null, medication);
+		assertThrows(InvalidRequestException.class, () -> fhirMedicationService.update(null, medication));
 	}
 	
-	@Test(expected = InvalidRequestException.class)
+	@Test
 	public void updateMedication_shouldThrowInvalidRequestException() {
 		Medication medication = new Medication();
 		medication.setId(MEDICATION_UUID);
 		
-		fhirMedicationService.update(WRONG_MEDICATION_UUID, medication);
+		assertThrows(InvalidRequestException.class, () -> fhirMedicationService.update(WRONG_MEDICATION_UUID, medication));
 	}
 	
-	@Test(expected = ResourceNotFoundException.class)
+	@Test
 	public void updateMedication_shouldThrowResourceNotFoundException() {
 		Medication medication = new Medication();
 		medication.setId(MEDICATION_UUID);
 		
-		fhirMedicationService.update(MEDICATION_UUID, medication);
+		assertThrows(ResourceNotFoundException.class, () -> fhirMedicationService.update(MEDICATION_UUID, medication));
 	}
 	
 	@Test

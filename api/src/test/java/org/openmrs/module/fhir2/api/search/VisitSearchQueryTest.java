@@ -19,7 +19,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -38,8 +38,8 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.Visit;
 import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.openmrs.module.fhir2.FhirConstants;
@@ -106,7 +106,7 @@ public class VisitSearchQueryTest extends BaseFhirContextSensitiveTest {
 		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}
 	
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		executeDataSet(VISIT_INITIAL_DATA_XML);
 		executeDataSet(LOCATION_INITIAL_DATA_XML);

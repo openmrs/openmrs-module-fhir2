@@ -16,6 +16,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -43,17 +44,17 @@ import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirConditionService;
 import org.openmrs.module.fhir2.api.search.param.ConditionSearchParams;
 import org.openmrs.module.fhir2.providers.BaseFhirProvenanceResourceTest;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ConditionFhirResourceProviderTest extends BaseFhirProvenanceResourceTest<Condition> {
 	
 	private static final String CONDITION_UUID = "23f620c3-2ecb-4d80-aea8-44fa1c5ff978";
@@ -73,13 +74,13 @@ public class ConditionFhirResourceProviderTest extends BaseFhirProvenanceResourc
 	
 	private ConditionFhirResourceProvider resourceProvider;
 	
-	@Before
+	@BeforeEach
 	public void setUp() {
 		resourceProvider = new ConditionFhirResourceProvider();
 		resourceProvider.setConditionService(conditionService);
 	}
 	
-	@Before
+	@BeforeEach
 	public void initCondition() {
 		condition = new Condition();
 		condition.setId(CONDITION_UUID);
@@ -107,12 +108,14 @@ public class ConditionFhirResourceProviderTest extends BaseFhirProvenanceResourc
 		assertThat(condition.getId(), equalTo(CONDITION_UUID));
 	}
 	
-	@Test(expected = ResourceNotFoundException.class)
+	@Test
 	public void getConditionWithWrongUuid_shouldThrowResourceNotFoundException() {
 		IdType id = new IdType();
 		id.setValue(WRONG_CONDITION_UUID);
-		Condition result = resourceProvider.getConditionByUuid(id);
-		assertThat(result, nullValue());
+		assertThrows(ResourceNotFoundException.class, () -> {
+			Condition result = resourceProvider.getConditionByUuid(id);
+			assertThat(result, nullValue());
+		});
 	}
 	
 	@Test

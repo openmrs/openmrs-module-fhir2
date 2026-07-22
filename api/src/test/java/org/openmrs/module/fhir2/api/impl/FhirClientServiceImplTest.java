@@ -16,8 +16,8 @@ import static org.hamcrest.Matchers.notNullValue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class FhirClientServiceImplTest {
 	
@@ -27,7 +27,7 @@ public class FhirClientServiceImplTest {
 	
 	private FhirClientServiceImpl fhirClientService;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		FhirContext fhirR3 = FhirContext.forDstu3Cached();
 		FhirContext fhirR4 = FhirContext.forR4Cached();

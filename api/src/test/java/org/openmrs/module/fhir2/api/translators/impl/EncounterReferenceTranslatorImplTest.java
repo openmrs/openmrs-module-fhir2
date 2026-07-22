@@ -13,21 +13,22 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 import static org.openmrs.module.fhir2.api.translators.impl.ReferenceHandlingTranslator.getReferenceId;
 
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Reference;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.Encounter;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirEncounterDao;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class EncounterReferenceTranslatorImplTest {
 	
 	private static final String ENCOUNTER_UUID = "12345-abcde-12345";
@@ -37,7 +38,7 @@ public class EncounterReferenceTranslatorImplTest {
 	
 	private EncounterReferenceTranslatorImpl encounterReferenceTranslator;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		encounterReferenceTranslator = new EncounterReferenceTranslatorImpl();
 		encounterReferenceTranslator.setEncounterDao(dao);
@@ -103,10 +104,10 @@ public class EncounterReferenceTranslatorImplTest {
 		assertThat(result, nullValue());
 	}
 	
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void toOpenmrsType_shouldThrowExceptionIfReferenceIsNotForEncounter() {
 		Reference reference = new Reference().setReference("Unknown" + "/" + ENCOUNTER_UUID).setType("Unknown");
 		
-		encounterReferenceTranslator.toOpenmrsType(reference);
+		assertThrows(IllegalArgumentException.class, () -> encounterReferenceTranslator.toOpenmrsType(reference));
 	}
 }

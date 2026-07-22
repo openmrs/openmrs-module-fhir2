@@ -25,8 +25,8 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.MedicationDispense;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.api.ConceptService;
 import org.openmrs.module.fhir2.api.FhirConceptSourceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,7 +50,7 @@ public class MedicationDispenseFhirResourceProviderIntegrationTest extends BaseF
 	@Autowired
 	FhirConceptSourceService fhirConceptSourceService;
 	
-	@Before
+	@BeforeEach
 	@Override
 	public void setup() throws Exception {
 		super.setup();

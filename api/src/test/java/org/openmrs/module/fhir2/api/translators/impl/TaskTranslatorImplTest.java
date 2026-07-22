@@ -17,7 +17,8 @@ import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -45,11 +46,13 @@ import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.openmrs.BaseOpenmrsMetadata;
 import org.openmrs.Concept;
 import org.openmrs.module.fhir2.FhirConstants;
@@ -59,7 +62,8 @@ import org.openmrs.module.fhir2.model.FhirTask;
 import org.openmrs.module.fhir2.model.FhirTaskInput;
 import org.openmrs.module.fhir2.model.FhirTaskOutput;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.WARN)
 public class TaskTranslatorImplTest {
 	
 	private static final String TASK_UUID = "d899333c-5bd4-45cc-b1e7-2f9542dbcbf6";
@@ -138,7 +142,7 @@ public class TaskTranslatorImplTest {
 	
 	private TaskTranslatorImpl taskTranslator;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		taskTranslator = new TaskTranslatorImpl();
 		taskTranslator.setReferenceTranslator(referenceTranslator);
@@ -154,9 +158,9 @@ public class TaskTranslatorImplTest {
 		assertThat(result, notNullValue());
 	}
 	
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void toFhirResource_shouldThrowExceptionForNullOpenmrsTask() {
-		taskTranslator.toFhirResource(null);
+		assertThrows(NullPointerException.class, () -> taskTranslator.toFhirResource(null));
 	}
 	
 	@Test
@@ -168,9 +172,9 @@ public class TaskTranslatorImplTest {
 		assertThat(result, notNullValue());
 	}
 	
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void toOpenmrsType_shouldThrowExceptionForNullTask() {
-		taskTranslator.toOpenmrsType(null);
+		assertThrows(NullPointerException.class, () -> taskTranslator.toOpenmrsType(null));
 	}
 	
 	@Test
@@ -209,25 +213,25 @@ public class TaskTranslatorImplTest {
 		assertThat(result.getStatus(), equalTo(OPENMRS_NEW_TASK_STATUS));
 	}
 	
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void toOpenmrsType_shouldThrowExceptionWhenNullProvided() {
 		Task fhirTask = new Task();
 		fhirTask.setId(TASK_UUID);
 		fhirTask.setStatus(FHIR_NEW_TASK_STATUS);
-		taskTranslator.toOpenmrsType(null, fhirTask);
+		assertThrows(NullPointerException.class, () -> taskTranslator.toOpenmrsType(null, fhirTask));
 	}
 	
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void toOpenmrsType_shouldThrowExceptionWhenFhirTaskNull() {
 		FhirTask task = new FhirTask();
 		task.setUuid(TASK_UUID);
 		
-		taskTranslator.toOpenmrsType(task, null);
+		assertThrows(NullPointerException.class, () -> taskTranslator.toOpenmrsType(task, null));
 	}
 	
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void toOpenmrsType_shouldThrowExceptionWhenAllNull() {
-		taskTranslator.toOpenmrsType(null, null);
+		assertThrows(NullPointerException.class, () -> taskTranslator.toOpenmrsType(null, null));
 	}
 	
 	@Test

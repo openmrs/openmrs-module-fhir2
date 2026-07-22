@@ -15,8 +15,8 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hl7.fhir.r4.model.Patient.SP_IDENTIFIER;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.openmrs.module.fhir2.FhirConstants.ENCOUNTER;
 import static org.openmrs.module.fhir2.FhirConstants.PATIENT;
 import static org.openmrs.module.fhir2.FhirConstants.PRACTITIONER;
@@ -47,8 +47,8 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Immunization;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.Obs;
 import org.openmrs.Provider;
 import org.openmrs.api.AdministrationService;
@@ -92,7 +92,7 @@ public class FhirImmunizationServiceImplTest extends BaseFhirContextSensitiveTes
 	@Autowired
 	private ImmunizationObsGroupHelper helper;
 	
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		executeDataSet(IMMUNIZATIONS_METADATA_XML);
 		executeDataSet(IMMUNIZATIONS_INITIAL_DATA_XML);
@@ -183,7 +183,7 @@ public class FhirImmunizationServiceImplTest extends BaseFhirContextSensitiveTes
 	
 	@Test
 	public void saveImmunization_shouldNotFailIfNoteConceptIsMissingAndNoteProvided() throws Exception {
-		// Remove the note concept since @Before loads it
+		// Remove the note concept since @BeforeEach loads it
 		conceptService.purgeConcept(conceptService.getConceptByMapping(FREETEXT_COMMENT_CONCEPT_CODE, CIEL_CONCEPT_SOURCE));
 		assertNull(conceptService.getConceptByMapping(FREETEXT_COMMENT_CONCEPT_CODE, CIEL_CONCEPT_SOURCE));
 		
@@ -235,7 +235,7 @@ public class FhirImmunizationServiceImplTest extends BaseFhirContextSensitiveTes
 	
 	@Test
 	public void saveImmunization_shouldNotFailIfNextDoseDateConceptIsMissingAndExtensionProvided() throws Exception {
-		// Remove the next dose date concept since @Before loads it
+		// Remove the next dose date concept since @BeforeEach loads it
 		conceptService.purgeConcept(conceptService.getConceptByMapping(NEXT_DOSE_DATE_CONCEPT_CODE, CIEL_CONCEPT_SOURCE));
 		assertNull(conceptService.getConceptByMapping(NEXT_DOSE_DATE_CONCEPT_CODE, CIEL_CONCEPT_SOURCE));
 		
@@ -317,7 +317,7 @@ public class FhirImmunizationServiceImplTest extends BaseFhirContextSensitiveTes
 	
 	@Test
 	public void updateImmunization_shouldNotFailIfNoteConceptIsMissingButNoteIsProvided() throws Exception {
-		// Remove the note concept since @Before loads it
+		// Remove the note concept since @BeforeEach loads it
 		conceptService.purgeConcept(conceptService.getConceptByMapping(FREETEXT_COMMENT_CONCEPT_CODE, CIEL_CONCEPT_SOURCE));
 		assertNull(conceptService.getConceptByMapping(FREETEXT_COMMENT_CONCEPT_CODE, CIEL_CONCEPT_SOURCE));
 		

@@ -23,16 +23,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.Concept;
 import org.openmrs.ConceptSource;
 import org.openmrs.module.fhir2.api.dao.FhirConceptDao;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class FhirConceptServiceImplTest {
 	
 	private static final String CONCEPT_UUID = "12345-abcdef-12345";
@@ -44,7 +44,7 @@ public class FhirConceptServiceImplTest {
 	
 	private FhirConceptServiceImpl fhirConceptService;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		fhirConceptService = new FhirConceptServiceImpl();
 		fhirConceptService.setDao(conceptDao);

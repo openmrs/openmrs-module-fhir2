@@ -18,18 +18,18 @@ import static org.mockito.Mockito.when;
 import java.util.Optional;
 
 import org.hl7.fhir.r4.model.ContactPoint;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.LocationAttributeType;
 import org.openmrs.PersonAttributeType;
 import org.openmrs.ProviderAttributeType;
 import org.openmrs.module.fhir2.api.dao.FhirContactPointMapDao;
 import org.openmrs.module.fhir2.model.FhirContactPointMap;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class FhirContactPointMapServiceImplTest {
 	
 	@Mock
@@ -46,7 +46,7 @@ public class FhirContactPointMapServiceImplTest {
 	
 	private ProviderAttributeType providerAttributeType;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		fhirContactPointMapService = new FhirContactPointMapServiceImpl();
 		fhirContactPointMapService.setDao(fhirContactPointMapDao);

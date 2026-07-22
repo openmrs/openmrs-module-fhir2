@@ -11,11 +11,11 @@ package org.openmrs.module.fhir2.providers.r3;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -48,17 +48,17 @@ import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirConditionService;
 import org.openmrs.module.fhir2.api.search.param.ConditionSearchParams;
 import org.openmrs.module.fhir2.providers.r4.MockIBundleProvider;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ConditionFhirR3ResourceProviderTest extends BaseFhirR3ProvenanceResourceTest<org.hl7.fhir.r4.model.Condition> {
 	
 	private static final String CONDITION_UUID = "23f620c3-2ecb-4d80-aea8-44fa1c5ff978";
@@ -78,13 +78,13 @@ public class ConditionFhirR3ResourceProviderTest extends BaseFhirR3ProvenanceRes
 	
 	private ConditionFhirResourceProvider resourceProvider;
 	
-	@Before
+	@BeforeEach
 	public void setUp() {
 		resourceProvider = new ConditionFhirResourceProvider();
 		resourceProvider.setConditionService(conditionService);
 	}
 	
-	@Before
+	@BeforeEach
 	public void initCondition() {
 		condition = new org.hl7.fhir.r4.model.Condition();
 		condition.setId(CONDITION_UUID);
@@ -128,7 +128,8 @@ public class ConditionFhirR3ResourceProviderTest extends BaseFhirR3ProvenanceRes
 	
 	@Test
 	public void getConditionByUuid_shouldRetainClinicalStatusWhenNotDiagnosis() {
-		condition.setClinicalStatus(new CodeableConcept().addCoding(new Coding().setCode("active")));
+		condition.setClinicalStatus(new CodeableConcept()
+		        .addCoding(new Coding().setSystem(FhirConstants.CONDITION_CLINICAL_STATUS_SYSTEM_URI).setCode("active")));
 		condition.addCategory(
 		    new CodeableConcept().addCoding(new Coding().setSystem(FhirConstants.CONDITION_CATEGORY_SYSTEM_URI)
 		            .setCode(FhirConstants.CONDITION_CATEGORY_CODE_CONDITION)));
@@ -139,12 +140,11 @@ public class ConditionFhirR3ResourceProviderTest extends BaseFhirR3ProvenanceRes
 		assertThat(converted.hasClinicalStatus(), is(true));
 	}
 	
-	@Test(expected = ResourceNotFoundException.class)
+	@Test
 	public void getConditionWithWrongUuid_shouldThrowResourceNotFoundException() {
 		IdType id = new IdType();
 		id.setValue(WRONG_CONDITION_UUID);
-		Condition result = resourceProvider.getConditionById(id);
-		assertThat(result, nullValue());
+		assertThrows(ResourceNotFoundException.class, () -> resourceProvider.getConditionById(id));
 	}
 	
 	@Test

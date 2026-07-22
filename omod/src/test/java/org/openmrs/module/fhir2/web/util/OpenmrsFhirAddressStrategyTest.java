@@ -17,22 +17,24 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
 import static org.mockito.Mockito.when;
 
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpServletRequest;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.openmrs.GlobalProperty;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.util.FhirGlobalPropertyHolder;
 
 // we intentionally have unnecessary stubbings for this class when testing the X-Forwarded headers
-@RunWith(MockitoJUnitRunner.Silent.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.WARN)
 public class OpenmrsFhirAddressStrategyTest {
 	
 	@Mock
@@ -46,7 +48,7 @@ public class OpenmrsFhirAddressStrategyTest {
 	
 	private OpenmrsFhirAddressStrategy fhirAddressStrategy;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		fhirAddressStrategy = new OpenmrsFhirAddressStrategy();
 		// avoid trying to do an actual lookup by pre-caching an empty string
@@ -54,7 +56,7 @@ public class OpenmrsFhirAddressStrategyTest {
 		        .globalPropertyChanged(new GlobalProperty(FhirConstants.GLOBAL_PROPERTY_URI_PREFIX, ""));
 	}
 	
-	@After
+	@AfterEach
 	public void after() {
 		FhirGlobalPropertyHolder.reset();
 		;

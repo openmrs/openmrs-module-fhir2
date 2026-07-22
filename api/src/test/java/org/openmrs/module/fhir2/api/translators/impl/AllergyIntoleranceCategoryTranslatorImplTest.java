@@ -14,8 +14,8 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.nullValue;
 
 import org.hl7.fhir.r4.model.AllergyIntolerance;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.AllergenType;
 import org.openmrs.module.fhir2.api.translators.AllergyIntoleranceCategoryTranslator;
 
@@ -23,7 +23,7 @@ public class AllergyIntoleranceCategoryTranslatorImplTest {
 	
 	private AllergyIntoleranceCategoryTranslator categoryTranslator;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		categoryTranslator = new AllergyIntoleranceCategoryTranslatorImpl();
 	}

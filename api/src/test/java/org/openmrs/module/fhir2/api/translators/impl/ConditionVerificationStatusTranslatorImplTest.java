@@ -17,8 +17,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.ConditionVerificationStatus;
 import org.openmrs.module.fhir2.FhirConstants;
 
@@ -32,7 +32,7 @@ public class ConditionVerificationStatusTranslatorImplTest {
 	
 	private ConditionVerificationStatusTranslatorImpl verificationStatusTranslator;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		verificationStatusTranslator = new ConditionVerificationStatusTranslatorImpl();
 	}

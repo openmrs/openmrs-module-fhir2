@@ -30,11 +30,13 @@ import java.util.Optional;
 
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.openmrs.Concept;
 import org.openmrs.ConceptMap;
 import org.openmrs.ConceptMapType;
@@ -48,7 +50,8 @@ import org.openmrs.module.fhir2.model.FhirConceptSource;
 import org.openmrs.util.LocaleUtility;
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.WARN)
 public class ConceptTranslatorImplTest {
 	
 	private static final String CONCEPT_UUID = "12345-abcdef-12345";
@@ -81,7 +84,7 @@ public class ConceptTranslatorImplTest {
 	
 	private FhirConceptSource fhirCiel;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		LocaleUtility.setLocalesAllowedListCache(Arrays.asList(Locale.ENGLISH));
 		conceptTranslator = new ConceptTranslatorImpl();

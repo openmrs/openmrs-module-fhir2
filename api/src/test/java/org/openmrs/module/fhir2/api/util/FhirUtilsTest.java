@@ -20,7 +20,7 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.OperationOutcome;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.openmrs.module.fhir2.FhirConstants;
 
 public class FhirUtilsTest {

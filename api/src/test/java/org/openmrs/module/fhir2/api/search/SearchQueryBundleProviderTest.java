@@ -27,18 +27,18 @@ import org.exparity.hamcrest.date.DateMatchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Observation;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.Obs;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirObservationDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.ObservationTranslator;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class SearchQueryBundleProviderTest {
 	
 	@Mock
@@ -55,7 +55,7 @@ public class SearchQueryBundleProviderTest {
 	
 	private SearchQueryBundleProvider<Obs, Observation> searchQueryBundleProvider;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		searchQueryBundleProvider = new SearchQueryBundleProvider<>(new SearchParameterMap(), observationDao, translator,
 		        globalPropertyService, searchQueryInclude);

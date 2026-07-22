@@ -10,12 +10,12 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import javax.annotation.Nonnull;
-import javax.persistence.NonUniqueResultException;
-import javax.persistence.PersistenceException;
-import javax.persistence.criteria.Join;
 
 import java.util.List;
 
+import jakarta.persistence.NonUniqueResultException;
+import jakarta.persistence.PersistenceException;
+import jakarta.persistence.criteria.Join;
 import lombok.extern.slf4j.Slf4j;
 import org.openmrs.module.fhir2.api.dao.internals.OpenmrsFhirCriteriaContext;
 import org.openmrs.module.fhir2.model.FhirObservationCategoryMap;
@@ -42,8 +42,7 @@ public class FhirObservationCategoryMapDaoImpl extends BaseDao {
 				        "Multiple observation categories mapped to concept class '" + conceptClassUuid + "'");
 			}
 			return results.isEmpty() ? null : results.get(0);
-		}
-		catch (PersistenceException e) {
+		} catch (PersistenceException e) {
 			log.error("Exception caught while trying to load category for concept class '{}'", conceptClassUuid, e);
 		}
 		

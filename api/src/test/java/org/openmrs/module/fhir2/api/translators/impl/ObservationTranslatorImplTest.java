@@ -17,6 +17,7 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -35,12 +36,12 @@ import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.Concept;
 import org.openmrs.ConceptNumeric;
 import org.openmrs.Encounter;
@@ -61,7 +62,7 @@ import org.openmrs.module.fhir2.api.translators.ObservationStatusTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationValueTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ObservationTranslatorImplTest {
 	
 	private static final String OBS_UUID = "12345-abcde-12345";
@@ -115,7 +116,7 @@ public class ObservationTranslatorImplTest {
 	
 	private ObservationTranslatorImpl observationTranslator;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		observationTranslator = new ObservationTranslatorImpl();
 		observationTranslator.setObservationStatusTranslator(observationStatusTranslator);
@@ -286,9 +287,9 @@ public class ObservationTranslatorImplTest {
 		assertThat(result.getHasMember(), hasItem(hasProperty("type", equalTo(FhirConstants.OBSERVATION))));
 	}
 	
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void toFhirResource_shouldThrowExceptionIfObsIsNull() {
-		observationTranslator.toFhirResource(null);
+		assertThrows(NullPointerException.class, () -> observationTranslator.toFhirResource(null));
 	}
 	
 	@Test
@@ -416,16 +417,16 @@ public class ObservationTranslatorImplTest {
 		assertThat(result.getGroupMembers(), hasItem(hasProperty("uuid", equalTo(OBS_UUID))));
 	}
 	
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void toOpenmrsType_shouldThrowExceptionIfObsNull() {
 		Observation observation = new Observation();
-		observationTranslator.toOpenmrsType(null, observation);
+		assertThrows(NullPointerException.class, () -> observationTranslator.toOpenmrsType(null, observation));
 	}
 	
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void toOpenmrsType_shouldThrowExceptionIfObservationNull() {
 		Obs expected = new Obs();
-		observationTranslator.toOpenmrsType(expected, null);
+		assertThrows(NullPointerException.class, () -> observationTranslator.toOpenmrsType(expected, null));
 	}
 	
 	@Test

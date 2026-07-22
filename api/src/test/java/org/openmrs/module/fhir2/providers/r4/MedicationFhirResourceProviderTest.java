@@ -9,13 +9,13 @@
  */
 package org.openmrs.module.fhir2.providers.r4;
 
-import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -40,16 +40,16 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.hl7.fhir.r4.model.OperationOutcome;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirMedicationService;
 import org.openmrs.module.fhir2.api.search.param.MedicationSearchParams;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class MedicationFhirResourceProviderTest {
 	
 	private static final String MEDICATION_UUID = "ce8bfad7-c87e-4af0-80cd-c2015c7dff93";
@@ -78,7 +78,7 @@ public class MedicationFhirResourceProviderTest {
 	
 	private Medication medication;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		resourceProvider = new MedicationFhirResourceProvider();
 		resourceProvider.setFhirMedicationService(fhirMedicationService);
@@ -109,12 +109,11 @@ public class MedicationFhirResourceProviderTest {
 		assertThat(medication.getId(), equalTo(MEDICATION_UUID));
 	}
 	
-	@Test(expected = ResourceNotFoundException.class)
+	@Test
 	public void getMedicationByUuid_shouldThrowResourceNotFoundException() {
 		IdType id = new IdType();
 		id.setValue(WRONG_MEDICATION_UUID);
-		Medication medication = resourceProvider.getMedicationByUuid(id);
-		assertThat(medication, nullValue());
+		assertThrows(ResourceNotFoundException.class, () -> resourceProvider.getMedicationByUuid(id));
 	}
 	
 	@Test
@@ -263,25 +262,27 @@ public class MedicationFhirResourceProviderTest {
 		assertThat(result.getResource(), equalTo(med));
 	}
 	
-	@Test(expected = InvalidRequestException.class)
+	@Test
 	public void doUpsert_shouldThrowInvalidRequestForUuidMismatch() {
 		when(fhirMedicationService.update(WRONG_MEDICATION_UUID, medication, mockRequestDetails, false))
 		        .thenThrow(InvalidRequestException.class);
-		
-		resourceProvider.doUpsert(new IdType().setValue(WRONG_MEDICATION_UUID), medication, mockRequestDetails, false);
+
+		assertThrows(InvalidRequestException.class, () -> resourceProvider
+		        .doUpsert(new IdType().setValue(WRONG_MEDICATION_UUID), medication, mockRequestDetails, false));
 	}
 	
-	@Test(expected = InvalidRequestException.class)
+	@Test
 	public void doUpsert_shouldThrowInvalidRequestForMissingId() {
 		Medication noIdMedication = new Medication();
 		
 		when(fhirMedicationService.update(MEDICATION_UUID, noIdMedication, mockRequestDetails, false))
 		        .thenThrow(InvalidRequestException.class);
 		
-		resourceProvider.doUpsert(new IdType().setValue(MEDICATION_UUID), noIdMedication, mockRequestDetails, false);
+		assertThrows(InvalidRequestException.class, () -> resourceProvider.doUpsert(new IdType().setValue(MEDICATION_UUID),
+		    noIdMedication, mockRequestDetails, false));
 	}
 	
-	@Test(expected = MethodNotAllowedException.class)
+	@Test
 	public void doUpsert_shouldThrowMethodNotAllowedIfDoesNotExist() {
 		Medication wrongMedication = new Medication();
 		
@@ -290,7 +291,8 @@ public class MedicationFhirResourceProviderTest {
 		when(fhirMedicationService.update(WRONG_MEDICATION_UUID, wrongMedication, mockRequestDetails, false))
 		        .thenThrow(MethodNotAllowedException.class);
 		
-		resourceProvider.doUpsert(new IdType().setValue(WRONG_MEDICATION_UUID), wrongMedication, mockRequestDetails, false);
+		assertThrows(MethodNotAllowedException.class, () -> resourceProvider
+		        .doUpsert(new IdType().setValue(WRONG_MEDICATION_UUID), wrongMedication, mockRequestDetails, false));
 	}
 	
 	@Test

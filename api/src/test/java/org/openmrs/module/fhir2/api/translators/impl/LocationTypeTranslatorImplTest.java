@@ -22,16 +22,16 @@ import java.util.List;
 
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.Concept;
 import org.openmrs.Location;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class LocationTypeTranslatorImplTest {
 	
 	private static final String TYPE_CONCEPT_UUID = "91df3897-1066-46a1-a403-714b737af00b";
@@ -45,7 +45,7 @@ public class LocationTypeTranslatorImplTest {
 	
 	private LocationTypeTranslatorImpl locationTypeTranslator;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		omrsLocation = new Location();
 		locationTypeTranslator = new LocationTypeTranslatorImpl();

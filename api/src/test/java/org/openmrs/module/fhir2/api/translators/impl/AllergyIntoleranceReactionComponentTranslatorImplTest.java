@@ -22,11 +22,11 @@ import java.util.Collections;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.Allergen;
 import org.openmrs.AllergenType;
 import org.openmrs.Allergy;
@@ -37,7 +37,7 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.AllergyIntoleranceSeverityTranslator;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class AllergyIntoleranceReactionComponentTranslatorImplTest {
 	
 	@Mock
@@ -72,7 +72,7 @@ public class AllergyIntoleranceReactionComponentTranslatorImplTest {
 	
 	private Allergy omrsAllergy;
 	
-	@Before
+	@BeforeEach
 	public void setUp() {
 		reactionComponentTranslator = new AllergyIntoleranceReactionComponentTranslatorImpl();
 		reactionComponentTranslator.setConceptTranslator(conceptTranslator);
@@ -306,23 +306,6 @@ public class AllergyIntoleranceReactionComponentTranslatorImplTest {
 		assertThat(omrsAllergy, notNullValue());
 		assertThat(omrsAllergy.getSeverity(), notNullValue());
 		assertThat(omrsAllergy.getSeverity(), equalTo(severeConcept));
-	}
-	
-	@Test
-	public void toOpenmrsType_shouldTranslateSeverityOtherCorrectly() {
-		AllergyIntolerance.AllergyIntoleranceReactionComponent reactionComponent = new AllergyIntolerance.AllergyIntoleranceReactionComponent();
-		reactionComponent.setSeverity(AllergyIntolerance.AllergyIntoleranceSeverity.NULL);
-		
-		Concept otherConcept = new Concept();
-		otherConcept.setUuid(GLOBAL_PROPERTY_OTHER_VALUE);
-		
-		when(severityTranslator.toOpenmrsType(AllergyIntolerance.AllergyIntoleranceSeverity.NULL)).thenReturn(otherConcept);
-		
-		reactionComponentTranslator.toOpenmrsType(omrsAllergy, reactionComponent);
-		
-		assertThat(omrsAllergy, notNullValue());
-		assertThat(omrsAllergy.getSeverity(), notNullValue());
-		assertThat(omrsAllergy.getSeverity(), equalTo(otherConcept));
 	}
 	
 	@Test

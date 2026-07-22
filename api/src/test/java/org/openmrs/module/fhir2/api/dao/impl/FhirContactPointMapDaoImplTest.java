@@ -18,8 +18,8 @@ import java.util.Optional;
 
 import org.hibernate.SessionFactory;
 import org.hl7.fhir.r4.model.ContactPoint;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.LocationAttributeType;
 import org.openmrs.PersonAttributeType;
 import org.openmrs.ProviderAttributeType;
@@ -68,7 +68,7 @@ public class FhirContactPointMapDaoImplTest extends BaseFhirContextSensitiveTest
 	
 	private static final String PROVIDER_ATTRIBUTE_TYPE_UUID = "257daea3-5750-4ff6-8d11-518c49f73556";
 	
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		fhirContactPointMapDao = new FhirContactPointMapDaoImpl();
 		fhirContactPointMapDao.setSessionFactory(sessionFactory);

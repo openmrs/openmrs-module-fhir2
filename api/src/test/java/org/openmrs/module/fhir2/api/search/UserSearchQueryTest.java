@@ -46,8 +46,8 @@ import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.hibernate.SessionFactory;
 import org.hl7.fhir.r4.model.Practitioner;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.User;
 import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.openmrs.module.fhir2.FhirConstants;
@@ -128,7 +128,7 @@ public class UserSearchQueryTest extends BaseFhirContextSensitiveTest {
 		        .map(it -> (Practitioner) it).collect(Collectors.toList());
 	}
 	
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		executeDataSet(USER_INITIAL_DATA_XML);
 		// Evict Hibernate L2 cache so entities loaded via JDBC/DbUnit are re-read from DB

@@ -14,7 +14,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.when;
 import static org.openmrs.module.fhir2.FhirConstants.UCUM_SYSTEM_URI;
 
@@ -24,20 +24,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import junitparams.FileParameters;
-import junitparams.JUnitParamsRunner;
 import org.fhir.ucum.UcumEssenceService;
 import org.fhir.ucum.UcumException;
 import org.fhir.ucum.UcumService;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.SimpleQuantity;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvFileSource;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnit;
-import org.mockito.junit.MockitoRule;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.openmrs.Concept;
 import org.openmrs.ConceptMap;
 import org.openmrs.ConceptMapType;
@@ -47,7 +47,8 @@ import org.openmrs.ConceptSource;
 import org.openmrs.module.fhir2.api.FhirConceptService;
 import org.openmrs.module.fhir2.api.FhirConceptSourceService;
 
-@RunWith(JUnitParamsRunner.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.WARN)
 public class ObservationQuantityCodingTranslatorImplTest {
 	
 	private static final String CONCEPT_UUID = "33fdc8ad-fe4d-499b-93a8-8a991c1d488g";
@@ -55,9 +56,6 @@ public class ObservationQuantityCodingTranslatorImplTest {
 	private static final String baseUcumServiceXml = "ucum-essence.xml";
 	
 	private static final String fhirUcumServiceXml = "ucum-fhir-essence.xml";
-	
-	@Rule
-	public MockitoRule rule = MockitoJUnit.rule();
 	
 	@Mock
 	private FhirConceptService conceptService;
@@ -67,7 +65,7 @@ public class ObservationQuantityCodingTranslatorImplTest {
 	
 	ObservationQuantityCodingTranslatorImpl quantityCodingTranslator;
 	
-	@Before
+	@BeforeEach
 	public void setup() throws UcumException, IOException {
 		ConceptTranslatorImpl conceptTranslator = new ConceptTranslatorImpl();
 		conceptTranslator.setConceptService(conceptService);
@@ -91,8 +89,8 @@ public class ObservationQuantityCodingTranslatorImplTest {
 	/**
 	 * Tests all common fhir ucum codes specified in https://www.hl7.org/fhir/valueset-ucum-common.html
 	 */
-	@Test
-	@FileParameters("classpath:org/openmrs/module/fhir2/api/translators.impl/fhir-ucum-common.csv")
+	@ParameterizedTest
+	@CsvFileSource(resources = "/org/openmrs/module/fhir2/api/translators.impl/fhir-ucum-common.csv")
 	public void toFhirResource_shouldTranslateConceptWithCommonUCUMUnitCodes(String code) {
 		ConceptNumeric cn = new ConceptNumeric();
 		

@@ -15,6 +15,8 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -26,12 +28,13 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.Reference;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.openmrs.Concept;
 import org.openmrs.Encounter;
 import org.openmrs.Obs;
@@ -45,7 +48,8 @@ import org.openmrs.module.fhir2.api.translators.OrderReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.model.FhirDiagnosticReport;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.WARN)
 public class DiagnosticReportTranslatorImplTest {
 	
 	private static final String PARENT_UUID = "249b9094-b812-4b0c-a204-0052a05c657f";
@@ -79,7 +83,7 @@ public class DiagnosticReportTranslatorImplTest {
 	
 	private DiagnosticReport diagnosticReport;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		translator = new DiagnosticReportTranslatorImpl();
 		translator.setObservationReferenceTranslator(observationReferenceTranslator);
@@ -114,9 +118,9 @@ public class DiagnosticReportTranslatorImplTest {
 		assertThat(result, notNullValue());
 	}
 	
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void toFhirResource_shouldThrowExceptionForNullObsGroup() {
-		translator.toFhirResource(null);
+		assertThrows(NullPointerException.class, () -> translator.toFhirResource(null));
 	}
 	
 	@Test
@@ -232,14 +236,14 @@ public class DiagnosticReportTranslatorImplTest {
 		assertThat(result.getResults().iterator().next().getUuid(), equalTo(CHILD_UUID));
 	}
 	
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void toOpenmrsType_shouldThrowExceptionForCreatingNullDiagnosticReport() {
-		translator.toOpenmrsType(null);
+		assertThrows(NullPointerException.class, () -> translator.toOpenmrsType(null));
 	}
 	
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void toOpenmrsType_shouldThrowExceptionForUpdatingWithNullDiagnosticReport() {
-		translator.toOpenmrsType(fhirDiagnosticReport, null);
+		assertThrows(NullPointerException.class, () -> translator.toOpenmrsType(fhirDiagnosticReport, null));
 	}
 	
 	@Test
@@ -314,9 +318,9 @@ public class DiagnosticReportTranslatorImplTest {
 		assertThat(result.getCode(), equalTo(translatedCode));
 	}
 	
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void toOpenmrsType_shouldThrowExceptionWhenNoneProvided() {
-		translator.toOpenmrsType(null, diagnosticReport);
+		assertThrows(NullPointerException.class, () -> translator.toOpenmrsType(null, diagnosticReport));
 	}
 	
 	@Test
@@ -326,7 +330,7 @@ public class DiagnosticReportTranslatorImplTest {
 		Order radiologyOrder = new Order();
 		when(orderReferenceTranslator.toOpenmrsType(radiologyOrderRef)).thenReturn(radiologyOrder);
 		FhirDiagnosticReport result = translator.toOpenmrsType(diagnosticReport);
-		Assert.assertEquals(radiologyOrder, result.getOrders().iterator().next());
+		assertEquals(radiologyOrder, result.getOrders().iterator().next());
 	}
 	
 	@Test
@@ -336,7 +340,7 @@ public class DiagnosticReportTranslatorImplTest {
 		fhirDiagnosticReport.setOrders(Collections.singleton(radiologyOrder));
 		when(orderReferenceTranslator.toFhirResource(radiologyOrder)).thenReturn(new Reference(RADIOLOGY_ORDER_REFERENCE));
 		DiagnosticReport result = translator.toFhirResource(fhirDiagnosticReport);
-		Assert.assertEquals(RADIOLOGY_ORDER_REFERENCE, result.getBasedOn().get(0).getReference());
+		assertEquals(RADIOLOGY_ORDER_REFERENCE, result.getBasedOn().get(0).getReference());
 	}
 	
 }

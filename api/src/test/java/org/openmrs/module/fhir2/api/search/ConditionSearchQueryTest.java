@@ -24,6 +24,7 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.openmrs.test.OpenmrsMatchers.hasId;
 import static org.openmrs.test.OpenmrsMatchers.hasUuid;
 
@@ -45,12 +46,12 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import org.apache.commons.lang.time.DateUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.Condition;
 import org.openmrs.api.ConditionService;
 import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
@@ -141,7 +142,7 @@ public class ConditionSearchQueryTest extends BaseFhirContextSensitiveTest {
 	@Autowired
 	ConditionService conditionService;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		executeDataSet(CONDITION_INITIAL_DATA_XML);
 	}
@@ -919,19 +920,19 @@ public class ConditionSearchQueryTest extends BaseFhirContextSensitiveTest {
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 	}
 	
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void searchForConditions_shouldReturnConditionByOnsetAgeExceptionForWrongUnit() {
 		QuantityOrListParam orList = new QuantityOrListParam();
 		orList.addOr(new QuantityParam(ParamPrefixEnum.LESSTHAN, 1.5, "", "WRONG_UNIT"));
 		QuantityAndListParam onsetAgeParam = new QuantityAndListParam().addAnd(orList);
 		
-		//when(localDateTimeFactory.now()).thenReturn(LocalDateTime.of(2020, Month.MARCH, 13, 19, 10, 0));
-		
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER,
 		    onsetAgeParam);
 		
-		IBundleProvider results = search(theParams);
-		get(results);
+		assertThrows(IllegalArgumentException.class, () -> {
+			IBundleProvider results = search(theParams);
+			get(results);
+		});
 	}
 	
 	@Test

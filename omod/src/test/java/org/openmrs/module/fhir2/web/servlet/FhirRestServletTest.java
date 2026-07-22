@@ -9,21 +9,21 @@
  */
 package org.openmrs.module.fhir2.web.servlet;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Collections;
 
-import org.junit.Before;
-import org.junit.Test;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.openmrs.util.OpenmrsClassLoader;
@@ -44,13 +44,13 @@ public class FhirRestServletTest {
 	
 	private TestableFhirRestServlet servlet;
 	
-	@Before
+	@BeforeEach
 	public void setUp() throws ServletException, IOException {
 		MockitoAnnotations.initMocks(this);
 		
 		servlet = new TestableFhirRestServlet();
 		
-		when(mockServletConfig.getServletContext()).thenReturn(mock(javax.servlet.ServletContext.class));
+		when(mockServletConfig.getServletContext()).thenReturn(mock(jakarta.servlet.ServletContext.class));
 		when(mockResponse.getWriter()).thenReturn(mockWriter);
 		
 		servlet.init(mockServletConfig);
@@ -65,6 +65,7 @@ public class FhirRestServletTest {
 		when(mockRequest.getServletPath()).thenReturn("");
 		when(mockRequest.getContextPath()).thenReturn("");
 		when(mockRequest.getQueryString()).thenReturn("");
+		when(mockRequest.getHeaderNames()).thenReturn(Collections.emptyEnumeration());
 		
 		Thread.currentThread().setContextClassLoader(null);
 		assertNull(Thread.currentThread().getContextClassLoader());

@@ -14,15 +14,15 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.openmrs.util.PrivilegeConstants.GET_OBS;
 
 import java.util.Collection;
 
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.Obs;
 import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.context.Context;
@@ -45,7 +45,7 @@ public class FhirObservationDaoImplTest extends BaseFhirContextSensitiveTest {
 	@Autowired
 	private FhirObservationDao dao;
 	
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		executeDataSet(OBS_DATA_XML);
 	}
@@ -83,8 +83,7 @@ public class FhirObservationDaoImplTest extends BaseFhirContextSensitiveTest {
 		try {
 			Context.addProxyPrivilege(GET_OBS);
 			assertThat(dao.getSearchResults(theParams), notNullValue());
-		}
-		finally {
+		} finally {
 			Context.removeProxyPrivilege(GET_OBS);
 		}
 	}
@@ -100,8 +99,7 @@ public class FhirObservationDaoImplTest extends BaseFhirContextSensitiveTest {
 		try {
 			Context.addProxyPrivilege(GET_OBS);
 			assertThat(dao.getSearchResultsCount(theParams), greaterThan(0));
-		}
-		finally {
+		} finally {
 			Context.removeProxyPrivilege(GET_OBS);
 		}
 	}

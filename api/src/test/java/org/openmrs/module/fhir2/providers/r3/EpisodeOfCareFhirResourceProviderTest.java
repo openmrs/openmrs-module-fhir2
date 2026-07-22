@@ -13,20 +13,20 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.dstu3.model.EpisodeOfCare;
 import org.hl7.fhir.dstu3.model.IdType;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.module.fhir2.api.FhirEpisodeOfCareService;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class EpisodeOfCareFhirResourceProviderTest {
 	
 	private static final String EPISODE_OF_CARE_UUID = "8a849d5e-6011-4279-a124-40ada5a687de";
@@ -40,13 +40,13 @@ public class EpisodeOfCareFhirResourceProviderTest {
 	
 	private org.hl7.fhir.r4.model.EpisodeOfCare episodeOfCare;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		resourceProvider = new EpisodeOfCareFhirResourceProvider();
 		resourceProvider.setEpisodeOfCareService(episodeOfCareService);
 	}
 	
-	@Before
+	@BeforeEach
 	public void initEpisodeOfCare() {
 		episodeOfCare = new org.hl7.fhir.r4.model.EpisodeOfCare();
 		episodeOfCare.setId(EPISODE_OF_CARE_UUID);
@@ -71,11 +71,10 @@ public class EpisodeOfCareFhirResourceProviderTest {
 		assertThat(result.getId(), equalTo(EPISODE_OF_CARE_UUID));
 	}
 	
-	@Test(expected = ResourceNotFoundException.class)
+	@Test
 	public void getEpisodeOfCareByWrongId_shouldThrowResourceNotFoundException() {
 		IdType idType = new IdType();
 		idType.setValue(WRONG_EPISODE_OF_CARE_UUID);
-		assertThat(resourceProvider.getEpisodeOfCareById(idType).isResource(), is(true));
-		assertThat(resourceProvider.getEpisodeOfCareById(idType), nullValue());
+		assertThrows(ResourceNotFoundException.class, () -> resourceProvider.getEpisodeOfCareById(idType));
 	}
 }

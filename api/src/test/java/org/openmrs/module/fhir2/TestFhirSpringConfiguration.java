@@ -9,11 +9,27 @@
  */
 package org.openmrs.module.fhir2;
 
+import javax.sql.DataSource;
+
+import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 @Configuration
 @ImportResource({ "classpath:applicationContext-service.xml", "classpath*:moduleApplicationContext.xml" })
 public class TestFhirSpringConfiguration {
 	
+	@Autowired
+	private DataSource dataSource;
+	
+	// core's SchedulerConfig (ShedLock LockProvider) needs this table at context init; core's test base
+	// only creates it at @BeforeEach since the test schema comes from hbm2ddl, not liquibase
+	@PostConstruct
+	public void ensureShedlockTable() {
+		new JdbcTemplate(dataSource)
+		        .execute("CREATE TABLE IF NOT EXISTS shedlock (name VARCHAR(64) NOT NULL, lock_until TIMESTAMP NOT NULL, "
+		                + "locked_at TIMESTAMP NOT NULL, locked_by VARCHAR(255) NOT NULL, PRIMARY KEY (name))");
+	}
 }

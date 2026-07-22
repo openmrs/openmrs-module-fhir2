@@ -18,6 +18,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
@@ -32,12 +33,12 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.RelatedPerson;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.Patient;
 import org.openmrs.Person;
 import org.openmrs.PersonAddress;
@@ -52,7 +53,7 @@ import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonAddressTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonNameTranslator;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class RelatedPersonTranslatorImplTest {
 	
 	private static final String RELATIONSHIP_UUID = "2d298ef7-4eb5-4753-a998-5b5e4b1cf48a";
@@ -98,7 +99,7 @@ public class RelatedPersonTranslatorImplTest {
 	
 	private Person personA;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		relatedPersonTranslator = new RelatedPersonTranslatorImpl();
 		relatedPersonTranslator.setGenderTranslator(genderTranslator);
@@ -140,9 +141,9 @@ public class RelatedPersonTranslatorImplTest {
 		assertThat(result, notNullValue());
 	}
 	
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void shouldThrowExceptionIfRelationshipToTranslateIsNull() {
-		relatedPersonTranslator.toFhirResource(null);
+		assertThrows(NullPointerException.class, () -> relatedPersonTranslator.toFhirResource(null));
 	}
 	
 	@Test
