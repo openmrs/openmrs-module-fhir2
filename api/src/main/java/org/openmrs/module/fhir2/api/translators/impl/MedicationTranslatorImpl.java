@@ -12,6 +12,7 @@ package org.openmrs.module.fhir2.api.translators.impl;
 import static lombok.AccessLevel.PROTECTED;
 import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getLastUpdated;
 import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getVersionId;
+import static org.openmrs.module.fhir2.api.util.GeneralUtils.replaceContents;
 
 import javax.annotation.Nonnull;
 
@@ -24,6 +25,7 @@ import lombok.Setter;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.StringType;
+import org.openmrs.Concept;
 import org.openmrs.Drug;
 import org.openmrs.DrugIngredient;
 import org.openmrs.module.fhir2.FhirConstants;
@@ -109,16 +111,24 @@ public class MedicationTranslatorImpl implements MedicationTranslator {
 			existingDrug.setConcept(conceptTranslator.toOpenmrsType(medication.getForm()));
 		}
 		
-		Collection<DrugIngredient> ingredients = new LinkedHashSet<>();
-		
 		if (medication.hasIngredient()) {
+			Collection<DrugIngredient> ingredients = new LinkedHashSet<>();
 			for (Medication.MedicationIngredientComponent ingredient : medication.getIngredient()) {
+				Concept ingredientConcept = conceptTranslator.toOpenmrsType(ingredient.getItemCodeableConcept());
+				if (ingredientConcept == null) {
+					continue;
+				}
+				
 				DrugIngredient omrsIngredient = new DrugIngredient();
 				omrsIngredient.setDrug(existingDrug);
-				omrsIngredient.setIngredient(conceptTranslator.toOpenmrsType(ingredient.getItemCodeableConcept()));
+				omrsIngredient.setIngredient(ingredientConcept);
 				ingredients.add(omrsIngredient);
 			}
-			existingDrug.setIngredients(ingredients);
+			if (existingDrug.getIngredients() == null) {
+				existingDrug.setIngredients(ingredients);
+			} else {
+				replaceContents(existingDrug.getIngredients(), ingredients);
+			}
 		}
 		
 		getOpenmrsMedicineExtension(medication).ifPresent(ext -> ext.getExtension()

@@ -58,9 +58,6 @@ public class AuthenticationFilterTest {
 	@Mock
 	private ContextDAO contextDAO;
 	
-	@Mock
-	private User user;
-	
 	static class InMemoryAuthenticationScheme implements AuthenticationScheme {
 		
 		@Override

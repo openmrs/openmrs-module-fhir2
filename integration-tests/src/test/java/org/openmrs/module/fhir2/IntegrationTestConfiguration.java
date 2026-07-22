@@ -9,12 +9,26 @@
  */
 package org.openmrs.module.fhir2;
 
+import javax.sql.DataSource;
+
+import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 @Configuration
 @ImportResource({ "classpath:applicationContext-service.xml", "classpath*:moduleApplicationContext.xml",
         "classpath:openmrs-servlet.xml", "classpath*:webModuleApplicationContext.xml" })
 public class IntegrationTestConfiguration {
 	
+	@Autowired
+	private DataSource dataSource;
+	
+	@PostConstruct
+	public void ensureShedlockTable() {
+		new JdbcTemplate(dataSource)
+		        .execute("CREATE TABLE IF NOT EXISTS shedlock (name VARCHAR(64) NOT NULL, lock_until TIMESTAMP NOT NULL, "
+		                + "locked_at TIMESTAMP NOT NULL, locked_by VARCHAR(255) NOT NULL, PRIMARY KEY (name))");
+	}
 }

@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 import ca.uhn.fhir.rest.param.TokenAndListParam;
+import org.openmrs.Person;
 import org.openmrs.Provider;
 import org.openmrs.ProviderAttribute;
 import org.openmrs.module.fhir2.api.dao.FhirPractitionerDao;
@@ -23,6 +24,16 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class FhirPractitionerDaoImpl extends BasePractitionerDao<Provider> implements FhirPractitionerDao {
+	
+	@Override
+	public Provider createOrUpdate(@Nonnull Provider provider) {
+		Person person = provider.getPerson();
+		if (person != null && person.getPersonId() == null) {
+			provider.setPerson(getSessionFactory().getCurrentSession().merge(person));
+		}
+		
+		return super.createOrUpdate(provider);
+	}
 	
 	@Override
 	public boolean hasDistinctResults() {
