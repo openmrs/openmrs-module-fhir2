@@ -26,9 +26,9 @@ public class ObservationStatusTranslatorImpl implements ObservationStatusTransla
 	
 	@Override
 	public Obs toOpenmrsType(@Nonnull Obs observation, @Nonnull Observation.ObservationStatus observationStatus) {
-		if (observationStatus.equals(Observation.ObservationStatus.PRELIMINARY)
+		if (observationStatus != null && (observationStatus.equals(Observation.ObservationStatus.PRELIMINARY)
 		        || observationStatus.equals(Observation.ObservationStatus.FINAL)
-		        || observationStatus.equals(Observation.ObservationStatus.AMENDED)) {
+		        || observationStatus.equals(Observation.ObservationStatus.AMENDED))) {
 			observation.setStatus(Obs.Status.valueOf(observationStatus.toString()));
 		}
 		return observation;
