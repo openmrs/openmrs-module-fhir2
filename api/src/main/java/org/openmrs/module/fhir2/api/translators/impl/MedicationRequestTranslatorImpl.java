@@ -102,7 +102,7 @@ public class MedicationRequestTranslatorImpl implements MedicationRequestTransla
 		medicationRequest.setAuthoredOn(drugOrder.getDateCreated());
 		medicationRequest.setStatus(statusTranslator.toFhirResource(drugOrder));
 		
-		medicationRequest.setIdentifier(orderIdentifierTranslator.toFhirIdentifiers(drugOrder));
+		medicationRequest.addIdentifier(orderIdentifierTranslator.toFhirResource(drugOrder));
 		
 		if (drugOrder.getDrug() != null) {
 			medicationRequest.setMedication(medicationReferenceTranslator.toFhirResource(drugOrder.getDrug()));
