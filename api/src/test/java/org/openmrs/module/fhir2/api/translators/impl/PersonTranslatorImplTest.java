@@ -332,7 +332,7 @@ public class PersonTranslatorImplTest {
 		address.setCity(ADDRESS_CITY);
 		when(addressTranslator.toFhirResource(
 		    argThat(allOf(hasProperty("uuid", equalTo(ADDRESS_UUID)), hasProperty("cityVillage", equalTo(ADDRESS_CITY))))))
-		        .thenReturn(address);
+		            .thenReturn(address);
 		
 		Person person = new Person();
 		PersonAddress personAddress = new PersonAddress();

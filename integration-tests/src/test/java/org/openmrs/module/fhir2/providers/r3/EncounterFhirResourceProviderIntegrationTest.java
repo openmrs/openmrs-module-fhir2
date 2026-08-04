@@ -870,7 +870,7 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR3Inte
 		
 		MockHttpServletResponse response = get(
 		    "/Encounter/?_query=encountersWithMedicationRequests&patientSearchTerm=Chebaskwony").accept(FhirMediaTypes.JSON)
-		        .go();
+		            .go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
@@ -923,7 +923,7 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR3Inte
 		
 		MockHttpServletResponse response = get(
 		    "/Encounter/?_query=encountersWithMedicationRequests&location=9356400c-a5a2-4532-8f2b-2361b3446eb8")
-		        .accept(FhirMediaTypes.JSON).go();
+		            .accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));

@@ -81,7 +81,7 @@ public class FhirDiagnosticReportDaoImpl extends BaseFhirDao<FhirDiagnosticRepor
 			
 			handleAndListParam(criteriaContext.getCriteriaBuilder(), result,
 			    token -> Optional.of(criteriaContext.getCriteriaBuilder().equal(resultsJoin.get("uuid"), token.getIdPart())))
-			        .ifPresent(criteriaContext::addPredicate);
+			            .ifPresent(criteriaContext::addPredicate);
 		}
 	}
 	
