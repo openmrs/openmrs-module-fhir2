@@ -12,8 +12,6 @@ package org.openmrs.module.fhir2.api.translators.impl;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
@@ -73,8 +71,6 @@ public class MedicationRequestTranslatorImplTest {
 	private static final String DRUG_ORDER_NUMBER = "ORD-1";
 	
 	private static final String DISCONTINUED_DRUG_ORDER_NUMBER = "ORD-2";
-	
-	private static final String ACCESSION_NUMBER = "ACC-1";
 	
 	private static final String PRIOR_MEDICATION_REQUEST_REFERENCE = FhirConstants.MEDICATION_REQUEST + "/"
 	        + DRUG_ORDER_UUID;
@@ -260,22 +256,6 @@ public class MedicationRequestTranslatorImplTest {
 		
 		assertThat(result.getIdentifier(), not(empty()));
 		assertThat(result.getIdentifierFirstRep().getValue(), equalTo(DRUG_ORDER_NUMBER));
-	}
-	
-	@Test
-	public void toFhirResource_shouldAddAccessionNumberIdentifierWhenPresent() {
-		drugOrder.setAccessionNumber(ACCESSION_NUMBER);
-		
-		MedicationRequest result = medicationRequestTranslator.toFhirResource(drugOrder);
-		
-		assertThat(result.getIdentifier(), hasItem(hasProperty("value", equalTo(ACCESSION_NUMBER))));
-	}
-	
-	@Test
-	public void toFhirResource_shouldNotAddAccessionNumberIdentifierWhenAbsent() {
-		MedicationRequest result = medicationRequestTranslator.toFhirResource(drugOrder);
-		
-		assertThat(result.getIdentifier(), not(hasItem(hasProperty("value", equalTo(ACCESSION_NUMBER)))));
 	}
 	
 	@Test

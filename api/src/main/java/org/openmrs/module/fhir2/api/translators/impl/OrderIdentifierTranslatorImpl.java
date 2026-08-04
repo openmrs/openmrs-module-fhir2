@@ -11,11 +11,7 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import javax.annotation.Nonnull;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Identifier;
@@ -41,28 +37,6 @@ public class OrderIdentifierTranslatorImpl implements OrderIdentifierTranslator 
 		orderIdentifier.setUse(Identifier.IdentifierUse.USUAL);
 		
 		return orderIdentifier;
-	}
-	
-	@Override
-	public List<Identifier> toFhirIdentifiers(@Nonnull Order order) {
-		List<Identifier> identifiers = new ArrayList<>();
-		identifiers.add(toFhirResource(order));
-		
-		if (StringUtils.isNotBlank(order.getAccessionNumber())) {
-			Identifier accessionIdentifier = new Identifier();
-			
-			Coding acsnCoding = new Coding().setSystem(FhirConstants.IDENTIFIER_TYPE_SYSTEM_URI).setCode("ACSN")
-			        .setDisplay("Accession ID");
-			accessionIdentifier.setType(new CodeableConcept().addCoding(acsnCoding));
-			
-			accessionIdentifier.setValue(order.getAccessionNumber());
-			
-			accessionIdentifier.setUse(Identifier.IdentifierUse.USUAL);
-			
-			identifiers.add(accessionIdentifier);
-		}
-		
-		return identifiers;
 	}
 	
 	@Override

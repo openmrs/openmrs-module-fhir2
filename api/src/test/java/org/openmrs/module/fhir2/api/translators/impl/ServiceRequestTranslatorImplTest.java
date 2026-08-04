@@ -69,8 +69,6 @@ public class ServiceRequestTranslatorImplTest {
 	
 	private static final String DISCONTINUED_TEST_ORDER_NUMBER = "ORD-2";
 	
-	private static final String ACCESSION_NUMBER = "ACC-1";
-	
 	private static final String PRIOR_SERVICE_REQUEST_REFERENCE = FhirConstants.SERVICE_REQUEST + "/" + SERVICE_REQUEST_UUID;
 	
 	private static final String LOINC_CODE = "1000-1";
@@ -406,33 +404,6 @@ public class ServiceRequestTranslatorImplTest {
 		
 		assertThat(result.getIdentifier(), hasSize(1));
 		assertThat(result.getIdentifierFirstRep().getValue(), equalTo(TEST_ORDER_NUMBER));
-	}
-	
-	@Test
-	public void toFhirResource_shouldAddAccessionNumberIdentifierWhenPresent() throws Exception {
-		TestOrder order = new TestOrder();
-		setOrderNumberByReflection(order, TEST_ORDER_NUMBER);
-		order.setAccessionNumber(ACCESSION_NUMBER);
-		
-		when(taskService.searchForTasks(any()))
-		        .thenReturn(new MockIBundleProvider<>(Collections.emptyList(), PREFERRED_PAGE_SIZE, COUNT));
-		
-		ServiceRequest result = translator.toFhirResource(order);
-		
-		assertThat(result.getIdentifier(), hasSize(2));
-		assertThat(result.getIdentifier(), hasItem(hasProperty("value", equalTo(ACCESSION_NUMBER))));
-	}
-	
-	@Test
-	public void toFhirResource_shouldNotAddAccessionNumberIdentifierWhenAbsent() {
-		TestOrder order = new TestOrder();
-		
-		when(taskService.searchForTasks(any()))
-		        .thenReturn(new MockIBundleProvider<>(Collections.emptyList(), PREFERRED_PAGE_SIZE, COUNT));
-		
-		ServiceRequest result = translator.toFhirResource(order);
-		
-		assertThat(result.getIdentifier(), hasSize(1));
 	}
 	
 	@Test
