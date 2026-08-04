@@ -11,6 +11,8 @@ package org.openmrs.module.fhir2.api.translators;
 
 import javax.annotation.Nonnull;
 
+import java.util.List;
+
 import org.hl7.fhir.r4.model.Identifier;
 import org.openmrs.Order;
 
@@ -18,5 +20,15 @@ public interface OrderIdentifierTranslator extends OpenmrsFhirTranslator<Order, 
 	
 	@Override
 	public Identifier toFhirResource(@Nonnull Order order);
+	
+	/**
+	 * Translates the order number and, if present, the accession number of the given order into a list
+	 * of FHIR Identifiers.
+	 *
+	 * @param order the order to translate
+	 * @return a list containing the order number identifier and, if present, the accession number
+	 *         identifier
+	 */
+	public List<Identifier> toFhirIdentifiers(@Nonnull Order order);
 	
 }
