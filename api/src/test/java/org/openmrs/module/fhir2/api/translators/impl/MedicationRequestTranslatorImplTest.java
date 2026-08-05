@@ -251,6 +251,14 @@ public class MedicationRequestTranslatorImplTest {
 	}
 	
 	@Test
+	public void toFhirResource_shouldTranslateOrderNumberToIdentifier() {
+		MedicationRequest result = medicationRequestTranslator.toFhirResource(drugOrder);
+		
+		assertThat(result.getIdentifier(), not(empty()));
+		assertThat(result.getIdentifierFirstRep().getValue(), equalTo(DRUG_ORDER_NUMBER));
+	}
+	
+	@Test
 	public void toFhirResource_shouldConvertStatusToFhirType() {
 		drugOrder.setVoided(true);
 		drugOrder.setVoidedBy(new User());

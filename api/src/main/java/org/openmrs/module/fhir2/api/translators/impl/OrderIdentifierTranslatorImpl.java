@@ -16,6 +16,7 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Identifier;
 import org.openmrs.Order;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.OrderIdentifierTranslator;
 import org.springframework.stereotype.Component;
 
@@ -27,7 +28,7 @@ public class OrderIdentifierTranslatorImpl implements OrderIdentifierTranslator 
 		
 		Identifier orderIdentifier = new Identifier();
 		
-		Coding placCoding = new Coding().setSystem("http://terminology.hl7.org/CodeSystem/v2-0203").setCode("PLAC")
+		Coding placCoding = new Coding().setSystem(FhirConstants.IDENTIFIER_TYPE_SYSTEM_URI).setCode("PLAC")
 		        .setDisplay("Placer Identifier");
 		orderIdentifier.setType(new CodeableConcept().addCoding(placCoding));
 		

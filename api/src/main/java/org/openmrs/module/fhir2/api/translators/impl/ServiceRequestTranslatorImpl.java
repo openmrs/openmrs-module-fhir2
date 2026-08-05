@@ -90,6 +90,8 @@ public class ServiceRequestTranslatorImpl implements ServiceRequestTranslator<Te
 		
 		serviceRequest.setCode(conceptTranslator.toFhirResource(order.getConcept()));
 		
+		serviceRequest.addIdentifier(orderIdentifierTranslator.toFhirResource(order));
+		
 		serviceRequest.setIntent(ServiceRequest.ServiceRequestIntent.ORDER);
 		
 		serviceRequest.setSubject(patientReferenceTranslator.toFhirResource(order.getPatient()));
