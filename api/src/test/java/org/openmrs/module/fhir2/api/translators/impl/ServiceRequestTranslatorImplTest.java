@@ -398,26 +398,26 @@ public class ServiceRequestTranslatorImplTest {
 	public void toFhirResource_shouldTranslateOrderNumberToIdentifier() throws Exception {
 		TestOrder order = new TestOrder();
 		setOrderNumberByReflection(order, TEST_ORDER_NUMBER);
-
+		
 		when(taskService.searchForTasks(any()))
 		        .thenReturn(new MockIBundleProvider<>(Collections.emptyList(), PREFERRED_PAGE_SIZE, COUNT));
-
+		
 		ServiceRequest result = translator.toFhirResource(order);
-
+		
 		assertThat(result.getIdentifier(), hasSize(1));
 		assertThat(result.getIdentifierFirstRep().getValue(), equalTo(TEST_ORDER_NUMBER));
 	}
-
+	
 	@Test
 	public void toFhirResource_shouldTranslateInstructionsToPatientInstruction() {
 		TestOrder order = new TestOrder();
 		order.setInstructions(INSTRUCTIONS);
-
+		
 		when(taskService.searchForTasks(any()))
 		        .thenReturn(new MockIBundleProvider<>(Collections.emptyList(), PREFERRED_PAGE_SIZE, COUNT));
-
+		
 		ServiceRequest result = translator.toFhirResource(order);
-
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getPatientInstruction(), equalTo(INSTRUCTIONS));
 	}
