@@ -28,7 +28,6 @@ import java.util.List;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -79,7 +78,7 @@ public class TaskFhirResourceProviderTest extends BaseFhirProvenanceResourceTest
 	
 	@Mock
 	private FhirTaskService taskService;
-
+	
 	@Getter(AccessLevel.PUBLIC)
 	private TaskFhirResourceProvider resourceProvider;
 	
