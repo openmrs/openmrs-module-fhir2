@@ -90,7 +90,9 @@ public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDa
 			if (token.getValue() != null
 			        && !token.getValue().isEmpty()) {
 				try {
-					return Optional.of(eq("status", FhirTask.TaskStatus.valueOf(Task.TaskStatus.fromCode(token.getValue().toLowerCase()).name())));
+					return Optional.of(eq("status",
+					    FhirTask.TaskStatus
+					            .valueOf(Task.TaskStatus.fromCode(token.getValue().toLowerCase()).name())));
 				}
 				catch (IllegalArgumentException | FHIRException e) {
 					return Optional.empty();

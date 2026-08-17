@@ -197,7 +197,7 @@ public class TaskVersionConverter {
 				tgt.setFor(convertReference(src.getFor()));
 			}
 			if (src.hasContext()) {
-				tgt.setFocus(convertReference(src.getContext()));
+				tgt.setEncounter(convertReference(src.getContext()));
 			}
 			if (src.hasExecutionPeriod()) {
 				tgt.setExecutionPeriod(convertPeriod(src.getExecutionPeriod()));
