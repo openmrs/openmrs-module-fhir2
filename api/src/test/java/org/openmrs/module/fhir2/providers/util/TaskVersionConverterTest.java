@@ -55,4 +55,23 @@ public class TaskVersionConverterTest {
 		assertThat(result.getEncounter(), notNullValue());
 		assertThat(result.getEncounter().getReference(), equalTo("Encounter/enc-uuid-2222"));
 	}
+	
+	@Test
+	public void convertTask_shouldMapR4FocusAndEncounterToDstu3FocusAndContextRespectively() throws FHIRException {
+		//given
+		org.hl7.fhir.r4.model.Task src = new org.hl7.fhir.r4.model.Task();
+		src.setStatus(org.hl7.fhir.r4.model.Task.TaskStatus.REQUESTED);
+		src.setIntent(org.hl7.fhir.r4.model.Task.TaskIntent.ORDER);
+		src.setFocus(new org.hl7.fhir.r4.model.Reference("Observation/obs-uuid-1111"));
+		src.setEncounter(new org.hl7.fhir.r4.model.Reference("Encounter/enc-uuid-2222"));
+		
+		//when
+		Task result = TaskVersionConverter.convertTask(src);
+		
+		//then
+		assertThat(result.getFocus(), notNullValue());
+		assertThat(result.getFocus().getReference(), equalTo("Observation/obs-uuid-1111"));
+		assertThat(result.getContext(), notNullValue());
+		assertThat(result.getContext().getReference(), equalTo("Encounter/enc-uuid-2222"));
+	}
 }
