@@ -23,6 +23,8 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Criterion;
+import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.r4.model.Task;
 import org.openmrs.api.db.DAOException;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirTaskDao;
@@ -48,6 +50,10 @@ public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDa
 				case FhirConstants.FOR_REFERENCE_SEARCH_HANDLER:
 					entry.getValue().forEach(
 					    param -> handleReference(criteria, (ReferenceAndListParam) param.getParam(), "forReference", "f"));
+					break;
+				case FhirConstants.FOCUS_REFERENCE_SEARCH_HANDLER:
+					entry.getValue().forEach(param -> handleReference(criteria, (ReferenceAndListParam) param.getParam(),
+					    "focusReference", "fo"));
 					break;
 				case FhirConstants.TASK_CODE_SEARCH_HANDLER:
 					entry.getValue().forEach(code -> handleTaskCodeConcept(criteria, (TokenAndListParam) code.getParam()));
@@ -81,11 +87,12 @@ public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDa
 	
 	private Optional<Criterion> handleStatus(TokenAndListParam tokenAndListParam) {
 		return handleAndListParam(tokenAndListParam, token -> {
-			if (token.getValue() != null) {
+			if (token.getValue() != null && !token.getValue().isEmpty()) {
 				try {
-					return Optional.of(eq("status", FhirTask.TaskStatus.valueOf(token.getValue().toUpperCase())));
+					return Optional.of(eq("status",
+					    FhirTask.TaskStatus.valueOf(Task.TaskStatus.fromCode(token.getValue().toLowerCase()).name())));
 				}
-				catch (IllegalArgumentException e) {
+				catch (IllegalArgumentException | FHIRException e) {
 					return Optional.empty();
 				}
 			}
@@ -102,7 +109,7 @@ public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDa
 				}
 				
 				List<Optional<? extends Criterion>> criterionList = new ArrayList<>();
-				criterionList.add(Optional.of(eq(String.format("%s.reference", alias), param.getIdPart())));
+				criterionList.add(Optional.of(eq(String.format("%s.targetUuid", alias), param.getIdPart())));
 				criterionList.add(Optional.of(eq(String.format("%s.type", alias), param.getResourceType())));
 				return Optional.of(and(toCriteriaArray(criterionList)));
 			}
