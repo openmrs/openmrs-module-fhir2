@@ -43,6 +43,7 @@ import org.openmrs.module.ModuleFactory;
 import org.openmrs.module.fhir2.FhirActivator;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
+import org.openmrs.module.fhir2.api.annotations.FhirInterceptor;
 import org.openmrs.module.fhir2.api.annotations.R4Provider;
 import org.openmrs.module.fhir2.api.spi.ModuleLifecycleListener;
 import org.openmrs.module.fhir2.narrative.OpenmrsThymeleafNarrativeGenerator;
@@ -146,11 +147,7 @@ public class FhirRestServlet extends RestfulServer implements ModuleLifecycleLis
 		setPagingProvider(createPagingProvider());
 		setDefaultResponseEncoding(EncodingEnum.JSON);
 
-		registerInterceptor(loggingInterceptor);
-		registerInterceptor(new RequireAuthenticationInterceptor());
-		registerInterceptor(new DisableCacheInterceptor());
-		registerInterceptor(new SummaryInterceptor());
-		registerInterceptor(new SupportMergePatchInterceptor());
+		registerInterceptors();
 
 		String narrativesOverridePropertyFile = NarrativeUtils.getValidatedPropertiesFilePath(
 				globalPropertyService.getGlobalProperty(FhirConstants.NARRATIVES_OVERRIDE_PROPERTY_FILE, null));
@@ -170,6 +167,38 @@ public class FhirRestServlet extends RestfulServer implements ModuleLifecycleLis
 		started = true;
 	}
 	//@formatter:on
+	
+	/**
+	 * Registers the interceptors this server runs with: the ones this module owns, then any bean in the
+	 * application context annotated {@link FhirInterceptor}, which is how a module other than this one
+	 * contributes a cross-cutting concern. Resource providers are already collected from the context
+	 * this way; interceptors were not, and could not be added from outside at all, because
+	 * {@link #refreshed()} unregisters every interceptor and runs whenever any module starts or stops.
+	 * <p>
+	 * A contributed bean that cannot be supplied is left to fail rather than skipped. Skipping would
+	 * leave the FHIR API answering requests with an authorization or audit interceptor quietly missing,
+	 * which is worse than a startup failure naming the bean.
+	 */
+	protected void registerInterceptors() {
+		registerInterceptor(loggingInterceptor);
+		registerInterceptor(new RequireAuthenticationInterceptor());
+		registerInterceptor(new DisableCacheInterceptor());
+		registerInterceptor(new SummaryInterceptor());
+		registerInterceptor(new SupportMergePatchInterceptor());
+		
+		ConfigurableApplicationContext ctx = getModuleApplicationContext();
+		if (ctx != null) {
+			ctx.getBeansWithAnnotation(FhirInterceptor.class).values().forEach(this::registerInterceptor);
+		}
+	}
+	
+	/**
+	 * The context contributed interceptors are read from. Separated so a test can supply one without
+	 * writing to the activator's static field, which every other test in the module would then read.
+	 */
+	protected ConfigurableApplicationContext getModuleApplicationContext() {
+		return FhirActivator.getApplicationContext();
+	}
 	
 	protected Class<? extends Annotation> getResourceProviderAnnotation() {
 		return R4Provider.class;
@@ -256,11 +285,8 @@ public class FhirRestServlet extends RestfulServer implements ModuleLifecycleLis
 				        .filter(entry -> validBeanNames.contains(entry.getKey())).map(Map.Entry::getValue)
 				        .collect(Collectors.toList()));
 				
-				registerInterceptor(ctx.getBean("hapiLoggingInterceptor", LoggingInterceptor.class));
-				registerInterceptor(new RequireAuthenticationInterceptor());
-				registerInterceptor(new DisableCacheInterceptor());
-				registerInterceptor(new SummaryInterceptor());
-				registerInterceptor(new SupportMergePatchInterceptor());
+				setLoggingInterceptor(ctx.getBean("hapiLoggingInterceptor", LoggingInterceptor.class));
+				registerInterceptors();
 				
 				setAdministrationService(ctx.getBean("adminService", AdministrationService.class));
 				setGlobalPropertyService(ctx.getBean(FhirGlobalPropertyService.class));
