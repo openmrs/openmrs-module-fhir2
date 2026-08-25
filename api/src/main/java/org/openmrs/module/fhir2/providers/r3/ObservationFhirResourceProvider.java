@@ -141,15 +141,31 @@ public class ObservationFhirResourceProvider implements IResourceProvider {
 	        @OperationParam(name = Observation.SP_SUBJECT) ReferenceAndListParam subjectParam,
 	        @OperationParam(name = Observation.SP_PATIENT) ReferenceAndListParam patientParam,
 	        @OperationParam(name = Observation.SP_CATEGORY) TokenAndListParam category,
-	        @OperationParam(name = Observation.SP_CODE) TokenAndListParam code) {
+	        @OperationParam(name = Observation.SP_CODE) TokenAndListParam code,
+	        @OperationParam(name = Observation.SP_ENCOUNTER) ReferenceAndListParam encounterParam,
+	        @IncludeParam(allow = { "Observation:" + Observation.SP_ENCOUNTER, "Observation:" + Observation.SP_PATIENT,
+	                "Observation:" + Observation.SP_RELATED_TYPE }) HashSet<Include> includes,
+	        @IncludeParam(reverse = true, allow = { "Observation:" + Observation.SP_RELATED_TYPE,
+	                "DiagnosticReport:" + DiagnosticReport.SP_RESULT }) HashSet<Include> revIncludes) {
 		if (patientParam != null) {
 			subjectParam = patientParam;
+		}
+		
+		if (CollectionUtils.isEmpty(includes)) {
+			includes = null;
+		}
+		
+		if (CollectionUtils.isEmpty(revIncludes)) {
+			revIncludes = null;
 		}
 		
 		ObservationSearchParams searchParams = new ObservationSearchParams();
 		searchParams.setPatient(subjectParam);
 		searchParams.setCategory(category);
 		searchParams.setCode(code);
+		searchParams.setEncounter(encounterParam);
+		searchParams.setIncludes(includes);
+		searchParams.setRevIncludes(revIncludes);
 		
 		return new SearchQueryBundleProviderR3Wrapper(observationService.getLastnObservations(max, searchParams));
 	}
