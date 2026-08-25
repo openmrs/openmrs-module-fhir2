@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
@@ -92,6 +93,9 @@ public class LocationFhirResourceProviderTest extends BaseFhirProvenanceResource
 	
 	@Mock
 	private FhirLocationService locationService;
+	
+	@Mock
+	private RequestDetails mockRequestDetails;
 	
 	private LocationFhirResourceProvider resourceProvider;
 	
@@ -528,41 +532,45 @@ public class LocationFhirResourceProviderTest extends BaseFhirProvenanceResource
 	}
 	
 	@Test
-	public void updateLocation_shouldUpdateLocation() {
+	public void doUpsert_shouldUpdateLocation() {
 		Location newLocation = location;
 		
-		when(locationService.update(LOCATION_UUID, location)).thenReturn(newLocation);
+		when(locationService.update(LOCATION_UUID, location, mockRequestDetails, false)).thenReturn(newLocation);
 		
-		MethodOutcome result = resourceProvider.updateLocation(new IdType().setValue(LOCATION_UUID), location);
+		MethodOutcome result = resourceProvider.doUpsert(new IdType().setValue(LOCATION_UUID), location, mockRequestDetails,
+		    false);
 		assertThat(result, notNullValue());
 		assertThat(result.getResource(), equalTo(newLocation));
 	}
 	
 	@Test(expected = InvalidRequestException.class)
-	public void updateLocation_shouldThrowInvalidRequestExceptionForUuidMismatch() {
-		when(locationService.update(WRONG_LOCATION_UUID, location)).thenThrow(InvalidRequestException.class);
+	public void doUpsert_shouldThrowInvalidRequestExceptionForUuidMismatch() {
+		when(locationService.update(WRONG_LOCATION_UUID, location, mockRequestDetails, false))
+		        .thenThrow(InvalidRequestException.class);
 		
-		resourceProvider.updateLocation(new IdType().setValue(WRONG_LOCATION_UUID), location);
+		resourceProvider.doUpsert(new IdType().setValue(WRONG_LOCATION_UUID), location, mockRequestDetails, false);
 	}
 	
 	@Test(expected = InvalidRequestException.class)
-	public void updateLocation_shouldThrowInvalidRequestExceptionForMissingId() {
+	public void doUpsert_shouldThrowInvalidRequestExceptionForMissingId() {
 		Location noIdLocation = new Location();
 		
-		when(locationService.update(LOCATION_UUID, noIdLocation)).thenThrow(InvalidRequestException.class);
+		when(locationService.update(LOCATION_UUID, noIdLocation, mockRequestDetails, false))
+		        .thenThrow(InvalidRequestException.class);
 		
-		resourceProvider.updateLocation(new IdType().setValue(LOCATION_UUID), noIdLocation);
+		resourceProvider.doUpsert(new IdType().setValue(LOCATION_UUID), noIdLocation, mockRequestDetails, false);
 	}
 	
 	@Test(expected = MethodNotAllowedException.class)
-	public void updateLocation_ShouldThrowMethodNotAllowedIfDoesNotExist() {
+	public void doUpsert_ShouldThrowMethodNotAllowedIfDoesNotExist() {
 		Location wrongLocation = new Location();
 		
 		wrongLocation.setId(WRONG_LOCATION_UUID);
 		
-		when(locationService.update(WRONG_LOCATION_UUID, wrongLocation)).thenThrow(MethodNotAllowedException.class);
+		when(locationService.update(WRONG_LOCATION_UUID, wrongLocation, mockRequestDetails, false))
+		        .thenThrow(MethodNotAllowedException.class);
 		
-		resourceProvider.updateLocation(new IdType().setValue(WRONG_LOCATION_UUID), wrongLocation);
+		resourceProvider.doUpsert(new IdType().setValue(WRONG_LOCATION_UUID), wrongLocation, mockRequestDetails, false);
 	}
 	
 	@Test
