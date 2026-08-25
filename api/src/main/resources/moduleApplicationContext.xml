@@ -57,6 +57,7 @@
             <list>
                 <value>authorizationInterceptor</value>
                 <value>cacheInterceptor</value>
+                <value>transactionInterceptor</value>
             </list>
         </property>
     </bean>

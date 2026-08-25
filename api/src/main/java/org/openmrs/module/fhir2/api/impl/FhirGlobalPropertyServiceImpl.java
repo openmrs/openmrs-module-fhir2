@@ -11,15 +11,12 @@ package org.openmrs.module.fhir2.api.impl;
 
 import java.util.Map;
 
-import lombok.AccessLevel;
-import lombok.Setter;
 import org.openmrs.api.APIException;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.util.FhirGlobalPropertyHolder;
 import org.springframework.stereotype.Component;
 
 @Component
-@Setter(AccessLevel.PACKAGE)
 public class FhirGlobalPropertyServiceImpl implements FhirGlobalPropertyService {
 	
 	@Override

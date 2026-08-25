@@ -14,6 +14,8 @@ import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.Optional;
 
+import com.google.common.annotations.VisibleForTesting;
+import lombok.AccessLevel;
 import lombok.Setter;
 import org.openmrs.ConceptSource;
 import org.openmrs.Duration;
@@ -23,36 +25,29 @@ import org.openmrs.module.fhir2.api.dao.FhirConceptSourceDao;
 import org.openmrs.module.fhir2.model.FhirConceptSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
-@Transactional
-@Setter
 public class FhirConceptSourceServiceImpl implements FhirConceptSourceService {
 	
-	@Autowired
+	@Setter(value = AccessLevel.PUBLIC, onMethod_ = { @Autowired, @VisibleForTesting })
 	private FhirConceptSourceDao dao;
 	
 	@Override
-	@Transactional(readOnly = true)
 	public Collection<FhirConceptSource> getFhirConceptSources() {
 		return dao.getFhirConceptSources();
 	}
 	
 	@Override
-	@Transactional(readOnly = true)
 	public Optional<FhirConceptSource> getFhirConceptSourceByUrl(@Nonnull String url) {
 		return dao.getFhirConceptSourceByUrl(url);
 	}
 	
 	@Override
-	@Transactional(readOnly = true)
 	public Optional<FhirConceptSource> getFhirConceptSource(@Nonnull ConceptSource conceptSource) {
 		return dao.getFhirConceptSourceByConceptSource(conceptSource);
 	}
 	
 	@Override
-	@Transactional(readOnly = true)
 	public String getUrlForConceptSource(@Nonnull ConceptSource conceptSource) {
 		return getFhirConceptSource(conceptSource).map(FhirConceptSource::getUrl)
 		        .orElseGet(() -> Duration.SNOMED_CT_CONCEPT_SOURCE_HL7_CODE.equals(conceptSource.getHl7Code())
@@ -61,7 +56,6 @@ public class FhirConceptSourceServiceImpl implements FhirConceptSourceService {
 	}
 	
 	@Override
-	@Transactional(readOnly = true)
 	public Optional<ConceptSource> getConceptSourceByUrl(@Nonnull String url) {
 		if (url == null) {
 			return Optional.empty();
@@ -80,13 +74,11 @@ public class FhirConceptSourceServiceImpl implements FhirConceptSourceService {
 	}
 	
 	@Override
-	@Transactional(readOnly = true)
 	public Optional<ConceptSource> getConceptSourceByHl7Code(@Nonnull String hl7Code) {
 		return dao.getConceptSourceByHl7Code(hl7Code);
 	}
 	
 	@Override
-	@Transactional
 	public FhirConceptSource saveFhirConceptSource(@Nonnull FhirConceptSource fhirConceptSource) {
 		return dao.saveFhirConceptSource(fhirConceptSource);
 	}

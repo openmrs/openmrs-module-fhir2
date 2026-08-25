@@ -43,30 +43,29 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-@Setter(AccessLevel.PACKAGE)
 public class FhirImmunizationServiceImpl extends BaseFhirService<Immunization, Obs> implements FhirImmunizationService {
 	
-	@Autowired
-	@Getter
-	private ImmunizationTranslator translator;
-	
-	@Autowired
-	@Getter
+	@Getter(value = AccessLevel.PROTECTED)
+	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
 	private FhirObservationDao dao;
 	
-	@Autowired
+	@Getter(value = AccessLevel.PROTECTED)
+	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
+	private ImmunizationTranslator translator;
+	
+	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
 	private ObsService obsService;
 	
-	@Autowired
+	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
 	private EncounterService encounterService;
 	
-	@Autowired
+	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
 	private ImmunizationObsGroupHelper helper;
 	
-	@Autowired
+	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
 	private SearchQueryInclude<Immunization> searchQueryInclude;
 	
-	@Autowired
+	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
 	private SearchQuery<org.openmrs.Obs, Immunization, FhirObservationDao, ImmunizationTranslator, SearchQueryInclude<Immunization>> searchQuery;
 	
 	@Override

@@ -19,7 +19,7 @@ import org.openmrs.annotation.Authorized;
 import org.openmrs.module.fhir2.model.FhirConceptSource;
 import org.openmrs.util.PrivilegeConstants;
 
-public interface FhirConceptSourceDao {
+public interface FhirConceptSourceDao extends FhirDaoAop {
 	
 	@Authorized(PrivilegeConstants.GET_CONCEPT_SOURCES)
 	Collection<FhirConceptSource> getFhirConceptSources();

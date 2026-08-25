@@ -37,6 +37,7 @@ import org.openmrs.module.fhir2.api.dao.FhirConceptDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class FhirConceptDaoImpl extends BaseFhirDao<Concept> implements FhirConceptDao {
@@ -45,11 +46,13 @@ public class FhirConceptDaoImpl extends BaseFhirDao<Concept> implements FhirConc
 	private ConceptService conceptService;
 	
 	@Override
+	@Transactional(readOnly = true)
 	public Concept get(@Nonnull String uuid) {
 		return conceptService.getConceptByUuid(uuid);
 	}
 	
 	@Override
+	@Transactional(readOnly = true)
 	public Optional<Concept> getConceptWithSameAsMappingInSource(@Nonnull ConceptSource conceptSource,
 	        @Nonnull String mappingCode) {
 		if (conceptSource == null || mappingCode == null) {
@@ -65,6 +68,7 @@ public class FhirConceptDaoImpl extends BaseFhirDao<Concept> implements FhirConc
 	}
 	
 	@Override
+	@Transactional(readOnly = true)
 	public List<Concept> getConceptsWithAnyMappingInSource(@Nonnull ConceptSource conceptSource,
 	        @Nonnull String mappingCode) {
 		if (conceptSource == null || mappingCode == null) {

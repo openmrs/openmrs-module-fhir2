@@ -26,6 +26,7 @@ import org.openmrs.module.fhir2.model.FhirPatientIdentifierSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class FhirPatientIdentifierSystemDaoImpl implements FhirPatientIdentifierSystemDao {
@@ -34,6 +35,7 @@ public class FhirPatientIdentifierSystemDaoImpl implements FhirPatientIdentifier
 	private SessionFactory sessionFactory;
 	
 	@Override
+	@Transactional(readOnly = true)
 	public String getUrlByPatientIdentifierType(PatientIdentifierType patientIdentifierType) {
 		return (String) sessionFactory.getCurrentSession().createCriteria(FhirPatientIdentifierSystem.class)
 		        .add(eq("patientIdentifierType.patientIdentifierTypeId", patientIdentifierType.getId()))
@@ -41,12 +43,14 @@ public class FhirPatientIdentifierSystemDaoImpl implements FhirPatientIdentifier
 	}
 	
 	@Override
+	@Transactional(readOnly = true)
 	public PatientIdentifierType getPatientIdentifierTypeByUrl(String url) {
 		return (PatientIdentifierType) sessionFactory.getCurrentSession().createCriteria(FhirPatientIdentifierSystem.class)
 		        .add(eq("url", url)).setProjection(Projections.property("patientIdentifierType")).uniqueResult();
 	}
 	
 	@Override
+	@Transactional(readOnly = true)
 	public Optional<FhirPatientIdentifierSystem> getFhirPatientIdentifierSystem(
 	        @Nonnull PatientIdentifierType patientIdentifierType) {
 		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(FhirPatientIdentifierSystem.class);
@@ -55,6 +59,7 @@ public class FhirPatientIdentifierSystemDaoImpl implements FhirPatientIdentifier
 	}
 	
 	@Override
+	@Transactional
 	public FhirPatientIdentifierSystem saveFhirPatientIdentifierSystem(
 	        @Nonnull FhirPatientIdentifierSystem fhirPatientIdentifierSystem) {
 		sessionFactory.getCurrentSession().saveOrUpdate(fhirPatientIdentifierSystem);

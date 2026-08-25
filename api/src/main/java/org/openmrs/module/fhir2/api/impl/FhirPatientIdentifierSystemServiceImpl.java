@@ -21,31 +21,26 @@ import org.openmrs.module.fhir2.api.dao.FhirPatientIdentifierSystemDao;
 import org.openmrs.module.fhir2.model.FhirPatientIdentifierSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
-@Transactional
 @Setter(AccessLevel.PACKAGE)
 public class FhirPatientIdentifierSystemServiceImpl implements FhirPatientIdentifierSystemService {
 	
-	@Autowired
+	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
 	private FhirPatientIdentifierSystemDao dao;
 	
 	@Override
-	@Transactional(readOnly = true)
 	public String getUrlByPatientIdentifierType(@Nonnull PatientIdentifierType patientIdentifierType) {
 		return dao.getUrlByPatientIdentifierType(patientIdentifierType);
 	}
 	
 	@Override
-	@Transactional(readOnly = true)
 	public Optional<FhirPatientIdentifierSystem> getFhirPatientIdentifierSystem(
 	        @Nonnull PatientIdentifierType patientIdentifierType) {
 		return dao.getFhirPatientIdentifierSystem(patientIdentifierType);
 	}
 	
 	@Override
-	@Transactional
 	public FhirPatientIdentifierSystem saveFhirPatientIdentifierSystem(
 	        @Nonnull FhirPatientIdentifierSystem fhirPatientIdentifierSystem) {
 		return dao.saveFhirPatientIdentifierSystem(fhirPatientIdentifierSystem);

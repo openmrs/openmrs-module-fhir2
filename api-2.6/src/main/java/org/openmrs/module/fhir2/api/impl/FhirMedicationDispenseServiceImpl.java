@@ -10,9 +10,9 @@
 package org.openmrs.module.fhir2.api.impl;
 
 import static lombok.AccessLevel.PACKAGE;
+import static lombok.AccessLevel.PROTECTED;
 
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.MedicationDispense;
@@ -26,16 +26,15 @@ import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.MedicationDispenseTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
-@Transactional
-@Getter(AccessLevel.PROTECTED)
 public class FhirMedicationDispenseServiceImpl extends BaseFhirService<MedicationDispense, org.openmrs.MedicationDispense> implements FhirMedicationDispenseService {
 	
+	@Getter(PROTECTED)
 	@Setter(value = PACKAGE, onMethod_ = @Autowired)
 	private FhirMedicationDispenseDao<org.openmrs.MedicationDispense> dao;
 	
+	@Getter(PROTECTED)
 	@Setter(value = PACKAGE, onMethod_ = @Autowired)
 	private MedicationDispenseTranslator<org.openmrs.MedicationDispense> translator;
 	

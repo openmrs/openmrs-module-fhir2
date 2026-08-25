@@ -22,7 +22,7 @@ import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 /**
  * Base interface for all FHIR DAO objects
  */
-public interface FhirDao<T extends OpenmrsObject & Auditable> extends Serializable {
+public interface FhirDao<T extends OpenmrsObject & Auditable> extends FhirDaoAop, Serializable {
 	
 	T get(@Nonnull String uuid);
 	

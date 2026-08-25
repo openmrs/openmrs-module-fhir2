@@ -15,7 +15,7 @@ import org.openmrs.PersonAttributeType;
 import org.openmrs.attribute.BaseAttributeType;
 import org.openmrs.module.fhir2.model.FhirContactPointMap;
 
-public interface FhirContactPointMapDao {
+public interface FhirContactPointMapDao extends FhirDaoAop {
 	
 	Optional<FhirContactPointMap> getFhirContactPointMapByUuid(String uuid);
 	

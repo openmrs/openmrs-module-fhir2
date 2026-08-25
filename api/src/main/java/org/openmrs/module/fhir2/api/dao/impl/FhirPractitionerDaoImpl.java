@@ -23,6 +23,7 @@ import org.openmrs.Provider;
 import org.openmrs.ProviderAttribute;
 import org.openmrs.module.fhir2.api.dao.FhirPractitionerDao;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class FhirPractitionerDaoImpl extends BasePractitionerDao<Provider> implements FhirPractitionerDao {
@@ -38,6 +39,7 @@ public class FhirPractitionerDaoImpl extends BasePractitionerDao<Provider> imple
 	}
 	
 	@Override
+	@Transactional(readOnly = true)
 	@SuppressWarnings("unchecked")
 	public List<ProviderAttribute> getActiveAttributesByPractitionerAndAttributeTypeUuid(@Nonnull Provider provider,
 	        @Nonnull String providerAttributeTypeUuid) {

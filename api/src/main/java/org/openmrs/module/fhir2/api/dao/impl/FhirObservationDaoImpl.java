@@ -46,6 +46,7 @@ import org.openmrs.module.fhir2.api.mappings.ObservationCategoryMap;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObservationDao {
@@ -57,6 +58,7 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 	private FhirEncounterDao encounterDao;
 	
 	@Override
+	@Transactional(readOnly = true)
 	public List<Obs> getSearchResults(@Nonnull SearchParameterMap theParams) {
 		if (!theParams.getParameters(FhirConstants.LASTN_OBSERVATION_SEARCH_HANDLER).isEmpty()) {
 			Criteria criteria = getSessionFactory().getCurrentSession().createCriteria(typeToken.getRawType());
@@ -116,6 +118,7 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 	}
 	
 	@Override
+	@Transactional(readOnly = true)
 	public int getSearchResultsCount(@Nonnull SearchParameterMap theParams) {
 		if (!theParams.getParameters(FhirConstants.LASTN_OBSERVATION_SEARCH_HANDLER).isEmpty()) {
 			Criteria criteria = getSessionFactory().getCurrentSession().createCriteria(typeToken.getRawType());

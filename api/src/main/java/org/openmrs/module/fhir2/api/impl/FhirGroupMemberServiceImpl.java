@@ -14,10 +14,8 @@ import javax.annotation.Nonnull;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import org.openmrs.module.fhir2.api.FhirGroupMemberService;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
-@Transactional
 public class FhirGroupMemberServiceImpl implements FhirGroupMemberService {
 	
 	@Override
