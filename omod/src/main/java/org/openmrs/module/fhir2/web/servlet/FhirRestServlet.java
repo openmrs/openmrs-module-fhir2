@@ -193,11 +193,14 @@ public class FhirRestServlet extends RestfulServer implements ModuleLifecycleLis
 	}
 	
 	/**
-	 * The application context this servlet reads its collaborators from -- contributed interceptors,
-	 * and everything {@link #refreshed()} re-resolves after the context is rebuilt. Separated so a test
-	 * can supply one without writing to the activator's static field, which is shared by every test in
-	 * the module and cannot be cleared: {@code setApplicationContext} assigns only when handed a
-	 * {@link ConfigurableApplicationContext}, so passing null leaves the previous value in place.
+	 * The context {@link #registerInterceptors()} and {@link #refreshed()} read from. Separated so a
+	 * test can supply one without writing the activator's static field, which is shared by every test
+	 * in the module and cannot be put back: {@code FhirActivator.setApplicationContext} assigns only
+	 * when handed a {@link ConfigurableApplicationContext}, so passing null leaves the previous value
+	 * in place.
+	 * <p>
+	 * {@link #autoInject()} still reads the static directly. It runs before the servlet is started and
+	 * is not on the refresh path, so overriding this does not redirect it.
 	 */
 	protected ConfigurableApplicationContext getModuleApplicationContext() {
 		return FhirActivator.getApplicationContext();

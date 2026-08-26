@@ -11,7 +11,6 @@ package org.openmrs.module.fhir2.web.servlet;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -39,7 +38,6 @@ import org.openmrs.api.AdministrationService;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.annotations.FhirInterceptor;
-import org.openmrs.module.fhir2.web.authentication.RequireAuthenticationInterceptor;
 import org.openmrs.util.OpenmrsClassLoader;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.context.support.GenericApplicationContext;
@@ -146,9 +144,11 @@ public class FhirRestServletTest {
 	public void refreshed_shouldStillHaveTheContributedInterceptorAfterAContextRefresh() throws ServletException {
 		ContributedInterceptor contributed = withRefreshableContext();
 		
+		LoggingInterceptor loggingInterceptorBeforeInit = new LoggingInterceptor();
+		
 		RefreshableFhirRestServlet refreshable = new RefreshableFhirRestServlet();
 		refreshable.setGlobalPropertyService(globalPropertyService);
-		refreshable.setLoggingInterceptor(new LoggingInterceptor());
+		refreshable.setLoggingInterceptor(loggingInterceptorBeforeInit);
 		refreshable.setMessageSource(new StaticMessageSource());
 		refreshable.init(mockServletConfig);
 		
@@ -157,10 +157,13 @@ public class FhirRestServletTest {
 		refreshable.refreshed();
 		
 		assertThat(refreshable.getInterceptorService().getAllRegisteredInterceptors(), hasItem(contributed));
-		// the built-ins coming back is what shows the unregister-and-re-register cycle really ran, rather
-		// than the contributed one having simply never been removed
+		// the rebuilt context's logging interceptor is what shows the registry was actually torn down and
+		// rebuilt. The built-ins alone would not: had unregisterAllInterceptors() never run they would
+		// still be there from initialize(), so their presence tells the two cases apart not at all.
 		assertThat(refreshable.getInterceptorService().getAllRegisteredInterceptors(),
-		    hasItem(instanceOf(RequireAuthenticationInterceptor.class)));
+		    hasItem(context.getBean("hapiLoggingInterceptor", LoggingInterceptor.class)));
+		assertThat(refreshable.getInterceptorService().getAllRegisteredInterceptors(),
+		    not(hasItem(loggingInterceptorBeforeInit)));
 	}
 	
 	/**
@@ -182,8 +185,7 @@ public class FhirRestServletTest {
 	
 	private <T> T withContextContaining(String beanName, Class<T> beanClass) {
 		context = new GenericApplicationContext();
-		context.registerBeanDefinition(beanName, org.springframework.beans.factory.support.BeanDefinitionBuilder
-		        .genericBeanDefinition(beanClass).getBeanDefinition());
+		context.registerBeanDefinition(beanName, BeanDefinitionBuilder.genericBeanDefinition(beanClass).getBeanDefinition());
 		context.refresh();
 		return context.getBean(beanName, beanClass);
 	}
