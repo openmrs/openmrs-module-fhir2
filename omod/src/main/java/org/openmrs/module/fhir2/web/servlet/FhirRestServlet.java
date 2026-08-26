@@ -297,8 +297,9 @@ public class FhirRestServlet extends RestfulServer implements ModuleLifecycleLis
 				
 				// Keep these two adjacent: the servlet goes on serving through a refresh, and a request
 				// arriving between them is answered with no interceptors, RequireAuthenticationInterceptor
-				// among them. And keep them last: this is where another module's code runs, so a throw
-				// here must not leave the re-wiring above half done.
+				// among them. And keep them last: a contributed bean whose creation was deferred past the
+				// context refresh is constructed here and can throw, so it must not leave the re-wiring
+				// above half done.
 				getInterceptorService().unregisterAllInterceptors();
 				registerInterceptors();
 			}
