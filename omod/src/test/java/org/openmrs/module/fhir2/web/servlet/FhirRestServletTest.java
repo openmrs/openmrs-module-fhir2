@@ -184,6 +184,33 @@ public class FhirRestServletTest {
 	}
 	
 	/**
+	 * The case FM2-698 describes: the contributing module starts after this one, so its bean reaches
+	 * the context only at the refresh. registerInterceptors() reads the context each time it runs,
+	 * rather than replaying what initialize() found, and that is what picks this bean up.
+	 */
+	@Test
+	public void refreshed_shouldRegisterAContributedInterceptorThatReachedTheContextAfterInitialize()
+	        throws ServletException {
+		withRefreshableContext();
+		
+		R4ServletWithTestContext refreshable = new R4ServletWithTestContext();
+		refreshable.setGlobalPropertyService(globalPropertyService);
+		refreshable.setLoggingInterceptor(new LoggingInterceptor());
+		refreshable.setMessageSource(new StaticMessageSource());
+		refreshable.init(mockServletConfig);
+		
+		context.registerBeanDefinition("lateComer",
+		    BeanDefinitionBuilder.genericBeanDefinition(ContributedInterceptor.class).getBeanDefinition());
+		ContributedInterceptor lateComer = context.getBean("lateComer", ContributedInterceptor.class);
+		
+		assertThat(refreshable.getInterceptorService().getAllRegisteredInterceptors(), not(hasItem(lateComer)));
+		
+		refreshable.refreshed();
+		
+		assertThat(refreshable.getInterceptorService().getAllRegisteredInterceptors(), hasItem(lateComer));
+	}
+	
+	/**
 	 * {@link FhirInterceptor} promises a module author every version-specific servlet. R3 keeps that by
 	 * inheriting initialize(), so an override added there later would drop contributed interceptors
 	 * from the R3 API.

@@ -34,7 +34,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
  * Every version-specific servlet registers it, so one meant for a single FHIR version must work out
  * which it is serving: {@code getFhirContext().getVersion().getVersion()} on a hook handed
  * {@code RequestDetails}, and on {@code Pointcut.SERVER_INCOMING_REQUEST_PRE_PROCESSED}, which is
- * passed only the request and the response, the servlet path.
+ * passed only the request and the response,
+ * {@code org.openmrs.module.fhir2.web.util.FhirVersionUtils.getFhirVersion(request)}.
  */
 @Target({ ElementType.CONSTRUCTOR, ElementType.FIELD, ElementType.METHOD, ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
