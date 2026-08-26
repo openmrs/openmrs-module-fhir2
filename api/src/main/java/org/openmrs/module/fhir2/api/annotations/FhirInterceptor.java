@@ -18,25 +18,23 @@ import java.lang.annotation.Target;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 /**
- * Marks a Spring bean as a HAPI interceptor the FHIR REST servlets should register, so that a
- * module other than this one can add a cross-cutting concern to the FHIR API -- authorization,
- * audit, consent. The bean carries HAPI's own {@code Hook} methods; this annotation only says it
- * should be picked up, in the way {@link R4Provider} says so for a resource provider.
+ * Marks a Spring bean as a HAPI interceptor the FHIR REST servlets should register, so a module
+ * other than this one can add a cross-cutting concern -- authorization, audit, consent -- in the
+ * way {@link R4Provider} marks a resource provider.
  * <p>
- * The bean must carry at least one {@code Hook} method. HAPI refuses one that does not, logging
- * "Interceptor registered with no valid hooks" and continuing, so an annotated bean without hooks
- * is absent from the request path with nothing but a warning to say so.
+ * The bean must carry at least one {@code Hook} method: HAPI logs "Interceptor registered with no
+ * valid hooks" and drops one that does not, so it is absent from the request path with only a
+ * warning to say so.
  * <p>
- * Registration order is only HAPI's tie-break: on each hook it sorts by
- * {@code Interceptor(order = ...)}, which {@code Hook(order = ...)} overrides per method when
- * non-zero. Every interceptor this module owns leaves that at the default 0, so a contributed bean
- * with a negative order runs ahead of them -- authentication included.
+ * Registration order is only HAPI's tie-break -- it sorts each hook by {@code Interceptor(order)},
+ * which a non-zero {@code Hook(order)} overrides per method. This module's own interceptors all
+ * leave that at 0, so a contributed bean with a negative order runs ahead of them, authentication
+ * included.
  * <p>
- * They are registered on every version-specific servlet, so an interceptor meant for one FHIR
- * version has to work out which it is serving. On a hook handed {@code RequestDetails} that is
- * {@code getFhirContext().getVersion().getVersion()}. On
- * {@code Pointcut.SERVER_INCOMING_REQUEST_PRE_PROCESSED} there is no such handle -- it is passed
- * only the request and the response -- so the servlet path is the only discriminator.
+ * Every version-specific servlet registers it, so one meant for a single FHIR version must work out
+ * which it is serving: {@code getFhirContext().getVersion().getVersion()} on a hook handed
+ * {@code RequestDetails}, and on {@code Pointcut.SERVER_INCOMING_REQUEST_PRE_PROCESSED}, which is
+ * passed only the request and the response, the servlet path.
  */
 @Target({ ElementType.CONSTRUCTOR, ElementType.FIELD, ElementType.METHOD, ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)

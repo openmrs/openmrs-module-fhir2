@@ -169,18 +169,14 @@ public class FhirRestServlet extends RestfulServer implements ModuleLifecycleLis
 	//@formatter:on
 	
 	/**
-	 * Registers the interceptors this server runs with: the ones this module owns, then any bean in the
-	 * application context annotated {@link FhirInterceptor}, which is how a module other than this one
-	 * contributes a cross-cutting concern.
+	 * Registers this module's own interceptors, then every bean annotated {@link FhirInterceptor} --
+	 * how a module other than this one contributes a cross-cutting concern.
 	 * <p>
-	 * A contributed bean that cannot be supplied is deliberately not caught. Worth knowing before
-	 * relying on that: from {@link #initialize()} at server startup the exception aborts the whole
-	 * OpenMRS boot, not just this module.
+	 * A contributed bean that cannot be supplied is deliberately not caught, and from
+	 * {@link #initialize()} at server startup that aborts the whole OpenMRS boot, not just this module.
 	 */
 	protected void registerInterceptors() {
-		// first, so the window in refreshed() between tearing the registry down and building it back up
-		// is as short as it can be made: everything after this line is registered with authentication
-		// already in place
+		// first, so refreshed() rebuilds the registry with authentication in place before anything else
 		registerInterceptor(new RequireAuthenticationInterceptor());
 		registerInterceptor(loggingInterceptor);
 		registerInterceptor(new DisableCacheInterceptor());
@@ -194,11 +190,9 @@ public class FhirRestServlet extends RestfulServer implements ModuleLifecycleLis
 	}
 	
 	/**
-	 * The context {@link #registerInterceptors()} and {@link #refreshed()} read from. Separated so a
-	 * test can supply one without writing the activator's static field, which is shared by every test
-	 * in the module and cannot be put back: {@code FhirActivator.setApplicationContext} assigns only
-	 * when handed a {@link ConfigurableApplicationContext}, so passing null leaves the previous value
-	 * in place.
+	 * The context {@link #registerInterceptors()} and {@link #refreshed()} read from. A test overrides
+	 * this rather than writing {@code FhirActivator}'s static, which it cannot put back afterwards --
+	 * {@code setApplicationContext} assigns only when handed a {@link ConfigurableApplicationContext}.
 	 */
 	protected ConfigurableApplicationContext getModuleApplicationContext() {
 		return FhirActivator.getApplicationContext();
@@ -295,11 +289,9 @@ public class FhirRestServlet extends RestfulServer implements ModuleLifecycleLis
 				
 				administrationService.addGlobalPropertyListener(fhirRestServletListener);
 				
-				// Keep these two adjacent: the servlet goes on serving through a refresh, and a request
-				// arriving between them is answered with no interceptors, RequireAuthenticationInterceptor
-				// among them. And keep them last: a contributed bean whose creation was deferred past the
-				// context refresh is constructed here and can throw, so it must not leave the re-wiring
-				// above half done.
+				// Adjacent: a request arriving between them is answered with no interceptors at all,
+				// RequireAuthenticationInterceptor included. Last: a contributed bean deferred past the
+				// context refresh is built here and can throw, which must not pre-empt the re-wiring above.
 				getInterceptorService().unregisterAllInterceptors();
 				registerInterceptors();
 			}
