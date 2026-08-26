@@ -185,9 +185,10 @@ public class FhirRestServletTest {
 	}
 	
 	/**
-	 * A context carrying the contributed interceptor plus every bean refreshed() resolves by name or by
-	 * type. The contributed one is found by its annotation, so its bean name is arbitrary; the other
-	 * four are the names and types refreshed() asks for by hand.
+	 * A context carrying the contributed interceptor plus the four beans refreshed() throws without.
+	 * The contributed one is found by its annotation, so its bean name is arbitrary; the other four are
+	 * the names and types refreshed() asks for by hand. Resource providers it resolves by type, and
+	 * none here, which is a bundle with no providers rather than a failure.
 	 */
 	private ContributedInterceptor withRefreshableContext() {
 		context = new GenericApplicationContext();
