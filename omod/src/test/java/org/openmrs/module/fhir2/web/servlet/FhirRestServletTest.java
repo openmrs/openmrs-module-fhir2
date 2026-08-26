@@ -167,6 +167,24 @@ public class FhirRestServletTest {
 	}
 	
 	/**
+	 * {@link FhirInterceptor} tells a module author its bean is picked up by every version-specific
+	 * servlet, and nothing else checks that promise -- the R3 servlet keeps it only by not overriding
+	 * initialize(), which a later change could do without noticing what it costs.
+	 */
+	@Test
+	public void initialize_shouldRegisterTheContributedInterceptorOnTheR3ServletToo() throws ServletException {
+		ContributedInterceptor contributed = withContextContaining("contributed", ContributedInterceptor.class);
+		
+		R3ServletReadingTheTestContext r3 = new R3ServletReadingTheTestContext();
+		r3.setGlobalPropertyService(globalPropertyService);
+		r3.setLoggingInterceptor(new LoggingInterceptor());
+		r3.setMessageSource(new StaticMessageSource());
+		r3.init(mockServletConfig);
+		
+		assertThat(r3.getInterceptorService().getAllRegisteredInterceptors(), hasItem(contributed));
+	}
+	
+	/**
 	 * A context carrying the contributed interceptor plus every bean refreshed() resolves by name or by
 	 * type. The names are the ones the servlet asks for; a rename here reads as the interceptor being
 	 * lost rather than as the bean being missing.
@@ -209,6 +227,14 @@ public class FhirRestServletTest {
 		@Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_PROCESSED)
 		public boolean incomingRequest(HttpServletRequest request, HttpServletResponse response) {
 			return true;
+		}
+	}
+	
+	class R3ServletReadingTheTestContext extends FhirR3RestServlet {
+		
+		@Override
+		protected GenericApplicationContext getModuleApplicationContext() {
+			return context;
 		}
 	}
 	
