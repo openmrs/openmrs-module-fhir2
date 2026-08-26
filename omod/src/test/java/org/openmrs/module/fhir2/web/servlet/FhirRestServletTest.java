@@ -134,11 +134,11 @@ public class FhirRestServletTest {
 	}
 	
 	/**
-	 * The acceptance criterion this ticket turns on. The two tests above call registerInterceptors()
-	 * directly, so they never run unregisterAllInterceptors() and cannot tell "registered" apart from
-	 * "survives being unregistered and registered again" -- which is the whole defect. This one drives
-	 * the real initialize() and then the real refreshed(), the path a module start or stop actually
-	 * takes.
+	 * The acceptance criterion this ticket turns on. The two {@code registerInterceptors_should...}
+	 * tests call that method directly, so they never run unregisterAllInterceptors() and cannot tell
+	 * "registered" apart from "survives being unregistered and registered again" -- which is the whole
+	 * defect. This one drives the real initialize() and then the real refreshed(), the path a module
+	 * start or stop actually takes.
 	 */
 	@Test
 	public void refreshed_shouldStillHaveTheContributedInterceptorAfterAContextRefresh() throws ServletException {
@@ -168,8 +168,8 @@ public class FhirRestServletTest {
 	
 	/**
 	 * {@link FhirInterceptor} tells a module author its bean is picked up by every version-specific
-	 * servlet, and nothing else checks that promise -- the R3 servlet keeps it only by not overriding
-	 * initialize(), which a later change could do without noticing what it costs.
+	 * servlet. FhirR3RestServlet keeps that by inheriting initialize(), so an override added there
+	 * later would drop contributed interceptors from the R3 API; this fails if one does.
 	 */
 	@Test
 	public void initialize_shouldRegisterTheContributedInterceptorOnTheR3ServletToo() throws ServletException {
