@@ -102,6 +102,8 @@ public class FhirRestServletTest {
 			context.close();
 			context = null;
 		}
+		// static, and every test in this module shares one JVM
+		InterceptorWatchingProvider.watch(null);
 	}
 	
 	@Test
@@ -205,11 +207,12 @@ public class FhirRestServletTest {
 	}
 	
 	/**
-	 * The servlet keeps answering requests all through a refresh, and RequireAuthenticationInterceptor
-	 * is the only thing that rejects an unauthenticated FHIR request -- AuthenticationFilter never
-	 * stops the chain itself. So the registry must not be left empty while refreshed() rebuilds the
-	 * providers, which runs every other module's provider constructors and reads two global properties
-	 * from the database. This provider reports what was registered at the moment it was built.
+	 * The servlet keeps answering requests all through a refresh, and a request carrying no credentials
+	 * passes straight through AuthenticationFilter -- which only rejects one whose Basic credentials
+	 * fail -- so RequireAuthenticationInterceptor is what rejects it. The registry must not be left
+	 * empty while refreshed() rebuilds the providers, which runs every other module's provider
+	 * constructors and reads two global properties from the database. This provider reports what was
+	 * registered when it was built.
 	 */
 	@Test
 	public void refreshed_shouldKeepInterceptorsRegisteredWhileTheProvidersAreRebuilt() throws ServletException {

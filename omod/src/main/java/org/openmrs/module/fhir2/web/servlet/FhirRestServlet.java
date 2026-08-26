@@ -173,15 +173,22 @@ public class FhirRestServlet extends RestfulServer implements ModuleLifecycleLis
 	 * application context annotated {@link FhirInterceptor}, which is how a module other than this one
 	 * contributes a cross-cutting concern.
 	 * <p>
-	 * A contributed bean that cannot be supplied is deliberately not caught, and where that lands
-	 * differs by path: from {@link #initialize()} the servlet is never registered and the FHIR API is
-	 * unavailable until the module is restarted, reported as a module startup error; from
-	 * {@link #refreshed()} OpenMRS logs it at WARN and both servlets keep serving without the
-	 * contributed interceptors, skipping any listener the activator had still to call.
+	 * A contributed bean that cannot be supplied is deliberately not caught, and the blast radius is
+	 * very different on the two paths. From {@link #initialize()} at server startup the
+	 * {@code ModuleException} escapes {@code Listener.performWebStartOfModules}, whose tail loop is
+	 * unguarded, and aborts the whole OpenMRS boot -- not just this module. From {@link #refreshed()}
+	 * OpenMRS logs it at WARN and carries on: the servlet that threw keeps serving with the built-ins
+	 * and no contributed interceptors, while every listener after it is skipped, so the other servlet
+	 * is left un-refreshed and still holding the previous context's providers and interceptors. Only a
+	 * bean whose creation is deferred past the context refresh -- lazy, prototype or scoped -- reaches
+	 * either path; a plain singleton fails the refresh itself, first.
 	 */
 	protected void registerInterceptors() {
-		registerInterceptor(loggingInterceptor);
+		// first, so the window in refreshed() between tearing the registry down and building it back up
+		// is as short as it can be made: everything after this line is registered with authentication
+		// already in place
 		registerInterceptor(new RequireAuthenticationInterceptor());
+		registerInterceptor(loggingInterceptor);
 		registerInterceptor(new DisableCacheInterceptor());
 		registerInterceptor(new SummaryInterceptor());
 		registerInterceptor(new SupportMergePatchInterceptor());
@@ -294,15 +301,18 @@ public class FhirRestServlet extends RestfulServer implements ModuleLifecycleLis
 				
 				administrationService.addGlobalPropertyListener(fhirRestServletListener);
 				
-				// Unregister and re-register together, and last. Together because the servlet keeps serving
-				// throughout a refresh, and RequireAuthenticationInterceptor is the only thing that rejects
-				// an unauthenticated FHIR request -- AuthenticationFilter deliberately never stops the
-				// chain -- so any work between the two leaves a window where requests are answered with no
-				// authentication at all. Last because this is where another module's code runs: a
-				// contributed bean whose creation was deferred past the context refresh can throw, and
-				// everything above has to have happened by then or the servlet is left bound to the
-				// context just closed. During the provider lookup above, the previous refresh's
-				// interceptors are still in place.
+				// Unregister and re-register adjacently, and last. Adjacently because the servlet goes on
+				// serving requests throughout a refresh, and a request carrying no credentials at all
+				// passes straight through AuthenticationFilter -- which only rejects one whose Basic
+				// credentials fail -- leaving RequireAuthenticationInterceptor as the thing that rejects
+				// it. Work between the teardown and the rebuild is therefore served with no authentication
+				// at all. Adjacency narrows that window to these two statements rather than closing it;
+				// what it removes is the provider rebuild and two uncached global-property reads. Last
+				// because this is where another module's code runs: a contributed bean whose creation was
+				// deferred past the context refresh can throw, and everything above has to have happened
+				// by then or the servlet is left bound to the context just closed. Through the provider
+				// rebuild above, the interceptors from the previous initialize() or refreshed() are still
+				// in place.
 				getInterceptorService().unregisterAllInterceptors();
 				registerInterceptors();
 			}
