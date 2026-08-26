@@ -175,9 +175,10 @@ public class FhirRestServlet extends RestfulServer implements ModuleLifecycleLis
 	 * this way; interceptors were not, and could not be added from outside at all, because
 	 * {@link #refreshed()} unregisters every interceptor and runs whenever any module starts or stops.
 	 * <p>
-	 * A contributed bean that cannot be supplied is left to fail rather than skipped. Skipping would
-	 * leave the FHIR API answering requests with an authorization or audit interceptor quietly missing,
-	 * which is worse than a startup failure naming the bean.
+	 * A contributed bean that cannot be supplied is left to fail rather than skipped: swallowing it
+	 * would leave the FHIR API answering requests with an authorization or audit interceptor quietly
+	 * missing. What OpenMRS then does with the failure differs by path, so this does not promise a
+	 * particular outcome -- on the refresh path the module loader catches it and logs a warning.
 	 */
 	protected void registerInterceptors() {
 		registerInterceptor(loggingInterceptor);

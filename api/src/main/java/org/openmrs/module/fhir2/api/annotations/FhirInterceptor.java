@@ -32,10 +32,12 @@ import org.springframework.beans.factory.annotation.Qualifier;
  * "Interceptor registered with no valid hooks" and continuing, so an annotated bean without hooks
  * is absent from the request path with nothing but a warning to say so.
  * <p>
- * Beans found here are registered after the interceptors this module owns, so authentication has
- * already run. Order among contributed interceptors is HAPI's own, from
- * {@code Interceptor(order = ...)}. They are registered on every version-specific servlet, so an
- * interceptor meant for one FHIR version should check the version it is handed.
+ * Beans found here are registered after the interceptors this module owns, but registration order
+ * is only HAPI's tie-break. On any one hook it sorts by {@code Interceptor(order = ...)} first, and
+ * every interceptor this module owns leaves that at its default of 0 -- so a contributed bean
+ * declaring a negative order runs before them on the hooks it shares with them, authentication
+ * among those. They are registered on every version-specific servlet, so an interceptor meant for
+ * one FHIR version should check the version it is handed.
  */
 @Target({ ElementType.CONSTRUCTOR, ElementType.FIELD, ElementType.METHOD, ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
