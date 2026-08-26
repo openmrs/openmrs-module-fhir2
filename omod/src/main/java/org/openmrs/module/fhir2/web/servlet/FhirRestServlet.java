@@ -171,19 +171,13 @@ public class FhirRestServlet extends RestfulServer implements ModuleLifecycleLis
 	/**
 	 * Registers the interceptors this server runs with: the ones this module owns, then any bean in the
 	 * application context annotated {@link FhirInterceptor}, which is how a module other than this one
-	 * contributes a cross-cutting concern. Resource providers are already collected from the context
-	 * this way; interceptors were not, and one added from outside did not last, because
-	 * {@link #refreshed()} unregisters every interceptor and runs whenever any module starts or stops.
+	 * contributes a cross-cutting concern.
 	 * <p>
-	 * A contributed bean that cannot be supplied is left to fail rather than skipped: swallowing it
-	 * would leave the FHIR API answering requests with an authorization or audit interceptor quietly
-	 * missing. Where that failure lands differs by path, and in opposite directions. From
-	 * {@link #initialize()} the servlet is never registered and the FHIR API is unavailable for the
-	 * life of the JVM, reported as a module startup error. From {@link #refreshed()} OpenMRS logs
-	 * "Unable to invoke method on the module's activator" at WARN and both servlets keep serving --
-	 * without the contributed interceptors, and without any later listener the activator had still to
-	 * call. Either way a bean that is a plain singleton fails the context refresh itself, before this
-	 * runs at all.
+	 * A contributed bean that cannot be supplied is deliberately not caught, and where that lands
+	 * differs by path: from {@link #initialize()} the servlet is never registered and the FHIR API is
+	 * unavailable until the module is restarted, reported as a module startup error; from
+	 * {@link #refreshed()} OpenMRS logs it at WARN and both servlets keep serving without the
+	 * contributed interceptors, skipping any listener the activator had still to call.
 	 */
 	protected void registerInterceptors() {
 		registerInterceptor(loggingInterceptor);

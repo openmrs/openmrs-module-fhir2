@@ -147,11 +147,10 @@ public class FhirRestServletTest {
 	}
 	
 	/**
-	 * The acceptance criterion this ticket turns on. The two {@code registerInterceptors_should...}
-	 * tests call that method directly, so they never run unregisterAllInterceptors() and cannot tell
-	 * "registered" apart from "survives being unregistered and registered again" -- which is the whole
-	 * defect. This one drives the real initialize() and then the real refreshed(), the path a module
-	 * start or stop actually takes.
+	 * The two {@code registerInterceptors_should...} tests call that method directly, so they never run
+	 * unregisterAllInterceptors() and cannot tell "registered" apart from "survives being unregistered
+	 * and registered again" -- which is the whole defect. This one drives the real initialize() and
+	 * then the real refreshed(), the path a module start or stop actually takes.
 	 */
 	@Test
 	public void refreshed_shouldStillHaveTheContributedInterceptorAfterAContextRefresh() throws ServletException {
@@ -169,10 +168,6 @@ public class FhirRestServletTest {
 		
 		refreshable.refreshed();
 		
-		// the whole registry, not just the contributed one: the built-ins have to come back too, and
-		// nothing else here would notice if one stopped being registered. The absent pre-init logging
-		// interceptor is the assertion that shows the registry was torn down -- the rebuilt one's
-		// presence passes whether unregisterAllInterceptors() ran or not.
 		List<Object> afterRefresh = refreshable.getInterceptorService().getAllRegisteredInterceptors();
 		
 		// the built-ins have to come back too, and nothing else here would notice if one stopped being
@@ -181,7 +176,7 @@ public class FhirRestServletTest {
 		assertThat(afterRefresh,
 		    hasItems(instanceOf(RequireAuthenticationInterceptor.class), instanceOf(DisableCacheInterceptor.class),
 		        instanceOf(SummaryInterceptor.class), instanceOf(SupportMergePatchInterceptor.class)));
-		assertThat(afterRefresh, hasItem(sameInstance(contributed)));
+		assertThat(afterRefresh, hasItem(contributed));
 		assertThat(afterRefresh, hasItem(sameInstance(context.getBean("hapiLoggingInterceptor", LoggingInterceptor.class))));
 		// this is the assertion that shows the registry was torn down: the rebuilt logging interceptor's
 		// presence passes whether unregisterAllInterceptors() ran or not, the pre-init one's absence does
@@ -237,9 +232,10 @@ public class FhirRestServletTest {
 	
 	/**
 	 * A context carrying the contributed interceptor plus the four beans refreshed() throws without.
-	 * The contributed one is found by its annotation, so its bean name is arbitrary; the other four are
-	 * the names and types refreshed() asks for by hand. Resource providers it resolves by type, and
-	 * none here, which is a bundle with no providers rather than a failure.
+	 * The contributed one is found by its annotation, so its bean name is arbitrary; of the other four,
+	 * refreshed() asks for hapiLoggingInterceptor and adminService by name and the remaining two by
+	 * type. Resource providers it resolves by type, and none here, which is a bundle with no providers
+	 * rather than a failure.
 	 */
 	private ContributedInterceptor withRefreshableContext() {
 		ContributedInterceptor contributed = withContextContaining("contributed", ContributedInterceptor.class);
@@ -284,11 +280,6 @@ public class FhirRestServletTest {
 		}
 	}
 	
-	/**
-	 * Carries a real hook because HAPI refuses an interceptor that has none: it logs "Interceptor
-	 * registered with no valid hooks" and moves on, so a bean annotated but hookless is silently absent
-	 * from the request path.
-	 */
 	@FhirInterceptor
 	public static class ContributedInterceptor {
 		
