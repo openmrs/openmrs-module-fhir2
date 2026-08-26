@@ -28,12 +28,16 @@ import javax.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
 
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.IServerAddressStrategy;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Patient;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -206,6 +210,32 @@ public class FhirRestServletTest {
 	}
 	
 	/**
+	 * The servlet keeps answering requests all through a refresh, and RequireAuthenticationInterceptor
+	 * is the only thing that rejects an unauthenticated FHIR request -- AuthenticationFilter never
+	 * stops the chain itself. So the registry must not be left empty while refreshed() rebuilds the
+	 * providers, which runs every other module's provider constructors and reads two global properties
+	 * from the database. This provider reports what was registered at the moment it was built.
+	 */
+	@Test
+	public void refreshed_shouldKeepInterceptorsRegisteredWhileTheProvidersAreRebuilt() throws ServletException {
+		withRefreshableContext();
+		context.registerBeanDefinition("interceptorWatchingProvider",
+		    BeanDefinitionBuilder.genericBeanDefinition(InterceptorWatchingProvider.class).getBeanDefinition());
+		
+		R4ServletWithTestContext refreshable = new R4ServletWithTestContext();
+		refreshable.setGlobalPropertyService(globalPropertyService);
+		refreshable.setLoggingInterceptor(new LoggingInterceptor());
+		refreshable.setMessageSource(new StaticMessageSource());
+		refreshable.init(mockServletConfig);
+		
+		InterceptorWatchingProvider.watch(refreshable);
+		refreshable.refreshed();
+		
+		assertThat(InterceptorWatchingProvider.seenWhileBeingBuilt,
+		    hasItem(instanceOf(RequireAuthenticationInterceptor.class)));
+	}
+	
+	/**
 	 * A context carrying the contributed interceptor plus the four beans refreshed() throws without.
 	 * The contributed one is found by its annotation, so its bean name is arbitrary; the other four are
 	 * the names and types refreshed() asks for by hand. Resource providers it resolves by type, and
@@ -225,6 +255,33 @@ public class FhirRestServletTest {
 		context.registerBeanDefinition(beanName, BeanDefinitionBuilder.genericBeanDefinition(beanClass).getBeanDefinition());
 		context.refresh();
 		return context.getBean(beanName, beanClass);
+	}
+	
+	/**
+	 * Records the servlet's interceptor registry from its own constructor, which refreshed() runs while
+	 * it is rebuilding the resource providers. Static because Spring, not the test, constructs it.
+	 */
+	public static class InterceptorWatchingProvider implements IResourceProvider {
+		
+		private static FhirRestServlet watched;
+		
+		static List<Object> seenWhileBeingBuilt;
+		
+		static void watch(FhirRestServlet servlet) {
+			watched = servlet;
+			seenWhileBeingBuilt = null;
+		}
+		
+		public InterceptorWatchingProvider() {
+			if (watched != null) {
+				seenWhileBeingBuilt = new ArrayList<>(watched.getInterceptorService().getAllRegisteredInterceptors());
+			}
+		}
+		
+		@Override
+		public Class<? extends IBaseResource> getResourceType() {
+			return Patient.class;
+		}
 	}
 	
 	/**

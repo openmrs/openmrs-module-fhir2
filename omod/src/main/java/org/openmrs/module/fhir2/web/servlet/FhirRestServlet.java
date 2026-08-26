@@ -283,8 +283,6 @@ public class FhirRestServlet extends RestfulServer implements ModuleLifecycleLis
 		if (started) {
 			final ConfigurableApplicationContext ctx = getModuleApplicationContext();
 			if (ctx != null) {
-				getInterceptorService().unregisterAllInterceptors();
-				
 				unregisterAllProviders();
 				
 				// load the resource providers from the Spring context
@@ -302,10 +300,16 @@ public class FhirRestServlet extends RestfulServer implements ModuleLifecycleLis
 				
 				administrationService.addGlobalPropertyListener(fhirRestServletListener);
 				
-				// last, because a contributed bean whose creation was deferred past the context refresh can
-				// throw here, and everything above has to have happened by then or the servlet is left
-				// bound to the context just closed. The provider lookup above runs other modules' code too,
-				// but moving that is FM2-163's business, not this change's.
+				// Unregister and re-register together, and last. Together because the servlet keeps serving
+				// throughout a refresh, and RequireAuthenticationInterceptor is the only thing that rejects
+				// an unauthenticated FHIR request -- AuthenticationFilter deliberately never stops the
+				// chain -- so any work between the two leaves a window where requests are answered with no
+				// authentication at all. Last because this is where another module's code runs: a
+				// contributed bean whose creation was deferred past the context refresh can throw, and
+				// everything above has to have happened by then or the servlet is left bound to the
+				// context just closed. During the provider lookup above, the previous refresh's
+				// interceptors are still in place.
+				getInterceptorService().unregisterAllInterceptors();
 				registerInterceptors();
 			}
 		}
