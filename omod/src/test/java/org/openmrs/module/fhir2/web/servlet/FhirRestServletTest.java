@@ -186,8 +186,8 @@ public class FhirRestServletTest {
 	
 	/**
 	 * A context carrying the contributed interceptor plus every bean refreshed() resolves by name or by
-	 * type. The names are the ones the servlet asks for; a rename here reads as the interceptor being
-	 * lost rather than as the bean being missing.
+	 * type. The contributed one is found by its annotation, so its bean name is arbitrary; the other
+	 * four are the names and types refreshed() asks for by hand.
 	 */
 	private ContributedInterceptor withRefreshableContext() {
 		context = new GenericApplicationContext();
