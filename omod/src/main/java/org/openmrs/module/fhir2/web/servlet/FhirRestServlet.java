@@ -173,15 +173,9 @@ public class FhirRestServlet extends RestfulServer implements ModuleLifecycleLis
 	 * application context annotated {@link FhirInterceptor}, which is how a module other than this one
 	 * contributes a cross-cutting concern.
 	 * <p>
-	 * A contributed bean that cannot be supplied is deliberately not caught, and the blast radius is
-	 * very different on the two paths. From {@link #initialize()} at server startup the
-	 * {@code ModuleException} escapes {@code Listener.performWebStartOfModules}, whose tail loop is
-	 * unguarded, and aborts the whole OpenMRS boot -- not just this module. From {@link #refreshed()}
-	 * OpenMRS logs it at WARN and carries on: the servlet that threw keeps serving with the built-ins
-	 * and no contributed interceptors, while every listener after it is skipped, so the other servlet
-	 * is left un-refreshed and still holding the previous context's providers and interceptors. Only a
-	 * bean whose creation is deferred past the context refresh -- lazy, prototype or scoped -- reaches
-	 * either path; a plain singleton fails the refresh itself, first.
+	 * A contributed bean that cannot be supplied is deliberately not caught. Worth knowing before
+	 * relying on that: from {@link #initialize()} at server startup the exception aborts the whole
+	 * OpenMRS boot, not just this module.
 	 */
 	protected void registerInterceptors() {
 		// first, so the window in refreshed() between tearing the registry down and building it back up
@@ -301,18 +295,10 @@ public class FhirRestServlet extends RestfulServer implements ModuleLifecycleLis
 				
 				administrationService.addGlobalPropertyListener(fhirRestServletListener);
 				
-				// Unregister and re-register adjacently, and last. Adjacently because the servlet goes on
-				// serving requests throughout a refresh, and a request carrying no credentials at all
-				// passes straight through AuthenticationFilter -- which only rejects one whose Basic
-				// credentials fail -- leaving RequireAuthenticationInterceptor as the thing that rejects
-				// it. Work between the teardown and the rebuild is therefore served with no authentication
-				// at all. Adjacency narrows that window to these two statements rather than closing it;
-				// what it removes is the provider rebuild and two uncached global-property reads. Last
-				// because this is where another module's code runs: a contributed bean whose creation was
-				// deferred past the context refresh can throw, and everything above has to have happened
-				// by then or the servlet is left bound to the context just closed. Through the provider
-				// rebuild above, the interceptors from the previous initialize() or refreshed() are still
-				// in place.
+				// Keep these two adjacent: the servlet goes on serving through a refresh, and a request
+				// arriving between them is answered with no interceptors, RequireAuthenticationInterceptor
+				// among them. And keep them last: this is where another module's code runs, so a throw
+				// here must not leave the re-wiring above half done.
 				getInterceptorService().unregisterAllInterceptors();
 				registerInterceptors();
 			}
