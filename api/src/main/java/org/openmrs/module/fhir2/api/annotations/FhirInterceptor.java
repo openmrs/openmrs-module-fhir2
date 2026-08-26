@@ -29,8 +29,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
  * silently stopped.
  * <p>
  * The bean must carry at least one {@code Hook} method. HAPI refuses one that does not, logging
- * "Interceptor registered with no valid hooks" and continuing, so an annotated bean without hooks is
- * absent from the request path with nothing but a warning to say so.
+ * "Interceptor registered with no valid hooks" and continuing, so an annotated bean without hooks
+ * is absent from the request path with nothing but a warning to say so.
  * <p>
  * Beans found here are registered after the interceptors this module owns, so authentication has
  * already run. Order among contributed interceptors is HAPI's own, from

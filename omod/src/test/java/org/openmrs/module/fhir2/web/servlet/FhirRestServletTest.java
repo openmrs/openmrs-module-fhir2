@@ -11,6 +11,7 @@ package org.openmrs.module.fhir2.web.servlet;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -27,15 +28,22 @@ import java.io.PrintWriter;
 
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.rest.server.IServerAddressStrategy;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.openmrs.api.AdministrationService;
+import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.annotations.FhirInterceptor;
+import org.openmrs.module.fhir2.web.authentication.RequireAuthenticationInterceptor;
 import org.openmrs.util.OpenmrsClassLoader;
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.context.support.StaticMessageSource;
 
 public class FhirRestServletTest {
 	
@@ -51,6 +59,9 @@ public class FhirRestServletTest {
 	@Mock
 	private PrintWriter mockWriter;
 	
+	@Mock
+	private FhirGlobalPropertyService globalPropertyService;
+	
 	private TestableFhirRestServlet servlet;
 	
 	private GenericApplicationContext context;
@@ -63,6 +74,13 @@ public class FhirRestServletTest {
 		
 		when(mockServletConfig.getServletContext()).thenReturn(mock(javax.servlet.ServletContext.class));
 		when(mockResponse.getWriter()).thenReturn(mockWriter);
+		
+		// the page sizes the module ships with; the paging provider rejects a size of zero, which is what
+		// an unstubbed mock would hand it
+		when(globalPropertyService.getGlobalPropertyAsInteger(FhirConstants.OPENMRS_FHIR_DEFAULT_PAGE_SIZE, 10))
+		        .thenReturn(10);
+		when(globalPropertyService.getGlobalPropertyAsInteger(FhirConstants.OPENMRS_FHIR_MAXIMUM_PAGE_SIZE, 100))
+		        .thenReturn(100);
 		
 		servlet.init(mockServletConfig);
 	}
@@ -117,6 +135,51 @@ public class FhirRestServletTest {
 		assertThat(servlet.getInterceptorService().getAllRegisteredInterceptors(), not(hasItem(ignored)));
 	}
 	
+	/**
+	 * The acceptance criterion this ticket turns on. The two tests above call registerInterceptors()
+	 * directly, so they never run unregisterAllInterceptors() and cannot tell "registered" apart from
+	 * "survives being unregistered and registered again" -- which is the whole defect. This one drives
+	 * the real initialize() and then the real refreshed(), the path a module start or stop actually
+	 * takes.
+	 */
+	@Test
+	public void refreshed_shouldStillHaveTheContributedInterceptorAfterAContextRefresh() throws ServletException {
+		ContributedInterceptor contributed = withRefreshableContext();
+		
+		RefreshableFhirRestServlet refreshable = new RefreshableFhirRestServlet();
+		refreshable.setGlobalPropertyService(globalPropertyService);
+		refreshable.setLoggingInterceptor(new LoggingInterceptor());
+		refreshable.setMessageSource(new StaticMessageSource());
+		refreshable.init(mockServletConfig);
+		
+		assertThat(refreshable.getInterceptorService().getAllRegisteredInterceptors(), hasItem(contributed));
+		
+		refreshable.refreshed();
+		
+		assertThat(refreshable.getInterceptorService().getAllRegisteredInterceptors(), hasItem(contributed));
+		// the built-ins coming back is what shows the unregister-and-re-register cycle really ran, rather
+		// than the contributed one having simply never been removed
+		assertThat(refreshable.getInterceptorService().getAllRegisteredInterceptors(),
+		    hasItem(instanceOf(RequireAuthenticationInterceptor.class)));
+	}
+	
+	/**
+	 * A context carrying the contributed interceptor plus every bean refreshed() resolves by name or by
+	 * type. The names are the ones the servlet asks for; a rename here reads as the interceptor being
+	 * lost rather than as the bean being missing.
+	 */
+	private ContributedInterceptor withRefreshableContext() {
+		context = new GenericApplicationContext();
+		context.registerBeanDefinition("contributed",
+		    BeanDefinitionBuilder.genericBeanDefinition(ContributedInterceptor.class).getBeanDefinition());
+		context.getBeanFactory().registerSingleton("hapiLoggingInterceptor", new LoggingInterceptor());
+		context.getBeanFactory().registerSingleton("adminService", mock(AdministrationService.class));
+		context.getBeanFactory().registerSingleton("fhirGlobalPropertyService", globalPropertyService);
+		context.getBeanFactory().registerSingleton("serverAddressStrategy", mock(IServerAddressStrategy.class));
+		context.refresh();
+		return context.getBean("contributed", ContributedInterceptor.class);
+	}
+	
 	private <T> T withContextContaining(String beanName, Class<T> beanClass) {
 		context = new GenericApplicationContext();
 		context.registerBeanDefinition(beanName, org.springframework.beans.factory.support.BeanDefinitionBuilder
@@ -144,6 +207,18 @@ public class FhirRestServletTest {
 		@Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_PROCESSED)
 		public boolean incomingRequest(HttpServletRequest request, HttpServletResponse response) {
 			return true;
+		}
+	}
+	
+	/**
+	 * Unlike {@link TestableFhirRestServlet} this leaves initialize() alone, because refreshed() does
+	 * nothing until initialize() has set the servlet started.
+	 */
+	class RefreshableFhirRestServlet extends FhirRestServlet {
+		
+		@Override
+		protected GenericApplicationContext getModuleApplicationContext() {
+			return context;
 		}
 	}
 	
