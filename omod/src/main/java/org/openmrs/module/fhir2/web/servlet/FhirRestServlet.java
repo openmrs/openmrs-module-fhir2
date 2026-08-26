@@ -177,8 +177,13 @@ public class FhirRestServlet extends RestfulServer implements ModuleLifecycleLis
 	 * <p>
 	 * A contributed bean that cannot be supplied is left to fail rather than skipped: swallowing it
 	 * would leave the FHIR API answering requests with an authorization or audit interceptor quietly
-	 * missing. What OpenMRS then does with the failure differs by path, so this does not promise a
-	 * particular outcome -- on the refresh path the module loader catches it and logs a warning.
+	 * missing. Where that failure lands differs by path, and in opposite directions. From
+	 * {@link #initialize()} the servlet is never registered and the FHIR API is unavailable for the
+	 * life of the JVM, reported as a module startup error. From {@link #refreshed()} OpenMRS logs
+	 * "Unable to invoke method on the module's activator" at WARN and both servlets keep serving --
+	 * without the contributed interceptors, and without any later listener the activator had still to
+	 * call. Either way a bean that is a plain singleton fails the context refresh itself, before this
+	 * runs at all.
 	 */
 	protected void registerInterceptors() {
 		registerInterceptor(loggingInterceptor);
@@ -199,9 +204,6 @@ public class FhirRestServlet extends RestfulServer implements ModuleLifecycleLis
 	 * in the module and cannot be put back: {@code FhirActivator.setApplicationContext} assigns only
 	 * when handed a {@link ConfigurableApplicationContext}, so passing null leaves the previous value
 	 * in place.
-	 * <p>
-	 * {@link #autoInject()} still reads the static directly. It runs before the servlet is started and
-	 * is not on the refresh path, so overriding this does not redirect it.
 	 */
 	protected ConfigurableApplicationContext getModuleApplicationContext() {
 		return FhirActivator.getApplicationContext();
@@ -261,7 +263,7 @@ public class FhirRestServlet extends RestfulServer implements ModuleLifecycleLis
 	}
 	
 	protected void autoInject() {
-		final ConfigurableApplicationContext ctx = FhirActivator.getApplicationContext();
+		final ConfigurableApplicationContext ctx = getModuleApplicationContext();
 		if (ctx != null) {
 			AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 			bpp.setBeanFactory(ctx.getAutowireCapableBeanFactory());
@@ -293,14 +295,18 @@ public class FhirRestServlet extends RestfulServer implements ModuleLifecycleLis
 				        .collect(Collectors.toList()));
 				
 				setLoggingInterceptor(ctx.getBean("hapiLoggingInterceptor", LoggingInterceptor.class));
-				registerInterceptors();
-				
 				setAdministrationService(ctx.getBean("adminService", AdministrationService.class));
 				setGlobalPropertyService(ctx.getBean(FhirGlobalPropertyService.class));
 				setServerAddressStrategy(ctx.getBean(IServerAddressStrategy.class));
 				setPagingProvider(createPagingProvider());
 				
 				administrationService.addGlobalPropertyListener(fhirRestServletListener);
+				
+				// last, because a contributed bean whose creation was deferred past the context refresh can
+				// throw here, and everything above has to have happened by then or the servlet is left
+				// bound to the context just closed. The provider lookup above runs other modules' code too,
+				// but moving that is FM2-163's business, not this change's.
+				registerInterceptors();
 			}
 		}
 	}

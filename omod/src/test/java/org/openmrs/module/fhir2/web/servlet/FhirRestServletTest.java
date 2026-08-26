@@ -11,7 +11,11 @@ package org.openmrs.module.fhir2.web.servlet;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.mock;
@@ -24,6 +28,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.List;
 
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -38,6 +43,10 @@ import org.openmrs.api.AdministrationService;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.annotations.FhirInterceptor;
+import org.openmrs.module.fhir2.web.authentication.RequireAuthenticationInterceptor;
+import org.openmrs.module.fhir2.web.util.DisableCacheInterceptor;
+import org.openmrs.module.fhir2.web.util.SummaryInterceptor;
+import org.openmrs.module.fhir2.web.util.SupportMergePatchInterceptor;
 import org.openmrs.util.OpenmrsClassLoader;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.context.support.GenericApplicationContext;
@@ -146,7 +155,7 @@ public class FhirRestServletTest {
 		
 		LoggingInterceptor loggingInterceptorBeforeInit = new LoggingInterceptor();
 		
-		RefreshableFhirRestServlet refreshable = new RefreshableFhirRestServlet();
+		R4ServletWithTestContext refreshable = new R4ServletWithTestContext();
 		refreshable.setGlobalPropertyService(globalPropertyService);
 		refreshable.setLoggingInterceptor(loggingInterceptorBeforeInit);
 		refreshable.setMessageSource(new StaticMessageSource());
@@ -156,14 +165,26 @@ public class FhirRestServletTest {
 		
 		refreshable.refreshed();
 		
-		assertThat(refreshable.getInterceptorService().getAllRegisteredInterceptors(), hasItem(contributed));
-		// the rebuilt context's logging interceptor is what shows the registry was actually torn down and
-		// rebuilt. The built-ins alone would not: had unregisterAllInterceptors() never run they would
-		// still be there from initialize(), so their presence tells the two cases apart not at all.
-		assertThat(refreshable.getInterceptorService().getAllRegisteredInterceptors(),
-		    hasItem(context.getBean("hapiLoggingInterceptor", LoggingInterceptor.class)));
-		assertThat(refreshable.getInterceptorService().getAllRegisteredInterceptors(),
-		    not(hasItem(loggingInterceptorBeforeInit)));
+		// the whole registry, not just the contributed one: the built-ins have to come back too, and
+		// nothing else here would notice if one stopped being registered. The absent pre-init logging
+		// interceptor is the assertion that shows the registry was torn down -- the rebuilt one's
+		// presence passes whether unregisterAllInterceptors() ran or not.
+		List<Object> afterRefresh = refreshable.getInterceptorService().getAllRegisteredInterceptors();
+		
+		// the built-ins have to come back too, and nothing else here would notice if one stopped being
+		// registered -- deleting RequireAuthenticationInterceptor from registerInterceptors() left this
+		// file green when the only assertion was about the contributed one
+		assertThat(afterRefresh,
+		    hasItems(instanceOf(RequireAuthenticationInterceptor.class), instanceOf(DisableCacheInterceptor.class),
+		        instanceOf(SummaryInterceptor.class), instanceOf(SupportMergePatchInterceptor.class)));
+		assertThat(afterRefresh, hasItem(sameInstance(contributed)));
+		assertThat(afterRefresh, hasItem(sameInstance(context.getBean("hapiLoggingInterceptor", LoggingInterceptor.class))));
+		// this is the assertion that shows the registry was torn down: the rebuilt logging interceptor's
+		// presence passes whether unregisterAllInterceptors() ran or not, the pre-init one's absence does
+		// not
+		assertThat(afterRefresh, not(hasItem(sameInstance(loggingInterceptorBeforeInit))));
+		// and nothing else, so a duplicate or a stray registration is caught rather than ignored
+		assertThat(afterRefresh, hasSize(6));
 	}
 	
 	/**
@@ -175,7 +196,7 @@ public class FhirRestServletTest {
 	public void initialize_shouldRegisterTheContributedInterceptorOnTheR3ServletToo() throws ServletException {
 		ContributedInterceptor contributed = withContextContaining("contributed", ContributedInterceptor.class);
 		
-		R3ServletReadingTheTestContext r3 = new R3ServletReadingTheTestContext();
+		R3ServletWithTestContext r3 = new R3ServletWithTestContext();
 		r3.setGlobalPropertyService(globalPropertyService);
 		r3.setLoggingInterceptor(new LoggingInterceptor());
 		r3.setMessageSource(new StaticMessageSource());
@@ -191,15 +212,12 @@ public class FhirRestServletTest {
 	 * none here, which is a bundle with no providers rather than a failure.
 	 */
 	private ContributedInterceptor withRefreshableContext() {
-		context = new GenericApplicationContext();
-		context.registerBeanDefinition("contributed",
-		    BeanDefinitionBuilder.genericBeanDefinition(ContributedInterceptor.class).getBeanDefinition());
+		ContributedInterceptor contributed = withContextContaining("contributed", ContributedInterceptor.class);
 		context.getBeanFactory().registerSingleton("hapiLoggingInterceptor", new LoggingInterceptor());
 		context.getBeanFactory().registerSingleton("adminService", mock(AdministrationService.class));
 		context.getBeanFactory().registerSingleton("fhirGlobalPropertyService", globalPropertyService);
 		context.getBeanFactory().registerSingleton("serverAddressStrategy", mock(IServerAddressStrategy.class));
-		context.refresh();
-		return context.getBean("contributed", ContributedInterceptor.class);
+		return contributed;
 	}
 	
 	private <T> T withContextContaining(String beanName, Class<T> beanClass) {
@@ -231,7 +249,7 @@ public class FhirRestServletTest {
 		}
 	}
 	
-	class R3ServletReadingTheTestContext extends FhirR3RestServlet {
+	class R3ServletWithTestContext extends FhirR3RestServlet {
 		
 		@Override
 		protected GenericApplicationContext getModuleApplicationContext() {
@@ -243,7 +261,7 @@ public class FhirRestServletTest {
 	 * Unlike {@link TestableFhirRestServlet} this leaves initialize() alone, because refreshed() does
 	 * nothing until initialize() has set the servlet started.
 	 */
-	class RefreshableFhirRestServlet extends FhirRestServlet {
+	class R4ServletWithTestContext extends FhirRestServlet {
 		
 		@Override
 		protected GenericApplicationContext getModuleApplicationContext() {
