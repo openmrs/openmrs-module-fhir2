@@ -172,7 +172,7 @@ public class FhirRestServlet extends RestfulServer implements ModuleLifecycleLis
 	 * Registers the interceptors this server runs with: the ones this module owns, then any bean in the
 	 * application context annotated {@link FhirInterceptor}, which is how a module other than this one
 	 * contributes a cross-cutting concern. Resource providers are already collected from the context
-	 * this way; interceptors were not, and could not be added from outside at all, because
+	 * this way; interceptors were not, and one added from outside did not last, because
 	 * {@link #refreshed()} unregisters every interceptor and runs whenever any module starts or stops.
 	 * <p>
 	 * A contributed bean that cannot be supplied is left to fail rather than skipped: swallowing it

@@ -23,10 +23,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
  * audit, consent. The bean carries HAPI's own {@code Hook} methods; this annotation only says it
  * should be picked up, in the way {@link R4Provider} says so for a resource provider.
  * <p>
- * Registering one from outside was not previously possible. The servlet unregisters every
- * interceptor when the module context refreshes, and that happens whenever any OpenMRS module
- * starts or stops, so an interceptor added at runtime worked until the next module event and then
- * silently stopped.
+ * Registering one from outside used not to last. The servlet unregisters every interceptor when the
+ * module context refreshes, and that happens whenever any OpenMRS module starts or stops, so an
+ * interceptor added at runtime worked until the next module event and then silently stopped.
  * <p>
  * The bean must carry at least one {@code Hook} method. HAPI refuses one that does not, logging
  * "Interceptor registered with no valid hooks" and continuing, so an annotated bean without hooks
