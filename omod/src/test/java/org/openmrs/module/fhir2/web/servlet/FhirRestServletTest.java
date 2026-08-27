@@ -86,7 +86,7 @@ public class FhirRestServletTest {
 		when(mockServletConfig.getServletContext()).thenReturn(mock(javax.servlet.ServletContext.class));
 		when(mockResponse.getWriter()).thenReturn(mockWriter);
 		
-		// the shipped defaults; the paging provider rejects the zero an unstubbed mock would hand it
+		// an unstubbed mock returns 0, which BasePagingProvider rejects
 		when(globalPropertyService.getGlobalPropertyAsInteger(FhirConstants.OPENMRS_FHIR_DEFAULT_PAGE_SIZE, 10))
 		        .thenReturn(10);
 		when(globalPropertyService.getGlobalPropertyAsInteger(FhirConstants.OPENMRS_FHIR_MAXIMUM_PAGE_SIZE, 100))
@@ -101,7 +101,6 @@ public class FhirRestServletTest {
 			context.close();
 			context = null;
 		}
-		// static, and every test in this module shares one JVM
 		InterceptorWatchingProvider.watch(null);
 	}
 	
@@ -132,8 +131,8 @@ public class FhirRestServletTest {
 	}
 	
 	/**
-	 * Fails if the scan matches hook-bearing beans instead of the annotation. The fixture carries real
-	 * hooks because HAPI drops a hookless one regardless, which would pass either way.
+	 * The fixture declares a real hook: HAPI refuses a hookless interceptor anyway, so without one the
+	 * test would pass either way.
 	 */
 	@Test
 	public void registerInterceptors_shouldIgnoreAHookBearingBeanThatIsNotAnnotated() {
@@ -145,10 +144,6 @@ public class FhirRestServletTest {
 		assertThat(servlet.getInterceptorService().getAllRegisteredInterceptors(), not(hasItem(ignored)));
 	}
 	
-	/**
-	 * Not redundant with the tests that call registerInterceptors() directly: those never reach
-	 * unregisterAllInterceptors(), which is the defect. This drives initialize() then refreshed().
-	 */
 	@Test
 	public void refreshed_shouldStillHaveTheContributedInterceptorAfterAContextRefresh() throws ServletException {
 		ContributedInterceptor contributed = withRefreshableContext();
@@ -167,7 +162,6 @@ public class FhirRestServletTest {
 		
 		List<Object> afterRefresh = refreshable.getInterceptorService().getAllRegisteredInterceptors();
 		
-		// the built-ins have to come back too, and nothing else here would notice if one stopped
 		assertThat(afterRefresh,
 		    hasItems(instanceOf(RequireAuthenticationInterceptor.class), instanceOf(DisableCacheInterceptor.class),
 		        instanceOf(SummaryInterceptor.class), instanceOf(SupportMergePatchInterceptor.class)));
@@ -175,14 +169,9 @@ public class FhirRestServletTest {
 		assertThat(afterRefresh, hasItem(sameInstance(context.getBean("hapiLoggingInterceptor", LoggingInterceptor.class))));
 		// this is what shows the teardown ran; asserting the rebuilt interceptor present does not
 		assertThat(afterRefresh, not(hasItem(sameInstance(loggingInterceptorBeforeInit))));
-		// and nothing else, so a duplicate or a stray registration is caught rather than ignored
 		assertThat(afterRefresh, hasSize(6));
 	}
 	
-	/**
-	 * Fails if registerInterceptors() caches the contributed beans at initialize() rather than reading
-	 * the context each time, which drops a module that starts after this one.
-	 */
 	@Test
 	public void refreshed_shouldRegisterAContributedInterceptorThatReachedTheContextAfterInitialize()
 	        throws ServletException {
@@ -205,10 +194,6 @@ public class FhirRestServletTest {
 		assertThat(refreshable.getInterceptorService().getAllRegisteredInterceptors(), hasItem(lateComer));
 	}
 	
-	/**
-	 * Fails if FhirR3RestServlet overrides initialize(), which would drop contributed interceptors from
-	 * the R3 API.
-	 */
 	@Test
 	public void initialize_shouldRegisterTheContributedInterceptorOnTheR3ServletToo() throws ServletException {
 		ContributedInterceptor contributed = withContextContaining("contributed", ContributedInterceptor.class);
@@ -222,10 +207,6 @@ public class FhirRestServletTest {
 		assertThat(r3.getInterceptorService().getAllRegisteredInterceptors(), hasItem(contributed));
 	}
 	
-	/**
-	 * Fails if unregisterAllInterceptors() moves back before the provider rebuild, which would answer
-	 * requests unauthenticated while other modules' provider constructors run.
-	 */
 	@Test
 	public void refreshed_shouldKeepInterceptorsRegisteredWhileTheProvidersAreRebuilt() throws ServletException {
 		withRefreshableContext();
@@ -246,8 +227,8 @@ public class FhirRestServletTest {
 	}
 	
 	/**
-	 * The beans refreshed() throws without. It asks for hapiLoggingInterceptor and adminService by
-	 * name, so those two cannot be renamed here.
+	 * refreshed() looks two of these up by name, so hapiLoggingInterceptor and adminService cannot be
+	 * renamed.
 	 */
 	private ContributedInterceptor withRefreshableContext() {
 		ContributedInterceptor contributed = withContextContaining("contributed", ContributedInterceptor.class);
@@ -266,8 +247,8 @@ public class FhirRestServletTest {
 	}
 	
 	/**
-	 * Records the servlet's interceptor registry from its own constructor, which refreshed() runs while
-	 * it is rebuilding the resource providers. Static because Spring, not the test, constructs it.
+	 * Captures the interceptor registry from its constructor, which Spring runs during the provider
+	 * rebuild. Static because Spring, not the test, constructs it.
 	 */
 	public static class InterceptorWatchingProvider implements IResourceProvider {
 		
