@@ -62,6 +62,14 @@ public class TaskSearchQueryTest extends BaseFhirContextSensitiveTest {
 	
 	private static final String TASK_DATA_OWNER_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirTaskDaoImplTest_owner_data.xml";
 	
+	private static final String TASK_DATA_BARE_REFERENCE_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirTaskDaoImplTest_bare_reference_data.xml";
+	
+	private static final String BARE_REFERENCE_TASK_UUID = "2ba49b19-6d51-4de9-8bb0-b2d3c86ab0a8";
+	
+	private static final String BARE_REFERENCE_ORDER_UUID = "6d0ae116-707a-4629-9850-f15206e63ab0";
+	
+	private static final String BARE_REFERENCE_PRACTITIONER_UUID = "8f1a6b47-1f0d-4a5e-8f36-3f5f2c9a4d21";
+	
 	private static final String TASK_UUID = "d899333c-5bd4-45cc-b1e7-2f9542dbcbf6";
 	
 	private static final String INPROGRESS_TASK_UUID = "b3c9f4a7-44dc-4b29-adfd-a8b297a41f44";
@@ -183,6 +191,49 @@ public class TaskSearchQueryTest extends BaseFhirContextSensitiveTest {
 		assertThat(((Task) resultList.iterator().next()).getIdElement().getIdPart(), equalTo(BASED_ON_TASK_UUID));
 	}
 	
+	/**
+	 * A reference whose id is stored without a "Type/" prefix - the shape written whenever a client
+	 * sends Reference.type alongside a bare resource id - leaves fhir_reference.target_uuid unset.
+	 * Searching by such a reference must still find the Task. See FM2-700.
+	 */
+	@Test
+	public void searchForTasks_shouldReturnTasksByBasedOnWhenTheStoredReferenceHasNoResourceTypePrefix() throws Exception {
+		executeDataSet(TASK_DATA_BARE_REFERENCE_XML);
+		
+		ReferenceParam basedOnReference = new ReferenceParam();
+		basedOnReference.setValue(FhirConstants.SERVICE_REQUEST + "/" + BARE_REFERENCE_ORDER_UUID);
+		
+		ReferenceAndListParam ref = new ReferenceAndListParam().addAnd(new ReferenceOrListParam().add(basedOnReference));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.BASED_ON_REFERENCE_SEARCH_HANDLER,
+		    ref);
+		
+		List<IBaseResource> resultList = get(search(theParams));
+		
+		assertThat(resultList, hasSize(equalTo(1)));
+		assertThat(((Task) resultList.iterator().next()).getIdElement().getIdPart(), equalTo(BARE_REFERENCE_TASK_UUID));
+	}
+	
+	/**
+	 * A bare id carries no resource type of its own, so the stored target_type is the only thing that
+	 * scopes it. Searching the same id under a different type must not match. See FM2-700.
+	 */
+	@Test
+	public void searchForTasks_shouldNotReturnTasksWhenABareReferenceIdIsSearchedUnderAnotherResourceType()
+	        throws Exception {
+		executeDataSet(TASK_DATA_BARE_REFERENCE_XML);
+		
+		ReferenceParam wrongType = new ReferenceParam();
+		wrongType.setValue(FhirConstants.PATIENT + "/" + BARE_REFERENCE_ORDER_UUID);
+		
+		ReferenceAndListParam ref = new ReferenceAndListParam().addAnd(new ReferenceOrListParam().add(wrongType));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.BASED_ON_REFERENCE_SEARCH_HANDLER,
+		    ref);
+		
+		assertThat(get(search(theParams)), empty());
+	}
+	
 	@Test
 	public void getTasksByBasedOnUuid_shouldReturnTasksForMultipleBasedOnReferenceOr() {
 		ReferenceParam basedOnReference = new ReferenceParam()
@@ -221,6 +272,45 @@ public class TaskSearchQueryTest extends BaseFhirContextSensitiveTest {
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, empty());
+	}
+	
+	/**
+	 * The mirror of the bare-id case: this row has target_uuid populated, and needs the same
+	 * resource-type scoping. See FM2-700.
+	 */
+	@Test
+	public void searchForTasks_shouldNotReturnTasksWhenATargetUuidMatchIsSearchedUnderAnotherResourceType() {
+		ReferenceParam wrongType = new ReferenceParam();
+		wrongType.setValue(FhirConstants.PATIENT + "/" + BASED_ON_ORDER_UUID);
+		
+		ReferenceAndListParam ref = new ReferenceAndListParam().addAnd(new ReferenceOrListParam().add(wrongType));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.BASED_ON_REFERENCE_SEARCH_HANDLER,
+		    ref);
+		
+		assertThat(get(search(theParams)), empty());
+	}
+	
+	/**
+	 * The same storage shape reaches every reference filter, since they all share
+	 * {@code FhirTaskDaoImpl#handleReference}. See FM2-700.
+	 */
+	@Test
+	public void searchForTasks_shouldReturnTasksByOwnerWhenTheStoredReferenceHasNoResourceTypePrefix() throws Exception {
+		executeDataSet(TASK_DATA_BARE_REFERENCE_XML);
+		
+		ReferenceParam ownerReference = new ReferenceParam();
+		ownerReference.setValue(FhirConstants.PRACTITIONER + "/" + BARE_REFERENCE_PRACTITIONER_UUID);
+		
+		ReferenceAndListParam ref = new ReferenceAndListParam().addAnd(new ReferenceOrListParam().add(ownerReference));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.OWNER_REFERENCE_SEARCH_HANDLER,
+		    ref);
+		
+		List<IBaseResource> resultList = get(search(theParams));
+		
+		assertThat(resultList, hasSize(equalTo(1)));
+		assertThat(((Task) resultList.iterator().next()).getIdElement().getIdPart(), equalTo(BARE_REFERENCE_TASK_UUID));
 	}
 	
 	@Test
