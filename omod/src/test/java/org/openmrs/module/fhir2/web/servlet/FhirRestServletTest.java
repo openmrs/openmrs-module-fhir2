@@ -132,9 +132,8 @@ public class FhirRestServletTest {
 	}
 	
 	/**
-	 * Picking up an unannotated bean would put every hook-bearing bean in every module into the FHIR
-	 * request path uninvited. The fixture carries real hooks because HAPI drops a hookless interceptor
-	 * anyway, so a hookless one would pass this whether the annotation were honoured or not.
+	 * Fails if the scan matches hook-bearing beans instead of the annotation. The fixture carries real
+	 * hooks because HAPI drops a hookless one regardless, which would pass either way.
 	 */
 	@Test
 	public void registerInterceptors_shouldIgnoreAHookBearingBeanThatIsNotAnnotated() {
@@ -147,10 +146,8 @@ public class FhirRestServletTest {
 	}
 	
 	/**
-	 * The {@code registerInterceptors_should...} tests call that method directly, so they never reach
-	 * unregisterAllInterceptors() and cannot tell "registered" from "survives being unregistered and
-	 * registered again" -- the whole defect. This drives the real initialize() then the real
-	 * refreshed().
+	 * Not redundant with the tests that call registerInterceptors() directly: those never reach
+	 * unregisterAllInterceptors(), which is the defect. This drives initialize() then refreshed().
 	 */
 	@Test
 	public void refreshed_shouldStillHaveTheContributedInterceptorAfterAContextRefresh() throws ServletException {
@@ -176,17 +173,15 @@ public class FhirRestServletTest {
 		        instanceOf(SummaryInterceptor.class), instanceOf(SupportMergePatchInterceptor.class)));
 		assertThat(afterRefresh, hasItem(contributed));
 		assertThat(afterRefresh, hasItem(sameInstance(context.getBean("hapiLoggingInterceptor", LoggingInterceptor.class))));
-		// the assertion that shows the registry was torn down -- the rebuilt one's presence above passes
-		// either way
+		// this is what shows the teardown ran; asserting the rebuilt interceptor present does not
 		assertThat(afterRefresh, not(hasItem(sameInstance(loggingInterceptorBeforeInit))));
 		// and nothing else, so a duplicate or a stray registration is caught rather than ignored
 		assertThat(afterRefresh, hasSize(6));
 	}
 	
 	/**
-	 * The case FM2-698 describes: the contributing module starts after this one, so its bean reaches
-	 * the context only at the refresh. registerInterceptors() reads the context each time it runs,
-	 * rather than replaying what initialize() found, and that is what picks this bean up.
+	 * Fails if registerInterceptors() caches the contributed beans at initialize() rather than reading
+	 * the context each time, which drops a module that starts after this one.
 	 */
 	@Test
 	public void refreshed_shouldRegisterAContributedInterceptorThatReachedTheContextAfterInitialize()
@@ -211,9 +206,8 @@ public class FhirRestServletTest {
 	}
 	
 	/**
-	 * {@link FhirInterceptor} promises a module author every version-specific servlet. R3 keeps that by
-	 * inheriting initialize(), so an override added there later would drop contributed interceptors
-	 * from the R3 API.
+	 * Fails if FhirR3RestServlet overrides initialize(), which would drop contributed interceptors from
+	 * the R3 API.
 	 */
 	@Test
 	public void initialize_shouldRegisterTheContributedInterceptorOnTheR3ServletToo() throws ServletException {
@@ -229,10 +223,8 @@ public class FhirRestServletTest {
 	}
 	
 	/**
-	 * The servlet keeps answering through a refresh, and a request carrying no credentials passes
-	 * straight through AuthenticationFilter -- which rejects only a failed Basic one -- so
-	 * RequireAuthenticationInterceptor is what stops it. This provider reports the registry as it was
-	 * when refreshed() built it, in the middle of rebuilding the providers.
+	 * Fails if unregisterAllInterceptors() moves back before the provider rebuild, which would answer
+	 * requests unauthenticated while other modules' provider constructors run.
 	 */
 	@Test
 	public void refreshed_shouldKeepInterceptorsRegisteredWhileTheProvidersAreRebuilt() throws ServletException {
@@ -254,9 +246,8 @@ public class FhirRestServletTest {
 	}
 	
 	/**
-	 * The contributed interceptor plus the four beans refreshed() throws without. It finds the
-	 * contributed one by annotation, so that bean name is arbitrary; of the rest it asks for
-	 * hapiLoggingInterceptor and adminService by name, the other two by type.
+	 * The beans refreshed() throws without. It asks for hapiLoggingInterceptor and adminService by
+	 * name, so those two cannot be renamed here.
 	 */
 	private ContributedInterceptor withRefreshableContext() {
 		ContributedInterceptor contributed = withContextContaining("contributed", ContributedInterceptor.class);

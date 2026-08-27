@@ -18,24 +18,13 @@ import java.lang.annotation.Target;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 /**
- * Marks a Spring bean as a HAPI interceptor the FHIR REST servlets should register, so a module
- * other than this one can add a cross-cutting concern -- authorization, audit, consent -- in the
- * way {@link R4Provider} marks a resource provider.
+ * Marks a Spring bean as a HAPI interceptor every FHIR REST servlet registers, the way
+ * {@link R4Provider} marks a resource provider.
  * <p>
- * The bean must carry at least one {@code Hook} method: HAPI logs "Interceptor registered with no
- * valid hooks" and drops one that does not, so it is absent from the request path with only a
- * warning to say so.
+ * Carry at least one {@code Hook} method; HAPI drops an interceptor without one.
  * <p>
- * Registration order is only HAPI's tie-break -- it sorts each hook by {@code Interceptor(order)},
- * which a non-zero {@code Hook(order)} overrides per method. This module's own interceptors all
- * leave that at 0, so a contributed bean with a negative order runs ahead of them, authentication
- * included.
- * <p>
- * Every version-specific servlet registers it, so one meant for a single FHIR version must work out
- * which it is serving: {@code getFhirContext().getVersion().getVersion()} on a hook handed
- * {@code RequestDetails}, and on {@code Pointcut.SERVER_INCOMING_REQUEST_PRE_PROCESSED}, which is
- * passed only the request and the response,
- * {@code org.openmrs.module.fhir2.web.util.FhirVersionUtils.getFhirVersion(request)}.
+ * On a hook handed no {@code RequestDetails}, read the FHIR version from
+ * {@code FhirVersionUtils.getFhirVersion(request)} rather than the servlet path.
  */
 @Target({ ElementType.CONSTRUCTOR, ElementType.FIELD, ElementType.METHOD, ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)

@@ -169,14 +169,11 @@ public class FhirRestServlet extends RestfulServer implements ModuleLifecycleLis
 	//@formatter:on
 	
 	/**
-	 * Registers this module's own interceptors, then every bean annotated {@link FhirInterceptor} --
-	 * how a module other than this one contributes a cross-cutting concern.
-	 * <p>
-	 * A contributed bean that cannot be supplied is deliberately not caught, and from
-	 * {@link #initialize()} at server startup that aborts the whole OpenMRS boot, not just this module.
+	 * Registers this module's interceptors, then every bean annotated {@link FhirInterceptor}. One that
+	 * cannot be supplied is not caught, and from {@link #initialize()} aborts OpenMRS startup.
 	 */
 	protected void registerInterceptors() {
-		// first, so refreshed() rebuilds the registry with authentication in place before anything else
+		// keep first: the rebuild in refreshed() serves requests before it finishes
 		registerInterceptor(new RequireAuthenticationInterceptor());
 		registerInterceptor(loggingInterceptor);
 		registerInterceptor(new DisableCacheInterceptor());
@@ -190,9 +187,8 @@ public class FhirRestServlet extends RestfulServer implements ModuleLifecycleLis
 	}
 	
 	/**
-	 * The context {@link #registerInterceptors()} and {@link #refreshed()} read from. A test overrides
-	 * this rather than writing {@code FhirActivator}'s static, which it cannot put back afterwards --
-	 * {@code setApplicationContext} assigns only when handed a {@link ConfigurableApplicationContext}.
+	 * The context {@link #registerInterceptors()} and {@link #refreshed()} read from. Override this in
+	 * a test rather than writing {@code FhirActivator}'s static, which cannot be put back.
 	 */
 	protected ConfigurableApplicationContext getModuleApplicationContext() {
 		return FhirActivator.getApplicationContext();
@@ -289,10 +285,9 @@ public class FhirRestServlet extends RestfulServer implements ModuleLifecycleLis
 				
 				administrationService.addGlobalPropertyListener(fhirRestServletListener);
 				
-				// Adjacent: a request arriving between them is answered with no interceptors at all,
-				// RequireAuthenticationInterceptor included. Last: a contributed bean deferred past the
-				// context refresh is built here and can throw, which must not pre-empt the re-wiring above.
+				// keep adjacent to the rebuild: the gap serves requests unauthenticated
 				getInterceptorService().unregisterAllInterceptors();
+				// keep last: a contributed bean can throw here
 				registerInterceptors();
 			}
 		}
