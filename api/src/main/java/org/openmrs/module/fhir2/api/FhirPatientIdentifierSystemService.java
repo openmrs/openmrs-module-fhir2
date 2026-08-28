@@ -13,12 +13,23 @@ import javax.annotation.Nonnull;
 
 import java.util.Optional;
 
+import org.hl7.fhir.r4.model.Identifier;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.module.fhir2.model.FhirPatientIdentifierSystem;
 
 public interface FhirPatientIdentifierSystemService extends FhirHelperService {
 	
 	String getUrlByPatientIdentifierType(PatientIdentifierType patientIdentifierType);
+	
+	/**
+	 * Resolves the OpenMRS {@link PatientIdentifierType} a FHIR {@link Identifier} refers to. An
+	 * identifier carrying a {@code system} is resolved against the registered identifier-system URLs;
+	 * otherwise the identifier's {@code type.text} is treated as an identifier type name.
+	 *
+	 * @param identifier the FHIR identifier to resolve
+	 * @return the matching identifier type, or {@code null} if it cannot be resolved
+	 */
+	PatientIdentifierType getPatientIdentifierTypeByIdentifier(Identifier identifier);
 	
 	Optional<FhirPatientIdentifierSystem> getFhirPatientIdentifierSystem(@Nonnull PatientIdentifierType identifierType);
 	
