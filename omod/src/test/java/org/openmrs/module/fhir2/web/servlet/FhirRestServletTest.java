@@ -9,11 +9,14 @@
  */
 package org.openmrs.module.fhir2.web.servlet;
 
+import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.assertEquals;
@@ -31,12 +34,16 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.IServerAddressStrategy;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.After;
 import org.junit.Before;
@@ -47,6 +54,7 @@ import org.openmrs.api.AdministrationService;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.annotations.FhirInterceptor;
+import org.openmrs.module.fhir2.api.annotations.R4Provider;
 import org.openmrs.module.fhir2.web.authentication.RequireAuthenticationInterceptor;
 import org.openmrs.module.fhir2.web.util.DisableCacheInterceptor;
 import org.openmrs.module.fhir2.web.util.SummaryInterceptor;
@@ -226,6 +234,37 @@ public class FhirRestServletTest {
 		    hasItem(instanceOf(RequireAuthenticationInterceptor.class)));
 	}
 	
+	@Test
+	public void refreshed_shouldStillRouteAResourceReadAfterARefresh() throws ServletException {
+		withRefreshableContext();
+		context.registerBeanDefinition("patientProvider",
+		    BeanDefinitionBuilder.genericBeanDefinition(ReadablePatientProvider.class).getBeanDefinition());
+		
+		R4ServletWithTestContext refreshable = new R4ServletWithTestContext();
+		refreshable.setFhirContext(FhirContext.forR4());
+		refreshable.setGlobalPropertyService(globalPropertyService);
+		refreshable.setLoggingInterceptor(new LoggingInterceptor());
+		refreshable.setMessageSource(new StaticMessageSource());
+		refreshable.setResourceProviders(singletonList(context.getBean("patientProvider", ReadablePatientProvider.class)));
+		refreshable.init(mockServletConfig);
+		
+		int boundAtInit = bindingCountFor(refreshable, "Patient");
+		assertThat(boundAtInit, greaterThan(0));
+		
+		refreshable.refreshed();
+		
+		// the provider list is repopulated either way; the bindings are what a read routes on. Equality
+		// rather than greaterThan, because registerProviders appends and only unregisterAllProviders
+		// running first keeps that from doubling them
+		assertThat(bindingCountFor(refreshable, "Patient"), is(boundAtInit));
+		assertThat(refreshable.getResourceProviders(), hasSize(1));
+	}
+	
+	private int bindingCountFor(FhirRestServlet servlet, String resourceName) {
+		return servlet.getResourceBindings().stream().filter(b -> resourceName.equals(b.getResourceName()))
+		        .mapToInt(b -> b.getMethodBindings().size()).sum();
+	}
+	
 	/**
 	 * refreshed() looks two of these up by name, so hapiLoggingInterceptor and adminService cannot be
 	 * renamed.
@@ -265,6 +304,20 @@ public class FhirRestServletTest {
 			if (watched != null) {
 				seenWhileBeingBuilt = new ArrayList<>(watched.getInterceptorService().getAllRegisteredInterceptors());
 			}
+		}
+		
+		@Override
+		public Class<? extends IBaseResource> getResourceType() {
+			return Patient.class;
+		}
+	}
+	
+	@R4Provider
+	public static class ReadablePatientProvider implements IResourceProvider {
+		
+		@Read
+		public Patient read(@IdParam IdType id) {
+			return new Patient();
 		}
 		
 		@Override

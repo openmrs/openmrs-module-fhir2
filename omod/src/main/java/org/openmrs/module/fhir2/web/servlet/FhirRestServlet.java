@@ -265,7 +265,9 @@ public class FhirRestServlet extends RestfulServer implements ModuleLifecycleLis
 				// load the resource providers from the Spring context
 				Set<String> validBeanNames = Arrays.stream(ctx.getBeanNamesForAnnotation(getResourceProviderAnnotation()))
 				        .collect(Collectors.toSet());
-				setResourceProviders(ctx.getBeansOfType(IResourceProvider.class).entrySet().stream()
+				// registerProviders, not setResourceProviders: the setter only repopulates the field, and
+				// unregisterAllProviders has already destroyed the method bindings a read routes on
+				registerProviders(ctx.getBeansOfType(IResourceProvider.class).entrySet().stream()
 				        .filter(entry -> validBeanNames.contains(entry.getKey())).map(Map.Entry::getValue)
 				        .collect(Collectors.toList()));
 				
