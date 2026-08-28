@@ -39,8 +39,6 @@ public class FhirActivatorTest {
 		
 		activator.willRefreshContext();
 		
-		// both FHIR servlets register as listeners, so one failing must not leave the other bound to a
-		// context that has been closed
 		assertThat(reached[0], is(true));
 	}
 }

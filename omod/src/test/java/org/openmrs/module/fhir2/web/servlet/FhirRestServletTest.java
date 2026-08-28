@@ -17,6 +17,7 @@ import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.assertEquals;
@@ -178,6 +179,11 @@ public class FhirRestServletTest {
 		// this is what shows the teardown ran; asserting the rebuilt interceptor present does not
 		assertThat(afterRefresh, not(hasItem(sameInstance(loggingInterceptorBeforeInit))));
 		assertThat(afterRefresh, hasSize(6));
+		// a contributed hook that leaves @Interceptor(order) at its default runs after authentication
+		// only because it is registered after it: HAPI sorts by order and leaves registration as the
+		// tie-break
+		assertThat(indexOfType(afterRefresh, RequireAuthenticationInterceptor.class),
+		    lessThan(afterRefresh.indexOf(contributed)));
 	}
 	
 	@Test
@@ -258,6 +264,15 @@ public class FhirRestServletTest {
 		// running first keeps that from doubling them
 		assertThat(bindingCountFor(refreshable, "Patient"), is(boundAtInit));
 		assertThat(refreshable.getResourceProviders(), hasSize(1));
+	}
+	
+	private int indexOfType(List<Object> interceptors, Class<?> type) {
+		for (int i = 0; i < interceptors.size(); i++) {
+			if (type.isInstance(interceptors.get(i))) {
+				return i;
+			}
+		}
+		return -1;
 	}
 	
 	private int bindingCountFor(FhirRestServlet servlet, String resourceName) {
