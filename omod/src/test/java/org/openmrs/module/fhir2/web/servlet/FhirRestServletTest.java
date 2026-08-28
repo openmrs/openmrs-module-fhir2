@@ -17,12 +17,12 @@ import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import javax.servlet.ServletConfig;
@@ -179,11 +179,32 @@ public class FhirRestServletTest {
 		// this is what shows the teardown ran; asserting the rebuilt interceptor present does not
 		assertThat(afterRefresh, not(hasItem(sameInstance(loggingInterceptorBeforeInit))));
 		assertThat(afterRefresh, hasSize(6));
-		// a contributed hook that leaves @Interceptor(order) at its default runs after authentication
-		// only because it is registered after it: HAPI sorts by order and leaves registration as the
-		// tie-break
-		assertThat(indexOfType(afterRefresh, RequireAuthenticationInterceptor.class),
-		    lessThan(afterRefresh.indexOf(contributed)));
+	}
+	
+	@Test
+	public void refreshed_shouldRejectAnUnauthenticatedRequestBeforeAContributedInterceptorSeesIt()
+	        throws ServletException, IOException {
+		ContributedInterceptor contributed = withRefreshableContext();
+		
+		R4ServletWithTestContext refreshable = new R4ServletWithTestContext();
+		refreshable.setGlobalPropertyService(globalPropertyService);
+		refreshable.setLoggingInterceptor(new LoggingInterceptor());
+		refreshable.setMessageSource(new StaticMessageSource());
+		refreshable.init(mockServletConfig);
+		refreshable.refreshed();
+		
+		when(mockRequest.getMethod()).thenReturn("GET");
+		when(mockRequest.getRequestURI()).thenReturn("/fhir2Servlet/Patient/1");
+		when(mockRequest.getRequestURL()).thenReturn(new StringBuffer("http://localhost/fhir2Servlet/Patient/1"));
+		when(mockRequest.getServletPath()).thenReturn("");
+		when(mockRequest.getContextPath()).thenReturn("");
+		when(mockRequest.getQueryString()).thenReturn("");
+		
+		refreshable.service(mockRequest, mockResponse);
+		
+		// dispatch order, not registry order: the registry sorts on class-level order alone
+		verify(mockResponse).sendError(HttpServletResponse.SC_UNAUTHORIZED, "Not authenticated");
+		assertThat(contributed.sawRequest, is(false));
 	}
 	
 	@Test
@@ -259,20 +280,9 @@ public class FhirRestServletTest {
 		
 		refreshable.refreshed();
 		
-		// the provider list is repopulated either way; the bindings are what a read routes on. Equality
-		// rather than greaterThan, because registerProviders appends and only unregisterAllProviders
-		// running first keeps that from doubling them
+		// equality, not greaterThan: registerProviders appends, so a skipped unregister doubles it
 		assertThat(bindingCountFor(refreshable, "Patient"), is(boundAtInit));
 		assertThat(refreshable.getResourceProviders(), hasSize(1));
-	}
-	
-	private int indexOfType(List<Object> interceptors, Class<?> type) {
-		for (int i = 0; i < interceptors.size(); i++) {
-			if (type.isInstance(interceptors.get(i))) {
-				return i;
-			}
-		}
-		return -1;
 	}
 	
 	private int bindingCountFor(FhirRestServlet servlet, String resourceName) {
@@ -344,8 +354,11 @@ public class FhirRestServletTest {
 	@FhirInterceptor
 	public static class ContributedInterceptor {
 		
+		boolean sawRequest;
+		
 		@Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_PROCESSED)
 		public boolean incomingRequest(HttpServletRequest request, HttpServletResponse response) {
+			sawRequest = true;
 			return true;
 		}
 	}

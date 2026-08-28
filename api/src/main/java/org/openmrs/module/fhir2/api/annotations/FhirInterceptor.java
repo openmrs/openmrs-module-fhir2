@@ -18,9 +18,8 @@ import java.lang.annotation.Target;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 /**
- * Marks a Spring bean as a HAPI interceptor the FHIR REST servlets should register, so a module
- * other than this one can add a cross-cutting concern -- authorization, audit, consent. It must
- * declare a {@code Hook} method or HAPI drops it.
+ * Marks a Spring bean as a HAPI interceptor contributed by another module. It is registered on both
+ * the R3 and the R4 servlet, and HAPI drops it unless it declares a {@code Hook} method.
  */
 @Target({ ElementType.CONSTRUCTOR, ElementType.FIELD, ElementType.METHOD, ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
