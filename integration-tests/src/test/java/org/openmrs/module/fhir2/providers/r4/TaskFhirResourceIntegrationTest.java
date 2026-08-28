@@ -60,7 +60,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 	
 	private static final String FOCUS_OBSERVATION_UUID = "5085AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	
-	private static final String BARE_BASED_ON_SERVICE_REQUEST_UUID = "6d0ae116-707a-4629-9850-f15206e63ab0";
+	private static final String BARE_BASED_ON_SERVICE_REQUEST_UUID = "05caaf38-35a1-4c06-a229-44b4ea608b34";
 	
 	private static final String JSON_MERGE_PATCH_TASK_PATH = "org/openmrs/module/fhir2/providers/Task_merge_json_patch.json";
 	

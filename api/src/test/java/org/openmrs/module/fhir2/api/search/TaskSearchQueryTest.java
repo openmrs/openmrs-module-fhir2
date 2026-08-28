@@ -66,7 +66,7 @@ public class TaskSearchQueryTest extends BaseFhirContextSensitiveTest {
 	
 	private static final String BARE_REFERENCE_TASK_UUID = "2ba49b19-6d51-4de9-8bb0-b2d3c86ab0a8";
 	
-	private static final String BARE_REFERENCE_ORDER_UUID = "6d0ae116-707a-4629-9850-f15206e63ab0";
+	private static final String BARE_REFERENCE_ORDER_UUID = "05caaf38-35a1-4c06-a229-44b4ea608b34";
 	
 	private static final String BARE_REFERENCE_PRACTITIONER_UUID = "8f1a6b47-1f0d-4a5e-8f36-3f5f2c9a4d21";
 	
@@ -200,8 +200,8 @@ public class TaskSearchQueryTest extends BaseFhirContextSensitiveTest {
 	public void searchForTasks_shouldReturnTasksByBasedOnWhenTheStoredReferenceHasNoResourceTypePrefix() throws Exception {
 		executeDataSet(TASK_DATA_BARE_REFERENCE_XML);
 		
-		ReferenceParam basedOnReference = new ReferenceParam();
-		basedOnReference.setValue(FhirConstants.SERVICE_REQUEST + "/" + BARE_REFERENCE_ORDER_UUID);
+		ReferenceParam basedOnReference = new ReferenceParam(
+		        FhirConstants.SERVICE_REQUEST + "/" + BARE_REFERENCE_ORDER_UUID);
 		
 		ReferenceAndListParam ref = new ReferenceAndListParam().addAnd(new ReferenceOrListParam().add(basedOnReference));
 		
@@ -223,8 +223,7 @@ public class TaskSearchQueryTest extends BaseFhirContextSensitiveTest {
 	        throws Exception {
 		executeDataSet(TASK_DATA_BARE_REFERENCE_XML);
 		
-		ReferenceParam wrongType = new ReferenceParam();
-		wrongType.setValue(FhirConstants.PATIENT + "/" + BARE_REFERENCE_ORDER_UUID);
+		ReferenceParam wrongType = new ReferenceParam(FhirConstants.PATIENT + "/" + BARE_REFERENCE_ORDER_UUID);
 		
 		ReferenceAndListParam ref = new ReferenceAndListParam().addAnd(new ReferenceOrListParam().add(wrongType));
 		
@@ -280,8 +279,7 @@ public class TaskSearchQueryTest extends BaseFhirContextSensitiveTest {
 	 */
 	@Test
 	public void searchForTasks_shouldNotReturnTasksWhenATargetUuidMatchIsSearchedUnderAnotherResourceType() {
-		ReferenceParam wrongType = new ReferenceParam();
-		wrongType.setValue(FhirConstants.PATIENT + "/" + BASED_ON_ORDER_UUID);
+		ReferenceParam wrongType = new ReferenceParam(FhirConstants.PATIENT + "/" + BASED_ON_ORDER_UUID);
 		
 		ReferenceAndListParam ref = new ReferenceAndListParam().addAnd(new ReferenceOrListParam().add(wrongType));
 		
@@ -299,8 +297,8 @@ public class TaskSearchQueryTest extends BaseFhirContextSensitiveTest {
 	public void searchForTasks_shouldReturnTasksByOwnerWhenTheStoredReferenceHasNoResourceTypePrefix() throws Exception {
 		executeDataSet(TASK_DATA_BARE_REFERENCE_XML);
 		
-		ReferenceParam ownerReference = new ReferenceParam();
-		ownerReference.setValue(FhirConstants.PRACTITIONER + "/" + BARE_REFERENCE_PRACTITIONER_UUID);
+		ReferenceParam ownerReference = new ReferenceParam(
+		        FhirConstants.PRACTITIONER + "/" + BARE_REFERENCE_PRACTITIONER_UUID);
 		
 		ReferenceAndListParam ref = new ReferenceAndListParam().addAnd(new ReferenceOrListParam().add(ownerReference));
 		
