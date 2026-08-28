@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.WeakHashMap;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -73,12 +74,12 @@ public class FhirActivator extends BaseModuleActivator implements ApplicationCon
 		started = true;
 		log.info("Started FHIR");
 		
-		lifecycleListeners.forEach(ModuleLifecycleListener::started);
+		notifyListeners("started", ModuleLifecycleListener::started);
 	}
 	
 	@Override
 	public void willRefreshContext() {
-		lifecycleListeners.forEach(ModuleLifecycleListener::willRefresh);
+		notifyListeners("willRefresh", ModuleLifecycleListener::willRefresh);
 		unloadModules();
 	}
 	
@@ -98,12 +99,12 @@ public class FhirActivator extends BaseModuleActivator implements ApplicationCon
 		applicationContext.getBean("fhirR4", FhirContext.class).registerCustomType(GroupMember.class);
 		loadModules();
 		
-		lifecycleListeners.forEach(ModuleLifecycleListener::refreshed);
+		notifyListeners("refreshed", ModuleLifecycleListener::refreshed);
 	}
 	
 	@Override
 	public void willStop() {
-		lifecycleListeners.forEach(ModuleLifecycleListener::willStop);
+		notifyListeners("willStop", ModuleLifecycleListener::willStop);
 		
 		if (globalPropertyHolder != null) {
 			Context.getAdministrationService().removeGlobalPropertyListener(globalPropertyHolder);
@@ -112,12 +113,27 @@ public class FhirActivator extends BaseModuleActivator implements ApplicationCon
 	
 	@Override
 	public void stopped() {
-		lifecycleListeners.forEach(ModuleLifecycleListener::stopped);
+		notifyListeners("stopped", ModuleLifecycleListener::stopped);
 		unloadModules();
 		
 		globalPropertyHolder = null;
 		started = false;
 		log.info("Shutdown FHIR");
+	}
+	
+	/**
+	 * Notifies every listener even if an earlier one throws. Both FHIR servlets register here, so one
+	 * failing must not leave the other holding a context that has been closed.
+	 */
+	private void notifyListeners(String event, Consumer<ModuleLifecycleListener> notification) {
+		for (ModuleLifecycleListener listener : lifecycleListeners) {
+			try {
+				notification.accept(listener);
+			}
+			catch (Exception e) {
+				log.error("FHIR2 lifecycle listener {} failed on {}", listener.getClass().getName(), event, e);
+			}
+		}
 	}
 	
 	public void addModuleLifecycleListener(@Nonnull ModuleLifecycleListener lifecycleListener) {
