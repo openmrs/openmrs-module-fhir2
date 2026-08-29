@@ -60,6 +60,8 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 	
 	private static final String FOCUS_OBSERVATION_UUID = "5085AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	
+	private static final String BARE_BASED_ON_SERVICE_REQUEST_UUID = "05caaf38-35a1-4c06-a229-44b4ea608b34";
+	
 	private static final String JSON_MERGE_PATCH_TASK_PATH = "org/openmrs/module/fhir2/providers/Task_merge_json_patch.json";
 	
 	private static final String JSON_PATCH_TASK_PATH = "org/openmrs/module/fhir2/providers/Task_json_patch.json";
@@ -849,6 +851,40 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		assertThat(results, notNullValue());
 		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(results.hasEntry(), is(true));
+		assertThat(results.getEntry(), hasSize(1));
+		assertThat(results.getEntry(), hasItem(
+		    hasResource(hasProperty("idElement", hasProperty("idPart", equalTo(createdTask.getIdElement().getIdPart()))))));
+	}
+	
+	/**
+	 * A client that carries the resource type in Reference.type and a bare id in Reference.reference
+	 * stores the id without a "Type/" prefix, which leaves fhir_reference.target_uuid unset. Searching
+	 * by that reference must still find the Task. See FM2-700.
+	 */
+	@Test
+	public void shouldSearchTasksByBasedOnReferenceStoredWithoutAResourceTypePrefixAsJson() throws Exception {
+		Task newTask = new Task();
+		newTask.setStatus(Task.TaskStatus.REQUESTED);
+		newTask.setIntent(Task.TaskIntent.ORDER);
+		newTask.addBasedOn(new Reference().setReference(BARE_BASED_ON_SERVICE_REQUEST_UUID).setType("ServiceRequest"));
+		
+		MockHttpServletResponse createResponse = post("/Task").accept(FhirMediaTypes.JSON).jsonContent(toJson(newTask)).go();
+		assertThat(createResponse, isCreated());
+		Task createdTask = readResponse(createResponse);
+		
+		// the precondition this test exists for: the id was stored as the client wrote it, unprefixed
+		assertThat(createdTask.getBasedOnFirstRep().getReference(), equalTo(BARE_BASED_ON_SERVICE_REQUEST_UUID));
+		
+		MockHttpServletResponse response = get("/Task?based-on=ServiceRequest/" + BARE_BASED_ON_SERVICE_REQUEST_UUID)
+		        .accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
+		
+		Bundle results = readBundleResponse(response);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(results.getEntry(), hasSize(1));
 		assertThat(results.getEntry(), hasItem(
 		    hasResource(hasProperty("idElement", hasProperty("idPart", equalTo(createdTask.getIdElement().getIdPart()))))));
