@@ -116,8 +116,12 @@ public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDa
 				Join<?, ?> taskAliasJoin = criteriaContext.addJoin(property, alias);
 				
 				List<Optional<? extends Predicate>> predicateList = new ArrayList<>();
-				predicateList.add(Optional
-				        .of(criteriaContext.getCriteriaBuilder().equal(taskAliasJoin.get("targetUuid"), param.getIdPart())));
+				// reference holds the reference string as the client wrote it; targetUuid holds the id
+				// parsed out of that string, which is null when the client wrote a bare id. Match the
+				// id against both columns.
+				predicateList.add(Optional.of(criteriaContext.getCriteriaBuilder().or(
+				    criteriaContext.getCriteriaBuilder().equal(taskAliasJoin.get("targetUuid"), param.getIdPart()),
+				    criteriaContext.getCriteriaBuilder().equal(taskAliasJoin.get("reference"), param.getIdPart()))));
 				predicateList.add(Optional
 				        .of(criteriaContext.getCriteriaBuilder().equal(taskAliasJoin.get("type"), param.getResourceType())));
 				return Optional.of(criteriaContext.getCriteriaBuilder().and(toCriteriaArray(predicateList)));

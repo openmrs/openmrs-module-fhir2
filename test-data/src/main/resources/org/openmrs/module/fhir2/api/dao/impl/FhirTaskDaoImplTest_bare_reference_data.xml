@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!--
+    This Source Code Form is subject to the terms of the Mozilla Public License,
+    v. 2.0. If a copy of the MPL was not distributed with this file, You can
+    obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+    the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+
+    Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+    graphic logo is a trademark of OpenMRS Inc.
+-->
+<dataset>
+	<!--
+		A reference stored the way a client that sends Reference.type alongside a bare resource id
+		writes one: the type lands in target_type and the id in reference, and target_uuid is left
+		unset because FhirReference#setReference could not parse a resource id out of a bare id.
+		target_uuid is deliberately absent from these rows - do not add it.
+	-->
+	<fhir_reference reference_id="300" name="ServiceRequest/05caaf38-35a1-4c06-a229-44b4ea608b34" target_type="ServiceRequest" reference="05caaf38-35a1-4c06-a229-44b4ea608b34" uuid="3f3ecb0a-2ca2-4e21-a5cd-bb1af1ad1e94" creator="1" date_created="2026-01-01 00:00:00.0" retired="false"/>
+	<fhir_reference reference_id="301" name="Practitioner/8f1a6b47-1f0d-4a5e-8f36-3f5f2c9a4d21" target_type="Practitioner" reference="8f1a6b47-1f0d-4a5e-8f36-3f5f2c9a4d21" uuid="9c2f1e3b-6a44-4d8b-9f7c-0a5b8d2e1f60" creator="1" date_created="2026-01-01 00:00:00.0" retired="false"/>
+
+	<fhir_task task_id="300" name="Task based on a bare ServiceRequest reference" status="REQUESTED" intent="ORDER" owner_reference_id="301" creator="1" date_created="2026-01-01 00:00:00.0" retired="false" uuid="2ba49b19-6d51-4de9-8bb0-b2d3c86ab0a8"/>
+	<fhir_task_based_on_reference task_id="300" reference_id="300"/>
+</dataset>
