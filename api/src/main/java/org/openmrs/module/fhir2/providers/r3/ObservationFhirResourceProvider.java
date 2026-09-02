@@ -15,6 +15,7 @@ import static lombok.AccessLevel.PROTECTED;
 import javax.annotation.Nonnull;
 
 import java.util.HashSet;
+import java.util.Set;
 
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
@@ -136,6 +137,9 @@ public class ObservationFhirResourceProvider implements IResourceProvider {
 		        valueStringParam, date, code, category, id, lastUpdated, sort, includes, revIncludes)));
 	}
 	
+	// Note: @OperationParam has no chainWhitelist, so the encounter parameter accepts only a plain
+	// reference (e.g. encounter=<uuid>). Chained modifiers such as encounter.type are silently
+	// ignored by HAPI; use the @Search endpoint above for chained encounter filtering.
 	@Operation(name = "lastn", idempotent = true, type = Observation.class, bundleType = BundleTypeEnum.SEARCHSET)
 	public IBundleProvider getLastnObservations(@OperationParam(name = "max") NumberParam max,
 	        @OperationParam(name = Observation.SP_SUBJECT) ReferenceAndListParam subjectParam,
@@ -144,9 +148,9 @@ public class ObservationFhirResourceProvider implements IResourceProvider {
 	        @OperationParam(name = Observation.SP_CODE) TokenAndListParam code,
 	        @OperationParam(name = Observation.SP_ENCOUNTER) ReferenceAndListParam encounterParam,
 	        @IncludeParam(allow = { "Observation:" + Observation.SP_ENCOUNTER, "Observation:" + Observation.SP_PATIENT,
-	                "Observation:" + Observation.SP_RELATED_TYPE }) HashSet<Include> includes,
+	                "Observation:" + Observation.SP_RELATED_TYPE }) Set<Include> includes,
 	        @IncludeParam(reverse = true, allow = { "Observation:" + Observation.SP_RELATED_TYPE,
-	                "DiagnosticReport:" + DiagnosticReport.SP_RESULT }) HashSet<Include> revIncludes) {
+	                "DiagnosticReport:" + DiagnosticReport.SP_RESULT }) Set<Include> revIncludes) {
 		if (patientParam != null) {
 			subjectParam = patientParam;
 		}
