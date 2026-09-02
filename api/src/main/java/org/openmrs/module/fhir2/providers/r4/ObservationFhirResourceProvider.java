@@ -175,21 +175,13 @@ public class ObservationFhirResourceProvider implements IResourceProvider {
 			subjectParam = patientParam;
 		}
 		
-		if (CollectionUtils.isEmpty(includes)) {
-			includes = null;
-		}
-		
-		if (CollectionUtils.isEmpty(revIncludes)) {
-			revIncludes = null;
-		}
-		
 		ObservationSearchParams searchParams = new ObservationSearchParams();
 		searchParams.setPatient(subjectParam);
 		searchParams.setCategory(category);
 		searchParams.setCode(code);
 		searchParams.setEncounter(encounterParam);
-		searchParams.setIncludes(includes);
-		searchParams.setRevIncludes(revIncludes);
+		searchParams.setIncludes(CollectionUtils.isEmpty(includes) ? null : includes);
+		searchParams.setRevIncludes(CollectionUtils.isEmpty(revIncludes) ? null : revIncludes);
 		
 		return observationService.getLastnObservations(max, searchParams);
 	}
