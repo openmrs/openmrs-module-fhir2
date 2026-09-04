@@ -13,7 +13,6 @@ import static org.openmrs.module.fhir2.FhirConstants.FHIR2_MODULE_ID;
 
 import javax.annotation.Nonnull;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -21,6 +20,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.WeakHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -60,7 +60,7 @@ public class FhirActivator extends BaseModuleActivator implements ApplicationCon
 	
 	private final Map<String, Set<Class<?>>> services = new HashMap<>();
 	
-	private final List<ModuleLifecycleListener> lifecycleListeners = new ArrayList<>();
+	private final List<ModuleLifecycleListener> lifecycleListeners = new CopyOnWriteArrayList<>();
 	
 	private boolean started = false;
 	
@@ -124,14 +124,20 @@ public class FhirActivator extends BaseModuleActivator implements ApplicationCon
 	/**
 	 * Notifies every listener even if an earlier one throws. Both FHIR servlets register here, so one
 	 * failing must not leave the other holding a context that has been closed.
+	 * <p>
+	 * Catches {@link Throwable} rather than {@link Exception} because the failure this is guarding
+	 * against is a refresh that swaps module classloaders, and a listener touching a class from a
+	 * half-unloaded module raises {@link LinkageError} rather than an exception.
 	 */
 	private void notifyListeners(String event, Consumer<ModuleLifecycleListener> notification) {
 		for (ModuleLifecycleListener listener : lifecycleListeners) {
 			try {
 				notification.accept(listener);
 			}
-			catch (Exception e) {
-				log.error("FHIR2 lifecycle listener {} failed on {}", listener.getClass().getName(), event, e);
+			catch (Throwable t) {
+				log.error("FHIR2 lifecycle listener {} failed on {}; it may serve stale providers or interceptors until the "
+				        + "next context refresh",
+				    listener.getClass().getName(), event, t);
 			}
 		}
 	}
