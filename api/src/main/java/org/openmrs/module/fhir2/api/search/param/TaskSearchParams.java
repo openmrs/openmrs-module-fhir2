@@ -46,23 +46,37 @@ public class TaskSearchParams extends BaseResourceSearchParams {
 	
 	private ReferenceAndListParam forReference;
 	
+	private ReferenceAndListParam focusReference;
+	
 	private TokenAndListParam taskCode;
 	
 	private TokenAndListParam status;
 	
 	@Builder
 	public TaskSearchParams(ReferenceAndListParam basedOnReference, ReferenceAndListParam ownerReference,
-	    ReferenceAndListParam forReference, TokenAndListParam taskCode, TokenAndListParam status, TokenAndListParam id,
-	    DateRangeParam lastUpdated, SortSpec sort, HashSet<Include> includes) {
+	    ReferenceAndListParam forReference, ReferenceAndListParam focusReference, TokenAndListParam taskCode,
+	    TokenAndListParam status, TokenAndListParam id, DateRangeParam lastUpdated, SortSpec sort,
+	    HashSet<Include> includes) {
 		
 		super(id, lastUpdated, sort, includes, null);
 		
 		this.basedOnReference = basedOnReference;
 		this.ownerReference = ownerReference;
 		this.forReference = forReference;
+		this.focusReference = focusReference;
 		this.taskCode = taskCode;
 		this.status = status;
 		
+	}
+	
+	/**
+	 * Backward-compatible 9-arg overload (without focusReference) so existing callers (R3 provider,
+	 * ServiceRequest translator, etc.) continue to compile unchanged.
+	 */
+	public TaskSearchParams(ReferenceAndListParam basedOnReference, ReferenceAndListParam ownerReference,
+	    ReferenceAndListParam forReference, TokenAndListParam taskCode, TokenAndListParam status, TokenAndListParam id,
+	    DateRangeParam lastUpdated, SortSpec sort, HashSet<Include> includes) {
+		this(basedOnReference, ownerReference, forReference, null, taskCode, status, id, lastUpdated, sort, includes);
 	}
 	
 	@Override
@@ -70,6 +84,7 @@ public class TaskSearchParams extends BaseResourceSearchParams {
 		return baseSearchParameterMap().addParameter(FhirConstants.BASED_ON_REFERENCE_SEARCH_HANDLER, getBasedOnReference())
 		        .addParameter(FhirConstants.OWNER_REFERENCE_SEARCH_HANDLER, getOwnerReference())
 		        .addParameter(FhirConstants.FOR_REFERENCE_SEARCH_HANDLER, getForReference())
+		        .addParameter(FhirConstants.FOCUS_REFERENCE_SEARCH_HANDLER, getFocusReference())
 		        .addParameter(FhirConstants.TASK_CODE_SEARCH_HANDLER, getTaskCode())
 		        .addParameter(FhirConstants.STATUS_SEARCH_HANDLER, getStatus());
 	}

@@ -33,6 +33,8 @@ public final class FhirConstants {
 	
 	public static final String DIAGNOSTIC_REPORT_SERVICE_SYSTEM_URI = HL7_FHIR_CODE_SYSTEM_PREFIX + "/v2-0074";
 	
+	public static final String IDENTIFIER_TYPE_SYSTEM_URI = HL7_FHIR_CODE_SYSTEM_PREFIX + "/v2-0203";
+	
 	public static final String INTERPRETATION_SYSTEM_URI = HL7_FHIR_CODE_SYSTEM_PREFIX + "/v3-ObservationInterpretation";
 	
 	public static final String ALLERGY_INTOLERANCE_CLINICAL_STATUS_SYSTEM_URI = HL7_FHIR_CODE_SYSTEM_PREFIX
@@ -304,6 +306,8 @@ public final class FhirConstants {
 	public static final String OWNER_REFERENCE_SEARCH_HANDLER = "owner.reference.search.handler";
 	
 	public static final String FOR_REFERENCE_SEARCH_HANDLER = "for.reference.search.handler";
+	
+	public static final String FOCUS_REFERENCE_SEARCH_HANDLER = "focus.reference.search.handler";
 	
 	public static final String RESULT_SEARCH_HANDLER = "result.search.handler";
 	

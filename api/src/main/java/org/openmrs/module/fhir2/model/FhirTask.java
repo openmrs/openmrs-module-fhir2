@@ -44,13 +44,18 @@ public class FhirTask extends BaseOpenmrsMetadata {
 	 * Based on <a href="https://www.hl7.org/fhir/task.html">...</a> v4.0.1
 	 */
 	public enum TaskStatus {
+		DRAFT,
 		REQUESTED,
-		READY,
-		ONHOLD,
-		CANCELLED,
-		REJECTED,
+		RECEIVED,
 		ACCEPTED,
+		REJECTED,
+		READY,
+		CANCELLED,
+		INPROGRESS,
+		ONHOLD,
+		FAILED,
 		COMPLETED,
+		ENTEREDINERROR,
 		UNKNOWN
 	}
 	
@@ -114,6 +119,15 @@ public class FhirTask extends BaseOpenmrsMetadata {
 	@OneToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "owner_reference_id", referencedColumnName = "reference_id")
 	private FhirReference ownerReference;
+	
+	/**
+	 * The request being actioned or the resource being manipulated by this task. This is the
+	 * Observation or other resource that the task is focused on (e.g., the Observation that triggered
+	 * the creation of this nursing task).
+	 */
+	@OneToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name = "focus_reference_id", referencedColumnName = "reference_id")
+	private FhirReference focusReference;
 	
 	/**
 	 * Additional information that may be needed in the execution of the task. see

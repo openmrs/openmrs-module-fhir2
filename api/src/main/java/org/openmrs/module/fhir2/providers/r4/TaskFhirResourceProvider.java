@@ -104,6 +104,7 @@ public class TaskFhirResourceProvider extends BaseUpsertFhirResourceProvider<Tas
 	        @OptionalParam(name = Task.SP_BASED_ON, chainWhitelist = { "" }) ReferenceAndListParam basedOnReference,
 	        @OptionalParam(name = Task.SP_OWNER, chainWhitelist = { "" }) ReferenceAndListParam ownerReference,
 	        @OptionalParam(name = Task.SP_SUBJECT, chainWhitelist = { "" }) ReferenceAndListParam forReference,
+	        @OptionalParam(name = Task.SP_FOCUS, chainWhitelist = { "" }) ReferenceAndListParam focusReference,
 	        @OptionalParam(name = Task.SP_CODE) TokenAndListParam taskCode,
 	        @OptionalParam(name = Task.SP_STATUS) TokenAndListParam status,
 	        @OptionalParam(name = Task.SP_RES_ID) TokenAndListParam id,
@@ -113,7 +114,8 @@ public class TaskFhirResourceProvider extends BaseUpsertFhirResourceProvider<Tas
 		if (CollectionUtils.isEmpty(includes)) {
 			includes = null;
 		}
-		return service.searchForTasks(new TaskSearchParams(basedOnReference, ownerReference, forReference, taskCode, status,
-		        id, lastUpdated, sort, includes));
+		return service.searchForTasks(TaskSearchParams.builder().basedOnReference(basedOnReference)
+		        .ownerReference(ownerReference).forReference(forReference).focusReference(focusReference).taskCode(taskCode)
+		        .status(status).id(id).lastUpdated(lastUpdated).sort(sort).includes(includes).build());
 	}
 }

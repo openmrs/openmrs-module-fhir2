@@ -11,8 +11,11 @@ package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.assertThrows;
+import static org.openmrs.util.PrivilegeConstants.GET_OBS;
 
 import java.util.Collection;
 
@@ -21,6 +24,8 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.Obs;
+import org.openmrs.api.APIAuthenticationException;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirObservationDao;
@@ -62,6 +67,46 @@ public class FhirObservationDaoImplTest extends BaseFhirContextSensitiveTest {
 	
 	@Test
 	public void search_shouldReturnSearchQuery() {
+		Collection<Obs> obs = dao.getSearchResults(observationSearchParams());
+		
+		assertThat(obs, notNullValue());
+	}
+	
+	@Test
+	public void getSearchResults_shouldRequireGetObsPrivilege() {
+		SearchParameterMap theParams = observationSearchParams();
+		
+		Context.logout();
+		
+		assertThrows(APIAuthenticationException.class, () -> dao.getSearchResults(theParams));
+		
+		try {
+			Context.addProxyPrivilege(GET_OBS);
+			assertThat(dao.getSearchResults(theParams), notNullValue());
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_OBS);
+		}
+	}
+	
+	@Test
+	public void getSearchResultsCount_shouldRequireGetObsPrivilege() {
+		SearchParameterMap theParams = observationSearchParams();
+		
+		Context.logout();
+		
+		assertThrows(APIAuthenticationException.class, () -> dao.getSearchResultsCount(theParams));
+		
+		try {
+			Context.addProxyPrivilege(GET_OBS);
+			assertThat(dao.getSearchResultsCount(theParams), greaterThan(0));
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_OBS);
+		}
+	}
+	
+	private static SearchParameterMap observationSearchParams() {
 		TokenAndListParam code = new TokenAndListParam();
 		TokenParam codingToken = new TokenParam();
 		codingToken.setValue(OBS_CONCEPT_ID);
@@ -69,10 +114,7 @@ public class FhirObservationDaoImplTest extends BaseFhirContextSensitiveTest {
 		
 		SearchParameterMap theParams = new SearchParameterMap();
 		theParams.addParameter(FhirConstants.CODED_SEARCH_HANDLER, code);
-		
-		Collection<Obs> obs = dao.getSearchResults(theParams);
-		
-		assertThat(obs, notNullValue());
+		return theParams;
 	}
 	
 }

@@ -15,10 +15,13 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThrows;
 import static org.openmrs.test.OpenmrsMatchers.hasId;
+import static org.openmrs.util.PrivilegeConstants.GET_ORDERS;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -30,6 +33,8 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.DrugOrder;
+import org.openmrs.api.APIAuthenticationException;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirMedicationRequestDao;
@@ -119,6 +124,66 @@ public class FhirMedicationRequestDaoImplTest extends BaseFhirContextSensitiveTe
 		
 		assertThat(drugOrders, notNullValue());
 		assertThat(drugOrders, hasSize(greaterThanOrEqualTo(1)));
+	}
+	
+	@Test
+	public void get_shouldRequireGetOrdersPrivilege() {
+		Context.logout();
+		
+		assertThrows(APIAuthenticationException.class, () -> dao.get(DRUG_ORDER_UUID));
+		
+		try {
+			Context.addProxyPrivilege(GET_ORDERS);
+			assertThat(dao.get(DRUG_ORDER_UUID), notNullValue());
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_ORDERS);
+		}
+	}
+	
+	@Test
+	public void getSearchResults_shouldRequireGetOrdersPrivilege() {
+		SearchParameterMap theParams = codedSearchParams();
+		
+		Context.logout();
+		
+		assertThrows(APIAuthenticationException.class, () -> dao.getSearchResults(theParams));
+		
+		try {
+			Context.addProxyPrivilege(GET_ORDERS);
+			assertThat(dao.getSearchResults(theParams), notNullValue());
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_ORDERS);
+		}
+	}
+	
+	@Test
+	public void getSearchResultsCount_shouldRequireGetOrdersPrivilege() {
+		SearchParameterMap theParams = codedSearchParams();
+		
+		Context.logout();
+		
+		assertThrows(APIAuthenticationException.class, () -> dao.getSearchResultsCount(theParams));
+		
+		try {
+			Context.addProxyPrivilege(GET_ORDERS);
+			assertThat(dao.getSearchResultsCount(theParams), greaterThan(0));
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_ORDERS);
+		}
+	}
+	
+	private static SearchParameterMap codedSearchParams() {
+		TokenAndListParam code = new TokenAndListParam();
+		TokenParam codingToken = new TokenParam();
+		codingToken.setValue(MEDICATION_REQUEST_CONCEPT_ID);
+		code.addAnd(codingToken);
+		
+		SearchParameterMap theParams = new SearchParameterMap();
+		theParams.addParameter(FhirConstants.CODED_SEARCH_HANDLER, code);
+		return theParams;
 	}
 	
 }
