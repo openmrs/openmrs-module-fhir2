@@ -52,6 +52,17 @@ public interface FhirDao<T extends OpenmrsObject & Auditable> extends FhirDaoAop
 	T get(@Nonnull String uuid);
 	
 	/**
+	 * Returns whether a row with the given UUID exists in this DAO's backing table, ideally without
+	 * loading the full Hibernate entity into the session.
+	 *
+	 * @param uuid The UUID to probe
+	 * @return {@code true} if a row for the UUID exists in the backing table
+	 */
+	default boolean exists(@Nonnull String uuid) {
+		return get(uuid) != null;
+	}
+	
+	/**
 	 * Fetches one or more objects of type {@link T} by UUIDs <br/>
 	 * Each UUID supplied to this function should be unique <br/>
 	 * <strong>NB</strong> No attempt is made to ensure the order in which the results are returned

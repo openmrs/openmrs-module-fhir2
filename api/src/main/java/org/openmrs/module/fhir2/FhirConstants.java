@@ -127,6 +127,10 @@ public final class FhirConstants {
 	public static final String OPENMRS_FHIR_EXT_MEDICATION_REQUEST_FULFILLER_STATUS = OPENMRS_FHIR_EXT_PREFIX
 	        + "/medicationrequest/fulfillerstatus";
 	
+	public static final String OPENMRS_FHIR_EXT_DIAGNOSIS_RANK = OPENMRS_FHIR_EXT_PREFIX + "/diagnosis-rank";
+	
+	public static final String OPENMRS_FHIR_STRUCTURE_DEFINITION_PREFIX = OPENMRS_FHIR_PREFIX + "/StructureDefinition";
+	
 	public static final String OPENMRS_FHIR_DEFAULT_PAGE_SIZE = "fhir2.paging.default";
 	
 	public static final String OPENMRS_FHIR_MAXIMUM_PAGE_SIZE = "fhir2.paging.maximum";
@@ -275,6 +279,8 @@ public final class FhirConstants {
 	
 	public static final String TAG_SEARCH_HANDLER = "tag.search.handler";
 	
+	public static final String PROFILE_SEARCH_HANDLER = "profile.search.handler";
+	
 	public static final String GROUP_MEMBERS_SEARCH_HANDLER = "group.members.search.handler";
 	
 	public static final String HAPI_NARRATIVES_PROPERTY_FILE = "classpath:ca/uhn/fhir/narrative/narratives.properties";
@@ -388,8 +394,6 @@ public final class FhirConstants {
 	public static final String CONDITION_CATEGORY_CODE_CONDITION = "problem-list-item";
 	
 	public static final String CONDITION_CATEGORY_CODE_DIAGNOSIS = "encounter-diagnosis";
-	
-	public static final String DIAGNOSIS_RANK_EXTENSION_URI = "http://fhir.openmrs.org/R4/StructureDefinition/diagnosis-rank";
 	
 	public static final String CONDITION_CLINICAL_SYSTEM_URI = HL7_FHIR_CODE_SYSTEM_PREFIX + "/condition-clinical";
 	

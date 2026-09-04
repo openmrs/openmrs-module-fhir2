@@ -28,7 +28,7 @@
         <reference value="Encounter/6519d653-393b-4118-9c83-a3715b82d4ac"/>
     </context>
     <verificationStatus value="confirmed"/>
-    <extension url="http://fhir.openmrs.org/R4/StructureDefinition/diagnosis-rank">
+    <extension url="http://fhir.openmrs.org/ext/diagnosis-rank">
         <valueInteger value="1"/>
     </extension>
     <onsetDateTime value="2014-11-25T22:17:00+11:00"/>

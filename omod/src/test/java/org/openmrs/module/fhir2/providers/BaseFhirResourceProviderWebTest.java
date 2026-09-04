@@ -44,7 +44,9 @@ import org.openmrs.api.context.UserContext;
 import org.openmrs.api.db.ContextDAO;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.impl.FhirGlobalPropertyServiceImpl;
+import org.openmrs.module.fhir2.api.util.ProfileRoutingContext;
 import org.openmrs.module.fhir2.web.servlet.FhirRestServlet;
+import org.openmrs.module.fhir2.web.util.ProfileRoutingInterceptor;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -60,6 +62,8 @@ public abstract class BaseFhirResourceProviderWebTest<T extends IResourceProvide
 	private IParser parser;
 	
 	private LoggingInterceptor interceptor;
+	
+	private ProfileRoutingInterceptor profileRoutingInterceptor;
 	
 	private FhirRestServlet servlet;
 	
@@ -88,6 +92,9 @@ public abstract class BaseFhirResourceProviderWebTest<T extends IResourceProvide
 		interceptor = new LoggingInterceptor();
 		interceptor.setLoggerName("org.openmrs.module.fhir2.accessLog");
 		
+		profileRoutingInterceptor = new ProfileRoutingInterceptor();
+		profileRoutingInterceptor.setProfileRoutingContext(new ProfileRoutingContext());
+		
 		MockServletContext servletContext = new MockServletContext();
 		servletConfig = new MockServletConfig(servletContext, getServletName());
 		
@@ -114,6 +121,7 @@ public abstract class BaseFhirResourceProviderWebTest<T extends IResourceProvide
 		servlet = getRestfulServer();
 		servlet.setFhirContext(getFhirContext());
 		servlet.setLoggingInterceptor(interceptor);
+		servlet.setProfileRoutingInterceptor(profileRoutingInterceptor);
 		servlet.setGlobalPropertyService(new FhirGlobalPropertyServiceImpl() {
 			
 			@Override

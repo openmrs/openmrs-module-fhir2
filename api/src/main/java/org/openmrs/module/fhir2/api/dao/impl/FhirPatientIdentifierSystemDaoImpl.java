@@ -18,6 +18,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 
+import java.util.List;
 import java.util.Optional;
 
 import lombok.Getter;
@@ -75,6 +76,32 @@ public class FhirPatientIdentifierSystemDaoImpl implements FhirPatientIdentifier
 		catch (NoResultException e) {
 			return null;
 		}
+	}
+	
+	@Override
+	@Transactional(readOnly = true)
+	public PatientIdentifierType getPatientIdentifierTypeByNameOrUuid(String name, String uuid) {
+		EntityManager em = sessionFactory.getCurrentSession();
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<PatientIdentifierType> cq = cb.createQuery(PatientIdentifierType.class);
+		Root<PatientIdentifierType> root = cq.from(PatientIdentifierType.class);
+		
+		cq.select(root).where(cb.or(cb.and(cb.equal(root.get("name"), name), cb.equal(root.get("retired"), false)),
+		    cb.equal(root.get("uuid"), uuid)));
+		
+		List<PatientIdentifierType> identifierTypes = em.createQuery(cq).getResultList();
+		
+		if (identifierTypes.isEmpty()) {
+			return null;
+		}
+		
+		// favour uuid if one was supplied
+		if (uuid != null) {
+			return identifierTypes.stream().filter((idType) -> uuid.equals(idType.getUuid())).findFirst()
+			        .orElse(identifierTypes.get(0));
+		}
+		
+		return identifierTypes.get(0);
 	}
 	
 	@Override
