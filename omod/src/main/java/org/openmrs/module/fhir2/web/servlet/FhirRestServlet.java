@@ -17,15 +17,20 @@ import javax.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.BasePagingProvider;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
@@ -33,8 +38,11 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.IServerAddressStrategy;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
+import ca.uhn.fhir.util.ReflectionUtil;
 import lombok.AccessLevel;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.reflect.MethodUtils;
 import org.openmrs.GlobalProperty;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.GlobalPropertyListener;
@@ -43,6 +51,7 @@ import org.openmrs.module.ModuleFactory;
 import org.openmrs.module.fhir2.FhirActivator;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
+import org.openmrs.module.fhir2.api.annotations.FhirInterceptor;
 import org.openmrs.module.fhir2.api.annotations.R4Provider;
 import org.openmrs.module.fhir2.api.spi.ModuleLifecycleListener;
 import org.openmrs.module.fhir2.narrative.OpenmrsThymeleafNarrativeGenerator;
@@ -59,6 +68,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 public class FhirRestServlet extends RestfulServer implements ModuleLifecycleListener {
 	
@@ -77,6 +87,13 @@ public class FhirRestServlet extends RestfulServer implements ModuleLifecycleLis
 	private LoggingInterceptor loggingInterceptor;
 	
 	private boolean started = false;
+	
+	/**
+	 * What the last {@link #registerInterceptors()} put on the server, so the next one can take it back
+	 * off. Narrower than unregistering everything: an interceptor some other code registered directly
+	 * on this servlet is not ours to drop.
+	 */
+	private final List<Object> registeredInterceptors = new ArrayList<>();
 	
 	@Setter(value = AccessLevel.PUBLIC, onMethod_ = { @Qualifier("messageSourceService"), @Autowired })
 	private MessageSource messageSource;
@@ -146,11 +163,7 @@ public class FhirRestServlet extends RestfulServer implements ModuleLifecycleLis
 		setPagingProvider(createPagingProvider());
 		setDefaultResponseEncoding(EncodingEnum.JSON);
 
-		registerInterceptor(loggingInterceptor);
-		registerInterceptor(new RequireAuthenticationInterceptor());
-		registerInterceptor(new DisableCacheInterceptor());
-		registerInterceptor(new SummaryInterceptor());
-		registerInterceptor(new SupportMergePatchInterceptor());
+		registerInterceptors();
 
 		String narrativesOverridePropertyFile = NarrativeUtils.getValidatedPropertiesFilePath(
 				globalPropertyService.getGlobalProperty(FhirConstants.NARRATIVES_OVERRIDE_PROPERTY_FILE, null));
@@ -170,6 +183,132 @@ public class FhirRestServlet extends RestfulServer implements ModuleLifecycleLis
 		started = true;
 	}
 	//@formatter:on
+	
+	/**
+	 * Builds the servlet's interceptor set: the module's own interceptors, then any bean another module
+	 * contributes with {@link FhirInterceptor}. Safe to call on a servlet that is already serving,
+	 * which is what {@link #refreshed()} does - the new set is registered before the previous one is
+	 * dropped, so a concurrent request never finds the servlet without
+	 * {@link RequireAuthenticationInterceptor}.
+	 * <p>
+	 * Synchronized because it reads and rewrites {@code registeredInterceptors} around calls that
+	 * mutate HAPI's registry: {@link #initialize()} runs on the container's init thread and
+	 * {@link #refreshed()} on whichever thread drove the context refresh.
+	 */
+	protected synchronized void registerInterceptors() {
+		List<Object> previous = new ArrayList<>(registeredInterceptors);
+		List<Object> current = new ArrayList<>();
+		
+		try {
+			// these carry FhirConstants.BUILT_IN_INTERCEPTOR_ORDER, so they dispatch ahead of a contributed
+			// bean whatever order the two happen to be registered in - which is only enforced for beans
+			// this method registers, not for interceptors put on the servlet by other means
+			for (Object interceptor : Arrays.asList(new RequireAuthenticationInterceptor(), loggingInterceptor,
+			    new DisableCacheInterceptor(), new SummaryInterceptor(), new SupportMergePatchInterceptor())) {
+				registerInterceptor(interceptor);
+				current.add(interceptor);
+			}
+			
+			// drop the previous set only now that its replacement is in place, and only the entries the new
+			// set did not carry over by identity - unregistering one HAPI has kept would leave a hole
+			Set<Object> retained = Collections.newSetFromMap(new IdentityHashMap<>());
+			retained.addAll(current);
+			previous.stream().filter(interceptor -> !retained.contains(interceptor))
+			        .forEach(getInterceptorService()::unregisterInterceptor);
+			
+			registerContributedInterceptors(current);
+		}
+		finally {
+			// in the finally so that a throw cannot leave the field naming interceptors that are no longer
+			// on the server: the next call would skip unregistering the ones that are, orphaning them
+			registeredInterceptors.clear();
+			registeredInterceptors.addAll(current);
+		}
+	}
+	
+	/**
+	 * Registers each {@link FhirInterceptor} bean, adding the ones HAPI accepts to {@code current}.
+	 * Contributed beans are third-party code, so one that cannot be built or scanned is reported and
+	 * skipped rather than allowed to abandon the rebuild half-done.
+	 */
+	private void registerContributedInterceptors(List<Object> current) {
+		ConfigurableApplicationContext ctx = getModuleApplicationContext();
+		if (ctx == null) {
+			return;
+		}
+		
+		Map<String, Object> contributed;
+		try {
+			contributed = ctx.getBeansWithAnnotation(FhirInterceptor.class);
+		}
+		catch (Exception e) {
+			log.error("Could not read the contributed FHIR interceptors from the Spring context; none of them will run", e);
+			return;
+		}
+		
+		for (Map.Entry<String, Object> entry : contributed.entrySet()) {
+			String beanName = entry.getKey();
+			Object interceptor = entry.getValue();
+			
+			try {
+				String orderViolation = describeOrderViolation(interceptor);
+				
+				if (orderViolation != null) {
+					log.error(
+					    "Not registering contributed FHIR interceptor bean {} ({}): {}, which would run it ahead of this "
+					            + "module's own interceptors, including authentication. Contributed interceptors must "
+					            + "order at or above {}.",
+					    beanName, interceptor.getClass().getName(), orderViolation, Interceptor.DEFAULT_ORDER);
+				} else if (getInterceptorService().registerInterceptor(interceptor)) {
+					current.add(interceptor);
+					log.info("Registered contributed FHIR interceptor bean {} ({})", beanName,
+					    interceptor.getClass().getName());
+				} else {
+					log.error(
+					    "Contributed FHIR interceptor bean {} ({}) declares no @Hook method HAPI can see and will not "
+					            + "run. A bean behind an interface-based Spring proxy hides its hooks; annotate a concrete "
+					            + "class and keep it clear of interface-based AOP.",
+					    beanName, interceptor.getClass().getName());
+				}
+			}
+			catch (Exception e) {
+				log.error("Could not register contributed FHIR interceptor bean {} ({}); it will not run", beanName,
+				    interceptor.getClass().getName(), e);
+			}
+		}
+	}
+	
+	/**
+	 * Where a contributed interceptor declares an order that would sort it ahead of this module's own,
+	 * phrased for a log message, or null if it declares none. HAPI orders the hooks for a pointcut by
+	 * the {@code order} on {@link Interceptor} or {@link Hook}, and this module's interceptors hold
+	 * {@link FhirConstants#BUILT_IN_INTERCEPTOR_ORDER}, so a contributed interceptor only has to stay
+	 * at or above {@link Interceptor#DEFAULT_ORDER} to run after them. Screening the beans this servlet
+	 * registers is all this does; it says nothing about interceptors registered elsewhere.
+	 */
+	private static String describeOrderViolation(Object interceptor) {
+		// mirrors BaseInterceptorService#scanInterceptorForHookMethods, concrete class included, so that
+		// this sees the same orders HAPI will
+		Class<?> type = interceptor.getClass();
+		
+		Interceptor typeAnnotation = type.getAnnotation(Interceptor.class);
+		if (typeAnnotation != null && typeAnnotation.order() < Interceptor.DEFAULT_ORDER) {
+			return "the class declares @Interceptor(order = " + typeAnnotation.order() + ")";
+		}
+		
+		for (Method method : ReflectionUtil.getDeclaredMethods(type, true)) {
+			Hook hook = MethodUtils.getAnnotation(method, Hook.class, true, true);
+			if (hook != null && hook.order() < Interceptor.DEFAULT_ORDER) {
+				return method.getName() + "() declares @Hook(order = " + hook.order() + ")";
+			}
+		}
+		
+		return null;
+	}
+	
+	protected ConfigurableApplicationContext getModuleApplicationContext() {
+		return FhirActivator.getApplicationContext();
+	}
 	
 	protected Class<? extends Annotation> getResourceProviderAnnotation() {
 		return R4Provider.class;
@@ -225,7 +364,7 @@ public class FhirRestServlet extends RestfulServer implements ModuleLifecycleLis
 	}
 	
 	protected void autoInject() {
-		final ConfigurableApplicationContext ctx = FhirActivator.getApplicationContext();
+		final ConfigurableApplicationContext ctx = getModuleApplicationContext();
 		if (ctx != null) {
 			AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 			bpp.setBeanFactory(ctx.getAutowireCapableBeanFactory());
@@ -243,31 +382,29 @@ public class FhirRestServlet extends RestfulServer implements ModuleLifecycleLis
 	@Override
 	public void refreshed() {
 		if (started) {
-			final ConfigurableApplicationContext ctx = FhirActivator.getApplicationContext();
+			final ConfigurableApplicationContext ctx = getModuleApplicationContext();
 			if (ctx != null) {
-				getInterceptorService().unregisterAllInterceptors();
-				
 				unregisterAllProviders();
 				
 				// load the resource providers from the Spring context
 				Set<String> validBeanNames = Arrays.stream(ctx.getBeanNamesForAnnotation(getResourceProviderAnnotation()))
 				        .collect(Collectors.toSet());
-				setResourceProviders(ctx.getBeansOfType(IResourceProvider.class).entrySet().stream()
+				// registerProviders, not setResourceProviders: the setter leaves no method bindings
+				registerProviders(ctx.getBeansOfType(IResourceProvider.class).entrySet().stream()
 				        .filter(entry -> validBeanNames.contains(entry.getKey())).map(Map.Entry::getValue)
 				        .collect(Collectors.toList()));
 				
-				registerInterceptor(ctx.getBean("hapiLoggingInterceptor", LoggingInterceptor.class));
-				registerInterceptor(new RequireAuthenticationInterceptor());
-				registerInterceptor(new DisableCacheInterceptor());
-				registerInterceptor(new SummaryInterceptor());
-				registerInterceptor(new SupportMergePatchInterceptor());
-				
+				setLoggingInterceptor(ctx.getBean("hapiLoggingInterceptor", LoggingInterceptor.class));
 				setAdministrationService(ctx.getBean("adminService", AdministrationService.class));
 				setGlobalPropertyService(ctx.getBean(FhirGlobalPropertyService.class));
 				setServerAddressStrategy(ctx.getBean(IServerAddressStrategy.class));
 				setPagingProvider(createPagingProvider());
 				
 				administrationService.addGlobalPropertyListener(fhirRestServletListener);
+				
+				// last, so that a throw from any of the lookups above leaves the interceptors from the
+				// previous context in place rather than none at all
+				registerInterceptors();
 			}
 		}
 	}
