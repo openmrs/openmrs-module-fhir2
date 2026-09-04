@@ -56,6 +56,7 @@ import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.handler.FhirResourceHandler;
 import org.openmrs.module.fhir2.api.search.CompositeBundleProvider;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
+import org.openmrs.module.fhir2.api.util.ProfileRoutingContext;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BaseCompositeFhirServiceTest {
@@ -486,6 +487,48 @@ public class BaseCompositeFhirServiceTest {
 	}
 	
 	@Test
+	public void searchShouldRouteToHandlerNamedByProfileCapturedFromTheRequest() {
+		IBundleProvider primaryBundle = emptyBundle();
+		when(primaryHandler.search(any())).thenReturn(primaryBundle);
+		service.setProfileRoutingContext(contextRequesting(PROFILE_PRIMARY));
+		
+		service.exposedSearch(new SearchParameterMap());
+		
+		verify(primaryHandler).search(any());
+		verify(secondaryHandler, never()).search(any());
+	}
+	
+	@Test
+	public void searchShouldUnionProfilesFromTheRequestAndTheParameterMap() {
+		IBundleProvider primaryBundle = emptyBundle();
+		IBundleProvider secondaryBundle = emptyBundle();
+		when(primaryHandler.search(any())).thenReturn(primaryBundle);
+		when(secondaryHandler.search(any())).thenReturn(secondaryBundle);
+		service.setProfileRoutingContext(contextRequesting(PROFILE_PRIMARY));
+		
+		service.exposedSearch(profileParams(PROFILE_SECONDARY));
+		
+		verify(primaryHandler).search(any());
+		verify(secondaryHandler).search(any());
+	}
+	
+	@Test
+	public void searchShouldFanOutWhenTheRequestCapturedNoProfile() {
+		IBundleProvider primaryBundle = emptyBundle();
+		IBundleProvider secondaryBundle = emptyBundle();
+		when(primaryHandler.search(any())).thenReturn(primaryBundle);
+		when(secondaryHandler.search(any())).thenReturn(secondaryBundle);
+		service.setProfileRoutingContext(new ProfileRoutingContext());
+		
+		service.exposedSearch(new SearchParameterMap());
+		
+		verify(primaryHandler).search(any());
+		verify(secondaryHandler).search(any());
+		verify(primaryHandler).acceptsSearch(any());
+		verify(secondaryHandler).acceptsSearch(any());
+	}
+	
+	@Test
 	public void searchByProfileShouldStillStampProfileOnResults() {
 		IBundleProvider primaryBundle = mock(IBundleProvider.class);
 		Encounter raw = encounter("e1");
@@ -546,6 +589,12 @@ public class BaseCompositeFhirServiceTest {
 	
 	private static List<String> profileUrlsOf(Encounter e) {
 		return e.getMeta().getProfile().stream().map(p -> p.getValue()).collect(Collectors.toList());
+	}
+	
+	private static ProfileRoutingContext contextRequesting(String... profileUrls) {
+		ProfileRoutingContext context = new ProfileRoutingContext();
+		context.setRequestedProfiles(Arrays.asList(profileUrls));
+		return context;
 	}
 	
 	private static SearchParameterMap profileParams(String... profileUrls) {

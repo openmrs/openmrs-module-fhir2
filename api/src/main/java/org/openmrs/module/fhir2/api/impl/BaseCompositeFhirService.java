@@ -47,6 +47,7 @@ import org.openmrs.module.fhir2.api.handler.FhirResourceHandler;
 import org.openmrs.module.fhir2.api.search.CompositeBundleProvider;
 import org.openmrs.module.fhir2.api.search.param.PropParam;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
+import org.openmrs.module.fhir2.api.util.ProfileRoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -106,6 +107,9 @@ public abstract class BaseCompositeFhirService<R extends IAnyResource> implement
 	
 	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
 	private FhirGlobalPropertyService globalPropertyService;
+	
+	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
+	private ProfileRoutingContext profileRoutingContext = new ProfileRoutingContext();
 	
 	@SuppressWarnings("UnstableApiUsage")
 	protected BaseCompositeFhirService() {
@@ -347,7 +351,7 @@ public abstract class BaseCompositeFhirService<R extends IAnyResource> implement
 	}
 	
 	private Set<String> requestedProfiles(SearchParameterMap params) {
-		Set<String> profiles = new HashSet<>();
+		Set<String> profiles = new HashSet<>(profileRoutingContext.getRequestedProfiles());
 		for (Map.Entry<String, List<PropParam<?>>> entry : params.getParameters()) {
 			if (!FhirConstants.PROFILE_SEARCH_HANDLER.equals(entry.getKey())) {
 				continue;
