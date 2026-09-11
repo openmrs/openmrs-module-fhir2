@@ -9,18 +9,17 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
-import static java.util.Collections.singletonList;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -35,118 +34,65 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.openmrs.Concept;
-import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
-import org.openmrs.module.fhir2.api.dao.FhirConceptDao;
-import org.openmrs.module.fhir2.api.search.SearchQuery;
-import org.openmrs.module.fhir2.api.search.SearchQueryBundleProvider;
-import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
-import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
-import org.openmrs.module.fhir2.api.translators.ValueSetTranslator;
+import org.openmrs.module.fhir2.api.handler.FhirResourceHandler;
+import org.openmrs.module.fhir2.providers.r4.MockIBundleProvider;
 
+/**
+ * Orchestrator-level tests for {@link FhirValueSetServiceImpl}. Dispatch mechanics are covered in
+ * {@link BaseCompositeFhirServiceTest}; backing-specific read/search lives in
+ * {@code ConceptBackedValueSetHandlerTest}. ValueSet is read-only at the provider ({@code @Read} +
+ * {@code @Search}), so this class only covers that {@code searchForValueSets} forwards through
+ * {@code doSearch}.
+ */
 @RunWith(MockitoJUnitRunner.class)
 public class FhirValueSetServiceImplTest {
-	
-	private static final Integer ROOT_CONCEPT_ID = 123;
-	
-	private static final String ROOT_CONCEPT_UUID = "0f97e14e-cdc2-49ac-9255-b5126f8a5147";
 	
 	private static final String ROOT_CONCEPT_NAME = "FOOD CONSTRUCT";
 	
 	private static final int START_INDEX = 0;
 	
-	private static final int END_INDEX = 10;
+	private static final int END_INDEX = 100;
 	
 	@Mock
-	private FhirConceptDao dao;
-	
-	@Mock
-	private ValueSetTranslator translator;
-	
-	@Mock
-	private SearchQueryInclude<ValueSet> searchQueryInclude;
-	
-	@Mock
-	private SearchQuery<Concept, ValueSet, FhirConceptDao, ValueSetTranslator, SearchQueryInclude<ValueSet>> searchQuery;
+	private FhirResourceHandler<ValueSet> handler;
 	
 	@Mock
 	private FhirGlobalPropertyService globalPropertyService;
 	
-	private FhirValueSetServiceImpl fhirValueSetService;
-	
-	private List<IBaseResource> get(IBundleProvider results) {
-		return results.getResources(START_INDEX, END_INDEX);
-	}
-	
-	private Concept concept;
-	
-	private ValueSet valueSet;
+	private FhirValueSetServiceImpl service;
 	
 	@Before
 	public void setup() {
-		fhirValueSetService = new FhirValueSetServiceImpl();
-		fhirValueSetService.setDao(dao);
-		fhirValueSetService.setTranslator(translator);
-		fhirValueSetService.setSearchQuery(searchQuery);
-		fhirValueSetService.setSearchQueryInclude(searchQueryInclude);
+		lenient().when(handler.getImplicitProfile())
+		        .thenReturn("http://fhir.openmrs.org/StructureDefinition/openmrs-valueset");
+		lenient().when(handler.acceptsSearch(any())).thenReturn(true);
 		
-		concept = new Concept();
-		concept.setUuid(ROOT_CONCEPT_UUID);
-		
-		valueSet = new ValueSet();
-		valueSet.setId(ROOT_CONCEPT_UUID);
+		service = new FhirValueSetServiceImpl();
+		service.setHandlers(Collections.singletonList(handler));
+		service.setGlobalPropertyService(globalPropertyService);
 	}
 	
 	@Test
-	public void get_shouldGetEncounterByUuid() {
-		when(dao.get(ROOT_CONCEPT_UUID)).thenReturn(concept);
-		when(translator.toFhirResource(concept)).thenReturn(valueSet);
+	public void searchForValueSets_shouldFanOutAndReturnHandlerResults() {
+		when(handler.search(any())).thenReturn(bundleOf(1));
 		
-		ValueSet valueSet = fhirValueSetService.get(ROOT_CONCEPT_UUID);
-		
-		assertThat(valueSet, notNullValue());
-		assertThat(valueSet.getId(), notNullValue());
-		assertThat(valueSet.getId(), equalTo(ROOT_CONCEPT_UUID));
-	}
-	
-	@Test
-	public void shouldSearchForValueSetsByName() {
-		StringAndListParam titleParam = new StringAndListParam()
+		StringAndListParam title = new StringAndListParam()
 		        .addAnd(new StringOrListParam().add(new StringParam(ROOT_CONCEPT_NAME)));
-		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.TITLE_SEARCH_HANDLER, titleParam);
-		
-		when(dao.getSearchResults(any())).thenReturn(singletonList(concept));
-		
-		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
-		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
-		when(translator.toFhirResource(concept)).thenReturn(valueSet);
-		when(translator.toFhirResources(anyCollection())).thenCallRealMethod();
-		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
-		
-		IBundleProvider results = fhirValueSetService.searchForValueSets(titleParam);
-		
-		List<IBaseResource> resultList = get(results);
+		IBundleProvider results = service.searchForValueSets(title);
+		List<IBaseResource> resultList = results.getResources(START_INDEX, END_INDEX);
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
+		assertThat(resultList, hasSize(1));
+		verify(handler).search(any());
 	}
 	
-	@Test
-	public void shouldReturnEmptyCollectionByWrongName() {
-		StringAndListParam titleParam = new StringAndListParam()
-		        .addAnd(new StringOrListParam().add(new StringParam("wrong name")));
-		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.TITLE_SEARCH_HANDLER, titleParam);
-		
-		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
-		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
-		
-		IBundleProvider results = fhirValueSetService.searchForValueSets(titleParam);
-		
-		List<IBaseResource> resultList = get(results);
-		
-		assertThat(results, notNullValue());
-		assertThat(resultList, empty());
+	private static IBundleProvider bundleOf(int n) {
+		List<ValueSet> rows = new ArrayList<>(n);
+		for (int i = 0; i < n; i++) {
+			rows.add(new ValueSet());
+		}
+		return new MockIBundleProvider<>(rows, 10, 1);
 	}
 }

@@ -78,7 +78,7 @@ public class DiagnosisTranslatorImplTest {
 		
 		Condition result = translator.toFhirResource(diagnosis);
 		
-		Extension rank = result.getExtensionByUrl(FhirConstants.DIAGNOSIS_RANK_EXTENSION_URI);
+		Extension rank = result.getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_DIAGNOSIS_RANK);
 		assertThat(rank, notNullValue());
 		assertThat(((IntegerType) rank.getValue()).getValue(), equalTo(1));
 		
@@ -123,7 +123,7 @@ public class DiagnosisTranslatorImplTest {
 	public void toOpenmrsType_shouldMapRankAndCertaintyAndSetAsVoidedIfClinicalStatusIsInactive() {
 		Condition condition = new Condition();
 		condition.setId("diag-uuid");
-		condition.addExtension(new Extension(FhirConstants.DIAGNOSIS_RANK_EXTENSION_URI, new IntegerType(2)));
+		condition.addExtension(new Extension(FhirConstants.OPENMRS_FHIR_EXT_DIAGNOSIS_RANK, new IntegerType(2)));
 		
 		CodeableConcept verificationStatus = new CodeableConcept();
 		verificationStatus.addCoding(new Coding().setSystem(FhirConstants.CONDITION_VER_STATUS_SYSTEM_URI)

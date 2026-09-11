@@ -131,7 +131,7 @@ public class DiagnosisTranslatorImpl implements DiagnosisTranslator {
 		// Add diagnosis-specific extensions
 		if (diagnosis.getRank() != null) {
 			Extension rankExtension = new Extension();
-			rankExtension.setUrl(FhirConstants.DIAGNOSIS_RANK_EXTENSION_URI);
+			rankExtension.setUrl(FhirConstants.OPENMRS_FHIR_EXT_DIAGNOSIS_RANK);
 			rankExtension.setValue(new IntegerType(diagnosis.getRank()));
 			fhirCondition.addExtension(rankExtension);
 		}
@@ -206,7 +206,7 @@ public class DiagnosisTranslatorImpl implements DiagnosisTranslator {
 		
 		// Set rank from extension
 		Optional<Extension> rankExtension = Optional
-		        .ofNullable(condition.getExtensionByUrl(FhirConstants.DIAGNOSIS_RANK_EXTENSION_URI));
+		        .ofNullable(condition.getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_DIAGNOSIS_RANK));
 		rankExtension.ifPresent(ext -> {
 			if (ext.getValue() instanceof IntegerType) {
 				existingDiagnosis.setRank(((IntegerType) ext.getValue()).getValue());

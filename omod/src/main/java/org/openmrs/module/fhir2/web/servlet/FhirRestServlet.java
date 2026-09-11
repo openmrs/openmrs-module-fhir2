@@ -49,6 +49,7 @@ import org.openmrs.module.fhir2.narrative.OpenmrsThymeleafNarrativeGenerator;
 import org.openmrs.module.fhir2.web.authentication.RequireAuthenticationInterceptor;
 import org.openmrs.module.fhir2.web.util.DisableCacheInterceptor;
 import org.openmrs.module.fhir2.web.util.NarrativeUtils;
+import org.openmrs.module.fhir2.web.util.ProfileRoutingInterceptor;
 import org.openmrs.module.fhir2.web.util.SummaryInterceptor;
 import org.openmrs.module.fhir2.web.util.SupportMergePatchInterceptor;
 import org.openmrs.util.OpenmrsClassLoader;
@@ -75,6 +76,9 @@ public class FhirRestServlet extends RestfulServer implements ModuleLifecycleLis
 	
 	@Setter(value = AccessLevel.PUBLIC, onMethod_ = { @Qualifier("hapiLoggingInterceptor"), @Autowired })
 	private LoggingInterceptor loggingInterceptor;
+	
+	@Setter(value = AccessLevel.PUBLIC, onMethod_ = { @Autowired })
+	private ProfileRoutingInterceptor profileRoutingInterceptor;
 	
 	private boolean started = false;
 	
@@ -151,6 +155,7 @@ public class FhirRestServlet extends RestfulServer implements ModuleLifecycleLis
 		registerInterceptor(new DisableCacheInterceptor());
 		registerInterceptor(new SummaryInterceptor());
 		registerInterceptor(new SupportMergePatchInterceptor());
+		registerInterceptor(profileRoutingInterceptor);
 
 		String narrativesOverridePropertyFile = NarrativeUtils.getValidatedPropertiesFilePath(
 				globalPropertyService.getGlobalProperty(FhirConstants.NARRATIVES_OVERRIDE_PROPERTY_FILE, null));
@@ -261,6 +266,7 @@ public class FhirRestServlet extends RestfulServer implements ModuleLifecycleLis
 				registerInterceptor(new DisableCacheInterceptor());
 				registerInterceptor(new SummaryInterceptor());
 				registerInterceptor(new SupportMergePatchInterceptor());
+				registerInterceptor(ctx.getBean(ProfileRoutingInterceptor.class));
 				
 				setAdministrationService(ctx.getBean("adminService", AdministrationService.class));
 				setGlobalPropertyService(ctx.getBean(FhirGlobalPropertyService.class));
