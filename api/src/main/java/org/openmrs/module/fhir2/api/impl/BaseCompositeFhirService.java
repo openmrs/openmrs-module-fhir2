@@ -51,6 +51,8 @@ import org.openmrs.module.fhir2.api.util.ProfileRoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.OrderUtils;
 
 /**
  * Abstract orchestrator for FHIR resource types backed by more than one OpenMRS domain object.
@@ -72,10 +74,12 @@ import org.springframework.beans.factory.annotation.Autowired;
  * <li>{@code get(uuid)} — {@code exists()} probe → {@code handler.get(uuid)}.
  * {@link ca.uhn.fhir.rest.server.exceptions.ResourceGoneException} from the owning handler
  * propagates without fall-through. {@link ResourceNotFoundException} if no handler claims it.
- * <li>{@code create(R)} — {@code meta.profile} match → first {@code canHandle} → otherwise
- * {@link NotImplementedOperationException}. Profile-targeted routing is unconditional — the named
- * handler validates the resource and may itself throw {@link InvalidRequestException} if the input
- * is malformed for it.
+ * <li>{@code create(R)} — {@code meta.profile} match → otherwise every handler whose
+ * {@code canHandle} claims the body, resolved by {@code @Order} when there is more than one.
+ * {@link InvalidRequestException} if the top precedence is tied, or if no handler claims at all;
+ * {@link NotImplementedOperationException} if no handler is registered for the type.
+ * Profile-targeted routing is unconditional — the named handler validates the resource and may
+ * itself throw {@link InvalidRequestException} if the input is malformed for it.
  * <li>{@code update(uuid, r)} / {@code update(uuid, r, RD, false)} — {@code exists()} probe →
  * {@code handler.update(...)}. {@link ResourceNotFoundException} if no handler owns the UUID.
  * <li>{@code update(uuid, r, RD, true)} — {@code exists()} probe first; if a handler owns the UUID,
@@ -376,20 +380,71 @@ public abstract class BaseCompositeFhirService<R extends IAnyResource> implement
 		return profiles;
 	}
 	
+	/**
+	 * Picks the handler that will own a content-bearing write. Since each {@code canHandle} speaks only
+	 * for its own backing, overlap between backings is visible only from here; several claimants are
+	 * resolved by {@code @Order}, and a tie at the top is rejected rather than settled by declaration
+	 * order.
+	 * <p>
+	 * When no handler claims, the two failures differ in kind. No handlers registered at all is a
+	 * server-side gap — this deployment cannot store the resource type in any form, which is what
+	 * {@code 501} means. Handlers that exist but all decline is a statement about this body: the server
+	 * can create the resource type, just not the version supplied, which is a {@code 400}.
+	 */
 	private FhirResourceHandler<R> resolveForCreate(R resource) {
 		FhirResourceHandler<R> byProfile = resolveByProfile(resource);
 		if (byProfile != null) {
 			return byProfile;
 		}
 		
-		for (FhirResourceHandler<R> handler : handlers) {
-			if (handler.canHandle(resource)) {
-				return handler;
-			}
+		List<FhirResourceHandler<R>> claimants = handlers.stream().filter(handler -> handler.canHandle(resource))
+		        .collect(Collectors.toList());
+		
+		if (claimants.size() == 1) {
+			return claimants.get(0);
 		}
 		
-		throw new NotImplementedOperationException(
-		        "No registered handler claims the supplied " + resourceClass.getSimpleName());
+		if (claimants.isEmpty()) {
+			if (handlers.isEmpty()) {
+				throw new NotImplementedOperationException("No " + FhirResourceHandler.class.getSimpleName()
+				        + " is registered for resources of type " + resourceClass.getSimpleName());
+			}
+			
+			throw new InvalidRequestException("None of the registered handlers for " + resourceClass.getSimpleName()
+			        + " accepts the supplied resource; set meta.profile to one of " + profilesOf(handlers)
+			        + " to target one explicitly");
+		}
+		
+		List<FhirResourceHandler<R>> mostSpecific = highestPrecedenceOf(claimants);
+		if (mostSpecific.size() == 1) {
+			return mostSpecific.get(0);
+		}
+		
+		throw new InvalidRequestException(
+		        "The supplied " + resourceClass.getSimpleName() + " is claimed by more than one backing of equal precedence "
+		                + profilesOf(mostSpecific) + "; set meta.profile to one of them to choose");
+	}
+	
+	/**
+	 * Narrows a set of claiming handlers to those sharing the lowest {@code @Order} value among them.
+	 * Only reached when more than one handler claims, keeping the reflective order lookup off the
+	 * common path.
+	 */
+	private List<FhirResourceHandler<R>> highestPrecedenceOf(List<FhirResourceHandler<R>> claimants) {
+		int winning = claimants.stream().mapToInt(BaseCompositeFhirService::orderOf).min().orElse(Ordered.LOWEST_PRECEDENCE);
+		return claimants.stream().filter(handler -> orderOf(handler) == winning).collect(Collectors.toList());
+	}
+	
+	private static int orderOf(Object handler) {
+		if (handler instanceof Ordered) {
+			return ((Ordered) handler).getOrder();
+		}
+		
+		return OrderUtils.getOrder(handler.getClass(), Ordered.LOWEST_PRECEDENCE);
+	}
+	
+	private String profilesOf(Collection<FhirResourceHandler<R>> subject) {
+		return subject.stream().map(FhirResourceHandler::getImplicitProfile).collect(Collectors.joining(", ", "[", "]"));
 	}
 	
 	private FhirResourceHandler<R> resolveByProfile(R resource) {

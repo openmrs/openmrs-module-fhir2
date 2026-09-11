@@ -13,10 +13,13 @@ import javax.annotation.Nonnull;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.search.param.PropParam;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
@@ -24,16 +27,56 @@ import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 /**
  * Static helpers for {@link FhirResourceHandler} implementations.
  * <p>
- * The main use today is search-routing via a coding system shared by handlers backing the same FHIR
- * resource type. Each handler declares its routing code in that system and opts out of a search
- * whenever a routing token (read from {@code _tag} or from a domain-specific token search param
- * such as {@code category}) references the shared system but doesn't include the caller's code.
- * Tokens in unrelated coding systems are treated as content filters and never cause opt-out.
+ * Each helper takes the caller's own coding system and code, never a list of the alternatives, so
+ * that a backing contributed by another module needs no changes here.
+ * <p>
+ * On search, a handler opts out whenever a routing token (read from {@code _tag} or from a
+ * domain-specific token search param such as {@code category}) references the shared system but
+ * doesn't include the caller's code. Tokens in unrelated coding systems are treated as content
+ * filters and never cause opt-out.
  */
 public final class HandlerSupport {
 	
 	private HandlerSupport() {
 		// no instances
+	}
+	
+	/**
+	 * A {@link FhirResourceHandler#canHandle} predicate for backings marked by membership of a coding
+	 * system, whatever the code — as the OpenMRS encounter-type and visit-type systems are.
+	 *
+	 * @param concepts the concepts to inspect (e.g. {@code Encounter.type}); may be empty
+	 * @param system the coding system that marks a body as the caller's
+	 */
+	public static boolean hasCodingInSystem(@Nonnull List<CodeableConcept> concepts, @Nonnull String system) {
+		return codings(concepts).anyMatch(coding -> system.equals(coding.getSystem()));
+	}
+	
+	/**
+	 * A {@link FhirResourceHandler#canHandle} predicate for backings that share a coding system and are
+	 * distinguished by code, as the {@code Condition} categories are.
+	 *
+	 * @param concepts the concepts to inspect (e.g. {@code Condition.category}); may be empty
+	 * @param system the shared coding system
+	 * @param code the calling handler's code within that system
+	 */
+	public static boolean hasCoding(@Nonnull List<CodeableConcept> concepts, @Nonnull String system, @Nonnull String code) {
+		return codings(concepts).anyMatch(coding -> system.equals(coding.getSystem()) && code.equals(coding.getCode()));
+	}
+	
+	/**
+	 * Returns whether the concepts carry no codings at all — neither any {@code CodeableConcept}, nor
+	 * one with a populated {@code coding}. The handler that owns the unmarked case, where the client
+	 * has named no backing, claims on this.
+	 *
+	 * @param concepts the concepts to inspect; may be empty
+	 */
+	public static boolean hasNoCodings(@Nonnull List<CodeableConcept> concepts) {
+		return !codings(concepts).findAny().isPresent();
+	}
+	
+	private static Stream<Coding> codings(List<CodeableConcept> concepts) {
+		return concepts.stream().filter(CodeableConcept::hasCoding).flatMap(concept -> concept.getCoding().stream());
 	}
 	
 	/**

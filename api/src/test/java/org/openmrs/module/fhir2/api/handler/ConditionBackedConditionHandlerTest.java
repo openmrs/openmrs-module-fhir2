@@ -77,9 +77,31 @@ public class ConditionBackedConditionHandlerTest {
 	
 	@Test
 	public void canHandle_shouldReturnTrueWhenNoCategoryProvided() {
-		// FhirUtils.getOpenmrsConditionType defaults to CONDITION when category absent — this handler
-		// is the default backing.
+		// this handler owns the unmarked case: a Condition with no category lands here
 		assertTrue(handler.canHandle(new Condition()));
+	}
+	
+	@Test
+	public void canHandle_shouldReturnTrueWhenCategoryCarriesNoCodings() {
+		// a category element present but empty is still the unmarked case
+		Condition condition = new Condition();
+		condition.addCategory(new CodeableConcept());
+		
+		assertTrue(handler.canHandle(condition));
+	}
+	
+	/**
+	 * Overlap with another backing is the orchestrator's to resolve; see FhirConditionServiceImplTest.
+	 */
+	@Test
+	public void canHandle_shouldStillClaimWhenCategoryAlsoNamesAnotherBacking() {
+		Condition condition = withCategory(FhirConstants.CONDITION_CATEGORY_CODE_CONDITION);
+		CodeableConcept alsoDiagnosis = new CodeableConcept();
+		alsoDiagnosis.addCoding(
+		    new Coding(FhirConstants.CONDITION_CATEGORY_SYSTEM_URI, FhirConstants.CONDITION_CATEGORY_CODE_DIAGNOSIS, null));
+		condition.addCategory(alsoDiagnosis);
+		
+		assertTrue(handler.canHandle(condition));
 	}
 	
 	@Test

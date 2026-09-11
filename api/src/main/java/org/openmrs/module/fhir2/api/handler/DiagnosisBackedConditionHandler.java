@@ -25,7 +25,6 @@ import org.hl7.fhir.r4.model.Condition;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirDiagnosisService;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
-import org.openmrs.module.fhir2.api.util.FhirUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -36,10 +35,9 @@ import org.springframework.stereotype.Component;
  * delegating every {@link org.openmrs.module.fhir2.api.FhirService} call to the
  * {@link FhirDiagnosisService}. Sibling of {@link ConditionBackedConditionHandler}.
  * <p>
- * Claims an incoming resource on writes when {@link FhirUtils#getOpenmrsConditionType} resolves to
- * {@code DIAGNOSIS} ({@code encounter-diagnosis} category). Opts out of search when the
- * {@code category} parameter targets a coding in
- * {@link FhirConstants#CONDITION_CATEGORY_SYSTEM_URI} whose code isn't
+ * Claims an incoming resource on writes when its {@code category} carries
+ * {@code encounter-diagnosis} in {@link FhirConstants#CONDITION_CATEGORY_SYSTEM_URI}. Opts out of
+ * search when the {@code category} parameter targets a coding in the same system whose code isn't
  * {@code "encounter-diagnosis"}.
  */
 @Component
@@ -59,8 +57,8 @@ public class DiagnosisBackedConditionHandler implements FhirResourceHandler<Cond
 	
 	@Override
 	public boolean canHandle(@Nonnull Condition condition) {
-		return FhirUtils.getOpenmrsConditionType(condition).filter(type -> type == FhirUtils.OpenmrsConditionType.DIAGNOSIS)
-		        .isPresent();
+		return HandlerSupport.hasCoding(condition.getCategory(), FhirConstants.CONDITION_CATEGORY_SYSTEM_URI,
+		    FhirConstants.CONDITION_CATEGORY_CODE_DIAGNOSIS);
 	}
 	
 	@Override

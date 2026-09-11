@@ -25,7 +25,6 @@ import org.hl7.fhir.r4.model.Condition;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirOpenmrsConditionService;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
-import org.openmrs.module.fhir2.api.util.FhirUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -37,14 +36,14 @@ import org.springframework.stereotype.Component;
  * {@link FhirOpenmrsConditionService}. Sibling of {@link DiagnosisBackedConditionHandler}, which
  * applies the same composition pattern over {@code FhirDiagnosisService}.
  * <p>
- * Claims an incoming resource on writes when {@link FhirUtils#getOpenmrsConditionType} resolves to
- * {@code CONDITION} — which includes the explicit {@code problem-list-item} category and the
- * default-when-absent case. Opts out of search when the {@code category} parameter targets a coding
- * in {@link FhirConstants#CONDITION_CATEGORY_SYSTEM_URI} whose code isn't
+ * Claims an incoming resource on writes when its {@code category} carries {@code problem-list-item}
+ * in {@link FhirConstants#CONDITION_CATEGORY_SYSTEM_URI}, and also when the body carries no
+ * category codings at all — this is the backing an unmarked {@code Condition} lands on. Opts out of
+ * search when the {@code category} parameter targets a coding in the same system whose code isn't
  * {@code "problem-list-item"}.
  */
 @Component
-@Order(Ordered.LOWEST_PRECEDENCE - 10)
+@Order(Ordered.LOWEST_PRECEDENCE)
 public class ConditionBackedConditionHandler implements FhirResourceHandler<Condition> {
 	
 	private static final String IMPLICIT_PROFILE = OPENMRS_FHIR_STRUCTURE_DEFINITION_PREFIX + "/openmrs-condition";
@@ -60,8 +59,8 @@ public class ConditionBackedConditionHandler implements FhirResourceHandler<Cond
 	
 	@Override
 	public boolean canHandle(@Nonnull Condition condition) {
-		return FhirUtils.getOpenmrsConditionType(condition).filter(type -> type == FhirUtils.OpenmrsConditionType.CONDITION)
-		        .isPresent();
+		return HandlerSupport.hasNoCodings(condition.getCategory()) || HandlerSupport.hasCoding(condition.getCategory(),
+		    FhirConstants.CONDITION_CATEGORY_SYSTEM_URI, FhirConstants.CONDITION_CATEGORY_CODE_CONDITION);
 	}
 	
 	@Override

@@ -35,7 +35,7 @@ import org.springframework.stereotype.Component;
  * delegating every {@link org.openmrs.module.fhir2.api.FhirService} call to the existing
  * {@link FhirVisitService}.
  * <p>
- * Claims an incoming resource on writes when its {@code type[].coding[].system} equals
+ * Claims an incoming resource on writes when its {@code type[].coding[].system} includes
  * {@link FhirConstants#VISIT_TYPE_SYSTEM_URI}. Opts out of search when the {@code _tag} parameter
  * contains a coding in the {@code OPENMRS_FHIR_EXT_ENCOUNTER_TAG} system whose value isn't
  * {@code "visit"}.
@@ -57,8 +57,7 @@ public class VisitBackedEncounterHandler implements FhirResourceHandler<Encounte
 	
 	@Override
 	public boolean canHandle(@Nonnull Encounter encounter) {
-		return encounter.getType().stream().flatMap(t -> t.getCoding().stream())
-		        .anyMatch(c -> FhirConstants.VISIT_TYPE_SYSTEM_URI.equals(c.getSystem()));
+		return HandlerSupport.hasCodingInSystem(encounter.getType(), FhirConstants.VISIT_TYPE_SYSTEM_URI);
 	}
 	
 	@Override

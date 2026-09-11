@@ -10,7 +10,9 @@
 package org.openmrs.module.fhir2.api.impl;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
@@ -29,6 +31,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -57,6 +60,7 @@ import org.openmrs.module.fhir2.api.handler.FhirResourceHandler;
 import org.openmrs.module.fhir2.api.search.CompositeBundleProvider;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.util.ProfileRoutingContext;
+import org.springframework.core.Ordered;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BaseCompositeFhirServiceTest {
@@ -64,6 +68,8 @@ public class BaseCompositeFhirServiceTest {
 	private static final String PROFILE_PRIMARY = "http://example.org/StructureDefinition/primary";
 	
 	private static final String PROFILE_SECONDARY = "http://example.org/StructureDefinition/secondary";
+	
+	private static final String PROFILE_SPECIALIZED = "http://example.org/StructureDefinition/specialized";
 	
 	private static final String UUID_PRIMARY = "11111111-1111-1111-1111-111111111111";
 	
@@ -199,13 +205,34 @@ public class BaseCompositeFhirServiceTest {
 		assertThrows(InvalidRequestException.class, () -> service.create(null));
 	}
 	
+	/** A client error: the server can create this resource type, just not the version supplied. */
 	@Test
-	public void createShouldThrowNotImplementedWhenNoHandlerClaims() {
+	public void createShouldThrowInvalidRequestWhenHandlersExistButNoneClaims() {
 		Encounter resource = new Encounter();
 		when(primaryHandler.canHandle(any())).thenReturn(false);
 		when(secondaryHandler.canHandle(any())).thenReturn(false);
 		
-		assertThrows(NotImplementedOperationException.class, () -> service.create(resource));
+		assertThrows(InvalidRequestException.class, () -> service.create(resource));
+	}
+	
+	@Test
+	public void createShouldNameTheRegisteredProfilesWhenNoHandlerClaims() {
+		// the message is the client's only route out of the rejection
+		Encounter resource = new Encounter();
+		when(primaryHandler.canHandle(any())).thenReturn(false);
+		when(secondaryHandler.canHandle(any())).thenReturn(false);
+		
+		InvalidRequestException thrown = assertThrows(InvalidRequestException.class, () -> service.create(resource));
+		
+		assertThat(thrown.getMessage(), allOf(containsString(PROFILE_PRIMARY), containsString(PROFILE_SECONDARY)));
+	}
+	
+	/** The genuinely unimplemented case: this deployment cannot store the resource type in any form. */
+	@Test
+	public void createShouldThrowNotImplementedWhenNoHandlersAreRegistered() {
+		service.setHandlers(Collections.emptyList());
+		
+		assertThrows(NotImplementedOperationException.class, () -> service.create(new Encounter()));
 	}
 	
 	@Test
@@ -237,17 +264,75 @@ public class BaseCompositeFhirServiceTest {
 		verify(secondaryHandler, never()).create(any());
 	}
 	
+	/** Both mocks are unannotated and so tie at LOWEST_PRECEDENCE, which is what makes them peers. */
 	@Test
-	public void createShouldUseFirstCanHandleInPriorityOrder() {
+	public void createShouldRejectWhenPeerHandlersBothClaim() {
 		Encounter resource = new Encounter();
 		when(primaryHandler.canHandle(resource)).thenReturn(true);
-		lenient().when(secondaryHandler.canHandle(resource)).thenReturn(true);
-		when(primaryHandler.create(resource)).thenReturn(encounter(UUID_PRIMARY));
+		when(secondaryHandler.canHandle(resource)).thenReturn(true);
 		
-		service.create(resource);
+		InvalidRequestException thrown = assertThrows(InvalidRequestException.class, () -> service.create(resource));
 		
-		verify(primaryHandler).create(resource);
+		assertThat(thrown.getMessage(), allOf(containsString(PROFILE_PRIMARY), containsString(PROFILE_SECONDARY)));
+		verify(primaryHandler, never()).create(any());
 		verify(secondaryHandler, never()).create(any());
+	}
+	
+	/**
+	 * The escape hatch for a module that deliberately overlaps a built-in, which need not know it
+	 * exists.
+	 */
+	@Test
+	public void createShouldDispatchToTheHighestPrecedenceClaimant() {
+		Encounter resource = new Encounter();
+		FhirResourceHandler<Encounter> specialized = orderedHandler(PROFILE_SPECIALIZED, Ordered.LOWEST_PRECEDENCE - 10);
+		when(specialized.canHandle(resource)).thenReturn(true);
+		lenient().when(primaryHandler.canHandle(resource)).thenReturn(true);
+		lenient().when(secondaryHandler.canHandle(resource)).thenReturn(true);
+		Encounter persisted = encounter(UUID_PRIMARY);
+		when(specialized.create(resource)).thenReturn(persisted);
+		service.setHandlers(Arrays.asList(specialized, primaryHandler, secondaryHandler));
+		
+		Encounter result = service.create(resource);
+		
+		assertThat(result, sameInstance(persisted));
+		verify(primaryHandler, never()).create(any());
+		verify(secondaryHandler, never()).create(any());
+	}
+	
+	/**
+	 * Precedence only settles a contest between claimants. A high-precedence handler that declines the
+	 * body must not suppress the lower-precedence one that claims it.
+	 */
+	@Test
+	public void createShouldIgnorePrecedenceOfHandlersThatDoNotClaim() {
+		Encounter resource = new Encounter();
+		FhirResourceHandler<Encounter> specialized = orderedHandler(PROFILE_SPECIALIZED, Ordered.LOWEST_PRECEDENCE - 10);
+		when(specialized.canHandle(resource)).thenReturn(false);
+		when(primaryHandler.canHandle(resource)).thenReturn(true);
+		lenient().when(secondaryHandler.canHandle(resource)).thenReturn(false);
+		Encounter persisted = encounter(UUID_PRIMARY);
+		when(primaryHandler.create(resource)).thenReturn(persisted);
+		service.setHandlers(Arrays.asList(specialized, primaryHandler, secondaryHandler));
+		
+		Encounter result = service.create(resource);
+		
+		assertThat(result, sameInstance(persisted));
+		verify(specialized, never()).create(any());
+	}
+	
+	/**
+	 * Builds a handler whose precedence the orchestrator can read. Mockito mocks carry no annotations,
+	 * so this uses the {@link Ordered} interface — the other half of the same Spring contract.
+	 */
+	@SuppressWarnings("unchecked")
+	private static FhirResourceHandler<Encounter> orderedHandler(String profile, int order) {
+		FhirResourceHandler<Encounter> handler = mock(FhirResourceHandler.class,
+		    withSettings().extraInterfaces(Ordered.class));
+		lenient().when(handler.getImplicitProfile()).thenReturn(profile);
+		lenient().when(handler.exists(anyString())).thenReturn(false);
+		lenient().when(((Ordered) handler).getOrder()).thenReturn(order);
+		return handler;
 	}
 	
 	@Test

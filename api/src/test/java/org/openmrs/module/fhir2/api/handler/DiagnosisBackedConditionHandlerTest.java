@@ -79,9 +79,23 @@ public class DiagnosisBackedConditionHandlerTest {
 	
 	@Test
 	public void canHandle_shouldReturnFalseWhenNoCategoryProvided() {
-		// FhirUtils.getOpenmrsConditionType defaults to CONDITION when category absent — diagnosis
-		// handler does not claim those.
+		// An unmarked Condition belongs to the problem-list backing, which owns the default case;
+		// this handler claims only an explicit encounter-diagnosis category.
 		assertFalse(handler.canHandle(new Condition()));
+	}
+	
+	/**
+	 * Overlap with another backing is the orchestrator's to resolve; see FhirConditionServiceImplTest.
+	 */
+	@Test
+	public void canHandle_shouldStillClaimWhenCategoryAlsoNamesAnotherBacking() {
+		Condition condition = withCategory(FhirConstants.CONDITION_CATEGORY_CODE_DIAGNOSIS);
+		CodeableConcept alsoProblemList = new CodeableConcept();
+		alsoProblemList.addCoding(
+		    new Coding(FhirConstants.CONDITION_CATEGORY_SYSTEM_URI, FhirConstants.CONDITION_CATEGORY_CODE_CONDITION, null));
+		condition.addCategory(alsoProblemList);
+		
+		assertTrue(handler.canHandle(condition));
 	}
 	
 	// ---- acceptsSearch (category-aware opt-out) ----

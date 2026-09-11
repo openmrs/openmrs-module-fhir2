@@ -81,6 +81,16 @@ public class FhirConditionServiceImplTest {
 		    inv -> participatesByCategory(inv.getArgument(0), FhirConstants.CONDITION_CATEGORY_CODE_CONDITION));
 		lenient().when(diagnosisHandler.acceptsSearch(any())).thenAnswer(
 		    inv -> participatesByCategory(inv.getArgument(0), FhirConstants.CONDITION_CATEGORY_CODE_DIAGNOSIS));
+		// Mirror handler canHandle — each looks only for its own category code, and the condition
+		// backing additionally owns the unmarked case. A body carrying both is therefore claimed by
+		// both, which is what the ambiguity test below relies on.
+		lenient().when(conditionHandler.canHandle(any())).thenAnswer(inv -> {
+			Condition condition = inv.getArgument(0);
+			return !hasAnyCategoryCoding(condition)
+			        || hasCategoryCode(condition, FhirConstants.CONDITION_CATEGORY_CODE_CONDITION);
+		});
+		lenient().when(diagnosisHandler.canHandle(any()))
+		        .thenAnswer(inv -> hasCategoryCode(inv.getArgument(0), FhirConstants.CONDITION_CATEGORY_CODE_DIAGNOSIS));
 		
 		service = new FhirConditionServiceImpl();
 		service.setHandlers(Arrays.asList(conditionHandler, diagnosisHandler));
@@ -113,7 +123,21 @@ public class FhirConditionServiceImplTest {
 		return true;
 	}
 	
-	// ---- create: orchestrator-level category pre-validation ----
+	private static boolean hasAnyCategoryCoding(Condition condition) {
+		return condition.getCategory().stream().anyMatch(CodeableConcept::hasCoding);
+	}
+	
+	private static boolean hasCategoryCode(Condition condition, String code) {
+		return condition.getCategory().stream().flatMap(category -> category.getCoding().stream())
+		        .anyMatch(coding -> FhirConstants.CONDITION_CATEGORY_SYSTEM_URI.equals(coding.getSystem())
+		                && code.equals(coding.getCode()));
+	}
+	
+	// ---- create: category-based dispatch ----
+	//
+	// The rejections below come from BaseCompositeFhirService, not from any Condition-specific
+	// pre-check: a category naming neither backing is claimed by neither handler, one naming both is
+	// claimed by both.
 	
 	@Test
 	public void create_shouldRejectConditionWithUnknownCategoryCoding() {
@@ -136,13 +160,50 @@ public class FhirConditionServiceImplTest {
 		assertThrows(InvalidRequestException.class, () -> service.create(condition));
 	}
 	
+	/** Both backings claim a body carrying both categories, and they register as peers. */
+	@Test
+	public void create_shouldRejectConditionCarryingBothCategories() {
+		Condition condition = newConditionWithCategory(FhirConstants.CONDITION_CATEGORY_CODE_CONDITION);
+		CodeableConcept alsoDiagnosis = new CodeableConcept();
+		alsoDiagnosis.addCoding(
+		    new Coding(FhirConstants.CONDITION_CATEGORY_SYSTEM_URI, FhirConstants.CONDITION_CATEGORY_CODE_DIAGNOSIS, null));
+		condition.addCategory(alsoDiagnosis);
+		
+		assertThrows(InvalidRequestException.class, () -> service.create(condition));
+		
+		verify(conditionHandler, never()).create(any());
+		verify(diagnosisHandler, never()).create(any());
+	}
+	
 	@Test
 	public void create_shouldDispatchToConditionHandlerForKnownCondition() {
 		Condition condition = newConditionWithCategory(FhirConstants.CONDITION_CATEGORY_CODE_CONDITION);
-		when(conditionHandler.canHandle(condition)).thenReturn(true);
 		when(conditionHandler.create(condition)).thenReturn(condition);
 		
 		service.create(condition);
+		
+		verify(conditionHandler).create(condition);
+		verify(diagnosisHandler, never()).create(any());
+	}
+	
+	@Test
+	public void create_shouldDispatchToDiagnosisHandlerForEncounterDiagnosis() {
+		Condition condition = newConditionWithCategory(FhirConstants.CONDITION_CATEGORY_CODE_DIAGNOSIS);
+		when(diagnosisHandler.create(condition)).thenReturn(condition);
+		
+		service.create(condition);
+		
+		verify(diagnosisHandler).create(condition);
+		verify(conditionHandler, never()).create(any());
+	}
+	
+	@Test
+	public void create_shouldDispatchToConditionHandlerWhenNoCategoryProvided() {
+		Condition condition = new Condition();
+		when(conditionHandler.create(condition)).thenReturn(condition);
+		
+		service.create(condition);
+		
 		verify(conditionHandler).create(condition);
 	}
 	

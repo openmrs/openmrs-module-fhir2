@@ -61,10 +61,18 @@ import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
  * priority. Handlers with distinct profiles all coexist (e.g. the encounter and visit mappings for
  * {@code Encounter}); a new backing should expose its own profile URL, namespaced by module id.
  * <p>
- * Tie-breaking semantics on {@code canHandle}: when two handlers both claim the same incoming
- * resource (e.g. an {@code Encounter} body carrying both encounter-type and visit-type codings),
- * the higher-priority handler wins silently. Use {@code meta.profile} to target a specific handler
- * when ambiguity needs to be resolved by the client.
+ * <b>Overlapping claims.</b> Write {@code canHandle} to describe <em>your</em> backing and nothing
+ * else: a handler that enumerates its rivals cannot accommodate one added later by another module.
+ * Overlap is visible only to the orchestrator, which resolves it by {@code @Order}. A handler
+ * registered at a higher precedence than everything else claiming the body wins outright, which is
+ * how you add a backing that deliberately overlaps a built-in. A tie at the top — the built-in
+ * encounter and visit backings are peers, so a body naming both lands here — is rejected with
+ * {@link ca.uhn.fhir.rest.server.exceptions.InvalidRequestException} naming the tied profiles,
+ * since declaration order is not an answer the client can predict or correct. The same rejection
+ * covers the opposite case, where no handler claims at all.
+ * <p>
+ * {@code meta.profile} is consulted <em>before</em> {@code canHandle}, so neither rejection can
+ * block a client that has stated which backing it means.
  * <h2>Implementing a handler</h2> Handler implementations typically bundle a DAO and a translator
  * (often by extending {@code BaseFhirService}) or compose an existing OpenMRS-typed service. A
  * minimal composing implementation — for example, the visit-backed mapping for FHIR
@@ -84,8 +92,7 @@ import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
  *     {@literal @}Override
  *     public boolean canHandle(Encounter encounter) {
  *         // Claim incoming Encounters whose type[].coding has the OpenMRS visit-type system.
- *         return encounter.getType().stream().flatMap(t -&gt; t.getCoding().stream())
- *             .anyMatch(c -&gt; FhirConstants.VISIT_TYPE_SYSTEM_URI.equals(c.getSystem()));
+ *         return HandlerSupport.hasCodingInSystem(encounter.getType(), FhirConstants.VISIT_TYPE_SYSTEM_URI);
  *     }
  *
  *     {@literal @}Override
@@ -155,6 +162,10 @@ public interface FhirResourceHandler<R extends IAnyResource> extends FhirService
 	 * This is a <em>dispatch</em> predicate, not input validation. A handler may return {@code true}
 	 * here and still reject specific malformed inputs at create or update time by throwing
 	 * {@link ca.uhn.fhir.rest.server.exceptions.InvalidRequestException}.
+	 * <p>
+	 * Answer for your own backing only; see <b>Overlapping claims</b> above. A handler that is the only
+	 * backing for its resource type has nothing to discriminate on and should simply return
+	 * {@code true}.
 	 *
 	 * @param resource the FHIR resource being submitted, never {@code null}
 	 * @return {@code true} if this handler is willing to process the resource

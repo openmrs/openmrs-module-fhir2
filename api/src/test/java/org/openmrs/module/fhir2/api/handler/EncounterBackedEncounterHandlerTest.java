@@ -91,6 +91,40 @@ public class EncounterBackedEncounterHandlerTest {
 		assertFalse(handler.canHandle(new Encounter()));
 	}
 	
+	/**
+	 * Overlap with another backing is the orchestrator's to resolve; see FhirEncounterServiceImplTest.
+	 */
+	@Test
+	public void canHandle_shouldStillClaimWhenTypeCodingsAlsoNameAnotherBacking() {
+		CodeableConcept type = new CodeableConcept();
+		type.addCoding().setSystem(FhirConstants.VISIT_TYPE_SYSTEM_URI).setCode("1");
+		type.addCoding().setSystem(FhirConstants.ENCOUNTER_TYPE_SYSTEM_URI).setCode("2");
+		Encounter encounter = new Encounter().addType(type);
+		
+		assertTrue(handler.canHandle(encounter));
+	}
+	
+	@Test
+	public void canHandle_shouldFindTheSystemAcrossSeparateTypeConcepts() {
+		// the coding can arrive in any of the type[] entries, not only the first
+		CodeableConcept visitType = new CodeableConcept();
+		visitType.addCoding().setSystem(FhirConstants.VISIT_TYPE_SYSTEM_URI).setCode("1");
+		CodeableConcept encounterType = new CodeableConcept();
+		encounterType.addCoding().setSystem(FhirConstants.ENCOUNTER_TYPE_SYSTEM_URI).setCode("2");
+		Encounter encounter = new Encounter().addType(visitType).addType(encounterType);
+		
+		assertTrue(handler.canHandle(encounter));
+	}
+	
+	@Test
+	public void canHandle_shouldIgnoreCodingsFromUnrelatedSystems() {
+		CodeableConcept type = new CodeableConcept();
+		type.addCoding().setSystem("http://example.org/some-system").setCode("1");
+		Encounter encounter = new Encounter().addType(type);
+		
+		assertFalse(handler.canHandle(encounter));
+	}
+	
 	// ---- acceptsSearch (tag-aware opt-out) ----
 	
 	@Test

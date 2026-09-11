@@ -14,6 +14,7 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
@@ -28,7 +29,9 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Encounter;
 import org.junit.Before;
 import org.junit.Test;
@@ -47,11 +50,11 @@ import org.openmrs.module.fhir2.providers.r4.MockIBundleProvider;
  * profile/canHandle routing, fan-out merge) are covered in {@link BaseCompositeFhirServiceTest},
  * and encounter/visit-specific CRUD lives in the handler tests under
  * {@code o.o.m.fhir2.api.handler}. What's left for this class is the encounter-specific
- * orchestration: that {@code searchForEncounters} forwards the {@code SearchParameterMap} through
- * {@code doSearch} and that {@code getEncounterEverything} builds the right
- * {@code SearchParameterMap}. Tag-based routing is the handlers' own concern (their
- * {@code acceptsSearch}); these tests simulate that with per-test mocks rather than re-testing
- * handler logic.
+ * orchestration: that a create lands on the backing its type codings name (and is rejected when
+ * they name both or neither), that {@code searchForEncounters} forwards the
+ * {@code SearchParameterMap} through {@code doSearch}, and that {@code getEncounterEverything}
+ * builds the right {@code SearchParameterMap}. The handler mocks here mirror what the real pair
+ * does rather than re-testing handler logic.
  */
 @RunWith(MockitoJUnitRunner.class)
 public class FhirEncounterServiceImplTest {
@@ -84,6 +87,12 @@ public class FhirEncounterServiceImplTest {
 		lenient().when(encounterHandler.acceptsSearch(any()))
 		        .thenAnswer(inv -> participatesByTag(inv.getArgument(0), "encounter"));
 		lenient().when(visitHandler.acceptsSearch(any())).thenAnswer(inv -> participatesByTag(inv.getArgument(0), "visit"));
+		// Likewise for canHandle: each real handler looks only for its own type system, so a body
+		// naming both is claimed by both. The ambiguity tests below rely on that.
+		lenient().when(encounterHandler.canHandle(any()))
+		        .thenAnswer(inv -> claims(inv.getArgument(0), FhirConstants.ENCOUNTER_TYPE_SYSTEM_URI));
+		lenient().when(visitHandler.canHandle(any()))
+		        .thenAnswer(inv -> claims(inv.getArgument(0), FhirConstants.VISIT_TYPE_SYSTEM_URI));
 		
 		service = new FhirEncounterServiceImpl();
 		service.setHandlers(Arrays.asList(encounterHandler, visitHandler));
@@ -119,6 +128,81 @@ public class FhirEncounterServiceImplTest {
 			}
 		}
 		return true;
+	}
+	
+	private static boolean claims(Encounter encounter, String mySystem) {
+		return encounter.getType().stream().flatMap(type -> type.getCoding().stream())
+		        .anyMatch(coding -> mySystem.equals(coding.getSystem()));
+	}
+	
+	// ---- create: type-coding dispatch ----
+	
+	@Test
+	public void create_shouldDispatchToEncounterHandlerForEncounterType() {
+		Encounter encounter = encounterTyped(FhirConstants.ENCOUNTER_TYPE_SYSTEM_URI);
+		when(encounterHandler.create(encounter)).thenReturn(encounter);
+		
+		service.create(encounter);
+		
+		verify(encounterHandler).create(encounter);
+		verify(visitHandler, never()).create(any());
+	}
+	
+	@Test
+	public void create_shouldDispatchToVisitHandlerForVisitType() {
+		Encounter encounter = encounterTyped(FhirConstants.VISIT_TYPE_SYSTEM_URI);
+		when(visitHandler.create(encounter)).thenReturn(encounter);
+		
+		service.create(encounter);
+		
+		verify(visitHandler).create(encounter);
+		verify(encounterHandler, never()).create(any());
+	}
+	
+	/**
+	 * Regression guard: resolving this by declaration order would write an OpenMRS Encounter row for a
+	 * request the client has no reason to read as encounter-flavoured.
+	 */
+	@Test
+	public void create_shouldRejectEncounterCarryingBothTypeSystems() {
+		CodeableConcept type = new CodeableConcept();
+		type.addCoding().setSystem(FhirConstants.VISIT_TYPE_SYSTEM_URI).setCode("1");
+		type.addCoding().setSystem(FhirConstants.ENCOUNTER_TYPE_SYSTEM_URI).setCode("2");
+		
+		assertThrows(InvalidRequestException.class, () -> service.create(new Encounter().addType(type)));
+		
+		verify(encounterHandler, never()).create(any());
+		verify(visitHandler, never()).create(any());
+	}
+	
+	@Test
+	public void create_shouldRejectEncounterWithNoRecognisedType() {
+		assertThrows(InvalidRequestException.class, () -> service.create(new Encounter()));
+	}
+	
+	/**
+	 * meta.profile is resolved before canHandle, so a client that states which backing it means still
+	 * gets through a body that content-based dispatch would have rejected.
+	 */
+	@Test
+	public void create_shouldHonourMetaProfileForAnOtherwiseAmbiguousEncounter() {
+		CodeableConcept type = new CodeableConcept();
+		type.addCoding().setSystem(FhirConstants.VISIT_TYPE_SYSTEM_URI).setCode("1");
+		type.addCoding().setSystem(FhirConstants.ENCOUNTER_TYPE_SYSTEM_URI).setCode("2");
+		Encounter encounter = new Encounter().addType(type);
+		encounter.getMeta().addProfile("http://fhir.openmrs.org/StructureDefinition/openmrs-visit");
+		when(visitHandler.create(encounter)).thenReturn(encounter);
+		
+		service.create(encounter);
+		
+		verify(visitHandler).create(encounter);
+		verify(encounterHandler, never()).create(any());
+	}
+	
+	private static Encounter encounterTyped(String system) {
+		CodeableConcept type = new CodeableConcept();
+		type.addCoding().setSystem(system).setCode("1");
+		return new Encounter().addType(type);
 	}
 	
 	// ---- searchForEncounters: tag-based dispatch ----
