@@ -15,8 +15,9 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import org.openmrs.module.fhir2.FhirConstants;
 
-@Interceptor
+@Interceptor(order = FhirConstants.BUILT_IN_INTERCEPTOR_ORDER)
 public class DisableCacheInterceptor {
 	
 	@Hook(Pointcut.SERVER_OUTGOING_RESPONSE)

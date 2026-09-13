@@ -18,8 +18,9 @@ import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.fhir2.FhirConstants;
 
-@Interceptor
+@Interceptor(order = FhirConstants.BUILT_IN_INTERCEPTOR_ORDER)
 public class RequireAuthenticationInterceptor {
 	
 	@Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_PROCESSED)

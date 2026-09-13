@@ -13,8 +13,9 @@ import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import org.openmrs.module.fhir2.FhirConstants;
 
-@Interceptor
+@Interceptor(order = FhirConstants.BUILT_IN_INTERCEPTOR_ORDER)
 public class SummaryInterceptor {
 	
 	@Hook(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED)

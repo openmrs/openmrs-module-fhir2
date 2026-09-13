@@ -18,6 +18,21 @@ public final class FhirConstants {
 	
 	public static final String FHIR2_MODULE_ID = "fhir2";
 	
+	/**
+	 * The HAPI interceptor order this module uses for its own interceptors, so that they dispatch ahead
+	 * of anything at {@code Interceptor.DEFAULT_ORDER} however late this module registers them. A bean
+	 * contributed with {@code org.openmrs.module.fhir2.api.annotations.FhirInterceptor} is held at or
+	 * above the default order, so it cannot precede them.
+	 * <p>
+	 * This is a convention, not a barrier: only beans that arrive through {@code FhirInterceptor} are
+	 * checked. Code that registers an interceptor on the servlet directly can still declare a lower
+	 * order and run first.
+	 * <p>
+	 * Deliberately a small magnitude rather than {@code Integer.MIN_VALUE}: HAPI compares two orders
+	 * with {@code a - b}, which overflows and inverts the comparison near the extremes of int.
+	 */
+	public static final int BUILT_IN_INTERCEPTOR_ORDER = -1000;
+	
 	public static final String OPENMRS_FHIR_SERVER_NAME = "OpenMRS FHIR Server";
 	
 	public static final String HL7_FHIR_CODE_SYSTEM_PREFIX = "http://terminology.hl7.org/CodeSystem";
