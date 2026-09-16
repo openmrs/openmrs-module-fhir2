@@ -18,6 +18,8 @@ import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertThrows;
+import static org.openmrs.util.PrivilegeConstants.GET_ORDERS;
 
 import java.time.LocalDateTime;
 import java.time.Month;
@@ -35,15 +37,19 @@ import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.Concept;
+import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.ConceptService;
+import org.openmrs.api.context.Context;
 import org.openmrs.api.db.hibernate.HibernateConceptDAO;
 import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.dao.FhirTaskDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.model.FhirReference;
 import org.openmrs.module.fhir2.model.FhirTask;
 import org.openmrs.module.fhir2.model.FhirTaskInput;
 import org.openmrs.module.fhir2.model.FhirTaskOutput;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class FhirTaskDaoImplTest extends BaseFhirContextSensitiveTest {
@@ -87,6 +93,9 @@ public class FhirTaskDaoImplTest extends BaseFhirContextSensitiveTest {
 	
 	@Autowired
 	private ConceptService conceptService;
+	
+	@Autowired
+	private ObjectProvider<FhirTaskDao> daoProvider;
 	
 	@Before
 	public void setup() throws Exception {
@@ -475,4 +484,36 @@ public class FhirTaskDaoImplTest extends BaseFhirContextSensitiveTest {
 		assertThat(results, hasItem(hasProperty("uuid", equalTo(TASK_UUID))));
 	}
 	
+	@Test
+	public void get_shouldRequireGetOrdersPrivilege() {
+		FhirTaskDao authorizedDao = daoProvider.getObject();
+		Context.logout();
+		
+		assertThrows(APIAuthenticationException.class, () -> authorizedDao.get(TASK_UUID));
+		
+		try {
+			Context.addProxyPrivilege(GET_ORDERS);
+			assertThat(authorizedDao.get(TASK_UUID), notNullValue());
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_ORDERS);
+		}
+	}
+	
+	@Test
+	public void getSearchResults_shouldRequireGetOrdersPrivilege() {
+		FhirTaskDao authorizedDao = daoProvider.getObject();
+		SearchParameterMap theParams = new SearchParameterMap();
+		Context.logout();
+		
+		assertThrows(APIAuthenticationException.class, () -> authorizedDao.getSearchResults(theParams));
+		
+		try {
+			Context.addProxyPrivilege(GET_ORDERS);
+			assertThat(authorizedDao.getSearchResults(theParams), notNullValue());
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_ORDERS);
+		}
+	}
 }
