@@ -27,6 +27,7 @@ import java.util.List;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
@@ -109,6 +110,9 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 	
 	@Mock
 	private FhirPractitionerService practitionerService;
+	
+	@Mock
+	private RequestDetails mockRequestDetails;
 	
 	private PractitionerFhirResourceProvider resourceProvider;
 	
@@ -557,42 +561,47 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 	}
 	
 	@Test
-	public void updatePractitioner_shouldUpdatePractitioner() {
+	public void doUpsert_shouldUpdatePractitioner() {
 		Practitioner newPractitioner = practitioner;
 		
-		when(practitionerService.update(PRACTITIONER_UUID, practitioner)).thenReturn(newPractitioner);
+		when(practitionerService.update(PRACTITIONER_UUID, practitioner, mockRequestDetails, false))
+		        .thenReturn(newPractitioner);
 		
-		MethodOutcome result = resourceProvider.updatePractitioner(new IdType().setValue(PRACTITIONER_UUID), practitioner);
+		MethodOutcome result = resourceProvider.doUpsert(new IdType().setValue(PRACTITIONER_UUID), practitioner,
+		    mockRequestDetails, false);
 		assertThat(result, notNullValue());
 		assertThat(result.getResource(), equalTo(newPractitioner));
 	}
 	
 	@Test(expected = InvalidRequestException.class)
-	public void updatePractitioner_shouldThrowInvalidRequestExceptionForUuidMismatch() {
-		when(practitionerService.update(WRONG_PRACTITIONER_UUID, practitioner)).thenThrow(InvalidRequestException.class);
+	public void doUpsert_shouldThrowInvalidRequestExceptionForUuidMismatch() {
+		when(practitionerService.update(WRONG_PRACTITIONER_UUID, practitioner, mockRequestDetails, false))
+		        .thenThrow(InvalidRequestException.class);
 		
-		resourceProvider.updatePractitioner(new IdType().setValue(WRONG_PRACTITIONER_UUID), practitioner);
+		resourceProvider.doUpsert(new IdType().setValue(WRONG_PRACTITIONER_UUID), practitioner, mockRequestDetails, false);
 	}
 	
 	@Test(expected = InvalidRequestException.class)
-	public void updatePractitioner_shouldThrowInvalidRequestForMissingId() {
+	public void doUpsert_shouldThrowInvalidRequestForMissingId() {
 		Practitioner noIdPractitioner = new Practitioner();
 		
-		when(practitionerService.update(PRACTITIONER_UUID, noIdPractitioner)).thenThrow(InvalidRequestException.class);
+		when(practitionerService.update(PRACTITIONER_UUID, noIdPractitioner, mockRequestDetails, false))
+		        .thenThrow(InvalidRequestException.class);
 		
-		resourceProvider.updatePractitioner(new IdType().setValue(PRACTITIONER_UUID), noIdPractitioner);
+		resourceProvider.doUpsert(new IdType().setValue(PRACTITIONER_UUID), noIdPractitioner, mockRequestDetails, false);
 	}
 	
 	@Test(expected = MethodNotAllowedException.class)
-	public void updatePractitioner_shouldThrowMethodNotAllowedIfDoesNotExist() {
+	public void doUpsert_shouldThrowMethodNotAllowedIfDoesNotExist() {
 		Practitioner wrongPractitioner = new Practitioner();
 		
 		wrongPractitioner.setId(WRONG_PRACTITIONER_UUID);
 		
-		when(practitionerService.update(WRONG_PRACTITIONER_UUID, wrongPractitioner))
+		when(practitionerService.update(WRONG_PRACTITIONER_UUID, wrongPractitioner, mockRequestDetails, false))
 		        .thenThrow(MethodNotAllowedException.class);
 		
-		resourceProvider.updatePractitioner(new IdType().setValue(WRONG_PRACTITIONER_UUID), wrongPractitioner);
+		resourceProvider.doUpsert(new IdType().setValue(WRONG_PRACTITIONER_UUID), wrongPractitioner, mockRequestDetails,
+		    false);
 	}
 	
 	@Test

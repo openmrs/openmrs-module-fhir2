@@ -27,7 +27,6 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Sort;
-import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
@@ -37,7 +36,6 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
-import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.Getter;
@@ -57,7 +55,7 @@ import org.springframework.stereotype.Component;
 
 @Component("locationFhirR4ResourceProvider")
 @R4Provider
-public class LocationFhirResourceProvider implements IResourceProvider {
+public class LocationFhirResourceProvider extends BaseUpsertFhirResourceProvider<Location> {
 	
 	@Getter(PROTECTED)
 	@Setter(value = PACKAGE, onMethod_ = @Autowired)
@@ -83,14 +81,14 @@ public class LocationFhirResourceProvider implements IResourceProvider {
 		return FhirProviderUtils.buildCreate(fhirLocationService.create(location));
 	}
 	
-	@Update
-	@SuppressWarnings("unused")
-	public MethodOutcome updateLocation(@IdParam IdType id, @ResourceParam Location location) {
+	@Override
+	public MethodOutcome doUpsert(IdType id, Location location, RequestDetails requestDetails, boolean createIfNotExists) {
 		if (id == null || id.getIdPart() == null) {
 			throw new InvalidRequestException("id must be specified to update");
 		}
 		
-		return FhirProviderUtils.buildUpdate(fhirLocationService.update(id.getIdPart(), location));
+		return FhirProviderUtils
+		        .buildUpdate(fhirLocationService.update(id.getIdPart(), location, requestDetails, createIfNotExists));
 	}
 	
 	@Patch

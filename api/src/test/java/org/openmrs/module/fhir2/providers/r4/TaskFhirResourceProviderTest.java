@@ -27,6 +27,7 @@ import java.util.List;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -71,6 +72,9 @@ public class TaskFhirResourceProviderTest extends BaseFhirProvenanceResourceTest
 	
 	@Mock
 	private FhirTaskService taskService;
+	
+	@Mock
+	private RequestDetails mockRequestDetails;
 	
 	@Getter(AccessLevel.PUBLIC)
 	private TaskFhirResourceProvider resourceProvider;
@@ -132,40 +136,41 @@ public class TaskFhirResourceProviderTest extends BaseFhirProvenanceResourceTest
 	}
 	
 	@Test
-	public void updateTask_shouldUpdateTask() {
-		when(taskService.update(TASK_UUID, task)).thenReturn(task);
+	public void doUpsert_shouldUpdateTask() {
+		when(taskService.update(TASK_UUID, task, mockRequestDetails, false)).thenReturn(task);
 		
 		IdType uuid = new IdType();
 		uuid.setValue(TASK_UUID);
 		
-		MethodOutcome result = resourceProvider.updateTask(uuid, task);
+		MethodOutcome result = resourceProvider.doUpsert(uuid, task, mockRequestDetails, false);
 		assertThat(result.getResource(), equalTo(task));
 	}
 	
 	@Test(expected = InvalidRequestException.class)
-	public void updateTask_shouldThrowInvalidRequestForTaskUuidMismatch() {
-		when(taskService.update(WRONG_TASK_UUID, task)).thenThrow(InvalidRequestException.class);
+	public void doUpsert_shouldThrowInvalidRequestForTaskUuidMismatch() {
+		when(taskService.update(WRONG_TASK_UUID, task, mockRequestDetails, false)).thenThrow(InvalidRequestException.class);
 		
-		resourceProvider.updateTask(new IdType().setValue(WRONG_TASK_UUID), task);
+		resourceProvider.doUpsert(new IdType().setValue(WRONG_TASK_UUID), task, mockRequestDetails, false);
 	}
 	
 	@Test(expected = InvalidRequestException.class)
-	public void updateTask_shouldThrowInvalidRequestIfTaskHasNoUuid() {
+	public void doUpsert_shouldThrowInvalidRequestIfTaskHasNoUuid() {
 		Task noIdTask = new Task();
 		
-		when(taskService.update(TASK_UUID, noIdTask)).thenThrow(InvalidRequestException.class);
+		when(taskService.update(TASK_UUID, noIdTask, mockRequestDetails, false)).thenThrow(InvalidRequestException.class);
 		
-		resourceProvider.updateTask(new IdType().setValue(TASK_UUID), noIdTask);
+		resourceProvider.doUpsert(new IdType().setValue(TASK_UUID), noIdTask, mockRequestDetails, false);
 	}
 	
 	@Test(expected = MethodNotAllowedException.class)
-	public void updateTask_shouldThrowMethodNotAllowedIfTaskDoesNotExist() {
+	public void doUpsert_shouldThrowMethodNotAllowedIfTaskDoesNotExist() {
 		Task wrongTask = new Task();
 		wrongTask.setId(WRONG_TASK_UUID);
 		
-		when(taskService.update(WRONG_TASK_UUID, wrongTask)).thenThrow(MethodNotAllowedException.class);
+		when(taskService.update(WRONG_TASK_UUID, wrongTask, mockRequestDetails, false))
+		        .thenThrow(MethodNotAllowedException.class);
 		
-		resourceProvider.updateTask(new IdType().setValue(WRONG_TASK_UUID), wrongTask);
+		resourceProvider.doUpsert(new IdType().setValue(WRONG_TASK_UUID), wrongTask, mockRequestDetails, false);
 	}
 	
 	@Test
