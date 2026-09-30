@@ -175,6 +175,18 @@ public final class FhirConstants {
 	
 	public static final String TASK = "Task";
 	
+	/*
+	 * Privileges for the module-owned Task table, declared in config.xml. Core defines no Task
+	 * privileges of its own.
+	 */
+	public static final String GET_TASKS_PRIVILEGE = "Get FHIR Tasks";
+	
+	public static final String ADD_TASKS_PRIVILEGE = "Add FHIR Tasks";
+	
+	public static final String EDIT_TASKS_PRIVILEGE = "Edit FHIR Tasks";
+	
+	public static final String DELETE_TASKS_PRIVILEGE = "Delete FHIR Tasks";
+	
 	public static final String DIAGNOSTIC_REPORT_CATEGORY_LAB = "LAB";
 	
 	public static final String VALUESET = "ValueSet";

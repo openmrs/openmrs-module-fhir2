@@ -28,6 +28,10 @@ public interface FhirServiceRequestDao<T extends OpenmrsObject & Auditable> exte
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_ORDERS)
+	boolean exists(@Nonnull String uuid);
+	
+	@Override
+	@Authorized(PrivilegeConstants.GET_ORDERS)
 	List<T> get(@Nonnull Collection<String> uuids);
 	
 	@Override

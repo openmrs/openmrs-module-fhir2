@@ -27,6 +27,10 @@ public interface FhirPatientDao extends FhirDao<Patient> {
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_PATIENTS)
+	boolean exists(@Nonnull String uuid);
+	
+	@Override
+	@Authorized(PrivilegeConstants.GET_PATIENTS)
 	List<Patient> get(@Nonnull Collection<String> uuids);
 	
 	@Authorized(PrivilegeConstants.GET_PATIENTS)

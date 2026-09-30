@@ -12,16 +12,22 @@ package org.openmrs.module.fhir2.api.dao;
 import java.util.Optional;
 
 import org.openmrs.PersonAttributeType;
+import org.openmrs.annotation.Authorized;
 import org.openmrs.attribute.BaseAttributeType;
 import org.openmrs.module.fhir2.model.FhirContactPointMap;
+import org.openmrs.util.PrivilegeConstants;
 
 public interface FhirContactPointMapDao extends FhirDaoAop {
 	
+	@Authorized(PrivilegeConstants.GET_PERSON_ATTRIBUTE_TYPES)
 	Optional<FhirContactPointMap> getFhirContactPointMapByUuid(String uuid);
 	
+	@Authorized(PrivilegeConstants.GET_PERSON_ATTRIBUTE_TYPES)
 	Optional<FhirContactPointMap> getFhirContactPointMapForPersonAttributeType(PersonAttributeType attributeType);
 	
+	@Authorized(PrivilegeConstants.GET_PERSON_ATTRIBUTE_TYPES)
 	Optional<FhirContactPointMap> getFhirContactPointMapForAttributeType(BaseAttributeType<?> attributeType);
 	
+	@Authorized(PrivilegeConstants.MANAGE_PERSON_ATTRIBUTE_TYPES)
 	FhirContactPointMap saveFhirContactPointMap(FhirContactPointMap contactPointMap);
 }

@@ -28,6 +28,10 @@ public interface FhirPersonDao extends FhirDao<Person> {
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_PERSONS)
+	boolean exists(@Nonnull String uuid);
+	
+	@Override
+	@Authorized(PrivilegeConstants.GET_PERSONS)
 	List<Person> get(@Nonnull Collection<String> uuids);
 	
 	@Authorized(PrivilegeConstants.GET_PERSONS)

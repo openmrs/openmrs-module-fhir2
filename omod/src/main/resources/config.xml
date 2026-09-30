@@ -60,6 +60,24 @@
 		</conditionalResource>
 	</conditionalResources>
 
+	<!-- Privileges guarding the module-owned FHIR Task table; core defines none for Tasks -->
+	<privilege>
+		<name>Get FHIR Tasks</name>
+		<description>Able to read FHIR Tasks</description>
+	</privilege>
+	<privilege>
+		<name>Add FHIR Tasks</name>
+		<description>Able to create FHIR Tasks</description>
+	</privilege>
+	<privilege>
+		<name>Edit FHIR Tasks</name>
+		<description>Able to update FHIR Tasks</description>
+	</privilege>
+	<privilege>
+		<name>Delete FHIR Tasks</name>
+		<description>Able to delete FHIR Tasks</description>
+	</privilege>
+
 	<servlet>
 		<servlet-name>fhir2Servlet</servlet-name>
 		<servlet-class>org.openmrs.module.fhir2.web.servlet.FhirRestServlet</servlet-class>
