@@ -30,10 +30,13 @@ import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
  * Each helper takes the caller's own coding system and code, never a list of the alternatives, so
  * that a backing contributed by another module needs no changes here.
  * <p>
- * On search, a handler opts out whenever a routing token (read from {@code _tag} or from a
- * domain-specific token search param such as {@code category}) references the shared system but
- * doesn't include the caller's code. Tokens in unrelated coding systems are treated as content
- * filters and never cause opt-out.
+ * On search, a handler opts out whenever an AND clause of a routing token (read from {@code _tag}
+ * or from a domain-specific token search param such as {@code category}) fails to name the caller's
+ * code. A token names the caller when its code matches and its system is either the routing system
+ * or absent; the system-less form follows the FHIR token rule that {@code [code]} matches any
+ * system. A clause naming only other codes or only other systems excludes the caller, because the
+ * backings this module ships carry no tags or categories outside their routing system, so no
+ * resource of theirs could satisfy such a clause.
  */
 public final class HandlerSupport {
 	
@@ -80,10 +83,9 @@ public final class HandlerSupport {
 	}
 	
 	/**
-	 * Returns whether a {@code _tag} parameter on the search request routes the request to a different
-	 * handler than the caller. The check looks at every AND clause of the {@code _tag} parameter — a
-	 * clause excludes the caller if it references the given routing system but none of its OR
-	 * alternatives carry the caller's code.
+	 * Returns whether a {@code _tag} parameter on the search request routes the request away from the
+	 * caller. Every AND clause of {@code _tag} must admit the caller: a clause does so when one of its
+	 * OR alternatives carries the caller's code, either in the routing system or with no system at all.
 	 *
 	 * @param params the search parameter map; the {@code _tag} parameter is read from the entry stored
 	 *            under {@link FhirConstants#TAG_SEARCH_HANDLER}
@@ -91,8 +93,8 @@ public final class HandlerSupport {
 	 *            requests (e.g. {@code OPENMRS_FHIR_EXT_ENCOUNTER_TAG})
 	 * @param routingCode the calling handler's code in the routing system (e.g. {@code "encounter"} or
 	 *            {@code "visit"})
-	 * @return {@code true} if any AND clause of {@code _tag} references the routing system but doesn't
-	 *         include the caller's code (meaning the caller should opt out of the search)
+	 * @return {@code true} if any AND clause of {@code _tag} fails to name the caller's code (meaning
+	 *         the caller should opt out of the search)
 	 */
 	public static boolean routingTagExcludes(@Nonnull SearchParameterMap params, @Nonnull String routingSystem,
 	        @Nonnull String routingCode) {
@@ -101,10 +103,9 @@ public final class HandlerSupport {
 	}
 	
 	/**
-	 * Returns whether a {@code category} parameter on the search request routes the request to a
-	 * different handler than the caller. Semantics mirror {@link #routingTagExcludes}: an AND clause
-	 * excludes the caller when it references the given coding system but none of its OR alternatives
-	 * carry the caller's code.
+	 * Returns whether a {@code category} parameter on the search request routes the request away from
+	 * the caller. Semantics mirror {@link #routingTagExcludes}: every AND clause must carry the
+	 * caller's code, in the routing system or with no system.
 	 *
 	 * @param params the search parameter map; the {@code category} parameter is read from the entry
 	 *            stored under {@link FhirConstants#CATEGORY_SEARCH_HANDLER}
@@ -112,8 +113,7 @@ public final class HandlerSupport {
 	 *            categories (e.g. {@code CONDITION_CATEGORY_SYSTEM_URI})
 	 * @param routingCode the calling handler's code in the routing system (e.g.
 	 *            {@code "problem-list-item"} or {@code "encounter-diagnosis"})
-	 * @return {@code true} if any AND clause of {@code category} references the routing system but
-	 *         doesn't include the caller's code
+	 * @return {@code true} if any AND clause of {@code category} fails to name the caller's code
 	 */
 	public static boolean routingCategoryExcludes(@Nonnull SearchParameterMap params, @Nonnull String routingSystem,
 	        @Nonnull String routingCode) {
@@ -127,31 +127,33 @@ public final class HandlerSupport {
 		}
 		
 		for (TokenOrListParam orList : tokenParam.getValuesAsQueryTokens()) {
-			if (orList == null) {
+			if (orList == null || orList.getValuesAsQueryTokens().isEmpty()) {
 				continue;
 			}
 			
-			boolean systemReferenced = false;
-			boolean codeMatched = false;
+			boolean namesCaller = false;
 			for (TokenParam token : orList.getValuesAsQueryTokens()) {
-				if (token == null) {
-					continue;
-				}
-				if (routingSystem.equals(token.getSystem())) {
-					systemReferenced = true;
-					if (routingCode.equals(token.getValue())) {
-						codeMatched = true;
-						break;
-					}
+				if (token != null && namesCaller(token, routingSystem, routingCode)) {
+					namesCaller = true;
+					break;
 				}
 			}
 			
-			if (systemReferenced && !codeMatched) {
+			if (!namesCaller) {
 				return true;
 			}
 		}
 		
 		return false;
+	}
+	
+	private static boolean namesCaller(TokenParam token, String routingSystem, String routingCode) {
+		if (!routingCode.equals(token.getValue())) {
+			return false;
+		}
+		
+		String system = token.getSystem();
+		return system == null || system.isEmpty() || routingSystem.equals(system);
 	}
 	
 	private static TokenAndListParam extractTokenAndListParam(SearchParameterMap params, String handlerKey) {

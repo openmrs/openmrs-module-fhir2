@@ -41,6 +41,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.handler.FhirResourceHandler;
+import org.openmrs.module.fhir2.api.handler.HandlerSupport;
 import org.openmrs.module.fhir2.api.search.param.EncounterSearchParams;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.providers.r4.MockIBundleProvider;
@@ -100,34 +101,10 @@ public class FhirEncounterServiceImplTest {
 	}
 	
 	/**
-	 * Mimics handler-side acceptsSearch — opt-in if no tag, opt-out if a routing-system tag specifies a
-	 * different code.
+	 * Mirrors the real handlers' acceptsSearch, which delegate to the shared routing predicate.
 	 */
 	private static boolean participatesByTag(SearchParameterMap params, String myCode) {
-		TokenAndListParam tag = (TokenAndListParam) params.getParameters().stream()
-		        .filter(e -> FhirConstants.TAG_SEARCH_HANDLER.equals(e.getKey())).flatMap(e -> e.getValue().stream())
-		        .map(p -> p.getParam()).filter(v -> v instanceof TokenAndListParam).findFirst().orElse(null);
-		if (tag == null || tag.size() == 0) {
-			return true;
-		}
-		for (Object orListObj : tag.getValuesAsQueryTokens()) {
-			ca.uhn.fhir.rest.param.TokenOrListParam orList = (ca.uhn.fhir.rest.param.TokenOrListParam) orListObj;
-			boolean systemSeen = false;
-			boolean codeMatched = false;
-			for (TokenParam token : orList.getValuesAsQueryTokens()) {
-				if (FhirConstants.OPENMRS_FHIR_EXT_ENCOUNTER_TAG.equals(token.getSystem())) {
-					systemSeen = true;
-					if (myCode.equals(token.getValue())) {
-						codeMatched = true;
-						break;
-					}
-				}
-			}
-			if (systemSeen && !codeMatched) {
-				return false;
-			}
-		}
-		return true;
+		return !HandlerSupport.routingTagExcludes(params, FhirConstants.OPENMRS_FHIR_EXT_ENCOUNTER_TAG, myCode);
 	}
 	
 	private static boolean claims(Encounter encounter, String mySystem) {
@@ -274,6 +251,34 @@ public class FhirEncounterServiceImplTest {
 		List<IBaseResource> resultList = results.getResources(START_INDEX, END_INDEX);
 		
 		assertThat(resultList, hasSize(14));
+	}
+	
+	@Test
+	public void searchForEncounters_shouldRestrictBySystemlessTagCode() {
+		// _tag=visit (no system) matches by code alone, as HAPI's own token matching does.
+		when(visitHandler.search(any())).thenReturn(bundleOf(5));
+		
+		EncounterSearchParams params = new EncounterSearchParams();
+		params.setTag(new TokenAndListParam().addAnd(new TokenParam(null, "visit")));
+		
+		List<IBaseResource> resultList = service.searchForEncounters(params).getResources(START_INDEX, END_INDEX);
+		
+		assertThat(resultList, hasSize(5));
+		verify(visitHandler).search(any());
+		verify(encounterHandler, never()).search(any());
+	}
+	
+	@Test
+	public void searchForEncounters_shouldReturnEmptyBundleForTagInUnrelatedSystem() {
+		// Neither backing carries tags outside the routing system, so nothing can match.
+		EncounterSearchParams params = new EncounterSearchParams();
+		params.setTag(new TokenAndListParam().addAnd(new TokenParam("http://example.org/other", "x")));
+		
+		IBundleProvider results = service.searchForEncounters(params);
+		
+		assertThat(results.getResources(START_INDEX, END_INDEX), empty());
+		verify(encounterHandler, never()).search(any());
+		verify(visitHandler, never()).search(any());
 	}
 	
 	// ---- getEncounterEverything ----

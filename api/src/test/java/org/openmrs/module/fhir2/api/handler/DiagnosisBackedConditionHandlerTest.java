@@ -132,6 +132,28 @@ public class DiagnosisBackedConditionHandlerTest {
 		assertTrue(handler.acceptsSearch(params));
 	}
 	
+	@Test
+	public void acceptsSearch_shouldOptOutOnCategoryInUnrelatedSystems() {
+		// Nothing in this backing carries a token outside the routing system, so the clause is unsatisfiable.
+		SearchParameterMap params = new SearchParameterMap().addParameter(FhirConstants.CATEGORY_SEARCH_HANDLER,
+		    new TokenAndListParam().addAnd(new TokenParam("http://example.org/some-other-system", "value")));
+		assertFalse(handler.acceptsSearch(params));
+	}
+	
+	@Test
+	public void acceptsSearch_shouldAcceptSystemlessTokenCarryingOwnCode() {
+		SearchParameterMap params = new SearchParameterMap().addParameter(FhirConstants.CATEGORY_SEARCH_HANDLER,
+		    new TokenAndListParam().addAnd(new TokenParam(null, FhirConstants.CONDITION_CATEGORY_CODE_DIAGNOSIS)));
+		assertTrue(handler.acceptsSearch(params));
+	}
+	
+	@Test
+	public void acceptsSearch_shouldOptOutOnSystemlessTokenCarryingSiblingCode() {
+		SearchParameterMap params = new SearchParameterMap().addParameter(FhirConstants.CATEGORY_SEARCH_HANDLER,
+		    new TokenAndListParam().addAnd(new TokenParam(null, FhirConstants.CONDITION_CATEGORY_CODE_CONDITION)));
+		assertFalse(handler.acceptsSearch(params));
+	}
+	
 	// ---- delegation ----
 	
 	@Test

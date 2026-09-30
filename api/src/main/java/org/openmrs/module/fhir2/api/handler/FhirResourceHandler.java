@@ -127,10 +127,9 @@ import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
  * <li>{@link #acceptsSearch(SearchParameterMap)} — the participation predicate for searches.
  * Default {@code true} (always participate). Override to opt out — typically when the search params
  * reference fields the handler cannot honor, or when a {@code _tag} parameter routes the request to
- * a different handler. Tag-based routing is conventionally implemented by checking whether the
- * search params include a {@code _tag} in this handler's routing coding system whose value doesn't
- * match this handler's code; if so, return {@code false}. Tags from unrelated coding systems are
- * treated as content filters and don't cause opt-out.
+ * a different handler. Tag-based routing is conventionally implemented with
+ * {@link HandlerSupport#routingTagExcludes}: opt out whenever an AND clause of {@code _tag} does
+ * not name this handler's code, in its routing system or with no system.
  * <li>{@link FhirService#exists(String)} (inherited) — the cheap UUID probe. Handlers extending
  * {@code BaseFhirService} get a row-existence DAO check for free; handlers composing another
  * service should override to delegate (e.g. {@code visitService.exists(uuid)}). Avoid going through

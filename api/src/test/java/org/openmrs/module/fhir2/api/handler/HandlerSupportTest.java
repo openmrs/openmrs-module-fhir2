@@ -42,8 +42,42 @@ public class HandlerSupportTest {
 	}
 	
 	@Test
-	public void shouldNotExcludeWhenTagIsInUnrelatedSystem() {
+	public void shouldExcludeWhenTagIsInUnrelatedSystem() {
+		// No resource of this backing carries a tag in another system, so the clause cannot be satisfied.
 		SearchParameterMap params = paramsWithTag(new TokenParam(OTHER_SYSTEM, "anything"));
+		assertTrue(HandlerSupport.routingTagExcludes(params, SYSTEM, CODE));
+	}
+	
+	@Test
+	public void shouldExcludeWhenTagInUnrelatedSystemCarriesMyCode() {
+		SearchParameterMap params = paramsWithTag(new TokenParam(OTHER_SYSTEM, CODE));
+		assertTrue(HandlerSupport.routingTagExcludes(params, SYSTEM, CODE));
+	}
+	
+	@Test
+	public void shouldNotExcludeWhenSystemlessTagCarriesMyCode() {
+		// _tag=encounter: a token without a system matches any system, so it routes by code alone.
+		SearchParameterMap params = paramsWithTag(new TokenParam(null, CODE));
+		assertFalse(HandlerSupport.routingTagExcludes(params, SYSTEM, CODE));
+	}
+	
+	@Test
+	public void shouldExcludeWhenSystemlessTagCarriesAnotherCode() {
+		SearchParameterMap params = paramsWithTag(new TokenParam(null, OTHER_CODE));
+		assertTrue(HandlerSupport.routingTagExcludes(params, SYSTEM, CODE));
+	}
+	
+	@Test
+	public void shouldTreatEmptySystemLikeNoSystem() {
+		// _tag=|encounter
+		SearchParameterMap params = paramsWithTag(new TokenParam("", CODE));
+		assertFalse(HandlerSupport.routingTagExcludes(params, SYSTEM, CODE));
+	}
+	
+	@Test
+	public void shouldSkipEmptyAndClauses() {
+		SearchParameterMap params = new SearchParameterMap().addParameter(FhirConstants.TAG_SEARCH_HANDLER,
+		    new TokenAndListParam().addAnd(new TokenOrListParam()));
 		assertFalse(HandlerSupport.routingTagExcludes(params, SYSTEM, CODE));
 	}
 	
@@ -84,24 +118,33 @@ public class HandlerSupportTest {
 	}
 	
 	@Test
-	public void shouldNotExcludeWhenAndClauseUnrelatedSystemAlsoPresent() {
+	public void shouldExcludeWhenAnyAndClauseIsInUnrelatedSystem() {
 		// _tag = encounter-tag|encounter AND other-system|whatever
-		// The routing-system clause matches our code → not excluded.
-		// The unrelated-system clause is content-only → not excluded.
+		// Every AND clause must be satisfiable by this backing; the second one is not.
 		TokenAndListParam tag = new TokenAndListParam();
 		tag.addAnd(new TokenParam(SYSTEM, CODE));
 		tag.addAnd(new TokenParam(OTHER_SYSTEM, "something"));
 		SearchParameterMap params = new SearchParameterMap().addParameter(FhirConstants.TAG_SEARCH_HANDLER, tag);
-		
+		assertTrue(HandlerSupport.routingTagExcludes(params, SYSTEM, CODE));
+	}
+	
+	@Test
+	public void shouldNotExcludeWhenOrListMixesUnrelatedSystemWithMyCode() {
+		// _tag = other-system|whatever,encounter-tag|encounter  (single OR clause)
+		TokenOrListParam orList = new TokenOrListParam();
+		orList.add(OTHER_SYSTEM, "whatever");
+		orList.add(SYSTEM, CODE);
+		SearchParameterMap params = new SearchParameterMap().addParameter(FhirConstants.TAG_SEARCH_HANDLER,
+		    new TokenAndListParam().addAnd(orList));
 		assertFalse(HandlerSupport.routingTagExcludes(params, SYSTEM, CODE));
 	}
 	
 	@Test
 	public void shouldExcludeWhenAnyAndClauseInRoutingSystemHasWrongCode() {
-		// _tag = other-system|whatever AND encounter-tag|visit
-		// The unrelated-system clause is fine. The routing-system clause excludes us.
+		// _tag = encounter-tag|encounter AND encounter-tag|visit
+		// The first clause admits us. The second clause excludes us.
 		TokenAndListParam tag = new TokenAndListParam();
-		tag.addAnd(new TokenParam(OTHER_SYSTEM, "something"));
+		tag.addAnd(new TokenParam(SYSTEM, CODE));
 		tag.addAnd(new TokenParam(SYSTEM, OTHER_CODE));
 		SearchParameterMap params = new SearchParameterMap().addParameter(FhirConstants.TAG_SEARCH_HANDLER, tag);
 		
@@ -157,6 +200,27 @@ public class HandlerSupportTest {
 		
 		assertFalse(HandlerSupport.routingCategoryExcludes(params, FhirConstants.CONDITION_CATEGORY_SYSTEM_URI,
 		    FhirConstants.CONDITION_CATEGORY_CODE_CONDITION));
+	}
+	
+	@Test
+	public void categoryShouldRouteBySystemlessCode() {
+		// Condition?category=encounter-diagnosis (no system) routes to the diagnosis backing only.
+		SearchParameterMap params = new SearchParameterMap().addParameter(FhirConstants.CATEGORY_SEARCH_HANDLER,
+		    new TokenAndListParam().addAnd(new TokenParam(null, FhirConstants.CONDITION_CATEGORY_CODE_DIAGNOSIS)));
+		assertTrue(HandlerSupport.routingCategoryExcludes(params, FhirConstants.CONDITION_CATEGORY_SYSTEM_URI,
+		    FhirConstants.CONDITION_CATEGORY_CODE_CONDITION));
+		assertFalse(HandlerSupport.routingCategoryExcludes(params, FhirConstants.CONDITION_CATEGORY_SYSTEM_URI,
+		    FhirConstants.CONDITION_CATEGORY_CODE_DIAGNOSIS));
+	}
+	
+	@Test
+	public void categoryShouldExcludeEveryoneWhenInUnrelatedSystem() {
+		SearchParameterMap params = new SearchParameterMap().addParameter(FhirConstants.CATEGORY_SEARCH_HANDLER,
+		    new TokenAndListParam().addAnd(new TokenParam("http://example.org/some-other-system", "value")));
+		assertTrue(HandlerSupport.routingCategoryExcludes(params, FhirConstants.CONDITION_CATEGORY_SYSTEM_URI,
+		    FhirConstants.CONDITION_CATEGORY_CODE_CONDITION));
+		assertTrue(HandlerSupport.routingCategoryExcludes(params, FhirConstants.CONDITION_CATEGORY_SYSTEM_URI,
+		    FhirConstants.CONDITION_CATEGORY_CODE_DIAGNOSIS));
 	}
 	
 	@Test
