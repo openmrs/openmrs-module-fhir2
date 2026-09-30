@@ -329,7 +329,8 @@ public class ObservationFhirResourceProviderTest extends BaseFhirR3ProvenanceRes
 		when(observationService.getLastnObservations(max, searchParams))
 		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
 		
-		IBundleProvider results = resourceProvider.getLastnObservations(max, referenceParam, null, categories, code);
+		IBundleProvider results = resourceProvider.getLastnObservations(max, referenceParam, null, categories, code, null,
+		    null, null);
 		
 		List<IBaseResource> resultList = get(results, 0, 10);
 		
@@ -364,7 +365,8 @@ public class ObservationFhirResourceProviderTest extends BaseFhirR3ProvenanceRes
 		when(observationService.getLastnObservations(null, searchParams))
 		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
 		
-		IBundleProvider results = resourceProvider.getLastnObservations(null, referenceParam, null, categories, code);
+		IBundleProvider results = resourceProvider.getLastnObservations(null, referenceParam, null, categories, code, null,
+		    null, null);
 		
 		List<IBaseResource> resultList = get(results, 0, 10);
 		
@@ -399,7 +401,8 @@ public class ObservationFhirResourceProviderTest extends BaseFhirR3ProvenanceRes
 		when(observationService.getLastnObservations(max, searchParams))
 		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
 		
-		IBundleProvider results = resourceProvider.getLastnObservations(max, null, referenceParam, categories, code);
+		IBundleProvider results = resourceProvider.getLastnObservations(max, null, referenceParam, categories, code, null,
+		    null, null);
 		
 		List<IBaseResource> resultList = get(results, 0, 10);
 		
@@ -427,7 +430,7 @@ public class ObservationFhirResourceProviderTest extends BaseFhirR3ProvenanceRes
 		when(observationService.getLastnObservations(max, searchParams))
 		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
 		
-		IBundleProvider results = resourceProvider.getLastnObservations(max, null, null, categories, code);
+		IBundleProvider results = resourceProvider.getLastnObservations(max, null, null, categories, code, null, null, null);
 		
 		List<IBaseResource> resultList = get(results, 0, 10);
 		
@@ -459,7 +462,8 @@ public class ObservationFhirResourceProviderTest extends BaseFhirR3ProvenanceRes
 		when(observationService.getLastnObservations(max, searchParams))
 		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
 		
-		IBundleProvider results = resourceProvider.getLastnObservations(max, referenceParam, null, null, code);
+		IBundleProvider results = resourceProvider.getLastnObservations(max, referenceParam, null, null, code, null, null,
+		    null);
 		
 		List<IBaseResource> resultList = get(results, 0, 10);
 		
@@ -489,7 +493,8 @@ public class ObservationFhirResourceProviderTest extends BaseFhirR3ProvenanceRes
 		when(observationService.getLastnObservations(max, searchParams))
 		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
 		
-		IBundleProvider results = resourceProvider.getLastnObservations(max, referenceParam, null, categories, null);
+		IBundleProvider results = resourceProvider.getLastnObservations(max, referenceParam, null, categories, null, null,
+		    null, null);
 		
 		List<IBaseResource> resultList = get(results, 0, 10);
 		
@@ -516,7 +521,8 @@ public class ObservationFhirResourceProviderTest extends BaseFhirR3ProvenanceRes
 		when(observationService.getLastnObservations(max, searchParams))
 		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
 		
-		IBundleProvider results = resourceProvider.getLastnObservations(max, referenceParam, null, null, null);
+		IBundleProvider results = resourceProvider.getLastnObservations(max, referenceParam, null, null, null, null, null,
+		    null);
 		
 		List<IBaseResource> resultList = get(results, 0, 10);
 		
