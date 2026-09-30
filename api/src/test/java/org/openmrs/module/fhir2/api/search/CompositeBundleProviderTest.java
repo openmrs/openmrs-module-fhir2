@@ -264,6 +264,143 @@ public class CompositeBundleProviderTest {
 		assertThat(idsOf(result), contains("b2", "b3"));
 	}
 	
+	@Test
+	public void shouldReturnEverythingFromStartWhenToIndexIsNotAfterFromIndex() {
+		// toIndex <= fromIndex means "all remaining", the way HAPI's getAllResources() asks for a page.
+		when(firstProvider.size()).thenReturn(2);
+		when(secondProvider.size()).thenReturn(2);
+		when(firstProvider.getResources(1, 2)).thenReturn(patientList("a2"));
+		when(secondProvider.getResources(0, 2)).thenReturn(patientList("b1", "b2"));
+		
+		CompositeBundleProvider provider = new CompositeBundleProvider(Arrays.asList(firstProvider, secondProvider),
+		        globalPropertyService);
+		
+		assertThat(idsOf(provider.getResources(1, 0)), contains("a2", "b1", "b2"));
+		assertThat(idsOf(provider.getResources(1, 1)), contains("a2", "b1", "b2"));
+	}
+	
+	@Test
+	public void shouldReturnEmptyWhenPageStartsExactlyAtTotalSize() {
+		when(firstProvider.size()).thenReturn(2);
+		when(secondProvider.size()).thenReturn(2);
+		
+		CompositeBundleProvider provider = new CompositeBundleProvider(Arrays.asList(firstProvider, secondProvider),
+		        globalPropertyService);
+		
+		assertThat(provider.getResources(4, 10), empty());
+		verify(firstProvider, never()).getResources(anyInt(), anyInt());
+		verify(secondProvider, never()).getResources(anyInt(), anyInt());
+	}
+	
+	@Test
+	public void shouldSkipZeroSizeProviderAtTheFront() {
+		when(firstProvider.size()).thenReturn(0);
+		when(secondProvider.size()).thenReturn(2);
+		when(thirdProvider.size()).thenReturn(2);
+		when(secondProvider.getResources(0, 2)).thenReturn(patientList("b1", "b2"));
+		when(thirdProvider.getResources(0, 1)).thenReturn(patientList("c1"));
+		
+		CompositeBundleProvider provider = new CompositeBundleProvider(
+		        Arrays.asList(firstProvider, secondProvider, thirdProvider), globalPropertyService);
+		
+		assertThat(idsOf(provider.getResources(0, 3)), contains("b1", "b2", "c1"));
+		verify(firstProvider, never()).getResources(anyInt(), anyInt());
+	}
+	
+	@Test
+	public void shouldSkipZeroSizeProviderInTheMiddle() {
+		when(firstProvider.size()).thenReturn(2);
+		when(secondProvider.size()).thenReturn(0);
+		when(thirdProvider.size()).thenReturn(2);
+		when(firstProvider.getResources(1, 2)).thenReturn(patientList("a2"));
+		when(thirdProvider.getResources(0, 1)).thenReturn(patientList("c1"));
+		
+		CompositeBundleProvider provider = new CompositeBundleProvider(
+		        Arrays.asList(firstProvider, secondProvider, thirdProvider), globalPropertyService);
+		
+		assertThat(idsOf(provider.getResources(1, 3)), contains("a2", "c1"));
+		verify(secondProvider, never()).getResources(anyInt(), anyInt());
+	}
+	
+	@Test
+	public void shouldPassIncludesThroughVerbatimOnSinglePageFastPath() {
+		when(firstProvider.size()).thenReturn(5);
+		when(secondProvider.size()).thenReturn(4);
+		List<IBaseResource> chunkWithIncludes = patientList("a1", "a2", "i_a");
+		when(firstProvider.getResources(0, 2)).thenReturn(chunkWithIncludes);
+		
+		CompositeBundleProvider provider = new CompositeBundleProvider(Arrays.asList(firstProvider, secondProvider),
+		        globalPropertyService);
+		
+		assertThat(provider.getResources(0, 2), equalTo(chunkWithIncludes));
+	}
+	
+	@Test
+	public void shouldTolerateChunkShorterThanPromisedWhenSpanningProviders() {
+		// A row voided between the count and the fetch makes a provider return fewer rows than size() said.
+		when(firstProvider.size()).thenReturn(3);
+		when(secondProvider.size()).thenReturn(2);
+		when(firstProvider.getResources(1, 3)).thenReturn(patientList("a2"));
+		when(secondProvider.getResources(0, 2)).thenReturn(patientList("b1", "b2", "i_b"));
+		
+		CompositeBundleProvider provider = new CompositeBundleProvider(Arrays.asList(firstProvider, secondProvider),
+		        globalPropertyService);
+		
+		assertThat(idsOf(provider.getResources(1, 5)), contains("a2", "b1", "b2", "i_b"));
+	}
+	
+	@Test
+	public void shouldLetUnknownSizeFirstProviderServeEveryPage() {
+		// An unknown size is treated as unbounded, so later providers are never reached. Documented on
+		// the class; this pins the behaviour.
+		when(firstProvider.size()).thenReturn(null);
+		when(secondProvider.size()).thenReturn(2);
+		when(firstProvider.getResources(10, 15)).thenReturn(patientList("a11"));
+		
+		CompositeBundleProvider provider = new CompositeBundleProvider(Arrays.asList(firstProvider, secondProvider),
+		        globalPropertyService);
+		
+		assertThat(provider.size(), equalTo(Integer.MAX_VALUE));
+		assertThat(idsOf(provider.getResources(10, 15)), contains("a11"));
+		verify(secondProvider, never()).getResources(anyInt(), anyInt());
+	}
+	
+	@Test
+	public void shouldStraddleIntoUnknownSizeSecondProvider() {
+		when(firstProvider.size()).thenReturn(2);
+		when(secondProvider.size()).thenReturn(null);
+		when(firstProvider.getResources(1, 2)).thenReturn(patientList("a2"));
+		when(secondProvider.getResources(0, 2)).thenReturn(patientList("b1", "b2"));
+		
+		CompositeBundleProvider provider = new CompositeBundleProvider(Arrays.asList(firstProvider, secondProvider),
+		        globalPropertyService);
+		
+		assertThat(idsOf(provider.getResources(1, 4)), contains("a2", "b1", "b2"));
+	}
+	
+	@Test
+	public void shouldReportMaxValueWhenFiniteSizesOverflow() {
+		when(firstProvider.size()).thenReturn(Integer.MAX_VALUE - 1);
+		when(secondProvider.size()).thenReturn(2);
+		
+		CompositeBundleProvider provider = new CompositeBundleProvider(Arrays.asList(firstProvider, secondProvider),
+		        globalPropertyService);
+		
+		assertThat(provider.size(), equalTo(Integer.MAX_VALUE));
+	}
+	
+	@Test
+	public void shouldCachePreferredPageSize() {
+		when(firstProvider.size()).thenReturn(1);
+		CompositeBundleProvider provider = new CompositeBundleProvider(Collections.singletonList(firstProvider),
+		        globalPropertyService);
+		
+		provider.preferredPageSize();
+		provider.preferredPageSize();
+		
+		verify(globalPropertyService).getGlobalPropertyAsInteger(anyString(), anyInt());
+	}
+	
 	private static List<IBaseResource> patientList(String... ids) {
 		return Arrays.stream(ids).map(id -> {
 			Patient p = new Patient();

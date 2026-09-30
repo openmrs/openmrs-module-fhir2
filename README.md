@@ -74,38 +74,49 @@ implementations in the
 
 ### Composite Resources and Handlers
 
-Some FHIR resources cannot be mapped one-to-one to a single OpenMRS domain
-object — the FHIR `Encounter` resource maps onto both the OpenMRS `Encounter`
-and the OpenMRS `Visit`, `Practitioner` maps onto both `Provider` and `User`,
-and FHIR `Condition` maps onto both OpenMRS `Condition` and `Diagnosis`. For
-these, the `Service` layer is implemented as a composite that delegates to
-one or more `FhirResourceHandler` beans, each representing a single OpenMRS
-backing for the FHIR resource.
+Every `Service` in this module is a composite that delegates to one or more
+`FhirResourceHandler` beans, each representing a single OpenMRS backing for the
+FHIR resource. Most resources have exactly one backing today, but some cannot
+be mapped one-to-one to a single OpenMRS domain object: the FHIR `Encounter`
+resource maps onto both the OpenMRS `Encounter` and the OpenMRS `Visit`,
+`Practitioner` maps onto both `Provider` and `User`, and FHIR `Condition` maps
+onto both OpenMRS `Condition` and `Diagnosis`.
 
 The pattern interacts with the four layers above as follows:
 
-* The composite service extends `CompositeFhirService<R>` rather than
-`BaseFhirService<R, U>`. It is still the `Service`-layer entry point used by
-`ResourceProvider`s — it just dispatches each operation to a handler instead
-of calling a `Translator` and `DAO` directly.
+* The composite service extends `BaseCompositeFhirService<R>`. It is still the
+`Service`-layer entry point used by `ResourceProvider`s — it just dispatches
+each operation to a handler instead of calling a `Translator` and `DAO`
+directly. The handlers extend `BaseFhirResourceHandler<R, U>` (which is where
+the `Translator` and `DAO` now live) or compose another service.
 * Each `FhirResourceHandler` *is* a `FhirService<R>` (the interface extends it)
 that also exposes the dispatch hooks the orchestrator needs: an implicit
 profile URL, a `canHandle` predicate, and a search participation predicate
-(`acceptsSearch`). Handlers are Spring beans, sorted by `@Order`; the first
-handler claiming a request wins.
+(`acceptsSearch`). Handlers are Spring beans, sorted by `@Order`. When more
+than one handler claims a create, the one with the highest precedence wins,
+and a tie at the top is rejected with a 400 asking the client to set
+`meta.profile`. Two handlers declaring the same implicit profile collapse to
+the higher-precedence one at startup, which is how an external module replaces
+a built-in backing.
 * The orchestrator dispatches with two primitives:
    * **Content-based** — `canHandle(R)` (with `meta.profile` taking precedence)
    for `create`, and for the `createIfNotExists` branch of `update` when no
    handler currently owns the UUID.
    * **UUID-based** — the `exists(uuid)` method inherited from `FhirService`,
-   used for `get` / `update` / `patch` / `delete`. `BaseFhirService` provides a
-   cheap row-existence DAO check; handlers that compose another service should
-   override `exists` to delegate.
-* For search, the orchestrator simply fans out to handlers whose
-`acceptsSearch(SearchParameterMap)` returns `true` and merges results via
-`CompositeBundleProvider`. Tag-based routing (e.g. `_tag` between an encounter
-handler and a visit handler) lives inside each handler's `acceptsSearch` —
-there is no orchestrator-level tag protocol.
+   used for `update` / `patch` / `delete` (`get` simply tries each handler in
+   turn). `BaseFhirService` provides a cheap row-existence DAO check; handlers
+   that compose another service should override `exists` to delegate. DAO
+   interfaces must declare `exists` with the same `@Authorized` privilege as
+   `get`, since it runs before any other privileged call.
+* For search, a `_profile` parameter naming a handler's implicit profile routes
+the search to that handler alone. Otherwise the orchestrator fans out to
+handlers whose `acceptsSearch(SearchParameterMap)` returns `true` and merges
+results via `CompositeBundleProvider`. Tag-based routing (e.g. `_tag` between
+an encounter handler and a visit handler) lives inside each handler's
+`acceptsSearch`, using the helpers in `HandlerSupport` — there is no
+orchestrator-level tag protocol.
+* Every resource a composite returns carries its handler's implicit profile in
+`meta.profile`.
 
 Adding a new backing for an existing FHIR resource — e.g. mapping an
 `ImagingOrder` from another module onto FHIR `ServiceRequest` — does not
@@ -120,16 +131,13 @@ module id (e.g.
 The relevant types live in:
 
 * [`org.openmrs.module.fhir2.api.handler`](https://github.com/openmrs/openmrs-module-fhir2/tree/master/api/src/main/java/org/openmrs/module/fhir2/api/handler) — the `FhirResourceHandler` SPI
-* [`org.openmrs.module.fhir2.api.impl`](https://github.com/openmrs/openmrs-module-fhir2/tree/master/api/src/main/java/org/openmrs/module/fhir2/api/impl) — `CompositeFhirService`, the abstract orchestrator
+* [`org.openmrs.module.fhir2.api.impl`](https://github.com/openmrs/openmrs-module-fhir2/tree/master/api/src/main/java/org/openmrs/module/fhir2/api/impl) — `BaseCompositeFhirService`, the abstract orchestrator
 * [`org.openmrs.module.fhir2.api.search`](https://github.com/openmrs/openmrs-module-fhir2/tree/master/api/src/main/java/org/openmrs/module/fhir2/api/search) — `CompositeBundleProvider`, the N-ary bundle merger
 
-Although the pattern was introduced for resources backed by multiple OpenMRS
-domain objects, the long-term direction is to convert all `Service`
-implementations to extend `CompositeFhirService` — even those with a single
-backing today — registering at minimum one handler for the existing backing.
-That makes every resource pluggable by external modules without requiring a
-case-by-case migration when a second backing is later added, and `BaseFhirService`
-becomes the legacy base class kept only until the migration completes.
+Single-backing resources follow the same pattern with one handler, so every
+resource is pluggable by external modules without a case-by-case migration when
+a second backing is later added. `BaseFhirService` remains only as the base of
+`BaseFhirResourceHandler` and of the handler-side delegate services.
 
 There are a couple of things that are not standard practice for other OpenMRS
 modules that should be borne in mind while developing this module.

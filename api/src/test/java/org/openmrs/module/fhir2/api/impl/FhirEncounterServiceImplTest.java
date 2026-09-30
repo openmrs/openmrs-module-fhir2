@@ -11,9 +11,11 @@ package org.openmrs.module.fhir2.api.impl;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
@@ -26,16 +28,21 @@ import java.util.Arrays;
 import java.util.List;
 
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.HasAndListParam;
+import ca.uhn.fhir.rest.param.HasOrListParam;
+import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Encounter;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.FhirConstants;
@@ -279,6 +286,53 @@ public class FhirEncounterServiceImplTest {
 		assertThat(results.getResources(START_INDEX, END_INDEX), empty());
 		verify(encounterHandler, never()).search(any());
 		verify(visitHandler, never()).search(any());
+	}
+	
+	@Test
+	public void searchForEncounters_shouldForwardHasParamToHandlers() {
+		when(encounterHandler.search(any())).thenReturn(bundleOf(1));
+		when(visitHandler.search(any())).thenReturn(bundleOf(0));
+		
+		HasAndListParam has = new HasAndListParam()
+		        .addAnd(new HasOrListParam().add(new HasParam("MedicationRequest", "encounter", "intent", "order")));
+		EncounterSearchParams params = new EncounterSearchParams();
+		params.setHasAndListParam(has);
+		
+		service.searchForEncounters(params);
+		
+		ArgumentCaptor<SearchParameterMap> captor = ArgumentCaptor.forClass(SearchParameterMap.class);
+		verify(encounterHandler).search(captor.capture());
+		verify(visitHandler).search(captor.capture());
+		for (SearchParameterMap forwarded : captor.getAllValues()) {
+			assertThat(forwarded.getParameters(FhirConstants.HAS_SEARCH_HANDLER).get(0).getParam(), sameInstance(has));
+		}
+	}
+	
+	// ---- get: encounter first, then visit ----
+	
+	@Test
+	public void get_shouldFallThroughToVisitHandlerWhenEncounterHandlerDoesNotKnowTheUuid() {
+		Encounter visit = new Encounter();
+		visit.setId(ENCOUNTER_UUID);
+		when(encounterHandler.get(ENCOUNTER_UUID)).thenThrow(new ResourceNotFoundException("not an encounter"));
+		when(visitHandler.get(ENCOUNTER_UUID)).thenReturn(visit);
+		
+		Encounter result = service.get(ENCOUNTER_UUID);
+		
+		assertThat(result, sameInstance(visit));
+		assertThat(result.getMeta().getProfile().get(0).getValue(),
+		    equalTo("http://fhir.openmrs.org/StructureDefinition/openmrs-visit"));
+	}
+	
+	@Test
+	public void delete_shouldRouteToVisitHandlerWhenItOwnsTheUuid() {
+		when(encounterHandler.exists(ENCOUNTER_UUID)).thenReturn(false);
+		when(visitHandler.exists(ENCOUNTER_UUID)).thenReturn(true);
+		
+		service.delete(ENCOUNTER_UUID);
+		
+		verify(visitHandler).delete(ENCOUNTER_UUID);
+		verify(encounterHandler, never()).delete(any());
 	}
 	
 	// ---- getEncounterEverything ----

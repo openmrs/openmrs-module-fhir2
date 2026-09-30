@@ -37,7 +37,8 @@ import org.springframework.transaction.annotation.Transactional;
  * Cross-provider sorting is intentionally not supported — each provider sorts its own slice and the
  * slices are concatenated in declaration order. The total reported size is the sum of each
  * provider's reported size; if any provider reports an unknown size the total is reported as
- * {@link Integer#MAX_VALUE}.
+ * {@link Integer#MAX_VALUE}. A provider of unknown size is also treated as unbounded when paging,
+ * so every provider after it is unreachable: only place such a provider last.
  * <p>
  * <b>Mains-then-includes ordering contract.</b> When a paged response spans more than one provider,
  * this class splits each provider's chunk into "main" results and "_include" results by assuming
