@@ -23,6 +23,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import lombok.Getter;
 import lombok.Setter;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.util.ProfileRoutingContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -38,7 +39,7 @@ import org.springframework.stereotype.Component;
  * type instead of only those whose provider was individually taught about profiles.
  */
 @Component
-@Interceptor
+@Interceptor(order = FhirConstants.BUILT_IN_INTERCEPTOR_ORDER)
 public class ProfileRoutingInterceptor {
 	
 	@Getter(PROTECTED)

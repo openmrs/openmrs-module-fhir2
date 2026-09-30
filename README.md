@@ -2,7 +2,7 @@
 
 openmrs-module-fhir2
 ==========================
-[![Build with Maven](https://github.com/openmrs/openmrs-module-fhir2/actions/workflows/main.yml/badge.svg)](https://github.com/openmrs/openmrs-module-fhir2/actions/workflows/main.yml)
+[![Build with Maven](https://github.com/openmrs/openmrs-module-fhir2/actions/workflows/build.yml/badge.svg)](https://github.com/openmrs/openmrs-module-fhir2/actions/workflows/build.yml)
 [![codecov](https://codecov.io/gh/openmrs/openmrs-module-fhir2/branch/master/graph/badge.svg)](https://codecov.io/gh/openmrs/openmrs-module-fhir2)
 
 Description

@@ -21,8 +21,9 @@ import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.apache.commons.lang.StringUtils;
+import org.openmrs.module.fhir2.FhirConstants;
 
-@Interceptor
+@Interceptor(order = FhirConstants.BUILT_IN_INTERCEPTOR_ORDER)
 public class SupportMergePatchInterceptor {
 	
 	private static final String JSON_MERGE_PATCH_CONTENT_TYPE = "application/merge-patch+json";
