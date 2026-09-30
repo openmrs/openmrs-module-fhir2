@@ -20,7 +20,6 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -54,15 +53,6 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 		
 		TypedQuery<Patient> query = criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery());
 		return query.getResultList().stream().findFirst().orElse(null);
-	}
-	
-	@Override
-	public List<Patient> getPatientsByIds(@Nonnull Collection<Integer> ids) {
-		OpenmrsFhirCriteriaContext<Patient, Patient> criteriaContext = createCriteriaContext(Patient.class);
-		
-		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot());
-		criteriaContext.getCriteriaQuery().where(criteriaContext.getRoot().get("id").in(ids));
-		return criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).getResultList();
 	}
 	
 	@Override

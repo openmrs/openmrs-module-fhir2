@@ -36,9 +36,6 @@ public interface FhirPatientDao extends FhirDao<Patient> {
 	@Authorized(PrivilegeConstants.GET_PATIENTS)
 	Patient getPatientById(@Nonnull Integer id);
 	
-	@Authorized(PrivilegeConstants.GET_PATIENTS)
-	List<Patient> getPatientsByIds(@Nonnull Collection<Integer> ids);
-	
 	@Override
 	@Authorized(PrivilegeConstants.GET_PATIENTS)
 	List<Patient> getSearchResults(@Nonnull SearchParameterMap theParams);
