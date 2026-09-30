@@ -13,6 +13,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
@@ -40,21 +41,18 @@ import java.util.stream.Collectors;
 
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.param.UriAndListParam;
-import ca.uhn.fhir.rest.param.UriOrListParam;
-import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.Patient;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.handler.FhirResourceHandler;
 import org.openmrs.module.fhir2.api.search.CompositeBundleProvider;
@@ -364,6 +362,17 @@ public class BaseCompositeFhirServiceTest {
 	}
 	
 	@Test
+	public void updateShouldReportUnknownUuidAsNotFoundEvenWhenBodyIdIsWrong() {
+		// Ownership is probed before the body is validated: an unknown UUID is 404 regardless of the
+		// body's id. The owning handler's own id validation only applies once an owner is found.
+		Encounter mismatched = encounter(UUID_PRIMARY);
+		
+		assertThrows(ResourceNotFoundException.class, () -> service.update(UUID_UNKNOWN, mismatched));
+		assertThrows(ResourceNotFoundException.class, () -> service.update(UUID_UNKNOWN, new Encounter()));
+		verify(primaryHandler, never()).update(anyString(), any(), any(), anyBoolean());
+	}
+	
+	@Test
 	public void updateShouldRouteToCurrentOwnerByExistsProbe() {
 		// given — secondary handler currently owns the uuid
 		Encounter incoming = new Encounter();
@@ -515,6 +524,57 @@ public class BaseCompositeFhirServiceTest {
 		assertThat(profileUrlsOf(stamped), contains(PROFILE_PRIMARY));
 	}
 	
+	@Test
+	public void searchShouldNotStampIncludedResources() {
+		// A search page is the toIndex - fromIndex matches followed by _include / _revinclude resources.
+		// Included resources belong to other handlers (possibly other resource types) and must keep the
+		// profile their own service gave them.
+		when(secondaryHandler.acceptsSearch(any())).thenReturn(false);
+		IBundleProvider primaryBundle = mock(IBundleProvider.class);
+		Encounter match = encounter("e1");
+		Patient includedPatient = new Patient();
+		includedPatient.setId("p1");
+		Encounter includedEncounter = encounter("e2");
+		includedEncounter.getMeta().addProfile(PROFILE_SECONDARY);
+		when(primaryBundle.getResources(0, 1))
+		        .thenReturn(Arrays.asList((IBaseResource) match, includedPatient, includedEncounter));
+		when(primaryHandler.search(any())).thenReturn(primaryBundle);
+		
+		List<IBaseResource> page = service.exposedSearch(new SearchParameterMap()).getResources(0, 1);
+		
+		assertThat(page, hasSize(3));
+		assertThat(profileUrlsOf((Encounter) page.get(0)), contains(PROFILE_PRIMARY));
+		assertThat(includedPatient.getMeta().getProfile(), is(empty()));
+		assertThat(profileUrlsOf(includedEncounter), contains(PROFILE_SECONDARY));
+	}
+	
+	@Test
+	public void searchShouldStampEveryResourceWhenPageBoundsAreOpenEnded() {
+		// toIndex <= fromIndex means "everything from fromIndex"; there is no way to tell matches from
+		// includes, so every resource on the page is treated as a match.
+		when(secondaryHandler.acceptsSearch(any())).thenReturn(false);
+		IBundleProvider primaryBundle = mock(IBundleProvider.class);
+		Encounter first = encounter("e1");
+		Encounter second = encounter("e2");
+		when(primaryBundle.getResources(0, 0)).thenReturn(Arrays.asList((IBaseResource) first, second));
+		when(primaryHandler.search(any())).thenReturn(primaryBundle);
+		
+		service.exposedSearch(new SearchParameterMap()).getResources(0, 0);
+		
+		assertThat(profileUrlsOf(first), contains(PROFILE_PRIMARY));
+		assertThat(profileUrlsOf(second), contains(PROFILE_PRIMARY));
+	}
+	
+	@Test
+	public void searchShouldReturnEmptyPageWhenHandlerReturnsNull() {
+		when(secondaryHandler.acceptsSearch(any())).thenReturn(false);
+		IBundleProvider primaryBundle = mock(IBundleProvider.class);
+		when(primaryBundle.getResources(anyInt(), anyInt())).thenReturn(null);
+		when(primaryHandler.search(any())).thenReturn(primaryBundle);
+		
+		assertThat(service.exposedSearch(new SearchParameterMap()).getResources(0, 10), is(empty()));
+	}
+	
 	// ---- _profile-based search routing ----
 	
 	@Test
@@ -522,7 +582,9 @@ public class BaseCompositeFhirServiceTest {
 		IBundleProvider primaryBundle = emptyBundle();
 		when(primaryHandler.search(any())).thenReturn(primaryBundle);
 		
-		service.exposedSearch(profileParams(PROFILE_PRIMARY));
+		service.setProfileRoutingContext(contextRequesting(PROFILE_PRIMARY));
+		
+		service.exposedSearch(new SearchParameterMap());
 		
 		verify(primaryHandler).search(any());
 		verify(secondaryHandler, never()).search(any());
@@ -535,7 +597,9 @@ public class BaseCompositeFhirServiceTest {
 		IBundleProvider primaryBundle = emptyBundle();
 		when(primaryHandler.search(any())).thenReturn(primaryBundle);
 		
-		service.exposedSearch(profileParams(PROFILE_PRIMARY));
+		service.setProfileRoutingContext(contextRequesting(PROFILE_PRIMARY));
+		
+		service.exposedSearch(new SearchParameterMap());
 		
 		verify(primaryHandler).search(any());
 		verify(secondaryHandler, never()).search(any());
@@ -550,7 +614,9 @@ public class BaseCompositeFhirServiceTest {
 		when(primaryHandler.search(any())).thenReturn(primaryBundle);
 		when(secondaryHandler.search(any())).thenReturn(secondaryBundle);
 		
-		service.exposedSearch(profileParams(PROFILE_PRIMARY, PROFILE_SECONDARY));
+		service.setProfileRoutingContext(contextRequesting(PROFILE_PRIMARY, PROFILE_SECONDARY));
+		
+		service.exposedSearch(new SearchParameterMap());
 		
 		verify(primaryHandler).search(any());
 		verify(secondaryHandler).search(any());
@@ -565,7 +631,10 @@ public class BaseCompositeFhirServiceTest {
 		when(primaryHandler.search(any())).thenReturn(primaryBundle);
 		when(secondaryHandler.search(any())).thenReturn(secondaryBundle);
 		
-		service.exposedSearch(profileParams("http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter"));
+		service.setProfileRoutingContext(
+		    contextRequesting("http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter"));
+		
+		service.exposedSearch(new SearchParameterMap());
 		
 		verify(primaryHandler).search(any());
 		verify(secondaryHandler).search(any());
@@ -581,20 +650,6 @@ public class BaseCompositeFhirServiceTest {
 		
 		verify(primaryHandler).search(any());
 		verify(secondaryHandler, never()).search(any());
-	}
-	
-	@Test
-	public void searchShouldUnionProfilesFromTheRequestAndTheParameterMap() {
-		IBundleProvider primaryBundle = emptyBundle();
-		IBundleProvider secondaryBundle = emptyBundle();
-		when(primaryHandler.search(any())).thenReturn(primaryBundle);
-		when(secondaryHandler.search(any())).thenReturn(secondaryBundle);
-		service.setProfileRoutingContext(contextRequesting(PROFILE_PRIMARY));
-		
-		service.exposedSearch(profileParams(PROFILE_SECONDARY));
-		
-		verify(primaryHandler).search(any());
-		verify(secondaryHandler).search(any());
 	}
 	
 	@Test
@@ -620,7 +675,9 @@ public class BaseCompositeFhirServiceTest {
 		when(primaryBundle.getResources(anyInt(), anyInt())).thenReturn(Collections.singletonList((IBaseResource) raw));
 		when(primaryHandler.search(any())).thenReturn(primaryBundle);
 		
-		IBundleProvider result = service.exposedSearch(profileParams(PROFILE_PRIMARY));
+		service.setProfileRoutingContext(contextRequesting(PROFILE_PRIMARY));
+		
+		IBundleProvider result = service.exposedSearch(new SearchParameterMap());
 		List<IBaseResource> page = result.getResources(0, 10);
 		
 		assertThat(page, hasSize(1));
@@ -680,14 +737,6 @@ public class BaseCompositeFhirServiceTest {
 		ProfileRoutingContext context = new ProfileRoutingContext();
 		context.setRequestedProfiles(Arrays.asList(profileUrls));
 		return context;
-	}
-	
-	private static SearchParameterMap profileParams(String... profileUrls) {
-		UriAndListParam profile = new UriAndListParam();
-		for (String url : profileUrls) {
-			profile.addAnd(new UriOrListParam().add(new UriParam(url)));
-		}
-		return new SearchParameterMap().addParameter(FhirConstants.PROFILE_SEARCH_HANDLER, profile);
 	}
 	
 	private static IBundleProvider emptyBundle() {

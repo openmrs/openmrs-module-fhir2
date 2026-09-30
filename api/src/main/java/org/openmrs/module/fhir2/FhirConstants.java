@@ -291,8 +291,6 @@ public final class FhirConstants {
 	
 	public static final String TAG_SEARCH_HANDLER = "tag.search.handler";
 	
-	public static final String PROFILE_SEARCH_HANDLER = "profile.search.handler";
-	
 	public static final String GROUP_MEMBERS_SEARCH_HANDLER = "group.members.search.handler";
 	
 	public static final String HAPI_NARRATIVES_PROPERTY_FILE = "classpath:ca/uhn/fhir/narrative/narratives.properties";

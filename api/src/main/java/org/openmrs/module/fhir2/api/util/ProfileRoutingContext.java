@@ -28,10 +28,8 @@ import org.springframework.stereotype.Component;
  * type — including one an external module has added a backing to — without that resource's provider
  * knowing about profiles.
  * <p>
- * Callers outside an HTTP request (another module invoking a service directly) never populate this
- * and always see an empty set; they can still target a handler by putting
- * {@link org.openmrs.module.fhir2.FhirConstants#PROFILE_SEARCH_HANDLER} into a
- * {@code SearchParameterMap} themselves.
+ * Callers outside an HTTP request (another module invoking a service directly) see an empty set
+ * unless they populate this holder themselves around the call, clearing it afterwards.
  */
 @Component
 public class ProfileRoutingContext {

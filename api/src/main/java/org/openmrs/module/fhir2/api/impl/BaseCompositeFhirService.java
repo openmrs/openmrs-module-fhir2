@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,9 +25,6 @@ import java.util.stream.Collectors;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.param.UriAndListParam;
-import ca.uhn.fhir.rest.param.UriOrListParam;
-import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
@@ -40,12 +36,10 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.FhirService;
 import org.openmrs.module.fhir2.api.handler.FhirResourceHandler;
 import org.openmrs.module.fhir2.api.search.CompositeBundleProvider;
-import org.openmrs.module.fhir2.api.search.param.PropParam;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.util.ProfileRoutingContext;
 import org.slf4j.Logger;
@@ -55,10 +49,10 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.OrderUtils;
 
 /**
- * Abstract orchestrator for FHIR resource types backed by more than one OpenMRS domain object.
- * Subclasses provide the concrete resource type {@code R}; Spring injects the ordered list of
- * {@link FhirResourceHandler}s registered for that type. The orchestrator dispatches each
- * {@link FhirService} call using one of two primitives:
+ * Abstract orchestrator behind every {@code Fhir<X>Service}. A FHIR resource type may be backed by
+ * one or more OpenMRS domain objects; subclasses provide the concrete resource type {@code R} and
+ * Spring injects the ordered list of {@link FhirResourceHandler}s registered for that type. The
+ * orchestrator dispatches each {@link FhirService} call using one of two primitives:
  * <ul>
  * <li><b>UUID-based</b> — {@link FhirService#exists(String)}. Used for {@code get}, {@code update},
  * {@code patch}, {@code delete}. Picks the first handler in {@code @Order} priority whose backing
@@ -71,9 +65,10 @@ import org.springframework.core.annotation.OrderUtils;
  * <p>
  * Per-operation behaviour:
  * <ul>
- * <li>{@code get(uuid)} — {@code exists()} probe → {@code handler.get(uuid)}.
- * {@link ca.uhn.fhir.rest.server.exceptions.ResourceGoneException} from the owning handler
- * propagates without fall-through. {@link ResourceNotFoundException} if no handler claims it.
+ * <li>{@code get(uuid)} — {@code handler.get(uuid)} on each handler in priority order until one
+ * returns; a handler's {@link ResourceNotFoundException} moves on to the next, while
+ * {@link ca.uhn.fhir.rest.server.exceptions.ResourceGoneException} propagates without fall-through.
+ * {@link ResourceNotFoundException} if no handler claims it.
  * <li>{@code create(R)} — {@code meta.profile} match → otherwise every handler whose
  * {@code canHandle} claims the body, resolved by {@code @Order} when there is more than one.
  * {@link InvalidRequestException} if the top precedence is tied, or if no handler claims at all;
@@ -81,14 +76,17 @@ import org.springframework.core.annotation.OrderUtils;
  * Profile-targeted routing is unconditional — the named handler validates the resource and may
  * itself throw {@link InvalidRequestException} if the input is malformed for it.
  * <li>{@code update(uuid, r)} / {@code update(uuid, r, RD, false)} — {@code exists()} probe →
- * {@code handler.update(...)}. {@link ResourceNotFoundException} if no handler owns the UUID.
+ * {@code handler.update(...)}. {@link ResourceNotFoundException} if no handler owns the UUID. The
+ * probe runs before the owning handler validates the body, so an unknown UUID is reported as 404
+ * even when the body's id is missing or does not match; a known UUID with a bad id is still 400.
  * <li>{@code update(uuid, r, RD, true)} — {@code exists()} probe first; if a handler owns the UUID,
  * dispatch to it. Otherwise fall back to {@code meta.profile} / {@code canHandle} dispatch and call
  * {@code handler.update(uuid, r, RD, true)} so the chosen handler runs its own create-if-not-exists
  * logic.
  * <li>{@code patch(uuid, ...)} — {@code exists()} probe → {@code handler.patch(uuid, ...)}.
  * <li>{@code delete(uuid)} — {@code exists()} probe → {@code handler.delete(uuid)}.
- * <li>{@code search(params)} — if {@code _profile} names at least one handler's
+ * <li>{@code search(params)} — if the request's {@code _profile} (captured into
+ * {@link ProfileRoutingContext} by the web layer) names at least one handler's
  * {@link FhirResourceHandler#getImplicitProfile() implicit profile}, route only to the matching
  * handler(s) (the same profile that identifies a handler for {@code create} also selects it for
  * search). Otherwise fan out to handlers whose
@@ -99,7 +97,9 @@ import org.springframework.core.annotation.OrderUtils;
  * </ul>
  * Resources returned by handlers have the handler's implicit profile stamped onto
  * {@code meta.profile} (deduped if already present) so clients can discover the routing key, both
- * for direct read/write returns and lazily on each page of a search bundle.
+ * for direct read/write returns and lazily on each page of a search bundle. Only the matched
+ * resources of a page are stamped; {@code _include} and {@code _revinclude} resources are resolved
+ * through their own resource's service and carry the profile of whichever handler produced them.
  */
 public abstract class BaseCompositeFhirService<R extends IAnyResource> implements FhirService<R> {
 	
@@ -181,6 +181,12 @@ public abstract class BaseCompositeFhirService<R extends IAnyResource> implement
 		return update(uuid, updatedResource, null, false);
 	}
 	
+	/**
+	 * Ownership is resolved before the body is validated, so an unknown UUID yields
+	 * {@link ResourceNotFoundException} regardless of the body's id. Once an owner is found, that
+	 * handler applies the usual id checks and may still reject the body with
+	 * {@link InvalidRequestException}.
+	 */
 	@Override
 	public R update(@Nonnull String uuid, @Nonnull R updatedResource, RequestDetails requestDetails,
 	        boolean createIfNotExists) {
@@ -299,12 +305,13 @@ public abstract class BaseCompositeFhirService<R extends IAnyResource> implement
 	 * Runs a fan-out search across the selected handlers and merges the result bundles via
 	 * {@link CompositeBundleProvider}.
 	 * <p>
-	 * Handler selection has two modes. If the request carries a {@code _profile} parameter naming at
-	 * least one handler's {@link FhirResourceHandler#getImplicitProfile() implicit profile}, the search
-	 * is routed only to the matching handler(s) — the same profile that identifies a handler for CRUD
-	 * also selects it for search, and {@code acceptsSearch} is not consulted. Otherwise (no
-	 * {@code _profile}, or a {@code _profile} that matches no handler — e.g. an unrelated conformance
-	 * profile) the orchestrator falls back to a fan-out across every handler whose
+	 * Handler selection has two modes. If the current request carries a {@code _profile} parameter (see
+	 * {@link ProfileRoutingContext}) naming at least one handler's
+	 * {@link FhirResourceHandler#getImplicitProfile() implicit profile}, the search is routed only to
+	 * the matching handler(s) — the same profile that identifies a handler for CRUD also selects it for
+	 * search, and {@code acceptsSearch} is not consulted. Otherwise (no {@code _profile}, or a
+	 * {@code _profile} that matches no handler — e.g. an unrelated conformance profile) the
+	 * orchestrator falls back to a fan-out across every handler whose
 	 * {@link FhirResourceHandler#acceptsSearch} returns true; any handler-specific routing (e.g. by
 	 * {@code _tag}) lives there.
 	 */
@@ -340,7 +347,7 @@ public abstract class BaseCompositeFhirService<R extends IAnyResource> implement
 	 * otherwise every handler whose {@code acceptsSearch} accepts the params participates.
 	 */
 	private List<FhirResourceHandler<R>> selectSearchTargets(SearchParameterMap params) {
-		Set<String> requestedProfiles = requestedProfiles(params);
+		Set<String> requestedProfiles = requestedProfiles();
 		if (!requestedProfiles.isEmpty()) {
 			List<FhirResourceHandler<R>> byProfile = handlers.stream()
 			        .filter(h -> requestedProfiles.contains(h.getImplicitProfile())).collect(Collectors.toList());
@@ -354,30 +361,8 @@ public abstract class BaseCompositeFhirService<R extends IAnyResource> implement
 		return handlers.stream().filter(h -> h.acceptsSearch(params)).collect(Collectors.toList());
 	}
 	
-	private Set<String> requestedProfiles(SearchParameterMap params) {
-		Set<String> profiles = new HashSet<>(profileRoutingContext.getRequestedProfiles());
-		for (Map.Entry<String, List<PropParam<?>>> entry : params.getParameters()) {
-			if (!FhirConstants.PROFILE_SEARCH_HANDLER.equals(entry.getKey())) {
-				continue;
-			}
-			for (PropParam<?> propParam : entry.getValue()) {
-				Object value = propParam.getParam();
-				if (!(value instanceof UriAndListParam)) {
-					continue;
-				}
-				for (UriOrListParam orList : ((UriAndListParam) value).getValuesAsQueryTokens()) {
-					if (orList == null) {
-						continue;
-					}
-					for (UriParam uri : orList.getValuesAsQueryTokens()) {
-						if (uri != null && uri.getValue() != null && !uri.getValue().isEmpty()) {
-							profiles.add(uri.getValue());
-						}
-					}
-				}
-			}
-		}
-		return profiles;
+	private Set<String> requestedProfiles() {
+		return profileRoutingContext.getRequestedProfiles();
 	}
 	
 	/**
@@ -543,15 +528,23 @@ public abstract class BaseCompositeFhirService<R extends IAnyResource> implement
 			this.profileUrl = profileUrl;
 		}
 		
+		/**
+		 * Stamps only the matched resources of the page. A search bundle provider returns the
+		 * {@code toIndex - fromIndex} matches first and appends any {@code _include} / {@code _revinclude}
+		 * resources after them; those were produced by other handlers (through their own resource's
+		 * service) and already carry the right profile.
+		 */
 		@Nonnull
 		@Override
 		public List<IBaseResource> getResources(int fromIndex, int toIndex) {
 			List<IBaseResource> raw = delegate.getResources(fromIndex, toIndex);
 			if (raw == null || raw.isEmpty()) {
-				return raw;
+				return raw == null ? Collections.emptyList() : raw;
 			}
 			
-			for (IBaseResource resource : raw) {
+			int matches = toIndex > fromIndex ? Math.min(toIndex - fromIndex, raw.size()) : raw.size();
+			for (int i = 0; i < matches; i++) {
+				IBaseResource resource = raw.get(i);
 				if (resource == null) {
 					continue;
 				}

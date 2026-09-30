@@ -112,7 +112,9 @@ public interface FhirService<T extends IAnyResource> {
 	 * @return the updated resource as it now appears in the database
 	 * @throws InvalidRequestException if any required argument is {@code null} or the resource's id
 	 *             doesn't match {@code uuid}
-	 * @throws ResourceNotFoundException if no resource with the given UUID exists
+	 * @throws ResourceNotFoundException if no resource with the given UUID exists; implementations may
+	 *             check existence before validating the id, in which case an unknown UUID is reported
+	 *             as not found even when the body's id is also wrong
 	 */
 	T update(@Nonnull String uuid, @Nonnull T updatedResource);
 	
