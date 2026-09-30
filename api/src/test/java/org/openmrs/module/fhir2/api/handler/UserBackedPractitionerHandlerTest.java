@@ -16,6 +16,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
@@ -23,8 +24,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.junit.Before;
 import org.junit.Test;
@@ -65,8 +68,6 @@ public class UserBackedPractitionerHandlerTest {
 	
 	@Test
 	public void canHandle_shouldAlwaysReturnFalse() {
-		// Preserves OLD behaviour: the previous orchestrator never created a User from a FHIR
-		// Practitioner write. An override handler with the same implicit profile could enable this.
 		assertFalse(handler.canHandle(new Practitioner()));
 		assertFalse(handler.canHandle(practitioner));
 	}
@@ -98,29 +99,29 @@ public class UserBackedPractitionerHandlerTest {
 	}
 	
 	@Test
-	public void create_shouldDelegateToUserService() {
-		when(userService.create(practitioner)).thenReturn(practitioner);
-		
-		Practitioner result = handler.create(practitioner);
-		
-		assertThat(result, sameInstance(practitioner));
-		verify(userService).create(practitioner);
+	public void create_shouldRejectWritesToUserBacking() {
+		assertThrows(MethodNotAllowedException.class, () -> handler.create(practitioner));
+		verifyNoInteractions(userService);
 	}
 	
 	@Test
-	public void update_shouldDelegateToUserService() {
-		when(userService.update(PRACTITIONER_UUID, practitioner)).thenReturn(practitioner);
-		
-		Practitioner result = handler.update(PRACTITIONER_UUID, practitioner);
-		
-		assertThat(result, sameInstance(practitioner));
-		verify(userService).update(PRACTITIONER_UUID, practitioner);
+	public void update_shouldRejectWritesToUserBacking() {
+		assertThrows(MethodNotAllowedException.class, () -> handler.update(PRACTITIONER_UUID, practitioner));
+		assertThrows(MethodNotAllowedException.class, () -> handler.update(PRACTITIONER_UUID, practitioner, null, true));
+		verifyNoInteractions(userService);
 	}
 	
 	@Test
-	public void delete_shouldDelegateToUserService() {
-		handler.delete(PRACTITIONER_UUID);
-		verify(userService).delete(PRACTITIONER_UUID);
+	public void patch_shouldRejectWritesToUserBacking() {
+		assertThrows(MethodNotAllowedException.class,
+		    () -> handler.patch(PRACTITIONER_UUID, PatchTypeEnum.JSON_PATCH, "[]", null));
+		verifyNoInteractions(userService);
+	}
+	
+	@Test
+	public void delete_shouldRejectWritesToUserBacking() {
+		assertThrows(MethodNotAllowedException.class, () -> handler.delete(PRACTITIONER_UUID));
+		verifyNoInteractions(userService);
 	}
 	
 	@Test

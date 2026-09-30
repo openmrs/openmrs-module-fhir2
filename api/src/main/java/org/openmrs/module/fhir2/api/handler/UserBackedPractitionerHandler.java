@@ -17,8 +17,10 @@ import java.util.Collection;
 import java.util.List;
 
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Practitioner;
@@ -31,15 +33,15 @@ import org.springframework.stereotype.Component;
 
 /**
  * Maps the FHIR {@link Practitioner} resource onto the OpenMRS {@code User} domain object by
- * delegating every {@link org.openmrs.module.fhir2.api.FhirService} call to the existing
- * {@link FhirUserService}. Sibling of {@link ProviderBackedPractitionerHandler}.
+ * delegating reads and searches to the existing {@link FhirUserService}. Sibling of
+ * {@link ProviderBackedPractitionerHandler}.
  * <p>
- * {@link #canHandle(Practitioner)} returns {@code false}: the OLD orchestrator never created a User
- * from a FHIR Practitioner write, and this handler preserves that behaviour. The user backing only
- * participates in reads (UUID-based dispatch via {@code exists()}) and searches (fan-out from the
- * orchestrator). An external module wanting to enable user-create-via-FHIR would register an
- * override handler with the same backing key and a {@code canHandle} that returns {@code true}
- * under whatever discriminator it chooses.
+ * The user backing is read-only through the FHIR API. {@link #canHandle(Practitioner)} returns
+ * {@code false} so no content-based dispatch selects it, and every write operation throws
+ * {@link MethodNotAllowedException} so that neither a {@code meta.profile} naming this handler nor
+ * UUID-based ownership of an existing user can reach {@link FhirUserService}'s write path. An
+ * external module wanting to enable user writes via FHIR would register an override handler with
+ * the same implicit profile and a higher priority.
  */
 @Component
 @Order(Ordered.LOWEST_PRECEDENCE)
@@ -79,29 +81,34 @@ public class UserBackedPractitionerHandler implements FhirResourceHandler<Practi
 	
 	@Override
 	public Practitioner create(@Nonnull Practitioner newResource) {
-		return userService.create(newResource);
+		throw readOnly();
 	}
 	
 	@Override
 	public Practitioner update(@Nonnull String uuid, @Nonnull Practitioner updatedResource) {
-		return userService.update(uuid, updatedResource);
+		throw readOnly();
 	}
 	
 	@Override
 	public Practitioner update(@Nonnull String uuid, @Nonnull Practitioner updatedResource, RequestDetails requestDetails,
 	        boolean createIfNotExists) {
-		return userService.update(uuid, updatedResource, requestDetails, createIfNotExists);
+		throw readOnly();
 	}
 	
 	@Override
 	public Practitioner patch(@Nonnull String uuid, @Nonnull PatchTypeEnum patchType, @Nonnull String body,
 	        RequestDetails requestDetails) {
-		return userService.patch(uuid, patchType, body, requestDetails);
+		throw readOnly();
 	}
 	
 	@Override
 	public void delete(@Nonnull String uuid) {
-		userService.delete(uuid);
+		throw readOnly();
+	}
+	
+	private static MethodNotAllowedException readOnly() {
+		return new MethodNotAllowedException("Practitioners backed by OpenMRS users are read-only through the FHIR API",
+		        RequestTypeEnum.GET);
 	}
 	
 	@Override
