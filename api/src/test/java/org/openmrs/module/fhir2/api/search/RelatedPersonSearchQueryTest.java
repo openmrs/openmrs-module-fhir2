@@ -48,9 +48,9 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.RelatedPerson;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.openmrs.Relationship;
 import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.openmrs.module.fhir2.FhirConstants;
@@ -119,7 +119,7 @@ public class RelatedPersonSearchQueryTest extends BaseFhirContextSensitiveTest {
 	@Autowired
 	private SearchQuery<Relationship, RelatedPerson, FhirRelatedPersonDao, RelatedPersonTranslator, SearchQueryInclude<RelatedPerson>> searchQuery;
 	
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		executeDataSet(RELATIONSHIP_DATA_XML);
 	}
@@ -509,7 +509,7 @@ public class RelatedPersonSearchQueryTest extends BaseFhirContextSensitiveTest {
 	}
 	
 	@Test
-	@Ignore("Currently, this is broken but the correct SQL is generated, so the issue appears to be with H2")
+	@Disabled("Currently, this is broken but the correct SQL is generated, so the issue appears to be with H2")
 	public void shouldReturnCollectionOfRelatedPeopleSortedByName() {
 		SortSpec sort = new SortSpec();
 		sort.setParamName(RelatedPerson.SP_NAME);

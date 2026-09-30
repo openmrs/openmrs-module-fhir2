@@ -23,20 +23,16 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.sameInstance;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -49,6 +45,10 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.IServerAddressStrategy;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Appender;
@@ -60,9 +60,9 @@ import org.apache.logging.log4j.core.config.Property;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.openmrs.api.AdministrationService;
@@ -101,13 +101,13 @@ public class FhirRestServletTest {
 	
 	private GenericApplicationContext context;
 	
-	@Before
+	@BeforeEach
 	public void setUp() throws ServletException, IOException {
 		MockitoAnnotations.initMocks(this);
 		
 		servlet = new TestableFhirRestServlet();
 		
-		when(mockServletConfig.getServletContext()).thenReturn(mock(javax.servlet.ServletContext.class));
+		when(mockServletConfig.getServletContext()).thenReturn(mock(jakarta.servlet.ServletContext.class));
 		when(mockResponse.getWriter()).thenReturn(mockWriter);
 		
 		// an unstubbed mock returns 0, which BasePagingProvider rejects
@@ -119,7 +119,7 @@ public class FhirRestServletTest {
 		servlet.init(mockServletConfig);
 	}
 	
-	@After
+	@AfterEach
 	public void closeContext() {
 		if (context != null) {
 			context.close();
@@ -137,6 +137,7 @@ public class FhirRestServletTest {
 		when(mockRequest.getServletPath()).thenReturn("");
 		when(mockRequest.getContextPath()).thenReturn("");
 		when(mockRequest.getQueryString()).thenReturn("");
+		when(mockRequest.getHeaderNames()).thenReturn(Collections.emptyEnumeration());
 		
 		Thread.currentThread().setContextClassLoader(null);
 		assertNull(Thread.currentThread().getContextClassLoader());
@@ -214,6 +215,7 @@ public class FhirRestServletTest {
 		when(mockRequest.getServletPath()).thenReturn("");
 		when(mockRequest.getContextPath()).thenReturn("");
 		when(mockRequest.getQueryString()).thenReturn("");
+		when(mockRequest.getHeaderNames()).thenReturn(Collections.emptyEnumeration());
 		
 		refreshable.service(mockRequest, mockResponse);
 		
@@ -527,8 +529,7 @@ public class FhirRestServletTest {
 		Appender appender = collectErrorsInto(errors);
 		try {
 			servlet.registerInterceptors();
-		}
-		finally {
+		} finally {
 			stopCollecting(appender);
 		}
 		
@@ -571,6 +572,7 @@ public class FhirRestServletTest {
 		when(mockRequest.getServletPath()).thenReturn("");
 		when(mockRequest.getContextPath()).thenReturn("");
 		when(mockRequest.getQueryString()).thenReturn("");
+		when(mockRequest.getHeaderNames()).thenReturn(Collections.emptyEnumeration());
 	}
 	
 	private int bindingCountFor(FhirRestServlet servlet, String resourceName) {

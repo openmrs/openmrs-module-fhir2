@@ -42,11 +42,11 @@ import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.BaseOpenmrsData;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.PersonAddress;
@@ -64,7 +64,7 @@ import org.openmrs.module.fhir2.api.translators.PersonAttributeTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonNameTranslator;
 import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class PatientTranslatorImplTest {
 	
 	private static final String PATIENT_UUID = "123456-abcdef-123456";
@@ -119,7 +119,7 @@ public class PatientTranslatorImplTest {
 	
 	private PatientTranslatorImpl patientTranslator;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		patientTranslator = new PatientTranslatorImpl();
 		patientTranslator.setIdentifierTranslator(identifierTranslator);

@@ -10,14 +10,14 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import javax.annotation.Nonnull;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
 
 import java.util.Optional;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Predicate;
 import org.openmrs.MedicationDispense;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirMedicationDispenseDao;

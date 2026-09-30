@@ -23,7 +23,7 @@ import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.MedicationRequest;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class JsonPatchUtilTest {
 	
@@ -36,8 +36,7 @@ public class JsonPatchUtilTest {
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_PATCH_MEDICATION_REQUEST_PATH)) {
 			Objects.requireNonNull(is);
 			medicationRequestPatchJson = inputStreamToString(is, UTF_8);
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 		

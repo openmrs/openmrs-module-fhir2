@@ -23,8 +23,8 @@ import java.util.List;
 import java.util.Optional;
 
 import co.unruly.matchers.OptionalMatchers;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.Concept;
 import org.openmrs.ConceptSource;
 import org.openmrs.api.ConceptService;
@@ -55,7 +55,7 @@ public class FhirConceptDaoImplTest extends BaseFhirContextSensitiveTest {
 	@Autowired
 	private FhirConceptDao dao;
 	
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		executeDataSet(CONCEPT_DATA_XML);
 		executeDataSet(CONCEPT_FHIR_DATA_XML);

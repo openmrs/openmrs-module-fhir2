@@ -15,16 +15,16 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
 
 import org.hl7.fhir.r4.model.EpisodeOfCare;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.PatientProgram;
 import org.openmrs.module.fhir2.api.dao.FhirEpisodeOfCareDao;
 import org.openmrs.module.fhir2.api.translators.EpisodeOfCareTranslator;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class FhirEpisodeOfCareServiceImplTest {
 	
 	private static final String EPISODE_OF_CARE_UUID = "9119b9f8-af3d-4ad8-9e2e-2317c3de91c6";
@@ -41,7 +41,7 @@ public class FhirEpisodeOfCareServiceImplTest {
 	
 	private EpisodeOfCare episodeOfCare;
 	
-	@Before
+	@BeforeEach
 	public void setUp() {
 		episodeOfCareService = new FhirEpisodeOfCareServiceImpl();
 		

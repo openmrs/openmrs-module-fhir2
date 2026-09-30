@@ -12,12 +12,6 @@ package org.openmrs.module.fhir2.api.dao.impl;
 import static org.hl7.fhir.r4.model.Patient.SP_DEATH_DATE;
 
 import javax.annotation.Nonnull;
-import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -32,6 +26,12 @@ import ca.uhn.fhir.rest.param.HasAndListParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Predicate;
 import lombok.NonNull;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.CohortMembership;
@@ -91,8 +91,7 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 				try {
 					return identifierTypes.stream().filter((idType) -> uuid.equals(idType.getUuid())).findFirst()
 					        .orElse(identifierTypes.get(0));
-				}
-				catch (NoSuchElementException ignored) {}
+				} catch (NoSuchElementException ignored) {}
 			}
 			
 			return identifierTypes.get(0);
@@ -257,15 +256,14 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 		
 		return handleAndListParamBySystem(criteriaContext.getCriteriaBuilder(), identifier, (system, tokens) -> {
 			if (system.isEmpty()) {
-				return Optional.of(
-				    criteriaContext.getCriteriaBuilder().in(identifiersJoin.get("identifier")).value(tokensToList(tokens)));
+				return Optional.of(identifiersJoin.get("identifier").in(tokensToList(tokens)));
 			} else {
 				Join<?, ?> identifiersIdentifierTypeJoin = criteriaContext.addJoin(identifiersJoin, "identifierType", "pit",
 				    pit -> criteriaContext.getCriteriaBuilder().equal(pit.get("retired"), false));
 				
 				return Optional.of(criteriaContext.getCriteriaBuilder().and(
 				    criteriaContext.getCriteriaBuilder().equal(identifiersIdentifierTypeJoin.get("name"), system),
-				    criteriaContext.getCriteriaBuilder().in(identifiersJoin.get("identifier")).value(tokensToList(tokens))));
+				    identifiersJoin.get("identifier").in(tokensToList(tokens))));
 			}
 		});
 	}

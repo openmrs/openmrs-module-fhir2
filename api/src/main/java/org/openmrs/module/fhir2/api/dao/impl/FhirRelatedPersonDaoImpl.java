@@ -19,7 +19,6 @@ import static org.hl7.fhir.r4.model.Person.SP_BIRTHDATE;
 import static org.hl7.fhir.r4.model.Person.SP_NAME;
 
 import javax.annotation.Nonnull;
-import javax.persistence.criteria.*;
 
 import java.util.Calendar;
 import java.util.Collection;
@@ -33,6 +32,7 @@ import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
+import jakarta.persistence.criteria.*;
 import org.apache.commons.lang3.time.DateUtils;
 import org.openmrs.PersonName;
 import org.openmrs.Relationship;

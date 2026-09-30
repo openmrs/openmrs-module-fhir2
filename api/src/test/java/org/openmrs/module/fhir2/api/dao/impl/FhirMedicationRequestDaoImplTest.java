@@ -19,7 +19,7 @@ import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.openmrs.test.OpenmrsMatchers.hasId;
 import static org.openmrs.util.PrivilegeConstants.GET_ORDERS;
 
@@ -30,8 +30,8 @@ import java.util.List;
 
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.DrugOrder;
 import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.context.Context;
@@ -61,7 +61,7 @@ public class FhirMedicationRequestDaoImplTest extends BaseFhirContextSensitiveTe
 	
 	private FhirMedicationRequestDao dao;
 	
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		dao = daoProvider.getObject();
 		executeDataSet(MEDICATION_REQUEST_INITIAL_DATA_XML);
@@ -135,8 +135,7 @@ public class FhirMedicationRequestDaoImplTest extends BaseFhirContextSensitiveTe
 		try {
 			Context.addProxyPrivilege(GET_ORDERS);
 			assertThat(dao.get(DRUG_ORDER_UUID), notNullValue());
-		}
-		finally {
+		} finally {
 			Context.removeProxyPrivilege(GET_ORDERS);
 		}
 	}
@@ -152,8 +151,7 @@ public class FhirMedicationRequestDaoImplTest extends BaseFhirContextSensitiveTe
 		try {
 			Context.addProxyPrivilege(GET_ORDERS);
 			assertThat(dao.getSearchResults(theParams), notNullValue());
-		}
-		finally {
+		} finally {
 			Context.removeProxyPrivilege(GET_ORDERS);
 		}
 	}
@@ -169,8 +167,7 @@ public class FhirMedicationRequestDaoImplTest extends BaseFhirContextSensitiveTe
 		try {
 			Context.addProxyPrivilege(GET_ORDERS);
 			assertThat(dao.getSearchResultsCount(theParams), greaterThan(0));
-		}
-		finally {
+		} finally {
 			Context.removeProxyPrivilege(GET_ORDERS);
 		}
 	}

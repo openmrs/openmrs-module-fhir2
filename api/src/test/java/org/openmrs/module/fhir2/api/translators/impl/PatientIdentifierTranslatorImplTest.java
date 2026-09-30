@@ -18,17 +18,17 @@ import static org.mockito.Mockito.when;
 import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
 import org.hl7.fhir.r4.model.Identifier;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.module.fhir2.api.FhirPatientService;
 import org.openmrs.module.fhir2.api.impl.FhirPatientIdentifierSystemServiceImpl;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class PatientIdentifierTranslatorImplTest {
 	
 	private static final String IDENTIFIER_TYPE_UUID = "123456-abcdef-123456";
@@ -49,7 +49,7 @@ public class PatientIdentifierTranslatorImplTest {
 	@Mock
 	private FhirPatientService patientService;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		identifierTranslator = new PatientIdentifierTranslatorImpl();
 		identifierTranslator.setPatientService(patientService);

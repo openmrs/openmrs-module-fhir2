@@ -72,8 +72,7 @@ public class FhirConditionServiceImpl extends BaseFhirService<Condition, org.ope
 		Condition result;
 		try {
 			result = super.get(uuid);
-		}
-		catch (ResourceNotFoundException e) {
+		} catch (ResourceNotFoundException e) {
 			result = diagnosisService.get(uuid);
 		}
 		
@@ -115,24 +114,23 @@ public class FhirConditionServiceImpl extends BaseFhirService<Condition, org.ope
 		
 		FhirUtils.OpenmrsConditionType result = FhirUtils.getOpenmrsConditionType(condition).orElse(null);
 		
-		if (result.equals(FhirUtils.OpenmrsConditionType.DIAGNOSIS)) {
-			return diagnosisService.update(uuid, condition);
-		} else {
-			return super.update(uuid, condition);
+		if (result == null) {
+			throw new InvalidRequestException(
+			        "Condition.category provided must be one of problem-list-item or encounter-diagnosis");
 		}
 		
+		if (result.equals(FhirUtils.OpenmrsConditionType.DIAGNOSIS)) {
+			return diagnosisService.update(uuid, condition);
+		}
+		
+		return super.update(uuid, condition);
 	}
 	
 	@Override
 	public void delete(@Nonnull String uuid) {
-		if (uuid == null) {
-			throw new InvalidRequestException("Uuid cannot be null.");
-		}
-		
 		try {
 			super.delete(uuid);
-		}
-		catch (ResourceNotFoundException e) {
+		} catch (ResourceNotFoundException e) {
 			diagnosisService.delete(uuid);
 		}
 	}

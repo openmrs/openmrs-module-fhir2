@@ -15,6 +15,7 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -29,12 +30,12 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Reference;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.*;
 import org.openmrs.api.EncounterService;
 import org.openmrs.module.fhir2.FhirConstants;
@@ -46,7 +47,7 @@ import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterTypeTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class EncounterTranslatorImplTest {
 	
 	private static final String ENCOUNTER_UUID = "34h34hj-343jk32-34nl3kd-34jk34";
@@ -119,7 +120,7 @@ public class EncounterTranslatorImplTest {
 	
 	private EncounterTranslatorImpl encounterTranslator;
 	
-	@Before
+	@BeforeEach
 	public void setUp() {
 		fhirEncounter = new Encounter();
 		omrsEncounter = new org.openmrs.Encounter();
@@ -180,9 +181,9 @@ public class EncounterTranslatorImplTest {
 		assertThat(result.getUuid(), equalTo(ENCOUNTER_UUID));
 	}
 	
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void toFhirResource_shouldThrowExceptionWhenOpenMrsEncounterIsNull() {
-		encounterTranslator.toFhirResource(null);
+		assertThrows(NullPointerException.class, () -> encounterTranslator.toFhirResource(null));
 	}
 	
 	@Test

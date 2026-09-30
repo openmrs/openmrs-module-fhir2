@@ -13,22 +13,23 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 import static org.openmrs.module.fhir2.api.translators.impl.ReferenceHandlingTranslator.getReferenceId;
 
 import org.hamcrest.Matchers;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Reference;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.User;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirUserDao;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class PractitionerReferenceTranslatorUserImplTest {
 	
 	private static final String USER_UUID = "2ffb1a5f-bcd3-4243-8f40-78edc2642789";
@@ -40,7 +41,7 @@ public class PractitionerReferenceTranslatorUserImplTest {
 	
 	private PractitionerReferenceTranslatorUserImpl practitionerReferenceTranslatorUser;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		practitionerReferenceTranslatorUser = new PractitionerReferenceTranslatorUserImpl();
 		practitionerReferenceTranslatorUser.setUserDao(userDao);
@@ -88,10 +89,10 @@ public class PractitionerReferenceTranslatorUserImplTest {
 		assertThat(result, Matchers.nullValue());
 	}
 	
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void toOpenmrsType_shouldThrowExceptionIfReferenceIsntForCreator() {
 		Reference reference = new Reference().setReference("Unknown" + "/" + USER_UUID).setType("Unknown");
 		
-		practitionerReferenceTranslatorUser.toOpenmrsType(reference);
+		assertThrows(IllegalArgumentException.class, () -> practitionerReferenceTranslatorUser.toOpenmrsType(reference));
 	}
 }

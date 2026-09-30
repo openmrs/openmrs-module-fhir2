@@ -43,10 +43,10 @@
     </bean>
     <!--    base ucum-essence file packaged with fhir-ucum-->
     <bean id="baseUcumService" class="org.fhir.ucum.UcumEssenceService">
-        <constructor-arg name="stream" value="classpath:ucum-essence.xml" />
+        <constructor-arg type="java.io.InputStream" value="classpath:ucum-essence.xml" />
     </bean>
     <!--    fhir2 module defined ucum-essence file containing additional (custom) UCUM definitions-->
     <bean id="fhirUcumService" class="org.fhir.ucum.UcumEssenceService">
-        <constructor-arg name="stream" value="classpath:ucum-fhir-essence.xml" />
+        <constructor-arg type="java.io.InputStream" value="classpath:ucum-fhir-essence.xml" />
     </bean>
 </beans>

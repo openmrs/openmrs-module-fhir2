@@ -32,7 +32,7 @@
     <ingredient>
         <itemCodeableConcept>
             <coding>
-                <code value="5090AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" />
+                <code value="5088AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" />
             </coding>
         </itemCodeableConcept>
     </ingredient>

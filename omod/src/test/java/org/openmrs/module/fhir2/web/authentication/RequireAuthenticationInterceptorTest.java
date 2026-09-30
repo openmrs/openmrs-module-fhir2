@@ -12,11 +12,10 @@ package org.openmrs.module.fhir2.web.authentication;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletResponse;
-
-import org.junit.Before;
-import org.junit.Test;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletResponse;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
@@ -26,7 +25,7 @@ public class RequireAuthenticationInterceptorTest {
 	
 	private MockHttpServletResponse response;
 	
-	@Before
+	@BeforeEach
 	public void setup() throws ServletException {
 		request = new MockHttpServletRequest();
 		response = new MockHttpServletResponse();

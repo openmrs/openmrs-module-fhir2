@@ -28,11 +28,11 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Practitioner;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.Person;
 import org.openmrs.PersonAddress;
 import org.openmrs.PersonName;
@@ -43,7 +43,7 @@ import org.openmrs.module.fhir2.api.translators.GenderTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonAddressTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonNameTranslator;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class PractitionerTranslatorUserImplTest {
 	
 	private static final String USER_UUID = "5b598dd8-42f8-4d7d-9041-098e4ee8ad30";
@@ -77,7 +77,7 @@ public class PractitionerTranslatorUserImplTest {
 	
 	private Practitioner practitioner;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		practitionerTranslatorUser = new PractitionerTranslatorUserImpl();
 		practitionerTranslatorUser.setNameTranslator(nameTranslator);

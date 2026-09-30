@@ -17,19 +17,19 @@ import static org.hamcrest.Matchers.nullValue;
 import java.util.Date;
 
 import org.hl7.fhir.r4.model.Period;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.Encounter;
 import org.openmrs.module.fhir2.api.translators.EncounterPeriodTranslator;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class EncounterPeriodTranslatorImplTest {
 	
 	private EncounterPeriodTranslator<Encounter> encounterPeriodTranslator;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		encounterPeriodTranslator = new EncounterPeriodTranslatorImpl();
 	}

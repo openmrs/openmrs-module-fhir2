@@ -28,8 +28,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.openmrs.module.fhir2.api.util.GeneralUtils.inputStreamToString;
 
-import javax.servlet.ServletException;
-
 import java.io.InputStream;
 import java.util.Calendar;
 import java.util.Collections;
@@ -42,24 +40,25 @@ import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import jakarta.servlet.ServletException;
 import lombok.AccessLevel;
 import lombok.Getter;
-import org.apache.commons.lang.time.DateUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.dstu3.model.Location;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirLocationService;
 import org.openmrs.module.fhir2.api.search.param.LocationSearchParams;
 import org.openmrs.module.fhir2.providers.r4.MockIBundleProvider;
 import org.springframework.mock.web.MockHttpServletResponse;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class LocationFhirResourceProviderWebTest extends BaseFhirR3ResourceProviderWebTest<LocationFhirResourceProvider, Location> {
 	
 	private static final String LOCATION_UUID = "9e0d2e27-541f-435d-aebd-81eed8acc56b";
@@ -109,7 +108,7 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR3ResourceProvi
 	@Captor
 	private ArgumentCaptor<LocationSearchParams> locationSearchParamsCaptor;
 	
-	@Before
+	@BeforeEach
 	@Override
 	public void setup() throws ServletException {
 		locationProvider = new LocationFhirResourceProvider();

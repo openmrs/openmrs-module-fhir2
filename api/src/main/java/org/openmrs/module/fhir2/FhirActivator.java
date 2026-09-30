@@ -133,8 +133,7 @@ public class FhirActivator extends BaseModuleActivator implements ApplicationCon
 		for (ModuleLifecycleListener listener : lifecycleListeners) {
 			try {
 				notification.accept(listener);
-			}
-			catch (Throwable t) {
+			} catch (Throwable t) {
 				log.error("FHIR2 lifecycle listener {} failed on {}; it may serve stale providers or interceptors until the "
 				        + "next context refresh",
 				    listener.getClass().getName(), event, t);
@@ -193,8 +192,7 @@ public class FhirActivator extends BaseModuleActivator implements ApplicationCon
 			        boolean result;
 			        try {
 				        result = c.getAnnotation(Component.class) != null;
-			        }
-			        catch (NullPointerException e) {
+			        } catch (NullPointerException e) {
 				        result = false;
 			        }
 			        

@@ -14,6 +14,7 @@ import static org.exparity.hamcrest.date.DateMatchers.sameOrBefore;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.anyOf;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.equalTo;
@@ -66,8 +67,8 @@ import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.Obs;
 import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.openmrs.module.fhir2.FhirConstants;
@@ -165,7 +166,7 @@ public class ObservationSearchQueryTest extends BaseFhirContextSensitiveTest {
 	@Autowired
 	private FhirEncounterDao encounterDao;
 	
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		executeDataSet(OBS_DATA_XML);
 	}
@@ -1728,7 +1729,9 @@ public class ObservationSearchQueryTest extends BaseFhirContextSensitiveTest {
 		assertThat(results, notNullValue());
 		List<IBaseResource> resultList = get(results);
 		
-		assertThat(resultList.size(), equalTo(2));
+		assertThat(resultList.stream().map(r -> r.getIdElement().getIdPart()).toList(),
+		    containsInAnyOrder("2f616900-5e7c-4667-9a7f-dcb260abf1de", "2ed1e57d-9f18-41d3-b067-2eeaf4b30fb0",
+		        "dd5b7ba9-ba83-45e4-8960-e4232964a0ce"));
 		assertThat(getDistinctEncounterDatetime(resultList), lessThanOrEqualTo(2));
 		assertThat(resultList, everyItem(anyOf(allOf(is(instanceOf(Observation.class))))));
 	}

@@ -17,8 +17,8 @@ import static org.hamcrest.Matchers.notNullValue;
 import java.util.Date;
 
 import org.hibernate.SessionFactory;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.Obs;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.ObsService;
@@ -53,7 +53,7 @@ public class FhirDiagnosticReportDaoImplTest extends BaseFhirContextSensitiveTes
 	@Qualifier("obsService")
 	private ObsService obsService;
 	
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		dao = new FhirDiagnosticReportDaoImpl();
 		dao.setSessionFactory(sessionFactory);

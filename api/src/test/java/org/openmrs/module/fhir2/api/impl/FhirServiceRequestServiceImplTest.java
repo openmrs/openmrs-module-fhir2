@@ -46,11 +46,11 @@ import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.ServiceRequest;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.TestOrder;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
@@ -61,7 +61,7 @@ import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.ServiceRequestTranslator;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class FhirServiceRequestServiceImplTest {
 	
 	private static final Integer SERVICE_REQUEST_ID = 123;
@@ -105,7 +105,7 @@ public class FhirServiceRequestServiceImplTest {
 	
 	private TestOrder order;
 	
-	@Before
+	@BeforeEach
 	public void setUp() {
 		serviceRequestService = new FhirServiceRequestServiceImpl() {
 			

@@ -43,8 +43,7 @@ public class XmlPatchUtils {
 		try {
 			XmlPatcher.patch(new ByteArrayInputStream(inputResource.getBytes(Constants.CHARSET_UTF8)),
 			    new ByteArrayInputStream(thePatchBody.getBytes(Constants.CHARSET_UTF8)), result);
-		}
-		catch (IOException | XmlPatchException e) {
+		} catch (IOException | XmlPatchException e) {
 			throw new InvalidRequestException(e);
 		}
 		

@@ -9,11 +9,11 @@
  */
 package org.openmrs.module.fhir2.providers.r3;
 
-import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -41,16 +41,16 @@ import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirMedicationRequestService;
 import org.openmrs.module.fhir2.api.search.param.MedicationRequestSearchParams;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class MedicationRequestFhirResourceProviderTest {
 	
 	private static final String MEDICATION_REQUEST_UUID = "d7f5a4dd-019e-4221-85fa-e084505b9695";
@@ -66,7 +66,7 @@ public class MedicationRequestFhirResourceProviderTest {
 	
 	private org.hl7.fhir.r4.model.MedicationRequest medicationRequest;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		resourceProvider = new MedicationRequestFhirResourceProvider();
 		resourceProvider.setMedicationRequestService(fhirMedicationRequestService);
@@ -94,12 +94,11 @@ public class MedicationRequestFhirResourceProviderTest {
 		assertThat(medicationRequest.getId(), equalTo(MEDICATION_REQUEST_UUID));
 	}
 	
-	@Test(expected = ResourceNotFoundException.class)
+	@Test
 	public void getMedicationRequestByUuid_shouldThrowResourceNotFoundException() {
 		IdType id = new IdType();
 		id.setValue(WRONG_MEDICATION_REQUEST_UUID);
-		MedicationRequest medicationRequest = resourceProvider.getMedicationRequestById(id);
-		assertThat(medicationRequest, nullValue());
+		assertThrows(ResourceNotFoundException.class, () -> resourceProvider.getMedicationRequestById(id));
 	}
 	
 	private List<MedicationRequest> get(IBundleProvider results, int theFromIndex, int theToIndex) {
@@ -239,7 +238,7 @@ public class MedicationRequestFhirResourceProviderTest {
 		
 		when(fhirMedicationRequestService.searchForMedicationRequests(
 		    new MedicationRequestSearchParams(null, null, null, null, null, null, null, null, lastUpdated, null, null)))
-		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(medicationRequest), 10, 1));
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(medicationRequest), 10, 1));
 		
 		IBundleProvider results = resourceProvider.searchForMedicationRequests(null, null, null, null, null, null, null,
 		    null, null, lastUpdated, null, null);
@@ -260,8 +259,8 @@ public class MedicationRequestFhirResourceProviderTest {
 		
 		when(fhirMedicationRequestService.searchForMedicationRequests(
 		    new MedicationRequestSearchParams(null, null, null, null, null, null, null, null, null, includes, null)))
-		            .thenReturn(new MockIBundleProvider<>(
-		                    Arrays.asList(medicationRequest, new org.hl7.fhir.r4.model.Practitioner()), 10, 1));
+		        .thenReturn(new MockIBundleProvider<>(
+		                Arrays.asList(medicationRequest, new org.hl7.fhir.r4.model.Practitioner()), 10, 1));
 		
 		IBundleProvider results = resourceProvider.searchForMedicationRequests(null, null, null, null, null, null, null,
 		    null, null, null, includes, null);
@@ -283,8 +282,8 @@ public class MedicationRequestFhirResourceProviderTest {
 		
 		when(fhirMedicationRequestService.searchForMedicationRequests(
 		    new MedicationRequestSearchParams(null, null, null, null, null, null, null, null, null, null, revIncludes)))
-		            .thenReturn(new org.openmrs.module.fhir2.providers.r4.MockIBundleProvider<>(
-		                    Arrays.asList(medicationRequest, new MedicationDispense()), 10, 1));
+		        .thenReturn(new org.openmrs.module.fhir2.providers.r4.MockIBundleProvider<>(
+		                Arrays.asList(medicationRequest, new MedicationDispense()), 10, 1));
 		
 		IBundleProvider results = resourceProvider.searchForMedicationRequests(null, null, null, null, null, null, null,
 		    null, null, null, null, revIncludes);

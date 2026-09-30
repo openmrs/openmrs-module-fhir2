@@ -12,18 +12,23 @@ package org.openmrs.module.fhir2.api.translators.impl;
 import static lombok.AccessLevel.PROTECTED;
 import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getLastUpdated;
 import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getVersionId;
+import static org.openmrs.module.fhir2.api.util.GeneralUtils.replaceContents;
 
 import javax.annotation.Nonnull;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import lombok.Getter;
 import lombok.Setter;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.StringType;
+import org.openmrs.Concept;
 import org.openmrs.Drug;
 import org.openmrs.DrugIngredient;
 import org.openmrs.module.fhir2.FhirConstants;
@@ -109,22 +114,40 @@ public class MedicationTranslatorImpl implements MedicationTranslator {
 			existingDrug.setConcept(conceptTranslator.toOpenmrsType(medication.getForm()));
 		}
 		
-		Collection<DrugIngredient> ingredients = new LinkedHashSet<>();
-		
 		if (medication.hasIngredient()) {
+			Collection<DrugIngredient> ingredients = new LinkedHashSet<>();
 			for (Medication.MedicationIngredientComponent ingredient : medication.getIngredient()) {
+				Concept ingredientConcept = conceptTranslator.toOpenmrsType(ingredient.getItemCodeableConcept());
+				if (ingredientConcept == null) {
+					throw new UnprocessableEntityException("Medication.ingredient item could not be mapped to a concept: "
+					        + describeCodings(ingredient.getItemCodeableConcept()));
+				}
+				
 				DrugIngredient omrsIngredient = new DrugIngredient();
 				omrsIngredient.setDrug(existingDrug);
-				omrsIngredient.setIngredient(conceptTranslator.toOpenmrsType(ingredient.getItemCodeableConcept()));
+				omrsIngredient.setIngredient(ingredientConcept);
 				ingredients.add(omrsIngredient);
 			}
-			existingDrug.setIngredients(ingredients);
+			if (existingDrug.getIngredients() == null) {
+				existingDrug.setIngredients(ingredients);
+			} else {
+				replaceContents(existingDrug.getIngredients(), ingredients);
+			}
 		}
 		
 		getOpenmrsMedicineExtension(medication).ifPresent(ext -> ext.getExtension()
 		        .forEach(e -> addMedicineComponent(existingDrug, e.getUrl(), ((StringType) e.getValue()).getValue())));
 		
 		return existingDrug;
+	}
+	
+	private static String describeCodings(CodeableConcept codeableConcept) {
+		if (codeableConcept == null || !codeableConcept.hasCoding()) {
+			return "<no coding>";
+		}
+		
+		return codeableConcept.getCoding().stream().map(c -> (c.hasSystem() ? c.getSystem() : "") + "|" + c.getCode())
+		        .collect(Collectors.joining(", "));
 	}
 	
 	public void addMedicineComponent(@Nonnull Drug drug, @Nonnull String url, @Nonnull String value) {

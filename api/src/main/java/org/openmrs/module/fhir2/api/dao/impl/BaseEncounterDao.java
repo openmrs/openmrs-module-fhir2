@@ -12,9 +12,6 @@ package org.openmrs.module.fhir2.api.dao.impl;
 import static org.openmrs.module.fhir2.FhirConstants.ENCOUNTER_TYPE_REFERENCE_SEARCH_HANDLER;
 
 import javax.annotation.Nonnull;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.Predicate;
 
 import java.util.LinkedHashSet;
 import java.util.Optional;
@@ -25,6 +22,9 @@ import ca.uhn.fhir.rest.param.HasAndListParam;
 import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Predicate;
 import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.openmrs.Auditable;

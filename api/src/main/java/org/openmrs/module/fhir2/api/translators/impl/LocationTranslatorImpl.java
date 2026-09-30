@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.commons.lang.math.NumberUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.Location;

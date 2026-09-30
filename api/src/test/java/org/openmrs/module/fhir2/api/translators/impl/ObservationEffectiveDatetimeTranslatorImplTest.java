@@ -12,6 +12,7 @@ package org.openmrs.module.fhir2.api.translators.impl;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Date;
 
@@ -19,20 +20,20 @@ import org.exparity.hamcrest.date.DateMatchers;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Type;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.Obs;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ObservationEffectiveDatetimeTranslatorImplTest {
 	
 	private ObservationEffectiveDatetimeTranslatorImpl datetimeTranslator;
 	
 	private Obs obs;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		datetimeTranslator = new ObservationEffectiveDatetimeTranslatorImpl();
 		obs = new Obs();
@@ -54,9 +55,9 @@ public class ObservationEffectiveDatetimeTranslatorImplTest {
 		assertThat(((DateTimeType) datetimeType).getValue(), DateMatchers.sameDay(new Date()));
 	}
 	
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void toOpenmrsType_shouldThrowExceptionIfTypeIsNull() {
-		datetimeTranslator.toOpenmrsType(obs, null);
+		assertThrows(NullPointerException.class, () -> datetimeTranslator.toOpenmrsType(obs, null));
 	}
 	
 	@Test

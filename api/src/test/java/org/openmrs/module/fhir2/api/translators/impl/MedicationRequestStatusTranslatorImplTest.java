@@ -19,8 +19,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.hl7.fhir.r4.model.MedicationRequest;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.DrugOrder;
 import org.openmrs.Order;
 
@@ -32,7 +32,7 @@ public class MedicationRequestStatusTranslatorImplTest {
 	
 	private DrugOrder drugOrder;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		statusTranslator = new MedicationRequestStatusTranslatorImpl();
 		

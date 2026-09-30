@@ -46,17 +46,15 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Location;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.LocationTranslator;
-import org.openmrs.test.SkipBaseSetup;
 import org.springframework.beans.factory.annotation.Autowired;
 
-@SkipBaseSetup
 public class LocationSearchQueryTest extends BaseFhirContextSensitiveTest {
 	
 	public static final String LOCATION_UUID = "5db6ae3c-867e-45a0-a1ce-f86219b64e1c";
@@ -121,7 +119,7 @@ public class LocationSearchQueryTest extends BaseFhirContextSensitiveTest {
 	@Autowired
 	private LocationTranslator translator;
 	
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		executeDataSet(INITIAL_XML_DATASET_PACKAGE_PATH);
 		executeDataSet(LOCATION_INITIAL_DATA_XML);

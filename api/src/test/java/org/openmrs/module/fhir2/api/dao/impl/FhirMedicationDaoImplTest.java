@@ -18,8 +18,8 @@ import static org.hamcrest.Matchers.nullValue;
 import java.util.Collections;
 
 import org.hibernate.SessionFactory;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.Concept;
 import org.openmrs.Drug;
 import org.openmrs.DrugIngredient;
@@ -51,7 +51,7 @@ public class FhirMedicationDaoImplTest extends BaseFhirContextSensitiveTest {
 	
 	private FhirMedicationDaoImpl medicationDao;
 	
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		medicationDao = new FhirMedicationDaoImpl();
 		medicationDao.setSessionFactory(sessionFactory);
@@ -83,6 +83,7 @@ public class FhirMedicationDaoImplTest extends BaseFhirContextSensitiveTest {
 		DrugIngredient ingredient = new DrugIngredient();
 		ingredient.setUuid(INGREDIENT_UUID);
 		ingredient.setIngredient(concept);
+		ingredient.setDrug(drug);
 		drug.setIngredients(Collections.singleton(ingredient));
 		
 		Drug result = medicationDao.createOrUpdate(drug);

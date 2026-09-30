@@ -44,11 +44,11 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.PersonAddress;
 import org.openmrs.PersonName;
 import org.openmrs.module.fhir2.FhirConstants;
@@ -61,7 +61,7 @@ import org.openmrs.module.fhir2.api.search.param.PersonSearchParams;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.PersonTranslator;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class FhirPersonServiceImplTest {
 	
 	private static final String GIVEN_NAME = "John";
@@ -129,7 +129,7 @@ public class FhirPersonServiceImplTest {
 	
 	private Person fhirPerson;
 	
-	@Before
+	@BeforeEach
 	public void setUp() {
 		personService = new FhirPersonServiceImpl() {
 			

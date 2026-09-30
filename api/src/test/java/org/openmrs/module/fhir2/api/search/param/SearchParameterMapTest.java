@@ -25,8 +25,8 @@ import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class SearchParameterMapTest {
 	
@@ -40,7 +40,7 @@ public class SearchParameterMapTest {
 	
 	private SearchParameterMap searchParam;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		searchParam = new SearchParameterMap();
 	}

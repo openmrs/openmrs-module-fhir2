@@ -21,8 +21,8 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import org.hl7.fhir.r4.model.Observation;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.ConceptNumeric;
 import org.openmrs.Obs;
 import org.openmrs.ObsReferenceRange;
@@ -46,7 +46,7 @@ public class ObservationReferenceRangeTranslatorImplTest {
 	
 	private ObservationReferenceRangeTranslatorImpl observationReferenceRangeTranslator;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		observationReferenceRangeTranslator = new ObservationReferenceRangeTranslatorImpl();
 	}

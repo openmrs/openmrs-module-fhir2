@@ -14,14 +14,6 @@ import static java.util.stream.Collectors.toList;
 import static lombok.AccessLevel.PROTECTED;
 
 import javax.annotation.Nonnull;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -34,6 +26,14 @@ import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import lombok.Getter;
 import lombok.Setter;
 import org.openmrs.Location;
@@ -114,7 +114,7 @@ public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLo
 		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot());
 		
 		criteriaContext.addPredicate(criteriaContext.getCriteriaBuilder().and(
-		    criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().join("location").get("locationId"),
+		    criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().join("owner").get("locationId"),
 		        location.getId()),
 		    criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().join("attributeType").get("uuid"),
 		        locationAttributeTypeUuid),
@@ -130,7 +130,7 @@ public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLo
 		final CriteriaQuery<LocationAttribute> criteria = criteriaBuilder.createQuery(LocationAttribute.class);
 		final Root<LocationAttribute> locationAttributeRoot = criteria.from(LocationAttribute.class);
 		
-		final Predicate byId = locationAttributeRoot.get("location").get("locationId")
+		final Predicate byId = locationAttributeRoot.get("owner").get("locationId")
 		        .in(location.stream().map(Location::getLocationId).collect(toList()));
 		final Predicate byAttributeType = criteriaBuilder.equal(locationAttributeRoot.get("attributeType").get("uuid"),
 		    locationAttributeTypeUuid);

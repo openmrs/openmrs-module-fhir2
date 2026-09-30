@@ -11,10 +11,6 @@ package org.openmrs.module.fhir2.web.servlet;
 
 import static org.openmrs.module.fhir2.FhirConstants.FHIR2_MODULE_ID;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -39,6 +35,9 @@ import ca.uhn.fhir.rest.server.IServerAddressStrategy;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.util.ReflectionUtil;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AccessLevel;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -111,8 +110,7 @@ public class FhirRestServlet extends RestfulServer implements ModuleLifecycleLis
 			int value;
 			try {
 				value = Integer.parseInt(newValue.getPropertyValue());
-			}
-			catch (NumberFormatException e) {
+			} catch (NumberFormatException e) {
 				globalPropertyDeleted(newValue.getProperty());
 				return;
 			}
@@ -217,8 +215,7 @@ public class FhirRestServlet extends RestfulServer implements ModuleLifecycleLis
 			        .forEach(getInterceptorService()::unregisterInterceptor);
 			
 			registerContributedInterceptors(current);
-		}
-		finally {
+		} finally {
 			// in the finally so that a throw cannot leave the field naming interceptors that are no longer
 			// on the server: the next call would skip unregistering the ones that are, orphaning them
 			registeredInterceptors.clear();
@@ -240,8 +237,7 @@ public class FhirRestServlet extends RestfulServer implements ModuleLifecycleLis
 		Map<String, Object> contributed;
 		try {
 			contributed = ctx.getBeansWithAnnotation(FhirInterceptor.class);
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			log.error("Could not read the contributed FHIR interceptors from the Spring context; none of them will run", e);
 			return;
 		}
@@ -270,8 +266,7 @@ public class FhirRestServlet extends RestfulServer implements ModuleLifecycleLis
 					            + "class and keep it clear of interface-based AOP.",
 					    beanName, interceptor.getClass().getName());
 				}
-			}
-			catch (Exception e) {
+			} catch (Exception e) {
 				log.error("Could not register contributed FHIR interceptor bean {} ({}); it will not run", beanName,
 				    interceptor.getClass().getName(), e);
 			}
@@ -420,8 +415,7 @@ public class FhirRestServlet extends RestfulServer implements ModuleLifecycleLis
 	public void destroy() {
 		try {
 			administrationService.removeGlobalPropertyListener(fhirRestServletListener);
-		}
-		catch (Exception ignored) {
+		} catch (Exception ignored) {
 			
 		}
 		
@@ -430,8 +424,7 @@ public class FhirRestServlet extends RestfulServer implements ModuleLifecycleLis
 			if (activator != null) {
 				activator.removeModuleLifecycleLister(this);
 			}
-		}
-		catch (Exception ignored) {
+		} catch (Exception ignored) {
 			
 		}
 		

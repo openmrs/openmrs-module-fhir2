@@ -31,11 +31,11 @@ import java.util.stream.Collectors;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.Location;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.LocationTag;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
@@ -46,7 +46,7 @@ import org.openmrs.module.fhir2.api.search.param.LocationSearchParams;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.LocationTranslator;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class FhirLocationServiceImplTest {
 	
 	private static final String LOCATION_UUID = "a1758922-b132-4ead-8ebe-5e2b4eaf43a1";
@@ -92,7 +92,7 @@ public class FhirLocationServiceImplTest {
 	
 	private Location fhirLocation;
 	
-	@Before
+	@BeforeEach
 	public void setUp() {
 		fhirLocationService = new FhirLocationServiceImpl() {
 			

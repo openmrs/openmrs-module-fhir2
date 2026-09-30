@@ -49,11 +49,13 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Practitioner;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.openmrs.Provider;
 import org.openmrs.User;
 import org.openmrs.module.fhir2.FhirConstants;
@@ -67,7 +69,8 @@ import org.openmrs.module.fhir2.api.search.param.PractitionerSearchParams;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.PractitionerTranslator;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.WARN)
 public class FhirPractitionerServiceImplTest {
 	
 	private static final Integer ID = 123;
@@ -151,7 +154,7 @@ public class FhirPractitionerServiceImplTest {
 	
 	private Practitioner practitioner2;
 	
-	@Before
+	@BeforeEach
 	public void setUp() {
 		when(userService.searchForUsers(any())).thenReturn(new SimpleBundleProvider());
 		

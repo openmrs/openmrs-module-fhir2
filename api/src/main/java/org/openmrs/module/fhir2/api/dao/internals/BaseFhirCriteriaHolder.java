@@ -10,12 +10,6 @@
 package org.openmrs.module.fhir2.api.dao.internals;
 
 import javax.annotation.Nonnull;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -24,6 +18,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

@@ -15,6 +15,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -29,11 +30,11 @@ import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.CodedOrFreeText;
 import org.openmrs.Concept;
 import org.openmrs.ConditionClinicalStatus;
@@ -47,7 +48,7 @@ import org.openmrs.module.fhir2.api.translators.ConditionVerificationStatusTrans
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ConditionTranslatorImplTest {
 	
 	private static final String CONDITION_UUID = "36aa91ad-66f3-455b-b28a-71beb6ca3195";
@@ -103,7 +104,7 @@ public class ConditionTranslatorImplTest {
 	
 	private Reference patientRef;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		conditionTranslator = new ConditionTranslatorImpl();
 		conditionTranslator.setPatientReferenceTranslator(patientReferenceTranslator);
@@ -149,9 +150,9 @@ public class ConditionTranslatorImplTest {
 		assertThat(condition.getUuid(), equalTo(CONDITION_UUID));
 	}
 	
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void toFhirResource_shouldThrowExceptionIfConditionToTranslateIsNull() {
-		conditionTranslator.toFhirResource(null);
+		assertThrows(NullPointerException.class, () -> conditionTranslator.toFhirResource(null));
 	}
 	
 	@Test

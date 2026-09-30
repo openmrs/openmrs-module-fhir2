@@ -14,8 +14,8 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 
 import org.hl7.fhir.r4.model.CodeableConcept;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.Concept;
 import org.openmrs.ConceptClass;
 import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
@@ -39,7 +39,7 @@ public class ObservationCategoryTranslatorImplTest extends BaseFhirContextSensit
 	@Autowired
 	ObservationCategoryTranslator observationCategoryTranslator;
 	
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		executeDataSet(OBSERVATION_CATEGORY_CONCEPT_CLASS_DATA);
 		concept = new Concept();

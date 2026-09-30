@@ -48,11 +48,11 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.RelatedPerson;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.PersonAddress;
 import org.openmrs.PersonName;
 import org.openmrs.Relationship;
@@ -66,7 +66,7 @@ import org.openmrs.module.fhir2.api.search.param.RelatedPersonSearchParams;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.RelatedPersonTranslator;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class FhirRelatedPersonServiceImplTest {
 	
 	private static final Integer RELATED_PERSON_ID = 123;
@@ -140,7 +140,7 @@ public class FhirRelatedPersonServiceImplTest {
 	
 	private RelatedPerson relatedPerson;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		relatedPersonService = new FhirRelatedPersonServiceImpl() {
 			

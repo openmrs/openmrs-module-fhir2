@@ -10,9 +10,6 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import javax.annotation.Nonnull;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.Predicate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,9 +18,11 @@ import java.util.Optional;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Predicate;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Task;
-import org.openmrs.api.db.DAOException;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirTaskDao;
 import org.openmrs.module.fhir2.api.dao.internals.OpenmrsFhirCriteriaContext;
@@ -75,18 +74,6 @@ public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDa
 		});
 	}
 	
-	@Override
-	public FhirTask createOrUpdate(@Nonnull FhirTask task) throws DAOException {
-		// TODO: Refactor - and figure out why CascadeType.ALL does not take care of this.
-		if (task.getOwnerReference() != null && task.getOwnerReference().getReference() != null) {
-			getSessionFactory().getCurrentSession().saveOrUpdate(task.getOwnerReference());
-		}
-		
-		getSessionFactory().getCurrentSession().saveOrUpdate(task);
-		
-		return task;
-	}
-	
 	private Boolean validReferenceParam(ReferenceParam ref) {
 		return (ref != null && ref.getIdPart() != null && ref.getResourceType() != null);
 	}
@@ -99,8 +86,7 @@ public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDa
 				try {
 					return Optional.of(criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("status"),
 					    FhirTask.TaskStatus.valueOf(Task.TaskStatus.fromCode(token.getValue().toLowerCase()).name())));
-				}
-				catch (IllegalArgumentException | FHIRException e) {
+				} catch (IllegalArgumentException | FHIRException e) {
 					return Optional.empty();
 				}
 			}

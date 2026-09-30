@@ -76,8 +76,7 @@ public class FhirPractitionerServiceImpl extends BaseFhirService<Practitioner, P
 		Practitioner result;
 		try {
 			result = super.get(uuid);
-		}
-		catch (ResourceNotFoundException e) {
+		} catch (ResourceNotFoundException e) {
 			result = userService.get(uuid);
 		}
 		

@@ -18,8 +18,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.hibernate.SessionFactory;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.CodedOrFreeText;
 import org.openmrs.Condition;
 import org.openmrs.ConditionClinicalStatus;
@@ -61,7 +61,7 @@ public class FhirConditionDaoImpl_Test extends BaseFhirContextSensitiveTest {
 	
 	private FhirConditionDaoImpl dao;
 	
-	@Before
+	@BeforeEach
 	public void setUp() {
 		dao = new FhirConditionDaoImpl();
 		dao.setSessionFactory(sessionFactory);

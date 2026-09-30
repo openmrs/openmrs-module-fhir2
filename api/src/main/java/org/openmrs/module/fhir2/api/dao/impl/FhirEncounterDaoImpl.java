@@ -13,10 +13,6 @@ import static org.hl7.fhir.r4.model.Encounter.SP_DATE;
 import static org.openmrs.module.fhir2.api.util.LastnOperationUtils.getTopNRankedIds;
 
 import javax.annotation.Nonnull;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
 
 import java.util.List;
 import java.util.Optional;
@@ -26,6 +22,10 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Predicate;
 import lombok.NonNull;
 import org.openmrs.Encounter;
 import org.openmrs.Order;

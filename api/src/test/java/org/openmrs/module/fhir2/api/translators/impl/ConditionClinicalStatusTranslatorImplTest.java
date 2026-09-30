@@ -16,8 +16,8 @@ import static org.hamcrest.Matchers.notNullValue;
 
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.ConditionClinicalStatus;
 import org.openmrs.module.fhir2.FhirConstants;
 
@@ -29,7 +29,7 @@ public class ConditionClinicalStatusTranslatorImplTest {
 	
 	private ConditionClinicalStatusTranslatorImpl clinicalStatusTranslator;
 	
-	@Before
+	@BeforeEach
 	public void setUp() {
 		this.clinicalStatusTranslator = new ConditionClinicalStatusTranslatorImpl();
 	}

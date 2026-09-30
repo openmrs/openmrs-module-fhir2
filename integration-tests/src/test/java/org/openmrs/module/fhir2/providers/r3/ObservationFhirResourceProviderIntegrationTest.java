@@ -45,8 +45,8 @@ import lombok.Getter;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirEncounterDao;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,7 +90,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 	@Autowired
 	private FhirEncounterDao encounterDao;
 	
-	@Before
+	@BeforeEach
 	@Override
 	public void setup() throws Exception {
 		super.setup();
@@ -562,7 +562,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 	public void shouldReturnLastnObservationsAsJson() throws Exception {
 		MockHttpServletResponse response = get(
 		    "Observation/$lastn?max=2&subject=" + OBS_PATIENT_UUID + "&category=laboratory&code=5242")
-		            .accept(FhirMediaTypes.JSON).go();
+		        .accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
@@ -593,7 +593,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 	public void shouldReturnLastnObservationsWhenMaxIsMissingAsJson() throws Exception {
 		MockHttpServletResponse response = get(
 		    "Observation/$lastn?subject=" + OBS_PATIENT_UUID + "&category=laboratory&code=5242").accept(FhirMediaTypes.JSON)
-		            .go();
+		        .go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
@@ -624,7 +624,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 	public void shouldReturnLastnObservationsWhenPatientReferenceIsPassedInPatientParameterAsJson() throws Exception {
 		MockHttpServletResponse response = get(
 		    "Observation/$lastn?max=2&patient=" + OBS_PATIENT_UUID + "&category=laboratory&code=5242")
-		            .accept(FhirMediaTypes.JSON).go();
+		        .accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
@@ -711,7 +711,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 	public void shouldReturnLastnObservationsWhenCodeIsMissingAsJson() throws Exception {
 		MockHttpServletResponse response = get(
 		    "Observation/$lastn?max=2&subject=" + OBS_PATIENT_UUID + "&category=laboratory").accept(FhirMediaTypes.JSON)
-		            .go();
+		        .go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
@@ -763,7 +763,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 	public void shouldReturnLastnObservationsAsXml() throws Exception {
 		MockHttpServletResponse response = get(
 		    "Observation/$lastn?max=2&subject=" + OBS_PATIENT_UUID + "&category=laboratory&code=5242")
-		            .accept(FhirMediaTypes.XML).go();
+		        .accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
@@ -794,7 +794,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 	public void shouldReturnLastnObservationsWhenMaxIsMissingAsXml() throws Exception {
 		MockHttpServletResponse response = get(
 		    "Observation/$lastn?subject=" + OBS_PATIENT_UUID + "&category=laboratory&code=5242").accept(FhirMediaTypes.XML)
-		            .go();
+		        .go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
@@ -825,7 +825,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 	public void shouldReturnLastnObservationsWhenPatientReferenceIsPassedInPatientParameterAsXml() throws Exception {
 		MockHttpServletResponse response = get(
 		    "Observation/$lastn?max=2&patient=" + OBS_PATIENT_UUID + "&category=laboratory&code=5242")
-		            .accept(FhirMediaTypes.XML).go();
+		        .accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
@@ -963,7 +963,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 	public void shouldReturnLastnEncountersObservationsAsJson() throws Exception {
 		MockHttpServletResponse response = get(
 		    "Observation/$lastn-encounters?max=2&subject=" + OBS_PATIENT_UUID + "&category=laboratory&code=5089")
-		            .accept(FhirMediaTypes.JSON).go();
+		        .accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
@@ -994,7 +994,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 	public void shouldReturnLastnEncountersObservationsWhenMaxIsMissingAsJson() throws Exception {
 		MockHttpServletResponse response = get(
 		    "Observation/$lastn-encounters?subject=" + OBS_PATIENT_UUID + "&category=laboratory&code=5089")
-		            .accept(FhirMediaTypes.JSON).go();
+		        .accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
@@ -1026,7 +1026,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 	        throws Exception {
 		MockHttpServletResponse response = get(
 		    "Observation/$lastn-encounters?max=2&patient=" + OBS_PATIENT_UUID + "&category=laboratory&code=5089")
-		            .accept(FhirMediaTypes.JSON).go();
+		        .accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
@@ -1067,7 +1067,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		assertThat(results, notNullValue());
 		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(results.hasEntry(), is(true));
-		assertThat(results, hasProperty("total", equalTo(2)));
+		assertThat(results, hasProperty("total", equalTo(3)));
 		
 		List<Bundle.BundleEntryComponent> entries = results.getEntry();
 		
@@ -1085,7 +1085,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 	public void shouldReturnLastnEncountersObservationsWhenCategoryIsMissingAsJson() throws Exception {
 		MockHttpServletResponse response = get(
 		    "Observation/$lastn-encounters?max=2&patient=" + OBS_PATIENT_UUID + "&code=5089").accept(FhirMediaTypes.JSON)
-		            .go();
+		        .go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
@@ -1114,7 +1114,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 	public void shouldReturnLastnEncountersObservationsWhenCodeIsMissingAsJson() throws Exception {
 		MockHttpServletResponse response = get(
 		    "Observation/$lastn-encounters?max=2&subject=" + OBS_PATIENT_UUID + "&category=laboratory")
-		            .accept(FhirMediaTypes.JSON).go();
+		        .accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
@@ -1167,7 +1167,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 	public void shouldReturnLastnEncountersObservationsAsXml() throws Exception {
 		MockHttpServletResponse response = get(
 		    "Observation/$lastn-encounters?max=2&subject=" + OBS_PATIENT_UUID + "&category=laboratory&code=5089")
-		            .accept(FhirMediaTypes.XML).go();
+		        .accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
@@ -1198,7 +1198,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 	public void shouldReturnLastnEncountersObservationsWhenMaxIsMissingAsXml() throws Exception {
 		MockHttpServletResponse response = get(
 		    "Observation/$lastn-encounters?subject=" + OBS_PATIENT_UUID + "&category=laboratory&code=5089")
-		            .accept(FhirMediaTypes.XML).go();
+		        .accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
@@ -1230,7 +1230,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 	        throws Exception {
 		MockHttpServletResponse response = get(
 		    "Observation/$lastn-encounters?max=2&patient=" + OBS_PATIENT_UUID + "&category=laboratory&code=5089")
-		            .accept(FhirMediaTypes.XML).go();
+		        .accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
@@ -1271,7 +1271,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		assertThat(results, notNullValue());
 		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(results.hasEntry(), is(true));
-		assertThat(results, hasProperty("total", equalTo(2)));
+		assertThat(results, hasProperty("total", equalTo(3)));
 		
 		List<Bundle.BundleEntryComponent> entries = results.getEntry();
 		
@@ -1289,7 +1289,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 	public void shouldReturnLastnEncountersObservationsWhenCategoryIsMissingAsXml() throws Exception {
 		MockHttpServletResponse response = get(
 		    "Observation/$lastn-encounters?max=2&patient=" + OBS_PATIENT_UUID + "&code=5089").accept(FhirMediaTypes.XML)
-		            .go();
+		        .go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
@@ -1318,7 +1318,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 	public void shouldReturnLastnEncountersObservationsWhenCodeIsMissingAsXml() throws Exception {
 		MockHttpServletResponse response = get(
 		    "Observation/$lastn-encounters?max=2&subject=" + OBS_PATIENT_UUID + "&category=laboratory")
-		            .accept(FhirMediaTypes.XML).go();
+		        .accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));

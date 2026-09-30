@@ -31,8 +31,8 @@ import lombok.Getter;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.MedicationRequest;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.module.fhir2.BaseFhirIntegrationTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -54,7 +54,7 @@ public class MedicationRequestFhirResourceProviderIntegrationTest extends BaseFh
 	@Autowired
 	private MedicationRequestFhirResourceProvider resourceProvider;
 	
-	@Before
+	@BeforeEach
 	@Override
 	public void setup() throws Exception {
 		super.setup();

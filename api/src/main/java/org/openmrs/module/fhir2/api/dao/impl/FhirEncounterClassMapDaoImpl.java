@@ -10,11 +10,11 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import javax.annotation.Nonnull;
-import javax.persistence.PersistenceException;
-import javax.persistence.criteria.Join;
 
 import java.util.List;
 
+import jakarta.persistence.PersistenceException;
+import jakarta.persistence.criteria.Join;
 import lombok.extern.slf4j.Slf4j;
 import org.openmrs.module.fhir2.api.dao.internals.OpenmrsFhirCriteriaContext;
 import org.openmrs.module.fhir2.model.FhirEncounterClassMap;
@@ -48,8 +48,7 @@ public class FhirEncounterClassMapDaoImpl extends BaseDao {
 			}
 			
 			return resultsList != null && !resultsList.isEmpty() ? resultsList.get(0) : null;
-		}
-		catch (PersistenceException e) {
+		} catch (PersistenceException e) {
 			log.error("Exception caught while trying to load encounter type for location '{}'", locationUuid);
 		}
 		

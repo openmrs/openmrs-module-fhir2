@@ -15,6 +15,7 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 import static org.openmrs.module.fhir2.FhirConstants.RX_NORM_SYSTEM_URI;
 import static org.openmrs.module.fhir2.FhirConstants.UCUM_SYSTEM_URI;
@@ -29,11 +30,11 @@ import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Type;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.Concept;
 import org.openmrs.ConceptNumeric;
 import org.openmrs.Obs;
@@ -42,7 +43,7 @@ import org.openmrs.module.fhir2.api.FhirConceptSourceService;
 import org.openmrs.module.fhir2.api.dao.impl.FhirConceptDaoImpl;
 import org.openmrs.module.fhir2.api.impl.FhirConceptServiceImpl;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ObservationValueTranslatorImplTest {
 	
 	private static final String CONCEPT_VALUE_UUID = "12345-abcde-54321";
@@ -64,7 +65,7 @@ public class ObservationValueTranslatorImplTest {
 	
 	private ObservationValueTranslatorImpl obsValueTranslator;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		FhirConceptDaoImpl fhirConceptDao = new FhirConceptDaoImpl();
 		fhirConceptDao.setConceptService(conceptService);
@@ -333,8 +334,8 @@ public class ObservationValueTranslatorImplTest {
 		assertThat(result, nullValue());
 	}
 	
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void toOpenmrsType_shouldThrowExceptionIfObsIsNull() {
-		obsValueTranslator.toOpenmrsType(null, new BooleanType());
+		assertThrows(NullPointerException.class, () -> obsValueTranslator.toOpenmrsType(null, new BooleanType()));
 	}
 }

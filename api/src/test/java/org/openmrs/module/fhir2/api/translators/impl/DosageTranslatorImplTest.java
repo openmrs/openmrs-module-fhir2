@@ -14,7 +14,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.when;
 
 import java.text.ParseException;
@@ -27,11 +27,13 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Dosage;
 import org.hl7.fhir.r4.model.SimpleQuantity;
 import org.hl7.fhir.r4.model.Timing;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.openmrs.Concept;
 import org.openmrs.ConceptMap;
 import org.openmrs.ConceptMapType;
@@ -47,7 +49,8 @@ import org.openmrs.module.fhir2.api.FhirConceptService;
 import org.openmrs.module.fhir2.api.FhirConceptSourceService;
 import org.openmrs.util.LocaleUtility;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.WARN)
 public class DosageTranslatorImplTest {
 	
 	private static final String DRUG_ORDER_UUID = "44fdc8ad-fe4d-499b-93a8-8a991c1d477e";
@@ -75,7 +78,7 @@ public class DosageTranslatorImplTest {
 	
 	private DrugOrder drugOrder;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		conceptTranslator = new ConceptTranslatorImpl();
 		conceptTranslator.setConceptService(conceptService);

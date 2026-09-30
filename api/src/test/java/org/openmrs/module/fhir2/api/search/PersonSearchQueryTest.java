@@ -33,11 +33,11 @@ import static org.hl7.fhir.r4.model.Person.SP_ADDRESS_POSTALCODE;
 import static org.hl7.fhir.r4.model.Person.SP_ADDRESS_STATE;
 import static org.hl7.fhir.r4.model.Person.SP_BIRTHDATE;
 import static org.hl7.fhir.r4.model.Person.SP_NAME;
-import static org.junit.Assert.fail;
-import static org.openmrs.util.OpenmrsUtil.compareWithNullAsGreatest;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -60,7 +60,7 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirPersonDao;
@@ -106,27 +106,40 @@ public class PersonSearchQueryTest extends BaseFhirContextSensitiveTest {
 	
 	private static final int END_INDEX = 10;
 	
+	// Mirrors the DB ORDER BY on PersonName columns, which under H2's MySQL-mode collation is
+	// case-insensitive -- so lower-case 'o' in "of Cos" sorts between upper-case 'N' and 'P',
+	// not after 'Z' as Java's default String.compareTo would have it.
+	private static final Comparator<String> NAME_PART = Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER);
+	
 	private static final ComparatorMatcherBuilder<HumanName> NAME_MATCHER = ComparatorMatcherBuilder.comparedBy((o1, o2) -> {
 		int ret;
-		ret = compareWithNullAsGreatest(o1.getFamily(), o2.getFamily()); // familyName
+		ret = NAME_PART.compare(o1.getFamily(), o2.getFamily()); // familyName
 		
 		if (ret == 0) { // familyName2
 			if (o1.hasExtension(FhirConstants.OPENMRS_FHIR_EXT_NAME + "#familyName2")
 			        && o2.hasExtension(FhirConstants.OPENMRS_FHIR_EXT_NAME + "#familyName2")) {
-				ret = compareWithNullAsGreatest(
+				ret = NAME_PART.compare(
 				    o1.getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_NAME + "#familyName2").getValue().toString(),
 				    o2.getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_NAME + "#familyName2").getValue().toString());
 			}
 		}
 		
-		if (ret == 0) { // givenName + middleName
-			ret = compareWithNullAsGreatest(o1.getGivenAsSingleString(), o2.getGivenAsSingleString());
+		if (ret == 0) { // givenName, middleName -- compared element-wise to match the DB ORDER BY,
+		                // which sorts on givenName and middleName as separate columns rather than
+		                // on the concatenated given-name-as-string.
+			int n = Math.min(o1.getGiven().size(), o2.getGiven().size());
+			for (int i = 0; i < n && ret == 0; i++) {
+				ret = NAME_PART.compare(o1.getGiven().get(i).getValue(), o2.getGiven().get(i).getValue());
+			}
+			if (ret == 0) {
+				ret = Integer.compare(o1.getGiven().size(), o2.getGiven().size());
+			}
 		}
 		
 		if (ret == 0) { // familyNamePrefix
 			if (o1.hasExtension(FhirConstants.OPENMRS_FHIR_EXT_NAME + "#familyNamePrefix")
 			        && o2.hasExtension(FhirConstants.OPENMRS_FHIR_EXT_NAME + "#familyNamePrefix")) {
-				ret = compareWithNullAsGreatest(
+				ret = NAME_PART.compare(
 				    o1.getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_NAME + "#familyNamePrefix").getValue().toString(),
 				    o2.getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_NAME + "#familyNamePrefix").getValue().toString());
 			}
@@ -135,7 +148,7 @@ public class PersonSearchQueryTest extends BaseFhirContextSensitiveTest {
 		if (ret == 0) { // familyNameSuffix
 			if (o1.hasExtension(FhirConstants.OPENMRS_FHIR_EXT_NAME + "#familyNameSuffix")
 			        && o2.hasExtension(FhirConstants.OPENMRS_FHIR_EXT_NAME + "#familyNameSuffix")) {
-				ret = compareWithNullAsGreatest(
+				ret = NAME_PART.compare(
 				    o1.getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_NAME + "#familyNameSuffix").getValue().toString(),
 				    o2.getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_NAME + "#familyNameSuffix").getValue().toString());
 			}

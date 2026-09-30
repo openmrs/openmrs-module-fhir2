@@ -16,7 +16,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.Task;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class TaskVersionConverterTest {
 	

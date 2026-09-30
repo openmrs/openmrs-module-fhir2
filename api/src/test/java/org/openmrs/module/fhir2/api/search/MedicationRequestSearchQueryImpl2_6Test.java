@@ -28,15 +28,15 @@ import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.MedicationRequest;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.DrugOrder;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.module.fhir2.api.dao.FhirMedicationRequestDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.MedicationRequestTranslator;
-import org.openmrs.test.BaseModuleContextSensitiveTest;
+import org.openmrs.test.jupiter.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -59,7 +59,7 @@ public class MedicationRequestSearchQueryImpl2_6Test extends BaseModuleContextSe
 	@Autowired
 	private SearchQuery<DrugOrder, MedicationRequest, FhirMedicationRequestDao, MedicationRequestTranslator, SearchQueryInclude<MedicationRequest>> searchQuery;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		executeDataSet("org/openmrs/api/include/MedicationDispenseServiceTest-initialData.xml");
 		updateSearchIndex();

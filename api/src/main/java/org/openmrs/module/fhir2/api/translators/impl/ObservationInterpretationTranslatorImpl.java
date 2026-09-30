@@ -11,7 +11,7 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import javax.annotation.Nonnull;
 
-import org.apache.commons.lang.WordUtils;
+import org.apache.commons.text.WordUtils;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.openmrs.Obs;
@@ -179,6 +179,6 @@ public class ObservationInterpretationTranslatorImpl implements ObservationInter
 	}
 	
 	private void setText(CodeableConcept interpretation, Obs.Interpretation text) {
-		interpretation.setText(WordUtils.capitalizeFully(text.toString().replaceAll("_", " ")));
+		interpretation.setText(WordUtils.capitalizeFully(text.toString().replace("_", " ")));
 	}
 }

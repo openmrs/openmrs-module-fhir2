@@ -14,8 +14,6 @@ import static org.springframework.http.HttpHeaders.ACCEPT;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 
 import javax.annotation.Nonnull;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -27,6 +25,8 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletException;
 import lombok.SneakyThrows;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -34,8 +34,8 @@ import org.hamcrest.TypeSafeMatcher;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.After;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mock;
 import org.openmrs.User;
 import org.openmrs.api.APIException;
@@ -75,7 +75,7 @@ public abstract class BaseFhirResourceProviderWebTest<T extends IResourceProvide
 	// This must be implemented by subclasses
 	public abstract T getResourceProvider();
 	
-	@Before
+	@BeforeEach
 	public void setup() throws ServletException {
 		when(userContext.getAuthenticatedUser()).thenReturn(user);
 		
@@ -94,7 +94,7 @@ public abstract class BaseFhirResourceProviderWebTest<T extends IResourceProvide
 		setupFhirServlet();
 	}
 	
-	@After
+	@AfterEach
 	public void tearDown() {
 		Context.closeSession();
 	}

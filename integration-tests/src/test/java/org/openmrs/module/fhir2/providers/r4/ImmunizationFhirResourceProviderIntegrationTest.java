@@ -36,8 +36,8 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Immunization;
 import org.hl7.fhir.r4.model.OperationOutcome;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.module.fhir2.BaseFhirIntegrationTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -73,7 +73,7 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 	@Autowired
 	private ImmunizationFhirResourceProvider resourceProvider;
 	
-	@Before
+	@BeforeEach
 	@Override
 	public void setup() throws Exception {
 		super.setup();

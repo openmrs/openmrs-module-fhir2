@@ -43,8 +43,8 @@ import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.ServiceRequest;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.TestOrder;
 import org.openmrs.api.cache.CacheConfig;
 import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
@@ -136,7 +136,7 @@ public class ServiceRequestSearchQueryTest extends BaseFhirContextSensitiveTest 
 	@Autowired
 	private SearchQuery<TestOrder, ServiceRequest, FhirServiceRequestDao<TestOrder>, ServiceRequestTranslator<TestOrder>, SearchQueryInclude<ServiceRequest>> searchQuery;
 	
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		// Needed until TRUNK-6299 in place
 		org.springframework.cache.CacheManager cm = cacheConfig.apiCacheManager();

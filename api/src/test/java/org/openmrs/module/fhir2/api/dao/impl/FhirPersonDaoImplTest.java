@@ -18,8 +18,8 @@ import static org.hamcrest.Matchers.nullValue;
 import java.util.List;
 
 import org.hibernate.SessionFactory;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.Person;
 import org.openmrs.PersonAttribute;
 import org.openmrs.api.context.Context;
@@ -45,7 +45,7 @@ public class FhirPersonDaoImplTest extends BaseFhirContextSensitiveTest {
 	@Qualifier("sessionFactory")
 	private SessionFactory sessionFactory;
 	
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		fhirPersonDao = new FhirPersonDaoImpl();
 		fhirPersonDao.setSessionFactory(sessionFactory);

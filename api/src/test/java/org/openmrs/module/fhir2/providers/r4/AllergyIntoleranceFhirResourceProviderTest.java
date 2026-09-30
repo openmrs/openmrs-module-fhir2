@@ -16,6 +16,7 @@ import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
@@ -41,17 +42,17 @@ import org.hl7.fhir.r4.model.AllergyIntolerance;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirAllergyIntoleranceService;
 import org.openmrs.module.fhir2.api.search.param.FhirAllergyIntoleranceSearchParams;
 import org.openmrs.module.fhir2.providers.BaseFhirProvenanceResourceTest;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class AllergyIntoleranceFhirResourceProviderTest extends BaseFhirProvenanceResourceTest<AllergyIntolerance> {
 	
 	private static final String ALLERGY_UUID = "1085AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
@@ -81,13 +82,13 @@ public class AllergyIntoleranceFhirResourceProviderTest extends BaseFhirProvenan
 	
 	private AllergyIntolerance allergyIntolerance;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		resourceProvider = new AllergyIntoleranceFhirResourceProvider();
 		resourceProvider.setFhirAllergyIntoleranceService(service);
 	}
 	
-	@Before
+	@BeforeEach
 	public void initAllergyIntolerance() {
 		allergyIntolerance = new AllergyIntolerance();
 		allergyIntolerance.setId(ALLERGY_UUID);
@@ -117,12 +118,14 @@ public class AllergyIntoleranceFhirResourceProviderTest extends BaseFhirProvenan
 		assertThat(allergy.getId(), equalTo(ALLERGY_UUID));
 	}
 	
-	@Test(expected = ResourceNotFoundException.class)
+	@Test
 	public void getAllergyIntoleranceByUuid_shouldThrowResourceNotFoundException() {
 		IdType id = new IdType();
 		id.setValue(WRONG_ALLERGY_UUID);
-		AllergyIntolerance result = resourceProvider.getAllergyIntoleranceByUuid(id);
-		assertThat(result, nullValue());
+		assertThrows(ResourceNotFoundException.class, () -> {
+			AllergyIntolerance result = resourceProvider.getAllergyIntoleranceByUuid(id);
+			assertThat(result, nullValue());
+		});
 	}
 	
 	@Test
@@ -133,8 +136,8 @@ public class AllergyIntoleranceFhirResourceProviderTest extends BaseFhirProvenan
 		
 		when(service.searchForAllergies(
 		    new FhirAllergyIntoleranceSearchParams(patient, null, null, null, null, null, null, null, null, null)))
-		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(allergyIntolerance), PREFERRED_PAGE_SIZE,
-		                    COUNT));
+		        .thenReturn(
+		            new MockIBundleProvider<>(Collections.singletonList(allergyIntolerance), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchForAllergies(patient, null, null, null, null, null, null, null,
 		    null, null, null);
@@ -154,8 +157,8 @@ public class AllergyIntoleranceFhirResourceProviderTest extends BaseFhirProvenan
 		
 		when(service.searchForAllergies(
 		    new FhirAllergyIntoleranceSearchParams(patient, null, null, null, null, null, null, null, null, null)))
-		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(allergyIntolerance), PREFERRED_PAGE_SIZE,
-		                    COUNT));
+		        .thenReturn(
+		            new MockIBundleProvider<>(Collections.singletonList(allergyIntolerance), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchForAllergies(patient, null, null, null, null, null, null, null,
 		    null, null, null);
@@ -175,8 +178,8 @@ public class AllergyIntoleranceFhirResourceProviderTest extends BaseFhirProvenan
 		
 		when(service.searchForAllergies(
 		    new FhirAllergyIntoleranceSearchParams(patient, null, null, null, null, null, null, null, null, null)))
-		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(allergyIntolerance), PREFERRED_PAGE_SIZE,
-		                    COUNT));
+		        .thenReturn(
+		            new MockIBundleProvider<>(Collections.singletonList(allergyIntolerance), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchForAllergies(patient, null, null, null, null, null, null, null,
 		    null, null, null);
@@ -197,8 +200,8 @@ public class AllergyIntoleranceFhirResourceProviderTest extends BaseFhirProvenan
 		
 		when(service.searchForAllergies(
 		    new FhirAllergyIntoleranceSearchParams(patient, null, null, null, null, null, null, null, null, null)))
-		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(allergyIntolerance), PREFERRED_PAGE_SIZE,
-		                    COUNT));
+		        .thenReturn(
+		            new MockIBundleProvider<>(Collections.singletonList(allergyIntolerance), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchForAllergies(patient, null, null, null, null, null, null, null,
 		    null, null, null);
@@ -218,8 +221,8 @@ public class AllergyIntoleranceFhirResourceProviderTest extends BaseFhirProvenan
 		
 		when(service.searchForAllergies(
 		    new FhirAllergyIntoleranceSearchParams(subject, null, null, null, null, null, null, null, null, null)))
-		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(allergyIntolerance), PREFERRED_PAGE_SIZE,
-		                    COUNT));
+		        .thenReturn(
+		            new MockIBundleProvider<>(Collections.singletonList(allergyIntolerance), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchForAllergies(null, subject, null, null, null, null, null, null,
 		    null, null, null);
@@ -239,8 +242,8 @@ public class AllergyIntoleranceFhirResourceProviderTest extends BaseFhirProvenan
 		
 		when(service.searchForAllergies(
 		    new FhirAllergyIntoleranceSearchParams(null, category, null, null, null, null, null, null, null, null)))
-		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(allergyIntolerance), PREFERRED_PAGE_SIZE,
-		                    COUNT));
+		        .thenReturn(
+		            new MockIBundleProvider<>(Collections.singletonList(allergyIntolerance), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchForAllergies(null, null, category, null, null, null, null, null,
 		    null, null, null);
@@ -260,8 +263,8 @@ public class AllergyIntoleranceFhirResourceProviderTest extends BaseFhirProvenan
 		
 		when(service.searchForAllergies(
 		    new FhirAllergyIntoleranceSearchParams(null, null, allergen, null, null, null, null, null, null, null)))
-		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(allergyIntolerance), PREFERRED_PAGE_SIZE,
-		                    COUNT));
+		        .thenReturn(
+		            new MockIBundleProvider<>(Collections.singletonList(allergyIntolerance), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchForAllergies(null, null, null, allergen, null, null, null, null,
 		    null, null, null);
@@ -281,8 +284,8 @@ public class AllergyIntoleranceFhirResourceProviderTest extends BaseFhirProvenan
 		
 		when(service.searchForAllergies(
 		    new FhirAllergyIntoleranceSearchParams(null, null, null, severity, null, null, null, null, null, null)))
-		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(allergyIntolerance), PREFERRED_PAGE_SIZE,
-		                    COUNT));
+		        .thenReturn(
+		            new MockIBundleProvider<>(Collections.singletonList(allergyIntolerance), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchForAllergies(null, null, null, null, severity, null, null, null,
 		    null, null, null);
@@ -302,8 +305,8 @@ public class AllergyIntoleranceFhirResourceProviderTest extends BaseFhirProvenan
 		
 		when(service.searchForAllergies(
 		    new FhirAllergyIntoleranceSearchParams(null, null, null, null, manifestation, null, null, null, null, null)))
-		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(allergyIntolerance), PREFERRED_PAGE_SIZE,
-		                    COUNT));
+		        .thenReturn(
+		            new MockIBundleProvider<>(Collections.singletonList(allergyIntolerance), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchForAllergies(null, null, null, null, null, manifestation, null,
 		    null, null, null, null);
@@ -323,8 +326,8 @@ public class AllergyIntoleranceFhirResourceProviderTest extends BaseFhirProvenan
 		
 		when(service.searchForAllergies(
 		    new FhirAllergyIntoleranceSearchParams(null, null, null, null, null, status, null, null, null, null)))
-		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(allergyIntolerance), PREFERRED_PAGE_SIZE,
-		                    COUNT));
+		        .thenReturn(
+		            new MockIBundleProvider<>(Collections.singletonList(allergyIntolerance), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchForAllergies(null, null, null, null, null, null, status, null, null,
 		    null, null);
@@ -364,8 +367,8 @@ public class AllergyIntoleranceFhirResourceProviderTest extends BaseFhirProvenan
 		
 		when(service.searchForAllergies(
 		    new FhirAllergyIntoleranceSearchParams(null, null, null, null, null, null, null, dateRangeParam, null, null)))
-		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(allergyIntolerance), PREFERRED_PAGE_SIZE,
-		                    COUNT));
+		        .thenReturn(
+		            new MockIBundleProvider<>(Collections.singletonList(allergyIntolerance), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchForAllergies(null, null, null, null, null, null, null, null,
 		    dateRangeParam, null, null);
@@ -385,8 +388,8 @@ public class AllergyIntoleranceFhirResourceProviderTest extends BaseFhirProvenan
 		
 		when(service.searchForAllergies(
 		    new FhirAllergyIntoleranceSearchParams(null, null, null, null, null, null, null, null, null, includes)))
-		            .thenReturn(new MockIBundleProvider<>(Arrays.asList(allergyIntolerance, new Patient()),
-		                    PREFERRED_PAGE_SIZE, COUNT));
+		        .thenReturn(
+		            new MockIBundleProvider<>(Arrays.asList(allergyIntolerance, new Patient()), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchForAllergies(null, null, null, null, null, null, null, null, null,
 		    null, includes);
@@ -438,30 +441,33 @@ public class AllergyIntoleranceFhirResourceProviderTest extends BaseFhirProvenan
 		assertThat(result.getResource(), equalTo(allergyIntolerance));
 	}
 	
-	@Test(expected = InvalidRequestException.class)
+	@Test
 	public void updateAllergyIntolerance_shouldThrowInvalidRequestForUuidMismatchException() {
 		when(service.update(WRONG_ALLERGY_UUID, allergyIntolerance)).thenThrow(InvalidRequestException.class);
-		
-		resourceProvider.updateAllergy(new IdType().setValue(WRONG_ALLERGY_UUID), allergyIntolerance);
+
+		assertThrows(InvalidRequestException.class,
+		    () -> resourceProvider.updateAllergy(new IdType().setValue(WRONG_ALLERGY_UUID), allergyIntolerance));
 	}
 	
-	@Test(expected = InvalidRequestException.class)
+	@Test
 	public void updateAllergyIntolerance_shouldThrowInvalidRequestForMissingId() {
 		AllergyIntolerance noIdAllergyIntolerance = new AllergyIntolerance();
 		
 		when(service.update(ALLERGY_UUID, noIdAllergyIntolerance)).thenThrow(InvalidRequestException.class);
 		
-		resourceProvider.updateAllergy(new IdType().setValue(ALLERGY_UUID), noIdAllergyIntolerance);
+		assertThrows(InvalidRequestException.class,
+		    () -> resourceProvider.updateAllergy(new IdType().setValue(ALLERGY_UUID), noIdAllergyIntolerance));
 	}
 	
-	@Test(expected = MethodNotAllowedException.class)
+	@Test
 	public void updateAllergyIntolerance_shouldThrowMethodNotAllowedIfDoesNotExist() {
 		AllergyIntolerance wrongAllergyIntolerance = new AllergyIntolerance();
 		wrongAllergyIntolerance.setId(WRONG_ALLERGY_UUID);
 		
 		when(service.update(WRONG_ALLERGY_UUID, wrongAllergyIntolerance)).thenThrow(MethodNotAllowedException.class);
 		
-		resourceProvider.updateAllergy(new IdType().setValue(WRONG_ALLERGY_UUID), wrongAllergyIntolerance);
+		assertThrows(MethodNotAllowedException.class,
+		    () -> resourceProvider.updateAllergy(new IdType().setValue(WRONG_ALLERGY_UUID), wrongAllergyIntolerance));
 	}
 	
 	@Test

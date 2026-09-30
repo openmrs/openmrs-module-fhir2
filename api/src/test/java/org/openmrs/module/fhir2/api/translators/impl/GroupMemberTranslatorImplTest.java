@@ -17,18 +17,18 @@ import static org.mockito.Mockito.when;
 
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.Reference;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.Cohort;
 import org.openmrs.Patient;
 import org.openmrs.module.fhir2.api.dao.FhirPatientDao;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.model.GroupMember;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class GroupMemberTranslatorImplTest {
 	
 	private static final String COHORT_UUID = "787e12bd-314e-4cc4-9b4d-1cdff9be9545";
@@ -43,14 +43,14 @@ public class GroupMemberTranslatorImplTest {
 	
 	private GroupMemberTranslatorImpl groupMemberTranslator;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		groupMemberTranslator = new GroupMemberTranslatorImpl();
 		groupMemberTranslator.setPatientDao(patientDao);
 		groupMemberTranslator.setPatientReferenceTranslator(patientReferenceTranslator);
 	}
 	
-	@Before
+	@BeforeEach
 	public void init() {
 		Cohort cohort = new Cohort();
 		cohort.setUuid(COHORT_UUID);

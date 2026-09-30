@@ -10,33 +10,40 @@
 package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 import static org.openmrs.module.fhir2.api.translators.impl.MedicationTranslatorImpl.DRUG_NAME_EXTENSION;
 
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.exparity.hamcrest.date.DateMatchers;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Medication;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.openmrs.Concept;
 import org.openmrs.Drug;
 import org.openmrs.DrugIngredient;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.WARN)
 public class MedicationTranslatorImplTest {
 	
 	private static final String MEDICATION_UUID = "aa47108b-9720-45d4-8be3-ba75e4cea8ac";
@@ -62,7 +69,7 @@ public class MedicationTranslatorImplTest {
 	
 	private Drug drug;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		drug = new Drug();
 		medicationTranslator = new MedicationTranslatorImpl();
@@ -227,6 +234,26 @@ public class MedicationTranslatorImplTest {
 		assertThat(drug, notNullValue());
 		assertThat(drug.getIngredients().size(), greaterThanOrEqualTo(1));
 		assertThat(drug.getIngredients().iterator().next().getIngredient().getUuid(), equalTo(INGREDIENT_CONCEPT_UUID));
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldRejectIngredientThatCannotBeMappedToConcept() {
+		CodeableConcept code = new CodeableConcept().addCoding(new Coding("http://example.org/unknown", "abc", ""));
+		
+		Medication medication = new Medication();
+		Medication.MedicationIngredientComponent ingredient = new Medication.MedicationIngredientComponent();
+		medication.addIngredient(ingredient.setItem(code));
+		
+		DrugIngredient existing = new DrugIngredient();
+		existing.setIngredient(new Concept());
+		drug.setIngredients(new HashSet<>(Collections.singleton(existing)));
+		
+		when(conceptTranslator.toOpenmrsType(code)).thenReturn(null);
+		
+		UnprocessableEntityException e = assertThrows(UnprocessableEntityException.class,
+		    () -> medicationTranslator.toOpenmrsType(drug, medication));
+		assertThat(e.getMessage(), containsString("http://example.org/unknown|abc"));
+		assertThat(drug.getIngredients().size(), equalTo(1));
 	}
 	
 	@Test

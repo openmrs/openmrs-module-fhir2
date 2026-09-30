@@ -9,13 +9,13 @@
  */
 package org.openmrs.module.fhir2;
 
-import javax.servlet.ServletContext;
-
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
+import jakarta.servlet.ServletContext;
 import lombok.AccessLevel;
 import lombok.Getter;
 import org.springframework.beans.BeansException;
@@ -27,6 +27,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.NoSuchMessageException;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
@@ -132,6 +133,11 @@ public class DelegatingWebApplicationContext implements WebApplicationContext {
 	@Override
 	public <T> ObjectProvider<T> getBeanProvider(ResolvableType resolvableType, boolean allowEagerInit) {
 		return applicationContext.getBeanProvider(resolvableType, allowEagerInit);
+	}
+	
+	@Override
+	public <T> ObjectProvider<T> getBeanProvider(ParameterizedTypeReference<T> requiredType) {
+		return applicationContext.getBeanProvider(requiredType);
 	}
 	
 	@Override
@@ -285,5 +291,11 @@ public class DelegatingWebApplicationContext implements WebApplicationContext {
 	public <A extends Annotation> A findAnnotationOnBean(String beanName, Class<A> annotationType,
 	        boolean allowFactoryBeanInit) throws NoSuchBeanDefinitionException {
 		return applicationContext.findAnnotationOnBean(beanName, annotationType, allowFactoryBeanInit);
+	}
+	
+	@Override
+	public <A extends Annotation> Set<A> findAllAnnotationsOnBean(String beanName, Class<A> annotationType,
+	        boolean allowFactoryBeanInit) throws NoSuchBeanDefinitionException {
+		return applicationContext.findAllAnnotationsOnBean(beanName, annotationType, allowFactoryBeanInit);
 	}
 }

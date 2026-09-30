@@ -18,6 +18,7 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.Mockito.when;
@@ -35,11 +36,11 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.Obs;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
@@ -52,7 +53,7 @@ import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.DiagnosticReportTranslator;
 import org.openmrs.module.fhir2.model.FhirDiagnosticReport;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class FhirDiagnosticReportServiceImplTest {
 	
 	private static final Integer ID = 123;
@@ -84,7 +85,7 @@ public class FhirDiagnosticReportServiceImplTest {
 	
 	private FhirDiagnosticReportServiceImpl service;
 	
-	@Before
+	@BeforeEach
 	public void setUp() {
 		service = new FhirDiagnosticReportServiceImpl() {
 			
@@ -171,29 +172,29 @@ public class FhirDiagnosticReportServiceImplTest {
 		assertThat(result, equalTo(diagnosticReport));
 	}
 	
-	@Test(expected = InvalidRequestException.class)
+	@Test
 	public void updateTask_shouldThrowInvalidRequestForUuidMismatch() {
 		DiagnosticReport diagnosticReport = new DiagnosticReport();
 		diagnosticReport.setId(UUID);
 		
-		service.update(WRONG_UUID, diagnosticReport);
+		assertThrows(InvalidRequestException.class, () -> service.update(WRONG_UUID, diagnosticReport));
 	}
 	
-	@Test(expected = InvalidRequestException.class)
+	@Test
 	public void updateTask_shouldThrowInvalidRequestForMissingUuid() {
 		DiagnosticReport diagnosticReport = new DiagnosticReport();
 		
-		service.update(UUID, diagnosticReport);
+		assertThrows(InvalidRequestException.class, () -> service.update(UUID, diagnosticReport));
 	}
 	
-	@Test(expected = ResourceNotFoundException.class)
+	@Test
 	public void updateTask_shouldThrowResourceNotFoundIfTaskDoesNotExist() {
 		DiagnosticReport diagnosticReport = new DiagnosticReport();
 		diagnosticReport.setId(WRONG_UUID);
 		
 		when(dao.get(WRONG_UUID)).thenReturn(null);
 		
-		service.update(WRONG_UUID, diagnosticReport);
+		assertThrows(ResourceNotFoundException.class, () -> service.update(WRONG_UUID, diagnosticReport));
 	}
 	
 	@Test

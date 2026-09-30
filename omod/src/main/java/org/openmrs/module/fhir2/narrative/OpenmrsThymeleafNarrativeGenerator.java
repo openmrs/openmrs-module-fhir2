@@ -7,96 +7,68 @@
  * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
  * graphic logo is a trademark of OpenMRS Inc.
  */
-
-/*
- * This class is derived and modified from the HAPI FHIR Core Library under the
- * terms of the Apache License, Version 2.0. You may obtain a copy of the
- * License at
- *
- *        http://www.apache.org/licenses/LICENSE-2.0
- *
- * The portions of this class that have not been modified by OpenMRS are
- * Copyright (C) 2014 - 2020 University Health Network.
- */
-
 package org.openmrs.module.fhir2.narrative;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.narrative2.ThymeleafNarrativeGenerator;
+import ca.uhn.fhir.narrative.BaseThymeleafNarrativeGenerator;
+import ca.uhn.fhir.narrative2.NarrativeTemplateManifest;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import lombok.Getter;
-import org.apache.commons.lang.Validate;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.apache.commons.lang3.Validate;
 import org.springframework.context.MessageSource;
 
 /**
- * Class for carrying out the task of narrative generation
+ * Thymeleaf-based narrative generator that resolves messages through the OpenMRS
+ * {@link MessageSource} and loads its template manifest through
+ * {@link OpenmrsNarrativeTemplateManifest}, so {@code openmrs:}-prefixed property file locations
+ * are supported alongside HAPI's {@code classpath:} and {@code file:} prefixes.
  */
-public class OpenmrsThymeleafNarrativeGenerator extends ThymeleafNarrativeGenerator {
-	
-	private boolean isInitialized;
+public class OpenmrsThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGenerator {
 	
 	@Getter
-	private List<String> propertyFiles;
+	private volatile List<String> propertyFiles;
+	
+	private volatile NarrativeTemplateManifest manifest;
 	
 	public OpenmrsThymeleafNarrativeGenerator(MessageSource messageSource, String... propertyFiles) {
 		this(messageSource, Arrays.asList(propertyFiles));
 	}
 	
-	/**
-	 * Constructor for OpenMRSThymeleafNarrativeGenerator
-	 * 
-	 * @param propertyFiles property files to define the narratives for this narrative generator
-	 */
 	public OpenmrsThymeleafNarrativeGenerator(MessageSource messageSource, List<String> propertyFiles) {
 		super();
 		setMessageResolver(new OpenmrsMessageResolver(messageSource));
 		setPropertyFiles(propertyFiles);
 	}
 	
-	/**
-	 * populates the resource narratives specified in property file with resource property values
-	 * 
-	 * @param theFhirContext
-	 * @param theResource
-	 * @return
-	 */
-	@Override
-	public boolean populateResourceNarrative(FhirContext theFhirContext, IBaseResource theResource) {
-		if (!isInitialized) {
-			initialize();
-		}
-		
-		return super.populateResourceNarrative(theFhirContext, theResource);
-	}
-	
-	/**
-	 * Sets property file paths for the narrative generator
-	 *
-	 * @param propertyFiles
-	 */
 	public void setPropertyFiles(List<String> propertyFiles) {
 		Validate.notNull(propertyFiles, "Property file can not be null");
 		this.propertyFiles = propertyFiles;
+		this.manifest = null;
 	}
 	
-	private synchronized void initialize() {
-		if (!isInitialized) {
-			List<String> propertyFile = getPropertyFiles();
-			try {
-				OpenmrsNarrativeTemplateManifest manifest = OpenmrsNarrativeTemplateManifest
-				        .forManifestFileLocation(propertyFile);
-				setManifest(manifest);
+	/**
+	 * Lazily loads the manifest on first use so that property files are only read (and validated) once
+	 * a narrative is actually requested, matching the behaviour of HAPI's own generators.
+	 */
+	@Override
+	protected NarrativeTemplateManifest getManifest() {
+		NarrativeTemplateManifest result = manifest;
+		if (result == null) {
+			synchronized (this) {
+				result = manifest;
+				if (result == null) {
+					try {
+						result = OpenmrsNarrativeTemplateManifest.forManifestFileLocation(propertyFiles);
+					} catch (IOException e) {
+						throw new InternalErrorException(e);
+					}
+					manifest = result;
+				}
 			}
-			catch (IOException e) {
-				throw new InternalErrorException(e);
-			}
-			
-			isInitialized = true;
 		}
+		return result;
 	}
 }

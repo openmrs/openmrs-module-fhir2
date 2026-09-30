@@ -16,6 +16,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -36,11 +37,11 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Reference;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.BaseOpenmrsData;
 import org.openmrs.Location;
 import org.openmrs.LocationAttribute;
@@ -55,7 +56,7 @@ import org.openmrs.module.fhir2.api.translators.LocationTagTranslator;
 import org.openmrs.module.fhir2.api.translators.LocationTypeTranslator;
 import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class LocationTranslatorImplTest {
 	
 	private static final String LOCATION_UUID = "c0938432-1691-11df-97a5-7038c432";
@@ -112,7 +113,7 @@ public class LocationTranslatorImplTest {
 	
 	private Location omrsLocation;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		omrsLocation = new Location();
 		
@@ -437,11 +438,11 @@ public class LocationTranslatorImplTest {
 		assertThat(result, nullValue());
 	}
 	
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void getOpenmrsParentLocation_shouldThrowExceptionIfReferenceIsntForLocation() {
 		Reference reference = new Reference().setReference("Unknown" + "/" + PARENT_LOCATION_NAME).setType("Unknown");
 		
-		locationTranslator.getOpenmrsParentLocation(reference);
+		assertThrows(IllegalArgumentException.class, () -> locationTranslator.getOpenmrsParentLocation(reference));
 	}
 	
 	@Test

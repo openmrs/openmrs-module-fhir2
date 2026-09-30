@@ -21,11 +21,13 @@ import java.util.Locale;
 
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.SimpleQuantity;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.openmrs.Concept;
 import org.openmrs.ConceptMap;
 import org.openmrs.ConceptMapType;
@@ -38,7 +40,8 @@ import org.openmrs.module.fhir2.api.FhirConceptService;
 import org.openmrs.module.fhir2.api.FhirConceptSourceService;
 import org.openmrs.util.LocaleUtility;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.WARN)
 public class MedicationQuantityCodingTranslatorImplTest {
 	
 	private static final String CONCEPT_UUID = "33fdc8ad-fe4d-499b-93a8-8a991c1d488g";
@@ -53,7 +56,7 @@ public class MedicationQuantityCodingTranslatorImplTest {
 	
 	private MedicationQuantityCodingTranslatorImpl quantityCodingTranslator;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		conceptTranslator = new ConceptTranslatorImpl();
 		conceptTranslator.setConceptService(conceptService);

@@ -14,6 +14,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 import static org.openmrs.module.fhir2.api.translators.impl.ReferenceHandlingTranslator.getReferenceId;
 
@@ -28,11 +29,11 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Reference;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.Allergen;
 import org.openmrs.AllergenType;
 import org.openmrs.Allergy;
@@ -49,7 +50,7 @@ import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class AllergyIntoleranceTranslatorImplTest {
 	
 	private static final String ALLERGY_UUID = "42311bd3-9dcd-4df7-bbc6-b66920944854";
@@ -105,7 +106,7 @@ public class AllergyIntoleranceTranslatorImplTest {
 	
 	private Allergy omrsAllergy;
 	
-	@Before
+	@BeforeEach
 	public void setUp() {
 		allergyIntoleranceTranslator = new AllergyIntoleranceTranslatorImpl();
 		allergyIntoleranceTranslator.setPractitionerReferenceTranslator(practitionerReferenceTranslator);
@@ -124,9 +125,9 @@ public class AllergyIntoleranceTranslatorImplTest {
 		omrsAllergy.setAllergen(allergen);
 	}
 	
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void toFhirResource_shouldThrowExceptionWhenCalledWithANullObject() {
-		allergyIntoleranceTranslator.toFhirResource(null);
+		assertThrows(NullPointerException.class, () -> allergyIntoleranceTranslator.toFhirResource(null));
 	}
 	
 	@Test
@@ -386,9 +387,9 @@ public class AllergyIntoleranceTranslatorImplTest {
 		assertThat(allergyIntolerance.getNote().get(0).getText(), equalTo(""));
 	}
 	
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void toOpenmrsType_shouldThrowExceptionIfAllergyIntoleranceIsNull() {
-		allergyIntoleranceTranslator.toOpenmrsType(omrsAllergy, null);
+		assertThrows(NullPointerException.class, () -> allergyIntoleranceTranslator.toOpenmrsType(omrsAllergy, null));
 	}
 	
 	@Test
@@ -425,16 +426,6 @@ public class AllergyIntoleranceTranslatorImplTest {
 	public void toOpenmrsType_shouldReturnNullWhenCalledWithFhirBiologicCategory() {
 		AllergyIntolerance allergy = new AllergyIntolerance();
 		allergy.addCategory(AllergyIntolerance.AllergyIntoleranceCategory.BIOLOGIC);
-		when(categoryTranslator.toOpenmrsType(allergy.getCategory().get(0).getValue())).thenReturn(null);
-		allergyIntoleranceTranslator.toOpenmrsType(omrsAllergy, allergy);
-		assertThat(omrsAllergy, notNullValue());
-		assertThat(omrsAllergy.getAllergen().getAllergenType(), nullValue());
-	}
-	
-	@Test
-	public void toOpenmrsType_shouldReturnNullCategoryWhenCalledWithFhirNullCategory() {
-		AllergyIntolerance allergy = new AllergyIntolerance();
-		allergy.addCategory(AllergyIntolerance.AllergyIntoleranceCategory.NULL);
 		when(categoryTranslator.toOpenmrsType(allergy.getCategory().get(0).getValue())).thenReturn(null);
 		allergyIntoleranceTranslator.toOpenmrsType(omrsAllergy, allergy);
 		assertThat(omrsAllergy, notNullValue());

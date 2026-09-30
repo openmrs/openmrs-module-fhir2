@@ -19,11 +19,11 @@ import static org.mockito.Mockito.when;
 import java.util.Optional;
 
 import org.hl7.fhir.r4.model.ContactPoint;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.LocationAttribute;
 import org.openmrs.LocationAttributeType;
 import org.openmrs.PersonAttribute;
@@ -38,7 +38,7 @@ import org.openmrs.module.fhir2.api.FhirContactPointMapService;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.model.FhirContactPointMap;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class TelecomTranslatorImplTest {
 	
 	private static final String CONTACT_POINT_ID = "e2323we23-323j34-23k23-23m23";
@@ -116,7 +116,7 @@ public class TelecomTranslatorImplTest {
 	
 	private FhirContactPointMap personContactPointMap;
 	
-	@Before
+	@BeforeEach
 	public void setUp() {
 		telecomTranslator = new TelecomTranslatorImpl();
 		telecomTranslator.setPersonService(personService);

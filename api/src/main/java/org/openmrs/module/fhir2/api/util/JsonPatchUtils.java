@@ -62,8 +62,7 @@ public class JsonPatchUtils {
 			T retVal;
 			try {
 				retVal = fhirJsonParser.parseResource(clazz, postPatchedContent);
-			}
-			catch (DataFormatException e) {
+			} catch (DataFormatException e) {
 				String resourceId = theResourceToUpdate.getIdElement().toUnqualifiedVersionless().getValue();
 				String resourceType = theCtx.getResourceDefinition(theResourceToUpdate).getName();
 				resourceId = defaultString(resourceId, resourceType);
@@ -73,8 +72,7 @@ public class JsonPatchUtils {
 			}
 			return retVal;
 			
-		}
-		catch (IOException | JsonPatchException theE) {
+		} catch (IOException | JsonPatchException theE) {
 			throw new InvalidRequestException(theE);
 		}
 		
@@ -112,8 +110,7 @@ public class JsonPatchUtils {
 			T retVal;
 			try {
 				retVal = fhirJsonParser.parseResource(clazz, postPatchedContent);
-			}
-			catch (DataFormatException e) {
+			} catch (DataFormatException e) {
 				String resourceId = theResourceToUpdate.getIdElement().toUnqualifiedVersionless().getValue();
 				String resourceType = theCtx.getResourceDefinition(theResourceToUpdate).getName();
 				resourceId = defaultString(resourceId, resourceType);
@@ -123,8 +120,7 @@ public class JsonPatchUtils {
 			}
 			return retVal;
 			
-		}
-		catch (IOException | JsonPatchException theE) {
+		} catch (IOException | JsonPatchException theE) {
 			throw new InvalidRequestException(theE);
 		}
 		

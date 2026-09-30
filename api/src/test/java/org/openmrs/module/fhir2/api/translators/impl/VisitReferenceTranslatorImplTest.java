@@ -13,21 +13,22 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 import static org.openmrs.module.fhir2.api.translators.impl.ReferenceHandlingTranslator.getReferenceId;
 
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Reference;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.Visit;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirVisitDao;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class VisitReferenceTranslatorImplTest {
 	
 	private static final String VISIT_UUID = "276379ef-07ce-4108-b5e0-c4dc21964b4f";
@@ -37,7 +38,7 @@ public class VisitReferenceTranslatorImplTest {
 	
 	private VisitReferenceTranslatorImpl visitReferenceTranslator;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		visitReferenceTranslator = new VisitReferenceTranslatorImpl();
 		visitReferenceTranslator.setDao(dao);
@@ -104,11 +105,11 @@ public class VisitReferenceTranslatorImplTest {
 		assertThat(result, nullValue());
 	}
 	
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void toOpenmrsType_shouldThrowExceptionIfReferenceIsNotForEncounter() {
 		Reference reference = new Reference().setReference("Unknown" + "/" + VISIT_UUID).setType("Unknown");
 		
-		visitReferenceTranslator.toOpenmrsType(reference);
+		assertThrows(IllegalArgumentException.class, () -> visitReferenceTranslator.toOpenmrsType(reference));
 	}
 	
 }

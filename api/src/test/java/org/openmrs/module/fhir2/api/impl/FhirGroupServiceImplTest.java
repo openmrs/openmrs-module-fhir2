@@ -36,11 +36,11 @@ import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.Practitioner;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.Cohort;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
@@ -51,7 +51,7 @@ import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.GroupTranslator;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class FhirGroupServiceImplTest {
 	
 	private static final Integer COHORT_ID = 123;
@@ -85,7 +85,7 @@ public class FhirGroupServiceImplTest {
 	
 	private static final int END_INDEX = 10;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		groupService = new FhirGroupServiceImpl() {
 			
@@ -142,28 +142,28 @@ public class FhirGroupServiceImplTest {
 		assertThat(result.getId(), equalTo(COHORT_UUID));
 	}
 	
-	@Test(expected = InvalidRequestException.class)
+	@Test
 	public void updateGroupShouldThrowInvalidRequestExceptionIfIdIsNull() {
 		Group group = new Group();
 		group.setId(COHORT_UUID);
 		
-		groupService.update(null, group);
+		assertThrows(InvalidRequestException.class, () -> groupService.update(null, group));
 	}
 	
-	@Test(expected = InvalidRequestException.class)
+	@Test
 	public void updateGroupShouldThrowInvalidRequestExceptionIfIdIsBad() {
 		Group group = new Group();
 		group.setId(COHORT_UUID);
 		
-		groupService.update(BAD_COHORT_UUID, group);
+		assertThrows(InvalidRequestException.class, () -> groupService.update(BAD_COHORT_UUID, group));
 	}
 	
-	@Test(expected = ResourceNotFoundException.class)
+	@Test
 	public void updateGroupShouldThrowResourceNotFoundException() {
 		Group group = new Group();
 		group.setId(COHORT_UUID);
 		
-		groupService.update(COHORT_UUID, group);
+		assertThrows(ResourceNotFoundException.class, () -> groupService.update(COHORT_UUID, group));
 	}
 	
 	@Test

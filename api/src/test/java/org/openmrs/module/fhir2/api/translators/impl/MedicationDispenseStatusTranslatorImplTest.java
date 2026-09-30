@@ -19,17 +19,17 @@ import static org.openmrs.module.fhir2.api.translators.impl.MedicationDispenseSt
 import java.util.Optional;
 
 import org.hl7.fhir.r4.model.MedicationDispense;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.Concept;
 import org.openmrs.ConceptSource;
 import org.openmrs.module.fhir2.api.FhirConceptService;
 import org.openmrs.module.fhir2.api.FhirConceptSourceService;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class MedicationDispenseStatusTranslatorImplTest {
 	
 	@Mock
@@ -43,7 +43,7 @@ public class MedicationDispenseStatusTranslatorImplTest {
 	@Mock
 	ConceptSource dispenseStatusSource;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		dispenseStatusTranslator = new MedicationDispenseStatusTranslatorImpl();
 		dispenseStatusTranslator.setConceptSourceService(conceptSourceService);

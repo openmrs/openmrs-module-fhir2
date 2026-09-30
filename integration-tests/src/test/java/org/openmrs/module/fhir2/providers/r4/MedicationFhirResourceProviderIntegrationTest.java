@@ -34,8 +34,8 @@ import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.OperationOutcome.OperationOutcomeIssueComponent;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.GlobalProperty;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.ConceptService;
@@ -83,7 +83,7 @@ public class MedicationFhirResourceProviderIntegrationTest extends BaseFhirR4Int
 	@Autowired
 	private AdministrationService adminService;
 	
-	@Before
+	@BeforeEach
 	@Override
 	public void setup() throws Exception {
 		super.setup();

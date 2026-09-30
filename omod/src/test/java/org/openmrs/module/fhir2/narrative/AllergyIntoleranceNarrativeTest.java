@@ -16,7 +16,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import java.io.IOException;
 
 import org.hl7.fhir.r4.model.AllergyIntolerance;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Test for AllergyIntolerance resource narrative generation

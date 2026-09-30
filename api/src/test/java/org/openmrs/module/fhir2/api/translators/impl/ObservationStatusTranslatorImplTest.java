@@ -15,13 +15,13 @@ import static org.hamcrest.Matchers.notNullValue;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.r4.model.Observation;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.Obs;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ObservationStatusTranslatorImplTest {
 	
 	private static final Obs.Status OBS_STATUS = Obs.Status.FINAL;
@@ -30,7 +30,7 @@ public class ObservationStatusTranslatorImplTest {
 	
 	private Obs obs;
 	
-	@Before
+	@BeforeEach
 	public void setUp() {
 		observationStatusTranslator = new ObservationStatusTranslatorImpl();
 		obs = new Obs();

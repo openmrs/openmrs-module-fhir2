@@ -203,16 +203,14 @@ public class PatientTranslatorImpl implements PatientTranslator {
 				patient.getDeceasedBooleanType();
 				
 				currentPatient.setDead(patient.getDeceasedBooleanType().booleanValue());
-			}
-			catch (FHIRException ignored) {}
+			} catch (FHIRException ignored) {}
 			
 			try {
 				patient.getDeceasedDateTimeType();
 				
 				currentPatient.setDead(true);
 				currentPatient.setDeathDate(patient.getDeceasedDateTimeType().getValue());
-			}
-			catch (FHIRException ignored) {}
+			} catch (FHIRException ignored) {}
 		}
 		
 		for (Address address : patient.getAddress()) {

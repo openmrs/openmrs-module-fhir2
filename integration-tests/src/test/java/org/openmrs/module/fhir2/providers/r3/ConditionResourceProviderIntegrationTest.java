@@ -36,8 +36,8 @@ import lombok.Getter;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Condition;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -65,7 +65,7 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR3Integrat
 	@Autowired
 	private ConditionFhirResourceProvider resourceProvider;
 	
-	@Before
+	@BeforeEach
 	@Override
 	public void setup() throws Exception {
 		super.setup();

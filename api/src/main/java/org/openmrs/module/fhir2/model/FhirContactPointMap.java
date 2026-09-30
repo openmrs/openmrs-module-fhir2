@@ -9,19 +9,20 @@
  */
 package org.openmrs.module.fhir2.model;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
-
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import org.hl7.fhir.r4.model.ContactPoint.ContactPointSystem;
 import org.hl7.fhir.r4.model.ContactPoint.ContactPointUse;
 import org.openmrs.BaseOpenmrsData;
@@ -38,7 +39,7 @@ public class FhirContactPointMap extends BaseOpenmrsData {
 	
 	@EqualsAndHashCode.Include
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "fhir_contact_point_map_id")
 	private Integer id;
 	
@@ -49,10 +50,12 @@ public class FhirContactPointMap extends BaseOpenmrsData {
 	private Integer attributeTypeId;
 	
 	@Enumerated(EnumType.STRING)
+	@JdbcTypeCode(SqlTypes.VARCHAR)
 	@Column(length = 50)
 	private ContactPointSystem system;
 	
 	@Enumerated(EnumType.STRING)
+	@JdbcTypeCode(SqlTypes.VARCHAR)
 	@Column(length = 50)
 	private ContactPointUse use;
 	

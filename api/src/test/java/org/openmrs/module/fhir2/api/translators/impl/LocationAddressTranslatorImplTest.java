@@ -18,14 +18,14 @@ import static org.hamcrest.Matchers.nullValue;
 
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.Extension;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.Location;
 import org.openmrs.module.fhir2.FhirConstants;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class LocationAddressTranslatorImplTest {
 	
 	private static final String CITY = "Test city";
@@ -70,7 +70,7 @@ public class LocationAddressTranslatorImplTest {
 	
 	private Location omrsLocation;
 	
-	@Before
+	@BeforeEach
 	public void setUp() {
 		translator = new LocationAddressTranslatorImpl();
 		omrsLocation = new Location();

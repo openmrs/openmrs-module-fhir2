@@ -16,6 +16,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -30,12 +31,12 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Reference;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.Location;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
@@ -48,7 +49,7 @@ import org.openmrs.module.fhir2.api.dao.impl.FhirEncounterClassMapDaoImpl;
 import org.openmrs.module.fhir2.api.translators.EncounterLocationTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class VisitTranslatorImplTest {
 	
 	private static final String VISIT_UUID = "65aefd46-973d-4526-89de-93842c80ad11";
@@ -91,7 +92,7 @@ public class VisitTranslatorImplTest {
 	private Date periodStart, periodEnd;
 	
 	@SneakyThrows
-	@Before
+	@BeforeEach
 	public void setup() {
 		visitTranslator = new VisitTranslatorImpl();
 		visitTranslator.setEncounterLocationTranslator(encounterLocationTranslator);
@@ -167,19 +168,19 @@ public class VisitTranslatorImplTest {
 		assertThat(result.getStopDatetime(), nullValue());
 	}
 	
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void toFhirResource_shouldThrowExceptionWhenVisitIsNull() {
-		visitTranslator.toFhirResource(null);
+		assertThrows(NullPointerException.class, () -> visitTranslator.toFhirResource(null));
 	}
 	
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void toOpenMrsType_shouldThrowExceptionWhenEncounterIsNull() {
-		visitTranslator.toOpenmrsType(null);
+		assertThrows(NullPointerException.class, () -> visitTranslator.toOpenmrsType(null));
 	}
 	
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void toOpenMrsType_shouldThrowExceptionWhenExistingVisitIsNull() {
-		visitTranslator.toOpenmrsType(null, new Encounter());
+		assertThrows(NullPointerException.class, () -> visitTranslator.toOpenmrsType(null, new Encounter()));
 	}
 	
 	@Test

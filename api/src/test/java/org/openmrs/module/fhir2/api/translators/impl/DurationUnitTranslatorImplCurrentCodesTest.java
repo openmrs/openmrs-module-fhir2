@@ -14,8 +14,8 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 
 import org.hl7.fhir.r4.model.Timing;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.Concept;
 import org.openmrs.ConceptMap;
 import org.openmrs.ConceptMapType;
@@ -54,7 +54,7 @@ public class DurationUnitTranslatorImplCurrentCodesTest extends BaseFhirContextS
 	@Autowired
 	ConceptService conceptService;
 	
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		executeDataSet(CURRENT_CODES_DATA);
 	}

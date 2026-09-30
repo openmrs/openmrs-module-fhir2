@@ -265,8 +265,7 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 		// TODO Improve these messages
 		try {
 			ValidateUtil.validate(object);
-		}
-		catch (ValidationException e) {
+		} catch (ValidationException e) {
 			log.error("Error occurred while validating {} object", resourceClass.getSimpleName(), e);
 			throw new UnprocessableEntityException(e.getMessage(), e);
 		}

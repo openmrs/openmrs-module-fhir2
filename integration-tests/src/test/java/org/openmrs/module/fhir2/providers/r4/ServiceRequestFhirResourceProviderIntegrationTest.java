@@ -28,9 +28,9 @@ import lombok.Getter;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.ServiceRequest;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -51,7 +51,7 @@ public class ServiceRequestFhirResourceProviderIntegrationTest extends BaseFhirR
 	@Autowired
 	private ServiceRequestFhirResourceProvider resourceProvider;
 	
-	@Before
+	@BeforeEach
 	@Override
 	public void setup() throws Exception {
 		super.setup();
@@ -259,7 +259,7 @@ public class ServiceRequestFhirResourceProviderIntegrationTest extends BaseFhirR
 		assertThat(response, statusEquals(HttpStatus.NOT_MODIFIED));
 	}
 	
-	@Ignore
+	@Disabled
 	public void shouldReturnAnUpdatedServiceRequestWithNewEtagWhenRetrievingAnExistingServiceRequestWithAnEtag()
 	        throws Exception {
 		MockHttpServletResponse response = get("/ServiceRequest/" + SERVICE_REQUEST_UUID).accept(FhirMediaTypes.JSON).go();

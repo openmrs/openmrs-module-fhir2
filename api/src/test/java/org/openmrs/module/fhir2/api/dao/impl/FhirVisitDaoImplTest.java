@@ -13,11 +13,11 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.openmrs.util.PrivilegeConstants.GET_VISITS;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.Visit;
 import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.context.Context;
@@ -39,7 +39,7 @@ public class FhirVisitDaoImplTest extends BaseFhirContextSensitiveTest {
 	
 	private FhirVisitDao dao;
 	
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		dao = daoFactory.getObject();
 		executeDataSet(VISIT_INITIAL_DATA_XML);
@@ -67,16 +67,14 @@ public class FhirVisitDaoImplTest extends BaseFhirContextSensitiveTest {
 		try {
 			dao.get(VISIT_UUID);
 			fail("Expected APIAuthenticationException for missing privilege, but it was not thrown");
-		}
-		catch (APIAuthenticationException ignored) {
+		} catch (APIAuthenticationException ignored) {
 			// this is the happy path
 		}
 		
 		try {
 			Context.addProxyPrivilege(GET_VISITS);
 			assertThat(dao.get(VISIT_UUID), notNullValue());
-		}
-		finally {
+		} finally {
 			Context.removeProxyPrivilege(GET_VISITS);
 		}
 	}

@@ -23,11 +23,11 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.EpisodeOfCare;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Reference;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.Concept;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.PatientProgram;
@@ -37,7 +37,7 @@ import org.openmrs.module.fhir2.FhirTestConstants;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class EpisodeOfCareTranslatorImplTest {
 	
 	private static final String PATIENT_UUID = "8549f706-7e85-4c1d-9424-217d50a2988b";
@@ -54,7 +54,7 @@ public class EpisodeOfCareTranslatorImplTest {
 	
 	private EpisodeOfCareTranslatorImpl episodeOfCareTranslator;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		episodeOfCareTranslator = new EpisodeOfCareTranslatorImpl();
 		episodeOfCareTranslator.setConceptTranslator(conceptTranslator);

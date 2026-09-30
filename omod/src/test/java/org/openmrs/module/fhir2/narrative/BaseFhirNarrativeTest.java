@@ -17,9 +17,9 @@ import java.util.TimeZone;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 
@@ -40,7 +40,7 @@ public class BaseFhirNarrativeTest {
 	 * Setup a common timezone before all the tests to avoid assertion errors in narrative generation
 	 * tests due to timezone mismatch
 	 */
-	@BeforeClass
+	@BeforeAll
 	public static void setupTimeZone() {
 		defaultTimeZone = TimeZone.getDefault();
 		TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
@@ -50,7 +50,7 @@ public class BaseFhirNarrativeTest {
 	 * Set OpenMRSThymeleafNarrativeGenerator as the narrative generator for the FhirContext and
 	 * initialize the parser
 	 */
-	@Before
+	@BeforeEach
 	public void setup() {
 		messageSource = new ReloadableResourceBundleMessageSource();
 		messageSource.setBasename("classpath:messages");
@@ -74,7 +74,7 @@ public class BaseFhirNarrativeTest {
 	/**
 	 * Reset the timezone to defaultTimeZone after all tests are run
 	 */
-	@AfterClass
+	@AfterAll
 	public static void resetTimeZone() {
 		TimeZone.setDefault(defaultTimeZone);
 	}

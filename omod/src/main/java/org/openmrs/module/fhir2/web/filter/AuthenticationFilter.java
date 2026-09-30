@@ -9,18 +9,17 @@
  */
 package org.openmrs.module.fhir2.web.filter;
 
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.FilterConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.api.context.Context;
@@ -54,8 +53,7 @@ public class AuthenticationFilter implements Filter {
 							UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(userAndPass[0],
 							        userAndPass[1]);
 							Context.authenticate(credentials);
-						}
-						catch (Exception e) {
+						} catch (Exception e) {
 							HttpServletResponse httpResponse = (HttpServletResponse) response;
 							httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Not authenticated");
 							return;

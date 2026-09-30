@@ -12,14 +12,14 @@ package org.openmrs.module.fhir2.api.dao.impl;
 import static lombok.AccessLevel.PROTECTED;
 
 import javax.annotation.Nonnull;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 
 import java.util.Optional;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.SessionFactory;
@@ -52,8 +52,7 @@ public class FhirPatientIdentifierSystemDaoImpl implements FhirPatientIdentifier
 		
 		try {
 			return em.createQuery(cq).getSingleResult();
-		}
-		catch (NoResultException e) {
+		} catch (NoResultException e) {
 			return null;
 		}
 	}
@@ -71,8 +70,7 @@ public class FhirPatientIdentifierSystemDaoImpl implements FhirPatientIdentifier
 		
 		try {
 			return em.createQuery(cq).getSingleResult();
-		}
-		catch (NoResultException e) {
+		} catch (NoResultException e) {
 			return null;
 		}
 	}
@@ -93,8 +91,7 @@ public class FhirPatientIdentifierSystemDaoImpl implements FhirPatientIdentifier
 	@Transactional
 	public FhirPatientIdentifierSystem saveFhirPatientIdentifierSystem(
 	        @Nonnull FhirPatientIdentifierSystem fhirPatientIdentifierSystem) {
-		sessionFactory.getCurrentSession().saveOrUpdate(fhirPatientIdentifierSystem);
-		return fhirPatientIdentifierSystem;
+		return sessionFactory.getCurrentSession().merge(fhirPatientIdentifierSystem);
 	}
 	
 	private OpenmrsFhirCriteriaContext<FhirPatientIdentifierSystem, FhirPatientIdentifierSystem> openmrsFhirCriteriaContext() {

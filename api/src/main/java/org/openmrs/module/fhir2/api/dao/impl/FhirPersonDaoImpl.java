@@ -10,8 +10,6 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import javax.annotation.Nonnull;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.Predicate;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,6 +17,8 @@ import java.util.stream.Stream;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.Predicate;
 import org.openmrs.Person;
 import org.openmrs.PersonAttribute;
 import org.openmrs.module.fhir2.FhirConstants;

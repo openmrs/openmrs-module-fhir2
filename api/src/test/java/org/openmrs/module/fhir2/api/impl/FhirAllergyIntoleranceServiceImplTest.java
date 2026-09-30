@@ -42,11 +42,11 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.Allergy;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
@@ -58,7 +58,7 @@ import org.openmrs.module.fhir2.api.search.param.FhirAllergyIntoleranceSearchPar
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.AllergyIntoleranceTranslator;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class FhirAllergyIntoleranceServiceImplTest {
 	
 	private static final Integer ALLERGY_ID = 123;
@@ -100,7 +100,7 @@ public class FhirAllergyIntoleranceServiceImplTest {
 	
 	private AllergyIntolerance fhirAllergy;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		service = new FhirAllergyIntoleranceServiceImpl() {
 			

@@ -102,8 +102,7 @@ public final class XmlPatcher {
 			dbf.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
 			DocumentBuilder builder = dbf.newDocumentBuilder();
 			return builder.parse(new InputSource(in));
-		}
-		catch (ParserConfigurationException | SAXException e) {
+		} catch (ParserConfigurationException | SAXException e) {
 			throw new XmlPatchException("Failed to parse XML: " + e.getMessage(), e);
 		}
 	}
@@ -117,8 +116,7 @@ public final class XmlPatcher {
 			Transformer t = tf.newTransformer();
 			t.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
 			t.transform(new DOMSource(doc), new StreamResult(out));
-		}
-		catch (TransformerException e) {
+		} catch (TransformerException e) {
 			throw new XmlPatchException("Failed to serialize XML: " + e.getMessage(), e);
 		}
 	}
@@ -126,8 +124,7 @@ public final class XmlPatcher {
 	private static void trySetAttribute(TransformerFactory tf, String name, Object value) {
 		try {
 			tf.setAttribute(name, value);
-		}
-		catch (IllegalArgumentException ignored) {
+		} catch (IllegalArgumentException ignored) {
 			// Some JDK XML implementations don't recognise these attributes; secure processing
 			// already covers the same ground, so a missing attribute is not fatal.
 		}
@@ -184,8 +181,7 @@ public final class XmlPatcher {
 				result.add(nodes.item(i));
 			}
 			return result;
-		}
-		catch (XPathExpressionException e) {
+		} catch (XPathExpressionException e) {
 			throw new XmlPatchException("Invalid XPath selector: " + selector, e);
 		}
 	}

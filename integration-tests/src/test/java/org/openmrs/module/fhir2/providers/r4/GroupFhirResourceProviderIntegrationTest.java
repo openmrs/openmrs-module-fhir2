@@ -28,8 +28,8 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.OperationOutcome;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.module.fhir2.BaseFhirIntegrationTest;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,7 +57,7 @@ public class GroupFhirResourceProviderIntegrationTest extends BaseFhirR4Integrat
 	@Getter(AccessLevel.PUBLIC)
 	private org.openmrs.module.fhir2.providers.r4.GroupFhirResourceProvider resourceProvider;
 	
-	@Before
+	@BeforeEach
 	@Override
 	public void setup() throws Exception {
 		super.setup();

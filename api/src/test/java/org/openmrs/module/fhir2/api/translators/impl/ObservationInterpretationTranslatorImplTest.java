@@ -13,14 +13,14 @@ import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.Obs;
 import org.openmrs.module.fhir2.FhirConstants;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ObservationInterpretationTranslatorImplTest {
 	
 	private ObservationInterpretationTranslatorImpl observationInterpretationTranslator;
@@ -29,7 +29,7 @@ public class ObservationInterpretationTranslatorImplTest {
 	
 	private CodeableConcept interpretation;
 	
-	@Before
+	@BeforeEach
 	public void setUp() {
 		observationInterpretationTranslator = new ObservationInterpretationTranslatorImpl();
 		obs = new Obs();

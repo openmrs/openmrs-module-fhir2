@@ -16,7 +16,7 @@ import static org.hamcrest.Matchers.is;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.openmrs.module.fhir2.api.spi.ModuleLifecycleListener;
 
 public class FhirActivatorTest {

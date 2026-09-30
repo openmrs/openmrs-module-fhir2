@@ -47,8 +47,8 @@ import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.ResourceType;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.module.fhir2.BaseFhirIntegrationTest;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -111,7 +111,7 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR4Integr
 	@Autowired
 	private PatientFhirResourceProvider resourceProvider;
 	
-	@Before
+	@BeforeEach
 	@Override
 	public void setup() throws Exception {
 		super.setup();

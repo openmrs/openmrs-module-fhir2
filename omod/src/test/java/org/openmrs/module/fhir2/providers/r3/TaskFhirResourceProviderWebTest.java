@@ -26,8 +26,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.openmrs.module.fhir2.api.util.GeneralUtils.inputStreamToString;
 
-import javax.servlet.ServletException;
-
 import java.io.InputStream;
 import java.util.Calendar;
 import java.util.Collections;
@@ -38,24 +36,28 @@ import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import jakarta.servlet.ServletException;
 import lombok.AccessLevel;
 import lombok.Getter;
-import org.apache.commons.lang.time.DateUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.dstu3.model.Task;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirTaskService;
 import org.openmrs.module.fhir2.api.search.param.TaskSearchParams;
 import org.openmrs.module.fhir2.providers.r4.MockIBundleProvider;
 import org.springframework.mock.web.MockHttpServletResponse;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.WARN)
 public class TaskFhirResourceProviderWebTest extends BaseFhirR3ResourceProviderWebTest<TaskFhirResourceProvider, Task> {
 	
 	private static final String TASK_UUID = "55616228-dc6d-446f-ab50-4ec711ea9243";
@@ -85,7 +87,7 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirR3ResourceProviderW
 	@Captor
 	private ArgumentCaptor<TaskSearchParams> taskSearchParamsArgumentCaptor;
 	
-	@Before
+	@BeforeEach
 	public void setup() throws ServletException {
 		resourceProvider = new TaskFhirResourceProvider();
 		resourceProvider.setFhirTaskService(service);

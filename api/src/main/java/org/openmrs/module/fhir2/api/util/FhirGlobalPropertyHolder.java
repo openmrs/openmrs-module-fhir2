@@ -47,16 +47,13 @@ public class FhirGlobalPropertyHolder implements GlobalPropertyListener {
 				try {
 					Context.addProxyPrivilege(PrivilegeConstants.GET_GLOBAL_PROPERTIES);
 					hasUserContext = true;
-				}
-				catch (APIException ignored) {}
+				} catch (APIException ignored) {}
 				
 				try {
 					gpValue = Context.getAdministrationService().getGlobalProperty(gp);
-				}
-				catch (APIException ignored) {
+				} catch (APIException ignored) {
 					
-				}
-				finally {
+				} finally {
 					if (hasUserContext) {
 						Context.removeProxyPrivilege(PrivilegeConstants.GET_GLOBAL_PROPERTIES);
 					}
@@ -85,8 +82,7 @@ public class FhirGlobalPropertyHolder implements GlobalPropertyListener {
 		
 		try {
 			return Integer.parseInt(globalPropertyValue);
-		}
-		catch (NumberFormatException e) {
+		} catch (NumberFormatException e) {
 			log.error("Error converting global property {} with value '{}' to an integer", globalProperty,
 			    globalPropertyValue, e);
 			return defaultValue;

@@ -19,11 +19,11 @@ import static org.mockito.Mockito.when;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Reference;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.EncounterProvider;
 import org.openmrs.EncounterRole;
 import org.openmrs.Provider;
@@ -32,7 +32,7 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirPractitionerDao;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class EncounterParticipantTranslatorImplTest {
 	
 	private static final String PROVIDER_UUID = "122344-234xx23-2323kk-232k2h2";
@@ -56,7 +56,7 @@ public class EncounterParticipantTranslatorImplTest {
 	
 	private Provider provider;
 	
-	@Before
+	@BeforeEach
 	public void setUp() {
 		participantTranslator = new EncounterParticipantTranslatorImpl();
 		participantTranslator.setPractitionerDao(practitionerDao);
@@ -114,9 +114,9 @@ public class EncounterParticipantTranslatorImplTest {
 		assertThat(encounterProvider.getProvider().getUuid(), equalTo(PROVIDER_UUID));
 	}
 	
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void shouldThrowExceptionWhenEncounterParticipantIsNull() {
-		participantTranslator.toOpenmrsType(new EncounterProvider(), null);
+		assertThrows(NullPointerException.class, () -> participantTranslator.toOpenmrsType(new EncounterProvider(), null));
 	}
 	
 	@Test

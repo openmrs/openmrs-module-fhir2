@@ -30,8 +30,8 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.MedicationRequest;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -56,7 +56,7 @@ public class MedicationRequestFhirResourceProviderIntegrationTest extends BaseFh
 	@Autowired
 	private MedicationRequestFhirResourceProvider resourceProvider;
 	
-	@Before
+	@BeforeEach
 	@Override
 	public void setup() throws Exception {
 		super.setup();

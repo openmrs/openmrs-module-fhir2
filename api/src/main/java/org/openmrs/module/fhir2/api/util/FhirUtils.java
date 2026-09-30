@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Condition;
@@ -238,8 +238,7 @@ public class FhirUtils {
 		String localization = null;
 		try {
 			localization = Context.getMessageSourceService().getMessage(code, null, Context.getLocale());
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			log.info("Caught exception while attempting to localize code [{}]", code, e);
 		}
 		

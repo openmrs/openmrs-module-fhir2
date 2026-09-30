@@ -21,11 +21,11 @@ import static org.mockito.Mockito.verify;
 
 import java.lang.reflect.Method;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.annotation.Authorized;
 import org.openmrs.aop.AuthorizationAdvice;
 import org.openmrs.module.fhir2.api.dao.FhirDaoAop;
@@ -33,7 +33,7 @@ import org.springframework.aop.Advisor;
 import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class FhirAopConfigurationTest {
 	
 	@Mock
@@ -43,7 +43,7 @@ public class FhirAopConfigurationTest {
 	
 	private Advisor advisor;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		configuration = new FhirAopConfiguration();
 		advisor = configuration.createFhirAuthorizationAdvisor(authorizationAdvice);

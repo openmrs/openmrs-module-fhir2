@@ -14,15 +14,15 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.when;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.module.fhir2.api.dao.FhirPatientIdentifierSystemDao;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class FhirPatientIdentifierSystemServiceImplTest {
 	
 	private static final String PATIENT_IDENTIFIER_URL = "www.example.com";
@@ -34,7 +34,7 @@ public class FhirPatientIdentifierSystemServiceImplTest {
 	
 	private PatientIdentifierType patientIdentifierType;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		patientIdentifierSystemService = new FhirPatientIdentifierSystemServiceImpl();
 		patientIdentifierType = new PatientIdentifierType();

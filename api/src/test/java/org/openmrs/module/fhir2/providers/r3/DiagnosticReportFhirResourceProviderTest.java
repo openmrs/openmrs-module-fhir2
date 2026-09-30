@@ -15,6 +15,7 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -42,17 +43,17 @@ import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirDiagnosticReportService;
 import org.openmrs.module.fhir2.api.search.param.DiagnosticReportSearchParams;
 import org.openmrs.module.fhir2.providers.r4.MockIBundleProvider;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class DiagnosticReportFhirResourceProviderTest extends BaseFhirR3ProvenanceResourceTest<org.hl7.fhir.r4.model.DiagnosticReport> {
 	
 	private static final String UUID = "bdd7e368-3d1a-42a9-9538-395391b64adf";
@@ -75,13 +76,13 @@ public class DiagnosticReportFhirResourceProviderTest extends BaseFhirR3Provenan
 	
 	private org.hl7.fhir.r4.model.DiagnosticReport diagnosticReport;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		resourceProvider = new DiagnosticReportFhirResourceProvider();
 		resourceProvider.setDiagnosticReportService(service);
 	}
 	
-	@Before
+	@BeforeEach
 	public void initDiagnosticReport() {
 		diagnosticReport = new org.hl7.fhir.r4.model.DiagnosticReport();
 		diagnosticReport.setId(UUID);
@@ -112,12 +113,12 @@ public class DiagnosticReportFhirResourceProviderTest extends BaseFhirR3Provenan
 		assertThat(result.getId(), equalTo(UUID));
 	}
 	
-	@Test(expected = ResourceNotFoundException.class)
+	@Test
 	public void getDiagnosticReportByWithWrongId_shouldThrowResourceNotFoundException() {
 		IdType idType = new IdType();
 		idType.setValue(WRONG_UUID);
 		
-		resourceProvider.getDiagnosticReportById(idType);
+		assertThrows(ResourceNotFoundException.class, () -> resourceProvider.getDiagnosticReportById(idType));
 	}
 	
 	@Test
@@ -144,26 +145,28 @@ public class DiagnosticReportFhirResourceProviderTest extends BaseFhirR3Provenan
 		assertThat(result.getResource().getIdElement().getIdPart(), equalTo(UUID));
 	}
 	
-	@Test(expected = InvalidRequestException.class)
+	@Test
 	public void updateDiagnosticReport_shouldThrowInvalidRequestForUuidMismatch() {
 		when(service.update(eq(WRONG_UUID), any(org.hl7.fhir.r4.model.DiagnosticReport.class)))
 		        .thenThrow(InvalidRequestException.class);
-		
-		resourceProvider.updateDiagnosticReport(new IdType().setValue(WRONG_UUID),
-		    (DiagnosticReport) VersionConvertorFactory_30_40.convertResource(diagnosticReport));
+
+		assertThrows(InvalidRequestException.class, () -> resourceProvider.updateDiagnosticReport(
+		    new IdType().setValue(WRONG_UUID),
+		    (DiagnosticReport) VersionConvertorFactory_30_40.convertResource(diagnosticReport)));
 	}
 	
-	@Test(expected = InvalidRequestException.class)
+	@Test
 	public void updateDiagnosticReport_shouldThrowInvalidRequestForMissingId() {
 		DiagnosticReport noIdDiagnosticReport = new DiagnosticReport();
 		
 		when(service.update(eq(UUID), any(org.hl7.fhir.r4.model.DiagnosticReport.class)))
 		        .thenThrow(InvalidRequestException.class);
 		
-		resourceProvider.updateDiagnosticReport(new IdType().setValue(UUID), noIdDiagnosticReport);
+		assertThrows(InvalidRequestException.class,
+		    () -> resourceProvider.updateDiagnosticReport(new IdType().setValue(UUID), noIdDiagnosticReport));
 	}
 	
-	@Test(expected = MethodNotAllowedException.class)
+	@Test
 	public void updateDiagnosticReport_shouldThrowMethodNotAllowedIfDoesNotExist() {
 		DiagnosticReport wrongDiagnosticReport = new DiagnosticReport();
 		
@@ -172,7 +175,8 @@ public class DiagnosticReportFhirResourceProviderTest extends BaseFhirR3Provenan
 		when(service.update(eq(WRONG_UUID), any(org.hl7.fhir.r4.model.DiagnosticReport.class)))
 		        .thenThrow(MethodNotAllowedException.class);
 		
-		resourceProvider.updateDiagnosticReport(new IdType().setValue(WRONG_UUID), wrongDiagnosticReport);
+		assertThrows(MethodNotAllowedException.class,
+		    () -> resourceProvider.updateDiagnosticReport(new IdType().setValue(WRONG_UUID), wrongDiagnosticReport));
 	}
 	
 	@Test

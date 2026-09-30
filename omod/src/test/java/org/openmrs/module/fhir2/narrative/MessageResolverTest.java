@@ -17,15 +17,15 @@ import static org.mockito.Mockito.doReturn;
 
 import java.util.Locale;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.thymeleaf.context.ITemplateContext;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class MessageResolverTest {
 	
 	private OpenmrsMessageResolver messageResolver;
@@ -33,7 +33,7 @@ public class MessageResolverTest {
 	@Mock
 	private ITemplateContext ctx;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
 		messageSource.setBasename("classpath:testMessages");

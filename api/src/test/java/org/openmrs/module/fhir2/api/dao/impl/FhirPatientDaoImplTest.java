@@ -21,8 +21,8 @@ import ca.uhn.fhir.rest.param.HasAndListParam;
 import ca.uhn.fhir.rest.param.HasOrListParam;
 import ca.uhn.fhir.rest.param.HasParam;
 import org.hibernate.SessionFactory;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.Patient;
 import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.openmrs.module.fhir2.FhirConstants;
@@ -60,7 +60,7 @@ public class FhirPatientDaoImplTest extends BaseFhirContextSensitiveTest {
 	@Autowired
 	private SessionFactory sessionFactory;
 	
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		dao = new FhirPatientDaoImpl();
 		dao.setSessionFactory(sessionFactory);

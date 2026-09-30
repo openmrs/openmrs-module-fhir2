@@ -14,6 +14,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.same;
 import static org.mockito.Mockito.when;
@@ -21,17 +22,17 @@ import static org.mockito.Mockito.when;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Quantity;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.Concept;
 import org.openmrs.Obs;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationValueTranslator;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ObservationComponentTranslatorImplTest {
 	
 	private static final String OBS_UUID = "12345-abcde-54321";
@@ -46,7 +47,7 @@ public class ObservationComponentTranslatorImplTest {
 	
 	private ObservationComponentTranslatorImpl observationComponentTranslator;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		observationComponentTranslator = new ObservationComponentTranslatorImpl();
 		observationComponentTranslator.setObservationValueTranslator(observationValueTranslator);
@@ -109,16 +110,16 @@ public class ObservationComponentTranslatorImplTest {
 		assertThat(((Quantity) result.getValue()).getValue().doubleValue(), equalTo(130d));
 	}
 	
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void toOpenmrsType_shouldThrowExceptionIfObsIsNull() {
 		Observation.ObservationComponentComponent component = new Observation.ObservationComponentComponent();
-		observationComponentTranslator.toOpenmrsType(null, component);
+		assertThrows(NullPointerException.class, () -> observationComponentTranslator.toOpenmrsType(null, component));
 	}
 	
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void toOpenmrsType_shouldThrowExceptionIfComponentNull() {
 		Obs obs = new Obs();
-		observationComponentTranslator.toOpenmrsType(obs, null);
+		assertThrows(NullPointerException.class, () -> observationComponentTranslator.toOpenmrsType(obs, null));
 	}
 	
 	@Test

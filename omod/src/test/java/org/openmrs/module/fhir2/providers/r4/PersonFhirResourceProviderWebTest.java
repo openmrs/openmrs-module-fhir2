@@ -26,8 +26,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.openmrs.module.fhir2.api.util.GeneralUtils.inputStreamToString;
 
-import javax.servlet.ServletException;
-
 import java.io.InputStream;
 import java.util.Calendar;
 import java.util.Collections;
@@ -39,25 +37,26 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import jakarta.servlet.ServletException;
 import lombok.AccessLevel;
 import lombok.Getter;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hamcrest.MatcherAssert;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Person;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirPersonService;
 import org.openmrs.module.fhir2.api.search.param.PersonSearchParams;
 import org.springframework.mock.web.MockHttpServletResponse;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class PersonFhirResourceProviderWebTest extends BaseFhirR4ResourceProviderWebTest<PersonFhirResourceProvider, Person> {
 	
 	private static final String PERSON_NAME = "Hannibal Lector";
@@ -91,7 +90,7 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirR4ResourceProvide
 	@Captor
 	private ArgumentCaptor<PersonSearchParams> personSearchParamsCaptor;
 	
-	@Before
+	@BeforeEach
 	@Override
 	public void setup() throws ServletException {
 		resourceProvider = new PersonFhirResourceProvider();
