@@ -89,10 +89,20 @@ public class TaskTranslatorImpl implements TaskTranslator {
 		fhirTask.setId(openmrsTask.getUuid());
 		
 		if (openmrsTask.getStatus() != null) {
-			fhirTask.setStatus(Task.TaskStatus.valueOf(openmrsTask.getStatus().name()));
+			try {
+				fhirTask.setStatus(Task.TaskStatus.valueOf(openmrsTask.getStatus().name()));
+			}
+			catch (IllegalArgumentException ex) {
+				fhirTask.setStatus(null);
+			}
 		}
 		if (openmrsTask.getIntent() != null) {
-			fhirTask.setIntent(Task.TaskIntent.valueOf(openmrsTask.getIntent().name()));
+			try {
+				fhirTask.setIntent(Task.TaskIntent.valueOf(openmrsTask.getIntent().name()));
+			}
+			catch (IllegalArgumentException ex) {
+				fhirTask.setIntent(null);
+			}
 		}
 		
 		if (openmrsTask.getBasedOnReferences() != null && !openmrsTask.getBasedOnReferences().isEmpty()) {
