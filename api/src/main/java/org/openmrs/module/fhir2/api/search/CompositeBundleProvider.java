@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -36,26 +35,37 @@ import org.springframework.transaction.annotation.Transactional;
  * <p>
  * Cross-provider sorting is intentionally not supported — each provider sorts its own slice and the
  * slices are concatenated in declaration order. The total reported size is the sum of each
- * provider's reported size; if any provider reports an unknown size the total is reported as
- * {@link Integer#MAX_VALUE}. A provider of unknown size is also treated as unbounded when paging,
- * so every provider after it is unreachable: only place such a provider last.
+ * provider's reported size, saturating at {@link Integer#MAX_VALUE}.
  * <p>
- * <b>Mains-then-includes ordering contract.</b> When a paged response spans more than one provider,
- * this class splits each provider's chunk into "main" results and "_include" results by assuming
- * the chunk is laid out as {@code [main_0, ..., main_{n-1}, include_0, ...]} where
- * {@code n = sliceEnd - sliceStart}. {@code SearchQueryBundleProvider} (the standard backing for
- * handler searches) honours this contract; an underlying {@link IBundleProvider} that interleaves
- * mains and includes within {@link IBundleProvider#getResources(int, int)} would defeat the split.
- * Handler implementations passing custom bundle providers into the composite must follow this
- * layout.
+ * A provider whose {@link IBundleProvider#size()} is {@code null} is measured while paging: where a
+ * page reaches into it, single-result probes find out whether it extends past the page and, once it
+ * does not, exactly where it ends, so later providers are still reached. Until every provider's
+ * size is known, {@link #size()} is {@code null} too. Sequential paging costs about one extra probe
+ * per page; a jump far beyond what has been seen of such a provider costs a logarithmic number of
+ * probes. Probing relies on the provider returning an empty page past its last result, since a page
+ * carries {@code _include} resources only alongside matches.
+ * <p>
+ * When a paged response spans more than one provider, this class splits each provider's chunk into
+ * "main" results and "_include" results by assuming the chunk is laid out as
+ * {@code [main_0, ..., main_{n-1}, include_0, ...]} where {@code n = sliceEnd - sliceStart}.
+ * {@code SearchQueryBundleProvider} (the standard backing for handler searches) honours this
+ * contract; an underlying {@link IBundleProvider} that interleaves mains and includes within
+ * {@link IBundleProvider#getResources(int, int)} would defeat the split. Handler implementations
+ * passing custom bundle providers into the composite must follow this layout.
  */
 public class CompositeBundleProvider implements IBundleProvider {
+	
+	private static final int UNKNOWN = -1;
 	
 	private final List<IBundleProvider> providers;
 	
 	private final FhirGlobalPropertyService globalPropertyService;
 	
+	/** Each provider's size, or {@link #UNKNOWN} until paging has measured it. */
 	private final int[] providerSizes;
+	
+	/** For a provider of unknown size, how many results it is known to have at least. */
+	private final int[] knownMinimums;
 	
 	@Getter
 	private final IPrimitiveType<Date> published;
@@ -79,26 +89,32 @@ public class CompositeBundleProvider implements IBundleProvider {
 		this.uuid = FhirUtils.newUuid();
 		
 		this.providerSizes = new int[this.providers.size()];
+		this.knownMinimums = new int[this.providers.size()];
 		for (int i = 0; i < this.providers.size(); i++) {
-			this.providerSizes[i] = Optional.ofNullable(this.providers.get(i).size()).orElse(Integer.MAX_VALUE);
+			Integer size = this.providers.get(i).size();
+			this.providerSizes[i] = size == null ? UNKNOWN : size;
 		}
 	}
 	
+	/**
+	 * Synchronized because measuring a provider of unknown size updates state that the paging provider
+	 * may share between concurrent page requests.
+	 */
 	@Transactional(readOnly = true)
 	@Nonnull
 	@Override
-	public List<IBaseResource> getResources(int fromIndex, int toIndex) {
+	public synchronized List<IBaseResource> getResources(int fromIndex, int toIndex) {
 		int firstResult = Math.max(fromIndex, 0);
 		
-		Integer total = size();
-		int absoluteEnd = (total == null) ? Integer.MAX_VALUE : total;
+		// toIndex <= fromIndex asks for everything from fromIndex on
+		long lastResult = toIndex > firstResult ? toIndex : Long.MAX_VALUE;
 		
-		int lastResult = absoluteEnd;
-		if (toIndex - firstResult > 0) {
-			lastResult = Math.min(lastResult, toIndex);
+		Integer knownTotal = size();
+		if (knownTotal != null) {
+			lastResult = Math.min(lastResult, knownTotal);
 		}
 		
-		if (firstResult >= absoluteEnd || firstResult >= lastResult) {
+		if (firstResult >= lastResult) {
 			return Collections.emptyList();
 		}
 		
@@ -109,10 +125,9 @@ public class CompositeBundleProvider implements IBundleProvider {
 		int lastHit = -1;
 		
 		long cum = 0;
-		for (int i = 0; i < providers.size(); i++) {
-			long size = providerSizes[i];
+		for (int i = 0; i < providers.size() && cum < lastResult; i++) {
 			long providerStart = cum;
-			long providerEnd = (size == Integer.MAX_VALUE) ? Integer.MAX_VALUE : cum + size;
+			long providerEnd = providerStart + extentBelow(i, (int) Math.min(lastResult - providerStart, Integer.MAX_VALUE));
 			
 			long sliceStart = Math.max(firstResult, providerStart);
 			long sliceEnd = Math.min(lastResult, providerEnd);
@@ -127,9 +142,6 @@ public class CompositeBundleProvider implements IBundleProvider {
 			}
 			
 			cum = providerEnd;
-			if (cum >= lastResult) {
-				break;
-			}
 		}
 		
 		if (firstHit < 0) {
@@ -180,23 +192,80 @@ public class CompositeBundleProvider implements IBundleProvider {
 		return pageSize;
 	}
 	
+	/**
+	 * @return the total number of matches, or {@code null} while any provider's size is still unknown
+	 */
 	@Nullable
 	@Override
-	public Integer size() {
+	public synchronized Integer size() {
 		if (total == null) {
 			long sum = 0;
 			for (int s : providerSizes) {
-				if (s == Integer.MAX_VALUE) {
-					return Integer.MAX_VALUE;
+				if (s == UNKNOWN) {
+					return null;
 				}
 				sum += s;
-				if (sum > Integer.MAX_VALUE) {
-					return Integer.MAX_VALUE;
-				}
 			}
-			total = (int) sum;
+			total = (int) Math.min(sum, Integer.MAX_VALUE);
 		}
 		
 		return total;
+	}
+	
+	/**
+	 * Returns how many of provider {@code i}'s results lie below the local index {@code limit}, i.e.
+	 * {@code min(size, limit)}, measuring a provider of unknown size as far as that requires.
+	 */
+	private int extentBelow(int i, int limit) {
+		if (providerSizes[i] != UNKNOWN) {
+			return Math.min(providerSizes[i], limit);
+		}
+		
+		if (limit <= knownMinimums[i] || hasResultAt(i, limit - 1)) {
+			return limit;
+		}
+		
+		providerSizes[i] = measure(i, limit - 1);
+		return providerSizes[i];
+	}
+	
+	/**
+	 * Finds the size of provider {@code i}, given that it has no result at local index
+	 * {@code absentAt}: gallops up from the results already known to exist to bracket the end, then
+	 * binary-searches the bracket.
+	 */
+	private int measure(int i, int absentAt) {
+		int present = knownMinimums[i] - 1;
+		int absent = absentAt;
+		
+		for (long step = 1; present + step < absent; step <<= 1) {
+			int probe = (int) (present + step);
+			if (!hasResultAt(i, probe)) {
+				absent = probe;
+				break;
+			}
+			present = probe;
+		}
+		
+		while (absent - present > 1) {
+			int mid = present + (absent - present) / 2;
+			if (hasResultAt(i, mid)) {
+				present = mid;
+			} else {
+				absent = mid;
+			}
+		}
+		
+		return present + 1;
+	}
+	
+	private boolean hasResultAt(int i, int index) {
+		List<IBaseResource> page = providers.get(i).getResources(index, index + 1);
+		if (page == null || page.isEmpty()) {
+			return false;
+		}
+		
+		knownMinimums[i] = Math.max(knownMinimums[i], index + 1);
+		return true;
 	}
 }

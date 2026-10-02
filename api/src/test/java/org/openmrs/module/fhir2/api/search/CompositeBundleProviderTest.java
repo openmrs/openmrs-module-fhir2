@@ -14,7 +14,9 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -23,14 +25,20 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import javax.annotation.Nonnull;
+
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.Before;
 import org.junit.Test;
@@ -89,7 +97,7 @@ public class CompositeBundleProviderTest {
 	}
 	
 	@Test
-	public void shouldReturnMaxValueWhenAnyProviderHasUnknownSize() {
+	public void shouldReportUnknownSizeWhileAnyProviderSizeIsUnknown() {
 		// given
 		when(firstProvider.size()).thenReturn(3);
 		when(secondProvider.size()).thenReturn(null);
@@ -99,7 +107,7 @@ public class CompositeBundleProviderTest {
 		        globalPropertyService);
 		
 		// then
-		assertThat(provider.size(), equalTo(Integer.MAX_VALUE));
+		assertThat(provider.size(), nullValue());
 	}
 	
 	@Test
@@ -350,32 +358,80 @@ public class CompositeBundleProviderTest {
 	}
 	
 	@Test
-	public void shouldLetUnknownSizeFirstProviderServeEveryPage() {
-		// An unknown size is treated as unbounded, so later providers are never reached. Documented on
-		// the class; this pins the behaviour.
-		when(firstProvider.size()).thenReturn(null);
-		when(secondProvider.size()).thenReturn(2);
-		when(firstProvider.getResources(10, 15)).thenReturn(patientList("a11"));
+	public void shouldPageSequentiallyPastAnUnknownSizeProvider() {
+		CompositeBundleProvider provider = new CompositeBundleProvider(
+		        Arrays.asList(new UnsizedProvider(false, "a1", "a2", "a3"), sized("b1", "b2")), globalPropertyService);
 		
-		CompositeBundleProvider provider = new CompositeBundleProvider(Arrays.asList(firstProvider, secondProvider),
-		        globalPropertyService);
-		
-		assertThat(provider.size(), equalTo(Integer.MAX_VALUE));
-		assertThat(idsOf(provider.getResources(10, 15)), contains("a11"));
-		verify(secondProvider, never()).getResources(anyInt(), anyInt());
+		assertThat(idsOf(provider.getResources(0, 2)), contains("a1", "a2"));
+		assertThat(provider.size(), nullValue());
+		assertThat(idsOf(provider.getResources(2, 4)), contains("a3", "b1"));
+		assertThat(idsOf(provider.getResources(4, 6)), contains("b2"));
+		assertThat(provider.size(), equalTo(5));
 	}
 	
 	@Test
-	public void shouldStraddleIntoUnknownSizeSecondProvider() {
-		when(firstProvider.size()).thenReturn(2);
-		when(secondProvider.size()).thenReturn(null);
-		when(firstProvider.getResources(1, 2)).thenReturn(patientList("a2"));
-		when(secondProvider.getResources(0, 2)).thenReturn(patientList("b1", "b2"));
+	public void shouldMeasureAnUnknownSizeProviderWhenAPageStartsBeyondIt() {
+		CompositeBundleProvider provider = new CompositeBundleProvider(
+		        Arrays.asList(new UnsizedProvider(false, "a1", "a2", "a3"), sized("b1", "b2")), globalPropertyService);
 		
-		CompositeBundleProvider provider = new CompositeBundleProvider(Arrays.asList(firstProvider, secondProvider),
+		assertThat(idsOf(provider.getResources(4, 6)), contains("b2"));
+		assertThat(provider.size(), equalTo(5));
+	}
+	
+	@Test
+	public void shouldNotCountIncludesAsMatchesWhereAnUnknownSizeProviderEnds() {
+		// The page asks a1..a3 for two matches but only one remains, so its chunk is [a3, i_a3]: a short
+		// chunk's length says nothing about how many entries are matches.
+		CompositeBundleProvider provider = new CompositeBundleProvider(
+		        Arrays.asList(new UnsizedProvider(true, "a1", "a2", "a3"), sized("b1", "b2")), globalPropertyService);
+		
+		assertThat(idsOf(provider.getResources(2, 4)), contains("a3", "b1", "i_a3"));
+		assertThat(provider.size(), equalTo(5));
+	}
+	
+	@Test
+	public void shouldReachEveryProviderAfterSeveralOfUnknownSize() {
+		CompositeBundleProvider provider = new CompositeBundleProvider(Arrays.asList(new UnsizedProvider(false, "a1", "a2"),
+		    new UnsizedProvider(false, "b1", "b2", "b3"), sized("c1")), globalPropertyService);
+		
+		assertThat(idsOf(provider.getResources(3, 6)), contains("b2", "b3", "c1"));
+		assertThat(provider.size(), equalTo(6));
+	}
+	
+	@Test
+	public void shouldReturnEverythingForAnOpenEndedPageAcrossAnUnknownSizeProvider() {
+		CompositeBundleProvider provider = new CompositeBundleProvider(
+		        Arrays.asList(new UnsizedProvider(false, "a1", "a2", "a3"), sized("b1", "b2")), globalPropertyService);
+		
+		assertThat(idsOf(provider.getResources(0, 0)), contains("a1", "a2", "a3", "b1", "b2"));
+		assertThat(provider.size(), equalTo(5));
+	}
+	
+	@Test
+	public void shouldReturnEmptyBeyondTheEndOfAnUnknownSizeLastProvider() {
+		CompositeBundleProvider provider = new CompositeBundleProvider(
+		        Arrays.asList(sized("a1"), new UnsizedProvider(false, "b1", "b2")), globalPropertyService);
+		
+		assertThat(provider.getResources(3, 5), empty());
+		assertThat(provider.size(), equalTo(3));
+	}
+	
+	@Test
+	public void shouldProbeAnUnknownSizeProviderAboutOncePerSequentialPage() {
+		String[] ids = IntStream.range(0, 95).mapToObj(i -> "a" + i).toArray(String[]::new);
+		UnsizedProvider unsized = new UnsizedProvider(false, ids);
+		CompositeBundleProvider provider = new CompositeBundleProvider(Arrays.asList(unsized, sized("b1")),
 		        globalPropertyService);
 		
-		assertThat(idsOf(provider.getResources(1, 4)), contains("a2", "b1", "b2"));
+		List<String> seen = new ArrayList<>();
+		for (int from = 0; from < 100; from += 10) {
+			seen.addAll(idsOf(provider.getResources(from, from + 10)));
+		}
+		
+		assertThat(seen, hasSize(96));
+		assertThat(seen.get(95), equalTo("b1"));
+		// a fetch and a probe per page, plus a handful of probes to find where the provider ends
+		assertThat(unsized.calls, lessThanOrEqualTo(2 * 10 + 8));
 	}
 	
 	@Test
@@ -401,6 +457,10 @@ public class CompositeBundleProviderTest {
 		verify(globalPropertyService).getGlobalPropertyAsInteger(anyString(), anyInt());
 	}
 	
+	private static IBundleProvider sized(String... ids) {
+		return new SimpleBundleProvider(patientList(ids));
+	}
+	
 	private static List<IBaseResource> patientList(String... ids) {
 		return Arrays.stream(ids).map(id -> {
 			Patient p = new Patient();
@@ -412,5 +472,57 @@ public class CompositeBundleProviderTest {
 	private static List<String> idsOf(List<IBaseResource> resources) {
 		return IntStream.range(0, resources.size()).mapToObj(i -> resources.get(i).getIdElement().getIdPart())
 		        .collect(Collectors.toList());
+	}
+	
+	/**
+	 * Reports no size, as a contributed handler's bundle may. Each page holds its matches followed, if
+	 * {@code withIncludes}, by one {@code i_<id>} include per match.
+	 */
+	private static class UnsizedProvider implements IBundleProvider {
+		
+		private final List<String> matches;
+		
+		private final boolean withIncludes;
+		
+		private int calls;
+		
+		UnsizedProvider(boolean withIncludes, String... matches) {
+			this.matches = Arrays.asList(matches);
+			this.withIncludes = withIncludes;
+		}
+		
+		@Nonnull
+		@Override
+		public List<IBaseResource> getResources(int fromIndex, int toIndex) {
+			calls++;
+			List<String> page = fromIndex >= matches.size() ? Collections.emptyList()
+			        : matches.subList(fromIndex, Math.min(toIndex, matches.size()));
+			
+			List<String> ids = new ArrayList<>(page);
+			if (withIncludes) {
+				page.forEach(id -> ids.add("i_" + id));
+			}
+			return patientList(ids.toArray(new String[0]));
+		}
+		
+		@Override
+		public Integer size() {
+			return null;
+		}
+		
+		@Override
+		public IPrimitiveType<Date> getPublished() {
+			return null;
+		}
+		
+		@Override
+		public String getUuid() {
+			return null;
+		}
+		
+		@Override
+		public Integer preferredPageSize() {
+			return null;
+		}
 	}
 }
