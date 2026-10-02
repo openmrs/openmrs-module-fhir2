@@ -54,10 +54,10 @@ import org.springframework.core.annotation.OrderUtils;
  * Spring injects the ordered list of {@link FhirResourceHandler}s registered for that type. The
  * orchestrator dispatches each {@link FhirService} call using one of two primitives:
  * <ul>
- * <li><b>UUID-based</b> — {@link FhirService#exists(String)}. Used for {@code get}, {@code update},
+ * <li>UUID-based — {@link FhirService#exists(String)}. Used for {@code get}, {@code update},
  * {@code patch}, {@code delete}. Picks the first handler in {@code @Order} priority whose backing
  * store reports the UUID exists.
- * <li><b>Content-based</b> — {@link FhirResourceHandler#canHandle(IAnyResource)} (with
+ * <li>Content-based — {@link FhirResourceHandler#canHandle(IAnyResource)} (with
  * {@link FhirResourceHandler#getImplicitProfile() meta.profile} taking precedence). Used for
  * {@code create} and for the {@code createIfNotExists} branch of {@code update} when no handler
  * owns the UUID yet.

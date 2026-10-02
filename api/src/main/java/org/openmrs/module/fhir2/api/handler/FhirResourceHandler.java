@@ -26,11 +26,11 @@ import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
  * a few extra hooks the orchestrator uses to dispatch among handlers. There are exactly two
  * dispatch primitives:
  * <ul>
- * <li><b>Content-based</b> — {@link #canHandle(IAnyResource)}. Used for {@code create} and for the
+ * <li>Content-based — {@link #canHandle(IAnyResource)}. Used for {@code create} and for the
  * {@code createIfNotExists} branch of {@code update}. The orchestrator picks the first handler in
  * priority order whose predicate returns {@code true} (or whose {@link #getImplicitProfile()}
  * matches the incoming resource's {@code meta.profile}).
- * <li><b>UUID-based</b> — {@link FhirService#exists(String)}. Used for {@code get}, {@code update},
+ * <li>UUID-based — {@link FhirService#exists(String)}. Used for {@code get}, {@code update},
  * {@code patch}, {@code delete}. The orchestrator picks the first handler whose backing store
  * reports the UUID exists. {@code BaseFhirService.exists} provides a cheap DAO row check; handlers
  * that compose another service should override to delegate (e.g. to
@@ -54,19 +54,19 @@ import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
  * without an explicit {@code @Order} are tied at {@code LOWEST_PRECEDENCE} and their relative order
  * is undefined.
  * <p>
- * <b>Replacing a backing.</b> Two handlers that return the same {@link #getImplicitProfile()
- * implicit profile} are treated as the same backing: at startup the orchestrator keeps only the
- * highest-priority one (lowest {@code @Order}) and drops the rest, logging a warning. This is how
- * an external module replaces a built-in mapping — return the built-in's profile URL and a higher
- * priority. Handlers with distinct profiles all coexist (e.g. the encounter and visit mappings for
- * {@code Encounter}); a new backing should expose its own profile URL, namespaced by module id.
+ * Two handlers that return the same {@link #getImplicitProfile() implicit profile} are treated as
+ * the same backing: at startup the orchestrator keeps only the highest-priority one (lowest
+ * {@code @Order}) and drops the rest, logging a warning. This is how an external module replaces a
+ * built-in mapping — return the built-in's profile URL and a higher priority. Handlers with
+ * distinct profiles all coexist (e.g. the encounter and visit mappings for {@code Encounter}); a
+ * new backing should expose its own profile URL, namespaced by module id.
  * <p>
- * <b>Overlapping claims.</b> Write {@code canHandle} to describe <em>your</em> backing and nothing
- * else: a handler that enumerates its rivals cannot accommodate one added later by another module.
- * Overlap is visible only to the orchestrator, which resolves it by {@code @Order}. A handler
- * registered at a higher precedence than everything else claiming the body wins outright, which is
- * how you add a backing that deliberately overlaps a built-in. A tie at the top — the built-in
- * encounter and visit backings are peers, so a body naming both lands here — is rejected with
+ * Write {@code canHandle} to describe <em>your</em> backing and nothing else: a handler that
+ * enumerates its rivals cannot accommodate one added later by another module. Overlap is visible
+ * only to the orchestrator, which resolves it by {@code @Order}. A handler registered at a higher
+ * precedence than everything else claiming the body wins outright, which is how you add a backing
+ * that deliberately overlaps a built-in. A tie at the top — the built-in encounter and visit
+ * backings are peers, so a body naming both lands here — is rejected with
  * {@link ca.uhn.fhir.rest.server.exceptions.InvalidRequestException} naming the tied profiles,
  * since declaration order is not an answer the client can predict or correct. The same rejection
  * covers the opposite case, where no handler claims at all.
@@ -162,9 +162,9 @@ public interface FhirResourceHandler<R extends IAnyResource> extends FhirService
 	 * here and still reject specific malformed inputs at create or update time by throwing
 	 * {@link ca.uhn.fhir.rest.server.exceptions.InvalidRequestException}.
 	 * <p>
-	 * Answer for your own backing only; see <b>Overlapping claims</b> above. A handler that is the only
-	 * backing for its resource type has nothing to discriminate on and should simply return
-	 * {@code true}.
+	 * Answer for your own backing only; the class documentation explains how the orchestrator resolves
+	 * overlapping claims. A handler that is the only backing for its resource type has nothing to
+	 * discriminate on and should simply return {@code true}.
 	 *
 	 * @param resource the FHIR resource being submitted, never {@code null}
 	 * @return {@code true} if this handler is willing to process the resource
