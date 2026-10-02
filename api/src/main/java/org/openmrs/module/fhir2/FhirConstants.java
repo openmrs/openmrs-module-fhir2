@@ -144,6 +144,16 @@ public final class FhirConstants {
 	
 	public static final String OPENMRS_FHIR_EXT_DIAGNOSIS_RANK = OPENMRS_FHIR_EXT_PREFIX + "/diagnosis-rank";
 	
+	/**
+	 * The diagnosis rank extension URL emitted by releases before
+	 * {@link #OPENMRS_FHIR_EXT_DIAGNOSIS_RANK} replaced it. Still accepted on input so that clients
+	 * round-tripping an older {@code Condition} keep their rank.
+	 *
+	 * @deprecated use {@link #OPENMRS_FHIR_EXT_DIAGNOSIS_RANK}
+	 */
+	@Deprecated
+	public static final String DIAGNOSIS_RANK_EXTENSION_URI = "http://fhir.openmrs.org/R4/StructureDefinition/diagnosis-rank";
+	
 	public static final String OPENMRS_FHIR_STRUCTURE_DEFINITION_PREFIX = OPENMRS_FHIR_PREFIX + "/StructureDefinition";
 	
 	public static final String OPENMRS_FHIR_DEFAULT_PAGE_SIZE = "fhir2.paging.default";

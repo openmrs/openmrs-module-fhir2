@@ -141,6 +141,31 @@ public class DiagnosisTranslatorImplTest {
 	}
 	
 	@Test
+	@SuppressWarnings("deprecation")
+	public void toOpenmrsType_shouldMapRankFromLegacyExtensionUrl() {
+		Condition condition = new Condition();
+		condition.setId("diag-uuid");
+		condition.addExtension(new Extension(FhirConstants.DIAGNOSIS_RANK_EXTENSION_URI, new IntegerType(2)));
+		
+		Diagnosis result = translator.toOpenmrsType(condition);
+		
+		assertThat(result.getRank(), equalTo(2));
+	}
+	
+	@Test
+	@SuppressWarnings("deprecation")
+	public void toOpenmrsType_shouldPreferCurrentRankExtensionUrlOverLegacy() {
+		Condition condition = new Condition();
+		condition.setId("diag-uuid");
+		condition.addExtension(new Extension(FhirConstants.DIAGNOSIS_RANK_EXTENSION_URI, new IntegerType(1)));
+		condition.addExtension(new Extension(FhirConstants.OPENMRS_FHIR_EXT_DIAGNOSIS_RANK, new IntegerType(2)));
+		
+		Diagnosis result = translator.toOpenmrsType(condition);
+		
+		assertThat(result.getRank(), equalTo(2));
+	}
+	
+	@Test
 	public void toFhirResource_shouldSetPatientEncounter() {
 		Diagnosis diagnosis = new Diagnosis();
 		diagnosis.setUuid("diag-uuid");

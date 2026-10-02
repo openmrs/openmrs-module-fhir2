@@ -204,14 +204,15 @@ public class DiagnosisTranslatorImpl implements DiagnosisTranslator {
 			existingDiagnosis.setCertainty(ConditionVerificationStatus.PROVISIONAL);
 		}
 		
-		// Set rank from extension
-		Optional<Extension> rankExtension = Optional
-		        .ofNullable(condition.getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_DIAGNOSIS_RANK));
-		rankExtension.ifPresent(ext -> {
-			if (ext.getValue() instanceof IntegerType) {
-				existingDiagnosis.setRank(((IntegerType) ext.getValue()).getValue());
-			}
-		});
+		// Set rank from extension, accepting the pre-rename URL from clients holding older resources
+		Extension rankExtension = condition.getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_DIAGNOSIS_RANK);
+		if (rankExtension == null) {
+			rankExtension = condition.getExtensionByUrl(FhirConstants.DIAGNOSIS_RANK_EXTENSION_URI);
+		}
+		
+		if (rankExtension != null && rankExtension.getValue() instanceof IntegerType) {
+			existingDiagnosis.setRank(((IntegerType) rankExtension.getValue()).getValue());
+		}
 		
 		// Set voided status based on clinical status
 		if (condition.hasClinicalStatus()) {
