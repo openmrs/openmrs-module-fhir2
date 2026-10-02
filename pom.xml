@@ -203,6 +203,14 @@
                 <artifactId>hapi-fhir-caching-caffeine</artifactId>
                 <version>${hapifhirVersion}</version>
             </dependency>
+            <!-- provided by openmrs-core; a bundled copy shadows core's for modules aware of fhir2, so Spring
+                 ignores their @PostConstruct/@PreDestroy -->
+            <dependency>
+                <groupId>jakarta.annotation</groupId>
+                <artifactId>jakarta.annotation-api</artifactId>
+                <version>3.0.0</version>
+                <scope>provided</scope>
+            </dependency>
             <dependency>
                 <groupId>ca.uhn.hapi.fhir</groupId>
                 <artifactId>hapi-fhir-base</artifactId>
