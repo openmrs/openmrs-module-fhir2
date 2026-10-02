@@ -34,6 +34,10 @@ public interface FhirConceptDao extends FhirDao<Concept> {
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_CONCEPTS)
+	boolean exists(@Nonnull String uuid);
+	
+	@Override
+	@Authorized(PrivilegeConstants.GET_CONCEPTS)
 	List<Concept> get(@Nonnull Collection<String> uuids);
 	
 	@Transactional(readOnly = true)

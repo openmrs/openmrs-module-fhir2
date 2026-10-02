@@ -27,6 +27,10 @@ public interface FhirEncounterDao extends FhirDao<Encounter> {
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_ENCOUNTERS)
+	boolean exists(@Nonnull String uuid);
+	
+	@Override
+	@Authorized(PrivilegeConstants.GET_ENCOUNTERS)
 	List<Encounter> get(@Nonnull Collection<String> uuids);
 	
 	@Authorized(PrivilegeConstants.GET_ENCOUNTERS)

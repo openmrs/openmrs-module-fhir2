@@ -71,8 +71,10 @@ import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.annotations.FhirInterceptor;
 import org.openmrs.module.fhir2.api.annotations.R3Provider;
 import org.openmrs.module.fhir2.api.annotations.R4Provider;
+import org.openmrs.module.fhir2.api.util.ProfileRoutingContext;
 import org.openmrs.module.fhir2.web.authentication.RequireAuthenticationInterceptor;
 import org.openmrs.module.fhir2.web.util.DisableCacheInterceptor;
+import org.openmrs.module.fhir2.web.util.ProfileRoutingInterceptor;
 import org.openmrs.module.fhir2.web.util.SummaryInterceptor;
 import org.openmrs.module.fhir2.web.util.SupportMergePatchInterceptor;
 import org.openmrs.util.OpenmrsClassLoader;
@@ -193,7 +195,7 @@ public class FhirRestServletTest {
 		assertThat(afterRefresh, hasItem(sameInstance(context.getBean("hapiLoggingInterceptor", LoggingInterceptor.class))));
 		// this is what shows the teardown ran; asserting the rebuilt interceptor present does not
 		assertThat(afterRefresh, not(hasItem(sameInstance(loggingInterceptorBeforeInit))));
-		assertThat(afterRefresh, hasSize(6));
+		assertThat(afterRefresh, hasSize(7));
 	}
 	
 	@Test
@@ -590,9 +592,16 @@ public class FhirRestServletTest {
 	
 	private void withRefreshableSingletons() {
 		context.getBeanFactory().registerSingleton("hapiLoggingInterceptor", new LoggingInterceptor());
+		context.getBeanFactory().registerSingleton("profileRoutingInterceptor", profileRoutingInterceptor());
 		context.getBeanFactory().registerSingleton("adminService", mock(AdministrationService.class));
 		context.getBeanFactory().registerSingleton("fhirGlobalPropertyService", globalPropertyService);
 		context.getBeanFactory().registerSingleton("serverAddressStrategy", mock(IServerAddressStrategy.class));
+	}
+	
+	private static ProfileRoutingInterceptor profileRoutingInterceptor() {
+		ProfileRoutingInterceptor interceptor = new ProfileRoutingInterceptor();
+		interceptor.setProfileRoutingContext(new ProfileRoutingContext());
+		return interceptor;
 	}
 	
 	private <T> T withContextContaining(String beanName, Class<T> beanClass) {
@@ -735,6 +744,10 @@ public class FhirRestServletTest {
 	
 	class R3ServletWithTestContext extends FhirR3RestServlet {
 		
+		R3ServletWithTestContext() {
+			setProfileRoutingInterceptor(profileRoutingInterceptor());
+		}
+		
 		@Override
 		protected GenericApplicationContext getModuleApplicationContext() {
 			return context;
@@ -747,6 +760,10 @@ public class FhirRestServletTest {
 	 */
 	class R4ServletWithTestContext extends FhirRestServlet {
 		
+		R4ServletWithTestContext() {
+			setProfileRoutingInterceptor(profileRoutingInterceptor());
+		}
+		
 		@Override
 		protected GenericApplicationContext getModuleApplicationContext() {
 			return context;
@@ -754,6 +771,10 @@ public class FhirRestServletTest {
 	}
 	
 	class TestableFhirRestServlet extends FhirRestServlet {
+		
+		TestableFhirRestServlet() {
+			setProfileRoutingInterceptor(profileRoutingInterceptor());
+		}
 		
 		@Override
 		public void initialize() {

@@ -9,45 +9,20 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
-import static lombok.AccessLevel.PROTECTED;
-
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import lombok.Getter;
-import lombok.Setter;
 import org.hl7.fhir.r4.model.RelatedPerson;
-import org.openmrs.Relationship;
 import org.openmrs.module.fhir2.api.FhirRelatedPersonService;
-import org.openmrs.module.fhir2.api.dao.FhirRelatedPersonDao;
-import org.openmrs.module.fhir2.api.search.SearchQuery;
-import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.RelatedPersonSearchParams;
-import org.openmrs.module.fhir2.api.translators.RelatedPersonTranslator;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
-public class FhirRelatedPersonServiceImpl extends BaseFhirService<RelatedPerson, Relationship> implements FhirRelatedPersonService {
-	
-	@Getter(value = PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private FhirRelatedPersonDao dao;
-	
-	@Getter(value = PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private RelatedPersonTranslator translator;
-	
-	@Getter(value = PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private SearchQueryInclude<RelatedPerson> searchQueryInclude;
-	
-	@Getter(value = PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private SearchQuery<Relationship, RelatedPerson, FhirRelatedPersonDao, RelatedPersonTranslator, SearchQueryInclude<RelatedPerson>> searchQuery;
+public class FhirRelatedPersonServiceImpl extends BaseCompositeFhirService<RelatedPerson> implements FhirRelatedPersonService {
 	
 	@Override
+	@Transactional(readOnly = true)
 	public IBundleProvider searchForRelatedPeople(RelatedPersonSearchParams relatedPersonSearchParams) {
-		return searchQuery.getQueryResults(relatedPersonSearchParams.toSearchParameterMap(), dao, translator,
-		    searchQueryInclude);
+		return doSearch(relatedPersonSearchParams.toSearchParameterMap());
 	}
 	
 }

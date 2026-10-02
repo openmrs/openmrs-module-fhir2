@@ -9,26 +9,13 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
-import static lombok.AccessLevel.PROTECTED;
-
-import lombok.Getter;
-import lombok.Setter;
 import org.hl7.fhir.r4.model.EpisodeOfCare;
-import org.openmrs.PatientProgram;
 import org.openmrs.module.fhir2.api.FhirEpisodeOfCareService;
-import org.openmrs.module.fhir2.api.dao.FhirEpisodeOfCareDao;
-import org.openmrs.module.fhir2.api.translators.EpisodeOfCareTranslator;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+/**
+ * EpisodeOfCare exposes no typed search or other resource-specific operations, so this orchestrator
+ * adds nothing to {@link BaseCompositeFhirService}; all CRUD dispatch is inherited.
+ */
 @Component
-public class FhirEpisodeOfCareServiceImpl extends BaseFhirService<EpisodeOfCare, PatientProgram> implements FhirEpisodeOfCareService {
-	
-	@Getter(value = PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private FhirEpisodeOfCareDao dao;
-	
-	@Getter(value = PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private EpisodeOfCareTranslator translator;
-}
+public class FhirEpisodeOfCareServiceImpl extends BaseCompositeFhirService<EpisodeOfCare> implements FhirEpisodeOfCareService {}

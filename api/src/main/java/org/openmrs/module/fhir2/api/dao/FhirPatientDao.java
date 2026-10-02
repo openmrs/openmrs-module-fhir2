@@ -15,7 +15,6 @@ import java.util.Collection;
 import java.util.List;
 
 import org.openmrs.Patient;
-import org.openmrs.PatientIdentifierType;
 import org.openmrs.annotation.Authorized;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.util.PrivilegeConstants;
@@ -28,16 +27,14 @@ public interface FhirPatientDao extends FhirDao<Patient> {
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_PATIENTS)
+	boolean exists(@Nonnull String uuid);
+	
+	@Override
+	@Authorized(PrivilegeConstants.GET_PATIENTS)
 	List<Patient> get(@Nonnull Collection<String> uuids);
 	
 	@Authorized(PrivilegeConstants.GET_PATIENTS)
 	Patient getPatientById(@Nonnull Integer id);
-	
-	@Authorized(PrivilegeConstants.GET_PATIENTS)
-	List<Patient> getPatientsByIds(@Nonnull Collection<Integer> ids);
-	
-	@Authorized(PrivilegeConstants.GET_PATIENT_IDENTIFIERS)
-	PatientIdentifierType getPatientIdentifierTypeByNameOrUuid(String name, String uuid);
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_PATIENTS)

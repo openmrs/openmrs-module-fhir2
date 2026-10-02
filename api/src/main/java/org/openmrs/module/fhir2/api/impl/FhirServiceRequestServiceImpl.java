@@ -16,41 +16,18 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
 import org.hl7.fhir.r4.model.ServiceRequest;
-import org.openmrs.TestOrder;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirServiceRequestService;
-import org.openmrs.module.fhir2.api.dao.FhirServiceRequestDao;
-import org.openmrs.module.fhir2.api.search.SearchQuery;
-import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
-import org.openmrs.module.fhir2.api.translators.ServiceRequestTranslator;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
-public class FhirServiceRequestServiceImpl extends BaseFhirService<ServiceRequest, TestOrder> implements FhirServiceRequestService {
-	
-	@Getter(value = AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
-	private FhirServiceRequestDao<TestOrder> dao;
-	
-	@Getter(value = AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
-	private ServiceRequestTranslator<TestOrder> translator;
-	
-	@Getter(value = AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
-	private SearchQueryInclude<ServiceRequest> searchQueryInclude;
-	
-	@Getter(value = AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
-	private SearchQuery<TestOrder, ServiceRequest, FhirServiceRequestDao<TestOrder>, ServiceRequestTranslator<TestOrder>, SearchQueryInclude<ServiceRequest>> searchQuery;
+public class FhirServiceRequestServiceImpl extends BaseCompositeFhirService<ServiceRequest> implements FhirServiceRequestService {
 	
 	@Override
+	@Transactional(readOnly = true)
 	public IBundleProvider searchForServiceRequests(ReferenceAndListParam patientReference, TokenAndListParam code,
 	        ReferenceAndListParam encounterReference, ReferenceAndListParam participantReference, DateRangeParam occurrence,
 	        TokenAndListParam uuid, DateRangeParam lastUpdated, HashSet<Include> includes) {
@@ -65,7 +42,6 @@ public class FhirServiceRequestServiceImpl extends BaseFhirService<ServiceReques
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated)
 		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
 		
-		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
+		return doSearch(theParams);
 	}
-	
 }

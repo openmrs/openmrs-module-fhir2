@@ -27,6 +27,10 @@ public interface FhirDiagnosisDao extends FhirDao<Diagnosis> {
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_DIAGNOSES)
+	boolean exists(@Nonnull String uuid);
+	
+	@Override
+	@Authorized(PrivilegeConstants.GET_DIAGNOSES)
 	List<Diagnosis> get(@Nonnull Collection<String> uuids);
 	
 	@Override

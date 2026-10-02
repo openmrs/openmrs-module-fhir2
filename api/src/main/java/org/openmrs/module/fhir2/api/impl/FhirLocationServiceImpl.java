@@ -10,52 +10,18 @@
 package org.openmrs.module.fhir2.api.impl;
 
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
 import org.hl7.fhir.r4.model.Location;
 import org.openmrs.module.fhir2.api.FhirLocationService;
-import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
-import org.openmrs.module.fhir2.api.search.SearchQuery;
-import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.LocationSearchParams;
-import org.openmrs.module.fhir2.api.translators.LocationTranslator;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
-public class FhirLocationServiceImpl extends BaseFhirService<Location, org.openmrs.Location> implements FhirLocationService {
-	
-	@Getter(value = AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
-	private FhirLocationDao dao;
-	
-	@Getter(value = AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
-	private LocationTranslator translator;
-	
-	@Getter(value = AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
-	private SearchQuery<org.openmrs.Location, Location, FhirLocationDao, LocationTranslator, SearchQueryInclude<Location>> searchQuery;
-	
-	@Getter(value = AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
-	private SearchQueryInclude<Location> searchQueryInclude;
-	
-	@Override
-	public org.openmrs.Location get(Integer id) {
-		return dao.get(id);
-	}
-	
-	@Override
-	public org.openmrs.Location getByUuid(String uuid) {
-		return dao.get(uuid);
-	}
+public class FhirLocationServiceImpl extends BaseCompositeFhirService<Location> implements FhirLocationService {
 	
 	@Override
 	@Transactional(readOnly = true)
 	public IBundleProvider searchForLocations(LocationSearchParams locationSearchParams) {
-		return searchQuery.getQueryResults(locationSearchParams.toSearchParameterMap(), dao, translator, searchQueryInclude);
+		return doSearch(locationSearchParams.toSearchParameterMap());
 	}
 }
