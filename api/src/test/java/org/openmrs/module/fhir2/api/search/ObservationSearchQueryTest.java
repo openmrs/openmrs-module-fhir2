@@ -1645,7 +1645,142 @@ public class ObservationSearchQueryTest extends BaseFhirContextSensitiveTest {
 		assertThat(resultList, everyItem(anyOf(allOf(is(instanceOf(Observation.class))))));
 		assertThat(resultList, isSortedAndWithinMax(1));
 	}
-	
+
+	@Test
+	public void searchForLastnObs_shouldHandleEncounterRequest() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+
+		patient.setValue(PATIENT_UUID);
+
+		referenceParam.addValue(new ReferenceOrListParam().add(patient));
+
+		ReferenceAndListParam encounterReference = new ReferenceAndListParam()
+		        .addAnd(new ReferenceOrListParam().add(new ReferenceParam().setValue(ENCOUNTER_UUID)));
+
+		TokenAndListParam categories = new TokenAndListParam().addAnd(new TokenParam().setValue("laboratory"));
+
+		TokenAndListParam code = new TokenAndListParam().addAnd(
+		    new TokenParam().setSystem(FhirTestConstants.LOINC_SYSTEM_URL).setValue(LOINC_SYSTOLIC_BP),
+		    new TokenParam().setSystem(FhirTestConstants.CIEL_SYSTEM_URN).setValue(CIEL_DIASTOLIC_BP));
+
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.CODED_SEARCH_HANDLER, code)
+		        .addParameter(FhirConstants.CATEGORY_SEARCH_HANDLER, categories)
+		        .addParameter(FhirConstants.MAX_SEARCH_HANDLER, new NumberParam(2))
+		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, referenceParam)
+		        .addParameter(FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER, encounterReference)
+		        .addParameter(FhirConstants.LASTN_OBSERVATION_SEARCH_HANDLER, new StringParam());
+
+		IBundleProvider results = search(theParams);
+
+		assertThat(results, notNullValue());
+		List<IBaseResource> resultList = results.getAllResources();
+
+		assertThat(resultList.size(), equalTo(2));
+		assertThat(resultList, everyItem(anyOf(allOf(is(instanceOf(Observation.class))))));
+		assertThat(resultList, isSortedAndWithinMax(2));
+	}
+
+	@Test
+	public void searchForLastnObs_shouldReturnEmptyWhenEncounterNotFound() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+
+		patient.setValue(PATIENT_UUID);
+
+		referenceParam.addValue(new ReferenceOrListParam().add(patient));
+
+		ReferenceAndListParam encounterReference = new ReferenceAndListParam()
+		        .addAnd(new ReferenceOrListParam().add(new ReferenceParam().setValue(PATIENT_WRONG_UUID)));
+
+		TokenAndListParam categories = new TokenAndListParam().addAnd(new TokenParam().setValue("laboratory"));
+
+		TokenAndListParam code = new TokenAndListParam().addAnd(
+		    new TokenParam().setSystem(FhirTestConstants.LOINC_SYSTEM_URL).setValue(LOINC_SYSTOLIC_BP),
+		    new TokenParam().setSystem(FhirTestConstants.CIEL_SYSTEM_URN).setValue(CIEL_DIASTOLIC_BP));
+
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.CODED_SEARCH_HANDLER, code)
+		        .addParameter(FhirConstants.CATEGORY_SEARCH_HANDLER, categories)
+		        .addParameter(FhirConstants.MAX_SEARCH_HANDLER, new NumberParam(2))
+		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, referenceParam)
+		        .addParameter(FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER, encounterReference)
+		        .addParameter(FhirConstants.LASTN_OBSERVATION_SEARCH_HANDLER, new StringParam());
+
+		IBundleProvider results = search(theParams);
+
+		assertThat(results, notNullValue());
+		List<IBaseResource> resultList = results.getAllResources();
+
+		assertThat(resultList, empty());
+	}
+
+	@Test
+	public void searchForLastnObs_shouldAddEncounterToReturnedResults() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+
+		patient.setValue(PATIENT_UUID);
+
+		referenceParam.addValue(new ReferenceOrListParam().add(patient));
+
+		TokenAndListParam code = new TokenAndListParam().addAnd(
+		    new TokenParam().setSystem(FhirTestConstants.LOINC_SYSTEM_URL).setValue(LOINC_SYSTOLIC_BP),
+		    new TokenParam().setSystem(FhirTestConstants.CIEL_SYSTEM_URN).setValue(CIEL_DIASTOLIC_BP));
+
+		HashSet<Include> includes = new HashSet<>();
+		includes.add(new Include("Observation:encounter"));
+
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.CODED_SEARCH_HANDLER, code)
+		        .addParameter(FhirConstants.MAX_SEARCH_HANDLER, new NumberParam(2))
+		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, referenceParam)
+		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes)
+		        .addParameter(FhirConstants.LASTN_OBSERVATION_SEARCH_HANDLER, new StringParam());
+
+		IBundleProvider results = search(theParams);
+
+		assertThat(results.size(), equalTo(2));
+
+		List<IBaseResource> resultList = get(results);
+
+		assertThat(resultList, notNullValue());
+		assertThat(resultList.size(), equalTo(3)); // 2 observations + 1 included encounter
+
+		Observation returnedObservation = (Observation) resultList.iterator().next();
+		assertThat(resultList, hasItem(allOf(is(instanceOf(Encounter.class)),
+		    hasProperty("id", equalTo(returnedObservation.getEncounter().getReferenceElement().getIdPart())))));
+	}
+
+	@Test
+	public void searchForLastnObs_shouldAddDiagnosticReportToReturnedResults() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+
+		patient.setValue(PATIENT_UUID);
+
+		referenceParam.addValue(new ReferenceOrListParam().add(patient));
+
+		TokenAndListParam code = new TokenAndListParam()
+		        .addAnd(new TokenParam().setSystem(FhirTestConstants.CIEL_SYSTEM_URN).setValue(VALUE_CONCEPT_ID));
+
+		HashSet<Include> revIncludes = new HashSet<>();
+		revIncludes.add(new Include("DiagnosticReport:result"));
+
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.CODED_SEARCH_HANDLER, code)
+		        .addParameter(FhirConstants.MAX_SEARCH_HANDLER, new NumberParam(2))
+		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, referenceParam)
+		        .addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER, revIncludes)
+		        .addParameter(FhirConstants.LASTN_OBSERVATION_SEARCH_HANDLER, new StringParam());
+
+		IBundleProvider results = search(theParams);
+
+		assertThat(results.size(), greaterThan(0));
+
+		List<IBaseResource> resultList = get(results);
+
+		assertThat(resultList, notNullValue());
+		assertThat(resultList, hasItem(is(instanceOf(DiagnosticReport.class))));
+	}
+
 	@Test
 	public void searchForLastnEncountersObs_shouldHandleNormalRequest() {
 		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
