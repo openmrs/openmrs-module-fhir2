@@ -37,6 +37,17 @@ public class ProfileRoutingContext {
 	private final ThreadLocal<Set<String>> requestedProfiles = new ThreadLocal<>();
 	
 	/**
+	 * The profiles requested by the current request, in the order they were supplied.
+	 *
+	 * @return the requested profile URLs, or an empty set when none were requested
+	 */
+	@Nonnull
+	public Set<String> getRequestedProfiles() {
+		Set<String> profiles = requestedProfiles.get();
+		return profiles == null ? Collections.emptySet() : profiles;
+	}
+
+	/**
 	 * Records the profiles requested by the current request, replacing any previous value. Passing
 	 * {@code null} or an empty collection clears the holder rather than storing an empty set, so a
 	 * request without {@code _profile} leaves nothing behind for the next user of this thread.
@@ -48,19 +59,8 @@ public class ProfileRoutingContext {
 			clear();
 			return;
 		}
-		
+
 		requestedProfiles.set(Collections.unmodifiableSet(new LinkedHashSet<>(profiles)));
-	}
-	
-	/**
-	 * The profiles requested by the current request, in the order they were supplied.
-	 *
-	 * @return the requested profile URLs, or an empty set when none were requested
-	 */
-	@Nonnull
-	public Set<String> getRequestedProfiles() {
-		Set<String> profiles = requestedProfiles.get();
-		return profiles == null ? Collections.emptySet() : profiles;
 	}
 	
 	/**
