@@ -65,10 +65,6 @@ public class FhirTaskServiceImplTest {
 		service.setGlobalPropertyService(globalPropertyService);
 	}
 	
-	private List<IBaseResource> get(IBundleProvider results) {
-		return results.getResources(START_INDEX, END_INDEX);
-	}
-	
 	@Test
 	public void searchForTasks_shouldFanOutAndReturnHandlerResults() {
 		when(handler.search(any())).thenReturn(bundleOf(1));

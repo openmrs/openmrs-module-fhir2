@@ -46,8 +46,8 @@ import org.springframework.transaction.annotation.Transactional;
  * carries {@code _include} resources only alongside matches.
  * <p>
  * When a paged response spans more than one provider, this class splits each provider's chunk into
- * "main" results and "_include" results by assuming the chunk is laid out as
- * {@code [main_0, ..., main_{n-1}, include_0, ...]} where {@code n = sliceEnd - sliceStart}.
+ * "main" results and "_include" results by assuming the chunk is laid out as {@code [main_0, ...,
+ * main_{n-1}, include_0, ...]} where {@code n = sliceEnd - sliceStart}.
  * {@code SearchQueryBundleProvider} (the standard backing for handler searches) honours this
  * contract; an underlying {@link IBundleProvider} that interleaves mains and includes within
  * {@link IBundleProvider#getResources(int, int)} would defeat the split. Handler implementations
@@ -73,9 +73,9 @@ public class CompositeBundleProvider implements IBundleProvider {
 	@Getter
 	private final String uuid;
 	
-	private transient Integer pageSize;
+	private Integer pageSize;
 	
-	private transient Integer total;
+	private Integer total;
 	
 	public CompositeBundleProvider(@Nonnull List<? extends IBundleProvider> providers,
 	    FhirGlobalPropertyService globalPropertyService) {

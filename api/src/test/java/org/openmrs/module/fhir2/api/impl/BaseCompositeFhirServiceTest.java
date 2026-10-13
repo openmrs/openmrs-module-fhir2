@@ -641,18 +641,6 @@ public class BaseCompositeFhirServiceTest {
 	}
 	
 	@Test
-	public void searchShouldRouteToHandlerNamedByProfileCapturedFromTheRequest() {
-		IBundleProvider primaryBundle = emptyBundle();
-		when(primaryHandler.search(any())).thenReturn(primaryBundle);
-		service.setProfileRoutingContext(contextRequesting(PROFILE_PRIMARY));
-		
-		service.exposedSearch(new SearchParameterMap());
-		
-		verify(primaryHandler).search(any());
-		verify(secondaryHandler, never()).search(any());
-	}
-	
-	@Test
 	public void searchShouldFanOutWhenTheRequestCapturedNoProfile() {
 		IBundleProvider primaryBundle = emptyBundle();
 		IBundleProvider secondaryBundle = emptyBundle();

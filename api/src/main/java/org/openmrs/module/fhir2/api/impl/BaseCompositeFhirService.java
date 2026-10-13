@@ -292,8 +292,10 @@ public abstract class BaseCompositeFhirService<R extends IAnyResource> implement
 			return;
 		}
 		
-		log.info("{} handlers for {}: active = {}", FhirResourceHandler.class.getSimpleName(), resourceClass.getSimpleName(),
-		    describe(handlers));
+		if (log.isInfoEnabled()) {
+			log.info("{} handlers for {}: active = {}", FhirResourceHandler.class.getSimpleName(),
+			    resourceClass.getSimpleName(), describe(handlers));
+		}
 	}
 	
 	private static <R extends IAnyResource> String describe(Collection<FhirResourceHandler<R>> handlers) {
