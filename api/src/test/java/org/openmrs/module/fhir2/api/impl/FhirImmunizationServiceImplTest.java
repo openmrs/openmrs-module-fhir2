@@ -42,6 +42,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
@@ -50,10 +51,12 @@ import org.hl7.fhir.r4.model.Immunization;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.Obs;
+import org.openmrs.Patient;
 import org.openmrs.Provider;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.ObsService;
+import org.openmrs.api.PatientService;
 import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.util.ImmunizationObsGroupHelper;
@@ -89,6 +92,9 @@ public class FhirImmunizationServiceImplTest extends BaseFhirContextSensitiveTes
 	@Qualifier("adminService")
 	private AdministrationService administrationService;
 	
+	@Autowired
+	private PatientService patientService;
+
 	@Autowired
 	private ImmunizationObsGroupHelper helper;
 	
@@ -428,6 +434,115 @@ public class FhirImmunizationServiceImplTest extends BaseFhirContextSensitiveTes
 		}
 	}
 	
+	// Patient a7e04421-525f-442f-8138-05b619d16def has birthdate 1975-05-27
+
+	@Test(expected = UnprocessableEntityException.class)
+	public void saveImmunization_shouldFailIfExpirationDateIsBeforePatientBirthdate() {
+		FhirContext ctx = FhirContext.forR4();
+		IParser parser = ctx.newJsonParser();
+		Immunization immunization = parser.parseResource(Immunization.class, "{\n"
+		        + "  \"resourceType\": \"Immunization\",\n" + "  \"status\": \"completed\",\n"
+		        + "  \"vaccineCode\": { \"coding\": [{ \"code\": \"15f83cd6-64e9-4e06-a5f9-364d3b14a43d\" }] },\n"
+		        + "  \"patient\": { \"reference\": \"Patient/a7e04421-525f-442f-8138-05b619d16def\", \"type\": \"Patient\" },\n"
+		        + "  \"encounter\": { \"reference\": \"Encounter/7d8c1980-6b78-11e0-93c3-18a905e044dc\", \"type\": \"Encounter\" },\n"
+		        + "  \"occurrenceDateTime\": \"2020-07-08T18:30:00.000Z\",\n"
+		        + "  \"expirationDate\": \"1974-12-31\",\n"
+		        + "  \"performer\": [{ \"actor\": { \"reference\": \"Practitioner/f9badd80-ab76-11e2-9e96-0800200c9a66\", \"type\": \"Practitioner\" } }]\n"
+		        + "}");
+
+		service.create(immunization);
+	}
+
+	@Test(expected = UnprocessableEntityException.class)
+	public void saveImmunization_shouldFailIfNextDoseDateIsBeforePatientBirthdate() {
+		FhirContext ctx = FhirContext.forR4();
+		IParser parser = ctx.newJsonParser();
+		Immunization immunization = parser.parseResource(Immunization.class, "{\n"
+		        + "  \"resourceType\": \"Immunization\",\n" + "  \"status\": \"completed\",\n"
+		        + "  \"vaccineCode\": { \"coding\": [{ \"code\": \"15f83cd6-64e9-4e06-a5f9-364d3b14a43d\" }] },\n"
+		        + "  \"patient\": { \"reference\": \"Patient/a7e04421-525f-442f-8138-05b619d16def\", \"type\": \"Patient\" },\n"
+		        + "  \"encounter\": { \"reference\": \"Encounter/7d8c1980-6b78-11e0-93c3-18a905e044dc\", \"type\": \"Encounter\" },\n"
+		        + "  \"occurrenceDateTime\": \"2020-07-08T18:30:00.000Z\",\n"
+		        + "  \"performer\": [{ \"actor\": { \"reference\": \"Practitioner/f9badd80-ab76-11e2-9e96-0800200c9a66\", \"type\": \"Practitioner\" } }],\n"
+		        + "  \"extension\": [{ \"url\": \"http://hl7.eu/fhir/StructureDefinition/immunization-nextDoseDate\", \"valueDateTime\": \"1975-01-15T10:30:00Z\" }]\n"
+		        + "}");
+
+		service.create(immunization);
+	}
+
+	@Test
+	public void saveImmunization_shouldSucceedIfExpirationDateIsAfterPatientBirthdate() {
+		FhirContext ctx = FhirContext.forR4();
+		IParser parser = ctx.newJsonParser();
+		Immunization immunization = parser.parseResource(Immunization.class, "{\n"
+		        + "  \"resourceType\": \"Immunization\",\n" + "  \"status\": \"completed\",\n"
+		        + "  \"vaccineCode\": { \"coding\": [{ \"code\": \"15f83cd6-64e9-4e06-a5f9-364d3b14a43d\" }] },\n"
+		        + "  \"patient\": { \"reference\": \"Patient/a7e04421-525f-442f-8138-05b619d16def\", \"type\": \"Patient\" },\n"
+		        + "  \"encounter\": { \"reference\": \"Encounter/7d8c1980-6b78-11e0-93c3-18a905e044dc\", \"type\": \"Encounter\" },\n"
+		        + "  \"occurrenceDateTime\": \"2020-07-08T18:30:00.000Z\",\n"
+		        + "  \"expirationDate\": \"2000-01-01\",\n"
+		        + "  \"performer\": [{ \"actor\": { \"reference\": \"Practitioner/f9badd80-ab76-11e2-9e96-0800200c9a66\", \"type\": \"Practitioner\" } }]\n"
+		        + "}");
+
+		assertThat(service.create(immunization), notNullValue());
+	}
+
+	@Test
+	public void saveImmunization_shouldSucceedIfNextDoseDateIsAfterPatientBirthdate() {
+		FhirContext ctx = FhirContext.forR4();
+		IParser parser = ctx.newJsonParser();
+		Immunization immunization = parser.parseResource(Immunization.class, "{\n"
+		        + "  \"resourceType\": \"Immunization\",\n" + "  \"status\": \"completed\",\n"
+		        + "  \"vaccineCode\": { \"coding\": [{ \"code\": \"15f83cd6-64e9-4e06-a5f9-364d3b14a43d\" }] },\n"
+		        + "  \"patient\": { \"reference\": \"Patient/a7e04421-525f-442f-8138-05b619d16def\", \"type\": \"Patient\" },\n"
+		        + "  \"encounter\": { \"reference\": \"Encounter/7d8c1980-6b78-11e0-93c3-18a905e044dc\", \"type\": \"Encounter\" },\n"
+		        + "  \"occurrenceDateTime\": \"2020-07-08T18:30:00.000Z\",\n"
+		        + "  \"performer\": [{ \"actor\": { \"reference\": \"Practitioner/f9badd80-ab76-11e2-9e96-0800200c9a66\", \"type\": \"Practitioner\" } }],\n"
+		        + "  \"extension\": [{ \"url\": \"http://hl7.eu/fhir/StructureDefinition/immunization-nextDoseDate\", \"valueDateTime\": \"2000-01-01T10:00:00Z\" }]\n"
+		        + "}");
+
+		assertThat(service.create(immunization), notNullValue());
+	}
+
+	@Test
+	public void saveImmunization_shouldSucceedWithAbsentExpirationDateAndNextDoseDate() {
+		FhirContext ctx = FhirContext.forR4();
+		IParser parser = ctx.newJsonParser();
+		Immunization immunization = parser.parseResource(Immunization.class, "{\n"
+		        + "  \"resourceType\": \"Immunization\",\n" + "  \"status\": \"completed\",\n"
+		        + "  \"vaccineCode\": { \"coding\": [{ \"code\": \"15f83cd6-64e9-4e06-a5f9-364d3b14a43d\" }] },\n"
+		        + "  \"patient\": { \"reference\": \"Patient/a7e04421-525f-442f-8138-05b619d16def\", \"type\": \"Patient\" },\n"
+		        + "  \"encounter\": { \"reference\": \"Encounter/7d8c1980-6b78-11e0-93c3-18a905e044dc\", \"type\": \"Encounter\" },\n"
+		        + "  \"occurrenceDateTime\": \"2020-07-08T18:30:00.000Z\",\n"
+		        + "  \"performer\": [{ \"actor\": { \"reference\": \"Practitioner/f9badd80-ab76-11e2-9e96-0800200c9a66\", \"type\": \"Practitioner\" } }]\n"
+		        + "}");
+
+		assertThat(service.create(immunization), notNullValue());
+	}
+
+	@Test
+	public void saveImmunization_shouldSucceedIfPatientBirthdateIsNull() {
+		Patient patient = patientService.getPatientByUuid("a7e04421-525f-442f-8138-05b619d16def");
+		patient.setBirthdate(null);
+		patientService.savePatient(patient);
+
+		FhirContext ctx = FhirContext.forR4();
+		IParser parser = ctx.newJsonParser();
+		// Use dates that would normally fail DOB validation to prove the guard is skipped
+		Immunization immunization = parser.parseResource(Immunization.class, "{\n"
+		        + "  \"resourceType\": \"Immunization\",\n" + "  \"status\": \"completed\",\n"
+		        + "  \"vaccineCode\": { \"coding\": [{ \"code\": \"15f83cd6-64e9-4e06-a5f9-364d3b14a43d\" }] },\n"
+		        + "  \"patient\": { \"reference\": \"Patient/a7e04421-525f-442f-8138-05b619d16def\", \"type\": \"Patient\" },\n"
+		        + "  \"encounter\": { \"reference\": \"Encounter/7d8c1980-6b78-11e0-93c3-18a905e044dc\", \"type\": \"Encounter\" },\n"
+		        + "  \"occurrenceDateTime\": \"2020-07-08T18:30:00.000Z\",\n"
+		        + "  \"expirationDate\": \"1974-12-31\",\n"
+		        + "  \"performer\": [{ \"actor\": { \"reference\": \"Practitioner/f9badd80-ab76-11e2-9e96-0800200c9a66\", \"type\": \"Practitioner\" } }],\n"
+		        + "  \"extension\": [{ \"url\": \"http://hl7.eu/fhir/StructureDefinition/immunization-nextDoseDate\", \"valueDateTime\": \"1975-01-15T10:30:00Z\" }]\n"
+		        + "}");
+
+		assertThat(service.create(immunization), notNullValue());
+	}
+
 	private List<Immunization> get(IBundleProvider results) {
 		return results.getResources(0, results.size()).stream().filter(it -> it instanceof Immunization)
 		        .map(it -> (Immunization) it).collect(Collectors.toList());
