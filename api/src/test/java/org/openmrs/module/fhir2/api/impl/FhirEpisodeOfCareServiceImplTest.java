@@ -12,7 +12,11 @@ package org.openmrs.module.fhir2.api.impl;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.util.Collections;
 
 import org.hl7.fhir.r4.model.EpisodeOfCare;
 import org.junit.Before;
@@ -20,50 +24,60 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.openmrs.PatientProgram;
-import org.openmrs.module.fhir2.api.dao.FhirEpisodeOfCareDao;
-import org.openmrs.module.fhir2.api.translators.EpisodeOfCareTranslator;
+import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
+import org.openmrs.module.fhir2.api.handler.FhirResourceHandler;
 
+/**
+ * Orchestrator-level tests for {@link FhirEpisodeOfCareServiceImpl}. Dispatch mechanics are covered
+ * in {@link BaseCompositeFhirServiceTest}; backing-specific CRUD lives in
+ * {@code PatientProgramBackedEpisodeOfCareHandlerTest}. EpisodeOfCare exposes only {@code @Read},
+ * so this class asserts that get reaches the handler through the composite.
+ */
 @RunWith(MockitoJUnitRunner.class)
 public class FhirEpisodeOfCareServiceImplTest {
 	
 	private static final String EPISODE_OF_CARE_UUID = "9119b9f8-af3d-4ad8-9e2e-2317c3de91c6";
 	
-	@Mock
-	private FhirEpisodeOfCareDao dao;
+	private static final String EPISODE_OF_CARE_PROFILE = "http://fhir.openmrs.org/StructureDefinition/openmrs-episodeofcare";
 	
 	@Mock
-	private EpisodeOfCareTranslator episodeOfCareTranslator;
+	private FhirResourceHandler<EpisodeOfCare> handler;
 	
-	private FhirEpisodeOfCareServiceImpl episodeOfCareService;
+	@Mock
+	private FhirGlobalPropertyService globalPropertyService;
 	
-	private PatientProgram patientProgram;
-	
-	private EpisodeOfCare episodeOfCare;
+	private FhirEpisodeOfCareServiceImpl service;
 	
 	@Before
-	public void setUp() {
-		episodeOfCareService = new FhirEpisodeOfCareServiceImpl();
+	public void setup() {
+		lenient().when(handler.getImplicitProfile()).thenReturn(EPISODE_OF_CARE_PROFILE);
 		
-		episodeOfCareService.setDao(dao);
-		episodeOfCareService.setTranslator(episodeOfCareTranslator);
-		
-		patientProgram = new PatientProgram();
-		patientProgram.setUuid(EPISODE_OF_CARE_UUID);
-		
-		episodeOfCare = new EpisodeOfCare();
-		episodeOfCare.setId(EPISODE_OF_CARE_UUID);
+		service = new FhirEpisodeOfCareServiceImpl();
+		service.setHandlers(Collections.singletonList(handler));
+		service.setGlobalPropertyService(globalPropertyService);
 	}
 	
 	@Test
-	public void get_shouldGetEncounterByUuid() {
-		when(dao.get(EPISODE_OF_CARE_UUID)).thenReturn(patientProgram);
-		when(episodeOfCareTranslator.toFhirResource(patientProgram)).thenReturn(episodeOfCare);
+	public void get_shouldDispatchToHandler() {
+		EpisodeOfCare episodeOfCare = new EpisodeOfCare();
+		episodeOfCare.setId(EPISODE_OF_CARE_UUID);
+		when(handler.get(EPISODE_OF_CARE_UUID)).thenReturn(episodeOfCare);
 		
-		EpisodeOfCare actualEpisodeOfCare = episodeOfCareService.get(EPISODE_OF_CARE_UUID);
+		EpisodeOfCare result = service.get(EPISODE_OF_CARE_UUID);
 		
-		assertThat(actualEpisodeOfCare, notNullValue());
-		assertThat(actualEpisodeOfCare.getId(), notNullValue());
-		assertThat(actualEpisodeOfCare.getId(), equalTo(EPISODE_OF_CARE_UUID));
+		assertThat(result, notNullValue());
+		assertThat(result.getId(), equalTo(EPISODE_OF_CARE_UUID));
+		verify(handler).get(EPISODE_OF_CARE_UUID);
+	}
+	
+	@Test
+	public void get_shouldStampHandlerProfileOnResult() {
+		EpisodeOfCare episodeOfCare = new EpisodeOfCare();
+		episodeOfCare.setId(EPISODE_OF_CARE_UUID);
+		when(handler.get(EPISODE_OF_CARE_UUID)).thenReturn(episodeOfCare);
+		
+		EpisodeOfCare result = service.get(EPISODE_OF_CARE_UUID);
+		
+		assertThat(result.getMeta().getProfile().get(0).getValue(), equalTo(EPISODE_OF_CARE_PROFILE));
 	}
 }

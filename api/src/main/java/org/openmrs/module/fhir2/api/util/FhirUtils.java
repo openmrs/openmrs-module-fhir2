@@ -22,7 +22,6 @@ import org.apache.commons.lang.StringUtils;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Condition;
-import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Reference;
 import org.openmrs.Concept;
@@ -34,12 +33,6 @@ import org.openmrs.module.fhir2.FhirConstants;
 public class FhirUtils {
 	
 	private FhirUtils() {
-	}
-	
-	public enum OpenmrsEncounterType {
-		ENCOUNTER,
-		VISIT,
-		AMBIGUOUS
 	}
 	
 	public enum OpenmrsConditionType {
@@ -126,27 +119,6 @@ public class FhirUtils {
 		issue.setSeverity(OperationOutcome.IssueSeverity.ERROR);
 		issue.setDiagnostics(diagnostics);
 		return outcome;
-	}
-	
-	public static Optional<OpenmrsEncounterType> getOpenmrsEncounterType(Encounter encounter) {
-		List<OpenmrsEncounterType> openmrsEncounterTypes = encounter.getType().stream().flatMap(
-		    it -> it.getCoding().stream().filter(coding -> FhirConstants.ENCOUNTER_TYPE_SYSTEM_URI.equals(coding.getSystem())
-		            || FhirConstants.VISIT_TYPE_SYSTEM_URI.equals(coding.getSystem())).map(coding -> {
-			            if (FhirConstants.ENCOUNTER_TYPE_SYSTEM_URI.equals(coding.getSystem())) {
-				            return OpenmrsEncounterType.ENCOUNTER;
-			            } else {
-				            return OpenmrsEncounterType.VISIT;
-			            }
-		            }))
-		        .distinct().collect(Collectors.toList());
-		
-		if (openmrsEncounterTypes.isEmpty()) {
-			return Optional.empty();
-		} else if (openmrsEncounterTypes.size() == 1) {
-			return Optional.of(openmrsEncounterTypes.get(0));
-		} else {
-			return Optional.of(OpenmrsEncounterType.AMBIGUOUS);
-		}
 	}
 	
 	/*

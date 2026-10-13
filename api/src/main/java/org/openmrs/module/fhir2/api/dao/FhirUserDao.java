@@ -27,6 +27,10 @@ public interface FhirUserDao extends FhirDao<User> {
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_USERS)
+	boolean exists(@Nonnull String uuid);
+	
+	@Override
+	@Authorized(PrivilegeConstants.GET_USERS)
 	List<User> get(@Nonnull Collection<String> uuids);
 	
 	@Authorized(PrivilegeConstants.GET_USERS)

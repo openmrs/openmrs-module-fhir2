@@ -27,6 +27,10 @@ public interface FhirGroupDao extends FhirDao<Cohort> {
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_PATIENT_COHORTS)
+	boolean exists(@Nonnull String uuid);
+	
+	@Override
+	@Authorized(PrivilegeConstants.GET_PATIENT_COHORTS)
 	List<Cohort> get(@Nonnull Collection<String> uuids);
 	
 	@Override

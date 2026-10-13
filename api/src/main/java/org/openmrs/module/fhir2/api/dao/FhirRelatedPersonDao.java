@@ -27,6 +27,10 @@ public interface FhirRelatedPersonDao extends FhirDao<Relationship> {
 	
 	@Override
 	@Authorized(value = { PrivilegeConstants.GET_PERSONS, PrivilegeConstants.GET_RELATIONSHIPS }, requireAll = true)
+	boolean exists(@Nonnull String uuid);
+	
+	@Override
+	@Authorized(value = { PrivilegeConstants.GET_PERSONS, PrivilegeConstants.GET_RELATIONSHIPS }, requireAll = true)
 	List<Relationship> get(@Nonnull Collection<String> uuids);
 	
 	@Override

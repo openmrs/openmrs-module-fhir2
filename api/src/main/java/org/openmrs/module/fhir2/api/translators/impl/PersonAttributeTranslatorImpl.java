@@ -34,7 +34,7 @@ import org.openmrs.PersonAttributeType;
 import org.openmrs.api.PersonService;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirConceptService;
-import org.openmrs.module.fhir2.api.FhirLocationService;
+import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.LocationReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonAttributeTranslator;
@@ -55,7 +55,7 @@ public class PersonAttributeTranslatorImpl implements PersonAttributeTranslator 
 	
 	@Getter(PROTECTED)
 	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private FhirLocationService locationService;
+	private FhirLocationDao locationDao;
 	
 	@Getter(PROTECTED)
 	@Setter(value = PROTECTED, onMethod_ = @Autowired)
@@ -189,7 +189,7 @@ public class PersonAttributeTranslatorImpl implements PersonAttributeTranslator 
 		
 		Location openmrsLocation;
 		try {
-			openmrsLocation = locationService.get(Integer.parseInt(locationId));
+			openmrsLocation = locationDao.get(Integer.parseInt(locationId));
 		}
 		catch (NumberFormatException e) {
 			return null;
@@ -250,7 +250,7 @@ public class PersonAttributeTranslatorImpl implements PersonAttributeTranslator 
 					referenceToType(reference).ifPresent((type) -> {
 						switch (type) {
 							case FhirConstants.LOCATION:
-								Location location = locationService.getByUuid(uuid);
+								Location location = locationDao.get(uuid);
 								if (location != null) {
 									personAttribute.setValue(location.getId().toString());
 								}

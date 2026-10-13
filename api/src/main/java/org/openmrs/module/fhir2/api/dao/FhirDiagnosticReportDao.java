@@ -27,6 +27,10 @@ public interface FhirDiagnosticReportDao extends FhirDao<FhirDiagnosticReport> {
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_OBS)
+	boolean exists(@Nonnull String uuid);
+	
+	@Override
+	@Authorized(PrivilegeConstants.GET_OBS)
 	List<FhirDiagnosticReport> get(@Nonnull Collection<String> uuids);
 	
 	@Override

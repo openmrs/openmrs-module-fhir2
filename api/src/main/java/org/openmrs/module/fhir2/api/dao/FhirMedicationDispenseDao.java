@@ -28,6 +28,10 @@ public interface FhirMedicationDispenseDao<T extends OpenmrsObject & Auditable> 
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_MEDICATION_DISPENSE)
+	boolean exists(@Nonnull String uuid);
+	
+	@Override
+	@Authorized(PrivilegeConstants.GET_MEDICATION_DISPENSE)
 	List<T> get(@Nonnull Collection<String> uuids);
 	
 	@Override
