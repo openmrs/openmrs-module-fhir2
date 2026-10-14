@@ -40,22 +40,14 @@ public class BaseFhirNarrativeTest {
 	protected ReloadableResourceBundleMessageSource messageSource;
 	
 	/**
-	 * Setup a common timezone before all the tests to avoid assertion errors in narrative generation
-	 * tests due to timezone mismatch
+	 * Setup a common timezone and locale before all the tests: the expected narratives are in UTC and
+	 * US English, and dates are formatted in the default timezone and locale, so on a machine whose
+	 * locale writes "pm" rather than "PM" (en_GB, en_UG, ...) the narrative generation tests would fail
 	 */
 	@BeforeClass
-	public static void setupTimeZone() {
+	public static void setupTimeZoneAndLocale() {
 		defaultTimeZone = TimeZone.getDefault();
 		TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
-	}
-	
-	/**
-	 * Setup a common locale before all the tests: the expected narratives are in US English, and dates
-	 * are formatted in the default locale, so on a machine whose locale writes "pm" rather than "PM"
-	 * (en_GB, en_UG, ...) the narrative generation tests would fail
-	 */
-	@BeforeClass
-	public static void setupLocale() {
 		defaultLocale = Locale.getDefault();
 		Locale.setDefault(Locale.US);
 	}
@@ -86,18 +78,11 @@ public class BaseFhirNarrativeTest {
 	}
 	
 	/**
-	 * Reset the timezone to defaultTimeZone after all tests are run
+	 * Reset the timezone and locale to defaultTimeZone and defaultLocale after all tests are run
 	 */
 	@AfterClass
-	public static void resetTimeZone() {
+	public static void resetTimeZoneAndLocale() {
 		TimeZone.setDefault(defaultTimeZone);
-	}
-	
-	/**
-	 * Reset the locale to defaultLocale after all tests are run
-	 */
-	@AfterClass
-	public static void resetLocale() {
 		Locale.setDefault(defaultLocale);
 	}
 }
