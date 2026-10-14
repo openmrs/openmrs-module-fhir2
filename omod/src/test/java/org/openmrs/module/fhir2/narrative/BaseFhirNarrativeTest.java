@@ -13,7 +13,6 @@ import static org.openmrs.module.fhir2.api.util.GeneralUtils.resourceToString;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Locale;
 import java.util.TimeZone;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -31,12 +30,6 @@ public class BaseFhirNarrativeTest {
 	
 	protected static TimeZone defaultTimeZone;
 	
-	protected static Locale defaultLocale;
-	
-	protected static Locale defaultDisplayLocale;
-	
-	protected static Locale defaultFormatLocale;
-	
 	protected final FhirContext ctx = FhirContext.forR4();
 	
 	protected IParser parser;
@@ -51,19 +44,6 @@ public class BaseFhirNarrativeTest {
 	public static void setupTimeZone() {
 		defaultTimeZone = TimeZone.getDefault();
 		TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
-	}
-	
-	/**
-	 * Setup a common locale before all the tests: the expected narratives are in US English, and dates
-	 * are formatted in the default locale, so on a machine whose locale writes "pm" rather than "PM"
-	 * (en_GB, en_UG, ...) the narrative generation tests would fail
-	 */
-	@BeforeAll
-	public static void setupLocale() {
-		defaultLocale = Locale.getDefault();
-		defaultDisplayLocale = Locale.getDefault(Locale.Category.DISPLAY);
-		defaultFormatLocale = Locale.getDefault(Locale.Category.FORMAT);
-		Locale.setDefault(Locale.US);
 	}
 	
 	/**
@@ -97,16 +77,5 @@ public class BaseFhirNarrativeTest {
 	@AfterAll
 	public static void resetTimeZone() {
 		TimeZone.setDefault(defaultTimeZone);
-	}
-	
-	/**
-	 * Reset the locale to its saved defaults after all tests are run, restoring the DISPLAY and FORMAT
-	 * locales last because Locale.setDefault(Locale) overwrites them
-	 */
-	@AfterAll
-	public static void resetLocale() {
-		Locale.setDefault(defaultLocale);
-		Locale.setDefault(Locale.Category.DISPLAY, defaultDisplayLocale);
-		Locale.setDefault(Locale.Category.FORMAT, defaultFormatLocale);
 	}
 }
