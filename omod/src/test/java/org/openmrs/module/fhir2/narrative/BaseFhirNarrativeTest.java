@@ -33,6 +33,10 @@ public class BaseFhirNarrativeTest {
 	
 	protected static Locale defaultLocale;
 	
+	protected static Locale defaultDisplayLocale;
+	
+	protected static Locale defaultFormatLocale;
+	
 	protected final FhirContext ctx = FhirContext.forR4();
 	
 	protected IParser parser;
@@ -49,6 +53,8 @@ public class BaseFhirNarrativeTest {
 		defaultTimeZone = TimeZone.getDefault();
 		TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
 		defaultLocale = Locale.getDefault();
+		defaultDisplayLocale = Locale.getDefault(Locale.Category.DISPLAY);
+		defaultFormatLocale = Locale.getDefault(Locale.Category.FORMAT);
 		Locale.setDefault(Locale.US);
 	}
 	
@@ -78,11 +84,14 @@ public class BaseFhirNarrativeTest {
 	}
 	
 	/**
-	 * Reset the timezone and locale to defaultTimeZone and defaultLocale after all tests are run
+	 * Reset the timezone and locale to their saved defaults after all tests are run, restoring the
+	 * DISPLAY and FORMAT locales last because Locale.setDefault(Locale) overwrites them
 	 */
 	@AfterClass
 	public static void resetTimeZoneAndLocale() {
 		TimeZone.setDefault(defaultTimeZone);
 		Locale.setDefault(defaultLocale);
+		Locale.setDefault(Locale.Category.DISPLAY, defaultDisplayLocale);
+		Locale.setDefault(Locale.Category.FORMAT, defaultFormatLocale);
 	}
 }
