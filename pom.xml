@@ -892,6 +892,8 @@
         <ucumVersion>1.0.10</ucumVersion>
         <!-- keep in sync with slf4jVersion in openmrs-core's pom for the targeted platform -->
         <slf4jVersion>1.7.36</slf4jVersion>
+        <!-- Some tests are locale specific -->
+        <argLine>-Duser.language=en -Duser.region=US</argLine>
     </properties>
 
     <profiles>
