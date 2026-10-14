@@ -33,6 +33,10 @@ public class BaseFhirNarrativeTest {
 	
 	protected static Locale defaultLocale;
 	
+	protected static Locale defaultDisplayLocale;
+	
+	protected static Locale defaultFormatLocale;
+	
 	protected final FhirContext ctx = FhirContext.forR4();
 	
 	protected IParser parser;
@@ -57,6 +61,8 @@ public class BaseFhirNarrativeTest {
 	@BeforeAll
 	public static void setupLocale() {
 		defaultLocale = Locale.getDefault();
+		defaultDisplayLocale = Locale.getDefault(Locale.Category.DISPLAY);
+		defaultFormatLocale = Locale.getDefault(Locale.Category.FORMAT);
 		Locale.setDefault(Locale.US);
 	}
 	
@@ -94,10 +100,13 @@ public class BaseFhirNarrativeTest {
 	}
 	
 	/**
-	 * Reset the locale to defaultLocale after all tests are run
+	 * Reset the locale to its saved defaults after all tests are run, restoring the DISPLAY and FORMAT
+	 * locales last because Locale.setDefault(Locale) overwrites them
 	 */
 	@AfterAll
 	public static void resetLocale() {
 		Locale.setDefault(defaultLocale);
+		Locale.setDefault(Locale.Category.DISPLAY, defaultDisplayLocale);
+		Locale.setDefault(Locale.Category.FORMAT, defaultFormatLocale);
 	}
 }
