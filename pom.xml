@@ -884,6 +884,8 @@
         <openmrsPlatformToolsVersion>2.8.0</openmrsPlatformToolsVersion>
         <hapifhirVersion>5.7.9</hapifhirVersion>
         <ucumVersion>1.0.3</ucumVersion>
+        <!-- Some tests are locale specific -->
+        <argLine>-Duser.language=en -Duser.region=US</argLine>
     </properties>
 
     <profiles>

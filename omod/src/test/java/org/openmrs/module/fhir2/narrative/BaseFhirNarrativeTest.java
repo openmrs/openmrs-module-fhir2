@@ -13,7 +13,6 @@ import static org.openmrs.module.fhir2.api.util.GeneralUtils.resourceToString;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Locale;
 import java.util.TimeZone;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -31,12 +30,6 @@ public class BaseFhirNarrativeTest {
 	
 	protected static TimeZone defaultTimeZone;
 	
-	protected static Locale defaultLocale;
-	
-	protected static Locale defaultDisplayLocale;
-	
-	protected static Locale defaultFormatLocale;
-	
 	protected final FhirContext ctx = FhirContext.forR4();
 	
 	protected IParser parser;
@@ -44,18 +37,13 @@ public class BaseFhirNarrativeTest {
 	protected ReloadableResourceBundleMessageSource messageSource;
 	
 	/**
-	 * Setup a common timezone and locale before all the tests: the expected narratives are in UTC and
-	 * US English, and dates are formatted in the default timezone and locale, so on a machine whose
-	 * locale writes "pm" rather than "PM" (en_GB, en_UG, ...) the narrative generation tests would fail
+	 * Setup a common timezone before all the tests to avoid assertion errors in narrative generation
+	 * tests due to timezone mismatch
 	 */
 	@BeforeClass
-	public static void setupTimeZoneAndLocale() {
+	public static void setupTimeZone() {
 		defaultTimeZone = TimeZone.getDefault();
 		TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
-		defaultLocale = Locale.getDefault();
-		defaultDisplayLocale = Locale.getDefault(Locale.Category.DISPLAY);
-		defaultFormatLocale = Locale.getDefault(Locale.Category.FORMAT);
-		Locale.setDefault(Locale.US);
 	}
 	
 	/**
@@ -84,14 +72,10 @@ public class BaseFhirNarrativeTest {
 	}
 	
 	/**
-	 * Reset the timezone and locale to their saved defaults after all tests are run, restoring the
-	 * DISPLAY and FORMAT locales last because Locale.setDefault(Locale) overwrites them
+	 * Reset the timezone to defaultTimeZone after all tests are run
 	 */
 	@AfterClass
-	public static void resetTimeZoneAndLocale() {
+	public static void resetTimeZone() {
 		TimeZone.setDefault(defaultTimeZone);
-		Locale.setDefault(defaultLocale);
-		Locale.setDefault(Locale.Category.DISPLAY, defaultDisplayLocale);
-		Locale.setDefault(Locale.Category.FORMAT, defaultFormatLocale);
 	}
 }
