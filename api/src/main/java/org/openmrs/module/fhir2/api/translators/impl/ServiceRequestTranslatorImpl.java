@@ -96,6 +96,10 @@ public class ServiceRequestTranslatorImpl implements ServiceRequestTranslator<Te
 		
 		serviceRequest.setPatientInstruction(order.getInstructions());
 		
+		if (order.getClinicalHistory() != null) {
+			serviceRequest.addNote().setText(order.getClinicalHistory());
+		}
+		
 		serviceRequest.setSubject(patientReferenceTranslator.toFhirResource(order.getPatient()));
 		
 		serviceRequest.setEncounter(encounterReferenceTranslator.toFhirResource(order.getEncounter()));
