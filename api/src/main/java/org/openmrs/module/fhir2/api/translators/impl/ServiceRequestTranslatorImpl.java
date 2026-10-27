@@ -142,11 +142,11 @@ public class ServiceRequestTranslatorImpl implements ServiceRequestTranslator<Te
 		
 		switch (order.getUrgency()) {
 			case ROUTINE:
+			case ON_SCHEDULED_DATE:
 				return ServiceRequest.ServiceRequestPriority.ROUTINE;
 			case STAT:
 				return ServiceRequest.ServiceRequestPriority.STAT;
 			default:
-				// ON_SCHEDULED_DATE describes timing rather than priority; the scheduled date is reflected in occurrence
 				return null;
 		}
 	}

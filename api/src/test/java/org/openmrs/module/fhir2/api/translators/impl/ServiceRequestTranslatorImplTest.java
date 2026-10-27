@@ -451,7 +451,7 @@ public class ServiceRequestTranslatorImplTest {
 	}
 	
 	@Test
-	public void toFhirResource_shouldNotSetPriorityForOnScheduledDateUrgency() {
+	public void toFhirResource_shouldTranslateOnScheduledDateUrgencyToRoutinePriority() {
 		TestOrder order = new TestOrder();
 		order.setUrgency(Order.Urgency.ON_SCHEDULED_DATE);
 		order.setScheduledDate(new Date());
@@ -462,7 +462,7 @@ public class ServiceRequestTranslatorImplTest {
 		ServiceRequest result = translator.toFhirResource(order);
 		
 		assertThat(result, notNullValue());
-		assertThat(result.hasPriority(), equalTo(false));
+		assertThat(result.getPriority(), equalTo(ServiceRequest.ServiceRequestPriority.ROUTINE));
 	}
 	
 	@Test
