@@ -23,12 +23,14 @@ public class MedicationRequestPriorityTranslatorImpl implements MedicationReques
 	public MedicationRequest.MedicationRequestPriority toFhirResource(@Nonnull DrugOrder.Urgency urgency) {
 		switch (urgency) {
 			case ROUTINE:
+				// FHIR has no equivalent to ON_SCHEDULED_DATE; an order on a scheduled date is not urgent, so treat it as
+				// routine
 			case ON_SCHEDULED_DATE:
 				return MedicationRequest.MedicationRequestPriority.ROUTINE;
 			case STAT:
 				return MedicationRequest.MedicationRequestPriority.STAT;
 			default:
-				return MedicationRequest.MedicationRequestPriority.NULL;
+				return null;
 		}
 	}
 	

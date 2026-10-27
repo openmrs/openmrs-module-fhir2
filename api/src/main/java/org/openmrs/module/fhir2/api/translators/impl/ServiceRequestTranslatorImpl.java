@@ -143,7 +143,7 @@ public class ServiceRequestTranslatorImpl implements ServiceRequestTranslator<Te
 		switch (order.getUrgency()) {
 			case ROUTINE:
 				// FHIR has no equivalent to ON_SCHEDULED_DATE; an order on a scheduled date is not urgent, so treat it as
-				// routine (the scheduled date itself is reflected in occurrence)
+				// routine
 			case ON_SCHEDULED_DATE:
 				return ServiceRequest.ServiceRequestPriority.ROUTINE;
 			case STAT:
