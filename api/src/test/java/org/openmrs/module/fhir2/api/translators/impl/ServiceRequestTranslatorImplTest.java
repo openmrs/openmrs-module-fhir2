@@ -423,6 +423,49 @@ public class ServiceRequestTranslatorImplTest {
 	}
 	
 	@Test
+	public void toFhirResource_shouldTranslateRoutineUrgencyToRoutinePriority() {
+		TestOrder order = new TestOrder();
+		order.setUrgency(Order.Urgency.ROUTINE);
+		
+		when(taskService.searchForTasks(any()))
+		        .thenReturn(new MockIBundleProvider<>(Collections.emptyList(), PREFERRED_PAGE_SIZE, COUNT));
+		
+		ServiceRequest result = translator.toFhirResource(order);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getPriority(), equalTo(ServiceRequest.ServiceRequestPriority.ROUTINE));
+	}
+	
+	@Test
+	public void toFhirResource_shouldTranslateStatUrgencyToStatPriority() {
+		TestOrder order = new TestOrder();
+		order.setUrgency(Order.Urgency.STAT);
+		
+		when(taskService.searchForTasks(any()))
+		        .thenReturn(new MockIBundleProvider<>(Collections.emptyList(), PREFERRED_PAGE_SIZE, COUNT));
+		
+		ServiceRequest result = translator.toFhirResource(order);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getPriority(), equalTo(ServiceRequest.ServiceRequestPriority.STAT));
+	}
+	
+	@Test
+	public void toFhirResource_shouldTranslateOnScheduledDateUrgencyToRoutinePriority() {
+		TestOrder order = new TestOrder();
+		order.setUrgency(Order.Urgency.ON_SCHEDULED_DATE);
+		order.setScheduledDate(new Date());
+		
+		when(taskService.searchForTasks(any()))
+		        .thenReturn(new MockIBundleProvider<>(Collections.emptyList(), PREFERRED_PAGE_SIZE, COUNT));
+		
+		ServiceRequest result = translator.toFhirResource(order);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getPriority(), equalTo(ServiceRequest.ServiceRequestPriority.ROUTINE));
+	}
+	
+	@Test
 	public void toFhirResource_shouldTranslateOccurrence() {
 		TestOrder testOrder = new TestOrder();
 		Date fromDate = new Date();
