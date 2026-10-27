@@ -75,6 +75,8 @@ public class ServiceRequestTranslatorImplTest {
 	
 	private static final String INSTRUCTIONS = "collect before 9am";
 	
+	private static final String CLINICAL_HISTORY = "patient has a history of anemia";
+	
 	private static final String PATIENT_UUID = "14d4f066-15f5-102d-96e4-000c29c2a5d7";
 	
 	private static final String ENCOUNTER_UUID = "y403fafb-e5e4-42d0-9d11-4f52e89d123r";
@@ -420,6 +422,34 @@ public class ServiceRequestTranslatorImplTest {
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getPatientInstruction(), equalTo(INSTRUCTIONS));
+	}
+	
+	@Test
+	public void toFhirResource_shouldTranslateClinicalHistoryToNote() {
+		TestOrder order = new TestOrder();
+		order.setClinicalHistory(CLINICAL_HISTORY);
+		
+		when(taskService.searchForTasks(any()))
+		        .thenReturn(new MockIBundleProvider<>(Collections.emptyList(), PREFERRED_PAGE_SIZE, COUNT));
+		
+		ServiceRequest result = translator.toFhirResource(order);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getNote(), hasSize(1));
+		assertThat(result.getNoteFirstRep().getText(), equalTo(CLINICAL_HISTORY));
+	}
+	
+	@Test
+	public void toFhirResource_shouldNotAddNoteWhenClinicalHistoryIsNull() {
+		TestOrder order = new TestOrder();
+		
+		when(taskService.searchForTasks(any()))
+		        .thenReturn(new MockIBundleProvider<>(Collections.emptyList(), PREFERRED_PAGE_SIZE, COUNT));
+		
+		ServiceRequest result = translator.toFhirResource(order);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.hasNote(), equalTo(false));
 	}
 	
 	@Test
