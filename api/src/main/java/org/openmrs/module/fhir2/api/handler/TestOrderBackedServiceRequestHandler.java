@@ -32,8 +32,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * Default handler for the FHIR {@link ServiceRequest} resource, mapping onto the OpenMRS
- * {@code TestOrder} table. Single backing today — claims every incoming ServiceRequest. Carries the
- * CRUD wiring lifted from the original {@code FhirServiceRequestServiceImpl}.
+ * {@code TestOrder} table. Claims every incoming ServiceRequest.
  */
 @Component
 @Order(Ordered.LOWEST_PRECEDENCE)

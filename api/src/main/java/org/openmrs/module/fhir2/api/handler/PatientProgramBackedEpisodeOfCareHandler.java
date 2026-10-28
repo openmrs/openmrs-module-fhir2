@@ -29,8 +29,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * Default handler for the FHIR {@link EpisodeOfCare} resource, mapping onto the OpenMRS
- * {@code PatientProgram} table. Single backing today — claims every incoming EpisodeOfCare. Carries
- * the CRUD wiring lifted from the original {@code FhirEpisodeOfCareServiceImpl}.
+ * {@code PatientProgram} table. Claims every incoming EpisodeOfCare.
  * <p>
  * EpisodeOfCare is read-only in this module: its resource provider exposes only {@code @Read}, and
  * no {@code SearchQuery} is wired for this backing. The handler therefore opts out of search

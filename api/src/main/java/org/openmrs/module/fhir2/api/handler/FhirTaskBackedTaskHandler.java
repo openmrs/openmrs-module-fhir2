@@ -31,8 +31,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * Default handler for the FHIR {@link Task} resource, mapping onto the OpenMRS {@link FhirTask}
- * table. Single backing today — claims every incoming Task. Carries the CRUD wiring lifted from the
- * original {@code FhirTaskServiceImpl}.
+ * table. Claims every incoming Task.
  */
 @Component
 @Order(Ordered.LOWEST_PRECEDENCE)

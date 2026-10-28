@@ -32,9 +32,8 @@ import org.springframework.stereotype.Component;
 
 /**
  * Default handler for the FHIR {@link Observation} resource, mapping onto the OpenMRS {@code Obs}
- * table. Single backing today — claims every incoming Observation. Carries the CRUD wiring lifted
- * from the original {@code FhirObservationServiceImpl} and the {@code applyUpdate} override that
- * routes saves through {@code ObsService} to handle OpenMRS's obs-immutability semantics.
+ * table. Claims every incoming Observation. Overrides {@code applyUpdate} to route saves through
+ * {@code ObsService} to handle OpenMRS's obs-immutability semantics.
  */
 @Component
 @Order(Ordered.LOWEST_PRECEDENCE)

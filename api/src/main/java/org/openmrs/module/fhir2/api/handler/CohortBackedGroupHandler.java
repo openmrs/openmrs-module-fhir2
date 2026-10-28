@@ -32,8 +32,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * Default handler for the FHIR {@link Group} resource, mapping onto the OpenMRS {@code Cohort}
- * table. Single backing today — claims every incoming Group. Carries the CRUD wiring lifted from
- * the original {@code FhirGroupServiceImpl}.
+ * table. Claims every incoming Group.
  */
 @Component
 @Order(Ordered.LOWEST_PRECEDENCE)

@@ -43,9 +43,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * Default handler for the FHIR {@link Immunization} resource, mapping onto the OpenMRS {@code Obs}
- * table as an obs group. Single backing today — claims every incoming Immunization. Carries the
- * CRUD wiring and the create/delete/update overrides lifted from the original
- * {@code FhirImmunizationServiceImpl}.
+ * table as an obs group. Claims every incoming Immunization.
  * <p>
  * Immunizations are stored as obs groups under a designated grouping concept, so
  * {@link #search(SearchParameterMap)} narrows every search to that concept. That filter lives here

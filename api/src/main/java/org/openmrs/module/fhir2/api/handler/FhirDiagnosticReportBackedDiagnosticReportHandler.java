@@ -31,9 +31,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * Default handler for the FHIR {@link DiagnosticReport} resource, mapping onto the OpenMRS
- * {@code FhirDiagnosticReport} model. Single backing today — claims every incoming
- * DiagnosticReport. Carries the CRUD wiring lifted from the original
- * {@code FhirDiagnosticReportServiceImpl}.
+ * {@code FhirDiagnosticReport} model. Claims every incoming DiagnosticReport.
  */
 @Component
 @Order(Ordered.LOWEST_PRECEDENCE)

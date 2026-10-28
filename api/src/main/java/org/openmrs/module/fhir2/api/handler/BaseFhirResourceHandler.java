@@ -18,9 +18,8 @@ import org.openmrs.module.fhir2.api.impl.BaseFhirService;
  * Base class for {@link FhirResourceHandler} implementations that own a single OpenMRS-table
  * backing.
  * <p>
- * Today this is a pure alias for {@link BaseFhirService} — concrete handlers extend this for CRUD
- * wiring and declare {@code implements FhirResourceHandler<R>} themselves. The intent is for this
- * type to eventually subsume {@code BaseFhirService}'s role; new code should target this base so
- * the transition lands without churn.
+ * Concrete handlers extend this for CRUD wiring and declare
+ * {@code implements FhirResourceHandler<R>} themselves. New handlers should extend this rather than
+ * {@link BaseFhirService} directly, as it is intended to take over that class's role.
  */
 public abstract class BaseFhirResourceHandler<T extends IAnyResource, U extends OpenmrsObject & Auditable> extends BaseFhirService<T, U> {}

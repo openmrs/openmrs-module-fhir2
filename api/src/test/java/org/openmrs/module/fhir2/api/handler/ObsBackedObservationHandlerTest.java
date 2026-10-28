@@ -107,7 +107,6 @@ public class ObsBackedObservationHandlerTest {
 	
 	@Test
 	public void canHandle_shouldAlwaysReturnTrue() {
-		// Single backing today — handler claims every incoming Observation.
 		assertTrue(handler.canHandle(new Observation()));
 	}
 	

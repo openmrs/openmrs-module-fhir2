@@ -44,10 +44,14 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
+import org.openmrs.module.fhir2.api.handler.ConditionBackedConditionHandler;
+import org.openmrs.module.fhir2.api.handler.DiagnosisBackedConditionHandler;
 import org.openmrs.module.fhir2.api.handler.FhirResourceHandler;
 import org.openmrs.module.fhir2.api.search.param.ConditionSearchParams;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.providers.r4.MockIBundleProvider;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.OrderUtils;
 
 /**
  * Orchestrator-level tests for {@link FhirConditionServiceImpl}. Dispatch mechanics (probe-by-uuid,
@@ -68,10 +72,10 @@ public class FhirConditionServiceImplTest {
 	
 	private static final int END_INDEX = 100;
 	
-	@Mock
+	@Mock(extraInterfaces = Ordered.class)
 	private FhirResourceHandler<Condition> conditionHandler;
 	
-	@Mock
+	@Mock(extraInterfaces = Ordered.class)
 	private FhirResourceHandler<Condition> diagnosisHandler;
 	
 	@Mock
@@ -85,6 +89,11 @@ public class FhirConditionServiceImplTest {
 		        .thenReturn("http://fhir.openmrs.org/StructureDefinition/openmrs-condition");
 		lenient().when(diagnosisHandler.getImplicitProfile())
 		        .thenReturn("http://fhir.openmrs.org/StructureDefinition/openmrs-diagnosis");
+		// The real handlers' precedence decides a create that both claim.
+		lenient().when(((Ordered) conditionHandler).getOrder())
+		        .thenReturn(OrderUtils.getOrder(ConditionBackedConditionHandler.class));
+		lenient().when(((Ordered) diagnosisHandler).getOrder())
+		        .thenReturn(OrderUtils.getOrder(DiagnosisBackedConditionHandler.class));
 		// Mirror handler acceptsSearch — opt-in unless category names the other side.
 		lenient().when(conditionHandler.acceptsSearch(any())).thenAnswer(
 		    inv -> participatesByCategory(inv.getArgument(0), FhirConstants.CONDITION_CATEGORY_CODE_CONDITION));
@@ -92,7 +101,7 @@ public class FhirConditionServiceImplTest {
 		    inv -> participatesByCategory(inv.getArgument(0), FhirConstants.CONDITION_CATEGORY_CODE_DIAGNOSIS));
 		// Mirror handler canHandle — each looks only for its own category code, and the condition
 		// backing additionally owns the unmarked case. A body carrying both is therefore claimed by
-		// both, which is what the ambiguity test below relies on.
+		// both, and precedence decides between them.
 		lenient().when(conditionHandler.canHandle(any())).thenAnswer(inv -> {
 			Condition condition = inv.getArgument(0);
 			return !hasAnyCategoryCoding(condition)
@@ -171,16 +180,17 @@ public class FhirConditionServiceImplTest {
 	
 	/** Both backings claim a body carrying both categories, and they register as peers. */
 	@Test
-	public void create_shouldRejectConditionCarryingBothCategories() {
+	public void create_shouldDispatchConditionCarryingBothCategoriesToConditionHandler() {
 		Condition condition = newConditionWithCategory(FhirConstants.CONDITION_CATEGORY_CODE_CONDITION);
 		CodeableConcept alsoDiagnosis = new CodeableConcept();
 		alsoDiagnosis.addCoding(
 		    new Coding(FhirConstants.CONDITION_CATEGORY_SYSTEM_URI, FhirConstants.CONDITION_CATEGORY_CODE_DIAGNOSIS, null));
 		condition.addCategory(alsoDiagnosis);
+		when(conditionHandler.create(condition)).thenReturn(condition);
 		
-		assertThrows(InvalidRequestException.class, () -> service.create(condition));
+		service.create(condition);
 		
-		verify(conditionHandler, never()).create(any());
+		verify(conditionHandler).create(condition);
 		verify(diagnosisHandler, never()).create(any());
 	}
 	

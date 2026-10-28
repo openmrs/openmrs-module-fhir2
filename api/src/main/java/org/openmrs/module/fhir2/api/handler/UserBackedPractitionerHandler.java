@@ -113,10 +113,8 @@ public class UserBackedPractitionerHandler implements FhirResourceHandler<Practi
 	
 	@Override
 	public IBundleProvider search(@Nonnull SearchParameterMap params) {
-		// Preserve OLD behaviour: the previous orchestrator called userService.searchForUsers with
-		// an empty SearchParameterMap, returning every user regardless of the practitioner search
-		// filters. Pre-existing limitation worth fixing separately — keeping the behaviour stable
-		// across this migration.
+		// The practitioner search parameters are not mapped onto users, so every user is returned
+		// regardless of the filters.
 		return userService.searchForUsers(new SearchParameterMap());
 	}
 }

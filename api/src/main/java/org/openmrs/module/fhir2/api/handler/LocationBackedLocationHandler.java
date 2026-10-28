@@ -31,8 +31,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * Default handler for the FHIR {@link Location} resource, mapping onto the OpenMRS {@code Location}
- * table. Single backing today — claims every incoming Location. Carries the CRUD wiring lifted from
- * the original {@code FhirLocationServiceImpl}.
+ * table. Claims every incoming Location.
  */
 @Component
 @Order(Ordered.LOWEST_PRECEDENCE)

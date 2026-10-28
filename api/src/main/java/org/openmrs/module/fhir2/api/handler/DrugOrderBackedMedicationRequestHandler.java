@@ -31,8 +31,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * Default handler for the FHIR {@link MedicationRequest} resource, mapping onto the OpenMRS
- * {@code DrugOrder} table. Single backing today — claims every incoming MedicationRequest. Carries
- * the CRUD wiring lifted from the original {@code FhirMedicationRequestServiceImpl}.
+ * {@code DrugOrder} table. Claims every incoming MedicationRequest.
  */
 @Component
 @Order(Ordered.LOWEST_PRECEDENCE)

@@ -42,7 +42,7 @@ import org.springframework.stereotype.Component;
  * isn't {@code "encounter"}.
  */
 @Component
-@Order(Ordered.LOWEST_PRECEDENCE)
+@Order(Ordered.LOWEST_PRECEDENCE - 10)
 public class EncounterBackedEncounterHandler implements FhirResourceHandler<Encounter> {
 	
 	private static final String IMPLICIT_PROFILE = OPENMRS_FHIR_STRUCTURE_DEFINITION_PREFIX + "/openmrs-encounter";

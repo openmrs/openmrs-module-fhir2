@@ -45,16 +45,16 @@ import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
  * accept the search.
  * <h2>Handler priority and @Order</h2> Handlers are sorted by Spring's
  * {@link org.springframework.core.annotation.Order @Order} annotation (or by implementing
- * {@link org.springframework.core.Ordered}). Lower numerical value means higher priority — first to
- * claim a {@code canHandle} / first probed by {@code exists}.
+ * {@link org.springframework.core.Ordered}). Lower numerical value means higher priority: it wins a
+ * contested {@code canHandle}, is probed first by {@code exists} and {@code get}, and has its
+ * results listed first in a merged search.
  * <p>
  * Built-in handlers shipped by this module register at
- * {@link org.springframework.core.Ordered#LOWEST_PRECEDENCE} on purpose, so any external module's
- * handler with an unspecified or lower-valued {@code @Order} runs first and can override the
- * built-in mapping. External modules that want to <em>complement</em> rather than override should
- * still use a value lower than {@code LOWEST_PRECEDENCE} so the ordering is deterministic — beans
- * without an explicit {@code @Order} are tied at {@code LOWEST_PRECEDENCE} and their relative order
- * is undefined.
+ * {@link org.springframework.core.Ordered#LOWEST_PRECEDENCE}, or at {@code LOWEST_PRECEDENCE - 10}
+ * for the primary backing of a resource with several (the OpenMRS encounter, condition and provider
+ * backings). An external module's handler must declare a lower {@code @Order} value than the
+ * built-in it means to override or outrank; a bean without an explicit {@code @Order} is tied with
+ * the built-ins at {@code LOWEST_PRECEDENCE}, and the relative order of tied beans is undefined.
  * <p>
  * Two handlers that return the same {@link #getImplicitProfile() implicit profile} are treated as
  * the same backing: at startup the orchestrator keeps only the highest-priority one (lowest

@@ -52,22 +52,26 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
+import org.openmrs.module.fhir2.api.handler.EncounterBackedEncounterHandler;
 import org.openmrs.module.fhir2.api.handler.FhirResourceHandler;
 import org.openmrs.module.fhir2.api.handler.HandlerSupport;
+import org.openmrs.module.fhir2.api.handler.VisitBackedEncounterHandler;
 import org.openmrs.module.fhir2.api.search.param.EncounterSearchParams;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.providers.r4.MockIBundleProvider;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.OrderUtils;
 
 /**
  * Orchestrator-level tests for {@link FhirEncounterServiceImpl}. Dispatch mechanics (probe-by-uuid,
  * profile/canHandle routing, fan-out merge) are covered in {@link BaseCompositeFhirServiceTest},
  * and encounter/visit-specific CRUD lives in the handler tests under
  * {@code o.o.m.fhir2.api.handler}. What's left for this class is the encounter-specific
- * orchestration: that a create lands on the backing its type codings name (and is rejected when
- * they name both or neither), that {@code searchForEncounters} forwards the
- * {@code SearchParameterMap} through {@code doSearch}, and that {@code getEncounterEverything}
- * builds the right {@code SearchParameterMap}. The handler mocks here mirror what the real pair
- * does rather than re-testing handler logic.
+ * orchestration: that a create lands on the backing its type codings name (the encounter backing
+ * when they name both, and rejected when they name neither), that {@code searchForEncounters}
+ * forwards the {@code SearchParameterMap} through {@code doSearch}, and that
+ * {@code getEncounterEverything} builds the right {@code SearchParameterMap}. The handler mocks
+ * here mirror what the real pair does rather than re-testing handler logic.
  */
 @RunWith(MockitoJUnitRunner.class)
 public class FhirEncounterServiceImplTest {
@@ -84,10 +88,10 @@ public class FhirEncounterServiceImplTest {
 	
 	private static final int END_INDEX = 100;
 	
-	@Mock
+	@Mock(extraInterfaces = Ordered.class)
 	private FhirResourceHandler<Encounter> encounterHandler;
 	
-	@Mock
+	@Mock(extraInterfaces = Ordered.class)
 	private FhirResourceHandler<Encounter> visitHandler;
 	
 	@Mock
@@ -101,13 +105,18 @@ public class FhirEncounterServiceImplTest {
 		        .thenReturn("http://fhir.openmrs.org/StructureDefinition/openmrs-encounter");
 		lenient().when(visitHandler.getImplicitProfile())
 		        .thenReturn("http://fhir.openmrs.org/StructureDefinition/openmrs-visit");
+		// The real handlers' precedence decides a create that both claim.
+		lenient().when(((Ordered) encounterHandler).getOrder())
+		        .thenReturn(OrderUtils.getOrder(EncounterBackedEncounterHandler.class));
+		lenient().when(((Ordered) visitHandler).getOrder())
+		        .thenReturn(OrderUtils.getOrder(VisitBackedEncounterHandler.class));
 		// Each handler's acceptsSearch decides participation based on the tag in params (mirrors
 		// what the real handlers do — orchestrator just calls acceptsSearch and respects it).
 		lenient().when(encounterHandler.acceptsSearch(any()))
 		        .thenAnswer(inv -> participatesByTag(inv.getArgument(0), "encounter"));
 		lenient().when(visitHandler.acceptsSearch(any())).thenAnswer(inv -> participatesByTag(inv.getArgument(0), "visit"));
 		// Likewise for canHandle: each real handler looks only for its own type system, so a body
-		// naming both is claimed by both. The ambiguity tests below rely on that.
+		// naming both is claimed by both, and precedence decides between them.
 		lenient().when(encounterHandler.canHandle(any()))
 		        .thenAnswer(inv -> claims(inv.getArgument(0), FhirConstants.ENCOUNTER_TYPE_SYSTEM_URI));
 		lenient().when(visitHandler.canHandle(any()))
@@ -154,19 +163,17 @@ public class FhirEncounterServiceImplTest {
 		verify(encounterHandler, never()).create(any());
 	}
 	
-	/**
-	 * Regression guard: resolving this by declaration order would write an OpenMRS Encounter row for a
-	 * request the client has no reason to read as encounter-flavoured.
-	 */
 	@Test
-	public void create_shouldRejectEncounterCarryingBothTypeSystems() {
+	public void create_shouldDispatchEncounterCarryingBothTypeSystemsToEncounterHandler() {
 		CodeableConcept type = new CodeableConcept();
 		type.addCoding().setSystem(FhirConstants.VISIT_TYPE_SYSTEM_URI).setCode("1");
 		type.addCoding().setSystem(FhirConstants.ENCOUNTER_TYPE_SYSTEM_URI).setCode("2");
+		Encounter encounter = new Encounter().addType(type);
+		when(encounterHandler.create(encounter)).thenReturn(encounter);
 		
-		assertThrows(InvalidRequestException.class, () -> service.create(new Encounter().addType(type)));
+		service.create(encounter);
 		
-		verify(encounterHandler, never()).create(any());
+		verify(encounterHandler).create(encounter);
 		verify(visitHandler, never()).create(any());
 	}
 	

@@ -30,8 +30,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * Default handler for the FHIR {@link Patient} resource, mapping onto the OpenMRS {@code Patient}
- * table. Single backing today — claims every incoming Patient. Carries the CRUD wiring lifted from
- * the original {@code FhirPatientServiceImpl}.
+ * table. Claims every incoming Patient.
  */
 @Component
 @Order(Ordered.LOWEST_PRECEDENCE)

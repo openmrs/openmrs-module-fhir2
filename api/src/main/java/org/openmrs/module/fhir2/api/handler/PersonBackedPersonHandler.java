@@ -31,9 +31,8 @@ import org.springframework.stereotype.Component;
 
 /**
  * Default handler for the FHIR {@link Person} resource, mapping onto the OpenMRS {@code Person}
- * table. Single backing today — claims every incoming Person. Carries the CRUD wiring lifted from
- * the original {@code FhirPersonServiceImpl}, including the {@code isVoided} override that reads
- * OpenMRS's person-specific voided flag.
+ * table. Claims every incoming Person. Overrides {@code isVoided} to read OpenMRS's person-specific
+ * voided flag.
  */
 @Component
 @Order(Ordered.LOWEST_PRECEDENCE)

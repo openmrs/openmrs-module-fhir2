@@ -35,10 +35,10 @@ import org.springframework.stereotype.Component;
  * {@link FhirOpenmrsProviderService}. Sibling of {@link UserBackedPractitionerHandler}, which
  * applies the same composition pattern over {@code FhirUserService}.
  * <p>
- * Claims any incoming Practitioner on create — provider is the default backing for new Practitioner
- * resources (the OLD orchestrator created providers and never users from a FHIR Practitioner
- * write). The orchestrator's content-based dispatch resolves to this handler unless
- * {@code meta.profile} explicitly names the user-backed profile.
+ * Claims any incoming Practitioner on create: a provider is the default backing for new
+ * Practitioner resources, since users cannot be written through the FHIR API. The orchestrator's
+ * content-based dispatch resolves to this handler unless {@code meta.profile} names another
+ * backing.
  */
 @Component
 @Order(Ordered.LOWEST_PRECEDENCE - 10)
@@ -57,10 +57,8 @@ public class ProviderBackedPractitionerHandler implements FhirResourceHandler<Pr
 	
 	@Override
 	public boolean canHandle(@Nonnull Practitioner resource) {
-		// The OLD orchestrator routed every create to the provider backing — there's no
-		// content-level discriminator (no analogue of encounter.type[].coding.system). The
-		// provider handler claims by default; an external module wanting to override or add a
-		// new backing should use meta.profile to discriminate.
+		// There is no content-level discriminator (no analogue of encounter.type[].coding.system), so
+		// the provider backing claims by default; another backing must be selected via meta.profile.
 		return true;
 	}
 	

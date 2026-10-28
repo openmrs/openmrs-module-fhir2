@@ -126,8 +126,7 @@ public class UserBackedPractitionerHandlerTest {
 	
 	@Test
 	public void search_shouldDelegateToUserServiceWithEmptySearchParams() {
-		// Preserves the OLD behaviour: user search ignored practitioner search params and always
-		// returned every user. Documented limitation worth fixing separately.
+		// Practitioner search parameters are not mapped onto users, so every user is returned.
 		IBundleProvider expected = new SimpleBundleProvider();
 		when(userService.searchForUsers(any())).thenReturn(expected);
 		

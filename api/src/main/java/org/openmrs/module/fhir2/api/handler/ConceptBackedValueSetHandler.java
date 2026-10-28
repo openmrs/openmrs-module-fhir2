@@ -31,8 +31,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * Default handler for the FHIR {@link ValueSet} resource, mapping onto the OpenMRS {@code Concept}
- * table (a concept and its set members). Single backing today — claims every incoming ValueSet.
- * Carries the CRUD wiring lifted from the original {@code FhirValueSetServiceImpl}.
+ * table (a concept and its set members). Claims every incoming ValueSet.
  */
 @Component
 @Order(Ordered.LOWEST_PRECEDENCE)

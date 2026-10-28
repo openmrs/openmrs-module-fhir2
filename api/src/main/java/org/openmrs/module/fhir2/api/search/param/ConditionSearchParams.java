@@ -62,8 +62,7 @@ public class ConditionSearchParams extends BaseResourceSearchParams {
 	@Override
 	public SearchParameterMap toSearchParameterMap() {
 		// category is included so the composite orchestrator's handlers can decide via acceptsSearch
-		// whether to participate in the fan-out. The condition/diagnosis DAOs ignore CATEGORY_SEARCH_HANDLER
-		// today; if a backing ever needs to filter by category at the DAO level, it can add a case.
+		// whether to participate in the fan-out; the condition and diagnosis DAOs do not filter on it.
 		return baseSearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, getPatientParam())
 		        .addParameter(FhirConstants.CODED_SEARCH_HANDLER, getCode())
 		        .addParameter(FhirConstants.CONDITION_CLINICAL_STATUS_HANDLER, getClinicalStatus())

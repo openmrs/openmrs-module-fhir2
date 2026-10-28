@@ -31,8 +31,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * Default handler for the FHIR {@link AllergyIntolerance} resource, mapping onto the OpenMRS
- * {@code Allergy} table. Single backing today — claims every incoming AllergyIntolerance. Carries
- * the CRUD wiring lifted from the original {@code FhirAllergyIntoleranceServiceImpl}.
+ * {@code Allergy} table. Claims every incoming AllergyIntolerance.
  */
 @Component
 @Order(Ordered.LOWEST_PRECEDENCE)

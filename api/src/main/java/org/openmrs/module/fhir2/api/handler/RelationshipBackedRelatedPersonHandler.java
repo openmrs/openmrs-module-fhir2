@@ -31,8 +31,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * Default handler for the FHIR {@link RelatedPerson} resource, mapping onto the OpenMRS
- * {@code Relationship} table. Single backing today — claims every incoming RelatedPerson. Carries
- * the CRUD wiring lifted from the original {@code FhirRelatedPersonServiceImpl}.
+ * {@code Relationship} table. Claims every incoming RelatedPerson.
  */
 @Component
 @Order(Ordered.LOWEST_PRECEDENCE)

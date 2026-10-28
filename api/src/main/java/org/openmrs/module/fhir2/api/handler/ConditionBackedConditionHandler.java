@@ -43,7 +43,7 @@ import org.springframework.stereotype.Component;
  * {@code "problem-list-item"}.
  */
 @Component
-@Order(Ordered.LOWEST_PRECEDENCE)
+@Order(Ordered.LOWEST_PRECEDENCE - 10)
 public class ConditionBackedConditionHandler implements FhirResourceHandler<Condition> {
 	
 	private static final String IMPLICIT_PROFILE = OPENMRS_FHIR_STRUCTURE_DEFINITION_PREFIX + "/openmrs-condition";
