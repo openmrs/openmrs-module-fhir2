@@ -216,6 +216,48 @@ public class CompositeBundleProviderTest {
 	}
 	
 	@Test
+	public void shouldNotRepeatAnIncludeSharedByTwoProviders() {
+		// given — both providers' pages _include the same resource
+		when(firstProvider.size()).thenReturn(1);
+		when(secondProvider.size()).thenReturn(1);
+		
+		List<IBaseResource> firstChunk = patientList("a1", "shared");
+		List<IBaseResource> secondChunk = patientList("b1", "shared");
+		when(firstProvider.getResources(0, 1)).thenReturn(firstChunk);
+		when(secondProvider.getResources(0, 1)).thenReturn(secondChunk);
+		
+		CompositeBundleProvider provider = new CompositeBundleProvider(Arrays.asList(firstProvider, secondProvider),
+		        globalPropertyService);
+		
+		// when
+		List<IBaseResource> result = provider.getResources(0, 2);
+		
+		// then
+		assertThat(idsOf(result), contains("a1", "b1", "shared"));
+	}
+	
+	@Test
+	public void shouldNotRepeatAMatchAsAnInclude() {
+		// given — the first provider's page _includes the second provider's match
+		when(firstProvider.size()).thenReturn(1);
+		when(secondProvider.size()).thenReturn(1);
+		
+		List<IBaseResource> firstChunk = patientList("a1", "b1");
+		List<IBaseResource> secondChunk = patientList("b1");
+		when(firstProvider.getResources(0, 1)).thenReturn(firstChunk);
+		when(secondProvider.getResources(0, 1)).thenReturn(secondChunk);
+		
+		CompositeBundleProvider provider = new CompositeBundleProvider(Arrays.asList(firstProvider, secondProvider),
+		        globalPropertyService);
+		
+		// when
+		List<IBaseResource> result = provider.getResources(0, 2);
+		
+		// then
+		assertThat(idsOf(result), contains("a1", "b1"));
+	}
+	
+	@Test
 	public void shouldConcatenateAcrossThreeProvidersWhenSpanningMultipleBoundaries() {
 		// given — sizes 2, 2, 2. Page [1, 5) takes 1 from p1, 2 from p2, 1 from p3.
 		when(firstProvider.size()).thenReturn(2);

@@ -15,12 +15,15 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import lombok.Getter;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
@@ -155,9 +158,12 @@ public class CompositeBundleProvider implements IBundleProvider {
 		}
 		
 		// Cross-provider: split each chunk into mains and includes and concatenate
-		// (mains-from-p0, mains-from-p1, ..., includes-from-p0, includes-from-p1, ...).
+		// (mains-from-p0, mains-from-p1, ..., includes-from-p0, includes-from-p1, ...). Each provider
+		// resolves its own includes, so several may include the same resource, or include one that
+		// another returned as a match; a bundle may hold each resource only once.
 		List<IBaseResource> mains = new ArrayList<>();
 		List<IBaseResource> includes = new ArrayList<>();
+		Set<String> seen = new HashSet<>();
 		
 		for (int i = firstHit; i <= lastHit; i++) {
 			if (localFrom[i] == localTo[i]) {
@@ -171,7 +177,11 @@ public class CompositeBundleProvider implements IBundleProvider {
 			
 			int requestedMains = localTo[i] - localFrom[i];
 			int actualMains = Math.min(requestedMains, chunk.size());
-			mains.addAll(chunk.subList(0, actualMains));
+			for (IBaseResource main : chunk.subList(0, actualMains)) {
+				seen.add(identityOf(main));
+				mains.add(main);
+			}
+			
 			if (chunk.size() > actualMains) {
 				includes.addAll(chunk.subList(actualMains, chunk.size()));
 			}
@@ -179,8 +189,28 @@ public class CompositeBundleProvider implements IBundleProvider {
 		
 		List<IBaseResource> result = new ArrayList<>(mains.size() + includes.size());
 		result.addAll(mains);
-		result.addAll(includes);
+		for (IBaseResource include : includes) {
+			String identity = identityOf(include);
+			if (identity == null || seen.add(identity)) {
+				result.add(include);
+			}
+		}
+		
 		return result;
+	}
+	
+	/**
+	 * @return the resource's type and id, or {@code null} for a resource without an id, which cannot be
+	 *         recognised as a duplicate
+	 */
+	private static String identityOf(IBaseResource resource) {
+		if (resource == null || resource.getIdElement() == null || resource.getIdElement().getIdPart() == null) {
+			return null;
+		}
+		
+		IIdType id = resource.getIdElement();
+		String type = id.hasResourceType() ? id.getResourceType() : resource.getClass().getSimpleName();
+		return type + "/" + id.getIdPart();
 	}
 	
 	@Override
