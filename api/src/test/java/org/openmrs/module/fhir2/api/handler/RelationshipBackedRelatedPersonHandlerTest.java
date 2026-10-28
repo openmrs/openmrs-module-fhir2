@@ -39,6 +39,7 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Address;
@@ -249,6 +250,18 @@ public class RelationshipBackedRelatedPersonHandlerTest {
 	@Test
 	public void get_shouldThrowResourceNotFoundForBadUuid() {
 		assertThrows(ResourceNotFoundException.class, () -> handler.get(WRONG_RELATED_PERSON_UUID));
+	}
+	
+	@Test
+	public void get_shouldThrowResourceGoneForVoidedRelationship() {
+		// given
+		Relationship voidedRelationship = new Relationship();
+		voidedRelationship.setUuid(RELATED_PERSON_UUID);
+		voidedRelationship.setVoided(true);
+		when(dao.get(RELATED_PERSON_UUID)).thenReturn(voidedRelationship);
+		
+		// when / then
+		assertThrows(ResourceGoneException.class, () -> handler.get(RELATED_PERSON_UUID));
 	}
 	
 	// ---- search ----

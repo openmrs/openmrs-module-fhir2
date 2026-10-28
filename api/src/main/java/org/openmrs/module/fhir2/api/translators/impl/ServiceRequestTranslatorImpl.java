@@ -36,6 +36,8 @@ import org.openmrs.Encounter;
 import org.openmrs.Order;
 import org.openmrs.Provider;
 import org.openmrs.TestOrder;
+import org.openmrs.api.context.Context;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirTaskService;
 import org.openmrs.module.fhir2.api.search.param.TaskSearchParams;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
@@ -102,7 +104,9 @@ public class ServiceRequestTranslatorImpl implements ServiceRequestTranslator<Te
 		
 		serviceRequest.setRequester(providerReferenceTranslator.toFhirResource(order.getOrderer()));
 		
-		serviceRequest.setPerformer(Collections.singletonList(determineServiceRequestPerformer(order.getUuid())));
+		if (Context.hasPrivilege(FhirConstants.GET_TASKS_PRIVILEGE)) {
+			serviceRequest.setPerformer(Collections.singletonList(determineServiceRequestPerformer(order.getUuid())));
+		}
 		
 		serviceRequest
 		        .setOccurrence(new Period().setStart(order.getEffectiveStartDate()).setEnd(order.getEffectiveStopDate()));

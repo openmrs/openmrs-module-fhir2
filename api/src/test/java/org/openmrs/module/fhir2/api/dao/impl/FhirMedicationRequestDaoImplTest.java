@@ -48,6 +48,9 @@ public class FhirMedicationRequestDaoImplTest extends BaseFhirContextSensitiveTe
 	
 	private static final String BAD_DRUG_ORDER_UUID = "uie3b9a2-4de5-4b12-ac40-jk90sdh";
 	
+	// TestOrder (order_id 7) from the standard test dataset
+	private static final String TEST_ORDER_UUID = "2c96f25c-4949-4f72-9931-d808fbc226df";
+	
 	private static final Integer DISCONTINUE_ORDER_ID = 1008;
 	
 	private static final String DISCONTINUE_ORDER_UUID = "b951a436-c775-4dfc-9432-e19446d18c28";
@@ -79,6 +82,31 @@ public class FhirMedicationRequestDaoImplTest extends BaseFhirContextSensitiveTe
 	public void getMedicationRequestByUuid_shouldReturnNullWhenCalledWithBadUuid() {
 		DrugOrder drugOrder = dao.get(BAD_DRUG_ORDER_UUID);
 		assertThat(drugOrder, nullValue());
+	}
+	
+	@Test
+	public void exists_shouldReturnTrueForDrugOrder() {
+		// given
+		String uuid = DRUG_ORDER_UUID;
+		
+		// when
+		boolean result = dao.exists(uuid);
+		
+		// then
+		assertThat(result, equalTo(true));
+	}
+	
+	@Test
+	public void exists_shouldReturnFalseForTestOrder() {
+		// given
+		// orders is a joined-subclass hierarchy, so the query must be restricted to drug_order rows
+		String uuid = TEST_ORDER_UUID;
+		
+		// when
+		boolean result = dao.exists(uuid);
+		
+		// then
+		assertThat(result, equalTo(false));
 	}
 	
 	@Test

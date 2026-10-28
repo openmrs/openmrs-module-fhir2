@@ -36,6 +36,8 @@ public class FhirLocationDaoImplTest extends BaseFhirContextSensitiveTest {
 	
 	private static final String UNKNOWN_LOCATION_UUID = "8516d594-9c31-4bd3-bfec-b42b2f8a8444";
 	
+	private static final String RETIRED_LOCATION_UUID = "689f6212-95da-466b-aac7-acdef0689fef";
+	
 	private static final String LOCATION_ATTRIBUTE_TYPE_UUID = "cb5703b1-0d1e-47e5-9d5b-d3ab77bccb9d";
 	
 	private static final String LOCATION_TAG_UUID = "cb5703b1-0d1e-47e5-9d5b-d3ab77baab9d";
@@ -68,6 +70,20 @@ public class FhirLocationDaoImplTest extends BaseFhirContextSensitiveTest {
 		Location location = fhirLocationDao.get(UNKNOWN_LOCATION_UUID);
 		
 		assertThat(location, nullValue());
+	}
+	
+	@Test
+	public void exists_shouldReturnTrueForRetiredLocation() {
+		// given
+		String uuid = RETIRED_LOCATION_UUID;
+		
+		// when
+		boolean result = fhirLocationDao.exists(uuid);
+		
+		// then
+		// must agree with get(), which does not filter out retired metadata
+		assertThat(result, equalTo(true));
+		assertThat(fhirLocationDao.get(uuid), notNullValue());
 	}
 	
 	@Test

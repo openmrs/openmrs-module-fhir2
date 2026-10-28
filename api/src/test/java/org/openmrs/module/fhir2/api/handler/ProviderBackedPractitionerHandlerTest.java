@@ -14,11 +14,14 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.junit.Before;
@@ -114,6 +117,36 @@ public class ProviderBackedPractitionerHandlerTest {
 		
 		assertThat(result, sameInstance(practitioner));
 		verify(providerService).update(PRACTITIONER_UUID, practitioner);
+	}
+	
+	@Test
+	public void updateWithRequestDetails_shouldPassCreateIfNotExistsThrough() {
+		// given
+		RequestDetails requestDetails = mock(RequestDetails.class);
+		when(providerService.update(PRACTITIONER_UUID, practitioner, requestDetails, true)).thenReturn(practitioner);
+		
+		// when
+		Practitioner result = handler.update(PRACTITIONER_UUID, practitioner, requestDetails, true);
+		
+		// then
+		assertThat(result, sameInstance(practitioner));
+		verify(providerService).update(PRACTITIONER_UUID, practitioner, requestDetails, true);
+	}
+	
+	@Test
+	public void patch_shouldDelegateToProviderService() {
+		// given
+		RequestDetails requestDetails = mock(RequestDetails.class);
+		String body = "[]";
+		when(providerService.patch(PRACTITIONER_UUID, PatchTypeEnum.JSON_PATCH, body, requestDetails))
+		        .thenReturn(practitioner);
+		
+		// when
+		Practitioner result = handler.patch(PRACTITIONER_UUID, PatchTypeEnum.JSON_PATCH, body, requestDetails);
+		
+		// then
+		assertThat(result, sameInstance(practitioner));
+		verify(providerService).patch(PRACTITIONER_UUID, PatchTypeEnum.JSON_PATCH, body, requestDetails);
 	}
 	
 	@Test

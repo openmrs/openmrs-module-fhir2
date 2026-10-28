@@ -13,6 +13,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertThrows;
 
 import java.util.Optional;
 
@@ -112,24 +113,36 @@ public class FhirContactPointMapDaoImplTest extends BaseFhirContextSensitiveTest
 	}
 	
 	@Test
-	public void getFhirContactPointMapForAttributeType_shouldRetrieveContactPointMapWhenLocationAttributeTypeIsFound() {
+	public void getFhirContactPointMapForLocationAttributeType_shouldRetrieveContactPointMap() {
 		locationAttributeType = locationService.getLocationAttributeTypeByName("telecom");
 		assertThat(locationAttributeType, notNullValue());
 		assertThat(locationAttributeType.getUuid(), equalTo(LOCATION_ATTRIBUTE_TYPE_UUID));
 		
 		Optional<FhirContactPointMap> result = fhirContactPointMapDao
-		        .getFhirContactPointMapForAttributeType(locationAttributeType);
+		        .getFhirContactPointMapForLocationAttributeType(locationAttributeType);
 		assertThat(result, notNullValue());
 	}
 	
 	@Test
-	public void getFhirContactPointMapForAttributeType_shouldRetrieveContactPointMapWhenProviderAttributeTypeIsFound() {
+	public void getFhirContactPointMapForProviderAttributeType_shouldRetrieveContactPointMap() {
 		providerAttributeType = providerService.getProviderAttributeTypeByUuid(PROVIDER_ATTRIBUTE_TYPE_UUID);
 		assertThat(providerAttributeType, notNullValue());
 		assertThat(providerAttributeType.getUuid(), equalTo(PROVIDER_ATTRIBUTE_TYPE_UUID));
 		
 		Optional<FhirContactPointMap> result = fhirContactPointMapDao
-		        .getFhirContactPointMapForAttributeType(providerAttributeType);
+		        .getFhirContactPointMapForProviderAttributeType(providerAttributeType);
 		assertThat(result, notNullValue());
+	}
+	
+	@Test
+	public void saveFhirContactPointMapForLocationAttributeType_shouldRejectMapFromAnotherDomain() {
+		// given
+		// the save is guarded by the location privilege, so it must not accept a person map
+		FhirContactPointMap contactPointMap = new FhirContactPointMap();
+		contactPointMap.setAttributeTypeDomain("person");
+		
+		// when / then
+		assertThrows(IllegalArgumentException.class,
+		    () -> fhirContactPointMapDao.saveFhirContactPointMapForLocationAttributeType(contactPointMap));
 	}
 }

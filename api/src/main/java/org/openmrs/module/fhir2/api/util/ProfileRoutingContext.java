@@ -46,7 +46,7 @@ public class ProfileRoutingContext {
 		Set<String> profiles = requestedProfiles.get();
 		return profiles == null ? Collections.emptySet() : profiles;
 	}
-
+	
 	/**
 	 * Records the profiles requested by the current request, replacing any previous value. Passing
 	 * {@code null} or an empty collection clears the holder rather than storing an empty set, so a
@@ -59,7 +59,7 @@ public class ProfileRoutingContext {
 			clear();
 			return;
 		}
-
+		
 		requestedProfiles.set(Collections.unmodifiableSet(new LinkedHashSet<>(profiles)));
 	}
 	

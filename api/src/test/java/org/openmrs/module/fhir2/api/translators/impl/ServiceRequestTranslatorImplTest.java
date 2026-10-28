@@ -11,6 +11,7 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
@@ -18,6 +19,8 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
@@ -34,6 +37,7 @@ import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.Task;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -46,6 +50,8 @@ import org.openmrs.OrderType;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
 import org.openmrs.TestOrder;
+import org.openmrs.api.context.Context;
+import org.openmrs.api.context.UserContext;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.FhirTestConstants;
 import org.openmrs.module.fhir2.api.FhirTaskService;
@@ -104,6 +110,9 @@ public class ServiceRequestTranslatorImplTest {
 	@Mock
 	private PractitionerReferenceTranslator<Provider> practitionerReferenceTranslator;
 	
+	@Mock
+	private UserContext userContext;
+	
 	private TestOrder discontinuedTestOrder;
 	
 	@Before
@@ -128,6 +137,15 @@ public class ServiceRequestTranslatorImplTest {
 		discontinuedTestOrder.setUuid(DISCONTINUED_TEST_ORDER_UUID);
 		setOrderNumberByReflection(discontinuedTestOrder, DISCONTINUED_TEST_ORDER_NUMBER);
 		discontinuedTestOrder.setPreviousOrder(order);
+		
+		// the performer lookup is gated on Context.hasPrivilege(), which reads the thread's UserContext
+		lenient().when(userContext.hasPrivilege(FhirConstants.GET_TASKS_PRIVILEGE)).thenReturn(true);
+		Context.setUserContext(userContext);
+	}
+	
+	@After
+	public void tearDown() {
+		Context.clearUserContext();
 	}
 	
 	@Test
@@ -550,6 +568,21 @@ public class ServiceRequestTranslatorImplTest {
 		assertThat(result, notNullValue());
 		assertThat(result, hasSize(1));
 		assertThat(result.iterator().next().getReference(), containsString(ORGANIZATION_UUID));
+	}
+	
+	@Test
+	public void toFhirResource_shouldOmitPerformerWhenUserCannotReadTasks() {
+		// given
+		TestOrder order = new TestOrder();
+		order.setUuid(SERVICE_REQUEST_UUID);
+		when(userContext.hasPrivilege(FhirConstants.GET_TASKS_PRIVILEGE)).thenReturn(false);
+		
+		// when
+		Collection<Reference> result = translator.toFhirResource(order).getPerformer();
+		
+		// then
+		assertThat(result, empty());
+		verifyNoInteractions(taskService);
 	}
 	
 	@Test

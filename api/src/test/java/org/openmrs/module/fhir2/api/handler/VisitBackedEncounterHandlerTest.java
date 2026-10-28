@@ -15,12 +15,15 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -194,6 +197,35 @@ public class VisitBackedEncounterHandlerTest {
 		
 		assertThat(result, sameInstance(fhirEncounter));
 		verify(visitService).update(ENCOUNTER_UUID, fhirEncounter);
+	}
+	
+	@Test
+	public void updateWithRequestDetails_shouldPassCreateIfNotExistsThrough() {
+		// given
+		RequestDetails requestDetails = mock(RequestDetails.class);
+		when(visitService.update(ENCOUNTER_UUID, fhirEncounter, requestDetails, true)).thenReturn(fhirEncounter);
+		
+		// when
+		Encounter result = handler.update(ENCOUNTER_UUID, fhirEncounter, requestDetails, true);
+		
+		// then
+		assertThat(result, sameInstance(fhirEncounter));
+		verify(visitService).update(ENCOUNTER_UUID, fhirEncounter, requestDetails, true);
+	}
+	
+	@Test
+	public void patch_shouldDelegateToVisitService() {
+		// given
+		RequestDetails requestDetails = mock(RequestDetails.class);
+		String body = "[]";
+		when(visitService.patch(ENCOUNTER_UUID, PatchTypeEnum.JSON_PATCH, body, requestDetails)).thenReturn(fhirEncounter);
+		
+		// when
+		Encounter result = handler.patch(ENCOUNTER_UUID, PatchTypeEnum.JSON_PATCH, body, requestDetails);
+		
+		// then
+		assertThat(result, sameInstance(fhirEncounter));
+		verify(visitService).patch(ENCOUNTER_UUID, PatchTypeEnum.JSON_PATCH, body, requestDetails);
 	}
 	
 	@Test

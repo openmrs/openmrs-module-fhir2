@@ -15,12 +15,15 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -193,6 +196,36 @@ public class DiagnosisBackedConditionHandlerTest {
 		
 		assertThat(result, sameInstance(fhirCondition));
 		verify(diagnosisService).update(CONDITION_UUID, fhirCondition);
+	}
+	
+	@Test
+	public void updateWithRequestDetails_shouldPassCreateIfNotExistsThrough() {
+		// given
+		RequestDetails requestDetails = mock(RequestDetails.class);
+		when(diagnosisService.update(CONDITION_UUID, fhirCondition, requestDetails, true)).thenReturn(fhirCondition);
+		
+		// when
+		Condition result = handler.update(CONDITION_UUID, fhirCondition, requestDetails, true);
+		
+		// then
+		assertThat(result, sameInstance(fhirCondition));
+		verify(diagnosisService).update(CONDITION_UUID, fhirCondition, requestDetails, true);
+	}
+	
+	@Test
+	public void patch_shouldDelegateToDiagnosisService() {
+		// given
+		RequestDetails requestDetails = mock(RequestDetails.class);
+		String body = "[]";
+		when(diagnosisService.patch(CONDITION_UUID, PatchTypeEnum.JSON_PATCH, body, requestDetails))
+		        .thenReturn(fhirCondition);
+		
+		// when
+		Condition result = handler.patch(CONDITION_UUID, PatchTypeEnum.JSON_PATCH, body, requestDetails);
+		
+		// then
+		assertThat(result, sameInstance(fhirCondition));
+		verify(diagnosisService).patch(CONDITION_UUID, PatchTypeEnum.JSON_PATCH, body, requestDetails);
 	}
 	
 	@Test

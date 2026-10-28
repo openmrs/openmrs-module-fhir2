@@ -17,6 +17,7 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -30,6 +31,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.Location;
 import org.junit.Before;
@@ -169,6 +171,16 @@ public class LocationBackedLocationHandlerTest {
 		assertThat(result.getId(), equalTo(LOCATION_UUID));
 		assertThat(result.getName(), equalTo(LOCATION_NAME));
 		assertThat(result.getDescription(), equalTo(LOCATION_DESCRIPTION));
+	}
+	
+	@Test
+	public void get_shouldThrowResourceGoneForRetiredLocation() {
+		// given
+		location.setRetired(true);
+		when(dao.get(LOCATION_UUID)).thenReturn(location);
+		
+		// when / then
+		assertThrows(ResourceGoneException.class, () -> handler.get(LOCATION_UUID));
 	}
 	
 	// ---- search ----

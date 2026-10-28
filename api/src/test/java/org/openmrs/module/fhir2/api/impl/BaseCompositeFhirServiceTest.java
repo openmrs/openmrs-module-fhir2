@@ -53,6 +53,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.handler.FhirResourceHandler;
 import org.openmrs.module.fhir2.api.search.CompositeBundleProvider;
@@ -157,6 +158,28 @@ public class BaseCompositeFhirServiceTest {
 	}
 	
 	@Test
+	public void getShouldFallThroughWhenFirstHandlerDeniesAccess() {
+		// given
+		doThrow(new APIAuthenticationException("denied")).when(primaryHandler).get(UUID_SECONDARY);
+		Encounter fromSecondary = encounter(UUID_SECONDARY);
+		doReturn(fromSecondary).when(secondaryHandler).get(UUID_SECONDARY);
+		
+		// when
+		Encounter result = service.get(UUID_SECONDARY);
+		
+		// then
+		assertThat(result, sameInstance(fromSecondary));
+	}
+	
+	@Test
+	public void getShouldReportNotFoundWhenEveryHandlerDeniesAccess() {
+		doThrow(new APIAuthenticationException("denied")).when(primaryHandler).get(UUID_PRIMARY);
+		doThrow(new APIAuthenticationException("denied")).when(secondaryHandler).get(UUID_PRIMARY);
+		
+		assertThrows(ResourceNotFoundException.class, () -> service.get(UUID_PRIMARY));
+	}
+	
+	@Test
 	public void getShouldStampImplicitProfile() {
 		Encounter raw = encounter(UUID_PRIMARY);
 		doReturn(raw).when(primaryHandler).get(UUID_PRIMARY);
@@ -194,6 +217,21 @@ public class BaseCompositeFhirServiceTest {
 		assertThat(results, hasSize(2));
 		assertThat(results.stream().map(e -> e.getIdElement().getIdPart()).collect(Collectors.toList()),
 		    contains(UUID_PRIMARY, UUID_SECONDARY));
+	}
+	
+	@Test
+	public void getCollectionShouldOmitHandlersThatDenyAccess() {
+		// given
+		List<String> uuids = Arrays.asList(UUID_PRIMARY, UUID_SECONDARY);
+		when(primaryHandler.get(uuids)).thenThrow(new APIAuthenticationException("denied"));
+		when(secondaryHandler.get(uuids)).thenReturn(Collections.singletonList(encounter(UUID_SECONDARY)));
+		
+		// when
+		List<Encounter> results = service.get(uuids);
+		
+		// then
+		assertThat(results.stream().map(e -> e.getIdElement().getIdPart()).collect(Collectors.toList()),
+		    contains(UUID_SECONDARY));
 	}
 	
 	// ---- create ----
@@ -387,6 +425,22 @@ public class BaseCompositeFhirServiceTest {
 	}
 	
 	@Test
+	public void updateShouldProbePastAHandlerThatDeniesAccess() {
+		// given
+		Encounter incoming = new Encounter();
+		when(primaryHandler.exists(UUID_SECONDARY)).thenThrow(new APIAuthenticationException("denied"));
+		when(secondaryHandler.exists(UUID_SECONDARY)).thenReturn(true);
+		when(secondaryHandler.update(eq(UUID_SECONDARY), eq(incoming), any(), anyBoolean()))
+		        .thenReturn(encounter(UUID_SECONDARY));
+		
+		// when
+		service.update(UUID_SECONDARY, incoming);
+		
+		// then
+		verify(secondaryHandler).update(eq(UUID_SECONDARY), eq(incoming), any(), anyBoolean());
+	}
+	
+	@Test
 	public void updateShouldRouteThroughCreateDispatchWhenCreateIfNotExistsAndNoOwner() {
 		// given — no handler owns the uuid, but primary canHandle the new resource
 		Encounter incoming = new Encounter();
@@ -454,6 +508,14 @@ public class BaseCompositeFhirServiceTest {
 		
 		verify(primaryHandler).delete(UUID_PRIMARY);
 		verify(secondaryHandler, never()).delete(anyString());
+	}
+	
+	@Test
+	public void deleteShouldReportNotFoundWhenTheOnlyPossibleOwnerDeniesAccess() {
+		when(primaryHandler.exists(UUID_PRIMARY)).thenThrow(new APIAuthenticationException("denied"));
+		
+		assertThrows(ResourceNotFoundException.class, () -> service.delete(UUID_PRIMARY));
+		verify(primaryHandler, never()).delete(anyString());
 	}
 	
 	// ---- search ----
@@ -551,7 +613,7 @@ public class BaseCompositeFhirServiceTest {
 	@Test
 	public void searchShouldStampEveryResourceWhenPageBoundsAreOpenEnded() {
 		// toIndex <= fromIndex means "everything from fromIndex"; there is no way to tell matches from
-		// includes, so every resource on the page is treated as a match.
+		// includes, so every resource of the service's type on the page is treated as a match.
 		when(secondaryHandler.acceptsSearch(any())).thenReturn(false);
 		IBundleProvider primaryBundle = mock(IBundleProvider.class);
 		Encounter first = encounter("e1");
@@ -563,6 +625,22 @@ public class BaseCompositeFhirServiceTest {
 		
 		assertThat(profileUrlsOf(first), contains(PROFILE_PRIMARY));
 		assertThat(profileUrlsOf(second), contains(PROFILE_PRIMARY));
+	}
+	
+	@Test
+	public void searchShouldNotStampResourcesOfOtherTypesWhenIncludesFallInsideThePageSpan() {
+		// $everything pre-materialises matches and includes into one list, so includes sit inside the span
+		when(secondaryHandler.acceptsSearch(any())).thenReturn(false);
+		Encounter match = encounter("e1");
+		Patient includedPatient = new Patient();
+		includedPatient.setId("p1");
+		when(primaryHandler.search(any()))
+		        .thenReturn(new SimpleBundleProvider(Arrays.asList((IBaseResource) match, includedPatient)));
+		
+		service.exposedSearch(new SearchParameterMap()).getResources(0, 2);
+		
+		assertThat(profileUrlsOf(match), contains(PROFILE_PRIMARY));
+		assertThat(includedPatient.getMeta().getProfile(), is(empty()));
 	}
 	
 	@Test

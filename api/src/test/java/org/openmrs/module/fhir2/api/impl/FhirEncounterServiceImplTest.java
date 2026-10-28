@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.api.impl;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
@@ -18,6 +19,8 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -27,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.HasAndListParam;
 import ca.uhn.fhir.rest.param.HasOrListParam;
@@ -35,6 +39,7 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -68,6 +73,12 @@ import org.openmrs.module.fhir2.providers.r4.MockIBundleProvider;
 public class FhirEncounterServiceImplTest {
 	
 	private static final String ENCOUNTER_UUID = "344kk343-45hj45-34jk34-34ui33";
+	
+	private static final String VISIT_UUID = "9a3c1f2e-77d4-4b0a-8e6f-5d2c3b4a1e0f";
+	
+	private static final String ENCOUNTER_PROFILE = "http://fhir.openmrs.org/StructureDefinition/openmrs-encounter";
+	
+	private static final String VISIT_PROFILE = "http://fhir.openmrs.org/StructureDefinition/openmrs-visit";
 	
 	private static final int START_INDEX = 0;
 	
@@ -322,6 +333,73 @@ public class FhirEncounterServiceImplTest {
 		assertThat(result, sameInstance(visit));
 		assertThat(result.getMeta().getProfile().get(0).getValue(),
 		    equalTo("http://fhir.openmrs.org/StructureDefinition/openmrs-visit"));
+	}
+	
+	/**
+	 * A deleted encounter must read as gone, not be masked by a visit that happens to share the uuid.
+	 */
+	@Test
+	public void get_shouldNotFallThroughToVisitHandlerWhenEncounterIsGone() {
+		// given
+		when(encounterHandler.get(ENCOUNTER_UUID)).thenThrow(new ResourceGoneException("voided"));
+		
+		// when / then
+		assertThrows(ResourceGoneException.class, () -> service.get(ENCOUNTER_UUID));
+		verify(visitHandler, never()).get(anyString());
+	}
+	
+	@Test
+	public void getCollection_shouldAggregateResultsFromBothHandlers() {
+		// given
+		List<String> uuids = Arrays.asList(ENCOUNTER_UUID, VISIT_UUID);
+		Encounter encounter = new Encounter();
+		encounter.setId(ENCOUNTER_UUID);
+		Encounter visit = new Encounter();
+		visit.setId(VISIT_UUID);
+		when(encounterHandler.get(uuids)).thenReturn(new ArrayList<>(Arrays.asList(encounter)));
+		when(visitHandler.get(uuids)).thenReturn(new ArrayList<>(Arrays.asList(visit)));
+		
+		// when
+		List<Encounter> results = service.get(uuids);
+		
+		// then
+		assertThat(results, contains(sameInstance(encounter), sameInstance(visit)));
+		assertThat(encounter.getMeta().getProfile().get(0).getValue(), equalTo(ENCOUNTER_PROFILE));
+		assertThat(visit.getMeta().getProfile().get(0).getValue(), equalTo(VISIT_PROFILE));
+	}
+	
+	@Test
+	public void update_shouldRouteToVisitHandlerWhenItOwnsTheUuid() {
+		// given
+		Encounter visit = new Encounter();
+		visit.setId(ENCOUNTER_UUID);
+		when(encounterHandler.exists(ENCOUNTER_UUID)).thenReturn(false);
+		when(visitHandler.exists(ENCOUNTER_UUID)).thenReturn(true);
+		when(visitHandler.update(ENCOUNTER_UUID, visit, null, false)).thenReturn(visit);
+		
+		// when
+		Encounter result = service.update(ENCOUNTER_UUID, visit);
+		
+		// then
+		assertThat(result, sameInstance(visit));
+		assertThat(result.getMeta().getProfile().get(0).getValue(), equalTo(VISIT_PROFILE));
+		verify(encounterHandler, never()).update(any(), any(), any(), anyBoolean());
+	}
+	
+	@Test
+	public void patch_shouldRouteToVisitHandlerWhenItOwnsTheUuid() {
+		// given
+		Encounter patched = new Encounter();
+		when(encounterHandler.exists(ENCOUNTER_UUID)).thenReturn(false);
+		when(visitHandler.exists(ENCOUNTER_UUID)).thenReturn(true);
+		when(visitHandler.patch(ENCOUNTER_UUID, PatchTypeEnum.JSON_PATCH, "[]", null)).thenReturn(patched);
+		
+		// when
+		Encounter result = service.patch(ENCOUNTER_UUID, PatchTypeEnum.JSON_PATCH, "[]", null);
+		
+		// then
+		assertThat(result, sameInstance(patched));
+		verify(encounterHandler, never()).patch(any(), any(), any(), any());
 	}
 	
 	@Test

@@ -10,10 +10,13 @@
 package org.openmrs.module.fhir2.api.impl;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -23,11 +26,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -54,6 +59,10 @@ import org.openmrs.module.fhir2.providers.r4.MockIBundleProvider;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class FhirConditionServiceImplTest {
+	
+	private static final String CONDITION_UUID = "a7b6c5d4-1234-4f5e-9a8b-0c1d2e3f4a5b";
+	
+	private static final String DIAGNOSIS_PROFILE = "http://fhir.openmrs.org/StructureDefinition/openmrs-diagnosis";
 	
 	private static final int START_INDEX = 0;
 	
@@ -271,6 +280,143 @@ public class FhirConditionServiceImplTest {
 		List<IBaseResource> resultList = results.getResources(START_INDEX, END_INDEX);
 		
 		assertThat(resultList, hasSize(5));
+	}
+	
+	// ---- get / update / patch / delete: ownership by uuid ----
+	
+	@Test
+	public void get_shouldFallThroughToDiagnosisHandlerWhenConditionHandlerDoesNotKnowTheUuid() {
+		// given
+		Condition diagnosis = new Condition();
+		diagnosis.setId(CONDITION_UUID);
+		when(conditionHandler.get(CONDITION_UUID)).thenThrow(new ResourceNotFoundException("not a condition"));
+		when(diagnosisHandler.get(CONDITION_UUID)).thenReturn(diagnosis);
+		
+		// when
+		Condition result = service.get(CONDITION_UUID);
+		
+		// then
+		assertThat(result, sameInstance(diagnosis));
+		assertThat(result.getMeta().getProfile().get(0).getValue(), equalTo(DIAGNOSIS_PROFILE));
+	}
+	
+	@Test
+	public void update_shouldRouteToConditionHandlerWhenItOwnsTheUuid() {
+		// given
+		Condition condition = newConditionWithCategory(FhirConstants.CONDITION_CATEGORY_CODE_CONDITION);
+		when(conditionHandler.exists(CONDITION_UUID)).thenReturn(true);
+		when(conditionHandler.update(CONDITION_UUID, condition, null, false)).thenReturn(condition);
+		
+		// when
+		Condition result = service.update(CONDITION_UUID, condition);
+		
+		// then
+		assertThat(result, sameInstance(condition));
+		verify(diagnosisHandler, never()).update(any(), any(), any(), anyBoolean());
+	}
+	
+	@Test
+	public void update_shouldRouteToDiagnosisHandlerWhenItOwnsTheUuid() {
+		// given
+		Condition condition = newConditionWithCategory(FhirConstants.CONDITION_CATEGORY_CODE_DIAGNOSIS);
+		when(conditionHandler.exists(CONDITION_UUID)).thenReturn(false);
+		when(diagnosisHandler.exists(CONDITION_UUID)).thenReturn(true);
+		when(diagnosisHandler.update(CONDITION_UUID, condition, null, false)).thenReturn(condition);
+		
+		// when
+		Condition result = service.update(CONDITION_UUID, condition);
+		
+		// then
+		assertThat(result, sameInstance(condition));
+		verify(conditionHandler, never()).update(any(), any(), any(), anyBoolean());
+	}
+	
+	/**
+	 * An uncategorised body would be claimed by the condition backing on create, but an update targets
+	 * an existing row, so the backing that already holds the uuid must receive it.
+	 */
+	@Test
+	public void update_shouldRouteByOwnershipRatherThanContent() {
+		// given
+		Condition uncategorised = new Condition();
+		when(conditionHandler.exists(CONDITION_UUID)).thenReturn(false);
+		when(diagnosisHandler.exists(CONDITION_UUID)).thenReturn(true);
+		when(diagnosisHandler.update(CONDITION_UUID, uncategorised, null, false)).thenReturn(uncategorised);
+		
+		// when
+		Condition result = service.update(CONDITION_UUID, uncategorised);
+		
+		// then
+		assertThat(result, sameInstance(uncategorised));
+		verify(conditionHandler, never()).update(any(), any(), any(), anyBoolean());
+	}
+	
+	@Test
+	public void patch_shouldRouteToDiagnosisHandlerWhenItOwnsTheUuid() {
+		// given
+		Condition patched = new Condition();
+		when(conditionHandler.exists(CONDITION_UUID)).thenReturn(false);
+		when(diagnosisHandler.exists(CONDITION_UUID)).thenReturn(true);
+		when(diagnosisHandler.patch(CONDITION_UUID, PatchTypeEnum.JSON_PATCH, "[]", null)).thenReturn(patched);
+		
+		// when
+		Condition result = service.patch(CONDITION_UUID, PatchTypeEnum.JSON_PATCH, "[]", null);
+		
+		// then
+		assertThat(result, sameInstance(patched));
+		verify(conditionHandler, never()).patch(any(), any(), any(), any());
+	}
+	
+	@Test
+	public void delete_shouldRouteToDiagnosisHandlerWhenItOwnsTheUuid() {
+		// given
+		when(conditionHandler.exists(CONDITION_UUID)).thenReturn(false);
+		when(diagnosisHandler.exists(CONDITION_UUID)).thenReturn(true);
+		
+		// when
+		service.delete(CONDITION_UUID);
+		
+		// then
+		verify(diagnosisHandler).delete(CONDITION_UUID);
+		verify(conditionHandler, never()).delete(any());
+	}
+	
+	@Test
+	public void update_shouldThrowResourceNotFoundForUnknownUuid() {
+		// given
+		Condition condition = newConditionWithCategory(FhirConstants.CONDITION_CATEGORY_CODE_CONDITION);
+		when(conditionHandler.exists(CONDITION_UUID)).thenReturn(false);
+		when(diagnosisHandler.exists(CONDITION_UUID)).thenReturn(false);
+		
+		// when / then
+		assertThrows(ResourceNotFoundException.class, () -> service.update(CONDITION_UUID, condition));
+		verify(conditionHandler, never()).update(any(), any(), any(), anyBoolean());
+		verify(diagnosisHandler, never()).update(any(), any(), any(), anyBoolean());
+	}
+	
+	@Test
+	public void patch_shouldThrowResourceNotFoundForUnknownUuid() {
+		// given
+		when(conditionHandler.exists(CONDITION_UUID)).thenReturn(false);
+		when(diagnosisHandler.exists(CONDITION_UUID)).thenReturn(false);
+		
+		// when / then
+		assertThrows(ResourceNotFoundException.class,
+		    () -> service.patch(CONDITION_UUID, PatchTypeEnum.JSON_PATCH, "[]", null));
+		verify(conditionHandler, never()).patch(any(), any(), any(), any());
+		verify(diagnosisHandler, never()).patch(any(), any(), any(), any());
+	}
+	
+	@Test
+	public void delete_shouldThrowResourceNotFoundForUnknownUuid() {
+		// given
+		when(conditionHandler.exists(CONDITION_UUID)).thenReturn(false);
+		when(diagnosisHandler.exists(CONDITION_UUID)).thenReturn(false);
+		
+		// when / then
+		assertThrows(ResourceNotFoundException.class, () -> service.delete(CONDITION_UUID));
+		verify(conditionHandler, never()).delete(any());
+		verify(diagnosisHandler, never()).delete(any());
 	}
 	
 	private static Condition newConditionWithCategory(String code) {

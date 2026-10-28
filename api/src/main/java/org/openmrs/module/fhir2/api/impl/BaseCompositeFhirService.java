@@ -36,6 +36,7 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.FhirService;
 import org.openmrs.module.fhir2.api.handler.FhirResourceHandler;
@@ -69,6 +70,7 @@ import org.springframework.core.annotation.OrderUtils;
  * returns; a handler's {@link ResourceNotFoundException} moves on to the next, while
  * {@link ca.uhn.fhir.rest.server.exceptions.ResourceGoneException} propagates without fall-through.
  * {@link ResourceNotFoundException} if no handler claims it.
+ * <li>{@code get(uuids)}: aggregates {@code handler.get(uuids)} across every handler.
  * <li>{@code create(R)} — {@code meta.profile} match → otherwise every handler whose
  * {@code canHandle} claims the body, resolved by {@code @Order} when there is more than one.
  * {@link InvalidRequestException} if the top precedence is tied, or if no handler claims at all;
@@ -138,8 +140,8 @@ public abstract class BaseCompositeFhirService<R extends IAnyResource> implement
 				stampProfile(result, handler);
 				return result;
 			}
-			catch (ResourceNotFoundException e) {
-				// not in this handler's backing — try the next one
+			catch (ResourceNotFoundException | APIAuthenticationException e) {
+				// not in this handler's backing, or not visible to this user; try the next one
 			}
 		}
 		
@@ -150,7 +152,14 @@ public abstract class BaseCompositeFhirService<R extends IAnyResource> implement
 	public List<R> get(@Nonnull Collection<String> uuids) {
 		List<R> aggregated = new ArrayList<>();
 		for (FhirResourceHandler<R> handler : handlers) {
-			List<R> chunk = handler.get(uuids);
+			List<R> chunk;
+			try {
+				chunk = handler.get(uuids);
+			}
+			catch (APIAuthenticationException e) {
+				continue;
+			}
+			
 			if (chunk == null || chunk.isEmpty()) {
 				continue;
 			}
@@ -469,8 +478,13 @@ public abstract class BaseCompositeFhirService<R extends IAnyResource> implement
 	
 	private FhirResourceHandler<R> findOwner(String uuid) {
 		for (FhirResourceHandler<R> handler : handlers) {
-			if (handler.exists(uuid)) {
-				return handler;
+			try {
+				if (handler.exists(uuid)) {
+					return handler;
+				}
+			}
+			catch (APIAuthenticationException e) {
+				// unreadable backings are treated as not owning the uuid; see the class documentation
 			}
 		}
 		return null;
@@ -499,7 +513,7 @@ public abstract class BaseCompositeFhirService<R extends IAnyResource> implement
 			return delegate;
 		}
 		
-		return new ProfileStampingBundleProvider(delegate, profileUrl);
+		return new ProfileStampingBundleProvider(delegate, profileUrl, resourceClass);
 	}
 	
 	protected ResourceNotFoundException resourceNotFound(String uuid) {
@@ -525,9 +539,12 @@ public abstract class BaseCompositeFhirService<R extends IAnyResource> implement
 		
 		private final String profileUrl;
 		
-		ProfileStampingBundleProvider(IBundleProvider delegate, String profileUrl) {
+		private final Class<?> resourceClass;
+		
+		ProfileStampingBundleProvider(IBundleProvider delegate, String profileUrl, Class<?> resourceClass) {
 			this.delegate = delegate;
 			this.profileUrl = profileUrl;
+			this.resourceClass = resourceClass;
 		}
 		
 		/**
@@ -535,6 +552,10 @@ public abstract class BaseCompositeFhirService<R extends IAnyResource> implement
 		 * {@code toIndex - fromIndex} matches first and appends any {@code _include} / {@code _revinclude}
 		 * resources after them; those were produced by other handlers (through their own resource's
 		 * service) and already carry the right profile.
+		 * <p>
+		 * Only resources of the service's own type are stamped, because not every provider bounds its
+		 * matches by the page span: {@code $everything} pre-materialises matches and includes into a single
+		 * list and reports them all as results.
 		 */
 		@Nonnull
 		@Override
@@ -547,7 +568,7 @@ public abstract class BaseCompositeFhirService<R extends IAnyResource> implement
 			int matches = toIndex > fromIndex ? Math.min(toIndex - fromIndex, raw.size()) : raw.size();
 			for (int i = 0; i < matches; i++) {
 				IBaseResource resource = raw.get(i);
-				if (resource == null) {
+				if (!resourceClass.isInstance(resource)) {
 					continue;
 				}
 				

@@ -19,6 +19,7 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
@@ -41,6 +42,8 @@ import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Observation;
@@ -195,6 +198,25 @@ public class PatientBackedPatientHandlerTest {
 		assertThat(result, notNullValue());
 		assertThat(result.getId(), notNullValue());
 		assertThat(result.getId(), equalTo(PATIENT_UUID));
+	}
+	
+	@Test
+	public void get_shouldThrowResourceGoneForVoidedPatient() {
+		// given
+		patient.setVoided(true);
+		when(dao.get(PATIENT_UUID)).thenReturn(patient);
+		
+		// when / then
+		assertThrows(ResourceGoneException.class, () -> handler.get(PATIENT_UUID));
+	}
+	
+	@Test
+	public void get_shouldThrowResourceNotFoundForUnknownUuid() {
+		// given
+		when(dao.get(WRONG_PATIENT_UUID)).thenReturn(null);
+		
+		// when / then
+		assertThrows(ResourceNotFoundException.class, () -> handler.get(WRONG_PATIENT_UUID));
 	}
 	
 	@Test
