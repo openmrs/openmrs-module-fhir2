@@ -27,10 +27,6 @@ public interface FhirConditionDao extends FhirDao<Condition> {
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_CONCEPTS)
-	boolean exists(@Nonnull String uuid);
-	
-	@Override
-	@Authorized(PrivilegeConstants.GET_CONCEPTS)
 	List<Condition> get(@Nonnull Collection<String> uuids);
 	
 	@Override

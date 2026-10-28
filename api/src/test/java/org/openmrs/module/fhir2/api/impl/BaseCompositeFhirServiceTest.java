@@ -424,20 +424,47 @@ public class BaseCompositeFhirServiceTest {
 		verify(primaryHandler, never()).update(anyString(), any(), any(), anyBoolean());
 	}
 	
+	/**
+	 * A denied probe leaves the owner of the UUID unknown, so the orchestrator must not carry on to the
+	 * next handler, which might write the same UUID into a second backing.
+	 */
 	@Test
-	public void updateShouldProbePastAHandlerThatDeniesAccess() {
+	public void updateShouldReportNotFoundWhenAProbeIsDenied() {
 		// given
 		Encounter incoming = new Encounter();
 		when(primaryHandler.exists(UUID_SECONDARY)).thenThrow(new APIAuthenticationException("denied"));
-		when(secondaryHandler.exists(UUID_SECONDARY)).thenReturn(true);
-		when(secondaryHandler.update(eq(UUID_SECONDARY), eq(incoming), any(), anyBoolean()))
-		        .thenReturn(encounter(UUID_SECONDARY));
 		
 		// when
-		service.update(UUID_SECONDARY, incoming);
+		assertThrows(ResourceNotFoundException.class, () -> service.update(UUID_SECONDARY, incoming));
 		
 		// then
-		verify(secondaryHandler).update(eq(UUID_SECONDARY), eq(incoming), any(), anyBoolean());
+		verify(secondaryHandler, never()).update(anyString(), any(), any(), anyBoolean());
+	}
+	
+	@Test
+	public void updateWithCreateIfNotExistsShouldNotCreateWhenAProbeIsDenied() {
+		// given
+		Encounter incoming = encounter(UUID_SECONDARY);
+		when(primaryHandler.exists(UUID_SECONDARY)).thenThrow(new APIAuthenticationException("denied"));
+		lenient().when(secondaryHandler.canHandle(incoming)).thenReturn(true);
+		
+		// when
+		assertThrows(ResourceNotFoundException.class, () -> service.update(UUID_SECONDARY, incoming, null, true));
+		
+		// then
+		verify(secondaryHandler, never()).update(anyString(), any(), any(), anyBoolean());
+	}
+	
+	@Test
+	public void updateShouldReportNotFoundWhenTheOwnerDeniesTheUpdate() {
+		// given
+		Encounter incoming = new Encounter();
+		when(primaryHandler.exists(UUID_PRIMARY)).thenReturn(true);
+		when(primaryHandler.update(eq(UUID_PRIMARY), eq(incoming), any(), anyBoolean()))
+		        .thenThrow(new APIAuthenticationException("denied"));
+		
+		// when / then
+		assertThrows(ResourceNotFoundException.class, () -> service.update(UUID_PRIMARY, incoming));
 	}
 	
 	@Test
@@ -508,6 +535,28 @@ public class BaseCompositeFhirServiceTest {
 		
 		verify(primaryHandler).delete(UUID_PRIMARY);
 		verify(secondaryHandler, never()).delete(anyString());
+	}
+	
+	@Test
+	public void patchShouldReportNotFoundWhenTheOwnerDeniesThePatch() {
+		// given
+		when(primaryHandler.exists(UUID_PRIMARY)).thenReturn(true);
+		when(primaryHandler.patch(eq(UUID_PRIMARY), eq(PatchTypeEnum.JSON_PATCH), eq("[]"), any()))
+		        .thenThrow(new APIAuthenticationException("denied"));
+		
+		// when / then
+		assertThrows(ResourceNotFoundException.class,
+		    () -> service.patch(UUID_PRIMARY, PatchTypeEnum.JSON_PATCH, "[]", null));
+	}
+	
+	@Test
+	public void deleteShouldReportNotFoundWhenTheOwnerDeniesTheDelete() {
+		// given
+		when(primaryHandler.exists(UUID_PRIMARY)).thenReturn(true);
+		doThrow(new APIAuthenticationException("denied")).when(primaryHandler).delete(UUID_PRIMARY);
+		
+		// when / then
+		assertThrows(ResourceNotFoundException.class, () -> service.delete(UUID_PRIMARY));
 	}
 	
 	@Test

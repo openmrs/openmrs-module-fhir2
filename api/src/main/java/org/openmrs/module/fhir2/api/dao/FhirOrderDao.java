@@ -27,10 +27,6 @@ public interface FhirOrderDao extends FhirDao<Order> {
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_ORDERS)
-	boolean exists(@Nonnull String uuid);
-	
-	@Override
-	@Authorized(PrivilegeConstants.GET_ORDERS)
 	List<Order> get(@Nonnull Collection<String> uuids);
 	
 	@Override

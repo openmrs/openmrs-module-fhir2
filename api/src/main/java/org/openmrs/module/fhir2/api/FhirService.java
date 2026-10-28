@@ -68,7 +68,9 @@ public interface FhirService<T extends IAnyResource> {
 	 * the resource cannot be found.
 	 * <p/>
 	 * This is generally intended to be used for cases where a quick "does this exist" check makes
-	 * sense.
+	 * sense. The composite services use it to find which backing owns a UUID, so implementations should
+	 * not require the read privilege (see {@code FhirDao#exists(String)}); the default, which goes
+	 * through {@link #get(String)}, does.
 	 *
 	 * @param uuid the UUID to probe, never {@code null}
 	 * @return {@code true} if a row for the UUID exists in the backing store

@@ -27,10 +27,6 @@ public interface FhirAllergyIntoleranceDao extends FhirDao<Allergy> {
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_ALLERGIES)
-	boolean exists(@Nonnull String uuid);
-	
-	@Override
-	@Authorized(PrivilegeConstants.GET_ALLERGIES)
 	List<Allergy> get(@Nonnull Collection<String> uuids);
 	
 	@Override

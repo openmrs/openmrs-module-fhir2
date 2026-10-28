@@ -52,11 +52,18 @@ public interface FhirDao<T extends OpenmrsObject & Auditable> extends FhirDaoAop
 	T get(@Nonnull String uuid);
 	
 	/**
-	 * Returns whether a row with the given UUID exists in this DAO's backing table, ideally without
+	 * Returns whether this DAO's backing table holds an object with the given UUID, ideally without
 	 * loading the full Hibernate entity into the session.
+	 * <p>
+	 * This is deliberately not guarded by a privilege: the composite services use it to find which
+	 * backing owns a UUID before calling that backing's guarded operation, which must not require the
+	 * read privilege (e.g., a delete). Because it is unguarded, it must reveal nothing beyond
+	 * existence, and must not be exposed to clients directly. It should agree with {@link #get(String)}
+	 * about which UUIDs this DAO serves, so an implementation whose {@code get} filters rows must
+	 * filter here too.
 	 *
 	 * @param uuid The UUID to probe
-	 * @return {@code true} if a row for the UUID exists in the backing table
+	 * @return {@code true} if this DAO serves an object with the UUID
 	 */
 	default boolean exists(@Nonnull String uuid) {
 		return get(uuid) != null;

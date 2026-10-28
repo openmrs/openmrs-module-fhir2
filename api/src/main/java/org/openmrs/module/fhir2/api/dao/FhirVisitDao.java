@@ -27,10 +27,6 @@ public interface FhirVisitDao extends FhirDao<Visit> {
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_VISITS)
-	boolean exists(@Nonnull String uuid);
-	
-	@Override
-	@Authorized(PrivilegeConstants.GET_VISITS)
 	List<Visit> get(@Nonnull Collection<String> uuids);
 	
 	@Override

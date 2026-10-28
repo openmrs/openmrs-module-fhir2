@@ -27,10 +27,6 @@ public interface FhirObservationDao extends FhirDao<Obs> {
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_OBS)
-	boolean exists(@Nonnull String uuid);
-	
-	@Override
-	@Authorized(PrivilegeConstants.GET_OBS)
 	List<Obs> get(@Nonnull Collection<String> uuids);
 	
 	@Override

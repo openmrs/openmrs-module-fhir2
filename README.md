@@ -106,8 +106,10 @@ a built-in backing.
    used for `update` / `patch` / `delete` (`get` simply tries each handler in
    turn). `BaseFhirService` provides a cheap row-existence DAO check; handlers
    that compose another service should override `exists` to delegate. DAO
-   interfaces must declare `exists` with the same `@Authorized` privilege as
-   `get`, since it runs before any other privileged call.
+   `exists` is deliberately not guarded by a privilege, so that, e.g., a
+   `delete` requires only the delete privilege; it must therefore reveal
+   nothing beyond whether the UUID exists. A missing privilege on the
+   operation itself is reported as not found, as it is for `get`.
 * For search, a `_profile` parameter naming a handler's implicit profile routes
 the search to that handler alone. Otherwise the orchestrator fans out to
 handlers whose `acceptsSearch(SearchParameterMap)` returns `true` and merges

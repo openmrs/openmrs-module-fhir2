@@ -28,10 +28,6 @@ public interface FhirPractitionerDao extends FhirDao<Provider> {
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_PROVIDERS)
-	boolean exists(@Nonnull String uuid);
-	
-	@Override
-	@Authorized(PrivilegeConstants.GET_PROVIDERS)
 	List<Provider> get(@Nonnull Collection<String> uuids);
 	
 	@Authorized(PrivilegeConstants.GET_PROVIDERS)

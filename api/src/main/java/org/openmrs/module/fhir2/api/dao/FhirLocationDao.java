@@ -34,10 +34,6 @@ public interface FhirLocationDao extends FhirDao<Location> {
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_LOCATIONS)
-	boolean exists(@Nonnull String uuid);
-	
-	@Override
-	@Authorized(PrivilegeConstants.GET_LOCATIONS)
 	List<Location> get(@Nonnull Collection<String> uuids);
 	
 	@Authorized(PrivilegeConstants.GET_LOCATIONS)

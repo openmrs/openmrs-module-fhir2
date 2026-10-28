@@ -31,10 +31,6 @@ public interface FhirTaskDao extends FhirDao<FhirTask> {
 	
 	@Override
 	@Authorized(FhirConstants.GET_TASKS_PRIVILEGE)
-	boolean exists(@Nonnull String uuid);
-	
-	@Override
-	@Authorized(FhirConstants.GET_TASKS_PRIVILEGE)
 	List<FhirTask> get(@Nonnull Collection<String> uuids);
 	
 	@Override

@@ -27,15 +27,17 @@ import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
  * dispatch primitives:
  * <ul>
  * <li>Content-based — {@link #canHandle(IAnyResource)}. Used for {@code create} and for the
- * {@code createIfNotExists} branch of {@code update}. The orchestrator picks the first handler in
- * priority order whose predicate returns {@code true} (or whose {@link #getImplicitProfile()}
- * matches the incoming resource's {@code meta.profile}).
- * <li>UUID-based — {@link FhirService#exists(String)}. Used for {@code get}, {@code update},
- * {@code patch}, {@code delete}. The orchestrator picks the first handler whose backing store
- * reports the UUID exists. {@code BaseFhirService.exists} provides a cheap DAO row check; handlers
- * that compose another service should override to delegate (e.g. to
- * {@code visitService.exists(uuid)}).
+ * {@code createIfNotExists} branch of {@code update}. A handler whose {@link #getImplicitProfile()}
+ * matches the incoming resource's {@code meta.profile} is chosen outright; otherwise the
+ * orchestrator picks the highest-priority handler whose predicate returns {@code true}, rejecting a
+ * tie (see below).
+ * <li>UUID-based — {@link FhirService#exists(String)}. Used for {@code update}, {@code patch} and
+ * {@code delete}. The orchestrator picks the first handler whose backing store reports the UUID
+ * exists. {@code BaseFhirService.exists} provides a cheap DAO row check; handlers that compose
+ * another service should override to delegate (e.g. to {@code visitService.exists(uuid)}).
  * </ul>
+ * {@code get} does not probe: the orchestrator calls each handler's {@code get} in priority order
+ * until one returns the resource.
  * <p>
  * Search restriction (e.g. {@code _tag}-based routing between an encounter handler and a visit
  * handler) lives inside each handler's {@link #acceptsSearch(SearchParameterMap)} — the
@@ -133,8 +135,9 @@ import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
  * <li>{@link FhirService#exists(String)} (inherited) — the cheap UUID probe. Handlers extending
  * {@code BaseFhirService} get a row-existence DAO check for free; handlers composing another
  * service should override to delegate (e.g. {@code visitService.exists(uuid)}). Avoid going through
- * {@code get()} for the probe — it pays the translator cost which the orchestrator doesn't need at
- * probe time.
+ * {@code get()} for the probe: it pays the translator cost which the orchestrator doesn't need at
+ * probe time, and it requires the read privilege, which the probe must not (see
+ * {@code FhirDao#exists(String)}).
  * </ul>
  */
 public interface FhirResourceHandler<R extends IAnyResource> extends FhirService<R> {

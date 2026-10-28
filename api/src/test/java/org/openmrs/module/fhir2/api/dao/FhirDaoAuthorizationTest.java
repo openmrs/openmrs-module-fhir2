@@ -15,7 +15,6 @@ import static org.hamcrest.Matchers.greaterThan;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,10 +34,14 @@ import org.springframework.core.type.filter.AssignableTypeFilter;
  * implements. That makes the DAO interfaces the single place where access is declared, and an
  * unannotated method there is an unguarded database operation. This test scans every DAO interface
  * and requires that every read and every write declares a privilege, that the method names fit the
- * read/write vocabulary the scan understands, and that {@code exists(String)} carries exactly the
- * privilege of {@code get(String)}, since the composite services probe it before any other call.
+ * read/write vocabulary the scan understands. The one deliberate exception is
+ * {@code exists(String)}, which the composite services use to find the backing that owns a UUID
+ * before calling its guarded operation; it must stay unguarded so that, e.g., a delete does not
+ * also require the read privilege.
  */
 public class FhirDaoAuthorizationTest {
+	
+	private static final String EXISTS = "exists(java.lang.String)";
 	
 	private static final String[] READ_PREFIXES = { "get", "exists" };
 	
@@ -50,7 +53,12 @@ public class FhirDaoAuthorizationTest {
 		int checked = 0;
 		
 		for (Class<?> dao : daoInterfaces()) {
-			for (Method method : effectiveMethods(dao).values()) {
+			for (Map.Entry<String, Method> entry : effectiveMethods(dao).entrySet()) {
+				if (EXISTS.equals(entry.getKey())) {
+					continue;
+				}
+				
+				Method method = entry.getValue();
 				checked++;
 				String label = dao.getSimpleName() + "." + signature(method);
 				
@@ -70,30 +78,24 @@ public class FhirDaoAuthorizationTest {
 	}
 	
 	@Test
-	public void existsShouldCarryTheSamePrivilegeAsGetOnEveryDaoInterface() throws Exception {
+	public void existsShouldNotBeGuardedOnAnyDaoInterface() throws Exception {
 		List<String> problems = new ArrayList<>();
 		int checked = 0;
 		
 		for (Class<?> dao : daoInterfaces()) {
-			Map<String, Method> methods = effectiveMethods(dao);
-			Method get = methods.get("get(java.lang.String)");
-			Authorized onGet = get == null ? null : get.getAnnotation(Authorized.class);
-			if (onGet == null) {
+			Method exists = effectiveMethods(dao).get(EXISTS);
+			if (exists == null) {
 				continue;
 			}
 			
 			checked++;
-			Method exists = methods.get("exists(java.lang.String)");
-			Authorized onExists = exists == null ? null : exists.getAnnotation(Authorized.class);
-			if (onExists == null) {
-				problems.add(dao.getSimpleName() + " declares @Authorized on get(String) but not on exists(String)");
-			} else if (!Arrays.equals(onGet.value(), onExists.value()) || onGet.requireAll() != onExists.requireAll()) {
-				problems.add(dao.getSimpleName() + " declares different privileges on get(String) and exists(String)");
+			if (exists.getAnnotation(Authorized.class) != null) {
+				problems.add(dao.getSimpleName() + " declares @Authorized on exists(String)");
 			}
 		}
 		
 		assertThat(problems, empty());
-		assertThat("expected to find annotated DAO interfaces to check", checked, greaterThan(0));
+		assertThat("expected to find DAO interfaces to check", checked, greaterThan(0));
 	}
 	
 	/**

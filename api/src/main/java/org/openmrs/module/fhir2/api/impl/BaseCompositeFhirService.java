@@ -55,9 +55,10 @@ import org.springframework.core.annotation.OrderUtils;
  * Spring injects the ordered list of {@link FhirResourceHandler}s registered for that type. The
  * orchestrator dispatches each {@link FhirService} call using one of two primitives:
  * <ul>
- * <li>UUID-based — {@link FhirService#exists(String)}. Used for {@code get}, {@code update},
- * {@code patch}, {@code delete}. Picks the first handler in {@code @Order} priority whose backing
- * store reports the UUID exists.
+ * <li>UUID-based — {@link FhirService#exists(String)}. Used for {@code update}, {@code patch} and
+ * {@code delete}. Picks the first handler in {@code @Order} priority whose backing store reports
+ * the UUID exists. The probe does not require the read privilege, so an operation needs only the
+ * privilege of the owning handler's operation itself.
  * <li>Content-based — {@link FhirResourceHandler#canHandle(IAnyResource)} (with
  * {@link FhirResourceHandler#getImplicitProfile() meta.profile} taking precedence). Used for
  * {@code create} and for the {@code createIfNotExists} branch of {@code update} when no handler
@@ -102,6 +103,11 @@ import org.springframework.core.annotation.OrderUtils;
  * for direct read/write returns and lazily on each page of a search bundle. Only the matched
  * resources of a page are stamped; {@code _include} and {@code _revinclude} resources are resolved
  * through their own resource's service and carry the profile of whichever handler produced them.
+ * <p>
+ * A missing privilege is reported as {@link ResourceNotFoundException}, so that clients cannot use
+ * the difference between "forbidden" and "not found" to learn whether a UUID exists. For
+ * {@code get} a handler that denies access is skipped in favour of the next one; for the UUID-based
+ * writes a denial by the owning handler is reported as not found.
  */
 public abstract class BaseCompositeFhirService<R extends IAnyResource> implements FhirService<R> {
 	
@@ -220,7 +226,14 @@ public abstract class BaseCompositeFhirService<R extends IAnyResource> implement
 			return result;
 		}
 		
-		R result = owner.update(uuid, updatedResource, requestDetails, createIfNotExists);
+		R result;
+		try {
+			result = owner.update(uuid, updatedResource, requestDetails, createIfNotExists);
+		}
+		catch (APIAuthenticationException e) {
+			throw resourceNotFound(uuid);
+		}
+		
 		stampProfile(result, owner);
 		return result;
 	}
@@ -237,7 +250,14 @@ public abstract class BaseCompositeFhirService<R extends IAnyResource> implement
 			throw resourceNotFound(uuid);
 		}
 		
-		R result = owner.patch(uuid, patchType, body, requestDetails);
+		R result;
+		try {
+			result = owner.patch(uuid, patchType, body, requestDetails);
+		}
+		catch (APIAuthenticationException e) {
+			throw resourceNotFound(uuid);
+		}
+		
 		stampProfile(result, owner);
 		return result;
 	}
@@ -253,7 +273,12 @@ public abstract class BaseCompositeFhirService<R extends IAnyResource> implement
 			throw resourceNotFound(uuid);
 		}
 		
-		owner.delete(uuid);
+		try {
+			owner.delete(uuid);
+		}
+		catch (APIAuthenticationException e) {
+			throw resourceNotFound(uuid);
+		}
 	}
 	
 	@Autowired(required = false)
@@ -476,6 +501,11 @@ public abstract class BaseCompositeFhirService<R extends IAnyResource> implement
 		return null;
 	}
 	
+	/**
+	 * A handler whose {@code exists} is guarded and denies the probe may own the UUID, so we report not
+	 * found rather than skip it; skipping would let an update-as-create write the same UUID into a
+	 * second backing.
+	 */
 	private FhirResourceHandler<R> findOwner(String uuid) {
 		for (FhirResourceHandler<R> handler : handlers) {
 			try {
@@ -484,7 +514,7 @@ public abstract class BaseCompositeFhirService<R extends IAnyResource> implement
 				}
 			}
 			catch (APIAuthenticationException e) {
-				// unreadable backings are treated as not owning the uuid; see the class documentation
+				throw resourceNotFound(uuid);
 			}
 		}
 		return null;

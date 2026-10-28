@@ -27,10 +27,6 @@ public interface FhirEpisodeOfCareDao extends FhirDao<PatientProgram> {
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_PATIENT_PROGRAMS)
-	boolean exists(@Nonnull String uuid);
-	
-	@Override
-	@Authorized(PrivilegeConstants.GET_PATIENT_PROGRAMS)
 	List<PatientProgram> get(@Nonnull Collection<String> uuids);
 	
 	@Override
