@@ -45,6 +45,7 @@ import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.util.ProfileRoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.OrderUtils;
@@ -456,12 +457,16 @@ public abstract class BaseCompositeFhirService<R extends IAnyResource> implement
 		return claimants.stream().filter(handler -> orderOf(handler) == winning).collect(Collectors.toList());
 	}
 	
+	/**
+	 * Reads {@code @Order} from the target class, since a handler proxied by Spring AOP (e.g., one that
+	 * is {@code @Transactional}) does not carry the annotation on its proxy class.
+	 */
 	private static int orderOf(Object handler) {
 		if (handler instanceof Ordered) {
 			return ((Ordered) handler).getOrder();
 		}
 		
-		return OrderUtils.getOrder(handler.getClass(), Ordered.LOWEST_PRECEDENCE);
+		return OrderUtils.getOrder(AopUtils.getTargetClass(handler), Ordered.LOWEST_PRECEDENCE);
 	}
 	
 	private String profilesOf(Collection<FhirResourceHandler<R>> subject) {

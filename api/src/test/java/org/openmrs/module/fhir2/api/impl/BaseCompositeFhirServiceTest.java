@@ -59,7 +59,9 @@ import org.openmrs.module.fhir2.api.handler.FhirResourceHandler;
 import org.openmrs.module.fhir2.api.search.CompositeBundleProvider;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.util.ProfileRoutingContext;
+import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BaseCompositeFhirServiceTest {
@@ -836,6 +838,40 @@ public class BaseCompositeFhirServiceTest {
 		verify(secondaryHandler).search(any());
 	}
 	
+	/**
+	 * Spring proxies a handler that is, e.g., {@code @Transactional}; its {@code @Order} must still be
+	 * honoured when it competes with a built-in for a create.
+	 */
+	@Test
+	public void createShouldHonourTheOrderOfAProxiedHandler() {
+		// given
+		Encounter body = new Encounter();
+		Encounter persisted = new Encounter();
+		
+		LowestPrecedenceHandler builtIn = mock(LowestPrecedenceHandler.class);
+		lenient().when(builtIn.getImplicitProfile()).thenReturn(PROFILE_PRIMARY);
+		lenient().when(builtIn.canHandle(any())).thenReturn(true);
+		
+		HighPrecedenceHandler target = mock(HighPrecedenceHandler.class);
+		lenient().when(target.getImplicitProfile()).thenReturn(PROFILE_SPECIALIZED);
+		lenient().when(target.canHandle(any())).thenReturn(true);
+		when(target.create(body)).thenReturn(persisted);
+		
+		ProxyFactory proxyFactory = new ProxyFactory(target);
+		proxyFactory.addInterface(FhirResourceHandler.class);
+		@SuppressWarnings("unchecked")
+		FhirResourceHandler<Encounter> proxied = (FhirResourceHandler<Encounter>) proxyFactory.getProxy();
+		
+		TestCompositeService composite = new TestCompositeService();
+		composite.setHandlers(Arrays.asList(proxied, builtIn));
+		
+		// when
+		Encounter result = composite.create(body);
+		
+		// then
+		assertThat(result, sameInstance(persisted));
+	}
+	
 	// ---- helpers ----
 	
 	private static Encounter encounter(String uuid) {
@@ -863,6 +899,12 @@ public class BaseCompositeFhirServiceTest {
 	private static <T> org.hamcrest.Matcher<T> not(org.hamcrest.Matcher<T> matcher) {
 		return org.hamcrest.Matchers.not(matcher);
 	}
+	
+	@Order(Ordered.LOWEST_PRECEDENCE)
+	private abstract static class LowestPrecedenceHandler implements FhirResourceHandler<Encounter> {}
+	
+	@Order(1)
+	private abstract static class HighPrecedenceHandler implements FhirResourceHandler<Encounter> {}
 	
 	/**
 	 * Concrete subclass that exposes the protected {@code doSearch} for direct testing.
