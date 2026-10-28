@@ -110,6 +110,19 @@ public class FhirMedicationRequestDaoImplTest extends BaseFhirContextSensitiveTe
 	}
 	
 	@Test
+	public void exists_shouldReturnFalseForDiscontinueOrderAsGetDoes() {
+		// given
+		String uuid = DISCONTINUE_ORDER_UUID;
+		
+		// when
+		boolean result = dao.exists(uuid);
+		
+		// then
+		assertThat(dao.get(uuid), nullValue());
+		assertThat(result, equalTo(false));
+	}
+	
+	@Test
 	public void getMedicationRequestByUuids_shouldReturnEmptyListWhenCalledWithBadUuid() {
 		List<DrugOrder> drugOrders = dao.get(Collections.singletonList(BAD_DRUG_ORDER_UUID));
 		assertThat(drugOrders.size(), is(0));
