@@ -36,9 +36,8 @@ import org.springframework.stereotype.Component;
  * {@link FhirVisitService}.
  * <p>
  * Claims an incoming resource on writes when its {@code type[].coding[].system} includes
- * {@link FhirConstants#VISIT_TYPE_SYSTEM_URI}. Opts out of search when the {@code _tag} parameter
- * contains a coding in the {@code OPENMRS_FHIR_EXT_ENCOUNTER_TAG} system whose value isn't
- * {@code "visit"}.
+ * {@link FhirConstants#VISIT_TYPE_SYSTEM_URI}. Opts out of search when a {@code _tag} clause routes
+ * away from {@code "visit"} (see {@link HandlerSupport#routingTagExcludes}).
  */
 @Component
 @Order(Ordered.LOWEST_PRECEDENCE)

@@ -99,8 +99,8 @@ import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
  *
  *     {@literal @}Override
  *     public boolean acceptsSearch(SearchParameterMap params) {
- *         // Opt out when _tag in the encounter-tag system specifies a non-visit code.
- *         return !excludedByRoutingTag(params, OPENMRS_FHIR_EXT_ENCOUNTER_TAG, "visit");
+ *         // Opt out when a _tag clause routes the search away from visits.
+ *         return !HandlerSupport.routingTagExcludes(params, OPENMRS_FHIR_EXT_ENCOUNTER_TAG, "visit");
  *     }
  *
  *     {@literal @}Override

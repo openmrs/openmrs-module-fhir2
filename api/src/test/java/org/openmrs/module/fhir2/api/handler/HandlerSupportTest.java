@@ -15,6 +15,7 @@ import static org.junit.Assert.assertTrue;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.TokenParamModifier;
 import org.junit.Test;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
@@ -152,6 +153,25 @@ public class HandlerSupportTest {
 	}
 	
 	@Test
+	public void shouldExcludeWhenNegatedTagCarriesMyCode() {
+		// _tag:not=encounter routes away from the encounter backing.
+		SearchParameterMap params = paramsWithTag(new TokenParam(SYSTEM, CODE).setModifier(TokenParamModifier.NOT));
+		assertTrue(HandlerSupport.routingTagExcludes(params, SYSTEM, CODE));
+	}
+	
+	@Test
+	public void shouldNotExcludeWhenNegatedTagCarriesAnotherCode() {
+		SearchParameterMap params = paramsWithTag(new TokenParam(null, OTHER_CODE).setModifier(TokenParamModifier.NOT));
+		assertFalse(HandlerSupport.routingTagExcludes(params, SYSTEM, CODE));
+	}
+	
+	@Test
+	public void shouldNotExcludeWhenNegatedTagIsInUnrelatedSystem() {
+		SearchParameterMap params = paramsWithTag(new TokenParam(OTHER_SYSTEM, CODE).setModifier(TokenParamModifier.NOT));
+		assertFalse(HandlerSupport.routingTagExcludes(params, SYSTEM, CODE));
+	}
+	
+	@Test
 	public void shouldNotExcludeWhenSearchParameterMapHasNoTagEntry() {
 		// SearchParameterMap can hold many parameter keys — only TAG_SEARCH_HANDLER should be read.
 		SearchParameterMap params = new SearchParameterMap().addParameter("UNRELATED_KEY",
@@ -231,5 +251,18 @@ public class HandlerSupportTest {
 		            FhirConstants.CONDITION_CATEGORY_CODE_DIAGNOSIS)));
 		assertFalse(HandlerSupport.routingCategoryExcludes(params, FhirConstants.CONDITION_CATEGORY_SYSTEM_URI,
 		    FhirConstants.CONDITION_CATEGORY_CODE_CONDITION));
+	}
+	
+	@Test
+	public void categoryShouldRouteAwayFromTheNegatedCode() {
+		// Condition?category:not=encounter-diagnosis routes to the condition backing only.
+		SearchParameterMap params = new SearchParameterMap().addParameter(FhirConstants.CATEGORY_SEARCH_HANDLER,
+		    new TokenAndListParam().addAnd(
+		        new TokenParam(FhirConstants.CONDITION_CATEGORY_SYSTEM_URI, FhirConstants.CONDITION_CATEGORY_CODE_DIAGNOSIS)
+		                .setModifier(TokenParamModifier.NOT)));
+		assertFalse(HandlerSupport.routingCategoryExcludes(params, FhirConstants.CONDITION_CATEGORY_SYSTEM_URI,
+		    FhirConstants.CONDITION_CATEGORY_CODE_CONDITION));
+		assertTrue(HandlerSupport.routingCategoryExcludes(params, FhirConstants.CONDITION_CATEGORY_SYSTEM_URI,
+		    FhirConstants.CONDITION_CATEGORY_CODE_DIAGNOSIS));
 	}
 }

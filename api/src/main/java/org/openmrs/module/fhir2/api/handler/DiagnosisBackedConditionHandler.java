@@ -37,8 +37,8 @@ import org.springframework.stereotype.Component;
  * <p>
  * Claims an incoming resource on writes when its {@code category} carries
  * {@code encounter-diagnosis} in {@link FhirConstants#CONDITION_CATEGORY_SYSTEM_URI}. Opts out of
- * search when the {@code category} parameter targets a coding in the same system whose code isn't
- * {@code "encounter-diagnosis"}.
+ * search when a {@code category} clause routes away from {@code "encounter-diagnosis"} (see
+ * {@link HandlerSupport#routingCategoryExcludes}).
  */
 @Component
 @Order(Ordered.LOWEST_PRECEDENCE)

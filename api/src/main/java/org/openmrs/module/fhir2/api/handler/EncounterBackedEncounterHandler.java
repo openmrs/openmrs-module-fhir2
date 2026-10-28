@@ -37,9 +37,8 @@ import org.springframework.stereotype.Component;
  * applies the same composition pattern over {@code FhirVisitService}.
  * <p>
  * Claims an incoming resource on writes when its {@code type[].coding[].system} includes
- * {@link FhirConstants#ENCOUNTER_TYPE_SYSTEM_URI}. Opts out of search when the {@code _tag}
- * parameter contains a coding in the {@code OPENMRS_FHIR_EXT_ENCOUNTER_TAG} system whose value
- * isn't {@code "encounter"}.
+ * {@link FhirConstants#ENCOUNTER_TYPE_SYSTEM_URI}. Opts out of search when a {@code _tag} clause
+ * routes away from {@code "encounter"} (see {@link HandlerSupport#routingTagExcludes}).
  */
 @Component
 @Order(Ordered.LOWEST_PRECEDENCE - 10)

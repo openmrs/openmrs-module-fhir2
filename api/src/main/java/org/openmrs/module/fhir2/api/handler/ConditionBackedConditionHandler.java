@@ -38,9 +38,9 @@ import org.springframework.stereotype.Component;
  * <p>
  * Claims an incoming resource on writes when its {@code category} carries {@code problem-list-item}
  * in {@link FhirConstants#CONDITION_CATEGORY_SYSTEM_URI}, and also when the body carries no
- * category codings at all — this is the backing an unmarked {@code Condition} lands on. Opts out of
- * search when the {@code category} parameter targets a coding in the same system whose code isn't
- * {@code "problem-list-item"}.
+ * category codings at all, so this is the backing an unmarked {@code Condition} lands on. Opts out
+ * of search when a {@code category} clause routes away from {@code "problem-list-item"} (see
+ * {@link HandlerSupport#routingCategoryExcludes}).
  */
 @Component
 @Order(Ordered.LOWEST_PRECEDENCE - 10)

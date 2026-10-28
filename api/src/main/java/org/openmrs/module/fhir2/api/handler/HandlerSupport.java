@@ -18,6 +18,7 @@ import java.util.stream.Stream;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.TokenParamModifier;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.openmrs.module.fhir2.FhirConstants;
@@ -86,6 +87,8 @@ public final class HandlerSupport {
 	 * Returns whether a {@code _tag} parameter on the search request routes the request away from the
 	 * caller. Every AND clause of {@code _tag} must admit the caller: a clause does so when one of its
 	 * OR alternatives carries the caller's code, either in the routing system or with no system at all.
+	 * A clause using the {@code :not} modifier instead admits the caller unless it names the caller's
+	 * code, so {@code _tag:not=visit} routes away from the visit handler only.
 	 *
 	 * @param params the search parameter map; the {@code _tag} parameter is read from the entry stored
 	 *            under {@link FhirConstants#TAG_SEARCH_HANDLER}
@@ -105,7 +108,7 @@ public final class HandlerSupport {
 	/**
 	 * Returns whether a {@code category} parameter on the search request routes the request away from
 	 * the caller. Semantics mirror {@link #routingTagExcludes}: every AND clause must carry the
-	 * caller's code, in the routing system or with no system.
+	 * caller's code, in the routing system or with no system, and a {@code :not} clause must not.
 	 *
 	 * @param params the search parameter map; the {@code category} parameter is read from the entry
 	 *            stored under {@link FhirConstants#CATEGORY_SEARCH_HANDLER}
@@ -131,15 +134,25 @@ public final class HandlerSupport {
 				continue;
 			}
 			
-			boolean namesCaller = false;
+			boolean hasPositive = false;
+			boolean positiveNamesCaller = false;
 			for (TokenParam token : orList.getValuesAsQueryTokens()) {
-				if (token != null && namesCaller(token, routingSystem, routingCode)) {
-					namesCaller = true;
-					break;
+				if (token == null) {
+					continue;
+				}
+				
+				boolean names = namesCaller(token, routingSystem, routingCode);
+				if (token.getModifier() == TokenParamModifier.NOT) {
+					if (names) {
+						return true;
+					}
+				} else {
+					hasPositive = true;
+					positiveNamesCaller |= names;
 				}
 			}
 			
-			if (!namesCaller) {
+			if (hasPositive && !positiveNamesCaller) {
 				return true;
 			}
 		}
