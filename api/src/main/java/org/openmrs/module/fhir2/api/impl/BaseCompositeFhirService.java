@@ -89,8 +89,8 @@ import org.springframework.core.annotation.OrderUtils;
  * logic.
  * <li>{@code patch(uuid, ...)} — {@code exists()} probe → {@code handler.patch(uuid, ...)}.
  * <li>{@code delete(uuid)} — {@code exists()} probe → {@code handler.delete(uuid)}.
- * <li>{@code search(params)} — if the request's {@code _profile} (captured into
- * {@link ProfileRoutingContext} by the web layer) names at least one handler's
+ * <li>{@code search(params)} — if the request's {@code _profile} for this resource type (captured
+ * into {@link ProfileRoutingContext} by the web layer) names at least one handler's
  * {@link FhirResourceHandler#getImplicitProfile() implicit profile}, route only to the matching
  * handler(s) (the same profile that identifies a handler for {@code create} also selects it for
  * search). Otherwise fan out to handlers whose
@@ -342,13 +342,13 @@ public abstract class BaseCompositeFhirService<R extends IAnyResource> implement
 	 * Runs a fan-out search across the selected handlers and merges the result bundles via
 	 * {@link CompositeBundleProvider}.
 	 * <p>
-	 * Handler selection has two modes. If the current request carries a {@code _profile} parameter (see
-	 * {@link ProfileRoutingContext}) naming at least one handler's
-	 * {@link FhirResourceHandler#getImplicitProfile() implicit profile}, the search is routed only to
-	 * the matching handler(s) — the same profile that identifies a handler for CRUD also selects it for
-	 * search, and {@code acceptsSearch} is not consulted. Otherwise (no {@code _profile}, or a
-	 * {@code _profile} that matches no handler — e.g. an unrelated conformance profile) the
-	 * orchestrator falls back to a fan-out across every handler whose
+	 * Handler selection has two modes. If the current request is a search for this resource type and
+	 * carries a {@code _profile} parameter (see {@link ProfileRoutingContext}) naming at least one
+	 * handler's {@link FhirResourceHandler#getImplicitProfile() implicit profile}, the search is routed
+	 * only to the matching handler(s) — the same profile that identifies a handler for CRUD also
+	 * selects it for search, and {@code acceptsSearch} is not consulted. Otherwise (no
+	 * {@code _profile}, or a {@code _profile} that matches no handler — e.g. an unrelated conformance
+	 * profile) the orchestrator falls back to a fan-out across every handler whose
 	 * {@link FhirResourceHandler#acceptsSearch} returns true; any handler-specific routing (e.g. by
 	 * {@code _tag}) lives there.
 	 */
@@ -399,7 +399,7 @@ public abstract class BaseCompositeFhirService<R extends IAnyResource> implement
 	}
 	
 	private Set<String> requestedProfiles() {
-		return profileRoutingContext.getRequestedProfiles();
+		return profileRoutingContext.getRequestedProfiles(resourceClass.getSimpleName());
 	}
 	
 	/**

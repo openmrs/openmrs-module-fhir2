@@ -111,7 +111,8 @@ a built-in backing.
    nothing beyond whether the UUID exists. A missing privilege on the
    operation itself is reported as not found, as it is for `get`.
 * For search, a `_profile` parameter naming a handler's implicit profile routes
-the search to that handler alone. Otherwise the orchestrator fans out to
+the search to that handler alone. It applies only to the resource type being
+searched, not to resources fetched for `_include` or `_revinclude`. Otherwise the orchestrator fans out to
 handlers whose `acceptsSearch(SearchParameterMap)` returns `true` and merges
 results via `CompositeBundleProvider`. Tag-based routing (e.g. `_tag` between
 an encounter handler and a visit handler) lives inside each handler's

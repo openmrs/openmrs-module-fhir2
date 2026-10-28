@@ -719,6 +719,29 @@ public class BaseCompositeFhirServiceTest {
 		verify(secondaryHandler, never()).search(any());
 	}
 	
+	/**
+	 * {@code _profile} applies only to the type being searched; a search for this type made while
+	 * resolving another type's {@code _revinclude} must fan out as usual.
+	 */
+	@Test
+	public void searchShouldIgnoreProfilesRequestedForAnotherResourceType() {
+		// given
+		IBundleProvider primaryBundle = emptyBundle();
+		IBundleProvider secondaryBundle = emptyBundle();
+		when(primaryHandler.search(any())).thenReturn(primaryBundle);
+		when(secondaryHandler.search(any())).thenReturn(secondaryBundle);
+		ProfileRoutingContext context = new ProfileRoutingContext();
+		context.setRequestedProfiles("Location", Collections.singletonList(PROFILE_PRIMARY));
+		service.setProfileRoutingContext(context);
+		
+		// when
+		service.exposedSearch(new SearchParameterMap());
+		
+		// then
+		verify(primaryHandler).search(any());
+		verify(secondaryHandler).search(any());
+	}
+	
 	@Test
 	public void searchByProfileShouldNotConsultAcceptsSearch() {
 		// An explicit _profile is authoritative: the orchestrator routes by profile without ever
@@ -886,7 +909,7 @@ public class BaseCompositeFhirServiceTest {
 	
 	private static ProfileRoutingContext contextRequesting(String... profileUrls) {
 		ProfileRoutingContext context = new ProfileRoutingContext();
-		context.setRequestedProfiles(Arrays.asList(profileUrls));
+		context.setRequestedProfiles("Encounter", Arrays.asList(profileUrls));
 		return context;
 	}
 	

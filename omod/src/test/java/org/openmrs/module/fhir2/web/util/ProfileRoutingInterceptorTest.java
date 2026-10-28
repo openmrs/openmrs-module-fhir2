@@ -28,6 +28,8 @@ public class ProfileRoutingInterceptorTest {
 	
 	private static final String OPENMRS_VISIT_PROFILE = "http://fhir.openmrs.org/StructureDefinition/openmrs-visit";
 	
+	private static final String ENCOUNTER = "Encounter";
+	
 	private ProfileRoutingContext context;
 	
 	private ProfileRoutingInterceptor interceptor;
@@ -43,35 +45,35 @@ public class ProfileRoutingInterceptorTest {
 	public void shouldCaptureNothingWhenNoProfileRequested() {
 		interceptor.captureRequestedProfiles(requestWithParameters(new HashMap<>()));
 		
-		assertThat(context.getRequestedProfiles(), empty());
+		assertThat(context.getRequestedProfiles(ENCOUNTER), empty());
 	}
 	
 	@Test
 	public void shouldCaptureASingleRequestedProfile() {
 		interceptor.captureRequestedProfiles(requestWithProfile(OPENMRS_VISIT_PROFILE));
 		
-		assertThat(context.getRequestedProfiles(), contains(OPENMRS_VISIT_PROFILE));
+		assertThat(context.getRequestedProfiles(ENCOUNTER), contains(OPENMRS_VISIT_PROFILE));
 	}
 	
 	@Test
 	public void shouldFlattenACommaSeparatedProfileList() {
 		interceptor.captureRequestedProfiles(requestWithProfile(OPENMRS_ENCOUNTER_PROFILE + "," + OPENMRS_VISIT_PROFILE));
 		
-		assertThat(context.getRequestedProfiles(), contains(OPENMRS_ENCOUNTER_PROFILE, OPENMRS_VISIT_PROFILE));
+		assertThat(context.getRequestedProfiles(ENCOUNTER), contains(OPENMRS_ENCOUNTER_PROFILE, OPENMRS_VISIT_PROFILE));
 	}
 	
 	@Test
 	public void shouldFlattenRepeatedProfileParameters() {
 		interceptor.captureRequestedProfiles(requestWithProfile(OPENMRS_ENCOUNTER_PROFILE, OPENMRS_VISIT_PROFILE));
 		
-		assertThat(context.getRequestedProfiles(), contains(OPENMRS_ENCOUNTER_PROFILE, OPENMRS_VISIT_PROFILE));
+		assertThat(context.getRequestedProfiles(ENCOUNTER), contains(OPENMRS_ENCOUNTER_PROFILE, OPENMRS_VISIT_PROFILE));
 	}
 	
 	@Test
 	public void shouldIgnoreBlankProfileValues() {
 		interceptor.captureRequestedProfiles(requestWithProfile("  ", "", OPENMRS_VISIT_PROFILE + " "));
 		
-		assertThat(context.getRequestedProfiles(), contains(OPENMRS_VISIT_PROFILE));
+		assertThat(context.getRequestedProfiles(ENCOUNTER), contains(OPENMRS_VISIT_PROFILE));
 	}
 	
 	@Test
@@ -79,7 +81,7 @@ public class ProfileRoutingInterceptorTest {
 		interceptor.captureRequestedProfiles(requestWithProfile(OPENMRS_ENCOUNTER_PROFILE));
 		interceptor.captureRequestedProfiles(requestWithProfile(OPENMRS_VISIT_PROFILE));
 		
-		assertThat(context.getRequestedProfiles(), contains(OPENMRS_VISIT_PROFILE));
+		assertThat(context.getRequestedProfiles(ENCOUNTER), contains(OPENMRS_VISIT_PROFILE));
 	}
 	
 	/**
@@ -91,7 +93,7 @@ public class ProfileRoutingInterceptorTest {
 		interceptor.captureRequestedProfiles(requestWithProfile(OPENMRS_VISIT_PROFILE));
 		interceptor.captureRequestedProfiles(requestWithParameters(new HashMap<>()));
 		
-		assertThat(context.getRequestedProfiles(), empty());
+		assertThat(context.getRequestedProfiles(ENCOUNTER), empty());
 	}
 	
 	@Test
@@ -101,7 +103,14 @@ public class ProfileRoutingInterceptorTest {
 		
 		interceptor.clearRequestedProfiles(requestDetails);
 		
-		assertThat(context.getRequestedProfiles(), empty());
+		assertThat(context.getRequestedProfiles(ENCOUNTER), empty());
+	}
+	
+	@Test
+	public void shouldOnlyExposeProfilesToTheSearchedResourceType() {
+		interceptor.captureRequestedProfiles(requestWithProfile(OPENMRS_VISIT_PROFILE));
+		
+		assertThat(context.getRequestedProfiles("Location"), empty());
 	}
 	
 	private static RequestDetails requestWithProfile(String... values) {
@@ -112,6 +121,7 @@ public class ProfileRoutingInterceptorTest {
 	
 	private static RequestDetails requestWithParameters(Map<String, String[]> parameters) {
 		ServletRequestDetails requestDetails = new ServletRequestDetails();
+		requestDetails.setResourceName(ENCOUNTER);
 		requestDetails.setParameters(parameters);
 		return requestDetails;
 	}

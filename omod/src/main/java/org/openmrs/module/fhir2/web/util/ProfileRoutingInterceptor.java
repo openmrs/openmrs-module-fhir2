@@ -48,7 +48,7 @@ public class ProfileRoutingInterceptor {
 	
 	@Hook(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED)
 	public void captureRequestedProfiles(RequestDetails requestDetails) {
-		profileRoutingContext.setRequestedProfiles(requestedProfiles(requestDetails));
+		profileRoutingContext.setRequestedProfiles(requestDetails.getResourceName(), requestedProfiles(requestDetails));
 	}
 	
 	/**
