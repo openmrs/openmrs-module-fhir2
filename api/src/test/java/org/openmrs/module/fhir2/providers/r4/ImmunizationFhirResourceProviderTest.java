@@ -154,10 +154,10 @@ public class ImmunizationFhirResourceProviderTest extends BaseFhirProvenanceReso
 		ReferenceAndListParam patient = new ReferenceAndListParam();
 		patient.addValue(new ReferenceOrListParam().add(new ReferenceParam(Immunization.SP_PATIENT, "John")));
 		
-		when(immunizationService.searchImmunizations(any(), any()))
+		when(immunizationService.searchImmunizations(any(), any(), any()))
 		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(immunization), 10, 1));
 		
-		IBundleProvider result = resourceProvider.searchImmunizations(patient, null);
+		IBundleProvider result = resourceProvider.searchImmunizations(patient, null, null);
 		
 		List<IBaseResource> resources = getResources(result, 1, 0);
 		
