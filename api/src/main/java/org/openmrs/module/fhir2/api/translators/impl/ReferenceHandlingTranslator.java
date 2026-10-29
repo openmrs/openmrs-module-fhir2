@@ -34,6 +34,7 @@ import org.openmrs.Provider;
 import org.openmrs.TestOrder;
 import org.openmrs.User;
 import org.openmrs.Visit;
+import org.openmrs.api.db.hibernate.HibernateUtil;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.OrderIdentifierTranslator;
 import org.openmrs.module.fhir2.api.util.FhirUtils;
@@ -141,6 +142,9 @@ public final class ReferenceHandlingTranslator {
 		if (order == null) {
 			return null;
 		}
+		
+		// lazy associations such as Obs.order hold an Order proxy, which fails the subclass checks below
+		order = HibernateUtil.getRealObjectFromProxy(order);
 		
 		if (order instanceof TestOrder) {
 			return createTestOrderReference((TestOrder) order, orderIdentifierTranslator);

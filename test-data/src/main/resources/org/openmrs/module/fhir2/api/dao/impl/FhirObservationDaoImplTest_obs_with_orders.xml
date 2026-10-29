@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!--
+    This Source Code Form is subject to the terms of the Mozilla Public License,
+    v. 2.0. If a copy of the MPL was not distributed with this file, You can
+    obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+    the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+
+    Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+    graphic logo is a trademark of OpenMRS Inc.
+-->
+<dataset>
+	<obs obs_id="1001" person_id="2" concept_id="5497" encounter_id="6" order_id="7" status="FINAL" obs_datetime="2008-10-20 00:00:00.0" location_id="1" value_numeric="500.0" comments="" creator="1" date_created="2008-10-20 14:09:35.0" voided="false" value_coded="[NULL]" value_coded_name_id="[NULL]" value_complex="[NULL]" value_text="[NULL]" value_datetime="[NULL]" value_drug="[NULL]" uuid="e32ef7c3-4422-43d3-86f3-5062d6ce68ec"/>
+	<obs obs_id="1002" person_id="7" concept_id="5089" encounter_id="3" order_id="1" status="FINAL" obs_datetime="2008-08-10 00:00:00.0" location_id="1" value_numeric="70.0" comments="" creator="1" date_created="2008-08-10 14:09:35.0" voided="false" value_coded="[NULL]" value_coded_name_id="[NULL]" value_complex="[NULL]" value_text="[NULL]" value_datetime="[NULL]" value_drug="[NULL]" uuid="f27be814-e176-4e7b-a035-42bb70ed29dc"/>
+</dataset>
