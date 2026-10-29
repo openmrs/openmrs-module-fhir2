@@ -18,6 +18,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 import static org.openmrs.module.fhir2.api.translators.impl.ReferenceHandlingTranslator.getReferenceId;
 
@@ -36,6 +37,7 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Reference;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -46,6 +48,8 @@ import org.openmrs.Location;
 import org.openmrs.LocationAttribute;
 import org.openmrs.LocationAttributeType;
 import org.openmrs.LocationTag;
+import org.openmrs.api.context.Context;
+import org.openmrs.api.context.UserContext;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
@@ -54,6 +58,7 @@ import org.openmrs.module.fhir2.api.translators.LocationReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.LocationTagTranslator;
 import org.openmrs.module.fhir2.api.translators.LocationTypeTranslator;
 import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
+import org.openmrs.util.PrivilegeConstants;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LocationTranslatorImplTest {
@@ -108,6 +113,9 @@ public class LocationTranslatorImplTest {
 	@Mock
 	private FhirGlobalPropertyService propertyService;
 	
+	@Mock
+	private UserContext userContext;
+	
 	private LocationTranslatorImpl locationTranslator;
 	
 	private Location omrsLocation;
@@ -126,6 +134,15 @@ public class LocationTranslatorImplTest {
 		locationTranslator.setLocationTagTranslator(locationTagTranslator);
 		locationTranslator.setLocationTypeTranslator(locationTypeTranslator);
 		locationTranslator.setPropertyService(propertyService);
+		
+		// telecom is gated on Context.hasPrivilege(), which reads the thread's UserContext
+		lenient().when(userContext.hasPrivilege(PrivilegeConstants.GET_LOCATION_ATTRIBUTE_TYPES)).thenReturn(true);
+		Context.setUserContext(userContext);
+	}
+	
+	@After
+	public void tearDown() {
+		Context.clearUserContext();
 	}
 	
 	@Test
