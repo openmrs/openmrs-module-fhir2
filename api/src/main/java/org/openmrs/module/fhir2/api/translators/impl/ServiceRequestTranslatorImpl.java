@@ -98,6 +98,12 @@ public class ServiceRequestTranslatorImpl implements ServiceRequestTranslator<Te
 		
 		serviceRequest.setPatientInstruction(order.getInstructions());
 		
+		serviceRequest.setPriority(determineServiceRequestPriority(order));
+		
+		if (order.getClinicalHistory() != null) {
+			serviceRequest.addNote().setText(order.getClinicalHistory());
+		}
+		
 		serviceRequest.setSubject(patientReferenceTranslator.toFhirResource(order.getPatient()));
 		
 		serviceRequest.setEncounter(encounterReferenceTranslator.toFhirResource(order.getEncounter()));
@@ -135,6 +141,24 @@ public class ServiceRequestTranslatorImpl implements ServiceRequestTranslator<Te
 	@Override
 	public TestOrder toOpenmrsType(@Nonnull ServiceRequest resource) {
 		throw new UnsupportedOperationException();
+	}
+	
+	private ServiceRequest.ServiceRequestPriority determineServiceRequestPriority(TestOrder order) {
+		if (order.getUrgency() == null) {
+			return null;
+		}
+		
+		switch (order.getUrgency()) {
+			case ROUTINE:
+				// FHIR has no equivalent to ON_SCHEDULED_DATE; an order on a scheduled date is not urgent, so treat it as
+				// routine
+			case ON_SCHEDULED_DATE:
+				return ServiceRequest.ServiceRequestPriority.ROUTINE;
+			case STAT:
+				return ServiceRequest.ServiceRequestPriority.STAT;
+			default:
+				return null;
+		}
 	}
 	
 	private ServiceRequest.ServiceRequestStatus determineServiceRequestStatus(TestOrder order) {
