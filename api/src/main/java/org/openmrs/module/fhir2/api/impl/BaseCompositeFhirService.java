@@ -15,6 +15,7 @@ import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -52,8 +53,9 @@ import org.springframework.core.annotation.OrderUtils;
 
 /**
  * Base class for services whose FHIR resource type {@code R} may be backed by more than one OpenMRS
- * domain object. Spring injects the {@link FhirResourceHandler}s registered for {@code R}, in
- * {@code @Order} priority, and each {@link FhirService} call is dispatched to one or more of them.
+ * domain object. Spring injects the {@link FhirResourceHandler}s registered for {@code R}, which
+ * are sorted by {@code @Order} priority, and each {@link FhirService} call is dispatched to one or
+ * more of them.
  * <h2>Dispatch</h2>
  * <ul>
  * <li>{@code get(uuid)} tries each handler in priority order. A handler's
@@ -84,9 +86,10 @@ import org.springframework.core.annotation.OrderUtils;
  * own resource's service.
  * <h2>Privileges</h2> A missing privilege is reported as {@link ResourceNotFoundException}, so
  * clients cannot use "forbidden" versus "not found" to learn whether a UUID exists. {@code get}
- * skips a handler that denies access; for writes, a denial by the owning handler is reported as not
- * found. The ownership probe does not require the read privilege, so a write needs only the
- * privilege of the owning handler's operation.
+ * skips a handler that denies access; for writes, a denial by the handler the write is dispatched
+ * to, including the create branch of an upsert, is reported as not found. The ownership probe does
+ * not require the read privilege, so a write needs only the privilege of the owning handler's
+ * operation.
  */
 public abstract class BaseCompositeFhirService<R extends IAnyResource> implements FhirService<R> {
 	
@@ -185,28 +188,25 @@ public abstract class BaseCompositeFhirService<R extends IAnyResource> implement
 			throw new InvalidRequestException("Resource cannot be null.");
 		}
 		
-		FhirResourceHandler<R> owner = findOwner(uuid);
+		FhirResourceHandler<R> handler = findOwner(uuid);
 		
-		if (owner == null) {
+		if (handler == null) {
 			if (!createIfNotExists) {
 				throw resourceNotFound(uuid);
 			}
 			
-			FhirResourceHandler<R> handler = resolveForCreate(updatedResource);
-			R result = handler.update(uuid, updatedResource, requestDetails, true);
-			stampProfile(result, handler);
-			return result;
+			handler = resolveForCreate(updatedResource);
 		}
 		
 		R result;
 		try {
-			result = owner.update(uuid, updatedResource, requestDetails, createIfNotExists);
+			result = handler.update(uuid, updatedResource, requestDetails, createIfNotExists);
 		}
 		catch (APIAuthenticationException e) {
 			throw resourceNotFound(uuid);
 		}
 		
-		stampProfile(result, owner);
+		stampProfile(result, handler);
 		return result;
 	}
 	
@@ -260,10 +260,15 @@ public abstract class BaseCompositeFhirService<R extends IAnyResource> implement
 			return;
 		}
 		
+		// Sorted here rather than trusting Spring's injection order, so that every dispatch decision, including
+		// the tie-break in create(), reads precedence from the same place; see orderOf().
+		List<FhirResourceHandler<R>> sorted = new ArrayList<>(rawHandlers);
+		sorted.sort(Comparator.comparingInt(BaseCompositeFhirService::orderOf));
+		
 		// Handlers sharing an implicit profile collapse to the highest-priority one (lowest @Order). This is
 		// how an external module replaces a built-in backing without both running on fan-out operations.
 		Map<String, FhirResourceHandler<R>> winners = new LinkedHashMap<>();
-		for (FhirResourceHandler<R> handler : rawHandlers) {
+		for (FhirResourceHandler<R> handler : sorted) {
 			String profile = handler.getImplicitProfile();
 			FhirResourceHandler<R> winner = winners.get(profile);
 			if (winner == null) {
@@ -410,8 +415,10 @@ public abstract class BaseCompositeFhirService<R extends IAnyResource> implement
 	}
 	
 	/**
-	 * Reads {@code @Order} from the target class, since a handler proxied by Spring AOP (e.g., one that
-	 * is {@code @Transactional}) does not carry the annotation on its proxy class.
+	 * A handler's precedence: {@link Ordered#getOrder()} if it implements {@link Ordered}, otherwise
+	 * {@code @Order} on its class, read from the target class since a handler proxied by Spring AOP
+	 * (e.g., one that is {@code @Transactional}) does not carry the annotation on its proxy class.
+	 * {@code @Order} on a {@code @Bean} method is not visible here and so is not honoured.
 	 */
 	private static int orderOf(Object handler) {
 		if (handler instanceof Ordered) {

@@ -44,7 +44,9 @@ import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
  * {@link org.springframework.core.annotation.Order @Order} annotation (or by implementing
  * {@link org.springframework.core.Ordered}). Lower numerical value means higher priority: it wins a
  * contested {@code canHandle}, is probed first by {@code exists} and {@code get}, and has its
- * results listed first in a merged search.
+ * results listed first in a merged search. The annotation must be on the handler's class;
+ * {@code @Order} on a {@code @Bean} method is ignored, so a handler declared that way should
+ * implement {@link org.springframework.core.Ordered} instead.
  * <p>
  * Built-in handlers shipped by this module register at
  * {@link org.springframework.core.Ordered#LOWEST_PRECEDENCE}, or at {@code LOWEST_PRECEDENCE - 10}

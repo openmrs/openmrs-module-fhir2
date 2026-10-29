@@ -60,6 +60,8 @@ import org.openmrs.module.fhir2.api.search.CompositeBundleProvider;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.util.ProfileRoutingContext;
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.Bean;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 
@@ -887,6 +889,27 @@ public class BaseCompositeFhirServiceTest {
 		assertThat(result, sameInstance(persisted));
 	}
 	
+	/**
+	 * Spring sorts injected handlers by {@code @Order} on a {@code @Bean} method, which the
+	 * orchestrator cannot see. Every dispatch decision must still agree on which handler comes first.
+	 */
+	@Test
+	public void getAndCreateShouldAgreeOnPrecedenceWhenABeanMethodDeclaresAnOrder() {
+		// given
+		try (AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(
+		        BeanMethodOrderConfig.class)) {
+			TestCompositeService composite = context.getBean(TestCompositeService.class);
+			
+			// when
+			Encounter fetched = composite.get(UUID_PRIMARY);
+			Encounter created = composite.create(new Encounter());
+			
+			// then
+			assertThat(fetched.getMeta().hasProfile(PROFILE_PRIMARY), is(true));
+			assertThat(created.getMeta().hasProfile(PROFILE_PRIMARY), is(true));
+		}
+	}
+	
 	// ---- helpers ----
 	
 	private static Encounter encounter(String uuid) {
@@ -920,6 +943,50 @@ public class BaseCompositeFhirServiceTest {
 	
 	@Order(1)
 	private abstract static class HighPrecedenceHandler implements FhirResourceHandler<Encounter> {}
+	
+	/**
+	 * Deliberately not a {@code @Configuration}, so that component scanning in context-sensitive tests
+	 * does not pick it up.
+	 */
+	static class BeanMethodOrderConfig {
+		
+		@Bean
+		@Order(0)
+		@SuppressWarnings("unchecked")
+		FhirResourceHandler<Encounter> overrideHandler() {
+			FhirResourceHandler<Encounter> handler = mock(FhirResourceHandler.class);
+			lenient().when(handler.getImplicitProfile()).thenReturn(PROFILE_SPECIALIZED);
+			lenient().when(handler.canHandle(any())).thenReturn(true);
+			lenient().when(handler.get(anyString())).thenReturn(encounter(UUID_PRIMARY));
+			lenient().when(handler.create(any())).thenReturn(encounter(UUID_PRIMARY));
+			return handler;
+		}
+		
+		@Bean
+		FhirResourceHandler<Encounter> builtInHandler() {
+			FhirResourceHandler<Encounter> handler = mock(HighPrecedenceHandler.class);
+			lenient().when(handler.getImplicitProfile()).thenReturn(PROFILE_PRIMARY);
+			lenient().when(handler.canHandle(any())).thenReturn(true);
+			lenient().when(handler.get(anyString())).thenReturn(encounter(UUID_PRIMARY));
+			lenient().when(handler.create(any())).thenReturn(encounter(UUID_PRIMARY));
+			return handler;
+		}
+		
+		@Bean
+		FhirGlobalPropertyService globalPropertyService() {
+			return mock(FhirGlobalPropertyService.class);
+		}
+		
+		@Bean
+		ProfileRoutingContext profileRoutingContext() {
+			return new ProfileRoutingContext();
+		}
+		
+		@Bean
+		TestCompositeService testCompositeService() {
+			return new TestCompositeService();
+		}
+	}
 	
 	/**
 	 * Concrete subclass that exposes the protected {@code doSearch} for direct testing.
