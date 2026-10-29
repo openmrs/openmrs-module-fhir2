@@ -50,11 +50,6 @@ import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.DiagnosticReportTranslator;
 import org.openmrs.module.fhir2.model.FhirDiagnosticReport;
 
-/**
- * Tests the CRUD/search wiring and dispatch predicates of the default DiagnosticReport handler.
- * Orchestrator-level concerns (fan-out, the typed {@code searchForDiagnosticReports} entry point)
- * live in {@code FhirDiagnosticReportServiceImplTest}.
- */
 @RunWith(MockitoJUnitRunner.class)
 public class FhirDiagnosticReportBackedDiagnosticReportHandlerTest {
 	

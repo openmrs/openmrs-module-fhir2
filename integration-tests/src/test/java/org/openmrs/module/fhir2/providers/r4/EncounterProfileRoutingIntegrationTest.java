@@ -240,7 +240,8 @@ public class EncounterProfileRoutingIntegrationTest extends BaseProfileRoutingR4
 	
 	/**
 	 * A visit create body whose {@code type} also carries an encounter-type coding, so both handlers'
-	 * {@code canHandle} claim it and only {@code meta.profile} can pick one.
+	 * {@code canHandle} claim it. {@code meta.profile} picks one; without it, the Encounter handler
+	 * wins.
 	 */
 	private Encounter ambiguousEncounter() throws Exception {
 		String json;

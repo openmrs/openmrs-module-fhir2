@@ -31,10 +31,6 @@ import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Resource;
 import org.springframework.mock.web.MockHttpServletResponse;
 
-/**
- * Shared helpers for R4 integration tests of composite-handler profile routing: following a search
- * across every page and reading the {@code meta.profile} a handler stamps onto each resource.
- */
 public abstract class BaseProfileRoutingR4IntegrationTest<T extends IResourceProvider, U extends DomainResource> extends BaseFhirR4IntegrationTest<T, U> {
 	
 	protected static final String UNKNOWN_PROFILE = "http://example.com/StructureDefinition/not-a-handler-profile";

@@ -58,11 +58,6 @@ import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.ServiceRequestTranslator;
 
-/**
- * Tests the read/search wiring and dispatch predicates of the default ServiceRequest handler.
- * Orchestrator-level concerns (fan-out, the typed {@code searchForServiceRequests} entry point)
- * live in {@code FhirServiceRequestServiceImplTest}.
- */
 @RunWith(MockitoJUnitRunner.class)
 public class TestOrderBackedServiceRequestHandlerTest {
 	

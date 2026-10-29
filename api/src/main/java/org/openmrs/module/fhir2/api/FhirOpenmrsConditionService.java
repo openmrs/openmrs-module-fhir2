@@ -14,19 +14,11 @@ import org.hl7.fhir.r4.model.Condition;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 
 /**
- * The CRUD and search service for FHIR {@link Condition} resources backed by the OpenMRS
- * {@code Condition} domain object (and its table), as distinct from the
- * {@link FhirDiagnosisService} which serves the same FHIR resource type from the {@code Diagnosis}
- * backing. Sibling of {@link FhirDiagnosisService} — the
- * {@link org.openmrs.module.fhir2.api.handler.ConditionBackedConditionHandler} composes this
- * service in the same way the
- * {@link org.openmrs.module.fhir2.api.handler.DiagnosisBackedConditionHandler} composes
- * {@code FhirDiagnosisService}.
+ * Serves FHIR {@link Condition} resources backed by the OpenMRS {@code Condition}, for use by
+ * {@link org.openmrs.module.fhir2.api.handler.ConditionBackedConditionHandler}.
+ * {@link FhirDiagnosisService} serves those backed by the OpenMRS {@code Diagnosis}.
  * <p>
- * Callers should generally use {@link FhirConditionService} (the composite orchestrator) — this
- * interface exists to keep condition-table-only CRUD behaviour in an {@code api}-package type so
- * the handler in {@code api.handler} can depend on it without reaching into the {@code api.impl}
- * package.
+ * Callers should generally use {@link FhirConditionService}, which dispatches across both backings.
  */
 public interface FhirOpenmrsConditionService extends FhirService<Condition> {
 	

@@ -22,27 +22,24 @@ import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
  * example one handler maps {@code Encounter} onto {@code org.openmrs.Encounter} while another maps
  * {@code Encounter} onto {@code org.openmrs.Visit}).
  * <p>
- * A handler <em>is</em> a {@link FhirService} — it inherits the standard CRUD contract and exposes
- * a few extra hooks the orchestrator uses to dispatch among handlers. There are exactly two
- * dispatch primitives:
+ * A handler <em>is</em> a {@link FhirService}: it inherits the standard CRUD contract and adds
+ * hooks the orchestrator uses to dispatch among handlers. There are two dispatch primitives:
  * <ul>
- * <li>Content-based — {@link #canHandle(IAnyResource)}. Used for {@code create} and for the
+ * <li>Content-based: {@link #canHandle(IAnyResource)}. Used for {@code create} and for the
  * {@code createIfNotExists} branch of {@code update}. A handler whose {@link #getImplicitProfile()}
  * matches the incoming resource's {@code meta.profile} is chosen outright; otherwise the
  * orchestrator picks the highest-priority handler whose predicate returns {@code true}, rejecting a
  * tie (see below).
- * <li>UUID-based — {@link FhirService#exists(String)}. Used for {@code update}, {@code patch} and
+ * <li>UUID-based: {@link FhirService#exists(String)}. Used for {@code update}, {@code patch} and
  * {@code delete}. The orchestrator picks the first handler whose backing store reports the UUID
- * exists. {@code BaseFhirService.exists} provides a cheap DAO row check; handlers that compose
- * another service should override to delegate (e.g. to {@code visitService.exists(uuid)}).
+ * exists.
  * </ul>
  * {@code get} does not probe: the orchestrator calls each handler's {@code get} in priority order
  * until one returns the resource.
  * <p>
  * Search restriction (e.g. {@code _tag}-based routing between an encounter handler and a visit
- * handler) lives inside each handler's {@link #acceptsSearch(SearchParameterMap)} — the
- * orchestrator stays agnostic about the routing protocol and just fans out across handlers that
- * accept the search.
+ * handler) lives inside each handler's {@link #acceptsSearch(SearchParameterMap)}; the orchestrator
+ * just fans out across the handlers that accept the search.
  * <h2>Handler priority and @Order</h2> Handlers are sorted by Spring's
  * {@link org.springframework.core.annotation.Order @Order} annotation (or by implementing
  * {@link org.springframework.core.Ordered}). Lower numerical value means higher priority: it wins a
@@ -59,16 +56,16 @@ import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
  * Two handlers that return the same {@link #getImplicitProfile() implicit profile} are treated as
  * the same backing: at startup the orchestrator keeps only the highest-priority one (lowest
  * {@code @Order}) and drops the rest, logging a warning. This is how an external module replaces a
- * built-in mapping — return the built-in's profile URL and a higher priority. Handlers with
- * distinct profiles all coexist (e.g. the encounter and visit mappings for {@code Encounter}); a
- * new backing should expose its own profile URL, namespaced by module id.
+ * built-in mapping: return the built-in's profile URL and a higher priority. Handlers with distinct
+ * profiles all coexist (e.g. the encounter and visit mappings for {@code Encounter}); a new backing
+ * should expose its own profile URL, namespaced by module id.
  * <p>
  * Write {@code canHandle} to describe <em>your</em> backing and nothing else: a handler that
  * enumerates its rivals cannot accommodate one added later by another module. Overlap is visible
  * only to the orchestrator, which resolves it by {@code @Order}. A handler registered at a higher
  * precedence than everything else claiming the body wins outright, which is how you add a backing
- * that deliberately overlaps a built-in. A tie at the top — the built-in encounter and visit
- * backings are peers, so a body naming both lands here — is rejected with
+ * that deliberately overlaps a built-in. A tie at the top (the built-in encounter and visit
+ * backings are peers, so a body naming both lands here) is rejected with
  * {@link ca.uhn.fhir.rest.server.exceptions.InvalidRequestException} naming the tied profiles,
  * since declaration order is not an answer the client can predict or correct. The same rejection
  * covers the opposite case, where no handler claims at all.
@@ -77,8 +74,8 @@ import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
  * block a client that has stated which backing it means.
  * <h2>Implementing a handler</h2> Handler implementations typically bundle a DAO and a translator
  * (often by extending {@code BaseFhirService}) or compose an existing OpenMRS-typed service. A
- * minimal composing implementation — for example, the visit-backed mapping for FHIR
- * {@code Encounter}, delegating to {@code FhirVisitService} — looks like: <pre>
+ * minimal composing implementation, such as the visit-backed mapping for FHIR {@code Encounter}
+ * that delegates to {@code FhirVisitService}, looks like: <pre>
  * {@literal @}Component
  * {@literal @}Order(Ordered.LOWEST_PRECEDENCE)        // or any lower value to override built-ins
  * public class VisitBackedEncounterHandler implements FhirResourceHandler&lt;Encounter&gt; {
@@ -113,26 +110,26 @@ import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
  * }
  * </pre> The dispatch methods worth getting right:
  * <ul>
- * <li>{@link #getImplicitProfile()} — a stable canonical URL identifying this handler. Clients can
+ * <li>{@link #getImplicitProfile()}: a stable canonical URL identifying this handler. Clients can
  * discover it from {@code meta.profile} on returned resources, and use it to target this handler on
  * a write (via {@code meta.profile}) or on a search (via the {@code _profile} search parameter).
  * The URL itself doesn't need to resolve to a published {@code StructureDefinition}, but it must be
  * unique across all registered handlers for the same resource type. URLs under
  * {@code http://fhir.openmrs.org/StructureDefinition/openmrs-*} are reserved for built-in handlers;
  * external modules should namespace by module id.
- * <li>{@link #canHandle(IAnyResource)} — the dispatch predicate for content-bearing writes when
+ * <li>{@link #canHandle(IAnyResource)}: the dispatch predicate for content-bearing writes when
  * {@code meta.profile} doesn't pin the request to a specific handler. Examine tags, codings,
- * profiles, references — whatever distinguishes resources this handler should own from those a
+ * profiles, references, or whatever distinguishes resources this handler should own from those a
  * sibling handler should own. Keep it cheap; it runs on every create. This is <em>not</em> input
  * validation: a handler may claim a resource and still reject specific malformed inputs at
  * {@link #create(IAnyResource)} time.
- * <li>{@link #acceptsSearch(SearchParameterMap)} — the participation predicate for searches.
- * Default {@code true} (always participate). Override to opt out — typically when the search params
+ * <li>{@link #acceptsSearch(SearchParameterMap)}: the participation predicate for searches. Default
+ * {@code true} (always participate). Override to opt out, typically when the search params
  * reference fields the handler cannot honor, or when a {@code _tag} parameter routes the request to
  * a different handler. Tag-based routing is conventionally implemented with
  * {@link HandlerSupport#routingTagExcludes}: opt out whenever an AND clause of {@code _tag} does
- * not name this handler's code, in its routing system or with no system.
- * <li>{@link FhirService#exists(String)} (inherited) — the cheap UUID probe. Handlers extending
+ * not name this handler's code, in its routing system or with no system given.
+ * <li>{@link FhirService#exists(String)} (inherited): the cheap UUID probe. Handlers extending
  * {@code BaseFhirService} get a row-existence DAO check for free; handlers composing another
  * service should override to delegate (e.g. {@code visitService.exists(uuid)}). Avoid going through
  * {@code get()} for the probe: it pays the translator cost which the orchestrator doesn't need at
@@ -158,7 +155,7 @@ public interface FhirResourceHandler<R extends IAnyResource> extends FhirService
 	
 	/**
 	 * Predicate that decides whether this handler claims an incoming resource on a content-bearing
-	 * write — {@link #create(IAnyResource)}, or {@link #update(String, IAnyResource)} when no handler
+	 * write: {@link #create(IAnyResource)}, or {@link #update(String, IAnyResource)} when no handler
 	 * currently owns the UUID and {@code createIfNotExists} is {@code true}.
 	 * <p>
 	 * This is a <em>dispatch</em> predicate, not input validation. A handler may return {@code true}

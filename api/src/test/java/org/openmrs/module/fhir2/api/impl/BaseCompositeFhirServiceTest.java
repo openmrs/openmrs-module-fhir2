@@ -91,20 +91,17 @@ public class BaseCompositeFhirServiceTest {
 	
 	@Before
 	public void setUp() {
-		// lenient — most tests only exercise a subset of the handler API. Distinct implicit profiles
-		// keep the two handlers independent: the orchestrator's collapse drops same-profile handlers,
-		// so stubbing distinct profiles (also the routing identity) ensures both stay active.
+		// Lenient because most tests exercise only part of the handler API. The profiles must differ,
+		// since the orchestrator collapses handlers that share one.
 		lenient().when(primaryHandler.getImplicitProfile()).thenReturn(PROFILE_PRIMARY);
 		lenient().when(secondaryHandler.getImplicitProfile()).thenReturn(PROFILE_SECONDARY);
 		lenient().when(primaryHandler.acceptsSearch(any())).thenReturn(true);
 		lenient().when(secondaryHandler.acceptsSearch(any())).thenReturn(true);
-		// Default UUID probe: nothing is owned. Tests that need ownership stub exists() per UUID.
+		// By default no handler owns any UUID.
 		lenient().when(primaryHandler.exists(anyString())).thenReturn(false);
 		lenient().when(secondaryHandler.exists(anyString())).thenReturn(false);
-		// Default get: throws ResourceNotFoundException — matches FhirService contract for missing
-		// UUIDs. Tests that need a successful read use doReturn(...).when(handler).get(uuid) to
-		// override per UUID without re-invoking the throwing default during stubbing.
-		// (Mockito mocks otherwise return null for unstubbed methods, which would mask the contract.)
+		// get() throws for a missing UUID, per the FhirService contract, rather than returning null as
+		// an unstubbed mock would. Override with doReturn(...), which does not invoke the throwing stub.
 		lenient().doThrow(new ResourceNotFoundException("not found")).when(primaryHandler).get(anyString());
 		lenient().doThrow(new ResourceNotFoundException("not found")).when(secondaryHandler).get(anyString());
 		
@@ -127,7 +124,7 @@ public class BaseCompositeFhirServiceTest {
 	
 	@Test
 	public void getShouldReturnFromFirstClaimingHandlerInPriorityOrder() {
-		// given — primary returns the resource; secondary should never be invoked past it
+		// given
 		Encounter fromPrimary = encounter(UUID_PRIMARY);
 		doReturn(fromPrimary).when(primaryHandler).get(UUID_PRIMARY);
 		
@@ -139,7 +136,7 @@ public class BaseCompositeFhirServiceTest {
 	
 	@Test
 	public void getShouldFallThroughWhenFirstHandlerThrowsResourceNotFound() {
-		// given — primary throws (default lenient setUp), secondary returns
+		// given: primary throws (from setUp)
 		Encounter fromSecondary = encounter(UUID_SECONDARY);
 		doReturn(fromSecondary).when(secondaryHandler).get(UUID_SECONDARY);
 		
@@ -151,10 +148,10 @@ public class BaseCompositeFhirServiceTest {
 	
 	@Test
 	public void getShouldPropagateResourceGoneFromOwningHandler() {
-		// given — primary owns the UUID but the underlying record is voided/retired
+		// given: primary's record is voided or retired
 		doThrow(new ca.uhn.fhir.rest.server.exceptions.ResourceGoneException("gone")).when(primaryHandler).get(UUID_PRIMARY);
 		
-		// when / then — ResourceGone propagates without falling through to secondary
+		// when / then
 		assertThrows(ca.uhn.fhir.rest.server.exceptions.ResourceGoneException.class, () -> service.get(UUID_PRIMARY));
 		verify(secondaryHandler, never()).get(anyString());
 	}
@@ -193,7 +190,7 @@ public class BaseCompositeFhirServiceTest {
 	
 	@Test
 	public void getShouldNotDuplicateAlreadyPresentProfile() {
-		// given — handler returns a resource that already has its profile set
+		// given
 		Encounter raw = encounter(UUID_PRIMARY);
 		raw.getMeta().addProfile(PROFILE_PRIMARY);
 		doReturn(raw).when(primaryHandler).get(UUID_PRIMARY);
@@ -243,7 +240,7 @@ public class BaseCompositeFhirServiceTest {
 		assertThrows(InvalidRequestException.class, () -> service.create(null));
 	}
 	
-	/** A client error: the server can create this resource type, just not the version supplied. */
+	/** A client error: the server can create this resource type, just not in the form supplied. */
 	@Test
 	public void createShouldThrowInvalidRequestWhenHandlersExistButNoneClaims() {
 		Encounter resource = new Encounter();
@@ -275,7 +272,7 @@ public class BaseCompositeFhirServiceTest {
 	
 	@Test
 	public void createShouldRouteByMetaProfileWhenSet() {
-		// given — meta.profile names the secondary handler, even though primary canHandle is true
+		// given: meta.profile names secondary, even though primary can handle the body
 		Encounter resource = new Encounter();
 		resource.getMeta().addProfile(PROFILE_SECONDARY);
 		Encounter persisted = encounter(UUID_SECONDARY);
@@ -317,8 +314,8 @@ public class BaseCompositeFhirServiceTest {
 	}
 	
 	/**
-	 * The escape hatch for a module that deliberately overlaps a built-in, which need not know it
-	 * exists.
+	 * Precedence lets a module deliberately override a built-in handler without the built-in knowing
+	 * about it.
 	 */
 	@Test
 	public void createShouldDispatchToTheHighestPrecedenceClaimant() {
@@ -361,7 +358,7 @@ public class BaseCompositeFhirServiceTest {
 	
 	/**
 	 * Builds a handler whose precedence the orchestrator can read. Mockito mocks carry no annotations,
-	 * so this uses the {@link Ordered} interface — the other half of the same Spring contract.
+	 * so this uses the {@link Ordered} interface, which Spring honours in the same way.
 	 */
 	@SuppressWarnings("unchecked")
 	private static FhirResourceHandler<Encounter> orderedHandler(String profile, int order) {
@@ -414,7 +411,7 @@ public class BaseCompositeFhirServiceTest {
 	
 	@Test
 	public void updateShouldRouteToCurrentOwnerByExistsProbe() {
-		// given — secondary handler currently owns the uuid
+		// given
 		Encounter incoming = new Encounter();
 		when(secondaryHandler.exists(UUID_SECONDARY)).thenReturn(true);
 		when(secondaryHandler.update(eq(UUID_SECONDARY), eq(incoming), any(), anyBoolean()))
@@ -471,7 +468,7 @@ public class BaseCompositeFhirServiceTest {
 	
 	@Test
 	public void updateShouldRouteThroughCreateDispatchWhenCreateIfNotExistsAndNoOwner() {
-		// given — no handler owns the uuid, but primary canHandle the new resource
+		// given: no handler owns the uuid, but primary can handle the body
 		Encounter incoming = new Encounter();
 		when(primaryHandler.canHandle(incoming)).thenReturn(true);
 		when(primaryHandler.update(eq(UUID_UNKNOWN), eq(incoming), any(), eq(true))).thenReturn(encounter(UUID_UNKNOWN));
@@ -584,7 +581,7 @@ public class BaseCompositeFhirServiceTest {
 	
 	@Test
 	public void searchShouldReturnSingleProviderUnwrappedWhenOnlyOneHandlerAccepts() {
-		// given — only primary accepts
+		// given
 		when(secondaryHandler.acceptsSearch(any())).thenReturn(false);
 		IBundleProvider primaryBundle = mock(IBundleProvider.class);
 		when(primaryHandler.search(any())).thenReturn(primaryBundle);
@@ -609,7 +606,7 @@ public class BaseCompositeFhirServiceTest {
 	
 	@Test
 	public void searchShouldOmitHandlersThatOptOutViaAcceptsSearch() {
-		// given — secondary opts out for this params instance
+		// given
 		SearchParameterMap params = new SearchParameterMap();
 		when(secondaryHandler.acceptsSearch(params)).thenReturn(false);
 		IBundleProvider primaryBundle = emptyBundle();
@@ -639,9 +636,8 @@ public class BaseCompositeFhirServiceTest {
 	
 	@Test
 	public void searchShouldNotStampIncludedResources() {
-		// A search page is the toIndex - fromIndex matches followed by _include / _revinclude resources.
-		// Included resources belong to other handlers (possibly other resource types) and must keep the
-		// profile their own service gave them.
+		// A page is toIndex - fromIndex matches followed by _include / _revinclude resources. Included
+		// resources must keep the profile their own service gave them.
 		when(secondaryHandler.acceptsSearch(any())).thenReturn(false);
 		IBundleProvider primaryBundle = mock(IBundleProvider.class);
 		Encounter match = encounter("e1");
@@ -744,8 +740,7 @@ public class BaseCompositeFhirServiceTest {
 	
 	@Test
 	public void searchByProfileShouldNotConsultAcceptsSearch() {
-		// An explicit _profile is authoritative: the orchestrator routes by profile without ever
-		// asking any handler's acceptsSearch.
+		// An explicit _profile is authoritative, so acceptsSearch is never consulted.
 		IBundleProvider primaryBundle = emptyBundle();
 		when(primaryHandler.search(any())).thenReturn(primaryBundle);
 		
@@ -776,8 +771,8 @@ public class BaseCompositeFhirServiceTest {
 	
 	@Test
 	public void searchShouldFallBackToAcceptsSearchWhenProfileMatchesNoHandler() {
-		// An unrelated conformance profile (e.g. US Core) matches no backing → treat as a non-routing
-		// filter and fan out via acceptsSearch, exactly as if no _profile were supplied.
+		// A profile that names no backing (e.g. US Core) is not a routing hint, so the search fans out
+		// as if no _profile were supplied.
 		IBundleProvider primaryBundle = emptyBundle();
 		IBundleProvider secondaryBundle = emptyBundle();
 		when(primaryHandler.search(any())).thenReturn(primaryBundle);
@@ -828,28 +823,25 @@ public class BaseCompositeFhirServiceTest {
 	
 	@Test
 	public void collapseShouldDropLowerPriorityHandlerWithDuplicateProfile() {
-		// given — both handlers declare the same implicit profile; primary has higher priority by
-		// virtue of being first in the injected list.
+		// given: both handlers share a profile; they tie on precedence, so list order decides
 		FhirResourceHandler<Encounter> overridePrimary = primaryHandler;
 		FhirResourceHandler<Encounter> overrideSecondary = secondaryHandler;
 		lenient().when(overridePrimary.getImplicitProfile()).thenReturn("http://example.org/StructureDefinition/shared");
 		lenient().when(overrideSecondary.getImplicitProfile()).thenReturn("http://example.org/StructureDefinition/shared");
 		
-		// Re-inject so the setter re-runs the collapse with the new profiles.
+		// setHandlers() is what collapses handlers, so it must see the new profiles
 		TestCompositeService localService = new TestCompositeService();
 		localService.setHandlers(Arrays.asList(overridePrimary, overrideSecondary));
 		localService.setGlobalPropertyService(globalPropertyService);
 		
-		// then — secondary was filtered out by the collapse; only primary is consulted, and its
-		// default lenient setUp stub makes get() throw ResourceNotFoundException.
+		// then: secondary was collapsed away, leaving only primary, whose get() throws (from setUp)
 		assertThrows(ResourceNotFoundException.class, () -> localService.get(UUID_SECONDARY));
 		verify(overrideSecondary, never()).get(UUID_SECONDARY);
 	}
 	
 	@Test
 	public void collapseShouldKeepHandlersWithDistinctProfiles() {
-		// default setUp uses distinct profiles (PROFILE_PRIMARY, PROFILE_SECONDARY); both should
-		// remain in the active list. We verify by exercising fan-out search: both handlers participate.
+		// setUp gives the handlers distinct profiles, so both should take part in a fan-out search
 		IBundleProvider primaryBundle = emptyBundle();
 		IBundleProvider secondaryBundle = emptyBundle();
 		when(primaryHandler.search(any())).thenReturn(primaryBundle);

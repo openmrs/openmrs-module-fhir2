@@ -17,10 +17,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Orchestrates the problem-list and encounter-diagnosis backings of FHIR {@code Condition}. Which
- * one owns a write is left entirely to the handlers' {@code canHandle}; a category naming neither
- * (an unknown code in the official system, or a coding from an unrelated system) is claimed by
- * neither, and {@link BaseCompositeFhirService} rejects it as a bad request.
+ * Orchestrates the problem-list and encounter-diagnosis backings of FHIR {@code Condition}. Unless
+ * {@code meta.profile} names a backing, a new {@code Condition} goes to whichever handler's
+ * {@code canHandle} accepts its category. A category naming neither (an unknown code in the
+ * official system, or a coding from an unrelated system) is rejected as a bad request.
  */
 @Component
 public class FhirConditionServiceImpl extends BaseCompositeFhirService<Condition> implements FhirConditionService {

@@ -60,11 +60,6 @@ import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.PersonTranslator;
 
-/**
- * Tests the CRUD/search wiring and dispatch predicates of the default Person handler.
- * Orchestrator-level concerns (fan-out, the typed {@code searchForPeople} entry point) live in
- * {@code FhirPersonServiceImplTest}.
- */
 @RunWith(MockitoJUnitRunner.class)
 public class PersonBackedPersonHandlerTest {
 	

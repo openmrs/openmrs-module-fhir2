@@ -42,14 +42,6 @@ import org.openmrs.module.fhir2.api.search.param.PropParam;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.providers.r4.MockIBundleProvider;
 
-/**
- * Orchestrator-level tests for {@link FhirObservationServiceImpl}. Dispatch mechanics
- * (probe-by-uuid, profile/canHandle routing, fan-out merge) are covered in
- * {@link BaseCompositeFhirServiceTest}; backing-specific CRUD/search lives in
- * {@code ObsBackedObservationHandlerTest}. What this class covers is the special-method
- * orchestration: that the typed entry points build the right {@link SearchParameterMap} and forward
- * through {@code doSearch}.
- */
 @RunWith(MockitoJUnitRunner.class)
 public class FhirObservationServiceImplTest {
 	

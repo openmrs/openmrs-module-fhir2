@@ -61,11 +61,6 @@ import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.MedicationRequestTranslator;
 
-/**
- * Tests the read/search wiring and dispatch predicates of the default MedicationRequest handler.
- * Orchestrator-level concerns (fan-out, the typed {@code searchForMedicationRequests} entry point)
- * live in {@code FhirMedicationRequestServiceImplTest}.
- */
 @RunWith(MockitoJUnitRunner.class)
 public class DrugOrderBackedMedicationRequestHandlerTest {
 	

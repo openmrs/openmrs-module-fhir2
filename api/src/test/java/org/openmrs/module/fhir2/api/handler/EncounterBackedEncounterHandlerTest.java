@@ -38,11 +38,6 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirOpenmrsEncounterService;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 
-/**
- * Tests the dispatch hooks and the delegation behaviour. The CRUD and search logic lives in
- * {@code FhirOpenmrsEncounterServiceImpl} and is tested in
- * {@code FhirOpenmrsEncounterServiceImplTest}.
- */
 @RunWith(MockitoJUnitRunner.class)
 public class EncounterBackedEncounterHandlerTest {
 	

@@ -137,7 +137,7 @@ public class UserBackedPractitionerHandlerTest {
 		
 		ArgumentCaptor<SearchParameterMap> captor = ArgumentCaptor.forClass(SearchParameterMap.class);
 		verify(userService).searchForUsers(captor.capture());
-		// Handler passes a fresh, empty SearchParameterMap — not the caller's filters.
+		// The caller's filters are dropped, not forwarded.
 		assertThat(captor.getValue(), is(not(sameInstance(caller))));
 		assertThat(captor.getValue().getParameters(), is(empty()));
 	}

@@ -33,11 +33,10 @@ import org.springframework.core.type.filter.AssignableTypeFilter;
  * {@code FhirAopConfiguration}, which resolves the annotation from the interface method the DAO
  * implements. That makes the DAO interfaces the single place where access is declared, and an
  * unannotated method there is an unguarded database operation. This test scans every DAO interface
- * and requires that every read and every write declares a privilege, that the method names fit the
- * read/write vocabulary the scan understands. The one deliberate exception is
- * {@code exists(String)}, which the composite services use to find the backing that owns a UUID
- * before calling its guarded operation; it must stay unguarded so that, e.g., a delete does not
- * also require the read privilege.
+ * and requires that each method is named as a read or a write and declares a privilege. The one
+ * deliberate exception is {@code exists(String)}, which the composite services use to find the
+ * backing that owns a UUID before calling its guarded operation; it must stay unguarded so that,
+ * e.g., a delete does not also require the read privilege.
  */
 public class FhirDaoAuthorizationTest {
 	
@@ -99,10 +98,10 @@ public class FhirDaoAuthorizationTest {
 	}
 	
 	/**
-	 * The abstract methods a DAO interface exposes, keyed by signature, resolved the way the advisor
-	 * resolves them: a declaration on the interface itself wins over one inherited from a parent
-	 * interface, so re-declaring a {@code FhirDao} method with {@code @Authorized} is what puts it
-	 * under guard. Default methods count too, since the advisor intercepts calls to them as well.
+	 * The methods a DAO interface exposes, keyed by signature, resolved the way the advisor resolves
+	 * them: a declaration on the interface itself wins over one inherited from a parent interface, so
+	 * re-declaring a {@code FhirDao} method with {@code @Authorized} is what puts it under guard.
+	 * Default methods count too, since the advisor intercepts calls to them as well.
 	 */
 	private static Map<String, Method> effectiveMethods(Class<?> dao) {
 		Map<String, Method> methods = new LinkedHashMap<>();

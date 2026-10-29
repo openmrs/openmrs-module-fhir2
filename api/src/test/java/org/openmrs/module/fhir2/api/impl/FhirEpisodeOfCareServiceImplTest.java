@@ -27,12 +27,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.handler.FhirResourceHandler;
 
-/**
- * Orchestrator-level tests for {@link FhirEpisodeOfCareServiceImpl}. Dispatch mechanics are covered
- * in {@link BaseCompositeFhirServiceTest}; backing-specific CRUD lives in
- * {@code PatientProgramBackedEpisodeOfCareHandlerTest}. EpisodeOfCare exposes only {@code @Read},
- * so this class asserts that get reaches the handler through the composite.
- */
 @RunWith(MockitoJUnitRunner.class)
 public class FhirEpisodeOfCareServiceImplTest {
 	

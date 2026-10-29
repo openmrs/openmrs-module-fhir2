@@ -38,7 +38,9 @@ public interface FhirContactPointMapDao extends FhirDaoAop {
 	@Authorized(PrivilegeConstants.MANAGE_LOCATION_ATTRIBUTE_TYPES)
 	FhirContactPointMap saveFhirContactPointMapForLocationAttributeType(FhirContactPointMap contactPointMap);
 	
-	/** Core has no privilege for provider attribute types, so this follows the one for providers. */
+	/**
+	 * Core has no privilege for managing provider attribute types, so this uses the one for providers.
+	 */
 	@Authorized(PrivilegeConstants.MANAGE_PROVIDERS)
 	FhirContactPointMap saveFhirContactPointMapForProviderAttributeType(FhirContactPointMap contactPointMap);
 	

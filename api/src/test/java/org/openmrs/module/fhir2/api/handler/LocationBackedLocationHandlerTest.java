@@ -48,11 +48,6 @@ import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.LocationTranslator;
 
-/**
- * Tests the CRUD/search wiring and dispatch predicates of the default Location handler.
- * Orchestrator-level concerns (fan-out, the typed {@code searchForLocations} entry point) live in
- * {@code FhirLocationServiceImplTest}.
- */
 @RunWith(MockitoJUnitRunner.class)
 public class LocationBackedLocationHandlerTest {
 	

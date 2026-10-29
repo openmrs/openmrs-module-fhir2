@@ -62,17 +62,6 @@ import org.openmrs.module.fhir2.providers.r4.MockIBundleProvider;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.OrderUtils;
 
-/**
- * Orchestrator-level tests for {@link FhirEncounterServiceImpl}. Dispatch mechanics (probe-by-uuid,
- * profile/canHandle routing, fan-out merge) are covered in {@link BaseCompositeFhirServiceTest},
- * and encounter/visit-specific CRUD lives in the handler tests under
- * {@code o.o.m.fhir2.api.handler}. What's left for this class is the encounter-specific
- * orchestration: that a create lands on the backing its type codings name (the encounter backing
- * when they name both, and rejected when they name neither), that {@code searchForEncounters}
- * forwards the {@code SearchParameterMap} through {@code doSearch}, and that
- * {@code getEncounterEverything} builds the right {@code SearchParameterMap}. The handler mocks
- * here mirror what the real pair does rather than re-testing handler logic.
- */
 @RunWith(MockitoJUnitRunner.class)
 public class FhirEncounterServiceImplTest {
 	
@@ -110,8 +99,7 @@ public class FhirEncounterServiceImplTest {
 		        .thenReturn(OrderUtils.getOrder(EncounterBackedEncounterHandler.class));
 		lenient().when(((Ordered) visitHandler).getOrder())
 		        .thenReturn(OrderUtils.getOrder(VisitBackedEncounterHandler.class));
-		// Each handler's acceptsSearch decides participation based on the tag in params (mirrors
-		// what the real handlers do — orchestrator just calls acceptsSearch and respects it).
+		// Each handler's acceptsSearch decides participation from the routing tag, as the real ones do.
 		lenient().when(encounterHandler.acceptsSearch(any()))
 		        .thenAnswer(inv -> participatesByTag(inv.getArgument(0), "encounter"));
 		lenient().when(visitHandler.acceptsSearch(any())).thenAnswer(inv -> participatesByTag(inv.getArgument(0), "visit"));
@@ -183,11 +171,11 @@ public class FhirEncounterServiceImplTest {
 	}
 	
 	/**
-	 * meta.profile is resolved before canHandle, so a client that states which backing it means still
-	 * gets through a body that content-based dispatch would have rejected.
+	 * meta.profile is resolved before canHandle, so a client can send a body naming both types to the
+	 * visit backing, which would otherwise lose to the encounter backing on precedence.
 	 */
 	@Test
-	public void create_shouldHonourMetaProfileForAnOtherwiseAmbiguousEncounter() {
+	public void create_shouldPreferMetaProfileOverHandlerPrecedence() {
 		CodeableConcept type = new CodeableConcept();
 		type.addCoding().setSystem(FhirConstants.VISIT_TYPE_SYSTEM_URI).setCode("1");
 		type.addCoding().setSystem(FhirConstants.ENCOUNTER_TYPE_SYSTEM_URI).setCode("2");

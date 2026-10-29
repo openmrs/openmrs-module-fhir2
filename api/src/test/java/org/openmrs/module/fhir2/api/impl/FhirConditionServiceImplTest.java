@@ -53,14 +53,6 @@ import org.openmrs.module.fhir2.providers.r4.MockIBundleProvider;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.OrderUtils;
 
-/**
- * Orchestrator-level tests for {@link FhirConditionServiceImpl}. Dispatch mechanics (probe-by-uuid,
- * profile/canHandle routing, fan-out merge) are covered in {@link BaseCompositeFhirServiceTest};
- * backing-specific CRUD lives in {@code FhirOpenmrsConditionServiceImplTest} and
- * {@code FhirDiagnosisServiceImplTest}. Category-based search routing is the handlers' own concern
- * (their {@code acceptsSearch}); these tests simulate that with per-test mocks rather than
- * re-testing handler logic.
- */
 @RunWith(MockitoJUnitRunner.class)
 public class FhirConditionServiceImplTest {
 	
@@ -94,12 +86,12 @@ public class FhirConditionServiceImplTest {
 		        .thenReturn(OrderUtils.getOrder(ConditionBackedConditionHandler.class));
 		lenient().when(((Ordered) diagnosisHandler).getOrder())
 		        .thenReturn(OrderUtils.getOrder(DiagnosisBackedConditionHandler.class));
-		// Mirror handler acceptsSearch — opt-in unless category names the other side.
+		// Mirrors the handlers' acceptsSearch: participate unless the category names the other side.
 		lenient().when(conditionHandler.acceptsSearch(any())).thenAnswer(
 		    inv -> participatesByCategory(inv.getArgument(0), FhirConstants.CONDITION_CATEGORY_CODE_CONDITION));
 		lenient().when(diagnosisHandler.acceptsSearch(any())).thenAnswer(
 		    inv -> participatesByCategory(inv.getArgument(0), FhirConstants.CONDITION_CATEGORY_CODE_DIAGNOSIS));
-		// Mirror handler canHandle — each looks only for its own category code, and the condition
+		// Mirrors the handlers' canHandle: each looks only for its own category code, and the condition
 		// backing additionally owns the unmarked case. A body carrying both is therefore claimed by
 		// both, and precedence decides between them.
 		lenient().when(conditionHandler.canHandle(any())).thenAnswer(inv -> {
@@ -154,8 +146,7 @@ public class FhirConditionServiceImplTest {
 	// ---- create: category-based dispatch ----
 	//
 	// The rejections below come from BaseCompositeFhirService, not from any Condition-specific
-	// pre-check: a category naming neither backing is claimed by neither handler, one naming both is
-	// claimed by both.
+	// pre-check: a category naming neither backing is claimed by neither handler.
 	
 	@Test
 	public void create_shouldRejectConditionWithUnknownCategoryCoding() {
@@ -178,7 +169,9 @@ public class FhirConditionServiceImplTest {
 		assertThrows(InvalidRequestException.class, () -> service.create(condition));
 	}
 	
-	/** Both backings claim a body carrying both categories, and they register as peers. */
+	/**
+	 * Both backings claim a body carrying both categories, and the condition backing has precedence.
+	 */
 	@Test
 	public void create_shouldDispatchConditionCarryingBothCategoriesToConditionHandler() {
 		Condition condition = newConditionWithCategory(FhirConstants.CONDITION_CATEGORY_CODE_CONDITION);

@@ -47,12 +47,6 @@ import org.openmrs.module.fhir2.api.handler.FhirResourceHandler;
 import org.openmrs.module.fhir2.api.search.param.PractitionerSearchParams;
 import org.openmrs.module.fhir2.providers.r4.MockIBundleProvider;
 
-/**
- * Orchestrator-level tests for {@link FhirPractitionerServiceImpl}. Dispatch mechanics are covered
- * in {@link BaseCompositeFhirServiceTest}; provider/user CRUD + search lives in
- * {@code FhirOpenmrsProviderServiceImplTest} and the handler-side tests under
- * {@code o.o.m.fhir2.api.handler}.
- */
 @RunWith(MockitoJUnitRunner.class)
 public class FhirPractitionerServiceImplTest {
 	

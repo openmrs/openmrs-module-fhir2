@@ -50,11 +50,6 @@ import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.GroupTranslator;
 
-/**
- * Tests the CRUD/search wiring and dispatch predicates of the default Group handler.
- * Orchestrator-level concerns (fan-out, the typed {@code searchForGroups} entry point) live in
- * {@code FhirGroupServiceImplTest}.
- */
 @RunWith(MockitoJUnitRunner.class)
 public class CohortBackedGroupHandlerTest {
 	

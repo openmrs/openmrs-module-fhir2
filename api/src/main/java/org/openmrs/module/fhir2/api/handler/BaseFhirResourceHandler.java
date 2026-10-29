@@ -20,6 +20,6 @@ import org.openmrs.module.fhir2.api.impl.BaseFhirService;
  * <p>
  * Concrete handlers extend this for CRUD wiring and declare
  * {@code implements FhirResourceHandler<R>} themselves. New handlers should extend this rather than
- * {@link BaseFhirService} directly, as it is intended to take over that class's role.
+ * {@link BaseFhirService} directly.
  */
 public abstract class BaseFhirResourceHandler<T extends IAnyResource, U extends OpenmrsObject & Auditable> extends BaseFhirService<T, U> {}

@@ -32,11 +32,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.api.FhirOpenmrsProviderService;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 
-/**
- * Tests the dispatch hooks and the delegation behaviour. The CRUD and search logic lives in
- * {@code FhirOpenmrsProviderServiceImpl} and is tested in
- * {@code FhirOpenmrsProviderServiceImplTest}.
- */
 @RunWith(MockitoJUnitRunner.class)
 public class ProviderBackedPractitionerHandlerTest {
 	
@@ -67,14 +62,14 @@ public class ProviderBackedPractitionerHandlerTest {
 	
 	@Test
 	public void canHandle_shouldAlwaysReturnTrue() {
-		// Provider is the default backing for new Practitioner resources — claims every input.
+		// Provider is the default Practitioner backing, so it claims every resource.
 		assertTrue(handler.canHandle(new Practitioner()));
 		assertTrue(handler.canHandle(practitioner));
 	}
 	
 	@Test
 	public void acceptsSearch_shouldAcceptAnySearch() {
-		// No tag-routing protocol for Practitioner; handler participates in every fan-out.
+		// Practitioner has no tag routing, so this handler joins every fan-out search.
 		assertTrue(handler.acceptsSearch(new SearchParameterMap()));
 	}
 	

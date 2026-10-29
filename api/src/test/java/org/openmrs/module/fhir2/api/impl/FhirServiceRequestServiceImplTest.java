@@ -39,13 +39,6 @@ import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.handler.FhirResourceHandler;
 import org.openmrs.module.fhir2.providers.r4.MockIBundleProvider;
 
-/**
- * Orchestrator-level tests for {@link FhirServiceRequestServiceImpl}. Dispatch mechanics are
- * covered in {@link BaseCompositeFhirServiceTest}; backing-specific read/search lives in
- * {@code TestOrderBackedServiceRequestHandlerTest}. ServiceRequest is read/search at the provider,
- * so this class only covers that {@code searchForServiceRequests} forwards through
- * {@code doSearch}.
- */
 @RunWith(MockitoJUnitRunner.class)
 public class FhirServiceRequestServiceImplTest {
 	

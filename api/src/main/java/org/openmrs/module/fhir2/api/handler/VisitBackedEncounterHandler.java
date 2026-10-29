@@ -32,7 +32,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * Maps the FHIR {@link Encounter} resource onto the OpenMRS {@code Visit} domain object by
- * delegating every {@link org.openmrs.module.fhir2.api.FhirService} call to the existing
+ * delegating every {@link org.openmrs.module.fhir2.api.FhirService} call to
  * {@link FhirVisitService}.
  * <p>
  * Claims an incoming resource on writes when its {@code type[].coding[].system} includes

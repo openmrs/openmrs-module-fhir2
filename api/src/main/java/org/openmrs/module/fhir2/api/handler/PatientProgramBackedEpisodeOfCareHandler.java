@@ -33,7 +33,7 @@ import org.springframework.stereotype.Component;
  * <p>
  * EpisodeOfCare is read-only in this module: its resource provider exposes only {@code @Read}, and
  * no {@code SearchQuery} is wired for this backing. The handler therefore opts out of search
- * fan-out via {@link #acceptsSearch(SearchParameterMap)} rather than pretending to support it.
+ * fan-out via {@link #acceptsSearch(SearchParameterMap)}.
  */
 @Component
 @Order(Ordered.LOWEST_PRECEDENCE)
@@ -60,9 +60,6 @@ public class PatientProgramBackedEpisodeOfCareHandler extends BaseFhirResourceHa
 		return true;
 	}
 	
-	/**
-	 * Always {@code false} — this backing has no search wiring, so it never joins a fan-out search.
-	 */
 	@Override
 	public boolean acceptsSearch(@Nonnull SearchParameterMap params) {
 		return false;

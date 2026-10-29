@@ -14,19 +14,12 @@ import org.hl7.fhir.r4.model.Practitioner;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 
 /**
- * The CRUD and search service for FHIR {@link Practitioner} resources backed by the OpenMRS
- * {@code Provider} domain object (and its table), as distinct from the {@link FhirUserService}
- * which serves the same FHIR resource type from the {@code User} backing. Sibling of
- * {@link FhirUserService} — the
- * {@link org.openmrs.module.fhir2.api.handler.ProviderBackedPractitionerHandler} composes this
- * service in the same way the
- * {@link org.openmrs.module.fhir2.api.handler.UserBackedPractitionerHandler} composes
- * {@code FhirUserService}.
+ * Serves FHIR {@link Practitioner} resources backed by the OpenMRS {@code Provider}, for use by
+ * {@link org.openmrs.module.fhir2.api.handler.ProviderBackedPractitionerHandler}.
+ * {@link FhirUserService} serves those backed by the OpenMRS {@code User}.
  * <p>
- * Callers should generally use {@link FhirPractitionerService} (the composite orchestrator) — this
- * interface exists to keep provider-table-only CRUD behaviour in an {@code api}-package type so the
- * handler in {@code api.handler} can depend on it without reaching into the {@code api.impl}
- * package.
+ * Callers should generally use {@link FhirPractitionerService}, which dispatches across both
+ * backings.
  */
 public interface FhirOpenmrsProviderService extends FhirService<Practitioner> {
 	

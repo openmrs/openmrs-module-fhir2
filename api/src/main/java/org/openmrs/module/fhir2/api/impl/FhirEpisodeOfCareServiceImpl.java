@@ -14,8 +14,8 @@ import org.openmrs.module.fhir2.api.FhirEpisodeOfCareService;
 import org.springframework.stereotype.Component;
 
 /**
- * EpisodeOfCare exposes no typed search or other resource-specific operations, so this orchestrator
- * adds nothing to {@link BaseCompositeFhirService}; all CRUD dispatch is inherited.
+ * Adds nothing to {@link BaseCompositeFhirService}, as EpisodeOfCare has no resource-specific
+ * operations.
  */
 @Component
 public class FhirEpisodeOfCareServiceImpl extends BaseCompositeFhirService<EpisodeOfCare> implements FhirEpisodeOfCareService {}

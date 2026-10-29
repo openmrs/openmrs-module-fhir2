@@ -44,11 +44,6 @@ import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.TaskTranslator;
 import org.openmrs.module.fhir2.model.FhirTask;
 
-/**
- * Tests the CRUD/search wiring and dispatch predicates of the default Task handler.
- * Orchestrator-level concerns (fan-out, the typed {@code searchForTasks} entry point) live in
- * {@code FhirTaskServiceImplTest}.
- */
 @RunWith(MockitoJUnitRunner.class)
 public class FhirTaskBackedTaskHandlerTest {
 	

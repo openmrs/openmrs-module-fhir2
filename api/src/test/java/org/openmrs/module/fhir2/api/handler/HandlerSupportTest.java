@@ -69,9 +69,16 @@ public class HandlerSupportTest {
 	}
 	
 	@Test
-	public void shouldTreatEmptySystemLikeNoSystem() {
-		// _tag=|encounter
+	public void shouldExcludeWhenTagExplicitlyHasNoSystem() {
+		// _tag=|encounter: only matches tags without a system, and routing tags always have one.
 		SearchParameterMap params = paramsWithTag(new TokenParam("", CODE));
+		assertTrue(HandlerSupport.routingTagExcludes(params, SYSTEM, CODE));
+	}
+	
+	@Test
+	public void shouldNotExcludeWhenNotTagExplicitlyHasNoSystem() {
+		// _tag:not=|encounter
+		SearchParameterMap params = paramsWithTag(new TokenParam("", CODE).setModifier(TokenParamModifier.NOT));
 		assertFalse(HandlerSupport.routingTagExcludes(params, SYSTEM, CODE));
 	}
 	
@@ -143,7 +150,7 @@ public class HandlerSupportTest {
 	@Test
 	public void shouldExcludeWhenAnyAndClauseInRoutingSystemHasWrongCode() {
 		// _tag = encounter-tag|encounter AND encounter-tag|visit
-		// The first clause admits us. The second clause excludes us.
+		// The first clause admits this backing but the second does not.
 		TokenAndListParam tag = new TokenAndListParam();
 		tag.addAnd(new TokenParam(SYSTEM, CODE));
 		tag.addAnd(new TokenParam(SYSTEM, OTHER_CODE));
@@ -173,7 +180,7 @@ public class HandlerSupportTest {
 	
 	@Test
 	public void shouldNotExcludeWhenSearchParameterMapHasNoTagEntry() {
-		// SearchParameterMap can hold many parameter keys — only TAG_SEARCH_HANDLER should be read.
+		// Only TAG_SEARCH_HANDLER is read; other parameter keys are ignored.
 		SearchParameterMap params = new SearchParameterMap().addParameter("UNRELATED_KEY",
 		    new TokenAndListParam().addAnd(new TokenParam(SYSTEM, OTHER_CODE)));
 		assertFalse(HandlerSupport.routingTagExcludes(params, SYSTEM, CODE));

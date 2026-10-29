@@ -47,7 +47,7 @@ public final class HandlerSupport {
 	
 	/**
 	 * A {@link FhirResourceHandler#canHandle} predicate for backings marked by membership of a coding
-	 * system, whatever the code — as the OpenMRS encounter-type and visit-type systems are.
+	 * system, whatever the code, as the OpenMRS encounter-type and visit-type systems are.
 	 *
 	 * @param concepts the concepts to inspect (e.g. {@code Encounter.type}); may be empty
 	 * @param system the coding system that marks a body as the caller's
@@ -69,9 +69,8 @@ public final class HandlerSupport {
 	}
 	
 	/**
-	 * Returns whether the concepts carry no codings at all — neither any {@code CodeableConcept}, nor
-	 * one with a populated {@code coding}. The handler that owns the unmarked case, where the client
-	 * has named no backing, claims on this.
+	 * Returns whether the concepts carry no codings at all. The handler that owns the unmarked case,
+	 * where the client has named no backing, claims on this.
 	 *
 	 * @param concepts the concepts to inspect; may be empty
 	 */
@@ -86,9 +85,10 @@ public final class HandlerSupport {
 	/**
 	 * Returns whether a {@code _tag} parameter on the search request routes the request away from the
 	 * caller. Every AND clause of {@code _tag} must admit the caller: a clause does so when one of its
-	 * OR alternatives carries the caller's code, either in the routing system or with no system at all.
-	 * A clause using the {@code :not} modifier instead admits the caller unless it names the caller's
-	 * code, so {@code _tag:not=visit} routes away from the visit handler only.
+	 * OR alternatives carries the caller's code, either in the routing system or with no system given
+	 * ({@code encounter}, but not {@code |encounter}, which names a code that has no system). A clause
+	 * using the {@code :not} modifier instead admits the caller unless it names the caller's code, so
+	 * {@code _tag:not=visit} routes away from the visit handler only.
 	 *
 	 * @param params the search parameter map; the {@code _tag} parameter is read from the entry stored
 	 *            under {@link FhirConstants#TAG_SEARCH_HANDLER}
@@ -96,8 +96,7 @@ public final class HandlerSupport {
 	 *            requests (e.g. {@code OPENMRS_FHIR_EXT_ENCOUNTER_TAG})
 	 * @param routingCode the calling handler's code in the routing system (e.g. {@code "encounter"} or
 	 *            {@code "visit"})
-	 * @return {@code true} if any AND clause of {@code _tag} fails to name the caller's code (meaning
-	 *         the caller should opt out of the search)
+	 * @return {@code true} if the caller should opt out of the search
 	 */
 	public static boolean routingTagExcludes(@Nonnull SearchParameterMap params, @Nonnull String routingSystem,
 	        @Nonnull String routingCode) {
@@ -108,7 +107,7 @@ public final class HandlerSupport {
 	/**
 	 * Returns whether a {@code category} parameter on the search request routes the request away from
 	 * the caller. Semantics mirror {@link #routingTagExcludes}: every AND clause must carry the
-	 * caller's code, in the routing system or with no system, and a {@code :not} clause must not.
+	 * caller's code, in the routing system or with no system given, and a {@code :not} clause must not.
 	 *
 	 * @param params the search parameter map; the {@code category} parameter is read from the entry
 	 *            stored under {@link FhirConstants#CATEGORY_SEARCH_HANDLER}
@@ -116,7 +115,7 @@ public final class HandlerSupport {
 	 *            categories (e.g. {@code CONDITION_CATEGORY_SYSTEM_URI})
 	 * @param routingCode the calling handler's code in the routing system (e.g.
 	 *            {@code "problem-list-item"} or {@code "encounter-diagnosis"})
-	 * @return {@code true} if any AND clause of {@code category} fails to name the caller's code
+	 * @return {@code true} if the caller should opt out of the search
 	 */
 	public static boolean routingCategoryExcludes(@Nonnull SearchParameterMap params, @Nonnull String routingSystem,
 	        @Nonnull String routingCode) {
@@ -165,8 +164,9 @@ public final class HandlerSupport {
 			return false;
 		}
 		
+		// A null system (code) matches any system; an empty one (|code) matches only codes without one.
 		String system = token.getSystem();
-		return system == null || system.isEmpty() || routingSystem.equals(system);
+		return system == null || routingSystem.equals(system);
 	}
 	
 	private static TokenAndListParam extractTokenAndListParam(SearchParameterMap params, String handlerKey) {

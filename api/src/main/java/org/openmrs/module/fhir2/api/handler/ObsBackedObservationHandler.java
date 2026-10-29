@@ -32,8 +32,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * Default handler for the FHIR {@link Observation} resource, mapping onto the OpenMRS {@code Obs}
- * table. Claims every incoming Observation. Overrides {@code applyUpdate} to route saves through
- * {@code ObsService} to handle OpenMRS's obs-immutability semantics.
+ * table. Claims every incoming Observation.
  */
 @Component
 @Order(Ordered.LOWEST_PRECEDENCE)
@@ -79,7 +78,7 @@ public class ObsBackedObservationHandler extends BaseFhirResourceHandler<Observa
 	
 	@Override
 	protected Observation applyUpdate(Obs existingObject, Observation updatedResource) {
-		// Obs in OpenMRS are conceptually immutable — ObsService.saveObs voids the previous row and
+		// Obs in OpenMRS are conceptually immutable: ObsService.saveObs voids the previous row and
 		// writes a new one, which is what callers expect for FHIR Observation PUT semantics.
 		ObservationTranslator translator = getTranslator();
 		Obs updatedObject = translator.toOpenmrsType(existingObject, updatedResource);

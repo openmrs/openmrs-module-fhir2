@@ -56,12 +56,6 @@ import org.openmrs.module.fhir2.api.translators.ImmunizationTranslator;
 import org.openmrs.module.fhir2.api.util.ImmunizationObsGroupHelper;
 import org.openmrs.validator.ValidateUtil;
 
-/**
- * Tests the dispatch predicates, search wiring and obs-specific write overrides of the default
- * Immunization handler against mocked collaborators. The CRUD paths (create / update / delete
- * against a real obs group) are exercised end-to-end through the composite by
- * {@code FhirImmunizationServiceImplTest}, which runs against a real database.
- */
 @RunWith(MockitoJUnitRunner.class)
 public class ObsBackedImmunizationHandlerTest {
 	

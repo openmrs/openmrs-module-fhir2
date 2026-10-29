@@ -38,13 +38,6 @@ import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.handler.FhirResourceHandler;
 import org.openmrs.module.fhir2.providers.r4.MockIBundleProvider;
 
-/**
- * Orchestrator-level tests for {@link FhirValueSetServiceImpl}. Dispatch mechanics are covered in
- * {@link BaseCompositeFhirServiceTest}; backing-specific read/search lives in
- * {@code ConceptBackedValueSetHandlerTest}. ValueSet is read-only at the provider ({@code @Read} +
- * {@code @Search}), so this class only covers that {@code searchForValueSets} forwards through
- * {@code doSearch}.
- */
 @RunWith(MockitoJUnitRunner.class)
 public class FhirValueSetServiceImplTest {
 	

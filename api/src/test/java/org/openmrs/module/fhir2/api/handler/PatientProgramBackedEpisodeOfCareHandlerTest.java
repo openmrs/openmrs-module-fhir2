@@ -28,10 +28,6 @@ import org.openmrs.module.fhir2.api.dao.FhirEpisodeOfCareDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.EpisodeOfCareTranslator;
 
-/**
- * Tests the CRUD wiring and dispatch predicates of the default EpisodeOfCare handler.
- * Orchestrator-level concerns live in {@code FhirEpisodeOfCareServiceImplTest}.
- */
 @RunWith(MockitoJUnitRunner.class)
 public class PatientProgramBackedEpisodeOfCareHandlerTest {
 	

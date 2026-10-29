@@ -14,19 +14,11 @@ import org.hl7.fhir.r4.model.Encounter;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 
 /**
- * The CRUD and search service for FHIR {@link Encounter} resources backed by the OpenMRS
- * {@code Encounter} domain object (and its table), as distinct from the {@link FhirVisitService}
- * which serves the same FHIR resource type from the {@code Visit} backing. Sibling of
- * {@link FhirVisitService} — the
- * {@link org.openmrs.module.fhir2.api.handler.EncounterBackedEncounterHandler} composes this
- * service in the same way the
- * {@link org.openmrs.module.fhir2.api.handler.VisitBackedEncounterHandler} composes
- * {@code FhirVisitService}.
+ * Serves FHIR {@link Encounter} resources backed by the OpenMRS {@code Encounter}, for use by
+ * {@link org.openmrs.module.fhir2.api.handler.EncounterBackedEncounterHandler}.
+ * {@link FhirVisitService} serves those backed by the OpenMRS {@code Visit}.
  * <p>
- * Callers should generally use {@link FhirEncounterService} (the composite orchestrator) — this
- * interface exists to keep encounter-table-only CRUD behaviour in an {@code api}-package type so
- * the handler in {@code api.handler} can depend on it without reaching into the {@code api.impl}
- * package.
+ * Callers should generally use {@link FhirEncounterService}, which dispatches across both backings.
  */
 public interface FhirOpenmrsEncounterService extends FhirService<Encounter> {
 	

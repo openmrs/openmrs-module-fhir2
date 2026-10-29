@@ -64,11 +64,6 @@ import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.RelatedPersonTranslator;
 
-/**
- * Tests the CRUD/search wiring and dispatch predicates of the default RelatedPerson handler.
- * Orchestrator-level concerns (fan-out, the typed {@code searchForRelatedPeople} entry point) live
- * in {@code FhirRelatedPersonServiceImplTest}.
- */
 @RunWith(MockitoJUnitRunner.class)
 public class RelationshipBackedRelatedPersonHandlerTest {
 	

@@ -64,11 +64,6 @@ import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.PatientTranslator;
 
-/**
- * Tests the CRUD/search wiring and dispatch predicates of the default Patient handler.
- * Orchestrator-level concerns (fan-out, the typed {@code searchForPatients} entry points and the
- * {@code $everything} operations) live in {@code FhirPatientServiceImplTest}.
- */
 @RunWith(MockitoJUnitRunner.class)
 public class PatientBackedPatientHandlerTest {
 	

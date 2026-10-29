@@ -46,11 +46,6 @@ import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.ValueSetTranslator;
 
-/**
- * Tests the read/search wiring and dispatch predicates of the default ValueSet handler.
- * Orchestrator-level concerns (fan-out, the typed {@code searchForValueSets} entry point) live in
- * {@code FhirValueSetServiceImplTest}.
- */
 @RunWith(MockitoJUnitRunner.class)
 public class ConceptBackedValueSetHandlerTest {
 	

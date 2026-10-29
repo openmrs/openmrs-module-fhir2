@@ -36,13 +36,6 @@ import org.openmrs.module.fhir2.api.handler.FhirResourceHandler;
 import org.openmrs.module.fhir2.api.search.param.FhirAllergyIntoleranceSearchParams;
 import org.openmrs.module.fhir2.providers.r4.MockIBundleProvider;
 
-/**
- * Orchestrator-level tests for {@link FhirAllergyIntoleranceServiceImpl}. Dispatch mechanics
- * (probe-by-uuid, profile/canHandle routing, fan-out merge) are covered in
- * {@link BaseCompositeFhirServiceTest}; backing-specific CRUD/search lives in
- * {@code AllergyBackedAllergyIntoleranceHandlerTest}. What this class covers is that the typed
- * {@code searchForAllergies} entry point forwards through {@code doSearch}.
- */
 @RunWith(MockitoJUnitRunner.class)
 public class FhirAllergyIntoleranceServiceImplTest {
 	

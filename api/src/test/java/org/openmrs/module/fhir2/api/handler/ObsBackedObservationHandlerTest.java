@@ -50,11 +50,6 @@ import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.ObservationTranslator;
 
-/**
- * Tests the CRUD/search wiring and dispatch predicates of the default Observation handler. The
- * orchestrator-level concerns (fan-out, the typed {@code searchForObservations} /
- * {@code getLastn…Observations} entry points) live in {@code FhirObservationServiceImplTest}.
- */
 @RunWith(MockitoJUnitRunner.class)
 public class ObsBackedObservationHandlerTest {
 	

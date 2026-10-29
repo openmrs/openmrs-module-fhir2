@@ -36,9 +36,7 @@ import org.springframework.stereotype.Component;
  * applies the same composition pattern over {@code FhirUserService}.
  * <p>
  * Claims any incoming Practitioner on create: a provider is the default backing for new
- * Practitioner resources, since users cannot be written through the FHIR API. The orchestrator's
- * content-based dispatch resolves to this handler unless {@code meta.profile} names another
- * backing.
+ * Practitioner resources, since users cannot be written through the FHIR API.
  */
 @Component
 @Order(Ordered.LOWEST_PRECEDENCE - 10)
@@ -58,7 +56,7 @@ public class ProviderBackedPractitionerHandler implements FhirResourceHandler<Pr
 	@Override
 	public boolean canHandle(@Nonnull Practitioner resource) {
 		// There is no content-level discriminator (no analogue of encounter.type[].coding.system), so
-		// the provider backing claims by default; another backing must be selected via meta.profile.
+		// the provider backing claims by default.
 		return true;
 	}
 	

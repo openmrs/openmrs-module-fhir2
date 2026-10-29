@@ -33,7 +33,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * Maps the FHIR {@link Practitioner} resource onto the OpenMRS {@code User} domain object by
- * delegating reads and searches to the existing {@link FhirUserService}. Sibling of
+ * delegating reads and searches to {@link FhirUserService}. Sibling of
  * {@link ProviderBackedPractitionerHandler}.
  * <p>
  * The user backing is read-only through the FHIR API. {@link #canHandle(Practitioner)} returns

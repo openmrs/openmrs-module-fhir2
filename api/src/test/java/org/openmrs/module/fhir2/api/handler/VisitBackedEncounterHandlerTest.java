@@ -174,7 +174,7 @@ public class VisitBackedEncounterHandlerTest {
 		when(visitService.exists(ENCOUNTER_UUID)).thenReturn(true);
 		
 		assertTrue(handler.exists(ENCOUNTER_UUID));
-		// Probe should use the cheap exists() — never call get(), which would translate.
+		// exists() must not fall back to get(), which translates the resource.
 		verify(visitService).exists(ENCOUNTER_UUID);
 		verify(visitService, never()).get(ENCOUNTER_UUID);
 	}

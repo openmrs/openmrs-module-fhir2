@@ -48,13 +48,6 @@ import org.openmrs.module.fhir2.api.search.param.PropParam;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.providers.r4.MockIBundleProvider;
 
-/**
- * Orchestrator-level tests for {@link FhirPatientServiceImpl}. Dispatch mechanics are covered in
- * {@link BaseCompositeFhirServiceTest}; backing-specific CRUD/search lives in
- * {@code PatientBackedPatientHandlerTest}. What this class covers is that create/update/search
- * reach the handler through the composite, and that the {@code $everything} operations build the
- * search parameters they promise.
- */
 @RunWith(MockitoJUnitRunner.class)
 public class FhirPatientServiceImplTest {
 	

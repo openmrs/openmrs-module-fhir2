@@ -57,11 +57,6 @@ import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.AllergyIntoleranceTranslator;
 
-/**
- * Tests the CRUD/search wiring and dispatch predicates of the default AllergyIntolerance handler.
- * Orchestrator-level concerns (fan-out, the typed {@code searchForAllergies} entry point) live in
- * {@code FhirAllergyIntoleranceServiceImplTest}.
- */
 @RunWith(MockitoJUnitRunner.class)
 public class AllergyBackedAllergyIntoleranceHandlerTest {
 	

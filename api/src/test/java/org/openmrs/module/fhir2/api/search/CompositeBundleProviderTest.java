@@ -64,7 +64,7 @@ public class CompositeBundleProviderTest {
 	
 	@Before
 	public void setUp() {
-		// lenient — not every test exercises preferredPageSize()
+		// lenient: not every test exercises preferredPageSize()
 		lenient().when(globalPropertyService.getGlobalPropertyAsInteger(anyString(), anyInt())).thenReturn(10);
 	}
 	
@@ -158,7 +158,7 @@ public class CompositeBundleProviderTest {
 	
 	@Test
 	public void shouldDelegateVerbatimWhenPageWithinSingleProvider() {
-		// given — page [0, 3) is entirely within firstProvider (size 5)
+		// given: page [0, 3) is entirely within firstProvider (size 5)
 		when(firstProvider.size()).thenReturn(5);
 		when(secondProvider.size()).thenReturn(4);
 		List<IBaseResource> firstSlice = patientList("a", "b", "c");
@@ -177,7 +177,7 @@ public class CompositeBundleProviderTest {
 	
 	@Test
 	public void shouldDelegateWithShiftedIndicesWhenPageWithinSecondProvider() {
-		// given — page [5, 8) is entirely within secondProvider; local [0, 3)
+		// given: page [5, 8) is local [0, 3) of secondProvider
 		when(firstProvider.size()).thenReturn(5);
 		when(secondProvider.size()).thenReturn(4);
 		List<IBaseResource> secondSlice = patientList("d", "e", "f");
@@ -196,7 +196,7 @@ public class CompositeBundleProviderTest {
 	
 	@Test
 	public void shouldConcatenateMainsThenIncludesWhenSpanningTwoProviders() {
-		// given — providers of size 3 and 4. Page [1, 5) takes 2 from p1 (with 1 include) and 2 from p2 (with 1 include).
+		// given: sizes 3 and 4, so page [1, 5) takes 2 matches and 1 include from each provider
 		when(firstProvider.size()).thenReturn(3);
 		when(secondProvider.size()).thenReturn(4);
 		
@@ -211,13 +211,13 @@ public class CompositeBundleProviderTest {
 		// when
 		List<IBaseResource> result = provider.getResources(1, 5);
 		
-		// then — mains-from-p1, mains-from-p2, includes-from-p1, includes-from-p2
+		// then: all matches, in provider order, before all includes
 		assertThat(idsOf(result), contains("a2", "a3", "b1", "b2", "i_a", "i_b"));
 	}
 	
 	@Test
 	public void shouldNotRepeatAnIncludeSharedByTwoProviders() {
-		// given — both providers' pages _include the same resource
+		// given: both providers' pages _include the same resource
 		when(firstProvider.size()).thenReturn(1);
 		when(secondProvider.size()).thenReturn(1);
 		
@@ -238,7 +238,7 @@ public class CompositeBundleProviderTest {
 	
 	@Test
 	public void shouldNotRepeatAMatchAsAnInclude() {
-		// given — the first provider's page _includes the second provider's match
+		// given: the first provider's page _includes the second provider's match
 		when(firstProvider.size()).thenReturn(1);
 		when(secondProvider.size()).thenReturn(1);
 		
@@ -259,7 +259,7 @@ public class CompositeBundleProviderTest {
 	
 	@Test
 	public void shouldConcatenateAcrossThreeProvidersWhenSpanningMultipleBoundaries() {
-		// given — sizes 2, 2, 2. Page [1, 5) takes 1 from p1, 2 from p2, 1 from p3.
+		// given: sizes 2, 2, 2, so page [1, 5) takes 1 from p1, 2 from p2, 1 from p3
 		when(firstProvider.size()).thenReturn(2);
 		when(secondProvider.size()).thenReturn(2);
 		when(thirdProvider.size()).thenReturn(2);
@@ -280,7 +280,7 @@ public class CompositeBundleProviderTest {
 	
 	@Test
 	public void shouldReturnEmptyWhenPageStartsBeyondTotalSize() {
-		// given — total size 4, page starts at 10
+		// given: total size 4, page starts at 10
 		when(firstProvider.size()).thenReturn(2);
 		when(secondProvider.size()).thenReturn(2);
 		
@@ -298,7 +298,7 @@ public class CompositeBundleProviderTest {
 	
 	@Test
 	public void shouldClampPageToProviderSizes() {
-		// given — total size 5, page asks for [3, 100)
+		// given: total size 5, page asks for [3, 100)
 		when(firstProvider.size()).thenReturn(2);
 		when(secondProvider.size()).thenReturn(3);
 		when(secondProvider.getResources(1, 3)).thenReturn(patientList("b2", "b3"));

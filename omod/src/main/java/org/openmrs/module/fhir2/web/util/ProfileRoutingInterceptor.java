@@ -32,11 +32,10 @@ import org.springframework.stereotype.Component;
  * Captures the {@code _profile} search parameter so the composite services can route a search to
  * the handler that owns the named profile.
  * <p>
- * HAPI ignores {@code _profile} when matching a request to a {@code @Search} method — any
- * underscore-prefixed parameter other than {@code _id}, {@code _include} and {@code _revinclude} is
- * skipped — so the value never reaches a resource provider and cannot be picked up by declaring it
- * on one. Reading it from the request here makes handler routing work uniformly for every resource
- * type instead of only those whose provider was individually taught about profiles.
+ * HAPI skips underscore-prefixed parameters other than {@code _id}, {@code _include} and
+ * {@code _revinclude} when matching a request to a {@code @Search} method, so {@code _profile}
+ * never reaches a resource provider and cannot be picked up by declaring it on one. Reading it here
+ * makes handler routing work for every resource type without each provider knowing about profiles.
  */
 @Component
 @Interceptor(order = FhirConstants.BUILT_IN_INTERCEPTOR_ORDER)
@@ -54,7 +53,7 @@ public class ProfileRoutingInterceptor {
 	/**
 	 * Clears the captured profiles once the request is done. Bound to
 	 * {@code SERVER_PROCESSING_COMPLETED} rather than {@code SERVER_PROCESSING_COMPLETED_NORMALLY}
-	 * because it fires whether or not the request succeeded — a failed request must not leave a profile
+	 * because it fires whether or not the request succeeded; a failed request must not leave a profile
 	 * behind on a pooled thread for the next request to pick up.
 	 */
 	@Hook(Pointcut.SERVER_PROCESSING_COMPLETED)

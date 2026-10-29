@@ -39,12 +39,6 @@ import org.openmrs.module.fhir2.api.handler.FhirResourceHandler;
 import org.openmrs.module.fhir2.api.search.param.PersonSearchParams;
 import org.openmrs.module.fhir2.providers.r4.MockIBundleProvider;
 
-/**
- * Orchestrator-level tests for {@link FhirPersonServiceImpl}. Dispatch mechanics are covered in
- * {@link BaseCompositeFhirServiceTest}; backing-specific CRUD/search lives in
- * {@code PersonBackedPersonHandlerTest}. What this class covers is that create/update/search reach
- * the handler through the composite.
- */
 @RunWith(MockitoJUnitRunner.class)
 public class FhirPersonServiceImplTest {
 	

@@ -51,64 +51,42 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.OrderUtils;
 
 /**
- * Abstract orchestrator behind every {@code Fhir<X>Service}. A FHIR resource type may be backed by
- * one or more OpenMRS domain objects; subclasses provide the concrete resource type {@code R} and
- * Spring injects the ordered list of {@link FhirResourceHandler}s registered for that type. The
- * orchestrator dispatches each {@link FhirService} call using one of two primitives:
+ * Base class for services whose FHIR resource type {@code R} may be backed by more than one OpenMRS
+ * domain object. Spring injects the {@link FhirResourceHandler}s registered for {@code R}, in
+ * {@code @Order} priority, and each {@link FhirService} call is dispatched to one or more of them.
+ * <h2>Dispatch</h2>
  * <ul>
- * <li>UUID-based — {@link FhirService#exists(String)}. Used for {@code update}, {@code patch} and
- * {@code delete}. Picks the first handler in {@code @Order} priority whose backing store reports
- * the UUID exists. The probe does not require the read privilege, so an operation needs only the
- * privilege of the owning handler's operation itself.
- * <li>Content-based — {@link FhirResourceHandler#canHandle(IAnyResource)} (with
- * {@link FhirResourceHandler#getImplicitProfile() meta.profile} taking precedence). Used for
- * {@code create} and for the {@code createIfNotExists} branch of {@code update} when no handler
- * owns the UUID yet.
+ * <li>{@code get(uuid)} tries each handler in priority order. A handler's
+ * {@link ResourceNotFoundException} moves on to the next; a
+ * {@link ca.uhn.fhir.rest.server.exceptions.ResourceGoneException} propagates.
+ * <li>{@code get(uuids)} aggregates the results of every handler.
+ * <li>{@code update}, {@code patch} and {@code delete} go to the first handler whose
+ * {@link FhirService#exists(String) exists} reports the UUID, and fail with
+ * {@link ResourceNotFoundException} if none does. Ownership is resolved before the body is
+ * validated, so an unknown UUID is a 404 even when the body's id is wrong; a known UUID with a bad
+ * id is still a 400.
+ * <li>{@code create}, and {@code update} with {@code createIfNotExists} when no handler owns the
+ * UUID, go to the handler whose {@link FhirResourceHandler#getImplicitProfile() implicit profile}
+ * appears in {@code meta.profile}. Failing that, they go to the handler whose
+ * {@link FhirResourceHandler#canHandle(IAnyResource) canHandle} claims the body, with several
+ * claimants resolved by {@code @Order}. A tie at the top, or no claimant at all, is an
+ * {@link InvalidRequestException}; no registered handlers is a
+ * {@link NotImplementedOperationException}. A handler chosen by profile is used unconditionally and
+ * may itself reject a body it cannot store.
+ * <li>{@link #doSearch(SearchParameterMap) Searches} go to the handlers named by the request's
+ * {@code _profile} (see {@link ProfileRoutingContext}), or otherwise to every handler whose
+ * {@link FhirResourceHandler#acceptsSearch(SearchParameterMap) acceptsSearch} accepts the
+ * parameters, and their results are merged by {@link CompositeBundleProvider}.
  * </ul>
- * <p>
- * Per-operation behaviour:
- * <ul>
- * <li>{@code get(uuid)} — {@code handler.get(uuid)} on each handler in priority order until one
- * returns; a handler's {@link ResourceNotFoundException} moves on to the next, while
- * {@link ca.uhn.fhir.rest.server.exceptions.ResourceGoneException} propagates without fall-through.
- * {@link ResourceNotFoundException} if no handler claims it.
- * <li>{@code get(uuids)}: aggregates {@code handler.get(uuids)} across every handler.
- * <li>{@code create(R)} — {@code meta.profile} match → otherwise every handler whose
- * {@code canHandle} claims the body, resolved by {@code @Order} when there is more than one.
- * {@link InvalidRequestException} if the top precedence is tied, or if no handler claims at all;
- * {@link NotImplementedOperationException} if no handler is registered for the type.
- * Profile-targeted routing is unconditional — the named handler validates the resource and may
- * itself throw {@link InvalidRequestException} if the input is malformed for it.
- * <li>{@code update(uuid, r)} / {@code update(uuid, r, RD, false)} — {@code exists()} probe →
- * {@code handler.update(...)}. {@link ResourceNotFoundException} if no handler owns the UUID. The
- * probe runs before the owning handler validates the body, so an unknown UUID is reported as 404
- * even when the body's id is missing or does not match; a known UUID with a bad id is still 400.
- * <li>{@code update(uuid, r, RD, true)} — {@code exists()} probe first; if a handler owns the UUID,
- * dispatch to it. Otherwise fall back to {@code meta.profile} / {@code canHandle} dispatch and call
- * {@code handler.update(uuid, r, RD, true)} so the chosen handler runs its own create-if-not-exists
- * logic.
- * <li>{@code patch(uuid, ...)} — {@code exists()} probe → {@code handler.patch(uuid, ...)}.
- * <li>{@code delete(uuid)} — {@code exists()} probe → {@code handler.delete(uuid)}.
- * <li>{@code search(params)} — if the request's {@code _profile} for this resource type (captured
- * into {@link ProfileRoutingContext} by the web layer) names at least one handler's
- * {@link FhirResourceHandler#getImplicitProfile() implicit profile}, route only to the matching
- * handler(s) (the same profile that identifies a handler for {@code create} also selects it for
- * search). Otherwise fan out to handlers whose
- * {@link FhirResourceHandler#acceptsSearch(SearchParameterMap) acceptsSearch} returns true. Either
- * way, results merge via {@link CompositeBundleProvider}. Any other routing protocol (e.g.
- * {@code _tag}) is the handler's own concern, embedded in {@code acceptsSearch} — the orchestrator
- * stays agnostic about it.
- * </ul>
- * Resources returned by handlers have the handler's implicit profile stamped onto
- * {@code meta.profile} (deduped if already present) so clients can discover the routing key, both
- * for direct read/write returns and lazily on each page of a search bundle. Only the matched
- * resources of a page are stamped; {@code _include} and {@code _revinclude} resources are resolved
- * through their own resource's service and carry the profile of whichever handler produced them.
- * <p>
- * A missing privilege is reported as {@link ResourceNotFoundException}, so that clients cannot use
- * the difference between "forbidden" and "not found" to learn whether a UUID exists. For
- * {@code get} a handler that denies access is skipped in favour of the next one; for the UUID-based
- * writes a denial by the owning handler is reported as not found.
+ * <h2>Profiles</h2> Each resource a handler returns has that handler's implicit profile added to
+ * {@code meta.profile}, so clients can discover the routing key. In a search bundle only the
+ * matched resources are stamped; {@code _include} and {@code _revinclude} resources come from their
+ * own resource's service.
+ * <h2>Privileges</h2> A missing privilege is reported as {@link ResourceNotFoundException}, so
+ * clients cannot use "forbidden" versus "not found" to learn whether a UUID exists. {@code get}
+ * skips a handler that denies access; for writes, a denial by the owning handler is reported as not
+ * found. The ownership probe does not require the read privilege, so a write needs only the
+ * privilege of the owning handler's operation.
  */
 public abstract class BaseCompositeFhirService<R extends IAnyResource> implements FhirService<R> {
 	
@@ -138,9 +116,8 @@ public abstract class BaseCompositeFhirService<R extends IAnyResource> implement
 			throw new InvalidRequestException("Uuid cannot be null.");
 		}
 		
-		// Try each handler in priority order. By default, the FhirResourceHandler's get() method should be equivalent
-		// to exists() if the item doesn't exist, i.e., bail early with a ResourceNotFound exception, so we avoid doing
-		// 2 * N db lookups here.
+		// Calls get() directly rather than probing exists() first, which would double the lookups; a handler's get()
+		// fails fast with ResourceNotFoundException for a UUID it does not hold.
 		for (FhirResourceHandler<R> handler : handlers) {
 			try {
 				R result = handler.get(uuid);
@@ -197,12 +174,6 @@ public abstract class BaseCompositeFhirService<R extends IAnyResource> implement
 		return update(uuid, updatedResource, null, false);
 	}
 	
-	/**
-	 * Ownership is resolved before the body is validated, so an unknown UUID yields
-	 * {@link ResourceNotFoundException} regardless of the body's id. Once an owner is found, that
-	 * handler applies the usual id checks and may still reject the body with
-	 * {@link InvalidRequestException}.
-	 */
 	@Override
 	public R update(@Nonnull String uuid, @Nonnull R updatedResource, RequestDetails requestDetails,
 	        boolean createIfNotExists) {
@@ -289,11 +260,8 @@ public abstract class BaseCompositeFhirService<R extends IAnyResource> implement
 			return;
 		}
 		
-		// Collapse handlers that declare the same implicit profile down to the highest-priority one
-		// (lowest numerical @Order); this is the seam by which an external module replaces a built-in
-		// backing without both running on fan-out operations. Distinct profiles (the common case) all
-		// survive. The implicit profile is the handler's single identity — for clients (CRUD + search
-		// routing) and here for override-dedup.
+		// Handlers sharing an implicit profile collapse to the highest-priority one (lowest @Order). This is
+		// how an external module replaces a built-in backing without both running on fan-out operations.
 		Map<String, FhirResourceHandler<R>> winners = new LinkedHashMap<>();
 		for (FhirResourceHandler<R> handler : rawHandlers) {
 			String profile = handler.getImplicitProfile();
@@ -301,10 +269,8 @@ public abstract class BaseCompositeFhirService<R extends IAnyResource> implement
 			if (winner == null) {
 				winners.put(profile, handler);
 			} else {
-				// A handler lost the priority race for a shared profile. WARN because it's almost always
-				// either a deliberate override (operator should confirm the right one won) or a
-				// misconfigured @Order on a handler that meant to override but didn't. Computed and
-				// logged here at startup; nothing downstream needs to remember it.
+				// Warn, since this is either a deliberate override the operator should confirm or a
+				// misconfigured @Order on a handler that meant to override but didn't.
 				log.warn(
 				    "Handler {} for {} profile '{}' was overridden by {} (lower numerical @Order wins). "
 				            + "If this is unintended, raise the priority of {} (smaller @Order value) above {}'s.",
@@ -339,18 +305,15 @@ public abstract class BaseCompositeFhirService<R extends IAnyResource> implement
 	}
 	
 	/**
-	 * Runs a fan-out search across the selected handlers and merges the result bundles via
-	 * {@link CompositeBundleProvider}.
+	 * Searches the selected handlers and merges their results with {@link CompositeBundleProvider}.
 	 * <p>
-	 * Handler selection has two modes. If the current request is a search for this resource type and
-	 * carries a {@code _profile} parameter (see {@link ProfileRoutingContext}) naming at least one
-	 * handler's {@link FhirResourceHandler#getImplicitProfile() implicit profile}, the search is routed
-	 * only to the matching handler(s) — the same profile that identifies a handler for CRUD also
-	 * selects it for search, and {@code acceptsSearch} is not consulted. Otherwise (no
-	 * {@code _profile}, or a {@code _profile} that matches no handler — e.g. an unrelated conformance
-	 * profile) the orchestrator falls back to a fan-out across every handler whose
-	 * {@link FhirResourceHandler#acceptsSearch} returns true; any handler-specific routing (e.g. by
-	 * {@code _tag}) lives there.
+	 * If the request's {@code _profile} for this resource type (see {@link ProfileRoutingContext})
+	 * names any handler's {@link FhirResourceHandler#getImplicitProfile() implicit profile}, only those
+	 * handlers are searched and {@code acceptsSearch} is not consulted. Otherwise, including when
+	 * {@code _profile} names only profiles no handler owns (e.g., an unrelated conformance profile),
+	 * every handler whose {@link FhirResourceHandler#acceptsSearch acceptsSearch} accepts the
+	 * parameters is searched; any other handler-specific routing, such as by {@code _tag}, belongs
+	 * there.
 	 */
 	protected IBundleProvider doSearch(@Nonnull SearchParameterMap params) {
 		List<FhirResourceHandler<R>> targets = selectSearchTargets(params);
@@ -378,11 +341,6 @@ public abstract class BaseCompositeFhirService<R extends IAnyResource> implement
 		return new CompositeBundleProvider(bundles, globalPropertyService);
 	}
 	
-	/**
-	 * Chooses which handlers a search fans out to. A {@code _profile} that names at least one handler's
-	 * implicit profile routes the search to exactly those handlers (skipping {@code acceptsSearch});
-	 * otherwise every handler whose {@code acceptsSearch} accepts the params participates.
-	 */
 	private List<FhirResourceHandler<R>> selectSearchTargets(SearchParameterMap params) {
 		Set<String> requestedProfiles = requestedProfiles();
 		if (!requestedProfiles.isEmpty()) {
@@ -403,15 +361,13 @@ public abstract class BaseCompositeFhirService<R extends IAnyResource> implement
 	}
 	
 	/**
-	 * Picks the handler that will own a content-bearing write. Since each {@code canHandle} speaks only
-	 * for its own backing, overlap between backings is visible only from here; several claimants are
-	 * resolved by {@code @Order}, and a tie at the top is rejected rather than settled by declaration
-	 * order.
+	 * Picks the handler that owns a content-bearing write. Each {@code canHandle} speaks only for its
+	 * own backing, so overlap is resolved here: by {@code @Order}, with a tie at the top rejected
+	 * rather than settled by declaration order.
 	 * <p>
-	 * When no handler claims, the two failures differ in kind. No handlers registered at all is a
-	 * server-side gap — this deployment cannot store the resource type in any form, which is what
-	 * {@code 501} means. Handlers that exist but all decline is a statement about this body: the server
-	 * can create the resource type, just not the version supplied, which is a {@code 400}.
+	 * When no handler claims the body, having no handlers at all is a {@code 501}, since this
+	 * deployment cannot store the resource type in any form; handlers that all decline is a
+	 * {@code 400}, since the fault lies with the body.
 	 */
 	private FhirResourceHandler<R> resolveForCreate(R resource) {
 		FhirResourceHandler<R> byProfile = resolveByProfile(resource);
@@ -447,11 +403,7 @@ public abstract class BaseCompositeFhirService<R extends IAnyResource> implement
 		                + profilesOf(mostSpecific) + "; set meta.profile to one of them to choose");
 	}
 	
-	/**
-	 * Narrows a set of claiming handlers to those sharing the lowest {@code @Order} value among them.
-	 * Only reached when more than one handler claims, keeping the reflective order lookup off the
-	 * common path.
-	 */
+	/** Narrows the claiming handlers to those sharing the lowest {@code @Order} value among them. */
 	private List<FhirResourceHandler<R>> highestPrecedenceOf(List<FhirResourceHandler<R>> claimants) {
 		int winning = claimants.stream().mapToInt(BaseCompositeFhirService::orderOf).min().orElse(Ordered.LOWEST_PRECEDENCE);
 		return claimants.stream().filter(handler -> orderOf(handler) == winning).collect(Collectors.toList());
@@ -501,8 +453,7 @@ public abstract class BaseCompositeFhirService<R extends IAnyResource> implement
 			}
 		}
 		
-		// Unrecognized profiles are intentionally ignored — the orchestrator falls through to
-		// canHandle() rather than rejecting the request.
+		// unrecognised profiles are ignored rather than rejected, leaving the choice to canHandle()
 		return null;
 	}
 	
@@ -585,8 +536,8 @@ public abstract class BaseCompositeFhirService<R extends IAnyResource> implement
 		/**
 		 * Stamps only the matched resources of the page. A search bundle provider returns the
 		 * {@code toIndex - fromIndex} matches first and appends any {@code _include} / {@code _revinclude}
-		 * resources after them; those were produced by other handlers (through their own resource's
-		 * service) and already carry the right profile.
+		 * resources after them; those come from their own resource's service and already carry the right
+		 * profile.
 		 * <p>
 		 * Only resources of the service's own type are stamped, because not every provider bounds its
 		 * matches by the page span: {@code $everything} pre-materialises matches and includes into a single

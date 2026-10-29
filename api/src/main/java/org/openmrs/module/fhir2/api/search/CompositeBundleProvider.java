@@ -31,14 +31,9 @@ import org.openmrs.module.fhir2.api.util.FhirUtils;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * An N-ary {@link IBundleProvider} that concatenates results from a list of providers in order,
- * preserving each provider's internal sort and grouping all "main" resources before any "_include"
- * resources (so a paged response interleaves main results from successive providers before any
- * included resources).
- * <p>
- * Cross-provider sorting is intentionally not supported — each provider sorts its own slice and the
- * slices are concatenated in declaration order. The total reported size is the sum of each
- * provider's reported size, saturating at {@link Integer#MAX_VALUE}.
+ * An {@link IBundleProvider} that concatenates the results of several providers in the order given.
+ * Each provider keeps its own sort; results are not sorted across providers. The reported size is
+ * the sum of the providers' sizes, saturating at {@link Integer#MAX_VALUE}.
  * <p>
  * A provider whose {@link IBundleProvider#size()} is {@code null} is measured while paging: where a
  * page reaches into it, single-result probes find out whether it extends past the page and, once it
@@ -48,13 +43,11 @@ import org.springframework.transaction.annotation.Transactional;
  * probes. Probing relies on the provider returning an empty page past its last result, since a page
  * carries {@code _include} resources only alongside matches.
  * <p>
- * When a paged response spans more than one provider, this class splits each provider's chunk into
- * "main" results and "_include" results by assuming the chunk is laid out as {@code [main_0, ...,
- * main_{n-1}, include_0, ...]} where {@code n = sliceEnd - sliceStart}.
- * {@code SearchQueryBundleProvider} (the standard backing for handler searches) honours this
- * contract; an underlying {@link IBundleProvider} that interleaves mains and includes within
- * {@link IBundleProvider#getResources(int, int)} would defeat the split. Handler implementations
- * passing custom bundle providers into the composite must follow this layout.
+ * A page that spans more than one provider lists every provider's matches before any
+ * {@code _include} resources, dropping includes already on the page. To split them, each provider's
+ * chunk is assumed to be laid out as {@code [main_0, ..., main_{n-1}, include_0, ...]}, where
+ * {@code n} is the number of matches requested from it. {@code SearchQueryBundleProvider} follows
+ * this layout, and any custom provider passed to the composite must too.
  */
 public class CompositeBundleProvider implements IBundleProvider {
 	
@@ -151,16 +144,13 @@ public class CompositeBundleProvider implements IBundleProvider {
 			return Collections.emptyList();
 		}
 		
-		// Fast path: page is entirely within one provider — return its slice verbatim, preserving
-		// any of its own _include ordering.
+		// a page entirely within one provider is returned verbatim, keeping its own _include ordering
 		if (firstHit == lastHit) {
 			return providers.get(firstHit).getResources(localFrom[firstHit], localTo[firstHit]);
 		}
 		
-		// Cross-provider: split each chunk into mains and includes and concatenate
-		// (mains-from-p0, mains-from-p1, ..., includes-from-p0, includes-from-p1, ...). Each provider
-		// resolves its own includes, so several may include the same resource, or include one that
-		// another returned as a match; a bundle may hold each resource only once.
+		// Each provider resolves its own includes, so several may include the same resource, or include
+		// one that another returned as a match; a bundle may hold each resource only once.
 		List<IBaseResource> mains = new ArrayList<>();
 		List<IBaseResource> includes = new ArrayList<>();
 		Set<String> seen = new HashSet<>();

@@ -205,9 +205,9 @@ public class FhirRestServlet extends RestfulServer implements ModuleLifecycleLis
 		
 		try {
 			// apart from HAPI's LoggingInterceptor, which keeps its default order, these carry
-			// FhirConstants.BUILT_IN_INTERCEPTOR_ORDER, so they dispatch ahead of a contributed bean whatever
-			// order the two happen to be registered in - which is only enforced for beans this method
-			// registers, not for interceptors put on the servlet by other means
+			// FhirConstants.BUILT_IN_INTERCEPTOR_ORDER so they run ahead of contributed beans regardless of
+			// registration order; that holds only against beans this method registers, not interceptors put
+			// on the servlet by other means
 			for (Object interceptor : Arrays.asList(new RequireAuthenticationInterceptor(), loggingInterceptor,
 			    new DisableCacheInterceptor(), new SummaryInterceptor(), new SupportMergePatchInterceptor(),
 			    profileRoutingInterceptor)) {

@@ -36,12 +36,6 @@ import org.openmrs.module.fhir2.api.handler.FhirResourceHandler;
 import org.openmrs.module.fhir2.api.search.param.MedicationSearchParams;
 import org.openmrs.module.fhir2.providers.r4.MockIBundleProvider;
 
-/**
- * Orchestrator-level tests for {@link FhirMedicationServiceImpl}. Dispatch mechanics are covered in
- * {@link BaseCompositeFhirServiceTest}; backing-specific CRUD/search lives in
- * {@code DrugBackedMedicationHandlerTest}. What this class covers is that the typed
- * {@code searchForMedications} entry point forwards through {@code doSearch}.
- */
 @RunWith(MockitoJUnitRunner.class)
 public class FhirMedicationServiceImplTest {
 	

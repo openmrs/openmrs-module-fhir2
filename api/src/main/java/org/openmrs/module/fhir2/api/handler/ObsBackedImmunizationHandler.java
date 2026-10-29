@@ -136,7 +136,7 @@ public class ObsBackedImmunizationHandler extends BaseFhirResourceHandler<Immuni
 	
 	@Override
 	protected Immunization applyUpdate(Obs existingObject, Immunization updatedResource) {
-		// Obs in OpenMRS are conceptually immutable — ObsService.saveObs voids the previous row and
+		// Obs in OpenMRS are conceptually immutable: ObsService.saveObs voids the previous row and
 		// writes a new one, which is what callers expect for FHIR Immunization PUT semantics.
 		ImmunizationTranslator translator = getTranslator();
 		Obs updatedObject = translator.toOpenmrsType(existingObject, updatedResource);

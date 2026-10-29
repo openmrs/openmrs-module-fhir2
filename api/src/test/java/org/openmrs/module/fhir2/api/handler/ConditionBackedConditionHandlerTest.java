@@ -39,11 +39,6 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirOpenmrsConditionService;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 
-/**
- * Tests the dispatch hooks and delegation behaviour. CRUD and search logic live in
- * {@code FhirOpenmrsConditionServiceImpl} and are tested in
- * {@code FhirOpenmrsConditionServiceImplTest}.
- */
 @RunWith(MockitoJUnitRunner.class)
 public class ConditionBackedConditionHandlerTest {
 	
