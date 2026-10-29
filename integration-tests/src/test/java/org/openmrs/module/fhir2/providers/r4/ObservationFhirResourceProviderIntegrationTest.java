@@ -57,6 +57,8 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR4In
 	
 	private static final String OBS_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirObservationDaoImplTest_initial_data_2.1.xml";
 	
+	private static final String OBS_WITH_ORDERS_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirObservationDaoImplTest_obs_with_orders.xml";
+	
 	private static final String JSON_CREATE_OBS_DOCUMENT = "org/openmrs/module/fhir2/providers/ObservationWebTest_create.json";
 	
 	private static final String XML_CREATE_OBS_DOCUMENT = "org/openmrs/module/fhir2/providers/ObservationWebTest_create.xml";
@@ -92,6 +94,14 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR4In
 	private static final String OBS_ENCOUNTER_UUID = "6519d653-393b-4118-9c83-a3715b82d4ac";
 	
 	private static final String WRONG_OBS_UUID = "121b73a6-e1a4-4424-8610-d5765bf2fdf7";
+	
+	private static final String OBS_WITH_TEST_ORDER_UUID = "e32ef7c3-4422-43d3-86f3-5062d6ce68ec";
+	
+	private static final String TEST_ORDER_UUID = "2c96f25c-4949-4f72-9931-d808fbc226df";
+	
+	private static final String OBS_WITH_DRUG_ORDER_UUID = "f27be814-e176-4e7b-a035-42bb70ed29dc";
+	
+	private static final String DRUG_ORDER_UUID = "921de0a3-05c4-444a-be03-e01b4c4b9142";
 	
 	@Autowired
 	@Getter(AccessLevel.PUBLIC)
@@ -150,6 +160,40 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR4In
 		assertThat(observation.getEncounter(), notNullValue());
 		assertThat(observation.getEncounter().getReference(), endsWith("/" + OBS_ENCOUNTER_UUID));
 		
+		assertThat(observation, validResource());
+	}
+	
+	@Test
+	public void shouldReturnObservationBasedOnTestOrderAsJson() throws Exception {
+		executeDataSet(OBS_WITH_ORDERS_DATA_XML);
+		
+		MockHttpServletResponse response = get("/Observation/" + OBS_WITH_TEST_ORDER_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		
+		Observation observation = readResponse(response);
+		
+		assertThat(observation.getBasedOn(), hasSize(1));
+		assertThat(observation.getBasedOnFirstRep().getType(), equalTo(FhirConstants.SERVICE_REQUEST));
+		assertThat(observation.getBasedOnFirstRep().getReference(),
+		    equalTo(FhirConstants.SERVICE_REQUEST + "/" + TEST_ORDER_UUID));
+		assertThat(observation, validResource());
+	}
+	
+	@Test
+	public void shouldReturnObservationBasedOnDrugOrderAsJson() throws Exception {
+		executeDataSet(OBS_WITH_ORDERS_DATA_XML);
+		
+		MockHttpServletResponse response = get("/Observation/" + OBS_WITH_DRUG_ORDER_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		
+		Observation observation = readResponse(response);
+		
+		assertThat(observation.getBasedOn(), hasSize(1));
+		assertThat(observation.getBasedOnFirstRep().getType(), equalTo(FhirConstants.MEDICATION_REQUEST));
+		assertThat(observation.getBasedOnFirstRep().getReference(),
+		    equalTo(FhirConstants.MEDICATION_REQUEST + "/" + DRUG_ORDER_UUID));
 		assertThat(observation, validResource());
 	}
 	
