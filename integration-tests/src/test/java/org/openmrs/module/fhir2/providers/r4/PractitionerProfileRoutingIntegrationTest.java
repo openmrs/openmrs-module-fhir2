@@ -195,6 +195,26 @@ public class PractitionerProfileRoutingIntegrationTest extends BaseProfileRoutin
 		assertThat(response, isMethodNotAllowed());
 	}
 	
+	@Test
+	public void shouldReportUpdateOfUserBackedPractitionerAsNotFound() throws Exception {
+		// given
+		Practitioner practitioner = readResponse(get("/Practitioner/" + USER_UUID).accept(FhirMediaTypes.JSON).go());
+		
+		// when
+		MockHttpServletResponse response = put("/Practitioner/" + USER_UUID).accept(FhirMediaTypes.JSON)
+		        .jsonContent(toJson(practitioner)).go();
+		
+		// then
+		assertThat(response, isNotFound());
+	}
+	
+	@Test
+	public void shouldReportDeleteOfUserBackedPractitionerAsNotFound() throws Exception {
+		MockHttpServletResponse response = delete("/Practitioner/" + USER_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isNotFound());
+	}
+	
 	private Practitioner readDocument() throws Exception {
 		String json;
 		try (InputStream is = getClass().getClassLoader().getResourceAsStream(JSON_CREATE_PRACTITIONER_DOCUMENT)) {

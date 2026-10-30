@@ -71,10 +71,10 @@ import org.springframework.core.annotation.OrderUtils;
  * UUID, go to the handler whose {@link FhirResourceHandler#getImplicitProfile() implicit profile}
  * appears in {@code meta.profile}. Failing that, they go to the handler whose
  * {@link FhirResourceHandler#canHandle(IAnyResource) canHandle} claims the body, with several
- * claimants resolved by {@code @Order}. A tie at the top, or no claimant at all, is an
- * {@link InvalidRequestException}; no registered handlers is a
- * {@link NotImplementedOperationException}. A handler chosen by profile is used unconditionally and
- * may itself reject a body it cannot store.
+ * claimants resolved by {@code @Order} unless {@link #resolvesOverlappingClaimsByOrder()} is
+ * {@code false}. A tie at the top, or no claimant at all, is an {@link InvalidRequestException}; no
+ * registered handlers is a {@link NotImplementedOperationException}. A handler chosen by profile is
+ * used unconditionally and may itself reject a body it cannot store.
  * <li>{@link #doSearch(SearchParameterMap) Searches} go to the handlers named by the request's
  * {@code _profile} (see {@link ProfileRoutingContext}), or otherwise to every handler whose
  * {@link FhirResourceHandler#acceptsSearch(SearchParameterMap) acceptsSearch} accepts the
@@ -314,7 +314,8 @@ public abstract class BaseCompositeFhirService<R extends IAnyResource> implement
 	 * <p>
 	 * If the request's {@code _profile} for this resource type (see {@link ProfileRoutingContext})
 	 * names any handler's {@link FhirResourceHandler#getImplicitProfile() implicit profile}, only those
-	 * handlers are searched and {@code acceptsSearch} is not consulted. Otherwise, including when
+	 * handlers are searched and {@code acceptsSearch} is not consulted, unless
+	 * {@link #profileRoutedSearchConsultsAcceptsSearch()} says otherwise. Otherwise, including when
 	 * {@code _profile} names only profiles no handler owns (e.g., an unrelated conformance profile),
 	 * every handler whose {@link FhirResourceHandler#acceptsSearch acceptsSearch} accepts the
 	 * parameters is searched; any other handler-specific routing, such as by {@code _tag}, belongs
@@ -352,13 +353,36 @@ public abstract class BaseCompositeFhirService<R extends IAnyResource> implement
 			List<FhirResourceHandler<R>> byProfile = handlers.stream()
 			        .filter(h -> requestedProfiles.contains(h.getImplicitProfile())).collect(Collectors.toList());
 			if (!byProfile.isEmpty()) {
-				return byProfile;
+				if (!profileRoutedSearchConsultsAcceptsSearch()) {
+					return byProfile;
+				}
+				
+				return byProfile.stream().filter(h -> h.acceptsSearch(params)).collect(Collectors.toList());
 			}
 			// _profile named only profiles no handler claims (e.g. an unrelated conformance profile);
 			// treat it as a non-routing filter and fall through to the acceptsSearch fan-out.
 		}
 		
 		return handlers.stream().filter(h -> h.acceptsSearch(params)).collect(Collectors.toList());
+	}
+	
+	/**
+	 * Whether a search routed by {@code _profile} is still narrowed by each named handler's
+	 * {@link FhirResourceHandler#acceptsSearch acceptsSearch}. Override to return {@code true} when
+	 * {@code acceptsSearch} applies a standard search parameter that the handlers' DAOs do not, so that
+	 * {@code _profile} is ANDed with it rather than replacing it.
+	 */
+	protected boolean profileRoutedSearchConsultsAcceptsSearch() {
+		return false;
+	}
+	
+	/**
+	 * Whether a body claimed by several handlers' {@code canHandle} goes to the one with the highest
+	 * {@code @Order} precedence. Override to return {@code false} to reject every such body as
+	 * ambiguous, so the client must choose a backing with {@code meta.profile}.
+	 */
+	protected boolean resolvesOverlappingClaimsByOrder() {
+		return true;
 	}
 	
 	private Set<String> requestedProfiles() {
@@ -398,7 +422,8 @@ public abstract class BaseCompositeFhirService<R extends IAnyResource> implement
 			        + " to target one explicitly");
 		}
 		
-		List<FhirResourceHandler<R>> mostSpecific = highestPrecedenceOf(claimants);
+		List<FhirResourceHandler<R>> mostSpecific = resolvesOverlappingClaimsByOrder() ? highestPrecedenceOf(claimants)
+		        : claimants;
 		if (mostSpecific.size() == 1) {
 			return mostSpecific.get(0);
 		}

@@ -20,10 +20,24 @@ import org.springframework.transaction.annotation.Transactional;
  * Orchestrates the problem-list and encounter-diagnosis backings of FHIR {@code Condition}. Unless
  * {@code meta.profile} names a backing, a new {@code Condition} goes to whichever handler's
  * {@code canHandle} accepts its category. A category naming neither (an unknown code in the
- * official system, or a coding from an unrelated system) is rejected as a bad request.
+ * official system, or a coding from an unrelated system), or naming both, is rejected as a bad
+ * request.
+ * <p>
+ * {@code category} is a standard search parameter that the backings' DAOs do not apply, so a search
+ * routed by {@code _profile} is still filtered by it.
  */
 @Component
 public class FhirConditionServiceImpl extends BaseCompositeFhirService<Condition> implements FhirConditionService {
+	
+	@Override
+	protected boolean profileRoutedSearchConsultsAcceptsSearch() {
+		return true;
+	}
+	
+	@Override
+	protected boolean resolvesOverlappingClaimsByOrder() {
+		return false;
+	}
 	
 	@Override
 	@Transactional(readOnly = true)

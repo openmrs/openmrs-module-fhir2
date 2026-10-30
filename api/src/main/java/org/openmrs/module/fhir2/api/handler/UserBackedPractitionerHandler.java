@@ -21,6 +21,7 @@ import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Practitioner;
@@ -37,11 +38,12 @@ import org.springframework.stereotype.Component;
  * {@link ProviderBackedPractitionerHandler}.
  * <p>
  * The user backing is read-only through the FHIR API. {@link #canHandle(Practitioner)} returns
- * {@code false} so no content-based dispatch selects it, and every write operation throws
- * {@link MethodNotAllowedException} so that neither a {@code meta.profile} naming this handler nor
- * UUID-based ownership of an existing user can reach {@link FhirUserService}'s write path. An
- * external module wanting to enable user writes via FHIR would register an override handler with
- * the same implicit profile and a higher priority.
+ * {@code false} so no content-based dispatch selects it. A create naming this handler in
+ * {@code meta.profile} throws {@link MethodNotAllowedException}; an update, patch or delete of an
+ * existing user reports the UUID as not found, as for an unknown UUID, since a distinct error would
+ * reveal to any client which UUIDs belong to users. Neither reaches {@link FhirUserService}'s write
+ * path. An external module wanting to enable user writes via FHIR would register an override
+ * handler with the same implicit profile and a higher priority.
  */
 @Component
 @Order(Ordered.LOWEST_PRECEDENCE)
@@ -86,24 +88,33 @@ public class UserBackedPractitionerHandler implements FhirResourceHandler<Practi
 	
 	@Override
 	public Practitioner update(@Nonnull String uuid, @Nonnull Practitioner updatedResource) {
-		throw readOnly();
+		throw notFound(uuid);
 	}
 	
 	@Override
 	public Practitioner update(@Nonnull String uuid, @Nonnull Practitioner updatedResource, RequestDetails requestDetails,
 	        boolean createIfNotExists) {
-		throw readOnly();
+		throw notFound(uuid);
 	}
 	
 	@Override
 	public Practitioner patch(@Nonnull String uuid, @Nonnull PatchTypeEnum patchType, @Nonnull String body,
 	        RequestDetails requestDetails) {
-		throw readOnly();
+		throw notFound(uuid);
 	}
 	
 	@Override
 	public void delete(@Nonnull String uuid) {
-		throw readOnly();
+		throw notFound(uuid);
+	}
+	
+	/**
+	 * Matches the composite service's report for an unknown UUID, so that a client without access to
+	 * users cannot tell a user's UUID from one that does not exist.
+	 */
+	private static ResourceNotFoundException notFound(String uuid) {
+		return new ResourceNotFoundException(
+		        "Resource of type " + Practitioner.class.getSimpleName() + " with ID " + uuid + " is not known");
 	}
 	
 	private static MethodNotAllowedException readOnly() {

@@ -28,6 +28,7 @@ import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.junit.Before;
 import org.junit.Test;
@@ -105,22 +106,22 @@ public class UserBackedPractitionerHandlerTest {
 	}
 	
 	@Test
-	public void update_shouldRejectWritesToUserBacking() {
-		assertThrows(MethodNotAllowedException.class, () -> handler.update(PRACTITIONER_UUID, practitioner));
-		assertThrows(MethodNotAllowedException.class, () -> handler.update(PRACTITIONER_UUID, practitioner, null, true));
+	public void update_shouldReportExistingUserAsNotFound() {
+		assertThrows(ResourceNotFoundException.class, () -> handler.update(PRACTITIONER_UUID, practitioner));
+		assertThrows(ResourceNotFoundException.class, () -> handler.update(PRACTITIONER_UUID, practitioner, null, true));
 		verifyNoInteractions(userService);
 	}
 	
 	@Test
-	public void patch_shouldRejectWritesToUserBacking() {
-		assertThrows(MethodNotAllowedException.class,
+	public void patch_shouldReportExistingUserAsNotFound() {
+		assertThrows(ResourceNotFoundException.class,
 		    () -> handler.patch(PRACTITIONER_UUID, PatchTypeEnum.JSON_PATCH, "[]", null));
 		verifyNoInteractions(userService);
 	}
 	
 	@Test
-	public void delete_shouldRejectWritesToUserBacking() {
-		assertThrows(MethodNotAllowedException.class, () -> handler.delete(PRACTITIONER_UUID));
+	public void delete_shouldReportExistingUserAsNotFound() {
+		assertThrows(ResourceNotFoundException.class, () -> handler.delete(PRACTITIONER_UUID));
 		verifyNoInteractions(userService);
 	}
 	

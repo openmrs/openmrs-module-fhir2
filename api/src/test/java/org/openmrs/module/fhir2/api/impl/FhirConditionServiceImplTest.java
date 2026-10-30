@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.api.impl;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
@@ -24,6 +25,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
@@ -49,6 +51,7 @@ import org.openmrs.module.fhir2.api.handler.DiagnosisBackedConditionHandler;
 import org.openmrs.module.fhir2.api.handler.FhirResourceHandler;
 import org.openmrs.module.fhir2.api.search.param.ConditionSearchParams;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
+import org.openmrs.module.fhir2.api.util.ProfileRoutingContext;
 import org.openmrs.module.fhir2.providers.r4.MockIBundleProvider;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.OrderUtils;
@@ -81,7 +84,8 @@ public class FhirConditionServiceImplTest {
 		        .thenReturn("http://fhir.openmrs.org/StructureDefinition/openmrs-condition");
 		lenient().when(diagnosisHandler.getImplicitProfile())
 		        .thenReturn("http://fhir.openmrs.org/StructureDefinition/openmrs-diagnosis");
-		// The real handlers' precedence decides a create that both claim.
+		// The real handlers' precedence, which FhirConditionServiceImpl does not use to settle a create
+		// that both claim.
 		lenient().when(((Ordered) conditionHandler).getOrder())
 		        .thenReturn(OrderUtils.getOrder(ConditionBackedConditionHandler.class));
 		lenient().when(((Ordered) diagnosisHandler).getOrder())
@@ -93,7 +97,7 @@ public class FhirConditionServiceImplTest {
 		    inv -> participatesByCategory(inv.getArgument(0), FhirConstants.CONDITION_CATEGORY_CODE_DIAGNOSIS));
 		// Mirrors the handlers' canHandle: each looks only for its own category code, and the condition
 		// backing additionally owns the unmarked case. A body carrying both is therefore claimed by
-		// both, and precedence decides between them.
+		// both.
 		lenient().when(conditionHandler.canHandle(any())).thenAnswer(inv -> {
 			Condition condition = inv.getArgument(0);
 			return !hasAnyCategoryCoding(condition)
@@ -169,22 +173,35 @@ public class FhirConditionServiceImplTest {
 		assertThrows(InvalidRequestException.class, () -> service.create(condition));
 	}
 	
-	/**
-	 * Both backings claim a body carrying both categories, and the condition backing has precedence.
-	 */
 	@Test
-	public void create_shouldDispatchConditionCarryingBothCategoriesToConditionHandler() {
+	public void create_shouldRejectConditionCarryingBothCategories() {
+		Condition condition = newConditionWithBothCategories();
+		
+		assertThrows(InvalidRequestException.class, () -> service.create(condition));
+		
+		verify(conditionHandler, never()).create(any());
+		verify(diagnosisHandler, never()).create(any());
+	}
+	
+	@Test
+	public void create_shouldDispatchConditionCarryingBothCategoriesToBackingNamedByProfile() {
+		Condition condition = newConditionWithBothCategories();
+		condition.getMeta().addProfile(DIAGNOSIS_PROFILE);
+		when(diagnosisHandler.create(condition)).thenReturn(condition);
+		
+		service.create(condition);
+		
+		verify(diagnosisHandler).create(condition);
+		verify(conditionHandler, never()).create(any());
+	}
+	
+	private static Condition newConditionWithBothCategories() {
 		Condition condition = newConditionWithCategory(FhirConstants.CONDITION_CATEGORY_CODE_CONDITION);
 		CodeableConcept alsoDiagnosis = new CodeableConcept();
 		alsoDiagnosis.addCoding(
 		    new Coding(FhirConstants.CONDITION_CATEGORY_SYSTEM_URI, FhirConstants.CONDITION_CATEGORY_CODE_DIAGNOSIS, null));
 		condition.addCategory(alsoDiagnosis);
-		when(conditionHandler.create(condition)).thenReturn(condition);
-		
-		service.create(condition);
-		
-		verify(conditionHandler).create(condition);
-		verify(diagnosisHandler, never()).create(any());
+		return condition;
 	}
 	
 	@Test
@@ -264,6 +281,23 @@ public class FhirConditionServiceImplTest {
 		
 		assertThat(resultList, hasSize(2));
 		verify(diagnosisHandler).search(any());
+		verify(conditionHandler, never()).search(any());
+	}
+	
+	@Test
+	public void searchConditions_shouldApplyCategoryWhenRoutedByProfile() {
+		ProfileRoutingContext profileRoutingContext = new ProfileRoutingContext();
+		profileRoutingContext.setRequestedProfiles("Condition", Collections.singletonList(DIAGNOSIS_PROFILE));
+		service.setProfileRoutingContext(profileRoutingContext);
+		
+		ConditionSearchParams params = ConditionSearchParams.builder().category(new TokenAndListParam().addAnd(
+		    new TokenParam(FhirConstants.CONDITION_CATEGORY_SYSTEM_URI, FhirConstants.CONDITION_CATEGORY_CODE_CONDITION)))
+		        .build();
+		
+		IBundleProvider results = service.searchConditions(params);
+		
+		assertThat(results.getResources(START_INDEX, END_INDEX), empty());
+		verify(diagnosisHandler, never()).search(any());
 		verify(conditionHandler, never()).search(any());
 	}
 	

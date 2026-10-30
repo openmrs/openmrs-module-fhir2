@@ -38,6 +38,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.api.ConditionService;
 import org.openmrs.api.DiagnosisService;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletResponse;
 
@@ -170,6 +171,29 @@ public class ConditionProfileRoutingIntegrationTest extends BaseProfileRoutingR4
 		assertThat(results, everyItem(hasProfiles(contains(CONDITION_PROFILE))));
 		assertThat(results, hasSize(expected.size()));
 		assertThat(idsOf(results), equalTo(expected));
+	}
+	
+	@Test
+	public void shouldApplyCategoryToSearchRoutedByProfile() throws Exception {
+		List<Resource> results = searchAllPages("/Condition?category=" + FhirConstants.CONDITION_CATEGORY_SYSTEM_URI + "|"
+		        + FhirConstants.CONDITION_CATEGORY_CODE_CONDITION + "&_profile=" + DIAGNOSIS_PROFILE);
+		
+		assertThat(results, is(empty()));
+	}
+	
+	@Test
+	public void shouldRejectCreateCarryingBothCategoriesWithoutMetaProfile() throws Exception {
+		// given
+		Condition condition = readDocument(JSON_CREATE_DIAGNOSIS_DOCUMENT);
+		condition.addCategory().addCoding().setSystem(FhirConstants.CONDITION_CATEGORY_SYSTEM_URI)
+		        .setCode(FhirConstants.CONDITION_CATEGORY_CODE_CONDITION);
+		
+		// when
+		MockHttpServletResponse response = post("/Condition").accept(FhirMediaTypes.JSON).jsonContent(toJson(condition))
+		        .go();
+		
+		// then
+		assertThat(response, isBadRequest());
 	}
 	
 	@Test
