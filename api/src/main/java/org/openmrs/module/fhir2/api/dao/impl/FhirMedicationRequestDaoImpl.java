@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import javax.annotation.Nonnull;
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
 
@@ -40,6 +41,20 @@ public class FhirMedicationRequestDaoImpl extends BaseFhirDao<DrugOrder> impleme
 		DrugOrder result = super.get(uuid);
 		return result != null && result.getAction() != null && result.getAction() != Order.Action.DISCONTINUE ? result
 		        : null;
+	}
+	
+	@Override
+	@Transactional(readOnly = true)
+	public boolean exists(@Nonnull String uuid) {
+		OpenmrsFhirCriteriaContext<DrugOrder, Long> criteriaContext = createCriteriaContext(DrugOrder.class, Long.class);
+		
+		CriteriaBuilder cb = criteriaContext.getCriteriaBuilder();
+		criteriaContext.getCriteriaQuery().select(cb.count(criteriaContext.getRoot()));
+		criteriaContext.addPredicate(cb.equal(criteriaContext.getRoot().get("uuid"), uuid));
+		criteriaContext.addPredicate(cb.isNotNull(criteriaContext.getRoot().get("action")));
+		criteriaContext.addPredicate(cb.notEqual(criteriaContext.getRoot().get("action"), Order.Action.DISCONTINUE));
+		
+		return criteriaContext.getEntityManager().createQuery(criteriaContext.finalizeQuery()).getSingleResult() > 0;
 	}
 	
 	@Override

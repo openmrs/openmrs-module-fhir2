@@ -42,6 +42,8 @@ public class FhirObservationDaoImplTest extends BaseFhirContextSensitiveTest {
 	
 	private static final String OBS_CONCEPT_ID = "5089";
 	
+	private static final String VOIDED_OBS_UUID = "94dhs003-a55d-43c4-ac7a-bd6d1ba63381";
+	
 	@Autowired
 	private FhirObservationDao dao;
 	
@@ -63,6 +65,32 @@ public class FhirObservationDaoImplTest extends BaseFhirContextSensitiveTest {
 		Obs result = dao.get(BAD_OBS_UUID);
 		
 		assertThat(result, nullValue());
+	}
+	
+	@Test
+	public void exists_shouldReturnTrueForVoidedObs() {
+		// given
+		String uuid = VOIDED_OBS_UUID;
+		
+		// when
+		boolean result = dao.exists(uuid);
+		
+		// then
+		// must agree with get() so the service layer can report the voided resource as gone rather than missing
+		assertThat(result, equalTo(true));
+		assertThat(dao.get(uuid), notNullValue());
+	}
+	
+	@Test
+	public void exists_shouldReturnFalseForUnknownUuid() {
+		// given
+		String uuid = BAD_OBS_UUID;
+		
+		// when
+		boolean result = dao.exists(uuid);
+		
+		// then
+		assertThat(result, equalTo(false));
 	}
 	
 	@Test

@@ -11,9 +11,16 @@ package org.openmrs.module.fhir2.api;
 
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import org.hl7.fhir.r4.model.Condition;
-import org.openmrs.module.fhir2.api.search.param.DiagnosisSearchParams;
+import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 
+/**
+ * Serves FHIR {@link Condition} resources backed by the OpenMRS {@code Diagnosis}, for use by
+ * {@link org.openmrs.module.fhir2.api.handler.DiagnosisBackedConditionHandler}.
+ * {@link FhirOpenmrsConditionService} serves those backed by the OpenMRS {@code Condition}.
+ * <p>
+ * Callers should generally use {@link FhirConditionService}, which dispatches across both backings.
+ */
 public interface FhirDiagnosisService extends FhirService<Condition> {
 	
-	IBundleProvider searchDiagnoses(DiagnosisSearchParams diagnosisSearchParams);
+	IBundleProvider searchDiagnoses(SearchParameterMap theParams);
 }

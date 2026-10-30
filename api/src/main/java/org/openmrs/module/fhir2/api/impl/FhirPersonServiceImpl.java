@@ -10,45 +10,18 @@
 package org.openmrs.module.fhir2.api.impl;
 
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
 import org.hl7.fhir.r4.model.Person;
 import org.openmrs.module.fhir2.api.FhirPersonService;
-import org.openmrs.module.fhir2.api.dao.FhirPersonDao;
-import org.openmrs.module.fhir2.api.search.SearchQuery;
-import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.PersonSearchParams;
-import org.openmrs.module.fhir2.api.translators.PersonTranslator;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
-public class FhirPersonServiceImpl extends BaseFhirService<Person, org.openmrs.Person> implements FhirPersonService {
-	
-	@Getter(value = AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
-	private FhirPersonDao dao;
-	
-	@Getter(value = AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
-	private PersonTranslator translator;
-	
-	@Getter(value = AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
-	private SearchQueryInclude<Person> searchQueryInclude;
-	
-	@Getter(value = AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
-	private SearchQuery<org.openmrs.Person, Person, FhirPersonDao, PersonTranslator, SearchQueryInclude<Person>> searchQuery;
+public class FhirPersonServiceImpl extends BaseCompositeFhirService<Person> implements FhirPersonService {
 	
 	@Override
+	@Transactional(readOnly = true)
 	public IBundleProvider searchForPeople(PersonSearchParams personSearchParams) {
-		return searchQuery.getQueryResults(personSearchParams.toSearchParameterMap(), dao, translator, searchQueryInclude);
-	}
-	
-	@Override
-	protected boolean isVoided(org.openmrs.Person person) {
-		return person.getPersonVoided();
+		return doSearch(personSearchParams.toSearchParameterMap());
 	}
 }

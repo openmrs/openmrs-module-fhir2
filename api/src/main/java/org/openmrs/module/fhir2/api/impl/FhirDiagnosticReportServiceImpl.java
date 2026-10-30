@@ -10,42 +10,18 @@
 package org.openmrs.module.fhir2.api.impl;
 
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.openmrs.module.fhir2.api.FhirDiagnosticReportService;
-import org.openmrs.module.fhir2.api.dao.FhirDiagnosticReportDao;
-import org.openmrs.module.fhir2.api.search.SearchQuery;
-import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.DiagnosticReportSearchParams;
-import org.openmrs.module.fhir2.api.translators.DiagnosticReportTranslator;
-import org.openmrs.module.fhir2.model.FhirDiagnosticReport;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
-public class FhirDiagnosticReportServiceImpl extends BaseFhirService<DiagnosticReport, FhirDiagnosticReport> implements FhirDiagnosticReportService {
-	
-	@Getter(value = AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
-	private FhirDiagnosticReportDao dao;
-	
-	@Getter(value = AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
-	private DiagnosticReportTranslator translator;
-	
-	@Getter(value = AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
-	private SearchQueryInclude<DiagnosticReport> searchQueryInclude;
-	
-	@Getter(value = AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
-	private SearchQuery<FhirDiagnosticReport, DiagnosticReport, FhirDiagnosticReportDao, DiagnosticReportTranslator, SearchQueryInclude<DiagnosticReport>> searchQuery;
+public class FhirDiagnosticReportServiceImpl extends BaseCompositeFhirService<DiagnosticReport> implements FhirDiagnosticReportService {
 	
 	@Override
+	@Transactional(readOnly = true)
 	public IBundleProvider searchForDiagnosticReports(DiagnosticReportSearchParams diagnosticReportSearchParams) {
-		return searchQuery.getQueryResults(diagnosticReportSearchParams.toSearchParameterMap(), dao, translator,
-		    searchQueryInclude);
+		return doSearch(diagnosticReportSearchParams.toSearchParameterMap());
 	}
 }

@@ -9,44 +9,19 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
-import static lombok.AccessLevel.PROTECTED;
-
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import lombok.Getter;
-import lombok.Setter;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
-import org.openmrs.Allergy;
 import org.openmrs.module.fhir2.api.FhirAllergyIntoleranceService;
-import org.openmrs.module.fhir2.api.dao.FhirAllergyIntoleranceDao;
-import org.openmrs.module.fhir2.api.search.SearchQuery;
-import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.FhirAllergyIntoleranceSearchParams;
-import org.openmrs.module.fhir2.api.translators.AllergyIntoleranceTranslator;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
-public class FhirAllergyIntoleranceServiceImpl extends BaseFhirService<AllergyIntolerance, Allergy> implements FhirAllergyIntoleranceService {
-	
-	@Getter(value = PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private AllergyIntoleranceTranslator translator;
-	
-	@Getter(value = PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private FhirAllergyIntoleranceDao dao;
-	
-	@Getter(value = PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private SearchQueryInclude<AllergyIntolerance> searchQueryInclude;
-	
-	@Getter(value = PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private SearchQuery<org.openmrs.Allergy, AllergyIntolerance, FhirAllergyIntoleranceDao, AllergyIntoleranceTranslator, SearchQueryInclude<AllergyIntolerance>> searchQuery;
+public class FhirAllergyIntoleranceServiceImpl extends BaseCompositeFhirService<AllergyIntolerance> implements FhirAllergyIntoleranceService {
 	
 	@Override
+	@Transactional(readOnly = true)
 	public IBundleProvider searchForAllergies(FhirAllergyIntoleranceSearchParams allergyIntoleranceSearchParams) {
-		return searchQuery.getQueryResults(allergyIntoleranceSearchParams.toSearchParameterMap(), dao, translator,
-		    searchQueryInclude);
+		return doSearch(allergyIntoleranceSearchParams.toSearchParameterMap());
 	}
 }
