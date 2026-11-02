@@ -1319,6 +1319,7 @@ public class ServiceRequestSearchQueryTest extends BaseFhirContextSensitiveTest 
 	public void searchForServiceRequests_shouldAddVisitToResultListWhenEncounterPartOfIsIteratedById() {
 		// GET /ServiceRequest?_id={VISIT_SERVICE_REQUEST_UUID}&_include=ServiceRequest:encounter
 		//     &_include:iterate=Encounter:part-of
+		// (Encounter:part-of is the Encounter's Visit)
 		executeDataSet(TEST_ORDER_VISIT_DATA);
 		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(VISIT_SERVICE_REQUEST_UUID));
 		
@@ -1333,6 +1334,7 @@ public class ServiceRequestSearchQueryTest extends BaseFhirContextSensitiveTest 
 	public void searchForServiceRequests_shouldAddVisitToResultListWhenEncounterPartOfIsIteratedByLastUpdated() {
 		// GET /ServiceRequest?_lastUpdated=ge{VISIT_DATE_CREATED}&_lastUpdated=le{VISIT_DATE_CREATED}
 		//     &_include=ServiceRequest:encounter&_include:iterate=Encounter:part-of
+		// (Encounter:part-of is the Encounter's Visit)
 		executeDataSet(TEST_ORDER_VISIT_DATA);
 		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(VISIT_DATE_CREATED)
 		        .setLowerBound(VISIT_DATE_CREATED);
@@ -1348,6 +1350,7 @@ public class ServiceRequestSearchQueryTest extends BaseFhirContextSensitiveTest 
 	public void searchForServiceRequests_shouldNotAddVisitToResultListWhenEncounterPartOfIsNotIterated() {
 		// GET /ServiceRequest?_id={VISIT_SERVICE_REQUEST_UUID}&_include=ServiceRequest:encounter
 		//     &_include=Encounter:part-of
+		// (Encounter:part-of is the Encounter's Visit)
 		executeDataSet(TEST_ORDER_VISIT_DATA);
 		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(VISIT_SERVICE_REQUEST_UUID));
 		HashSet<Include> includes = new HashSet<>();

@@ -157,6 +157,9 @@ public class SearchQueryIncludeImpl<U extends IBaseResource> implements SearchQu
 			return includedResourcesSet;
 		}
 		
+		// every resource already in the results, the search's own matches as well as those included, so none is added twice
+		Set<String> includedIds = resourceList.stream().map(this::getTypedId).collect(Collectors.toSet());
+		
 		includeSet.forEach((includeParam) -> {
 			// isRecurse() is true when the include has the :iterate modifier, e.g. _include:iterate=Encounter:part-of
 			if (includeParam.isRecurse()) {
@@ -166,11 +169,10 @@ public class SearchQueryIncludeImpl<U extends IBaseResource> implements SearchQu
 			}
 		});
 		
+		includedResourcesSet.removeIf(it -> !includedIds.add(getTypedId(it)));
+		
 		// _include:iterate is applied again to the resources it just included, until it finds nothing new
 		Set<Include> iterateIncludeSet = getRecursiveIncludes(includeSet);
-		// the search's own matches are tracked too, so an iterated include that reaches one doesn't add it again
-		Set<String> includedIds = resourceList.stream().map(this::getTypedId).collect(Collectors.toSet());
-		includedResourcesSet.stream().map(this::getTypedId).forEach(includedIds::add);
 		Set<IBaseResource> newlyIncludedResources = includedResourcesSet;
 		
 		for (int depth = 0; depth < MAX_INCLUDE_ITERATIONS && !iterateIncludeSet.isEmpty()

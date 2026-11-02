@@ -484,6 +484,8 @@ public class LocationSearchQueryTest extends BaseFhirContextSensitiveTest {
 	@Test
 	public void searchForLocations_shouldAddEveryAncestorLocationWhenPartOfIsIterated() {
 		// GET /Location?_id={LOCATION_GREAT_GRANDCHILD_UUID}&_include:iterate=Location:partof
+		// (iterated includes are reapplied at most 3 times after the first include, see
+		// SearchQueryIncludeImpl.MAX_INCLUDE_ITERATIONS; this chain is 3 parents deep, so it stays within that)
 		HashSet<Include> includes = new HashSet<>();
 		includes.add(new Include("Location:partof", true));
 		
@@ -517,6 +519,28 @@ public class LocationSearchQueryTest extends BaseFhirContextSensitiveTest {
 		        .collect(Collectors.toList());
 		
 		assertThat(resultIds, containsInAnyOrder(LOCATION_GREAT_GRANDCHILD_UUID, LOCATION_GRANDCHILD_UUID));
+	}
+	
+	@Test
+	public void searchForLocations_shouldNotIncludeAMatchedLocationAgainWhenItIsAnotherMatchsParent() {
+		// GET /Location?_id={LOCATION_GREAT_GRANDCHILD_UUID},{LOCATION_GRANDCHILD_UUID}&_include=Location:partof
+		HashSet<Include> includes = new HashSet<>();
+		includes.add(new Include("Location:partof"));
+		
+		// the grandchild is both one of the matches and the great-grandchild's parent
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenOrListParam()
+		        .addOr(new TokenParam(LOCATION_GREAT_GRANDCHILD_UUID)).addOr(new TokenParam(LOCATION_GRANDCHILD_UUID)));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes)
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid);
+		
+		IBundleProvider results = search(theParams);
+		assertThat(results.size(), equalTo(2));
+		
+		List<String> resultIds = get(results).stream().map(it -> it.getIdElement().getIdPart()).collect(Collectors.toList());
+		
+		assertThat(resultIds,
+		    containsInAnyOrder(LOCATION_GREAT_GRANDCHILD_UUID, LOCATION_GRANDCHILD_UUID, LOCATION_CHILD_UUID));
 	}
 	
 	@Test
