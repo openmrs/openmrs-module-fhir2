@@ -484,7 +484,7 @@ public class LocationSearchQueryTest extends BaseFhirContextSensitiveTest {
 	@Test
 	public void searchForLocations_shouldAddEveryAncestorLocationWhenPartOfIsIterated() {
 		// GET /Location?_id={LOCATION_GREAT_GRANDCHILD_UUID}&_include:iterate=Location:partof
-		// (iterated includes are reapplied at most 3 times after the first include, see
+		// (iterated includes are reapplied at most 10 times after the first include, see
 		// SearchQueryIncludeImpl.MAX_INCLUDE_ITERATIONS; this chain is 3 parents deep, so it stays within that)
 		HashSet<Include> includes = new HashSet<>();
 		includes.add(new Include("Location:partof", true));

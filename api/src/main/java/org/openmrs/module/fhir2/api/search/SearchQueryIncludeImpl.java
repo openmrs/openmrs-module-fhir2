@@ -29,6 +29,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
@@ -69,11 +70,12 @@ import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 @NoArgsConstructor
 public class SearchQueryIncludeImpl<U extends IBaseResource> implements SearchQueryInclude<U> {
 	
-	private static final int MAX_INCLUDE_ITERATIONS = 3;
+	private static final int MAX_INCLUDE_ITERATIONS = 10;
 	
 	@Getter(AccessLevel.PROTECTED)
 	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
@@ -175,7 +177,8 @@ public class SearchQueryIncludeImpl<U extends IBaseResource> implements SearchQu
 		Set<Include> iterateIncludeSet = getRecursiveIncludes(includeSet);
 		Set<IBaseResource> newlyIncludedResources = includedResourcesSet;
 		
-		for (int depth = 0; depth < MAX_INCLUDE_ITERATIONS && !iterateIncludeSet.isEmpty()
+		int depth = 0;
+		for (; depth < MAX_INCLUDE_ITERATIONS && !iterateIncludeSet.isEmpty()
 		        && !newlyIncludedResources.isEmpty(); depth++) {
 			Set<IBaseResource> foundResources = new LinkedHashSet<>();
 			
@@ -188,16 +191,20 @@ public class SearchQueryIncludeImpl<U extends IBaseResource> implements SearchQu
 			newlyIncludedResources = foundResources;
 		}
 		
+		if (depth == MAX_INCLUDE_ITERATIONS && !newlyIncludedResources.isEmpty()) {
+			log.debug("Stopped applying {} after {} iterations; further resources may not have been included",
+			    iterateIncludeSet, MAX_INCLUDE_ITERATIONS);
+		}
+		
 		return includedResourcesSet;
 	}
 	
 	// An iterated include can meet resources of any type, but the include handlers cast every resource they are given to
-	// the include's source type, so it is only handed the resources of that type. This matches on the R4 type name, so
-	// it doesn't work for an R3 include like ProcedureRequest:encounter
+	// the include's source type, so it is only handed the resources of that type
 	private Set<IBaseResource> handleIncludeParamForMatchingResources(Collection<? extends IBaseResource> resources,
 	        Include includeParam) {
 		@SuppressWarnings("unchecked")
-		List<U> sourceResources = resources.stream().filter(it -> it.fhirType().equals(includeParam.getParamType()))
+		List<U> sourceResources = resources.stream().filter(it -> isOfType(it, includeParam.getParamType()))
 		        .map(it -> (U) it).collect(Collectors.toList());
 		
 		if (sourceResources.isEmpty()) {
@@ -209,6 +216,15 @@ public class SearchQueryIncludeImpl<U extends IBaseResource> implements SearchQu
 		return includedResources;
 	}
 	
+	// STU3 searches work on R4 resources internally, so an R3 ProcedureRequest include applies to an R4 ServiceRequest
+	private boolean isOfType(IBaseResource resource, String paramType) {
+		if (FhirConstants.PROCEDURE_REQUEST.equals(paramType)) {
+			return FhirConstants.SERVICE_REQUEST.equals(resource.fhirType());
+		}
+		
+		return resource.fhirType().equals(paramType);
+	}
+	
 	private String getTypedId(IBaseResource resource) {
 		return resource.fhirType() + "/" + resource.getIdElement().getIdPart();
 	}
@@ -218,7 +234,7 @@ public class SearchQueryIncludeImpl<U extends IBaseResource> implements SearchQu
 			case FhirConstants.INCLUDE_PART_OF_PARAM:
 				return handleParentLocationInclude(resourceList, includeParam.getParamType());
 			case FhirConstants.INCLUDE_ENCOUNTER_PART_OF_PARAM:
-				return handleVisitInclude(resourceList);
+				return handleVisitInclude(resourceList, includeParam.getParamType());
 			case FhirConstants.INCLUDE_CONTEXT_PARAM:
 			case FhirConstants.INCLUDE_ENCOUNTER_PARAM:
 				return handleEncounterInclude(resourceList, includeParam.getParamType());
@@ -487,10 +503,17 @@ public class SearchQueryIncludeImpl<U extends IBaseResource> implements SearchQu
 	}
 	
 	// in FHIR, an Encounter's partOf is its Visit, which is itself represented as an Encounter
-	protected Set<IBaseResource> handleVisitInclude(List<U> resourceList) {
-		Set<String> uniqueVisitUUIDs = resourceList.stream().filter(it -> it instanceof Encounter).map(it -> (Encounter) it)
-		        .map(Encounter::getPartOf).map(this::getIdFromReference).filter(Objects::nonNull)
-		        .collect(Collectors.toCollection(LinkedHashSet::new));
+	protected Set<IBaseResource> handleVisitInclude(List<U> resourceList, String paramType) {
+		Set<String> uniqueVisitUUIDs = new LinkedHashSet<>();
+		
+		switch (paramType) {
+			case FhirConstants.ENCOUNTER:
+				resourceList.stream().filter(it -> it instanceof Encounter).map(it -> (Encounter) it)
+				        .map(Encounter::getPartOf).map(this::getIdFromReference).forEach(uniqueVisitUUIDs::add);
+				break;
+		}
+		
+		uniqueVisitUUIDs.removeIf(Objects::isNull);
 		
 		if (uniqueVisitUUIDs.isEmpty()) {
 			return Collections.emptySet();

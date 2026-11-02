@@ -50,18 +50,20 @@ public class ServiceRequestFhirResourceProviderIntegrationTest extends BaseFhirR
 	private static final String PATIENT_UUID = "da7f524f-27ce-4bb2-86d6-6d1d05312bd5";
 	
 	private static final String ENCOUNTER_UUID = "y403fafb-e5e4-42d0-9d11-4f52e89d123r";
-
+	
 	private static final String TEST_ORDER_VISIT_DATA = "org/openmrs/module/fhir2/api/dao/impl/FhirServiceRequestTest_visit_data.xml";
-
+	
 	private static final String VISIT_SERVICE_REQUEST_UUID = "b5d6e7f8-2a3b-4c5d-8e9f-0a1b2c3d4e50";
-
+	
 	private static final String VISIT_ENCOUNTER_UUID = "8e2b7d40-1c3a-4f6e-b0d9-5a4c3b2e1f70";
-
+	
 	private static final String VISIT_UUID = "3c4f1a8e-6a0b-4b5e-9a57-1f2d3e4c5b60";
-
+	
 	private static final String VISIT_LOCATION_UUID = "8d6c993e-c2cc-11de-8d13-0010c6dffd0f";
-
+	
 	private static final String VISIT_DATE_CREATED = "2012-03-01";
+	
+	private static final String VISIT_DAY_AFTER_CREATED = "2012-03-02";
 	
 	@Getter(AccessLevel.PUBLIC)
 	@Autowired
@@ -169,35 +171,36 @@ public class ServiceRequestFhirResourceProviderIntegrationTest extends BaseFhirR
 	@Test
 	public void shouldIncludeEncounterAndVisitWhenSearchingById() throws Exception {
 		executeDataSet(TEST_ORDER_VISIT_DATA);
-
+		
 		MockHttpServletResponse response = get("/ServiceRequest?_id=" + VISIT_SERVICE_REQUEST_UUID
 		        + "&_include=ServiceRequest:encounter&_include:iterate=Encounter:part-of").accept(FhirMediaTypes.JSON).go();
-
+		
 		assertEncounterAndVisitIncluded(response);
 	}
-
+	
 	@Test
 	public void shouldIncludeEncounterAndVisitWhenSearchingByLastUpdated() throws Exception {
 		executeDataSet(TEST_ORDER_VISIT_DATA);
-
-		MockHttpServletResponse response = get("/ServiceRequest?_lastUpdated=ge" + VISIT_DATE_CREATED
-		        + "&_include=ServiceRequest:encounter&_include:iterate=Encounter:part-of").accept(FhirMediaTypes.JSON).go();
-
+		
+		MockHttpServletResponse response = get("/ServiceRequest?_lastUpdated=ge" + VISIT_DATE_CREATED + "&_lastUpdated=lt"
+		        + VISIT_DAY_AFTER_CREATED + "&_include=ServiceRequest:encounter&_include:iterate=Encounter:part-of")
+		                .accept(FhirMediaTypes.JSON).go();
+		
 		assertEncounterAndVisitIncluded(response);
 	}
-
+	
 	private void assertEncounterAndVisitIncluded(MockHttpServletResponse response) throws Exception {
 		assertThat(response, isOk());
-
+		
 		Bundle results = readBundleResponse(response);
-
+		
 		assertThat(results, notNullValue());
 		assertThat(results.getEntry(), hasSize(3)); // the ServiceRequest, its Encounter and that Encounter's Visit
 		assertThat(results.getEntry(), hasItem(hasResource(allOf(is(instanceOf(ServiceRequest.class)),
 		    hasProperty("idElement", hasProperty("idPart", equalTo(VISIT_SERVICE_REQUEST_UUID)))))));
 		assertThat(results.getEntry(), hasItem(hasResource(allOf(is(instanceOf(Encounter.class)),
 		    hasProperty("idElement", hasProperty("idPart", equalTo(VISIT_ENCOUNTER_UUID)))))));
-
+		
 		Encounter visit = results.getEntry().stream().map(Bundle.BundleEntryComponent::getResource)
 		        .filter(it -> VISIT_UUID.equals(it.getIdElement().getIdPart())).map(it -> (Encounter) it).findFirst()
 		        .orElse(null);
@@ -205,7 +208,7 @@ public class ServiceRequestFhirResourceProviderIntegrationTest extends BaseFhirR
 		assertThat(visit.getLocationFirstRep().getLocation().getReferenceElement().getIdPart(),
 		    equalTo(VISIT_LOCATION_UUID));
 	}
-
+	
 	@Test
 	public void shouldSearchForExistingServiceRequestsAsXML() throws Exception {
 		MockHttpServletResponse response = get("/ServiceRequest").accept(FhirMediaTypes.XML).go();

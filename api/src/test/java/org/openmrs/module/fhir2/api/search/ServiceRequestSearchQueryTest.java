@@ -1258,6 +1258,26 @@ public class ServiceRequestSearchQueryTest extends BaseFhirContextSensitiveTest 
 	}
 	
 	@Test
+	public void searchForServiceRequests_shouldAddEncounterToResultListWhenIteratedR3() {
+		// GET /ws/fhir2/R3/ProcedureRequest?_id={SERVICE_REQUEST_UUID}&_include:recurse=ProcedureRequest:encounter
+		// (STU3 searches return R4 ServiceRequests internally, so the iterated include must still match them)
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(SERVICE_REQUEST_UUID));
+		HashSet<Include> includes = new HashSet<>();
+		includes.add(new Include("ProcedureRequest:encounter", true));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
+		
+		List<IBaseResource> resultList = search(theParams).getResources(START_INDEX, END_INDEX);
+		
+		assertThat(resultList.size(), equalTo(2)); // the ServiceRequest and its Encounter
+		ServiceRequest returnedServiceRequest = (ServiceRequest) resultList.iterator().next();
+		assertThat(resultList, hasItem(allOf(is(instanceOf(Encounter.class)),
+		    hasProperty("id", equalTo(returnedServiceRequest.getEncounter().getReferenceElement().getIdPart())))));
+	}
+	
+	@Test
 	public void searchForServiceRequests_shouldHandleMultipleIncludes() {
 		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(SERVICE_REQUEST_UUID));
 		HashSet<Include> includes = new HashSet<>();
