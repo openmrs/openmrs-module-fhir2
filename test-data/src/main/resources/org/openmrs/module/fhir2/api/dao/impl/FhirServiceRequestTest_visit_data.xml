@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!--
+    This Source Code Form is subject to the terms of the Mozilla Public License,
+    v. 2.0. If a copy of the MPL was not distributed with this file, You can
+    obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+    the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+
+    Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+    graphic logo is a trademark of OpenMRS Inc.
+-->
+<dataset>
+	<visit visit_id="200" patient_id="2" visit_type_id="1" date_started="2012-03-01 00:00:00.0" location_id="1" creator="1" date_created="2012-03-01 00:00:00.0" voided="0" uuid="3c4f1a8e-6a0b-4b5e-9a57-1f2d3e4c5b60"/>
+	<encounter encounter_id="200" encounter_type="2" patient_id="2" location_id="2" visit_id="200" encounter_datetime="2012-03-01 09:00:00.0" creator="1" date_created="2012-03-01 09:00:00.0" voided="0" uuid="8e2b7d40-1c3a-4f6e-b0d9-5a4c3b2e1f70"/>
+	<orders order_id="200" order_type_id="2" order_number="ORD-200" urgency="ROUTINE" order_action="NEW" concept_id="5497" orderer="1" date_activated="2012-03-01 09:00:00.0" patient_id="2" care_setting="1" encounter_id="200" uuid="b5d6e7f8-2a3b-4c5d-8e9f-0a1b2c3d4e50" date_created="2012-03-01 09:00:00.0" creator="1" voided="0" />
+	<test_order order_id="200" />
+</dataset>

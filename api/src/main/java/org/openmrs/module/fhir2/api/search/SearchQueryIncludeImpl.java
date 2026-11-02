@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.api.search;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -55,6 +56,7 @@ import org.openmrs.module.fhir2.api.FhirObservationService;
 import org.openmrs.module.fhir2.api.FhirPatientService;
 import org.openmrs.module.fhir2.api.FhirPractitionerService;
 import org.openmrs.module.fhir2.api.FhirServiceRequestService;
+import org.openmrs.module.fhir2.api.FhirVisitService;
 import org.openmrs.module.fhir2.api.search.param.DiagnosticReportSearchParams;
 import org.openmrs.module.fhir2.api.search.param.EncounterSearchParams;
 import org.openmrs.module.fhir2.api.search.param.FhirAllergyIntoleranceSearchParams;
@@ -71,9 +73,15 @@ import org.springframework.stereotype.Component;
 @NoArgsConstructor
 public class SearchQueryIncludeImpl<U extends IBaseResource> implements SearchQueryInclude<U> {
 	
+	private static final int MAX_INCLUDE_ITERATIONS = 3;
+	
 	@Getter(AccessLevel.PROTECTED)
 	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
 	private FhirLocationService locationService;
+	
+	@Getter(AccessLevel.PROTECTED)
+	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
+	private FhirVisitService visitService;
 	
 	@Getter(AccessLevel.PROTECTED)
 	@Setter(value = AccessLevel.PROTECTED, onMethod_ = @Autowired)
@@ -150,16 +158,62 @@ public class SearchQueryIncludeImpl<U extends IBaseResource> implements SearchQu
 		}
 		
 		includeSet.forEach((includeParam) -> {
-			Optional.ofNullable(handleIncludeParam(resourceList, includeParam)).ifPresent(includedResourcesSet::addAll);
+			if (includeParam.isRecurse()) {
+				includedResourcesSet.addAll(handleIncludeParamForMatchingResources(resourceList, includeParam));
+			} else {
+				Optional.ofNullable(handleIncludeParam(resourceList, includeParam)).ifPresent(includedResourcesSet::addAll);
+			}
 		});
 		
+		// _include:iterate is applied again to the resources it just included, until it finds nothing new
+		Set<Include> iterateIncludeSet = getRecursiveIncludes(includeSet);
+		Set<String> includedIds = includedResourcesSet.stream().map(this::getTypedId).collect(Collectors.toSet());
+		Set<IBaseResource> newlyIncludedResources = includedResourcesSet;
+		
+		for (int depth = 0; depth < MAX_INCLUDE_ITERATIONS && !iterateIncludeSet.isEmpty()
+		        && !newlyIncludedResources.isEmpty(); depth++) {
+			Set<IBaseResource> foundResources = new LinkedHashSet<>();
+			
+			for (Include includeParam : iterateIncludeSet) {
+				foundResources.addAll(handleIncludeParamForMatchingResources(newlyIncludedResources, includeParam));
+			}
+			
+			foundResources.removeIf(it -> !includedIds.add(getTypedId(it)));
+			includedResourcesSet.addAll(foundResources);
+			newlyIncludedResources = foundResources;
+		}
+		
 		return includedResourcesSet;
+	}
+	
+	// An iterated include can meet resources of any type, but the include handlers cast every resource they are given to
+	// the include's source type, so it is only handed the resources of that type. This matches on the R4 type name, so
+	// it doesn't work for an R3 include like ProcedureRequest:encounter (see ProcedureRequestFhirResourceProvider)
+	private Set<IBaseResource> handleIncludeParamForMatchingResources(Collection<? extends IBaseResource> resources,
+	        Include includeParam) {
+		@SuppressWarnings("unchecked")
+		List<U> sourceResources = resources.stream().filter(it -> it.fhirType().equals(includeParam.getParamType()))
+		        .map(it -> (U) it).collect(Collectors.toList());
+		
+		if (sourceResources.isEmpty()) {
+			return Collections.emptySet();
+		}
+		
+		Set<IBaseResource> includedResources = new LinkedHashSet<>();
+		Optional.ofNullable(handleIncludeParam(sourceResources, includeParam)).ifPresent(includedResources::addAll);
+		return includedResources;
+	}
+	
+	private String getTypedId(IBaseResource resource) {
+		return resource.fhirType() + "/" + resource.getIdElement().getIdPart();
 	}
 	
 	protected Set<? extends IBaseResource> handleIncludeParam(List<U> resourceList, Include includeParam) {
 		switch (includeParam.getParamName()) {
 			case FhirConstants.INCLUDE_PART_OF_PARAM:
 				return handleParentLocationInclude(resourceList, includeParam.getParamType());
+			case FhirConstants.INCLUDE_ENCOUNTER_PART_OF_PARAM:
+				return handleVisitInclude(resourceList);
 			case FhirConstants.INCLUDE_CONTEXT_PARAM:
 			case FhirConstants.INCLUDE_ENCOUNTER_PARAM:
 				return handleEncounterInclude(resourceList, includeParam.getParamType());
@@ -425,6 +479,19 @@ public class SearchQueryIncludeImpl<U extends IBaseResource> implements SearchQu
 		}
 		
 		return Collections.emptySet();
+	}
+	
+	// an Encounter's partOf is its Visit, which is itself represented as an Encounter
+	protected Set<IBaseResource> handleVisitInclude(List<U> resourceList) {
+		Set<String> uniqueVisitUUIDs = resourceList.stream().filter(it -> it instanceof Encounter).map(it -> (Encounter) it)
+		        .map(Encounter::getPartOf).map(this::getIdFromReference).filter(Objects::nonNull)
+		        .collect(Collectors.toCollection(LinkedHashSet::new));
+		
+		if (uniqueVisitUUIDs.isEmpty()) {
+			return Collections.emptySet();
+		}
+		
+		return new LinkedHashSet<>(visitService.get(uniqueVisitUUIDs));
 	}
 	
 	protected Set<IBaseResource> handleParticipantInclude(List<U> resourceList, String paramType) {

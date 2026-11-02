@@ -11,6 +11,7 @@ package org.openmrs.module.fhir2.api.search;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
@@ -60,6 +61,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class LocationSearchQueryTest extends BaseFhirContextSensitiveTest {
 	
 	public static final String LOCATION_UUID = "5db6ae3c-867e-45a0-a1ce-f86219b64e1c";
+	
+	// Test location 12 -> 11 -> 8 -> 4, and Test location 6 -> 4
+	private static final String LOCATION_GREAT_GRANDCHILD_UUID = "f47ac10b-58cc-4372-a567-0e02b2c3d479";
+	
+	private static final String LOCATION_GRANDCHILD_UUID = "e7b8a6d4-3b2a-4f8b-8b6e-1f8b8e6e1f8b";
+	
+	private static final String LOCATION_CHILD_UUID = "cb82ab6d-9db2-451f-9ce2-0afc2b16eb13";
+	
+	private static final String LOCATION_ANCESTOR_UUID = "76cd2d30-2411-44ef-84ea-8b7473256a6a";
+	
+	private static final String LOCATION_OTHER_CHILD_UUID = "396ad089-789a-4290-be8c-9cd88909f1fa";
 	
 	private static final String LOCATION_NAME = "Test location 7";
 	
@@ -467,6 +479,63 @@ public class LocationSearchQueryTest extends BaseFhirContextSensitiveTest {
 		Location returnedLocation = resultList.iterator().next();
 		assertThat(resultList, hasItem(allOf(is(instanceOf(Location.class)),
 		    hasProperty("id", equalTo(returnedLocation.getPartOf().getReferenceElement().getIdPart())))));
+	}
+	
+	@Test
+	public void searchForLocations_shouldAddEveryAncestorLocationWhenPartOfIsIterated() {
+		HashSet<Include> includes = new HashSet<>();
+		includes.add(new Include("Location:partof", true));
+		
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(LOCATION_GREAT_GRANDCHILD_UUID));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes)
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid);
+		
+		IBundleProvider results = search(theParams);
+		assertThat(results.size(), equalTo(1));
+		
+		List<String> resultIds = get(results).stream().map(it -> it.getIdElement().getIdPart()).collect(Collectors.toList());
+		
+		// the location, its parent, grandparent and great-grandparent
+		assertThat(resultIds, containsInAnyOrder(LOCATION_GREAT_GRANDCHILD_UUID, LOCATION_GRANDCHILD_UUID,
+		    LOCATION_CHILD_UUID, LOCATION_ANCESTOR_UUID));
+	}
+	
+	@Test
+	public void searchForLocations_shouldOnlyAddParentLocationWhenPartOfIsNotIterated() {
+		HashSet<Include> includes = new HashSet<>();
+		includes.add(new Include("Location:partof"));
+		
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(LOCATION_GREAT_GRANDCHILD_UUID));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes)
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid);
+		
+		List<String> resultIds = get(search(theParams)).stream().map(it -> it.getIdElement().getIdPart())
+		        .collect(Collectors.toList());
+		
+		assertThat(resultIds, containsInAnyOrder(LOCATION_GREAT_GRANDCHILD_UUID, LOCATION_GRANDCHILD_UUID));
+	}
+	
+	@Test
+	public void searchForLocations_shouldAddEachAncestorLocationOnceWhenIteratedPartOfChainsMeet() {
+		HashSet<Include> includes = new HashSet<>();
+		includes.add(new Include("Location:partof", true));
+		
+		// both chains end at the same ancestor: one directly, the other three levels up
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenOrListParam()
+		        .addOr(new TokenParam(LOCATION_GREAT_GRANDCHILD_UUID)).addOr(new TokenParam(LOCATION_OTHER_CHILD_UUID)));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes)
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid);
+		
+		IBundleProvider results = search(theParams);
+		assertThat(results.size(), equalTo(2));
+		
+		List<String> resultIds = get(results).stream().map(it -> it.getIdElement().getIdPart()).collect(Collectors.toList());
+		
+		assertThat(resultIds, containsInAnyOrder(LOCATION_GREAT_GRANDCHILD_UUID, LOCATION_OTHER_CHILD_UUID,
+		    LOCATION_GRANDCHILD_UUID, LOCATION_CHILD_UUID, LOCATION_ANCESTOR_UUID));
 	}
 	
 	@Test
