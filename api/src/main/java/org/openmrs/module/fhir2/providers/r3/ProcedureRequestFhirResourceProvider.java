@@ -111,10 +111,7 @@ public class ProcedureRequestFhirResourceProvider implements IResourceProvider {
 	        @OptionalParam(name = ProcedureRequest.SP_OCCURRENCE) DateRangeParam occurrence,
 	        @OptionalParam(name = ProcedureRequest.SP_RES_ID) TokenAndListParam uuid,
 	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated,
-	        // Unlike the R4 ServiceRequest search, Encounter:part-of (iterated to reach an order's Visit) is not allowed
-	        // here: it is untested against STU3, and iterated includes are matched on the R4 type name of the resources
-	        // they are applied to (see SearchQueryIncludeImpl), so an R3-only include like ProcedureRequest:encounter
-	        // would never be applied if iterated
+	        // Encounter:part-of is only allowed on the R4 ServiceRequest search; it is untested against STU3
 	        @IncludeParam(allow = { "ProcedureRequest:" + ProcedureRequest.SP_PATIENT,
 	                "ProcedureRequest:" + ProcedureRequest.SP_REQUESTER,
 	                "ProcedureRequest:" + ProcedureRequest.SP_ENCOUNTER }) HashSet<Include> includes) {

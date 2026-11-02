@@ -189,7 +189,7 @@ public class SearchQueryIncludeImpl<U extends IBaseResource> implements SearchQu
 	
 	// An iterated include can meet resources of any type, but the include handlers cast every resource they are given to
 	// the include's source type, so it is only handed the resources of that type. This matches on the R4 type name, so
-	// it doesn't work for an R3 include like ProcedureRequest:encounter (see ProcedureRequestFhirResourceProvider)
+	// it doesn't work for an R3 include like ProcedureRequest:encounter
 	private Set<IBaseResource> handleIncludeParamForMatchingResources(Collection<? extends IBaseResource> resources,
 	        Include includeParam) {
 		@SuppressWarnings("unchecked")
