@@ -482,7 +482,7 @@ public class SearchQueryIncludeImpl<U extends IBaseResource> implements SearchQu
 		return Collections.emptySet();
 	}
 	
-	// an Encounter's partOf is its Visit, which is itself represented as an Encounter
+	// in FHIR, an Encounter's partOf is its Visit, which is itself represented as an Encounter
 	protected Set<IBaseResource> handleVisitInclude(List<U> resourceList) {
 		Set<String> uniqueVisitUUIDs = resourceList.stream().filter(it -> it instanceof Encounter).map(it -> (Encounter) it)
 		        .map(Encounter::getPartOf).map(this::getIdFromReference).filter(Objects::nonNull)
