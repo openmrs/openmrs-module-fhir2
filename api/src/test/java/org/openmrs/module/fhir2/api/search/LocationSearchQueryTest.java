@@ -542,6 +542,28 @@ public class LocationSearchQueryTest extends BaseFhirContextSensitiveTest {
 	}
 	
 	@Test
+	public void searchForLocations_shouldNotIncludeAMatchedLocationAgainWhenIteratedPartOfReachesIt() {
+		// GET /Location?_id={LOCATION_GREAT_GRANDCHILD_UUID},{LOCATION_CHILD_UUID}&_include:iterate=Location:partof
+		HashSet<Include> includes = new HashSet<>();
+		includes.add(new Include("Location:partof", true));
+		
+		// the great-grandchild's chain passes through the child, which is itself one of the matches
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenOrListParam()
+		        .addOr(new TokenParam(LOCATION_GREAT_GRANDCHILD_UUID)).addOr(new TokenParam(LOCATION_CHILD_UUID)));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes)
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid);
+		
+		IBundleProvider results = search(theParams);
+		assertThat(results.size(), equalTo(2));
+		
+		List<String> resultIds = get(results).stream().map(it -> it.getIdElement().getIdPart()).collect(Collectors.toList());
+		
+		assertThat(resultIds, containsInAnyOrder(LOCATION_GREAT_GRANDCHILD_UUID, LOCATION_CHILD_UUID,
+		    LOCATION_GRANDCHILD_UUID, LOCATION_ANCESTOR_UUID));
+	}
+	
+	@Test
 	public void searchForLocations_shouldNotAddNullParentLocationToReturnedResults() {
 		HashSet<Include> includes = new HashSet<>();
 		Include include = new Include("Location:partof");

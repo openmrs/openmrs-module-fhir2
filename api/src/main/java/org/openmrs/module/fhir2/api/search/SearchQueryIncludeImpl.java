@@ -168,7 +168,9 @@ public class SearchQueryIncludeImpl<U extends IBaseResource> implements SearchQu
 		
 		// _include:iterate is applied again to the resources it just included, until it finds nothing new
 		Set<Include> iterateIncludeSet = getRecursiveIncludes(includeSet);
-		Set<String> includedIds = includedResourcesSet.stream().map(this::getTypedId).collect(Collectors.toSet());
+		// the search's own matches are tracked too, so an iterated include that reaches one doesn't add it again
+		Set<String> includedIds = resourceList.stream().map(this::getTypedId).collect(Collectors.toSet());
+		includedResourcesSet.stream().map(this::getTypedId).forEach(includedIds::add);
 		Set<IBaseResource> newlyIncludedResources = includedResourcesSet;
 		
 		for (int depth = 0; depth < MAX_INCLUDE_ITERATIONS && !iterateIncludeSet.isEmpty()
