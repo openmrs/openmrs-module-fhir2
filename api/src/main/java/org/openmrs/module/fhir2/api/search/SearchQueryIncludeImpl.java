@@ -157,7 +157,7 @@ public class SearchQueryIncludeImpl<U extends IBaseResource> implements SearchQu
 			return includedResourcesSet;
 		}
 		
-		// every resource already in the results, the search's own matches as well as those included, so none is added twice
+		// track every resource already in the results, the search's own matches as well as those included, so none is added twice
 		Set<String> includedIds = resourceList.stream().map(this::getTypedId).collect(Collectors.toSet());
 		
 		includeSet.forEach((includeParam) -> {
