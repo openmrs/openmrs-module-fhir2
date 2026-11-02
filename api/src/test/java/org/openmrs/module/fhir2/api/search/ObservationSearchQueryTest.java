@@ -1316,6 +1316,9 @@ public class ObservationSearchQueryTest extends BaseFhirContextSensitiveTest {
 	
 	@Test
 	public void searchForObs_shouldAddEncounterLocationToReturnedResultsWhenEncounterLocationIsIterated() {
+		// GET /Observation?_id={OBS_UUID}&_include=Observation:encounter&_include:iterate=Encounter:location
+		// (the Observation search doesn't allow Encounter:location, so over REST this is rejected; this tests the include
+		// handling directly, as a chain across resource types)
 		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(OBS_UUID));
 		HashSet<Include> includes = new HashSet<>();
 		includes.add(new Include("Observation:encounter"));

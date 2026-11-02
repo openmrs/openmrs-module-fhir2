@@ -483,6 +483,7 @@ public class LocationSearchQueryTest extends BaseFhirContextSensitiveTest {
 	
 	@Test
 	public void searchForLocations_shouldAddEveryAncestorLocationWhenPartOfIsIterated() {
+		// GET /Location?_id={LOCATION_GREAT_GRANDCHILD_UUID}&_include:iterate=Location:partof
 		HashSet<Include> includes = new HashSet<>();
 		includes.add(new Include("Location:partof", true));
 		
@@ -503,6 +504,7 @@ public class LocationSearchQueryTest extends BaseFhirContextSensitiveTest {
 	
 	@Test
 	public void searchForLocations_shouldOnlyAddParentLocationWhenPartOfIsNotIterated() {
+		// GET /Location?_id={LOCATION_GREAT_GRANDCHILD_UUID}&_include=Location:partof
 		HashSet<Include> includes = new HashSet<>();
 		includes.add(new Include("Location:partof"));
 		
@@ -519,6 +521,7 @@ public class LocationSearchQueryTest extends BaseFhirContextSensitiveTest {
 	
 	@Test
 	public void searchForLocations_shouldAddEachAncestorLocationOnceWhenIteratedPartOfChainsMeet() {
+		// GET /Location?_id={LOCATION_GREAT_GRANDCHILD_UUID},{LOCATION_OTHER_CHILD_UUID}&_include:iterate=Location:partof
 		HashSet<Include> includes = new HashSet<>();
 		includes.add(new Include("Location:partof", true));
 		
