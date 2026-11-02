@@ -158,6 +158,7 @@ public class SearchQueryIncludeImpl<U extends IBaseResource> implements SearchQu
 		}
 		
 		includeSet.forEach((includeParam) -> {
+			// isRecurse() is true when the include has the :iterate modifier, e.g. _include:iterate=Encounter:part-of
 			if (includeParam.isRecurse()) {
 				includedResourcesSet.addAll(handleIncludeParamForMatchingResources(resourceList, includeParam));
 			} else {
