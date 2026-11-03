@@ -321,7 +321,7 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 				}
 			}
 		} else {
-			openmrsImmunization.removeGroupMember(members.get(CIEL_1418));
+			helper.voidMember(openmrsImmunization, members.get(CIEL_1418));
 		}
 		
 		if (fhirImmunization.hasManufacturer() && fhirImmunization.getManufacturer().hasDisplay()) {
@@ -344,7 +344,7 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 				}
 			}
 		} else {
-			openmrsImmunization.removeGroupMember(members.get(CIEL_1419));
+			helper.voidMember(openmrsImmunization, members.get(CIEL_1419));
 		}
 		
 		if (fhirImmunization.hasLotNumber()) {
@@ -367,7 +367,7 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 				}
 			}
 		} else {
-			openmrsImmunization.removeGroupMember(members.get(CIEL_1420));
+			helper.voidMember(openmrsImmunization, members.get(CIEL_1420));
 		}
 		
 		if (fhirImmunization.hasExpirationDate()) {
@@ -390,7 +390,7 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 				}
 			}
 		} else {
-			openmrsImmunization.removeGroupMember(members.get(CIEL_165907));
+			helper.voidMember(openmrsImmunization, members.get(CIEL_165907));
 		}
 		
 		Concept noteConcept = helper.conceptOrNull(CIEL_161011);
@@ -411,7 +411,7 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 				}
 			}
 		} else {
-			openmrsImmunization.removeGroupMember(members.get(CIEL_161011));
+			helper.voidMember(openmrsImmunization, members.get(CIEL_161011));
 		}
 		
 		Concept nextDoseDateConcept = helper.conceptOrNull(CIEL_170000);
@@ -440,7 +440,7 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 				}
 			}
 		} else {
-			openmrsImmunization.removeGroupMember(members.get(CIEL_170000));
+			helper.voidMember(openmrsImmunization, members.get(CIEL_170000));
 		}
 		
 		return openmrsImmunization;
