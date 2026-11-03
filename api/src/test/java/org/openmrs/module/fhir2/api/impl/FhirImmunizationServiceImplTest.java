@@ -54,6 +54,7 @@ import org.openmrs.Provider;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.ObsService;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.util.ImmunizationObsGroupHelper;
@@ -75,6 +76,8 @@ public class FhirImmunizationServiceImplTest extends BaseFhirContextSensitiveTes
 	private static final String PRACTITIONER_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirPractitionerDaoImplTest_initial_data.xml";
 	
 	private static final String IMMUNIZATION_NEXT_DOSE_DATE = "/org/openmrs/module/fhir2/providers/immunization-next-dose-date.json";
+	
+	private static final String IMMUNIZATION_UUID = "9353776b-dead-4588-8723-d687197d8438";
 	
 	@Autowired
 	private FhirImmunizationServiceImpl service;
@@ -332,6 +335,66 @@ public class FhirImmunizationServiceImplTest extends BaseFhirContextSensitiveTes
 		created.addNote().setText("This is an UPDATED immunization note.");
 		Immunization updated = service.update(created.getId(), created);
 		assertTrue(updated.getNote().isEmpty() || updated.getNoteFirstRep().getText() == null);
+	}
+	
+	@Test
+	public void updateImmunization_shouldKeepTheMembersItReplacesVoidedInTheirGroup() {
+		Immunization update = parseStoredImmunizationWith("  \"occurrenceDateTime\": \"2020-07-08T20:30:00+02:00\",\n"
+		        + "  \"manufacturer\": { \"display\": \"Pharma Inc.\" },\n" + "  \"lotNumber\": \"YU765YT-1\",\n"
+		        + "  \"expirationDate\": \"2020-10-08\",\n"
+		        + "  \"protocolApplied\": [ { \"doseNumberPositiveInt\": 4 } ],\n");
+		
+		service.update(IMMUNIZATION_UUID, update);
+		Context.flushSession();
+		Context.clearSession();
+		
+		// the dose number, lot number and expiration date the update changes
+		for (int replacedObsId : new int[] { 20, 21, 22 }) {
+			Obs replaced = obsService.getObs(replacedObsId);
+			assertTrue(replaced.getVoided());
+			assertThat(replaced.getObsGroup(), notNullValue());
+			assertThat(replaced.getObsGroup().getUuid(), is(IMMUNIZATION_UUID));
+		}
+		Map<String, Obs> members = helper.getObsMembersMap(obsService.getObsByUuid(IMMUNIZATION_UUID));
+		assertThat(members.get(CIEL_1420).getValueText(), is("YU765YT-1"));
+	}
+	
+	@Test
+	public void updateImmunization_shouldVoidTheMembersItLeavesOutAndKeepThemInTheirGroup() {
+		Immunization update = parseStoredImmunizationWith("  \"occurrenceDateTime\": \"2020-07-08T20:30:00\",\n"
+		        + "  \"manufacturer\": { \"display\": \"Pharma Inc.\" },\n"
+		        + "  \"protocolApplied\": [ { \"doseNumberPositiveInt\": 3 } ],\n");
+		
+		service.update(IMMUNIZATION_UUID, update);
+		Context.flushSession();
+		Context.clearSession();
+		
+		// the lot number and expiration date the update leaves out
+		for (int removedObsId : new int[] { 21, 22 }) {
+			Obs removed = obsService.getObs(removedObsId);
+			assertTrue(removed.getVoided());
+			assertThat(removed.getObsGroup(), notNullValue());
+			assertThat(removed.getObsGroup().getUuid(), is(IMMUNIZATION_UUID));
+		}
+		Map<String, Obs> members = helper.getObsMembersMap(obsService.getObsByUuid(IMMUNIZATION_UUID));
+		assertNull(members.get(CIEL_1420));
+		assertNull(members.get(CIEL_165907));
+	}
+	
+	/**
+	 * @param elements the elements, each followed by a comma, to put between the stored immunization's
+	 *            references and its performer
+	 * @return an update of the stored immunization with those elements
+	 */
+	private static Immunization parseStoredImmunizationWith(String elements) {
+		return FhirContext.forR4().newJsonParser().parseResource(Immunization.class, "{\n"
+		        + "  \"resourceType\": \"Immunization\",\n" + "  \"id\": \"" + IMMUNIZATION_UUID + "\",\n"
+		        + "  \"status\": \"completed\",\n"
+		        + "  \"vaccineCode\": { \"coding\": [ { \"code\": \"d144d24f-6913-4b63-9660-a9108c2bebef\" } ] },\n"
+		        + "  \"patient\": { \"reference\": \"Patient/a7e04421-525f-442f-8138-05b619d16def\" },\n"
+		        + "  \"encounter\": { \"reference\": \"Encounter/7d8c1980-6b78-11e0-93c3-18a905e044dc\" },\n" + elements
+		        + "  \"performer\": [ { \"actor\": { \"reference\": \"Practitioner/f9badd80-ab76-11e2-9e96-0800200c9a66\" } } ]\n"
+		        + "}");
 	}
 	
 	@Test

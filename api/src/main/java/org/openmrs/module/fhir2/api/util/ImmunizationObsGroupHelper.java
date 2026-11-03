@@ -136,9 +136,19 @@ public class ImmunizationObsGroupHelper {
 		Obs result = Obs.newInstance(previousObs);
 		result.setPreviousVersion(previousObs);
 		obsService.voidObs(previousObs, "Value updated");
-		immunizationObsGroup.removeGroupMember(previousObs);
 		immunizationObsGroup.addGroupMember(result);
 		return result;
+	}
+	
+	public void voidMember(Obs immunizationObsGroup, Obs member) {
+		if (member == null) {
+			return;
+		}
+		if (member.getId() == null) {
+			immunizationObsGroup.removeGroupMember(member);
+		} else if (!member.getVoided()) {
+			obsService.voidObs(member, "Value removed");
+		}
 	}
 	
 	public Provider getAdministeringProvider(Obs obs) {
