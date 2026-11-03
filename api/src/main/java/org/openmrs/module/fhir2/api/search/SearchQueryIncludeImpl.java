@@ -192,7 +192,7 @@ public class SearchQueryIncludeImpl<U extends IBaseResource> implements SearchQu
 		}
 		
 		if (depth == MAX_INCLUDE_ITERATIONS && !newlyIncludedResources.isEmpty()) {
-			log.debug("Stopped applying {} after {} iterations; further resources may not have been included",
+			log.warn("Stopped applying {} after {} iterations; further resources may not have been included",
 			    iterateIncludeSet, MAX_INCLUDE_ITERATIONS);
 		}
 		
