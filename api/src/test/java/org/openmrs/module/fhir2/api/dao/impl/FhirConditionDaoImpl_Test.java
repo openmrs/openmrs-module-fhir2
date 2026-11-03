@@ -13,6 +13,9 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertThrows;
+import static org.openmrs.util.PrivilegeConstants.GET_CONCEPTS;
+import static org.openmrs.util.PrivilegeConstants.GET_CONDITIONS;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -24,9 +27,12 @@ import org.openmrs.CodedOrFreeText;
 import org.openmrs.Condition;
 import org.openmrs.ConditionClinicalStatus;
 import org.openmrs.ConditionVerificationStatus;
+import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.PatientService;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
+import org.openmrs.module.fhir2.api.dao.FhirConditionDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -58,6 +64,9 @@ public class FhirConditionDaoImpl_Test extends BaseFhirContextSensitiveTest {
 	
 	@Autowired
 	private ConceptService conceptService;
+	
+	@Autowired
+	private FhirConditionDao proxiedDao;
 	
 	private FhirConditionDaoImpl dao;
 	
@@ -139,5 +148,26 @@ public class FhirConditionDaoImpl_Test extends BaseFhirContextSensitiveTest {
 		assertThat(result.getUuid(), equalTo(EXISTING_CONDITION_UUID));
 		assertThat(result.getPatient(), equalTo(patientService.getPatient(PATIENT_ID)));
 		assertThat(result.getEndDate(), nullValue());
+	}
+	
+	@Test
+	public void get_shouldRequireGetConditionsPrivilege() {
+		Context.logout();
+		
+		try {
+			Context.addProxyPrivilege(GET_CONCEPTS);
+			assertThrows(APIAuthenticationException.class, () -> proxiedDao.get(CONDITION_UUID));
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_CONCEPTS);
+		}
+		
+		try {
+			Context.addProxyPrivilege(GET_CONDITIONS);
+			assertThat(proxiedDao.get(CONDITION_UUID), notNullValue());
+		}
+		finally {
+			Context.removeProxyPrivilege(GET_CONDITIONS);
+		}
 	}
 }
