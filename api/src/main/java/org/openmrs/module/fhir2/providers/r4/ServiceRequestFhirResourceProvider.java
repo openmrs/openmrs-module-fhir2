@@ -111,8 +111,8 @@ public class ServiceRequestFhirResourceProvider implements IResourceProvider {
 	        @OptionalParam(name = ServiceRequest.SP_RES_ID) TokenAndListParam uuid,
 	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated,
 	        @IncludeParam(allow = { "ServiceRequest:" + ServiceRequest.SP_PATIENT,
-	                "ServiceRequest:" + ServiceRequest.SP_REQUESTER,
-	                "ServiceRequest:" + ServiceRequest.SP_ENCOUNTER }) HashSet<Include> includes) {
+	                "ServiceRequest:" + ServiceRequest.SP_REQUESTER, "ServiceRequest:" + ServiceRequest.SP_ENCOUNTER,
+	                "Encounter:" + Encounter.SP_PART_OF }) HashSet<Include> includes) {
 		if (patientReference == null) {
 			patientReference = subjectReference;
 		}

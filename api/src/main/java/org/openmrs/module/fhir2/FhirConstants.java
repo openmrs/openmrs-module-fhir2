@@ -340,6 +340,8 @@ public final class FhirConstants {
 	
 	public static final String INCLUDE_PART_OF_PARAM = "partof";
 	
+	public static final String INCLUDE_ENCOUNTER_PART_OF_PARAM = "part-of";
+	
 	public static final String INCLUDE_PARTICIPANT_PARAM = "participant";
 	
 	public static final String INCLUDE_LOCATION_PARAM = "location";

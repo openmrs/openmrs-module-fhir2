@@ -64,6 +64,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.Before;
@@ -1311,6 +1312,34 @@ public class ObservationSearchQueryTest extends BaseFhirContextSensitiveTest {
 		Observation returnedObservation = (Observation) resultList.iterator().next();
 		assertThat(resultList, hasItem(allOf(is(instanceOf(Encounter.class)),
 		    hasProperty("id", equalTo(returnedObservation.getEncounter().getReferenceElement().getIdPart())))));
+	}
+	
+	@Test
+	public void searchForObs_shouldAddEncounterLocationToReturnedResultsWhenEncounterLocationIsIterated() {
+		// GET /Observation?_id={OBS_UUID}&_include=Observation:encounter&_include:iterate=Encounter:location
+		// (the Observation search doesn't allow Encounter:location, so over REST this is rejected; this tests the include
+		// handling directly, as a chain across resource types)
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(OBS_UUID));
+		HashSet<Include> includes = new HashSet<>();
+		includes.add(new Include("Observation:encounter"));
+		includes.add(new Include("Encounter:location", true));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
+		
+		IBundleProvider results = search(theParams);
+		assertThat(results.size(), equalTo(1));
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(resultList.size(), equalTo(3)); // the Observation, its Encounter and that Encounter's Location
+		
+		Encounter encounter = resultList.stream().filter(it -> it instanceof Encounter).map(it -> (Encounter) it).findFirst()
+		        .orElse(null);
+		assertThat(encounter, notNullValue());
+		assertThat(resultList, hasItem(allOf(is(instanceOf(Location.class)),
+		    hasProperty("id", equalTo(encounter.getLocationFirstRep().getLocation().getReferenceElement().getIdPart())))));
 	}
 	
 	@Test

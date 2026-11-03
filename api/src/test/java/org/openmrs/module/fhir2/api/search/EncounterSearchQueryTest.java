@@ -1380,6 +1380,34 @@ public class EncounterSearchQueryTest extends BaseFhirContextSensitiveTest {
 	}
 	
 	@Test
+	public void searchForEncounters_shouldApplyIteratedIncludesAlongsideReverseIncludes() {
+		// GET /Encounter?_id={ENCOUNTER_UUID}&_include:iterate=Encounter:patient&_revinclude=MedicationRequest:encounter
+		// (iterated includes are also passed into the reverse include's own search, which returns MedicationRequests, so
+		// Encounter:patient must not be applied to them)
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(ENCOUNTER_UUID));
+		HashSet<Include> includes = new HashSet<>();
+		includes.add(new Include("Encounter:patient", true));
+		HashSet<Include> revIncludes = new HashSet<>();
+		revIncludes.add(new Include("MedicationRequest:encounter"));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes)
+		        .addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER, revIncludes);
+		
+		IBundleProvider results = search(theParams);
+		assertThat(results.size(), equalTo(1));
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(resultList.size(), equalTo(8)); // the Encounter, its Patient and its 6 MedicationRequests
+		Encounter returnedEncounter = (Encounter) resultList.iterator().next();
+		assertThat(resultList, hasItem(allOf(is(instanceOf(Patient.class)),
+		    hasProperty("id", equalTo(returnedEncounter.getSubject().getReferenceElement().getIdPart())))));
+		assertThat(resultList.stream().filter(it -> it instanceof MedicationRequest).count(), equalTo(6L));
+	}
+	
+	@Test
 	public void searchForEncounters_shouldReverseIncludeMedicationRequestsWithReturnedResults() {
 		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(ENCOUNTER_UUID));
 		HashSet<Include> revIncludes = new HashSet<>();

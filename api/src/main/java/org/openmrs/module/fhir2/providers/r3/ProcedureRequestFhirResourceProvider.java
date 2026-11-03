@@ -111,6 +111,7 @@ public class ProcedureRequestFhirResourceProvider implements IResourceProvider {
 	        @OptionalParam(name = ProcedureRequest.SP_OCCURRENCE) DateRangeParam occurrence,
 	        @OptionalParam(name = ProcedureRequest.SP_RES_ID) TokenAndListParam uuid,
 	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated,
+	        // Encounter:part-of is only allowed on the R4 ServiceRequest search; it is untested against STU3
 	        @IncludeParam(allow = { "ProcedureRequest:" + ProcedureRequest.SP_PATIENT,
 	                "ProcedureRequest:" + ProcedureRequest.SP_REQUESTER,
 	                "ProcedureRequest:" + ProcedureRequest.SP_ENCOUNTER }) HashSet<Include> includes) {
