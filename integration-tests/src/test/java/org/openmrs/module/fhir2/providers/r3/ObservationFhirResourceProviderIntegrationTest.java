@@ -960,6 +960,49 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 	}
 	
 	@Test
+	public void shouldReturnLastnObservationsFilteredByEncounterAsJson() throws Exception {
+		MockHttpServletResponse response = get(
+		    "Observation/$lastn?max=5&patient=" + OBS_PATIENT_UUID + "&encounter=" + OBS_ENCOUNTER_UUID)
+		            .accept(FhirMediaTypes.JSON).go();
+
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+
+		Bundle results = readBundleResponse(response);
+
+		assertThat(results, notNullValue());
+		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(results.hasEntry(), is(true));
+
+		List<Bundle.BundleEntryComponent> entries = results.getEntry();
+
+		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R3/Observation/"))));
+		assertThat(entries, everyItem(hasResource(instanceOf(Observation.class))));
+		assertThat(entries, everyItem(hasResource(validResource())));
+		assertThat(entries, everyItem(hasResource(hasProperty("context",
+		    hasProperty("reference", endsWith("/" + OBS_ENCOUNTER_UUID))))));
+		assertThat(entries, isSortedAndWithinMax(5));
+	}
+
+	@Test
+	public void shouldReturnEmptyLastnObservationsWhenEncounterNotFoundAsJson() throws Exception {
+		MockHttpServletResponse response = get(
+		    "Observation/$lastn?max=5&patient=" + OBS_PATIENT_UUID + "&encounter=" + WRONG_OBS_UUID)
+		            .accept(FhirMediaTypes.JSON).go();
+
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+
+		Bundle results = readBundleResponse(response);
+
+		assertThat(results, notNullValue());
+		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(results.hasEntry(), is(false));
+	}
+
+	@Test
 	public void shouldReturnLastnEncountersObservationsAsJson() throws Exception {
 		MockHttpServletResponse response = get(
 		    "Observation/$lastn-encounters?max=2&subject=" + OBS_PATIENT_UUID + "&category=laboratory&code=5089")
