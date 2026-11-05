@@ -11,17 +11,37 @@ package org.openmrs.module.fhir2.api.dao;
 
 import java.util.Optional;
 
+import org.openmrs.LocationAttributeType;
 import org.openmrs.PersonAttributeType;
-import org.openmrs.attribute.BaseAttributeType;
+import org.openmrs.ProviderAttributeType;
+import org.openmrs.annotation.Authorized;
 import org.openmrs.module.fhir2.model.FhirContactPointMap;
+import org.openmrs.util.PrivilegeConstants;
 
 public interface FhirContactPointMapDao extends FhirDaoAop {
 	
+	@Authorized
 	Optional<FhirContactPointMap> getFhirContactPointMapByUuid(String uuid);
 	
+	@Authorized(PrivilegeConstants.GET_PERSON_ATTRIBUTE_TYPES)
 	Optional<FhirContactPointMap> getFhirContactPointMapForPersonAttributeType(PersonAttributeType attributeType);
 	
-	Optional<FhirContactPointMap> getFhirContactPointMapForAttributeType(BaseAttributeType<?> attributeType);
+	@Authorized(PrivilegeConstants.GET_LOCATION_ATTRIBUTE_TYPES)
+	Optional<FhirContactPointMap> getFhirContactPointMapForLocationAttributeType(LocationAttributeType attributeType);
 	
-	FhirContactPointMap saveFhirContactPointMap(FhirContactPointMap contactPointMap);
+	@Authorized(PrivilegeConstants.GET_PROVIDER_ATTRIBUTE_TYPES)
+	Optional<FhirContactPointMap> getFhirContactPointMapForProviderAttributeType(ProviderAttributeType attributeType);
+	
+	@Authorized(PrivilegeConstants.MANAGE_PERSON_ATTRIBUTE_TYPES)
+	FhirContactPointMap saveFhirContactPointMapForPersonAttributeType(FhirContactPointMap contactPointMap);
+	
+	@Authorized(PrivilegeConstants.MANAGE_LOCATION_ATTRIBUTE_TYPES)
+	FhirContactPointMap saveFhirContactPointMapForLocationAttributeType(FhirContactPointMap contactPointMap);
+	
+	/**
+	 * Core has no privilege for managing provider attribute types, so this uses the one for providers.
+	 */
+	@Authorized(PrivilegeConstants.MANAGE_PROVIDERS)
+	FhirContactPointMap saveFhirContactPointMapForProviderAttributeType(FhirContactPointMap contactPointMap);
+	
 }

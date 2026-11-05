@@ -35,6 +35,9 @@ public class FhirPatientDaoImplTest extends BaseFhirContextSensitiveTest {
 	
 	private static final String BAD_PATIENT_UUID = "282390a6-3608-496d-9025-aecbc1235670";
 	
+	// Person (person_id 1) from the standard test dataset who has no patient row
+	private static final String NON_PATIENT_PERSON_UUID = "ba1b19c2-3ed6-4f63-b8c0-f762dc8d7562";
+	
 	private static final String GROUP_A = "dfb29c44-2e39-46c4-8cd7-18f21c6d47b1";
 	
 	private static final String GROUP_B = "a25ce1d7-326c-43ff-a87f-63d9d2f60f11";
@@ -96,6 +99,21 @@ public class FhirPatientDaoImplTest extends BaseFhirContextSensitiveTest {
 		Patient result = dao.get(BAD_PATIENT_UUID);
 		
 		assertThat(result, nullValue());
+	}
+	
+	@Test
+	public void exists_shouldReturnFalseForPersonWhoIsNotPatient() {
+		// given
+		// confirm the uuid belongs to a Person so a false result cannot come from an unknown uuid
+		FhirPersonDaoImpl personDao = new FhirPersonDaoImpl();
+		personDao.setSessionFactory(sessionFactory);
+		assertThat(personDao.exists(NON_PATIENT_PERSON_UUID), equalTo(true));
+		
+		// when
+		boolean result = dao.exists(NON_PATIENT_PERSON_UUID);
+		
+		// then
+		assertThat(result, equalTo(false));
 	}
 	
 	@Test

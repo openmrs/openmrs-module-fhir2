@@ -1,0 +1,95 @@
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public License,
+ * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+ * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+ * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ *
+ * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+ * graphic logo is a trademark of OpenMRS Inc.
+ */
+package org.openmrs.module.fhir2.api.util;
+
+import javax.annotation.Nonnull;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
+import lombok.AllArgsConstructor;
+import org.springframework.stereotype.Component;
+
+/**
+ * Carries the {@code _profile} values requested by the current FHIR search from the web layer down
+ * to {@code BaseCompositeFhirService}, which uses them to route a search to a specific
+ * {@link org.openmrs.module.fhir2.api.handler.FhirResourceHandler handler}.
+ * <p>
+ * A request-scoped holder is used rather than threading {@code _profile} through every resource
+ * provider and search-parameter class because handler routing must work for <em>any</em> resource
+ * type, including one an external module has added a backing to, without that resource's provider
+ * knowing about profiles.
+ * <p>
+ * The profiles are recorded against the resource type being searched, because {@code _profile}
+ * applies only to that type: searches for other types that run on the same thread, such as those
+ * resolving {@code _revinclude}, must not be routed by it.
+ * <p>
+ * Callers outside an HTTP request (another module invoking a service directly) see an empty set
+ * unless they populate this holder themselves around the call, clearing it afterwards.
+ */
+@Component
+public class ProfileRoutingContext {
+	
+	private final ThreadLocal<RequestedProfiles> requestedProfiles = new ThreadLocal<>();
+	
+	/**
+	 * The profiles requested by the current request for the given resource type, in the order they were
+	 * supplied.
+	 *
+	 * @param resourceType the FHIR resource type being searched, e.g. {@code "Encounter"}
+	 * @return the requested profile URLs, or an empty set when none were requested for that type
+	 */
+	@Nonnull
+	public Set<String> getRequestedProfiles(String resourceType) {
+		RequestedProfiles requested = requestedProfiles.get();
+		if (requested == null || !requested.resourceType.equals(resourceType)) {
+			return Collections.emptySet();
+		}
+		
+		return requested.profiles;
+	}
+	
+	/**
+	 * Records the profiles requested by the current request, replacing any previous value. Passing a
+	 * {@code null} resource type or {@code null} or empty profiles clears the holder rather than
+	 * storing an empty value, so a request without {@code _profile} leaves nothing behind for the next
+	 * user of this thread.
+	 *
+	 * @param resourceType the FHIR resource type the request searches
+	 * @param profiles the canonical profile URLs the client asked for
+	 */
+	public void setRequestedProfiles(String resourceType, Collection<String> profiles) {
+		if (resourceType == null || profiles == null || profiles.isEmpty()) {
+			clear();
+			return;
+		}
+		
+		requestedProfiles
+		        .set(new RequestedProfiles(resourceType, Collections.unmodifiableSet(new LinkedHashSet<>(profiles))));
+	}
+	
+	/**
+	 * Discards the profiles held for the current thread. Uses {@link ThreadLocal#remove()} rather than
+	 * storing {@code null} so the entry is not retained against a pooled thread.
+	 */
+	public void clear() {
+		requestedProfiles.remove();
+	}
+	
+	@AllArgsConstructor
+	private static final class RequestedProfiles {
+		
+		private final String resourceType;
+		
+		private final Set<String> profiles;
+	}
+}

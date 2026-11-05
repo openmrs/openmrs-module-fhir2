@@ -14,7 +14,9 @@ import java.util.Optional;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import org.openmrs.LocationAttributeType;
 import org.openmrs.PersonAttributeType;
+import org.openmrs.ProviderAttributeType;
 import org.openmrs.attribute.BaseAttributeType;
 import org.openmrs.module.fhir2.api.FhirContactPointMapService;
 import org.openmrs.module.fhir2.api.dao.FhirContactPointMapDao;
@@ -41,12 +43,37 @@ public class FhirContactPointMapServiceImpl implements FhirContactPointMapServic
 	
 	@Override
 	public Optional<FhirContactPointMap> getFhirContactPointMapForAttributeType(BaseAttributeType<?> attributeType) {
-		return dao.getFhirContactPointMapForAttributeType(attributeType);
+		// each domain has its own guarded lookup so the matching privilege is checked; other domains have no maps
+		if (attributeType instanceof LocationAttributeType) {
+			return dao.getFhirContactPointMapForLocationAttributeType((LocationAttributeType) attributeType);
+		}
+		
+		if (attributeType instanceof ProviderAttributeType) {
+			return dao.getFhirContactPointMapForProviderAttributeType((ProviderAttributeType) attributeType);
+		}
+		
+		return Optional.empty();
 	}
 	
 	@Override
 	public FhirContactPointMap saveFhirContactPointMap(FhirContactPointMap contactPointMap) {
-		return dao.saveFhirContactPointMap(contactPointMap);
+		// saving a map requires the same privilege as saving an attribute type of its domain
+		String attributeTypeDomain = contactPointMap.getAttributeTypeDomain();
+		if (attributeTypeDomain == null) {
+			throw new IllegalArgumentException("A contact point map must specify its attribute type domain");
+		}
+		
+		switch (attributeTypeDomain) {
+			case "person":
+				return dao.saveFhirContactPointMapForPersonAttributeType(contactPointMap);
+			case "location":
+				return dao.saveFhirContactPointMapForLocationAttributeType(contactPointMap);
+			case "provider":
+				return dao.saveFhirContactPointMapForProviderAttributeType(contactPointMap);
+			default:
+				throw new IllegalArgumentException("No privilege governs contact point maps for the '" + attributeTypeDomain
+				        + "' attribute type domain");
+		}
 	}
 	
 }
