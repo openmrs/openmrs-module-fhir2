@@ -11,9 +11,15 @@ package org.openmrs.module.fhir2.api.dao.impl;
 
 import javax.annotation.Nonnull;
 import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Predicate;
 
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.QuantityAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.TokenParamModifier;
 import org.openmrs.Diagnosis;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirDiagnosisDao;
@@ -23,6 +29,14 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class FhirDiagnosisDaoImpl extends BaseFhirDao<Diagnosis> implements FhirDiagnosisDao {
+	
+	/**
+	 * Diagnoses are always exposed as FHIR Conditions with a clinicalStatus of "unknown" (see
+	 * DiagnosisTranslatorImpl), so this is the only status a diagnosis can match.
+	 */
+	private static final String DIAGNOSIS_CLINICAL_STATUS = "unknown";
+	
+	private static final String ONSET_DATE_PROPERTY = "onsetDate";
 	
 	@Override
 	protected <U> void setupSearchParams(@Nonnull OpenmrsFhirCriteriaContext<Diagnosis, U> criteriaContext,
@@ -41,6 +55,18 @@ public class FhirDiagnosisDaoImpl extends BaseFhirDao<Diagnosis> implements Fhir
 					entry.getValue()
 					        .forEach(param -> handleDiagnosisCode(criteriaContext, (TokenAndListParam) param.getParam()));
 					break;
+				case FhirConstants.CONDITION_CLINICAL_STATUS_HANDLER:
+					entry.getValue()
+					        .forEach(param -> handleClinicalStatus(criteriaContext, (TokenAndListParam) param.getParam()));
+					break;
+				case FhirConstants.DATE_RANGE_SEARCH_HANDLER:
+					entry.getValue().forEach(param -> handleDateRangeParam(criteriaContext, param.getPropertyName(),
+					    (DateRangeParam) param.getParam()));
+					break;
+				case FhirConstants.QUANTITY_SEARCH_HANDLER:
+					entry.getValue()
+					        .forEach(param -> handleOnsetAge(criteriaContext, (QuantityAndListParam) param.getParam()));
+					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
 					handleCommonSearchParameters(criteriaContext, entry.getValue()).ifPresent(criteriaContext::addPredicate);
 					break;
@@ -56,5 +82,79 @@ public class FhirDiagnosisDaoImpl extends BaseFhirDao<Diagnosis> implements Fhir
 			getSearchQueryHelper().handleCodeableConcept(context, code, codedJoin, "dmap", "dterm")
 			        .ifPresent(context::addPredicate);
 		}
+	}
+	
+	/**
+	 * Diagnoses have no persisted clinical status; they are always reported as "unknown". The filter is
+	 * therefore evaluated against that fixed value: either every diagnosis matches, or none do.
+	 */
+	protected <U> void handleClinicalStatus(@Nonnull OpenmrsFhirCriteriaContext<Diagnosis, U> context,
+	        TokenAndListParam status) {
+		if (status == null || status.size() == 0) {
+			return;
+		}
+		
+		if (!matchesDiagnosisClinicalStatus(status)) {
+			context.addPredicate(matchNothing(context));
+		}
+	}
+	
+	private boolean matchesDiagnosisClinicalStatus(TokenAndListParam status) {
+		// AND list: every OR list must match
+		for (TokenOrListParam orList : status.getValuesAsQueryTokens()) {
+			boolean orMatches = false;
+			// OR list: at least one token must match
+			for (TokenParam token : orList.getValuesAsQueryTokens()) {
+				if (tokenMatchesDiagnosisStatus(token)) {
+					orMatches = true;
+					break;
+				}
+			}
+			if (!orMatches) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	private boolean tokenMatchesDiagnosisStatus(TokenParam token) {
+		boolean systemMatches = token.getSystem() == null || token.getSystem().isEmpty()
+		        || FhirConstants.CONDITION_CLINICAL_SYSTEM_URI.equals(token.getSystem());
+		boolean valueMatches = token.getValue() == null || token.getValue().isEmpty()
+		        || DIAGNOSIS_CLINICAL_STATUS.equalsIgnoreCase(token.getValue());
+		boolean matches = systemMatches && valueMatches;
+		
+		return TokenParamModifier.NOT.equals(token.getModifier()) ? !matches : matches;
+	}
+	
+	/**
+	 * Diagnoses carry no onset information, so an onset-date filter can never match one. The recorded
+	 * date maps to the date the diagnosis was created.
+	 */
+	protected <U> void handleDateRangeParam(@Nonnull OpenmrsFhirCriteriaContext<Diagnosis, U> context, String propertyName,
+	        DateRangeParam dateRange) {
+		if (dateRange == null || (dateRange.getLowerBound() == null && dateRange.getUpperBound() == null)) {
+			return;
+		}
+		
+		if (ONSET_DATE_PROPERTY.equals(propertyName)) {
+			context.addPredicate(matchNothing(context));
+		} else {
+			getSearchQueryHelper().handleDateRange(context, propertyName, dateRange).ifPresent(context::addPredicate);
+		}
+	}
+	
+	/**
+	 * Diagnoses carry no onset information, so an onset-age filter can never match one.
+	 */
+	protected <U> void handleOnsetAge(@Nonnull OpenmrsFhirCriteriaContext<Diagnosis, U> context,
+	        QuantityAndListParam onsetAge) {
+		if (onsetAge != null && onsetAge.size() > 0) {
+			context.addPredicate(matchNothing(context));
+		}
+	}
+	
+	private <U> Predicate matchNothing(OpenmrsFhirCriteriaContext<Diagnosis, U> context) {
+		return context.getCriteriaBuilder().disjunction();
 	}
 }
