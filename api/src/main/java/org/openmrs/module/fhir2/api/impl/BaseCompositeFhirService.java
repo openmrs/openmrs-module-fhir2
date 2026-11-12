@@ -86,10 +86,11 @@ import org.springframework.core.annotation.OrderUtils;
  * own resource's service.
  * <h2>Privileges</h2> A missing privilege is reported as {@link ResourceNotFoundException}, so
  * clients cannot use "forbidden" versus "not found" to learn whether a UUID exists. {@code get}
- * skips a handler that denies access; for writes, a denial by the handler the write is dispatched
- * to, including the create branch of an upsert, is reported as not found. The ownership probe does
- * not require the read privilege, so a write needs only the privilege of the owning handler's
- * operation.
+ * skips a handler that denies access; for {@code update}, {@code patch} and {@code delete}, a denial
+ * by the handler the write is dispatched to, including the create branch of an upsert, is reported
+ * as not found. A denied {@code create} names no existing UUID, so its denial propagates unchanged.
+ * The ownership probe does not require the read privilege, so a write needs only the privilege of
+ * the owning handler's operation.
  */
 public abstract class BaseCompositeFhirService<R extends IAnyResource> implements FhirService<R> {
 	
