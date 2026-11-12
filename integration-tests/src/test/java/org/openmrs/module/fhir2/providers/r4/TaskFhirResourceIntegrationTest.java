@@ -797,7 +797,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 	
 	@Test
 	public void shouldCreateTaskWithFocusReferenceAndRetrieveItAsJson() throws Exception {
-		//given — build a FHIR Task with focus set to an Observation reference
+		//given
 		Task newTask = new Task();
 		newTask.setStatus(Task.TaskStatus.REQUESTED);
 		newTask.setIntent(Task.TaskIntent.ORDER);
@@ -805,7 +805,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		Reference focusRef = new Reference().setReference("Observation/" + FOCUS_OBSERVATION_UUID).setType("Observation");
 		newTask.setFocus(focusRef);
 		
-		//when — POST the task
+		//when
 		MockHttpServletResponse createResponse = post("/Task").accept(FhirMediaTypes.JSON).jsonContent(toJson(newTask)).go();
 		
 		assertThat(createResponse, isCreated());
@@ -813,7 +813,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		Task createdTask = readResponse(createResponse);
 		String createdTaskUuid = createdTask.getIdElement().getIdPart();
 		
-		//then — GET it back and verify focus is persisted
+		//then
 		MockHttpServletResponse getResponse = get("/Task/" + createdTaskUuid).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(getResponse, isOk());
@@ -827,7 +827,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 	
 	@Test
 	public void shouldSearchTasksByFocusReferenceAsJson() throws Exception {
-		//given — create a task with focus via the API
+		//given
 		Task newTask = new Task();
 		newTask.setStatus(Task.TaskStatus.REQUESTED);
 		newTask.setIntent(Task.TaskIntent.ORDER);

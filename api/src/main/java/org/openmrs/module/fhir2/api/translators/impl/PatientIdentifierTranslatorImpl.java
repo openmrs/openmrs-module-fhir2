@@ -26,7 +26,6 @@ import org.openmrs.PatientIdentifier;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirPatientIdentifierSystemService;
-import org.openmrs.module.fhir2.api.FhirPatientService;
 import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
 import org.openmrs.module.fhir2.api.translators.LocationReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientIdentifierTranslator;
@@ -43,10 +42,6 @@ public class PatientIdentifierTranslatorImpl implements PatientIdentifierTransla
 	@Getter(PROTECTED)
 	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private FhirPatientIdentifierSystemService patientIdentifierSystemService;
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private FhirPatientService patientService;
 	
 	@Getter(PROTECTED)
 	@Setter(value = PROTECTED, onMethod_ = @Autowired)
@@ -100,7 +95,7 @@ public class PatientIdentifierTranslatorImpl implements PatientIdentifierTransla
 			return null;
 		}
 		
-		PatientIdentifierType type = patientService.getPatientIdentifierTypeByIdentifier(identifier);
+		PatientIdentifierType type = patientIdentifierSystemService.getPatientIdentifierTypeByIdentifier(identifier);
 		if (type == null && patientIdentifier.getIdentifierType() == null) {
 			return null;
 		}

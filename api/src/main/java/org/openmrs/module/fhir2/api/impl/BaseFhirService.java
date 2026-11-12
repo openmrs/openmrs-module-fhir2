@@ -56,7 +56,7 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 	
 	protected final Class<? super T> resourceClass;
 	
-	private boolean handlesOpenmrsMetadata;
+	private final boolean handlesOpenmrsMetadata;
 	
 	@Getter(PROTECTED)
 	@Setter(value = PROTECTED, onMethod_ = @__({ @Autowired, @Qualifier("fhirR4") }))
@@ -94,6 +94,11 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 	public List<T> get(@Nonnull Collection<String> uuids) {
 		OpenmrsFhirTranslator<U, T> translator = getTranslator();
 		return getDao().get(uuids).stream().map(translator::toFhirResource).collect(Collectors.toList());
+	}
+	
+	@Override
+	public boolean exists(@Nonnull String uuid) {
+		return getDao().exists(uuid);
 	}
 	
 	@Override

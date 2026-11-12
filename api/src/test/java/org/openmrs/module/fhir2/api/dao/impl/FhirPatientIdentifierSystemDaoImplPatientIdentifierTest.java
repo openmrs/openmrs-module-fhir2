@@ -21,7 +21,7 @@ import org.openmrs.PatientIdentifierType;
 import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class FhirPatientDaoImplPatientIdentifierTest extends BaseFhirContextSensitiveTest {
+public class FhirPatientIdentifierSystemDaoImplPatientIdentifierTest extends BaseFhirContextSensitiveTest {
 	
 	private static final String PATIENT_IDENTIFIER_TYPE_NAME = "Test Identifier Type";
 	
@@ -31,16 +31,16 @@ public class FhirPatientDaoImplPatientIdentifierTest extends BaseFhirContextSens
 	
 	private static final String WRONG_IDENTIFIER_TYPE_UUID = "123456-abcdef-123456";
 	
-	private static final String PATIENT_IDENTIFIER_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirPatientDaoImplPatientIdentifierTest_initial_data.xml";
+	private static final String PATIENT_IDENTIFIER_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirPatientIdentifierSystemDaoImplPatientIdentifierTest_initial_data.xml";
 	
-	private FhirPatientDaoImpl dao;
+	private FhirPatientIdentifierSystemDaoImpl dao;
 	
 	@Autowired
 	private SessionFactory sessionFactory;
 	
 	@Before
 	public void setup() throws Exception {
-		dao = new FhirPatientDaoImpl();
+		dao = new FhirPatientIdentifierSystemDaoImpl();
 		dao.setSessionFactory(sessionFactory);
 		executeDataSet(PATIENT_IDENTIFIER_DATA_XML);
 	}

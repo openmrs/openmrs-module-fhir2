@@ -28,13 +28,12 @@ import org.openmrs.module.fhir2.api.translators.DurationUnitTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * Covers dictionaries that carry the duration unit mappings current dictionaries ship: the SNOMED
- * CT minute code that is active since the 2021-07-31 release, and UCUM mappings. Unlike
- * {@link DurationUnitTranslatorImplTest}, the dataset here deliberately carries no legacy SNOMED CT
- * mappings, so these tests prove the fallbacks rather than the legacy path. Concepts whose mapping
- * sets the dataset must not carry, such as the current CIEL shape with both minute codes and
- * concepts whose SNOMED CT and UCUM mappings disagree, are built in memory instead, since
- * persisting a legacy minute mapping would change what {@code toOpenmrsType(MIN)} resolves.
+ * Covers the duration unit mappings current dictionaries ship: the SNOMED CT minute code active
+ * since the 2021-07-31 release, and UCUM. Unlike {@link DurationUnitTranslatorImplTest}, the
+ * dataset carries no legacy SNOMED CT mappings, so these tests exercise the fallbacks. Concepts
+ * with mapping sets the dataset must not carry (the current CIEL shape with both minute codes, or
+ * disagreeing SNOMED CT and UCUM mappings) are built in memory, since persisting a legacy minute
+ * mapping would change what {@code toOpenmrsType(MIN)} resolves.
  */
 public class DurationUnitTranslatorImplCurrentCodesTest extends BaseFhirContextSensitiveTest {
 	

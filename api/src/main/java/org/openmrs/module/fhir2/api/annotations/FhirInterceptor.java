@@ -22,14 +22,11 @@ import org.springframework.beans.factory.annotation.Qualifier;
  * the R3 and the R4 servlet, and HAPI drops it unless it declares a {@code Hook} method.
  * <p>
  * A bean registered through this annotation runs after this module's own interceptors,
- * authentication included. This module's interceptors hold
- * {@link org.openmrs.module.fhir2.FhirConstants#BUILT_IN_INTERCEPTOR_ORDER}, and a contributed bean
- * has to stay at or above {@code Interceptor.DEFAULT_ORDER} to stay behind them: one whose
- * {@code Interceptor} or {@code Hook} declares a lower order is reported and left unregistered.
- * Order contributed interceptors against each other with positive values.
- * <p>
- * That check covers this annotation only. It is not a guarantee about the servlet as a whole -
- * other code can register an interceptor on it directly, at any order it likes.
+ * authentication included (see
+ * {@link org.openmrs.module.fhir2.FhirConstants#BUILT_IN_INTERCEPTOR_ORDER}). One whose
+ * {@code Interceptor} or {@code Hook} declares an order below {@code Interceptor.DEFAULT_ORDER} is
+ * reported and left unregistered. Order contributed interceptors against each other with positive
+ * values.
  * <p>
  * The bean must be a class HAPI can scan: annotate a concrete class and keep it clear of
  * interface-based Spring AOP, which hides the hook methods behind a proxy. A bean HAPI finds no
