@@ -48,12 +48,10 @@ public class FhirAopConfiguration {
 	@Bean
 	public Advisor createFhirAuthorizationAdvisor(@Autowired AuthorizationAdvice authorizationAdvice) {
 		MethodBeforeAdvice advice = (method, args, target) -> {
-			// The core AuthorizationAdvice only resolves privileges from an @Authorized annotation that is
-			// directly declared on the method it is handed. When a DAO implementation overrides an interface
-			// method (e.g. getSearchResults()), the method invoked on the proxy carries the annotation only
-			// by inheritance, so we must substitute the interface method that declares it directly. We key
-			// off getAnnotation() rather than AnnotationUtils.findAnnotation() precisely because the latter
-			// resolves inherited annotations and would mask these overridden methods.
+			// The core AuthorizationAdvice only reads @Authorized declared directly on the method it is handed,
+			// so for a DAO method that inherits it from an interface, hand it the interface method instead.
+			// getAnnotation() rather than AnnotationUtils.findAnnotation(), since the latter resolves inherited
+			// annotations and would mask these methods.
 			if (method.getAnnotation(Authorized.class) == null) {
 				Method resolved = findAuthorizedInterfaceMethod(method, target.getClass());
 				if (resolved != null) {

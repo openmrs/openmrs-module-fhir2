@@ -46,9 +46,8 @@ import org.springframework.stereotype.Component;
  * table as an obs group. Claims every incoming Immunization.
  * <p>
  * Immunizations are stored as obs groups under a designated grouping concept, so
- * {@link #search(SearchParameterMap)} narrows every search to that concept. That filter lives here
- * rather than in the orchestrator because it is a detail of <em>this</em> backing: another module
- * mapping Immunization onto a different OpenMRS table must not inherit an obs concept restriction.
+ * {@link #search(SearchParameterMap)} narrows every search to that concept. The filter lives here
+ * rather than in the orchestrator so that other backings for Immunization don't inherit it.
  */
 @Component
 @Order(Ordered.LOWEST_PRECEDENCE)

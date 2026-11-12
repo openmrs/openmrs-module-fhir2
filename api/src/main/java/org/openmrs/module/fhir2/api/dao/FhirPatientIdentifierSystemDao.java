@@ -31,8 +31,6 @@ public interface FhirPatientIdentifierSystemDao extends FhirDaoAop {
 	 * {@code name} or any type matching {@code uuid} qualifies; when {@code uuid} is supplied it wins
 	 * over a name match.
 	 *
-	 * @param name the identifier type name to match, ignoring retired types
-	 * @param uuid the identifier type uuid to match
 	 * @return the matching identifier type, or {@code null} if none matches
 	 */
 	@Authorized(PrivilegeConstants.GET_PATIENT_IDENTIFIERS)

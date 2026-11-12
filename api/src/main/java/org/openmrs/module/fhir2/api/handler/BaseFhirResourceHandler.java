@@ -15,11 +15,8 @@ import org.openmrs.OpenmrsObject;
 import org.openmrs.module.fhir2.api.impl.BaseFhirService;
 
 /**
- * Base class for {@link FhirResourceHandler} implementations that own a single OpenMRS-table
- * backing.
- * <p>
- * Concrete handlers extend this for CRUD wiring and declare
- * {@code implements FhirResourceHandler<R>} themselves. New handlers should extend this rather than
- * {@link BaseFhirService} directly.
+ * Base class for {@link FhirResourceHandler} implementations backed by a single OpenMRS table.
+ * Subclasses must also declare {@code implements FhirResourceHandler<T>}. New handlers should
+ * extend this rather than {@link BaseFhirService} directly.
  */
 public abstract class BaseFhirResourceHandler<T extends IAnyResource, U extends OpenmrsObject & Auditable> extends BaseFhirService<T, U> {}

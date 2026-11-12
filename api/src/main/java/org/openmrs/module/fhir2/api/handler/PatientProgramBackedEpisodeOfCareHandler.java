@@ -31,9 +31,8 @@ import org.springframework.stereotype.Component;
  * Default handler for the FHIR {@link EpisodeOfCare} resource, mapping onto the OpenMRS
  * {@code PatientProgram} table. Claims every incoming EpisodeOfCare.
  * <p>
- * EpisodeOfCare is read-only in this module: its resource provider exposes only {@code @Read}, and
- * no {@code SearchQuery} is wired for this backing. The handler therefore opts out of search
- * fan-out via {@link #acceptsSearch(SearchParameterMap)}.
+ * EpisodeOfCare is read-only in this module and has no {@code SearchQuery}, so this handler opts
+ * out of search fan-out.
  */
 @Component
 @Order(Ordered.LOWEST_PRECEDENCE)

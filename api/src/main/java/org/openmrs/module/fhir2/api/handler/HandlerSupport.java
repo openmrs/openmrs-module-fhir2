@@ -33,11 +33,10 @@ import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
  * <p>
  * On search, a handler opts out whenever an AND clause of a routing token (read from {@code _tag}
  * or from a domain-specific token search param such as {@code category}) fails to name the caller's
- * code. A token names the caller when its code matches and its system is either the routing system
- * or absent; the system-less form follows the FHIR token rule that {@code [code]} matches any
- * system. A clause naming only other codes or only other systems excludes the caller, because the
- * backings this module ships carry no tags or categories outside their routing system, so no
- * resource of theirs could satisfy such a clause.
+ * code. A token names the caller when its code matches and its system is the routing system or
+ * absent (FHIR's {@code [code]} matches any system). A clause naming only other codes or systems
+ * excludes the caller, because the backings this module ships carry no tags or categories outside
+ * their routing system, so no resource of theirs could satisfy it.
  */
 public final class HandlerSupport {
 	

@@ -31,9 +31,8 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 /**
- * Maps the FHIR {@link Encounter} resource onto the OpenMRS {@code Visit} domain object by
- * delegating every {@link org.openmrs.module.fhir2.api.FhirService} call to
- * {@link FhirVisitService}.
+ * Maps the FHIR {@link Encounter} resource onto the OpenMRS {@code Visit} domain object via
+ * {@link FhirVisitService}. Sibling of {@link EncounterBackedEncounterHandler}.
  * <p>
  * Claims an incoming resource on writes when its {@code type[].coding[].system} includes
  * {@link FhirConstants#VISIT_TYPE_SYSTEM_URI}. Opts out of search when a {@code _tag} clause routes

@@ -31,10 +31,8 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 /**
- * Maps the FHIR {@link Condition} resource onto the OpenMRS {@code Condition} domain object by
- * delegating every {@link org.openmrs.module.fhir2.api.FhirService} call to the
- * {@link FhirOpenmrsConditionService}. Sibling of {@link DiagnosisBackedConditionHandler}, which
- * applies the same composition pattern over {@code FhirDiagnosisService}.
+ * Maps the FHIR {@link Condition} resource onto the OpenMRS {@code Condition} domain object via
+ * {@link FhirOpenmrsConditionService}. Sibling of {@link DiagnosisBackedConditionHandler}.
  * <p>
  * Claims an incoming resource on writes when its {@code category} carries {@code problem-list-item}
  * in {@link FhirConstants#CONDITION_CATEGORY_SYSTEM_URI}, and also when the body carries no

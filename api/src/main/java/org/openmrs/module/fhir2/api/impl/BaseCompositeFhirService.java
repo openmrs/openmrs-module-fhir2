@@ -86,11 +86,11 @@ import org.springframework.core.annotation.OrderUtils;
  * own resource's service.
  * <h2>Privileges</h2> A missing privilege is reported as {@link ResourceNotFoundException}, so
  * clients cannot use "forbidden" versus "not found" to learn whether a UUID exists. {@code get}
- * skips a handler that denies access; for {@code update}, {@code patch} and {@code delete}, a denial
- * by the handler the write is dispatched to, including the create branch of an upsert, is reported
- * as not found. A denied {@code create} names no existing UUID, so its denial propagates unchanged.
- * The ownership probe does not require the read privilege, so a write needs only the privilege of
- * the owning handler's operation.
+ * skips a handler that denies access; for {@code update}, {@code patch} and {@code delete}, a
+ * denial by the handler the write is dispatched to, including the create branch of an upsert, is
+ * reported as not found. A denied {@code create} names no existing UUID, so its denial propagates
+ * unchanged. The ownership probe does not require the read privilege, so a write needs only the
+ * privilege of the owning handler's operation.
  */
 public abstract class BaseCompositeFhirService<R extends IAnyResource> implements FhirService<R> {
 	
@@ -315,12 +315,10 @@ public abstract class BaseCompositeFhirService<R extends IAnyResource> implement
 	 * <p>
 	 * If the request's {@code _profile} for this resource type (see {@link ProfileRoutingContext})
 	 * names any handler's {@link FhirResourceHandler#getImplicitProfile() implicit profile}, only those
-	 * handlers are searched and {@code acceptsSearch} is not consulted, unless
-	 * {@link #profileRoutedSearchConsultsAcceptsSearch()} says otherwise. Otherwise, including when
-	 * {@code _profile} names only profiles no handler owns (e.g., an unrelated conformance profile),
-	 * every handler whose {@link FhirResourceHandler#acceptsSearch acceptsSearch} accepts the
-	 * parameters is searched; any other handler-specific routing, such as by {@code _tag}, belongs
-	 * there.
+	 * handlers are searched, filtered by {@code acceptsSearch} only if
+	 * {@link #profileRoutedSearchConsultsAcceptsSearch()} says so. Otherwise, including when
+	 * {@code _profile} names only profiles no handler owns, every handler whose
+	 * {@link FhirResourceHandler#acceptsSearch acceptsSearch} accepts the parameters is searched.
 	 */
 	protected IBundleProvider doSearch(@Nonnull SearchParameterMap params) {
 		List<FhirResourceHandler<R>> targets = selectSearchTargets(params);
@@ -434,7 +432,6 @@ public abstract class BaseCompositeFhirService<R extends IAnyResource> implement
 		                + profilesOf(mostSpecific) + "; set meta.profile to one of them to choose");
 	}
 	
-	/** Narrows the claiming handlers to those sharing the lowest {@code @Order} value among them. */
 	private List<FhirResourceHandler<R>> highestPrecedenceOf(List<FhirResourceHandler<R>> claimants) {
 		int winning = claimants.stream().mapToInt(BaseCompositeFhirService::orderOf).min().orElse(Ordered.LOWEST_PRECEDENCE);
 		return claimants.stream().filter(handler -> orderOf(handler) == winning).collect(Collectors.toList());

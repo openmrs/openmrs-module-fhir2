@@ -33,17 +33,15 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 /**
- * Maps the FHIR {@link Practitioner} resource onto the OpenMRS {@code User} domain object by
- * delegating reads and searches to {@link FhirUserService}. Sibling of
- * {@link ProviderBackedPractitionerHandler}.
+ * Maps the FHIR {@link Practitioner} resource onto the OpenMRS {@code User} domain object via
+ * {@link FhirUserService}. Sibling of {@link ProviderBackedPractitionerHandler}.
  * <p>
- * The user backing is read-only through the FHIR API. {@link #canHandle(Practitioner)} returns
- * {@code false} so no content-based dispatch selects it. A create naming this handler in
- * {@code meta.profile} throws {@link MethodNotAllowedException}; an update, patch or delete of an
- * existing user reports the UUID as not found, as for an unknown UUID, since a distinct error would
- * reveal to any client which UUIDs belong to users. Neither reaches {@link FhirUserService}'s write
- * path. An external module wanting to enable user writes via FHIR would register an override
- * handler with the same implicit profile and a higher priority.
+ * The user backing is read-only through the FHIR API and is never selected by content-based
+ * dispatch. A create naming this handler in {@code meta.profile} throws
+ * {@link MethodNotAllowedException}; an update, patch or delete reports the UUID as not found,
+ * since a distinct error would reveal to any client which UUIDs belong to users. To enable user
+ * writes, a module can register an override handler with the same implicit profile and a higher
+ * priority.
  */
 @Component
 @Order(Ordered.LOWEST_PRECEDENCE)
@@ -108,10 +106,7 @@ public class UserBackedPractitionerHandler implements FhirResourceHandler<Practi
 		throw notFound(uuid);
 	}
 	
-	/**
-	 * Matches the composite service's report for an unknown UUID, so that a client without access to
-	 * users cannot tell a user's UUID from one that does not exist.
-	 */
+	/** Matches the composite service's report for an unknown UUID. */
 	private static ResourceNotFoundException notFound(String uuid) {
 		return new ResourceNotFoundException(
 		        "Resource of type " + Practitioner.class.getSimpleName() + " with ID " + uuid + " is not known");

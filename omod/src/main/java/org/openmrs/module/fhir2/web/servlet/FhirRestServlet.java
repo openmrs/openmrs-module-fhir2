@@ -206,8 +206,7 @@ public class FhirRestServlet extends RestfulServer implements ModuleLifecycleLis
 		try {
 			// apart from HAPI's LoggingInterceptor, which keeps its default order, these carry
 			// FhirConstants.BUILT_IN_INTERCEPTOR_ORDER so they run ahead of contributed beans regardless of
-			// registration order; that holds only against beans this method registers, not interceptors put
-			// on the servlet by other means
+			// registration order
 			for (Object interceptor : Arrays.asList(new RequireAuthenticationInterceptor(), loggingInterceptor,
 			    new DisableCacheInterceptor(), new SummaryInterceptor(), new SupportMergePatchInterceptor(),
 			    profileRoutingInterceptor)) {
@@ -285,12 +284,9 @@ public class FhirRestServlet extends RestfulServer implements ModuleLifecycleLis
 	}
 	
 	/**
-	 * Where a contributed interceptor declares an order that would sort it ahead of this module's own,
-	 * phrased for a log message, or null if it declares none. HAPI orders the hooks for a pointcut by
-	 * the {@code order} on {@link Interceptor} or {@link Hook}, and this module's interceptors hold
-	 * {@link FhirConstants#BUILT_IN_INTERCEPTOR_ORDER}, so a contributed interceptor only has to stay
-	 * at or above {@link Interceptor#DEFAULT_ORDER} to run after them. Screening the beans this servlet
-	 * registers is all this does; it says nothing about interceptors registered elsewhere.
+	 * Describes, for a log message, where a contributed interceptor declares an {@link Interceptor} or
+	 * {@link Hook} order below {@link Interceptor#DEFAULT_ORDER}, which could sort it ahead of this
+	 * module's own interceptors; {@code null} if it declares none.
 	 */
 	private static String describeOrderViolation(Object interceptor) {
 		// mirrors BaseInterceptorService#scanInterceptorForHookMethods, concrete class included, so that

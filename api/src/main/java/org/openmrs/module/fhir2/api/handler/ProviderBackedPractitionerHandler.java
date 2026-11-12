@@ -30,10 +30,8 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 /**
- * Maps the FHIR {@link Practitioner} resource onto the OpenMRS {@code Provider} domain object by
- * delegating every {@link org.openmrs.module.fhir2.api.FhirService} call to the
- * {@link FhirOpenmrsProviderService}. Sibling of {@link UserBackedPractitionerHandler}, which
- * applies the same composition pattern over {@code FhirUserService}.
+ * Maps the FHIR {@link Practitioner} resource onto the OpenMRS {@code Provider} domain object via
+ * {@link FhirOpenmrsProviderService}. Sibling of {@link UserBackedPractitionerHandler}.
  * <p>
  * Claims any incoming Practitioner on create: a provider is the default backing for new
  * Practitioner resources, since users cannot be written through the FHIR API.

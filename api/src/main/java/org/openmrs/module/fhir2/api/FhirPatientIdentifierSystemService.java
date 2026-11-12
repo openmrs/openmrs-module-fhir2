@@ -26,7 +26,6 @@ public interface FhirPatientIdentifierSystemService extends FhirHelperService {
 	 * identifier carrying a {@code system} is resolved against the registered identifier-system URLs;
 	 * otherwise the identifier's {@code type.text} is treated as an identifier type name.
 	 *
-	 * @param identifier the FHIR identifier to resolve
 	 * @return the matching identifier type, or {@code null} if it cannot be resolved
 	 */
 	PatientIdentifierType getPatientIdentifierTypeByIdentifier(Identifier identifier);

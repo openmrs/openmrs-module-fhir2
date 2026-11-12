@@ -59,13 +59,8 @@ public class ProfileRoutingContext {
 	}
 	
 	/**
-	 * Records the profiles requested by the current request, replacing any previous value. Passing a
-	 * {@code null} resource type or {@code null} or empty profiles clears the holder rather than
-	 * storing an empty value, so a request without {@code _profile} leaves nothing behind for the next
-	 * user of this thread.
-	 *
-	 * @param resourceType the FHIR resource type the request searches
-	 * @param profiles the canonical profile URLs the client asked for
+	 * Records the profiles requested by the current request, replacing any previous value. A
+	 * {@code null} resource type or {@code null} or empty profiles clears the holder.
 	 */
 	public void setRequestedProfiles(String resourceType, Collection<String> profiles) {
 		if (resourceType == null || profiles == null || profiles.isEmpty()) {
@@ -77,10 +72,7 @@ public class ProfileRoutingContext {
 		        .set(new RequestedProfiles(resourceType, Collections.unmodifiableSet(new LinkedHashSet<>(profiles))));
 	}
 	
-	/**
-	 * Discards the profiles held for the current thread. Uses {@link ThreadLocal#remove()} rather than
-	 * storing {@code null} so the entry is not retained against a pooled thread.
-	 */
+	/** Discards the profiles held for the current thread. */
 	public void clear() {
 		requestedProfiles.remove();
 	}

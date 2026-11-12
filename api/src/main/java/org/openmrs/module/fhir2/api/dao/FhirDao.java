@@ -61,9 +61,6 @@ public interface FhirDao<T extends OpenmrsObject & Auditable> extends FhirDaoAop
 	 * existence, and must not be exposed to clients directly. It should agree with {@link #get(String)}
 	 * about which UUIDs this DAO serves, so an implementation whose {@code get} filters rows must
 	 * filter here too.
-	 *
-	 * @param uuid The UUID to probe
-	 * @return {@code true} if this DAO serves an object with the UUID
 	 */
 	default boolean exists(@Nonnull String uuid) {
 		return get(uuid) != null;
