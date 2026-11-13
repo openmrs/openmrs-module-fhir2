@@ -158,7 +158,28 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 			
 			throw createImmunizationRequestValidationError(errMsg);
 		}
-		
+
+		Date patientBirthdate = patient.getBirthdate();
+
+		if (patientBirthdate != null && fhirImmunization.hasExpirationDate()
+		        && fhirImmunization.getExpirationDate().before(patientBirthdate)) {
+			throw createImmunizationRequestValidationError(
+			    "Expiration date cannot be before the patient's date of birth");
+		}
+
+		if (patientBirthdate != null
+		        && fhirImmunization.hasExtension(FhirConstants.OPENMRS_FHIR_EXT_IMMUNIZATION_NEXT_DOSE_DATE)) {
+			Extension extension = fhirImmunization
+			        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_IMMUNIZATION_NEXT_DOSE_DATE);
+			if (extension != null && extension.hasValue() && extension.getValue() instanceof DateTimeType) {
+				Date nextDoseDate = ((DateTimeType) extension.getValue()).getValue();
+				if (nextDoseDate != null && nextDoseDate.before(patientBirthdate)) {
+					throw createImmunizationRequestValidationError(
+					    "Next dose date cannot be before the patient's date of birth");
+				}
+			}
+		}
+
 		List<ImmunizationPerformerComponent> performers = fhirImmunization.getPerformer();
 		Provider provider = null;
 		if (performers.size() > 1) {
