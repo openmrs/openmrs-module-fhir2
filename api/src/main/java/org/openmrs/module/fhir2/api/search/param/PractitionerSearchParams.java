@@ -62,12 +62,12 @@ public class PractitionerSearchParams extends BaseResourceSearchParams {
 	@Override
 	public SearchParameterMap toSearchParameterMap() {
 		return baseSearchParameterMap().addParameter(FhirConstants.IDENTIFIER_SEARCH_HANDLER, getIdentifier())
-		        .addParameter(FhirConstants.NAME_SEARCH_HANDLER, getName())
-		        .addParameter(FhirConstants.NAME_SEARCH_HANDLER, getGiven())
-		        .addParameter(FhirConstants.NAME_SEARCH_HANDLER, getFamily())
-		        .addParameter(FhirConstants.CITY_SEARCH_HANDLER, getCity())
-		        .addParameter(FhirConstants.STATE_SEARCH_HANDLER, getState())
-		        .addParameter(FhirConstants.POSTALCODE_SEARCH_HANDLER, getPostalCode())
-		        .addParameter(FhirConstants.COUNTRY_SEARCH_HANDLER, getCountry());
+		        .addParameter(FhirConstants.NAME_SEARCH_HANDLER, FhirConstants.NAME_PROPERTY, getName())
+		        .addParameter(FhirConstants.NAME_SEARCH_HANDLER, FhirConstants.GIVEN_PROPERTY, getGiven())
+		        .addParameter(FhirConstants.NAME_SEARCH_HANDLER, FhirConstants.FAMILY_PROPERTY, getFamily())
+		        .addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.CITY_PROPERTY, getCity())
+		        .addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.STATE_PROPERTY, getState())
+		        .addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.POSTAL_CODE_PROPERTY, getPostalCode())
+		        .addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.COUNTRY_PROPERTY, getCountry());
 	}
 }
