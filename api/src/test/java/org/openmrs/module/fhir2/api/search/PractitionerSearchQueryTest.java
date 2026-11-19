@@ -50,6 +50,7 @@ import org.openmrs.Provider;
 import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirPractitionerDao;
+import org.openmrs.module.fhir2.api.search.param.PractitionerSearchParams;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.PractitionerTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -680,4 +681,75 @@ public class PractitionerSearchQueryTest extends BaseFhirContextSensitiveTest {
 		            hasProperty("referenceElement", hasProperty("idPart", equalTo(PRACTITIONER_UUID))))))));
 	}
 	
+	@Test
+	public void searchForPractitioners_shouldReturnPractitionersByNameFromSearchParams() {
+		PractitionerSearchParams practitionerSearchParams = new PractitionerSearchParams();
+		practitionerSearchParams.setName(new StringAndListParam().addAnd(new StringParam(PRACTITIONER_GIVEN_NAME)));
+		
+		IBundleProvider results = search(practitionerSearchParams.toSearchParameterMap());
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, hasSize(equalTo(1)));
+		assertThat(resultList.iterator().next().getIdElement().getIdPart(), equalTo(PRACTITIONER_UUID));
+	}
+	
+	@Test
+	public void searchForPractitioners_shouldReturnPractitionersByGivenAndFamilyNameFromSearchParams() {
+		PractitionerSearchParams practitionerSearchParams = new PractitionerSearchParams();
+		practitionerSearchParams.setGiven(new StringAndListParam().addAnd(new StringParam(PRACTITIONER_GIVEN_NAME)));
+		practitionerSearchParams.setFamily(new StringAndListParam().addAnd(new StringParam(PRACTITIONER_FAMILY_NAME)));
+		
+		IBundleProvider results = search(practitionerSearchParams.toSearchParameterMap());
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, hasSize(equalTo(1)));
+		assertThat(resultList.iterator().next().getIdElement().getIdPart(), equalTo(PRACTITIONER_UUID));
+	}
+	
+	@Test
+	public void searchForPractitioners_shouldReturnEmptyCollectionByWrongFamilyNameFromSearchParams() {
+		PractitionerSearchParams practitionerSearchParams = new PractitionerSearchParams();
+		practitionerSearchParams.setFamily(new StringAndListParam().addAnd(new StringParam(WRONG_FAMILY_NAME)));
+		
+		IBundleProvider results = search(practitionerSearchParams.toSearchParameterMap());
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
+	}
+	
+	@Test
+	public void searchForPractitioners_shouldReturnPractitionersByAddressFromSearchParams() {
+		PractitionerSearchParams practitionerSearchParams = new PractitionerSearchParams();
+		practitionerSearchParams.setCity(new StringAndListParam().addAnd(new StringParam(CITY)));
+		practitionerSearchParams.setState(new StringAndListParam().addAnd(new StringParam(STATE)));
+		practitionerSearchParams.setPostalCode(new StringAndListParam().addAnd(new StringParam(POSTAL_CODE)));
+		practitionerSearchParams.setCountry(new StringAndListParam().addAnd(new StringParam(COUNTRY)));
+		
+		IBundleProvider results = search(practitionerSearchParams.toSearchParameterMap());
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, hasSize(equalTo(1)));
+		assertThat(resultList.iterator().next().getIdElement().getIdPart(), equalTo(PRACTITIONER_UUID));
+	}
+	
+	@Test
+	public void searchForPractitioners_shouldReturnEmptyCollectionByWrongCityFromSearchParams() {
+		PractitionerSearchParams practitionerSearchParams = new PractitionerSearchParams();
+		practitionerSearchParams.setCity(new StringAndListParam().addAnd(new StringParam(WRONG_CITY)));
+		
+		IBundleProvider results = search(practitionerSearchParams.toSearchParameterMap());
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
+	}
 }
