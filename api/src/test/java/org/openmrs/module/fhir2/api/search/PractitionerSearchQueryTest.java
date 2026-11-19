@@ -741,15 +741,58 @@ public class PractitionerSearchQueryTest extends BaseFhirContextSensitiveTest {
 	}
 	
 	@Test
-	public void searchForPractitioners_shouldReturnEmptyCollectionByWrongCityFromSearchParams() {
-		PractitionerSearchParams practitionerSearchParams = new PractitionerSearchParams();
-		practitionerSearchParams.setCity(new StringAndListParam().addAnd(new StringParam(WRONG_CITY)));
+	public void searchForPractitioners_shouldFilterByCityFromSearchParams() {
+		PractitionerSearchParams matching = new PractitionerSearchParams();
+		matching.setCity(new StringAndListParam().addAnd(new StringParam(CITY)));
+		PractitionerSearchParams notMatching = new PractitionerSearchParams();
+		notMatching.setCity(new StringAndListParam().addAnd(new StringParam(WRONG_CITY)));
 		
-		IBundleProvider results = search(practitionerSearchParams.toSearchParameterMap());
+		List<IBaseResource> resultList = get(search(matching.toSearchParameterMap()));
 		
-		List<IBaseResource> resultList = get(results);
+		assertThat(resultList, hasSize(equalTo(1)));
+		assertThat(resultList.iterator().next().getIdElement().getIdPart(), equalTo(PRACTITIONER_UUID));
+		assertThat(get(search(notMatching.toSearchParameterMap())), empty());
+	}
+	
+	@Test
+	public void searchForPractitioners_shouldFilterByStateFromSearchParams() {
+		PractitionerSearchParams matching = new PractitionerSearchParams();
+		matching.setState(new StringAndListParam().addAnd(new StringParam(STATE)));
+		PractitionerSearchParams notMatching = new PractitionerSearchParams();
+		notMatching.setState(new StringAndListParam().addAnd(new StringParam(WRONG_STATE)));
 		
-		assertThat(results, notNullValue());
-		assertThat(resultList, empty());
+		List<IBaseResource> resultList = get(search(matching.toSearchParameterMap()));
+		
+		assertThat(resultList, hasSize(equalTo(1)));
+		assertThat(resultList.iterator().next().getIdElement().getIdPart(), equalTo(PRACTITIONER_UUID));
+		assertThat(get(search(notMatching.toSearchParameterMap())), empty());
+	}
+	
+	@Test
+	public void searchForPractitioners_shouldFilterByPostalCodeFromSearchParams() {
+		PractitionerSearchParams matching = new PractitionerSearchParams();
+		matching.setPostalCode(new StringAndListParam().addAnd(new StringParam(POSTAL_CODE)));
+		PractitionerSearchParams notMatching = new PractitionerSearchParams();
+		notMatching.setPostalCode(new StringAndListParam().addAnd(new StringParam(WRONG_POSTAL_CODE)));
+		
+		List<IBaseResource> resultList = get(search(matching.toSearchParameterMap()));
+		
+		assertThat(resultList, hasSize(equalTo(1)));
+		assertThat(resultList.iterator().next().getIdElement().getIdPart(), equalTo(PRACTITIONER_UUID));
+		assertThat(get(search(notMatching.toSearchParameterMap())), empty());
+	}
+	
+	@Test
+	public void searchForPractitioners_shouldFilterByCountryFromSearchParams() {
+		PractitionerSearchParams matching = new PractitionerSearchParams();
+		matching.setCountry(new StringAndListParam().addAnd(new StringParam(COUNTRY)));
+		PractitionerSearchParams notMatching = new PractitionerSearchParams();
+		notMatching.setCountry(new StringAndListParam().addAnd(new StringParam(WRONG_COUNTRY)));
+		
+		List<IBaseResource> resultList = get(search(matching.toSearchParameterMap()));
+		
+		assertThat(resultList, hasSize(equalTo(1)));
+		assertThat(resultList.iterator().next().getIdElement().getIdPart(), equalTo(PRACTITIONER_UUID));
+		assertThat(get(search(notMatching.toSearchParameterMap())), empty());
 	}
 }
