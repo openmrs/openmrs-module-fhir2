@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
@@ -17,13 +18,21 @@ import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
 
+import java.util.Date;
 import java.util.List;
 
+import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
+import ca.uhn.fhir.rest.param.QuantityAndListParam;
+import ca.uhn.fhir.rest.param.QuantityOrListParam;
+import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.TokenParamModifier;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.Diagnosis;
@@ -143,5 +152,77 @@ public class FhirDiagnosisDaoImplTest extends BaseFhirContextSensitiveTest {
 		assertThat(diagnoses, notNullValue());
 		assertThat(diagnoses, hasSize(equalTo(1)));
 		assertThat(diagnoses, everyItem(hasProperty("encounter", hasProperty("uuid", equalTo(ENCOUNTER_UUID)))));
+	}
+	
+	@Test
+	public void search_shouldNotReturnDiagnosesWhenClinicalStatusIsActive() {
+		SearchParameterMap params = new SearchParameterMap().addParameter(FhirConstants.CONDITION_CLINICAL_STATUS_HANDLER,
+		    new TokenAndListParam().addAnd(new TokenParam("active")));
+		
+		List<Diagnosis> diagnoses = dao.getSearchResults(params);
+		
+		assertThat(diagnoses, empty());
+	}
+	
+	@Test
+	public void search_shouldReturnDiagnosesWhenClinicalStatusIsUnknown() {
+		SearchParameterMap params = new SearchParameterMap().addParameter(FhirConstants.CONDITION_CLINICAL_STATUS_HANDLER,
+		    new TokenAndListParam().addAnd(new TokenParam(FhirConstants.CONDITION_CLINICAL_SYSTEM_URI, "unknown")));
+		
+		List<Diagnosis> diagnoses = dao.getSearchResults(params);
+		
+		assertThat(diagnoses, hasSize(greaterThanOrEqualTo(1)));
+	}
+	
+	@Test
+	public void search_shouldNotReturnDiagnosesWhenClinicalStatusIsNotUnknown() {
+		SearchParameterMap params = new SearchParameterMap().addParameter(FhirConstants.CONDITION_CLINICAL_STATUS_HANDLER,
+		    new TokenAndListParam().addAnd(new TokenParam("unknown").setModifier(TokenParamModifier.NOT)));
+		
+		List<Diagnosis> diagnoses = dao.getSearchResults(params);
+		
+		assertThat(diagnoses, empty());
+	}
+	
+	@Test
+	public void search_shouldReturnDiagnosesWhenAnyClinicalStatusInOrListMatches() {
+		SearchParameterMap params = new SearchParameterMap().addParameter(FhirConstants.CONDITION_CLINICAL_STATUS_HANDLER,
+		    new TokenAndListParam().addAnd(new TokenParam("active"), new TokenParam("unknown")));
+		
+		List<Diagnosis> diagnoses = dao.getSearchResults(params);
+		
+		assertThat(diagnoses, hasSize(greaterThanOrEqualTo(1)));
+	}
+	
+	@Test
+	public void search_shouldNotReturnDiagnosesWhenOnsetDateIsProvided() {
+		SearchParameterMap params = new SearchParameterMap().addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER,
+		    "onsetDate", new DateRangeParam(new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, new Date(0))));
+		
+		List<Diagnosis> diagnoses = dao.getSearchResults(params);
+		
+		assertThat(diagnoses, empty());
+	}
+	
+	@Test
+	public void search_shouldNotReturnDiagnosesWhenOnsetAgeIsProvided() {
+		SearchParameterMap params = new SearchParameterMap().addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER,
+		    new QuantityAndListParam().addAnd(new QuantityOrListParam().add(new QuantityParam(5))));
+		
+		List<Diagnosis> diagnoses = dao.getSearchResults(params);
+		
+		assertThat(diagnoses, empty());
+	}
+	
+	@Test
+	public void search_shouldFilterDiagnosesByRecordedDate() {
+		// the dataset diagnosis is created on 2017-01-12
+		SearchParameterMap matching = new SearchParameterMap().addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER,
+		    "dateCreated", new DateRangeParam(new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, new Date(0))));
+		SearchParameterMap notMatching = new SearchParameterMap().addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER,
+		    "dateCreated", new DateRangeParam(new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, new Date())));
+		
+		assertThat(dao.getSearchResults(matching), hasSize(greaterThanOrEqualTo(1)));
+		assertThat(dao.getSearchResults(notMatching), empty());
 	}
 }
