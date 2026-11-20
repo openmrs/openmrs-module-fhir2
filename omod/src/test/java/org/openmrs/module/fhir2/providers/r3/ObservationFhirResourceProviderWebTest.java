@@ -884,6 +884,83 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR3ResourcePr
 	}
 	
 	@Test
+	public void lastn_shouldHandleRequestWithEncounterReference() throws Exception {
+		verifyLastnOperation("/Observation/$lastn?encounter=c4aa5682-90cf-48e8-87c9-a6066ffd3a3f");
+		verify(observationService).getLastnObservations(isNull(), searchParamsCaptor.capture());
+		
+		ReferenceAndListParam encounter = searchParamsCaptor.getValue().getEncounter();
+		ReferenceParam referenceParam = encounter.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0);
+		
+		assertThat(encounter, notNullValue());
+		assertThat(referenceParam.getIdPart(), equalTo("c4aa5682-90cf-48e8-87c9-a6066ffd3a3f"));
+	}
+	
+	@Test
+	public void lastn_shouldIncludeEncounterWithReturnedObservations() throws Exception {
+		verifyLastnOperation("/Observation/$lastn?_include=Observation:encounter");
+		verify(observationService).getLastnObservations(isNull(), searchParamsCaptor.capture());
+		
+		Set<Include> includes = searchParamsCaptor.getValue().getIncludes();
+		
+		assertThat(includes, notNullValue());
+		assertThat(includes.size(), equalTo(1));
+		assertThat(includes.iterator().next().getParamName(), equalTo(FhirConstants.INCLUDE_ENCOUNTER_PARAM));
+		assertThat(includes.iterator().next().getParamType(), equalTo(FhirConstants.OBSERVATION));
+	}
+	
+	@Test
+	public void lastn_shouldIncludePatientWithReturnedObservations() throws Exception {
+		verifyLastnOperation("/Observation/$lastn?_include=Observation:patient");
+		verify(observationService).getLastnObservations(isNull(), searchParamsCaptor.capture());
+		
+		Set<Include> includes = searchParamsCaptor.getValue().getIncludes();
+		
+		assertThat(includes, notNullValue());
+		assertThat(includes.size(), equalTo(1));
+		assertThat(includes.iterator().next().getParamName(), equalTo(FhirConstants.INCLUDE_PATIENT_PARAM));
+		assertThat(includes.iterator().next().getParamType(), equalTo(FhirConstants.OBSERVATION));
+	}
+	
+	@Test
+	public void lastn_shouldIncludeObservationGroupMembersWithReturnedObservations() throws Exception {
+		verifyLastnOperation("/Observation/$lastn?_include=Observation:related-type");
+		verify(observationService).getLastnObservations(isNull(), searchParamsCaptor.capture());
+		
+		Set<Include> includes = searchParamsCaptor.getValue().getIncludes();
+		
+		assertThat(includes, notNullValue());
+		assertThat(includes.size(), equalTo(1));
+		assertThat(includes.iterator().next().getParamName(), equalTo(FhirConstants.INCLUDE_RELATED_TYPE_PARAM));
+		assertThat(includes.iterator().next().getParamType(), equalTo(FhirConstants.OBSERVATION));
+	}
+	
+	@Test
+	public void lastn_shouldReverseIncludeObservationsWithReturnedObservations() throws Exception {
+		verifyLastnOperation("/Observation/$lastn?_revinclude=Observation:related-type");
+		verify(observationService).getLastnObservations(isNull(), searchParamsCaptor.capture());
+		
+		Set<Include> revIncludes = searchParamsCaptor.getValue().getRevIncludes();
+		
+		assertThat(revIncludes, notNullValue());
+		assertThat(revIncludes.size(), equalTo(1));
+		assertThat(revIncludes.iterator().next().getParamName(), equalTo(FhirConstants.INCLUDE_RELATED_TYPE_PARAM));
+		assertThat(revIncludes.iterator().next().getParamType(), equalTo(FhirConstants.OBSERVATION));
+	}
+	
+	@Test
+	public void lastn_shouldReverseIncludeDiagnosticReportsWithReturnedObservations() throws Exception {
+		verifyLastnOperation("/Observation/$lastn?_revinclude=DiagnosticReport:result");
+		verify(observationService).getLastnObservations(isNull(), searchParamsCaptor.capture());
+		
+		Set<Include> revIncludes = searchParamsCaptor.getValue().getRevIncludes();
+		
+		assertThat(revIncludes, notNullValue());
+		assertThat(revIncludes.size(), equalTo(1));
+		assertThat(revIncludes.iterator().next().getParamName(), equalTo(FhirConstants.INCLUDE_RESULT_PARAM));
+		assertThat(revIncludes.iterator().next().getParamType(), equalTo(FhirConstants.DIAGNOSTIC_REPORT));
+	}
+	
+	@Test
 	public void lastnEncounters_shouldHandleRequestWithMaxParameter() throws Exception {
 		verifyLastnEncountersOperation("/Observation/$lastn-encounters?max=3");
 		verify(observationService).getLastnEncountersObservations(maxCaptor.capture(), searchParamsCaptor.capture());
