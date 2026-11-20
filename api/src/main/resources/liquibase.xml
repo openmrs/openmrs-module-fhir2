@@ -656,6 +656,25 @@
         </sql>
     </changeSet>
 
+    <changeSet id="add_labSet_as_laboratory_observation_category_20220928" author="ruhanga" dbms="mysql,mariadb">
+        <preConditions onFail="MARK_RAN" onError="WARN">
+            <and>
+                <tableExists tableName="fhir_observation_category_map"/>
+                <!-- default UUID for LabSet -->
+                <sqlCheck expectedResult="1">
+                    select 1 from concept_class where uuid = '8d492026-c2cc-11de-8d13-0010c6dffd0f'
+                </sqlCheck>
+            </and>
+        </preConditions>
+        <sql><![CDATA[
+            insert into fhir_observation_category_map (concept_class_id, observation_category, creator, date_created, uuid)
+            select concept_class_id, 'laboratory', 1, now(), uuid()
+            from concept_class
+            where uuid = '8d492026-c2cc-11de-8d13-0010c6dffd0f'
+        ]]>
+        </sql>
+    </changeSet>
+
     <changeSet id="add_default_observation_categories_20200930" author="ibacher" dbms="postgresql">
         <preConditions onFail="MARK_RAN" onError="WARN">
             <and>
@@ -697,6 +716,25 @@
             select concept_class_id, 'exam', 1, now(), uuid_in(overlay(overlay(md5(random()::text || ':' || clock_timestamp()::text) placing '4' from 13) placing to_hex(floor(random()*(11-8+1) + 8)::int)::text from 17)::cstring)
             from concept_class
             where uuid = '8d491a9a-c2cc-11de-8d13-0010c6dffd0f'
+        ]]>
+        </sql>
+    </changeSet>
+
+    <changeSet id="add_labSet_as_laboratory_observation_category_20220928" author="ruhanga" dbms="postgresql">
+        <preConditions onFail="MARK_RAN" onError="WARN">
+            <and>
+                <tableExists tableName="fhir_observation_category_map"/>
+                <!-- default UUID for LabSet -->
+                <sqlCheck expectedResult="1">
+                    select 1 from concept_class where uuid = '8d492026-c2cc-11de-8d13-0010c6dffd0f'
+                </sqlCheck>
+            </and>
+        </preConditions>
+        <sql><![CDATA[
+            insert into fhir_observation_category_map (concept_class_id, observation_category, creator, date_created, uuid)
+            select concept_class_id, 'laboratory', 1, now(), uuid_in(overlay(overlay(md5(random()::text || ':' || clock_timestamp()::text) placing '4' from 13) placing to_hex(floor(random()*(11-8+1) + 8)::int)::text from 17)::cstring)
+            from concept_class
+            where uuid = '8d492026-c2cc-11de-8d13-0010c6dffd0f'
         ]]>
         </sql>
     </changeSet>
