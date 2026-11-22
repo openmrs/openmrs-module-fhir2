@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!--
+    This Source Code Form is subject to the terms of the Mozilla Public License,
+    v. 2.0. If a copy of the MPL was not distributed with this file, You can
+    obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+    the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+
+    Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+    graphic logo is a trademark of OpenMRS Inc.
+-->
+<dataset>
+    <person person_id="9001" gender="F" dead="false" creator="1" date_created="2020-01-01 00:00:00.0" voided="false" uuid="a1b2c3d4-0000-0000-0000-000000009001"/>
+    <person_name person_name_id="9001" person_id="9001" preferred="true" given_name="Clara" family_name="Clerk" creator="1" date_created="2020-01-01 00:00:00.0" voided="false" uuid="a1b2c3d4-0000-0000-0000-00000000a001"/>
+    <person_name person_name_id="9002" person_id="9001" preferred="false" given_name="Clara" family_name="Clerkson" creator="1" date_created="2020-01-01 00:00:00.0" voided="false" uuid="a1b2c3d4-0000-0000-0000-00000000a002"/>
+    <users user_id="9001" person_id="9001" system_id="9-9" username="testclerk" creator="1" date_created="2020-01-01 00:00:00.0" retired="false" uuid="a1b2c3d4-0000-0000-0000-00000000b001"/>
+</dataset>
