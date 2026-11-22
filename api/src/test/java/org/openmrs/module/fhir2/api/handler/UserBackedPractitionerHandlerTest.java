@@ -10,15 +10,11 @@
 package org.openmrs.module.fhir2.api.handler;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -26,6 +22,8 @@ import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -33,9 +31,9 @@ import org.hl7.fhir.r4.model.Practitioner;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirUserService;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 
@@ -126,21 +124,16 @@ public class UserBackedPractitionerHandlerTest {
 	}
 	
 	@Test
-	public void search_shouldDelegateToUserServiceWithEmptySearchParams() {
-		// Practitioner search parameters are not mapped onto users, so every user is returned.
+	public void search_shouldForwardSearchParametersToUserService() {
 		IBundleProvider expected = new SimpleBundleProvider();
-		when(userService.searchForUsers(any())).thenReturn(expected);
+		SearchParameterMap params = new SearchParameterMap().addParameter(FhirConstants.IDENTIFIER_SEARCH_HANDLER,
+		    new TokenAndListParam().addAnd(new TokenParam("nomatchxyz")));
+		when(userService.searchForUsers(params)).thenReturn(expected);
 		
-		SearchParameterMap caller = new SearchParameterMap();
-		IBundleProvider result = handler.search(caller);
+		IBundleProvider result = handler.search(params);
 		
-		assertThat(result, is(expected));
-		
-		ArgumentCaptor<SearchParameterMap> captor = ArgumentCaptor.forClass(SearchParameterMap.class);
-		verify(userService).searchForUsers(captor.capture());
-		// The caller's filters are dropped, not forwarded.
-		assertThat(captor.getValue(), is(not(sameInstance(caller))));
-		assertThat(captor.getValue().getParameters(), is(empty()));
+		assertThat(result, sameInstance(expected));
+		verify(userService).searchForUsers(params);
 	}
 	
 	@Test
