@@ -185,6 +185,17 @@ public class FhirDiagnosisDaoImplTest extends BaseFhirContextSensitiveTest {
 	}
 	
 	@Test
+	public void search_shouldNotReturnDiagnosesWhenClinicalStatusIsNotUnknownOrActive() {
+		SearchParameterMap params = new SearchParameterMap().addParameter(FhirConstants.CONDITION_CLINICAL_STATUS_HANDLER,
+		    new TokenAndListParam().addAnd(new TokenParam("unknown").setModifier(TokenParamModifier.NOT),
+		        new TokenParam("active").setModifier(TokenParamModifier.NOT)));
+		
+		List<Diagnosis> diagnoses = dao.getSearchResults(params);
+		
+		assertThat(diagnoses, empty());
+	}
+	
+	@Test
 	public void search_shouldReturnDiagnosesWhenAnyClinicalStatusInOrListMatches() {
 		SearchParameterMap params = new SearchParameterMap().addParameter(FhirConstants.CONDITION_CLINICAL_STATUS_HANDLER,
 		    new TokenAndListParam().addAnd(new TokenParam("active"), new TokenParam("unknown")));

@@ -103,28 +103,41 @@ public class FhirDiagnosisDaoImpl extends BaseFhirDao<Diagnosis> implements Fhir
 		// AND list: every OR list must match
 		for (TokenOrListParam orList : status.getValuesAsQueryTokens()) {
 			boolean orMatches = false;
-			// OR list: at least one token must match
+			TokenParamModifier modifier = null;
+			
+			// OR list: at least one positive token must match
 			for (TokenParam token : orList.getValuesAsQueryTokens()) {
+				if (modifier == null) {
+					modifier = token.getModifier();
+				}
+				
 				if (tokenMatchesDiagnosisStatus(token)) {
 					orMatches = true;
 					break;
 				}
 			}
+			
+			// Apply :not to the complete OR-list result
+			if (TokenParamModifier.NOT.equals(modifier)) {
+				orMatches = !orMatches;
+			}
+			
 			if (!orMatches) {
 				return false;
 			}
 		}
+		
 		return true;
 	}
 	
 	private boolean tokenMatchesDiagnosisStatus(TokenParam token) {
 		boolean systemMatches = token.getSystem() == null || token.getSystem().isEmpty()
 		        || FhirConstants.CONDITION_CLINICAL_SYSTEM_URI.equals(token.getSystem());
+		
 		boolean valueMatches = token.getValue() == null || token.getValue().isEmpty()
 		        || DIAGNOSIS_CLINICAL_STATUS.equalsIgnoreCase(token.getValue());
-		boolean matches = systemMatches && valueMatches;
 		
-		return TokenParamModifier.NOT.equals(token.getModifier()) ? !matches : matches;
+		return systemMatches && valueMatches;
 	}
 	
 	/**
