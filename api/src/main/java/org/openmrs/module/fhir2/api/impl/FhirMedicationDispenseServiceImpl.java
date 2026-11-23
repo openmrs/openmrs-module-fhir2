@@ -9,45 +9,21 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
-import static lombok.AccessLevel.PROTECTED;
-
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import lombok.Getter;
-import lombok.Setter;
 import org.hl7.fhir.r4.model.MedicationDispense;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirMedicationDispenseService;
-import org.openmrs.module.fhir2.api.dao.FhirMedicationDispenseDao;
-import org.openmrs.module.fhir2.api.search.SearchQuery;
-import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.MedicationDispenseSearchParams;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
-import org.openmrs.module.fhir2.api.translators.MedicationDispenseTranslator;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
-public class FhirMedicationDispenseServiceImpl extends BaseFhirService<MedicationDispense, org.openmrs.MedicationDispense> implements FhirMedicationDispenseService {
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private FhirMedicationDispenseDao<org.openmrs.MedicationDispense> dao;
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private MedicationDispenseTranslator<org.openmrs.MedicationDispense> translator;
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private SearchQueryInclude<MedicationDispense> searchQueryInclude;
-	
-	@Getter(PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private SearchQuery<org.openmrs.MedicationDispense, MedicationDispense, FhirMedicationDispenseDao<org.openmrs.MedicationDispense>, MedicationDispenseTranslator<org.openmrs.MedicationDispense>, SearchQueryInclude<MedicationDispense>> searchQuery;
+public class FhirMedicationDispenseServiceImpl extends BaseCompositeFhirService<MedicationDispense> implements FhirMedicationDispenseService {
 	
 	@Override
+	@Transactional(readOnly = true)
 	public IBundleProvider searchMedicationDispenses(MedicationDispenseSearchParams params) {
-		
 		SearchParameterMap theParams = new SearchParameterMap()
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, params.getId())
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY,
@@ -57,6 +33,6 @@ public class FhirMedicationDispenseServiceImpl extends BaseFhirService<Medicatio
 		        .addParameter(FhirConstants.MEDICATION_REQUEST_REFERENCE_SEARCH_HANDLER, params.getMedicationRequest())
 		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, params.getIncludes()).setSortSpec(params.getSort());
 		
-		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
+		return doSearch(theParams);
 	}
 }

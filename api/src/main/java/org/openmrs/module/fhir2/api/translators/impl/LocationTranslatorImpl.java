@@ -35,6 +35,7 @@ import org.hl7.fhir.r4.model.Reference;
 import org.openmrs.BaseOpenmrsData;
 import org.openmrs.LocationAttribute;
 import org.openmrs.LocationTag;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
@@ -44,6 +45,7 @@ import org.openmrs.module.fhir2.api.translators.LocationTagTranslator;
 import org.openmrs.module.fhir2.api.translators.LocationTranslator;
 import org.openmrs.module.fhir2.api.translators.LocationTypeTranslator;
 import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
+import org.openmrs.util.PrivilegeConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -172,7 +174,8 @@ public class LocationTranslatorImpl implements LocationTranslator {
 		final String locationContactPointAttributeType = propertyService
 		        .getGlobalProperty(FhirConstants.LOCATION_CONTACT_POINT_ATTRIBUTE_TYPE);
 		
-		if (locationContactPointAttributeType == null || locationContactPointAttributeType.isEmpty()) {
+		if (locationContactPointAttributeType == null || locationContactPointAttributeType.isEmpty()
+		        || !Context.hasPrivilege(PrivilegeConstants.GET_LOCATION_ATTRIBUTE_TYPES)) {
 			return Collections.emptyMap();
 		}
 		

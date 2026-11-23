@@ -25,7 +25,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.PatientIdentifierType;
-import org.openmrs.module.fhir2.api.FhirPatientService;
 import org.openmrs.module.fhir2.api.impl.FhirPatientIdentifierSystemServiceImpl;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -46,13 +45,9 @@ public class PatientIdentifierTranslatorImplTest {
 	@Mock
 	private FhirPatientIdentifierSystemServiceImpl patientIdentifierSystemService;
 	
-	@Mock
-	private FhirPatientService patientService;
-	
 	@Before
 	public void setup() {
 		identifierTranslator = new PatientIdentifierTranslatorImpl();
-		identifierTranslator.setPatientService(patientService);
 		identifierTranslator.setPatientIdentifierSystemService(patientIdentifierSystemService);
 	}
 	
@@ -127,7 +122,8 @@ public class PatientIdentifierTranslatorImplTest {
 		identifierType.setUuid(IDENTIFIER_TYPE_UUID);
 		identifierType.setName(IDENTIFIER_TYPE_NAME);
 		
-		when(patientService.getPatientIdentifierTypeByIdentifier(argThat(equalTo(identifier)))).thenReturn(identifierType);
+		when(patientIdentifierSystemService.getPatientIdentifierTypeByIdentifier(argThat(equalTo(identifier))))
+		        .thenReturn(identifierType);
 		
 		PatientIdentifier result = identifierTranslator.toOpenmrsType(identifier);
 		assertThat(result, notNullValue());
@@ -146,7 +142,8 @@ public class PatientIdentifierTranslatorImplTest {
 		identifierType.setUuid(IDENTIFIER_TYPE_UUID);
 		identifierType.setName(IDENTIFIER_TYPE_NAME);
 		
-		when(patientService.getPatientIdentifierTypeByIdentifier(argThat(equalTo(identifier)))).thenReturn(identifierType);
+		when(patientIdentifierSystemService.getPatientIdentifierTypeByIdentifier(argThat(equalTo(identifier))))
+		        .thenReturn(identifierType);
 		
 		assertThat(identifierTranslator.toOpenmrsType(identifier).getPreferred(), is(true));
 	}
@@ -160,7 +157,8 @@ public class PatientIdentifierTranslatorImplTest {
 		identifierType.setUuid(IDENTIFIER_TYPE_UUID);
 		identifierType.setName(IDENTIFIER_TYPE_NAME);
 		
-		when(patientService.getPatientIdentifierTypeByIdentifier(argThat(equalTo(identifier)))).thenReturn(identifierType);
+		when(patientIdentifierSystemService.getPatientIdentifierTypeByIdentifier(argThat(equalTo(identifier))))
+		        .thenReturn(identifierType);
 		
 		assertThat(identifierTranslator.toOpenmrsType(identifier).getPreferred(), is(false));
 	}
@@ -175,7 +173,8 @@ public class PatientIdentifierTranslatorImplTest {
 		Identifier identifier = new Identifier();
 		identifier.setType(null);
 		
-		when(patientService.getPatientIdentifierTypeByIdentifier(argThat(equalTo(identifier)))).thenReturn(null);
+		when(patientIdentifierSystemService.getPatientIdentifierTypeByIdentifier(argThat(equalTo(identifier))))
+		        .thenReturn(null);
 		
 		assertThat(identifierTranslator.toOpenmrsType(identifier), nullValue());
 	}

@@ -13,6 +13,12 @@ import static co.unruly.matchers.OptionalMatchers.contains;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.sameInstance;
+import static org.junit.Assert.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
@@ -100,8 +106,6 @@ public class FhirContactPointMapServiceImplTest {
 	
 	@Test
 	public void getFhirContactPointMapForAttributeType_shouldReturnEmptyFhirContactPointMapWhenAttributeTypeIsNotFound() {
-		when(fhirContactPointMapDao.getFhirContactPointMapForAttributeType(null)).thenReturn(Optional.empty());
-		
 		Optional<FhirContactPointMap> result = fhirContactPointMapService.getFhirContactPointMapForAttributeType(null);
 		
 		assertThat(result.isPresent(), is(false));
@@ -109,7 +113,7 @@ public class FhirContactPointMapServiceImplTest {
 	
 	@Test
 	public void getFhirContactPointMapForAttributeType_shouldReturnFhirContactPointMapWhenLocationAttributeTypeIsFound() {
-		when(fhirContactPointMapDao.getFhirContactPointMapForAttributeType(locationAttributeType))
+		when(fhirContactPointMapDao.getFhirContactPointMapForLocationAttributeType(locationAttributeType))
 		        .thenReturn(Optional.of(fhirContactPointMap));
 		
 		Optional<FhirContactPointMap> result = fhirContactPointMapService
@@ -121,7 +125,7 @@ public class FhirContactPointMapServiceImplTest {
 	
 	@Test
 	public void getFhirContactPointMapForAttributeType_shouldReturnFhirContactPointMapWhenProviderAttributeTypeIsFound() {
-		when(fhirContactPointMapDao.getFhirContactPointMapForAttributeType(providerAttributeType))
+		when(fhirContactPointMapDao.getFhirContactPointMapForProviderAttributeType(providerAttributeType))
 		        .thenReturn(Optional.of(fhirContactPointMap));
 		
 		Optional<FhirContactPointMap> result = fhirContactPointMapService
@@ -136,7 +140,9 @@ public class FhirContactPointMapServiceImplTest {
 		fhirContactPointMap.setSystem(ContactPoint.ContactPointSystem.EMAIL);
 		fhirContactPointMap.setUse(ContactPoint.ContactPointUse.WORK);
 		fhirContactPointMap.setRank(2);
-		when(fhirContactPointMapDao.saveFhirContactPointMap(fhirContactPointMap)).thenReturn(fhirContactPointMap);
+		fhirContactPointMap.setAttributeTypeDomain("person");
+		when(fhirContactPointMapDao.saveFhirContactPointMapForPersonAttributeType(fhirContactPointMap))
+		        .thenReturn(fhirContactPointMap);
 		
 		FhirContactPointMap result = fhirContactPointMapService.saveFhirContactPointMap(fhirContactPointMap);
 		
@@ -154,7 +160,7 @@ public class FhirContactPointMapServiceImplTest {
 		existingFhirContactPointMap.setSystem(ContactPoint.ContactPointSystem.PHONE);
 		existingFhirContactPointMap.setUse(ContactPoint.ContactPointUse.WORK);
 		existingFhirContactPointMap.setRank(1);
-		when(fhirContactPointMapDao.saveFhirContactPointMap(existingFhirContactPointMap))
+		when(fhirContactPointMapDao.saveFhirContactPointMapForPersonAttributeType(existingFhirContactPointMap))
 		        .thenReturn(existingFhirContactPointMap);
 		
 		FhirContactPointMap result = fhirContactPointMapService.saveFhirContactPointMap(existingFhirContactPointMap);
@@ -169,7 +175,8 @@ public class FhirContactPointMapServiceImplTest {
 		fhirContactPointMap.setSystem(ContactPoint.ContactPointSystem.EMAIL);
 		fhirContactPointMap.setUse(ContactPoint.ContactPointUse.HOME);
 		fhirContactPointMap.setRank(2);
-		when(fhirContactPointMapDao.saveFhirContactPointMap(fhirContactPointMap)).thenReturn(fhirContactPointMap);
+		when(fhirContactPointMapDao.saveFhirContactPointMapForPersonAttributeType(fhirContactPointMap))
+		        .thenReturn(fhirContactPointMap);
 		
 		result = fhirContactPointMapService.saveFhirContactPointMap(fhirContactPointMap);
 		assertThat(result.getAttributeTypeDomain(), equalTo("person"));
@@ -177,5 +184,38 @@ public class FhirContactPointMapServiceImplTest {
 		assertThat(result.getSystem(), equalTo(ContactPoint.ContactPointSystem.EMAIL));
 		assertThat(result.getUse(), equalTo(ContactPoint.ContactPointUse.HOME));
 		assertThat(result.getRank(), equalTo(2));
+	}
+	
+	@Test
+	public void saveFhirContactPointMap_shouldSaveThroughTheGuardedMethodForTheMapsDomain() {
+		// given
+		fhirContactPointMap.setAttributeTypeDomain("provider");
+		when(fhirContactPointMapDao.saveFhirContactPointMapForProviderAttributeType(fhirContactPointMap))
+		        .thenReturn(fhirContactPointMap);
+		
+		// when
+		FhirContactPointMap result = fhirContactPointMapService.saveFhirContactPointMap(fhirContactPointMap);
+		
+		// then
+		assertThat(result, sameInstance(fhirContactPointMap));
+		verify(fhirContactPointMapDao, never()).saveFhirContactPointMapForPersonAttributeType(any());
+	}
+	
+	@Test
+	public void saveFhirContactPointMap_shouldRejectDomainWithoutAPrivilege() {
+		// given
+		fhirContactPointMap.setAttributeTypeDomain("program");
+		
+		// when / then
+		assertThrows(IllegalArgumentException.class,
+		    () -> fhirContactPointMapService.saveFhirContactPointMap(fhirContactPointMap));
+		verifyNoInteractions(fhirContactPointMapDao);
+	}
+	
+	@Test
+	public void saveFhirContactPointMap_shouldRejectMapWithoutADomain() {
+		assertThrows(IllegalArgumentException.class,
+		    () -> fhirContactPointMapService.saveFhirContactPointMap(fhirContactPointMap));
+		verifyNoInteractions(fhirContactPointMapDao);
 	}
 }

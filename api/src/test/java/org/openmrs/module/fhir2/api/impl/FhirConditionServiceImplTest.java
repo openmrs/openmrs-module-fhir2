@@ -9,425 +9,466 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.sameInstance;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 
-import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.QuantityAndListParam;
-import ca.uhn.fhir.rest.param.QuantityOrListParam;
-import ca.uhn.fhir.rest.param.QuantityParam;
-import ca.uhn.fhir.rest.param.ReferenceAndListParam;
-import ca.uhn.fhir.rest.param.ReferenceOrListParam;
-import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Condition;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.openmrs.Condition;
 import org.openmrs.module.fhir2.FhirConstants;
-import org.openmrs.module.fhir2.api.FhirDiagnosisService;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
-import org.openmrs.module.fhir2.api.dao.FhirConditionDao;
-import org.openmrs.module.fhir2.api.search.SearchQuery;
-import org.openmrs.module.fhir2.api.search.SearchQueryBundleProvider;
-import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
-import org.openmrs.module.fhir2.api.search.TwoSearchQueryBundleProvider;
+import org.openmrs.module.fhir2.api.handler.ConditionBackedConditionHandler;
+import org.openmrs.module.fhir2.api.handler.DiagnosisBackedConditionHandler;
+import org.openmrs.module.fhir2.api.handler.FhirResourceHandler;
 import org.openmrs.module.fhir2.api.search.param.ConditionSearchParams;
-import org.openmrs.module.fhir2.api.search.param.DiagnosisSearchParams;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
-import org.openmrs.module.fhir2.api.translators.ConditionTranslator;
+import org.openmrs.module.fhir2.api.util.ProfileRoutingContext;
+import org.openmrs.module.fhir2.providers.r4.MockIBundleProvider;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.OrderUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FhirConditionServiceImplTest {
 	
-	private static final String CONDITION_UUID = "43578769-f1a4-46af-b08b-d9fe8a07066f";
+	private static final String CONDITION_UUID = "a7b6c5d4-1234-4f5e-9a8b-0c1d2e3f4a5b";
 	
-	private static final String WRONG_CONDITION_UUID = "90378769-f1a4-46af-b08b-d9fe8a09034j";
-	
-	private static final String LAST_UPDATED_DATE = "2020-09-03";
+	private static final String DIAGNOSIS_PROFILE = "http://fhir.openmrs.org/StructureDefinition/openmrs-diagnosis";
 	
 	private static final int START_INDEX = 0;
 	
-	private static final int END_INDEX = 10;
+	private static final int END_INDEX = 100;
 	
-	@Mock
-	private FhirConditionDao dao;
+	@Mock(extraInterfaces = Ordered.class)
+	private FhirResourceHandler<Condition> conditionHandler;
 	
-	@Mock
-	private ConditionTranslator<Condition> conditionTranslator;
+	@Mock(extraInterfaces = Ordered.class)
+	private FhirResourceHandler<Condition> diagnosisHandler;
 	
 	@Mock
 	private FhirGlobalPropertyService globalPropertyService;
 	
-	@Mock
-	private SearchQueryInclude<org.hl7.fhir.r4.model.Condition> searchQueryInclude;
-	
-	@Mock
-	private SearchQuery<Condition, org.hl7.fhir.r4.model.Condition, FhirConditionDao, ConditionTranslator<Condition>, SearchQueryInclude<org.hl7.fhir.r4.model.Condition>> searchQuery;
-	
-	private FhirConditionServiceImpl conditionService;
-	
-	@Mock
-	private FhirDiagnosisService diagnosisService;
-	
-	private Condition openmrsCondition;
-	
-	private org.hl7.fhir.r4.model.Condition fhirCondition;
+	private FhirConditionServiceImpl service;
 	
 	@Before
-	public void setup() {
-		conditionService = new FhirConditionServiceImpl() {
-			
-			@Override
-			protected void validateObject(Condition object) {
+	public void setUp() {
+		lenient().when(conditionHandler.getImplicitProfile())
+		        .thenReturn("http://fhir.openmrs.org/StructureDefinition/openmrs-condition");
+		lenient().when(diagnosisHandler.getImplicitProfile())
+		        .thenReturn("http://fhir.openmrs.org/StructureDefinition/openmrs-diagnosis");
+		// The real handlers' precedence, which FhirConditionServiceImpl does not use to settle a create
+		// that both claim.
+		lenient().when(((Ordered) conditionHandler).getOrder())
+		        .thenReturn(OrderUtils.getOrder(ConditionBackedConditionHandler.class));
+		lenient().when(((Ordered) diagnosisHandler).getOrder())
+		        .thenReturn(OrderUtils.getOrder(DiagnosisBackedConditionHandler.class));
+		// Mirrors the handlers' acceptsSearch: participate unless the category names the other side.
+		lenient().when(conditionHandler.acceptsSearch(any())).thenAnswer(
+		    inv -> participatesByCategory(inv.getArgument(0), FhirConstants.CONDITION_CATEGORY_CODE_CONDITION));
+		lenient().when(diagnosisHandler.acceptsSearch(any())).thenAnswer(
+		    inv -> participatesByCategory(inv.getArgument(0), FhirConstants.CONDITION_CATEGORY_CODE_DIAGNOSIS));
+		// Mirrors the handlers' canHandle: each looks only for its own category code, and the condition
+		// backing additionally owns the unmarked case. A body carrying both is therefore claimed by
+		// both.
+		lenient().when(conditionHandler.canHandle(any())).thenAnswer(inv -> {
+			Condition condition = inv.getArgument(0);
+			return !hasAnyCategoryCoding(condition)
+			        || hasCategoryCode(condition, FhirConstants.CONDITION_CATEGORY_CODE_CONDITION);
+		});
+		lenient().when(diagnosisHandler.canHandle(any()))
+		        .thenAnswer(inv -> hasCategoryCode(inv.getArgument(0), FhirConstants.CONDITION_CATEGORY_CODE_DIAGNOSIS));
+		
+		service = new FhirConditionServiceImpl();
+		service.setHandlers(Arrays.asList(conditionHandler, diagnosisHandler));
+		service.setGlobalPropertyService(globalPropertyService);
+	}
+	
+	private static boolean participatesByCategory(SearchParameterMap params, String myCode) {
+		TokenAndListParam category = (TokenAndListParam) params.getParameters().stream()
+		        .filter(e -> FhirConstants.CATEGORY_SEARCH_HANDLER.equals(e.getKey())).flatMap(e -> e.getValue().stream())
+		        .map(p -> p.getParam()).filter(v -> v instanceof TokenAndListParam).findFirst().orElse(null);
+		if (category == null || category.size() == 0) {
+			return true;
+		}
+		for (TokenOrListParam orList : category.getValuesAsQueryTokens()) {
+			boolean systemSeen = false;
+			boolean codeMatched = false;
+			for (TokenParam token : orList.getValuesAsQueryTokens()) {
+				if (FhirConstants.CONDITION_CATEGORY_SYSTEM_URI.equals(token.getSystem())) {
+					systemSeen = true;
+					if (myCode.equals(token.getValue())) {
+						codeMatched = true;
+						break;
+					}
+				}
 			}
-		};
-		conditionService.setDao(dao);
-		conditionService.setTranslator(conditionTranslator);
-		conditionService.setSearchQuery(searchQuery);
-		conditionService.setSearchQueryInclude(searchQueryInclude);
-		conditionService.setDiagnosisService(diagnosisService);
-		conditionService.setGlobalPropertyService(globalPropertyService);
-		
-		openmrsCondition = new Condition();
-		openmrsCondition.setUuid(CONDITION_UUID);
-		
-		fhirCondition = new org.hl7.fhir.r4.model.Condition();
-		fhirCondition.setId(CONDITION_UUID);
+			if (systemSeen && !codeMatched) {
+				return false;
+			}
+		}
+		return true;
 	}
 	
-	private List<IBaseResource> get(IBundleProvider results) {
-		return results.getResources(START_INDEX, END_INDEX);
+	private static boolean hasAnyCategoryCoding(Condition condition) {
+		return condition.getCategory().stream().anyMatch(CodeableConcept::hasCoding);
+	}
+	
+	private static boolean hasCategoryCode(Condition condition, String code) {
+		return condition.getCategory().stream().flatMap(category -> category.getCoding().stream())
+		        .anyMatch(coding -> FhirConstants.CONDITION_CATEGORY_SYSTEM_URI.equals(coding.getSystem())
+		                && code.equals(coding.getCode()));
+	}
+	
+	// ---- create: category-based dispatch ----
+	//
+	// The rejections below come from BaseCompositeFhirService, not from any Condition-specific
+	// pre-check: a category naming neither backing is claimed by neither handler.
+	
+	@Test
+	public void create_shouldRejectConditionWithUnknownCategoryCoding() {
+		Condition condition = new Condition();
+		// Coding present in the official condition-category system but with an unrecognised code.
+		CodeableConcept cc = new CodeableConcept();
+		cc.addCoding(new Coding(FhirConstants.CONDITION_CATEGORY_SYSTEM_URI, "not-a-real-code", null));
+		condition.addCategory(cc);
+		
+		assertThrows(InvalidRequestException.class, () -> service.create(condition));
 	}
 	
 	@Test
-	public void shouldGetConditionByUuid() {
-		when(dao.get(CONDITION_UUID)).thenReturn(openmrsCondition);
-		when(conditionTranslator.toFhirResource(openmrsCondition)).thenReturn(fhirCondition);
+	public void create_shouldRejectConditionWithCategoryInUnknownSystem() {
+		Condition condition = new Condition();
+		CodeableConcept cc = new CodeableConcept();
+		cc.addCoding(new Coding("http://example.org/some-system", "problem-list-item", null));
+		condition.addCategory(cc);
 		
-		org.hl7.fhir.r4.model.Condition condition = conditionService.get(CONDITION_UUID);
-		
-		assertThat(condition, notNullValue());
-		assertThat(condition.getId(), notNullValue());
-		assertThat(condition.getId(), equalTo(CONDITION_UUID));
+		assertThrows(InvalidRequestException.class, () -> service.create(condition));
 	}
 	
 	@Test
-	public void shouldThrowExceptionWhenGetMissingUuid() {
-		when(diagnosisService.get(WRONG_CONDITION_UUID)).thenThrow(ResourceNotFoundException.class);
-		assertThrows(ResourceNotFoundException.class, () -> conditionService.get(WRONG_CONDITION_UUID));
+	public void create_shouldRejectConditionCarryingBothCategories() {
+		Condition condition = newConditionWithBothCategories();
+		
+		assertThrows(InvalidRequestException.class, () -> service.create(condition));
+		
+		verify(conditionHandler, never()).create(any());
+		verify(diagnosisHandler, never()).create(any());
 	}
 	
 	@Test
-	public void create_shouldCreateNewCondition() {
-		Condition openMrsCondition = new Condition();
-		openMrsCondition.setUuid(CONDITION_UUID);
+	public void create_shouldDispatchConditionCarryingBothCategoriesToBackingNamedByProfile() {
+		Condition condition = newConditionWithBothCategories();
+		condition.getMeta().addProfile(DIAGNOSIS_PROFILE);
+		when(diagnosisHandler.create(condition)).thenReturn(condition);
 		
-		org.hl7.fhir.r4.model.Condition condition = new org.hl7.fhir.r4.model.Condition();
-		condition.setId(CONDITION_UUID);
+		service.create(condition);
 		
-		when(conditionTranslator.toFhirResource(openMrsCondition)).thenReturn(condition);
-		when(dao.createOrUpdate(openMrsCondition)).thenReturn(openMrsCondition);
-		when(conditionTranslator.toOpenmrsType(condition)).thenReturn(openMrsCondition);
-		
-		org.hl7.fhir.r4.model.Condition result = conditionService.create(condition);
-		
-		assertThat(result, notNullValue());
-		assertThat(result.getId(), notNullValue());
-		assertThat(result.getId(), equalTo(CONDITION_UUID));
+		verify(diagnosisHandler).create(condition);
+		verify(conditionHandler, never()).create(any());
 	}
 	
-	@Test
-	public void create_shouldThrowExceptionWhenConditionIsNull() {
-		assertThrows(InvalidRequestException.class, () -> conditionService.create(null));
-	}
-	
-	@Test
-	public void update_shouldUpdateExistingCondition() {
-		Condition openmrsCondition = new Condition();
-		openmrsCondition.setUuid(CONDITION_UUID);
-		
-		org.hl7.fhir.r4.model.Condition condition = new org.hl7.fhir.r4.model.Condition();
-		condition.setId(CONDITION_UUID);
-		
-		when(dao.get(CONDITION_UUID)).thenReturn(openmrsCondition);
-		when(conditionTranslator.toFhirResource(openmrsCondition)).thenReturn(condition);
-		when(dao.createOrUpdate(openmrsCondition)).thenReturn(openmrsCondition);
-		when(conditionTranslator.toOpenmrsType(any(Condition.class), any(org.hl7.fhir.r4.model.Condition.class)))
-		        .thenReturn(openmrsCondition);
-		
-		org.hl7.fhir.r4.model.Condition result = conditionService.update(CONDITION_UUID, condition);
-		
-		assertThat(result, notNullValue());
-		assertThat(result.getId(), notNullValue());
-		assertThat(result.getId(), equalTo(CONDITION_UUID));
-	}
-	
-	@Test
-	public void update_shouldThrowExceptionWhenIdIsNull() {
-		org.hl7.fhir.r4.model.Condition condition = new org.hl7.fhir.r4.model.Condition();
-		
-		assertThrows(InvalidRequestException.class, () -> conditionService.update(null, condition));
-	}
-	
-	@Test
-	public void update_shouldThrowExceptionWhenConditionIsNull() {
-		assertThrows(InvalidRequestException.class, () -> conditionService.update(CONDITION_UUID, null));
-	}
-	
-	@Test
-	public void update_shouldThrowExceptionWhenConditionIdIsNull() {
-		org.hl7.fhir.r4.model.Condition condition = new org.hl7.fhir.r4.model.Condition();
-		
-		assertThrows(InvalidRequestException.class, () -> conditionService.update(CONDITION_UUID, condition));
-	}
-	
-	@Test
-	public void update_shouldThrowExceptionWhenConditionIdDoesNotMatchCurrentId() {
-		org.hl7.fhir.r4.model.Condition condition = new org.hl7.fhir.r4.model.Condition();
-		condition.setId(WRONG_CONDITION_UUID);
-		
-		assertThrows(InvalidRequestException.class, () -> conditionService.update(CONDITION_UUID, condition));
-	}
-	
-	@Test
-	public void delete_shouldDeleteExistingCondition() {
-		Condition openmrsCondition = new Condition();
-		openmrsCondition.setUuid(CONDITION_UUID);
-		
-		org.hl7.fhir.r4.model.Condition condition = new org.hl7.fhir.r4.model.Condition();
-		condition.setId(CONDITION_UUID);
-		
-		when(dao.delete(CONDITION_UUID)).thenReturn(openmrsCondition);
-		
-		conditionService.delete(CONDITION_UUID);
-	}
-	
-	@Test
-	public void delete_shouldThrowExceptionWhenIdIsNull() {
-		assertThrows(InvalidRequestException.class, () -> conditionService.delete(null));
-	}
-	
-	@Test
-	public void searchConditions_shouldReturnTranslatedConditionReturnedByDao() {
-		ReferenceAndListParam patientReference = new ReferenceAndListParam();
-		patientReference.addValue(new ReferenceOrListParam().add(new ReferenceParam(Patient.SP_GIVEN, "patient name")));
-		
-		TokenAndListParam codeList = new TokenAndListParam();
-		codeList.addValue(new TokenOrListParam().add(new TokenParam("test code")));
-		
-		TokenAndListParam clinicalList = new TokenAndListParam();
-		clinicalList.addValue(new TokenOrListParam().add(new TokenParam("test clinical")));
-		
-		DateRangeParam onsetDate = new DateRangeParam().setLowerBound("gt2020-05-01").setUpperBound("lt2021-05-01");
-		
-		QuantityAndListParam onsetAge = new QuantityAndListParam();
-		onsetAge.addValue(new QuantityOrListParam().add(new QuantityParam(12)));
-		
-		DateRangeParam recordDate = new DateRangeParam().setLowerBound("gt2020-05-01").setUpperBound("lt2021-05-01");
-		
-		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(CONDITION_UUID));
-		
-		TokenAndListParam category = new TokenAndListParam().addAnd(new TokenOrListParam()
-		        .add(FhirConstants.CONDITION_CATEGORY_SYSTEM_URI, FhirConstants.CONDITION_CATEGORY_CODE_CONDITION));
-		
-		DateRangeParam lastUpdated = new DateRangeParam().setLowerBound(LAST_UPDATED_DATE).setUpperBound(LAST_UPDATED_DATE);
-		
-		SortSpec sort = new SortSpec("sort param");
-		
-		HashSet<Include> includes = new HashSet<>();
-		
-		SearchParameterMap theParams = new SearchParameterMap()
-		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientReference)
-		        .addParameter(FhirConstants.CODED_SEARCH_HANDLER, codeList)
-		        .addParameter(FhirConstants.CONDITION_CLINICAL_STATUS_HANDLER, clinicalList)
-		        .addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER, onsetAge)
-		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, "onsetDate", onsetDate)
-		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, "dateCreated", recordDate)
-		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
-		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated)
-		        .setSortSpec(sort);
-		
-		List<Condition> daoResults = Collections.singletonList(openmrsCondition);
-		when(dao.getSearchResults(any())).thenReturn(daoResults);
-		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
-		    new SearchQueryBundleProvider<>(theParams, dao, conditionTranslator, globalPropertyService, searchQueryInclude));
-		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
-		when(conditionTranslator.toFhirResources(daoResults)).thenReturn(Collections.singletonList(fhirCondition));
-		
-		IBundleProvider result = conditionService.searchConditions(new ConditionSearchParams(patientReference, codeList,
-		        clinicalList, onsetDate, onsetAge, recordDate, category, uuid, lastUpdated, sort, includes));
-		
-		List<IBaseResource> resultList = get(result);
-		
-		assertThat(result, notNullValue());
-		assertThat(resultList, not(empty()));
-		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
-	}
-	
-	@Test
-	public void create_shouldDelegateToDiagnosisServiceForDiagnosis() {
-		org.hl7.fhir.r4.model.Condition condition = new org.hl7.fhir.r4.model.Condition();
-		CodeableConcept category = new CodeableConcept();
-		category.addCoding(
+	private static Condition newConditionWithBothCategories() {
+		Condition condition = newConditionWithCategory(FhirConstants.CONDITION_CATEGORY_CODE_CONDITION);
+		CodeableConcept alsoDiagnosis = new CodeableConcept();
+		alsoDiagnosis.addCoding(
 		    new Coding(FhirConstants.CONDITION_CATEGORY_SYSTEM_URI, FhirConstants.CONDITION_CATEGORY_CODE_DIAGNOSIS, null));
-		condition.addCategory(category);
-		
-		org.hl7.fhir.r4.model.Condition expected = new org.hl7.fhir.r4.model.Condition();
-		when(diagnosisService.create(condition)).thenReturn(expected);
-		
-		org.hl7.fhir.r4.model.Condition result = conditionService.create(condition);
-		assertThat(result, equalTo(expected));
+		condition.addCategory(alsoDiagnosis);
+		return condition;
 	}
 	
 	@Test
-	public void update_shouldDelegateToDiagnosisServiceForDiagnosis() {
-		org.hl7.fhir.r4.model.Condition condition = new org.hl7.fhir.r4.model.Condition();
-		condition.setId(CONDITION_UUID);
-		CodeableConcept category = new CodeableConcept();
-		category.addCoding(
-		    new Coding(FhirConstants.CONDITION_CATEGORY_SYSTEM_URI, FhirConstants.CONDITION_CATEGORY_CODE_DIAGNOSIS, null));
-		condition.addCategory(category);
+	public void create_shouldDispatchToConditionHandlerForKnownCondition() {
+		Condition condition = newConditionWithCategory(FhirConstants.CONDITION_CATEGORY_CODE_CONDITION);
+		when(conditionHandler.create(condition)).thenReturn(condition);
 		
-		org.hl7.fhir.r4.model.Condition expected = new org.hl7.fhir.r4.model.Condition();
-		when(diagnosisService.update(CONDITION_UUID, condition)).thenReturn(expected);
-		org.hl7.fhir.r4.model.Condition result = conditionService.update(CONDITION_UUID, condition);
-		assertThat(result, equalTo(expected));
+		service.create(condition);
+		
+		verify(conditionHandler).create(condition);
+		verify(diagnosisHandler, never()).create(any());
 	}
 	
 	@Test
-	public void shouldSearchExplicitlyFor_shouldReturnTrueForNullParam() {
-		boolean result = conditionService.shouldSearchExplicitlyFor(null, FhirConstants.CONDITION_CATEGORY_CODE_CONDITION);
+	public void create_shouldDispatchToDiagnosisHandlerForEncounterDiagnosis() {
+		Condition condition = newConditionWithCategory(FhirConstants.CONDITION_CATEGORY_CODE_DIAGNOSIS);
+		when(diagnosisHandler.create(condition)).thenReturn(condition);
 		
-		assertThat(result, equalTo(true));
+		service.create(condition);
+		
+		verify(diagnosisHandler).create(condition);
+		verify(conditionHandler, never()).create(any());
 	}
 	
 	@Test
-	public void shouldSearchExplicitlyFor_shouldReturnTrueWhenTagMatches() {
-		TokenAndListParam category = new TokenAndListParam().addAnd(new TokenOrListParam()
-		        .add(FhirConstants.CONDITION_CATEGORY_SYSTEM_URI, FhirConstants.CONDITION_CATEGORY_CODE_CONDITION));
+	public void create_shouldDispatchToConditionHandlerWhenNoCategoryProvided() {
+		Condition condition = new Condition();
+		when(conditionHandler.create(condition)).thenReturn(condition);
 		
-		boolean result = conditionService.shouldSearchExplicitlyFor(category,
-		    FhirConstants.CONDITION_CATEGORY_CODE_CONDITION);
+		service.create(condition);
 		
-		assertThat(result, equalTo(true));
+		verify(conditionHandler).create(condition);
+	}
+	
+	// ---- searchConditions: fan-out + category-based routing ----
+	
+	@Test
+	public void searchConditions_shouldFanOutToBothHandlersWhenNoCategory() {
+		when(conditionHandler.search(any())).thenReturn(bundleOf(3));
+		when(diagnosisHandler.search(any())).thenReturn(bundleOf(2));
+		
+		IBundleProvider results = service.searchConditions(new ConditionSearchParams());
+		List<IBaseResource> resultList = results.getResources(START_INDEX, END_INDEX);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, hasSize(5));
+		verify(conditionHandler).search(any());
+		verify(diagnosisHandler).search(any());
 	}
 	
 	@Test
-	public void shouldSearchExplicitlyFor_shouldReturnFalseWhenTagDoesNotMatch() {
-		TokenAndListParam category = new TokenAndListParam().addAnd(new TokenOrListParam()
-		        .add(FhirConstants.CONDITION_CATEGORY_SYSTEM_URI, FhirConstants.CONDITION_CATEGORY_CODE_DIAGNOSIS));
+	public void searchConditions_shouldRestrictToConditionHandlerForProblemListCategory() {
+		when(conditionHandler.search(any())).thenReturn(bundleOf(3));
 		
-		boolean result = conditionService.shouldSearchExplicitlyFor(category,
-		    FhirConstants.CONDITION_CATEGORY_CODE_CONDITION);
+		ConditionSearchParams params = ConditionSearchParams.builder().category(new TokenAndListParam().addAnd(
+		    new TokenParam(FhirConstants.CONDITION_CATEGORY_SYSTEM_URI, FhirConstants.CONDITION_CATEGORY_CODE_CONDITION)))
+		        .build();
 		
-		assertThat(result, equalTo(false));
+		IBundleProvider results = service.searchConditions(params);
+		List<IBaseResource> resultList = results.getResources(START_INDEX, END_INDEX);
+		
+		assertThat(resultList, hasSize(3));
+		verify(conditionHandler).search(any());
+		verify(diagnosisHandler, never()).search(any());
 	}
 	
 	@Test
-	public void get_shouldReturnDiagnosisWhenConditionNotFound() {
-		when(dao.get(CONDITION_UUID)).thenReturn(null);
-		org.hl7.fhir.r4.model.Condition diagnosis = new org.hl7.fhir.r4.model.Condition();
+	public void searchConditions_shouldRestrictToDiagnosisHandlerForEncounterDiagnosisCategory() {
+		when(diagnosisHandler.search(any())).thenReturn(bundleOf(2));
+		
+		ConditionSearchParams params = ConditionSearchParams.builder().category(new TokenAndListParam().addAnd(
+		    new TokenParam(FhirConstants.CONDITION_CATEGORY_SYSTEM_URI, FhirConstants.CONDITION_CATEGORY_CODE_DIAGNOSIS)))
+		        .build();
+		
+		IBundleProvider results = service.searchConditions(params);
+		List<IBaseResource> resultList = results.getResources(START_INDEX, END_INDEX);
+		
+		assertThat(resultList, hasSize(2));
+		verify(diagnosisHandler).search(any());
+		verify(conditionHandler, never()).search(any());
+	}
+	
+	@Test
+	public void searchConditions_shouldApplyCategoryWhenRoutedByProfile() {
+		ProfileRoutingContext profileRoutingContext = new ProfileRoutingContext();
+		profileRoutingContext.setRequestedProfiles("Condition", Collections.singletonList(DIAGNOSIS_PROFILE));
+		service.setProfileRoutingContext(profileRoutingContext);
+		
+		ConditionSearchParams params = ConditionSearchParams.builder().category(new TokenAndListParam().addAnd(
+		    new TokenParam(FhirConstants.CONDITION_CATEGORY_SYSTEM_URI, FhirConstants.CONDITION_CATEGORY_CODE_CONDITION)))
+		        .build();
+		
+		IBundleProvider results = service.searchConditions(params);
+		
+		assertThat(results.getResources(START_INDEX, END_INDEX), empty());
+		verify(diagnosisHandler, never()).search(any());
+		verify(conditionHandler, never()).search(any());
+	}
+	
+	@Test
+	public void searchConditions_shouldFanOutWhenCategoryOrListMatchesBoth() {
+		when(conditionHandler.search(any())).thenReturn(bundleOf(3));
+		when(diagnosisHandler.search(any())).thenReturn(bundleOf(2));
+		
+		TokenOrListParam orList = new TokenOrListParam();
+		orList.add(FhirConstants.CONDITION_CATEGORY_SYSTEM_URI, FhirConstants.CONDITION_CATEGORY_CODE_CONDITION);
+		orList.add(FhirConstants.CONDITION_CATEGORY_SYSTEM_URI, FhirConstants.CONDITION_CATEGORY_CODE_DIAGNOSIS);
+		
+		ConditionSearchParams params = ConditionSearchParams.builder().category(new TokenAndListParam().addAnd(orList))
+		        .build();
+		
+		IBundleProvider results = service.searchConditions(params);
+		List<IBaseResource> resultList = results.getResources(START_INDEX, END_INDEX);
+		
+		assertThat(resultList, hasSize(5));
+	}
+	
+	// ---- get / update / patch / delete: ownership by uuid ----
+	
+	@Test
+	public void get_shouldFallThroughToDiagnosisHandlerWhenConditionHandlerDoesNotKnowTheUuid() {
+		// given
+		Condition diagnosis = new Condition();
 		diagnosis.setId(CONDITION_UUID);
-		when(diagnosisService.get(CONDITION_UUID)).thenReturn(diagnosis);
+		when(conditionHandler.get(CONDITION_UUID)).thenThrow(new ResourceNotFoundException("not a condition"));
+		when(diagnosisHandler.get(CONDITION_UUID)).thenReturn(diagnosis);
 		
-		org.hl7.fhir.r4.model.Condition result = conditionService.get(CONDITION_UUID);
+		// when
+		Condition result = service.get(CONDITION_UUID);
 		
-		assertThat(result, equalTo(diagnosis));
+		// then
+		assertThat(result, sameInstance(diagnosis));
+		assertThat(result.getMeta().getProfile().get(0).getValue(), equalTo(DIAGNOSIS_PROFILE));
 	}
 	
 	@Test
-	public void delete_shouldDelegateToDiagnosisServiceWhenConditionMissing() {
-		when(dao.delete(CONDITION_UUID)).thenReturn(null);
+	public void update_shouldRouteToConditionHandlerWhenItOwnsTheUuid() {
+		// given
+		Condition condition = newConditionWithCategory(FhirConstants.CONDITION_CATEGORY_CODE_CONDITION);
+		when(conditionHandler.exists(CONDITION_UUID)).thenReturn(true);
+		when(conditionHandler.update(CONDITION_UUID, condition, null, false)).thenReturn(condition);
 		
-		conditionService.delete(CONDITION_UUID);
+		// when
+		Condition result = service.update(CONDITION_UUID, condition);
 		
-		verify(diagnosisService).delete(CONDITION_UUID);
+		// then
+		assertThat(result, sameInstance(condition));
+		verify(diagnosisHandler, never()).update(any(), any(), any(), anyBoolean());
 	}
 	
 	@Test
-	public void searchConditions_shouldReturnDiagnosisBundleWhenOnlyDiagnosisMatches() {
-		TokenAndListParam category = new TokenAndListParam().addAnd(new TokenOrListParam()
-		        .add(FhirConstants.CONDITION_CATEGORY_SYSTEM_URI, FhirConstants.CONDITION_CATEGORY_CODE_DIAGNOSIS));
+	public void update_shouldRouteToDiagnosisHandlerWhenItOwnsTheUuid() {
+		// given
+		Condition condition = newConditionWithCategory(FhirConstants.CONDITION_CATEGORY_CODE_DIAGNOSIS);
+		when(conditionHandler.exists(CONDITION_UUID)).thenReturn(false);
+		when(diagnosisHandler.exists(CONDITION_UUID)).thenReturn(true);
+		when(diagnosisHandler.update(CONDITION_UUID, condition, null, false)).thenReturn(condition);
 		
-		IBundleProvider diagBundle = new SimpleBundleProvider();
-		when(diagnosisService.searchDiagnoses(any(DiagnosisSearchParams.class))).thenReturn(diagBundle);
+		// when
+		Condition result = service.update(CONDITION_UUID, condition);
 		
-		IBundleProvider result = conditionService.searchConditions(
-		    new ConditionSearchParams(null, null, null, null, null, null, category, null, null, null, new HashSet<>()));
+		// then
+		assertThat(result, sameInstance(condition));
+		verify(conditionHandler, never()).update(any(), any(), any(), anyBoolean());
+	}
+	
+	/**
+	 * An uncategorised body would be claimed by the condition backing on create, but an update targets
+	 * an existing row, so the backing that already holds the uuid must receive it.
+	 */
+	@Test
+	public void update_shouldRouteByOwnershipRatherThanContent() {
+		// given
+		Condition uncategorised = new Condition();
+		when(conditionHandler.exists(CONDITION_UUID)).thenReturn(false);
+		when(diagnosisHandler.exists(CONDITION_UUID)).thenReturn(true);
+		when(diagnosisHandler.update(CONDITION_UUID, uncategorised, null, false)).thenReturn(uncategorised);
 		
-		assertThat(result, sameInstance(diagBundle));
+		// when
+		Condition result = service.update(CONDITION_UUID, uncategorised);
+		
+		// then
+		assertThat(result, sameInstance(uncategorised));
+		verify(conditionHandler, never()).update(any(), any(), any(), anyBoolean());
 	}
 	
 	@Test
-	public void searchConditions_shouldReturnTwoBundleProviderWhenBothMatch() {
-		TokenAndListParam category = new TokenAndListParam()
-		        .addAnd(new TokenOrListParam().add(FhirConstants.CONDITION_CATEGORY_SYSTEM_URI,
-		            FhirConstants.CONDITION_CATEGORY_CODE_DIAGNOSIS))
-		        .addAnd(new TokenOrListParam().add(FhirConstants.CONDITION_CATEGORY_SYSTEM_URI,
-		            FhirConstants.CONDITION_CATEGORY_CODE_CONDITION));
+	public void patch_shouldRouteToDiagnosisHandlerWhenItOwnsTheUuid() {
+		// given
+		Condition patched = new Condition();
+		when(conditionHandler.exists(CONDITION_UUID)).thenReturn(false);
+		when(diagnosisHandler.exists(CONDITION_UUID)).thenReturn(true);
+		when(diagnosisHandler.patch(CONDITION_UUID, PatchTypeEnum.JSON_PATCH, "[]", null)).thenReturn(patched);
 		
-		IBundleProvider diagBundle = new SimpleBundleProvider();
-		IBundleProvider condBundle = new SimpleBundleProvider();
-		when(diagnosisService.searchDiagnoses(any(DiagnosisSearchParams.class))).thenReturn(diagBundle);
-		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(condBundle);
+		// when
+		Condition result = service.patch(CONDITION_UUID, PatchTypeEnum.JSON_PATCH, "[]", null);
 		
-		IBundleProvider result = conditionService.searchConditions(
-		    new ConditionSearchParams(null, null, null, null, null, null, category, null, null, null, new HashSet<>()));
-		
-		assertThat(result instanceof TwoSearchQueryBundleProvider, equalTo(true));
+		// then
+		assertThat(result, sameInstance(patched));
+		verify(conditionHandler, never()).patch(any(), any(), any(), any());
 	}
 	
 	@Test
-	public void searchConditions_shouldReturnConditionBundleWhenOnlyConditionMatches() {
-		TokenAndListParam category = new TokenAndListParam().addAnd(new TokenOrListParam()
-		        .add(FhirConstants.CONDITION_CATEGORY_SYSTEM_URI, FhirConstants.CONDITION_CATEGORY_CODE_CONDITION));
+	public void delete_shouldRouteToDiagnosisHandlerWhenItOwnsTheUuid() {
+		// given
+		when(conditionHandler.exists(CONDITION_UUID)).thenReturn(false);
+		when(diagnosisHandler.exists(CONDITION_UUID)).thenReturn(true);
 		
-		IBundleProvider condBundle = new SimpleBundleProvider();
-		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(condBundle);
+		// when
+		service.delete(CONDITION_UUID);
 		
-		IBundleProvider result = conditionService.searchConditions(
-		    new ConditionSearchParams(null, null, null, null, null, null, category, null, null, null, new HashSet<>()));
-		
-		assertThat(result, sameInstance(condBundle));
+		// then
+		verify(diagnosisHandler).delete(CONDITION_UUID);
+		verify(conditionHandler, never()).delete(any());
 	}
 	
 	@Test
-	public void searchConditions_shouldReturnEmptyBundleWhenNoMatches() {
-		TokenAndListParam category = new TokenAndListParam();
+	public void update_shouldThrowResourceNotFoundForUnknownUuid() {
+		// given
+		Condition condition = newConditionWithCategory(FhirConstants.CONDITION_CATEGORY_CODE_CONDITION);
+		when(conditionHandler.exists(CONDITION_UUID)).thenReturn(false);
+		when(diagnosisHandler.exists(CONDITION_UUID)).thenReturn(false);
 		
-		IBundleProvider result = conditionService.searchConditions(
-		    new ConditionSearchParams(null, null, null, null, null, null, category, null, null, null, new HashSet<>()));
-		
-		assertThat(result.getResources(0, 1), empty());
+		// when / then
+		assertThrows(ResourceNotFoundException.class, () -> service.update(CONDITION_UUID, condition));
+		verify(conditionHandler, never()).update(any(), any(), any(), anyBoolean());
+		verify(diagnosisHandler, never()).update(any(), any(), any(), anyBoolean());
 	}
 	
+	@Test
+	public void patch_shouldThrowResourceNotFoundForUnknownUuid() {
+		// given
+		when(conditionHandler.exists(CONDITION_UUID)).thenReturn(false);
+		when(diagnosisHandler.exists(CONDITION_UUID)).thenReturn(false);
+		
+		// when / then
+		assertThrows(ResourceNotFoundException.class,
+		    () -> service.patch(CONDITION_UUID, PatchTypeEnum.JSON_PATCH, "[]", null));
+		verify(conditionHandler, never()).patch(any(), any(), any(), any());
+		verify(diagnosisHandler, never()).patch(any(), any(), any(), any());
+	}
+	
+	@Test
+	public void delete_shouldThrowResourceNotFoundForUnknownUuid() {
+		// given
+		when(conditionHandler.exists(CONDITION_UUID)).thenReturn(false);
+		when(diagnosisHandler.exists(CONDITION_UUID)).thenReturn(false);
+		
+		// when / then
+		assertThrows(ResourceNotFoundException.class, () -> service.delete(CONDITION_UUID));
+		verify(conditionHandler, never()).delete(any());
+		verify(diagnosisHandler, never()).delete(any());
+	}
+	
+	private static Condition newConditionWithCategory(String code) {
+		Condition condition = new Condition();
+		CodeableConcept cc = new CodeableConcept();
+		cc.addCoding(new Coding(FhirConstants.CONDITION_CATEGORY_SYSTEM_URI, code, null));
+		condition.addCategory(cc);
+		return condition;
+	}
+	
+	private static IBundleProvider bundleOf(int n) {
+		List<Condition> rows = new ArrayList<>(n);
+		for (int i = 0; i < n; i++) {
+			rows.add(new Condition());
+		}
+		return new MockIBundleProvider<>(rows, 10, 1);
+	}
 }

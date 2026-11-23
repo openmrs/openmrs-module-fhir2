@@ -39,6 +39,7 @@ import org.openmrs.PatientIdentifier;
 import org.openmrs.PersonAddress;
 import org.openmrs.PersonAttribute;
 import org.openmrs.PersonName;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirPersonDao;
@@ -50,6 +51,7 @@ import org.openmrs.module.fhir2.api.translators.PersonAddressTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonAttributeTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonNameTranslator;
 import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
+import org.openmrs.util.PrivilegeConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -149,7 +151,8 @@ public class PatientTranslatorImpl implements PatientTranslator {
 		String personContactAttributeType = globalPropertyService
 		        .getGlobalProperty(FhirConstants.PERSON_CONTACT_POINT_ATTRIBUTE_TYPE);
 		
-		if (personContactAttributeType == null || personContactAttributeType.isEmpty()) {
+		if (personContactAttributeType == null || personContactAttributeType.isEmpty()
+		        || !Context.hasPrivilege(PrivilegeConstants.GET_PERSON_ATTRIBUTE_TYPES)) {
 			return Collections.emptyList();
 		}
 		

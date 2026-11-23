@@ -69,10 +69,7 @@ public class TaskSearchParams extends BaseResourceSearchParams {
 		
 	}
 	
-	/**
-	 * Backward-compatible 9-arg overload (without focusReference) so existing callers (R3 provider,
-	 * ServiceRequest translator, etc.) continue to compile unchanged.
-	 */
+	/** Equivalent to the full constructor with no {@code focusReference}. */
 	public TaskSearchParams(ReferenceAndListParam basedOnReference, ReferenceAndListParam ownerReference,
 	    ReferenceAndListParam forReference, TokenAndListParam taskCode, TokenAndListParam status, TokenAndListParam id,
 	    DateRangeParam lastUpdated, SortSpec sort, HashSet<Include> includes) {

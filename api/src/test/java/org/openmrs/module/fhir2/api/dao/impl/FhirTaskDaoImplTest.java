@@ -451,7 +451,7 @@ public class FhirTaskDaoImplTest extends BaseFhirContextSensitiveTest {
 	
 	@Test
 	public void searchForTasks_shouldReturnTasksByFocusReference() {
-		//given — save a task with a focus reference, then search by it
+		//given
 		FhirTask toUpdate = dao.get(TASK_UUID);
 		
 		FhirReference focusRef = new FhirReference();

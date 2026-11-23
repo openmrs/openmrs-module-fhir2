@@ -20,13 +20,10 @@ public final class FhirConstants {
 	
 	/**
 	 * The HAPI interceptor order this module uses for its own interceptors, so that they dispatch ahead
-	 * of anything at {@code Interceptor.DEFAULT_ORDER} however late this module registers them. A bean
-	 * contributed with {@code org.openmrs.module.fhir2.api.annotations.FhirInterceptor} is held at or
-	 * above the default order, so it cannot precede them.
-	 * <p>
-	 * This is a convention, not a barrier: only beans that arrive through {@code FhirInterceptor} are
-	 * checked. Code that registers an interceptor on the servlet directly can still declare a lower
-	 * order and run first.
+	 * of anything at {@code Interceptor.DEFAULT_ORDER} however late this module registers them. Beans
+	 * contributed with {@code org.openmrs.module.fhir2.api.annotations.FhirInterceptor} are held at or
+	 * above the default order, but code that registers an interceptor on the servlet directly can still
+	 * declare a lower order and run first.
 	 * <p>
 	 * Deliberately a small magnitude rather than {@code Integer.MIN_VALUE}: HAPI compares two orders
 	 * with {@code a - b}, which overflows and inverts the comparison near the extremes of int.
@@ -142,6 +139,20 @@ public final class FhirConstants {
 	public static final String OPENMRS_FHIR_EXT_MEDICATION_REQUEST_FULFILLER_STATUS = OPENMRS_FHIR_EXT_PREFIX
 	        + "/medicationrequest/fulfillerstatus";
 	
+	public static final String OPENMRS_FHIR_EXT_DIAGNOSIS_RANK = OPENMRS_FHIR_EXT_PREFIX + "/diagnosis-rank";
+	
+	/**
+	 * The diagnosis rank extension URL emitted by releases before
+	 * {@link #OPENMRS_FHIR_EXT_DIAGNOSIS_RANK} replaced it. Still accepted on input so that clients
+	 * round-tripping an older {@code Condition} keep their rank.
+	 *
+	 * @deprecated use {@link #OPENMRS_FHIR_EXT_DIAGNOSIS_RANK}
+	 */
+	@Deprecated
+	public static final String DIAGNOSIS_RANK_EXTENSION_URI = "http://fhir.openmrs.org/R4/StructureDefinition/diagnosis-rank";
+	
+	public static final String OPENMRS_FHIR_STRUCTURE_DEFINITION_PREFIX = OPENMRS_FHIR_PREFIX + "/StructureDefinition";
+	
 	public static final String OPENMRS_FHIR_DEFAULT_PAGE_SIZE = "fhir2.paging.default";
 	
 	public static final String OPENMRS_FHIR_MAXIMUM_PAGE_SIZE = "fhir2.paging.maximum";
@@ -185,6 +196,18 @@ public final class FhirConstants {
 	public static final String SERVICE_REQUEST = "ServiceRequest";
 	
 	public static final String TASK = "Task";
+	
+	/*
+	 * Privileges for the module-owned Task table, declared in config.xml. Core defines no Task
+	 * privileges of its own.
+	 */
+	public static final String GET_TASKS_PRIVILEGE = "Get FHIR Tasks";
+	
+	public static final String ADD_TASKS_PRIVILEGE = "Add FHIR Tasks";
+	
+	public static final String EDIT_TASKS_PRIVILEGE = "Edit FHIR Tasks";
+	
+	public static final String DELETE_TASKS_PRIVILEGE = "Delete FHIR Tasks";
 	
 	public static final String DIAGNOSTIC_REPORT_CATEGORY_LAB = "LAB";
 	
@@ -405,8 +428,6 @@ public final class FhirConstants {
 	public static final String CONDITION_CATEGORY_CODE_CONDITION = "problem-list-item";
 	
 	public static final String CONDITION_CATEGORY_CODE_DIAGNOSIS = "encounter-diagnosis";
-	
-	public static final String DIAGNOSIS_RANK_EXTENSION_URI = "http://fhir.openmrs.org/R4/StructureDefinition/diagnosis-rank";
 	
 	public static final String CONDITION_CLINICAL_SYSTEM_URI = HL7_FHIR_CODE_SYSTEM_PREFIX + "/condition-clinical";
 	

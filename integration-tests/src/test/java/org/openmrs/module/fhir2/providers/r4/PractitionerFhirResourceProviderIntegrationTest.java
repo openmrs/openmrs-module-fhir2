@@ -12,12 +12,15 @@ package org.openmrs.module.fhir2.providers.r4;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.equalToIgnoringCase;
 import static org.hamcrest.Matchers.everyItem;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.startsWith;
 import static org.openmrs.module.fhir2.api.util.GeneralUtils.inputStreamToString;
@@ -514,6 +517,35 @@ public class PractitionerFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R4/Practitioner/"))));
 		assertThat(entries, everyItem(hasResource(instanceOf(Practitioner.class))));
 		assertThat(entries, everyItem(hasResource(validResource())));
+	}
+	
+	@Test
+	public void shouldSearchForPractitionersByNameAsJson() throws Exception {
+		MockHttpServletResponse response = get("/Practitioner?given=John&family=Doe").accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
+		
+		Bundle results = readBundleResponse(response);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(results.getEntry(), hasItem(hasProperty("fullUrl", endsWith("/Practitioner/" + PRACTITIONER_UUID))));
+	}
+	
+	@Test
+	public void shouldNotReturnPractitionerWithNonMatchingAddressAsJson() throws Exception {
+		MockHttpServletResponse response = get("/Practitioner?address-city=Nowhere").accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
+		
+		Bundle results = readBundleResponse(response);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(results.getEntry(),
+		    not(hasItem(hasProperty("fullUrl", endsWith("/Practitioner/" + PRACTITIONER_UUID)))));
 	}
 	
 	@Test

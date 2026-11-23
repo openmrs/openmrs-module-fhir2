@@ -16,6 +16,8 @@ import java.util.Optional;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.r4.model.Identifier;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.module.fhir2.api.FhirPatientIdentifierSystemService;
 import org.openmrs.module.fhir2.api.dao.FhirPatientIdentifierSystemDao;
@@ -36,6 +38,17 @@ public class FhirPatientIdentifierSystemServiceImpl implements FhirPatientIdenti
 	@Cacheable("fhir2GetFhirUrlForIdentifier")
 	public String getUrlByPatientIdentifierType(@Nonnull PatientIdentifierType patientIdentifierType) {
 		return dao.getUrlByPatientIdentifierType(patientIdentifierType);
+	}
+	
+	@Override
+	public PatientIdentifierType getPatientIdentifierTypeByIdentifier(Identifier identifier) {
+		if (identifier.hasSystem()) {
+			return dao.getPatientIdentifierTypeByUrl(identifier.getSystem());
+		}
+		if (identifier.getType() == null || StringUtils.isBlank(identifier.getType().getText())) {
+			return null;
+		}
+		return dao.getPatientIdentifierTypeByNameOrUuid(identifier.getType().getText(), null);
 	}
 	
 	@Override

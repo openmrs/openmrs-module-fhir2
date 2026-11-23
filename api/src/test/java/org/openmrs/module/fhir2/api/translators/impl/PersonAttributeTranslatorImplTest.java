@@ -36,7 +36,7 @@ import org.openmrs.PersonAttributeType;
 import org.openmrs.api.PersonService;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirConceptService;
-import org.openmrs.module.fhir2.api.FhirLocationService;
+import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.LocationReferenceTranslator;
 
@@ -64,7 +64,7 @@ public class PersonAttributeTranslatorImplTest {
 	private static final String LOCATION_NAME = "Test Location";
 	
 	@Mock
-	private FhirLocationService locationService;
+	private FhirLocationDao locationDao;
 	
 	@Mock
 	private PersonService personService;
@@ -162,7 +162,7 @@ public class PersonAttributeTranslatorImplTest {
 		locationReference.setType(FhirConstants.LOCATION);
 		locationReference.setDisplay(LOCATION_NAME);
 		
-		when(locationService.get(LOCATION_ATTRIBUTE_ID)).thenReturn(location);
+		when(locationDao.get(LOCATION_ATTRIBUTE_ID)).thenReturn(location);
 		when(locationReferenceTranslator.toFhirResource(location)).thenReturn(locationReference);
 		
 		Extension result = personAttributeTranslator.toFhirResource(personAttribute);
@@ -342,7 +342,7 @@ public class PersonAttributeTranslatorImplTest {
 		location.setId(LOCATION_ATTRIBUTE_ID);
 		location.setUuid(LOCATION_ATTRIBUTE_UUID_VALUE);
 		
-		when(locationService.getByUuid(LOCATION_ATTRIBUTE_UUID_VALUE)).thenReturn(location);
+		when(locationDao.get(LOCATION_ATTRIBUTE_UUID_VALUE)).thenReturn(location);
 		
 		PersonAttribute result = personAttributeTranslator.toOpenmrsType(extension);
 		

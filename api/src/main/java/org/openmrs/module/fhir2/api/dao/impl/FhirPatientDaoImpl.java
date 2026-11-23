@@ -20,10 +20,8 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 
@@ -36,7 +34,6 @@ import lombok.NonNull;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.CohortMembership;
 import org.openmrs.Patient;
-import org.openmrs.PatientIdentifierType;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirPatientDao;
 import org.openmrs.module.fhir2.api.dao.internals.OpenmrsFhirCriteriaContext;
@@ -56,47 +53,6 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 		
 		TypedQuery<Patient> query = criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery());
 		return query.getResultList().stream().findFirst().orElse(null);
-	}
-	
-	@Override
-	public List<Patient> getPatientsByIds(@Nonnull Collection<Integer> ids) {
-		OpenmrsFhirCriteriaContext<Patient, Patient> criteriaContext = createCriteriaContext(Patient.class);
-		
-		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot());
-		criteriaContext.getCriteriaQuery().where(criteriaContext.getRoot().get("id").in(ids));
-		return criteriaContext.getEntityManager().createQuery(criteriaContext.getCriteriaQuery()).getResultList();
-	}
-	
-	@Override
-	public PatientIdentifierType getPatientIdentifierTypeByNameOrUuid(String name, String uuid) {
-		OpenmrsFhirCriteriaContext<PatientIdentifierType, PatientIdentifierType> criteriaContext = createCriteriaContext(
-		    PatientIdentifierType.class);
-		criteriaContext.getCriteriaQuery().select(criteriaContext.getRoot())
-		        .where(
-		            criteriaContext
-		                    .getCriteriaBuilder().or(
-		                        criteriaContext.getCriteriaBuilder().and(
-		                            criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("name"), name),
-		                            criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("retired"),
-		                                false)),
-		                        criteriaContext.getCriteriaBuilder().equal(criteriaContext.getRoot().get("uuid"), uuid)));
-		List<PatientIdentifierType> identifierTypes = criteriaContext.getEntityManager()
-		        .createQuery(criteriaContext.getCriteriaQuery()).getResultList();
-		
-		if (identifierTypes.isEmpty()) {
-			return null;
-		} else {
-			// favour uuid if one was supplied
-			if (uuid != null) {
-				try {
-					return identifierTypes.stream().filter((idType) -> uuid.equals(idType.getUuid())).findFirst()
-					        .orElse(identifierTypes.get(0));
-				}
-				catch (NoSuchElementException ignored) {}
-			}
-			
-			return identifierTypes.get(0);
-		}
 	}
 	
 	@Override

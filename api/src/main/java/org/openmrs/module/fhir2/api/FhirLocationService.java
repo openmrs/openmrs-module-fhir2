@@ -15,9 +15,5 @@ import org.openmrs.module.fhir2.api.search.param.LocationSearchParams;
 
 public interface FhirLocationService extends FhirService<Location> {
 	
-	org.openmrs.Location get(Integer id);
-	
-	org.openmrs.Location getByUuid(String uuid);
-	
 	IBundleProvider searchForLocations(LocationSearchParams locationSearchParams);
 }

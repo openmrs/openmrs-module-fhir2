@@ -33,6 +33,9 @@ public class FhirPersonDaoImplTest extends BaseFhirContextSensitiveTest {
 	
 	private static final String WRONG_PERSON_UUID = "wrong_person_uuid";
 	
+	// Patient (patient_id 7) from the standard test dataset
+	private static final String PATIENT_UUID = "5946f880-b197-400b-9caa-a3c661d23041";
+	
 	private static final String PERSON_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirPersonDaoImplTest_initial_data.xml";
 	
 	private static final String GIVEN_NAME = "John";
@@ -65,6 +68,19 @@ public class FhirPersonDaoImplTest extends BaseFhirContextSensitiveTest {
 	public void getPersonByWithWrongUuid_shouldReturnNullPerson() {
 		Person person = fhirPersonDao.get(WRONG_PERSON_UUID);
 		assertThat(person, nullValue());
+	}
+	
+	@Test
+	public void exists_shouldReturnTrueForPatient() {
+		// given
+		// every Patient is also a Person
+		String uuid = PATIENT_UUID;
+		
+		// when
+		boolean result = fhirPersonDao.exists(uuid);
+		
+		// then
+		assertThat(result, equalTo(true));
 	}
 	
 	@Test

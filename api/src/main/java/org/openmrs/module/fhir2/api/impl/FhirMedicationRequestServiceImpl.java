@@ -10,43 +10,18 @@
 package org.openmrs.module.fhir2.api.impl;
 
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
 import org.hl7.fhir.r4.model.MedicationRequest;
-import org.openmrs.DrugOrder;
 import org.openmrs.module.fhir2.api.FhirMedicationRequestService;
-import org.openmrs.module.fhir2.api.dao.FhirMedicationRequestDao;
-import org.openmrs.module.fhir2.api.search.SearchQuery;
-import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.MedicationRequestSearchParams;
-import org.openmrs.module.fhir2.api.translators.MedicationRequestTranslator;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
-public class FhirMedicationRequestServiceImpl extends BaseFhirService<MedicationRequest, org.openmrs.DrugOrder> implements FhirMedicationRequestService {
-	
-	@Getter(value = AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
-	private FhirMedicationRequestDao dao;
-	
-	@Getter(value = AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
-	private MedicationRequestTranslator translator;
-	
-	@Getter(value = AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
-	private SearchQueryInclude<MedicationRequest> searchQueryInclude;
-	
-	@Getter(value = AccessLevel.PROTECTED)
-	@Setter(value = AccessLevel.PACKAGE, onMethod_ = @Autowired)
-	private SearchQuery<DrugOrder, MedicationRequest, FhirMedicationRequestDao, MedicationRequestTranslator, SearchQueryInclude<MedicationRequest>> searchQuery;
+public class FhirMedicationRequestServiceImpl extends BaseCompositeFhirService<MedicationRequest> implements FhirMedicationRequestService {
 	
 	@Override
+	@Transactional(readOnly = true)
 	public IBundleProvider searchForMedicationRequests(MedicationRequestSearchParams medicationRequestSearchParams) {
-		return searchQuery.getQueryResults(medicationRequestSearchParams.toSearchParameterMap(), dao, translator,
-		    searchQueryInclude);
+		return doSearch(medicationRequestSearchParams.toSearchParameterMap());
 	}
-	
 }
