@@ -149,6 +149,8 @@ public class ConditionTranslatorImpl implements ConditionTranslator<Condition> {
 			existingCondition.setEndDate(condition.getAbatementDateTimeType().getValue());
 		} else if (condition.hasAbatementPeriod()) {
 			existingCondition.setEndDate(condition.getAbatementPeriod().getEnd());
+		} else {
+			existingCondition.setEndDate(null);
 		}
 		
 		existingCondition.setCreator(practitionerReferenceTranslator.toOpenmrsType(condition.getRecorder()));

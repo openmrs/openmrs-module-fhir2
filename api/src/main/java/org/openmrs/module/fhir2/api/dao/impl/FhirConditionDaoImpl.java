@@ -83,7 +83,7 @@ public class FhirConditionDaoImpl extends BaseFhirDao<Condition> implements Fhir
 		handleAndListParam(criteriaContext.getCriteriaBuilder(), status,
 		    tokenParam -> Optional.of(criteriaContext.getCriteriaBuilder()
 		            .equal(criteriaContext.getRoot().get("clinicalStatus"), convertStatus(tokenParam.getValue()))))
-		                    .ifPresent(criteriaContext::addPredicate);
+		        .ifPresent(criteriaContext::addPredicate);
 	}
 	
 	private ConditionClinicalStatus convertStatus(String status) {
@@ -97,7 +97,7 @@ public class FhirConditionDaoImpl extends BaseFhirDao<Condition> implements Fhir
 	        QuantityAndListParam onsetAge) {
 		handleAndListParam(criteriaContext.getCriteriaBuilder(), onsetAge,
 		    onsetAgeParam -> getSearchQueryHelper().handleAgeByDateProperty(criteriaContext, "onsetDate", onsetAgeParam))
-		            .ifPresent(criteriaContext::addPredicate);
+		        .ifPresent(criteriaContext::addPredicate);
 	}
 	
 	@Override

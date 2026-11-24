@@ -56,7 +56,7 @@ public class EncounterFhirResourceProvider_2_7IntegrationTest extends BaseFhirR4
 		// note that we restrict by date to rule out encounters from standard test data set
 		MockHttpServletResponse response = get(
 		    "/Encounter/?_query=encountersWithMedicationRequests&date=ge2009-01-01&status=active")
-		            .accept(BaseFhirIntegrationTest.FhirMediaTypes.JSON).go();
+		        .accept(BaseFhirIntegrationTest.FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentAsString(), notNullValue());

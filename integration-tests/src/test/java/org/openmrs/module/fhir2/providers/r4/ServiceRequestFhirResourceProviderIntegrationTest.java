@@ -184,7 +184,7 @@ public class ServiceRequestFhirResourceProviderIntegrationTest extends BaseFhirR
 		
 		MockHttpServletResponse response = get("/ServiceRequest?_lastUpdated=ge" + VISIT_DATE_CREATED + "&_lastUpdated=lt"
 		        + VISIT_DAY_AFTER_CREATED + "&_include=ServiceRequest:encounter&_include:iterate=Encounter:part-of")
-		                .accept(FhirMediaTypes.JSON).go();
+		        .accept(FhirMediaTypes.JSON).go();
 		
 		assertEncounterAndVisitIncluded(response);
 	}
