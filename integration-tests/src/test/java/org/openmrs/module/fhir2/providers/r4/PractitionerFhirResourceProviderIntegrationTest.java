@@ -544,8 +544,7 @@ public class PractitionerFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		
 		assertThat(results, notNullValue());
 		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
-		assertThat(results.getEntry(),
-		    not(hasItem(hasProperty("fullUrl", endsWith("/Practitioner/" + PRACTITIONER_UUID)))));
+		assertThat(results.getEntry(), not(hasItem(hasProperty("fullUrl", endsWith("/Practitioner/" + PRACTITIONER_UUID)))));
 	}
 	
 	@Test

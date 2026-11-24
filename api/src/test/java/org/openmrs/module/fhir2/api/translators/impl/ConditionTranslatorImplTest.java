@@ -15,6 +15,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -289,6 +290,17 @@ public class ConditionTranslatorImplTest {
 		assertThat(condition, notNullValue());
 		assertThat(condition.getEndDate(), notNullValue());
 		assertThat(condition.getEndDate(), sameDay(new Date()));
+	}
+	
+	@Test
+	public void shouldClearEndDateWhenFhirConditionHasNoAbatement() {
+		org.openmrs.Condition existingCondition = new org.openmrs.Condition();
+		existingCondition.setEndDate(new Date());
+		
+		org.openmrs.Condition condition = conditionTranslator.toOpenmrsType(existingCondition, fhirCondition);
+		
+		assertThat(condition, notNullValue());
+		assertThat(condition.getEndDate(), nullValue());
 	}
 	
 	@Test

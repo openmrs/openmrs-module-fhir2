@@ -208,7 +208,7 @@ public class ProfileRoutingWebTest extends BaseFhirR4ResourceProviderWebTest<Enc
 		// when
 		MockHttpServletResponse response = get(
 		    "/Location?_profile=" + LOCATION_PROFILE + "," + VISIT_PROFILE + "&_revinclude=Encounter:location")
-		            .accept(FhirMediaTypes.JSON).go();
+		        .accept(FhirMediaTypes.JSON).go();
 		
 		// then
 		assertThat(response, isOk());
