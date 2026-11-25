@@ -495,6 +495,36 @@ public class ConceptTranslatorImplTest {
 	}
 	
 	@Test
+	public void shouldTranslateCodeableConceptToConceptIfSingleConceptHasSameCodeWithDifferentMapTypes() {
+		addMapping(concept, broaderThan, ciel, "1650");
+		addMapping(concept, narrowerThan, ciel, "1650");
+		
+		CodeableConcept codeableConcept = new CodeableConcept();
+		Coding cielCoding = codeableConcept.addCoding();
+		cielCoding.setSystem(FhirTestConstants.CIEL_SYSTEM_URN);
+		cielCoding.setCode("1650");
+		
+		when(conceptService.getConceptsWithAnyMappingInSource(ciel, "1650")).thenReturn(Arrays.asList(concept));
+		
+		Concept result = conceptTranslator.toOpenmrsType(codeableConcept);
+		assertThat(result, notNullValue());
+		assertThat(result.getUuid(), equalTo(CONCEPT_UUID));
+	}
+	
+	@Test
+	public void shouldAddOneCodingIfSameCodeIsMappedWithDifferentNonSAME_ASMapTypes() {
+		addMapping(broaderThan, ciel, "1650");
+		addMapping(narrowerThan, ciel, "1650");
+		
+		CodeableConcept result = conceptTranslator.toFhirResource(concept);
+		
+		// the same code under two map types counts once: one external coding, one UUID
+		assertThat(result.getCoding(), hasSize(2));
+		assertThat(result.getCoding(), hasItem(
+		    allOf(hasProperty("system", equalTo(FhirTestConstants.CIEL_SYSTEM_URN)), hasProperty("code", equalTo("1650")))));
+	}
+	
+	@Test
 	public void shouldAddOnlySAME_ASCodesIfSameTypeOtherMappingsAlsoExist() {
 		addMapping(sameAs, ciel, "1650");
 		addMapping(narrowerThan, ciel, "1680");
