@@ -14,10 +14,12 @@ import static lombok.AccessLevel.PROTECTED;
 import javax.annotation.Nonnull;
 
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -45,6 +47,8 @@ import org.springframework.stereotype.Component;
 public class ConceptTranslatorImpl implements ConceptTranslator {
 	
 	private static final String CACHE_NAME = "fhir2ConceptToCodeableConcept";
+	
+	private static final String SAME_AS = "SAME-AS";
 	
 	@Getter(PROTECTED)
 	@Setter(value = PROTECTED, onMethod_ = @Autowired)
@@ -85,35 +89,43 @@ public class ConceptTranslatorImpl implements ConceptTranslator {
 		CodeableConcept codeableConcept = new CodeableConcept();
 		codeableConcept.setText(concept.getDisplayString());
 		addConceptCoding(codeableConcept.addCoding(), null, concept.getUuid(), concept);
-		//map of <systemUrl ,<mapType , code>> ie { "http://loinc.org” : { "SAME-AS" : "108-5", "NARROWER-THAN": "108-8" }}
-		Map<String, Map<String, String>> systemUrlToCodeMap = new HashMap<>();
+		// map of <systemUrl, <mapType, set of codes>>
+		// ie { "http://loinc.org" : { "SAME-AS" : ["108-5"], "NARROWER-THAN": ["108-8", "108-9"] }}
+		// Sets (not single codes) so that several mappings with the same map type are not overwritten,
+		// and so that duplicate mappings of the same code count once.
+		Map<String, Map<String, Set<String>>> systemUrlToCodeMap = new LinkedHashMap<>();
 		for (ConceptMap mapping : concept.getConceptMappings()) {
 			if (mapping.getConceptMapType() != null) {
 				ConceptMapType mapType = mapping.getConceptMapType();
 				boolean sameAs = mapType.getUuid() != null && mapType.getUuid().equals(ConceptMapType.SAME_AS_MAP_TYPE_UUID);
-				sameAs = sameAs || (mapType.getName() != null && mapType.getName().equalsIgnoreCase("SAME-AS"));
+				sameAs = sameAs || (mapType.getName() != null && mapType.getName().equalsIgnoreCase(SAME_AS));
 				ConceptReferenceTerm crt = mapping.getConceptReferenceTerm();
 				String sourceUrl = getSourceUrl(crt.getConceptSource(), allFhirConceptSources);
 				if (sourceUrl != null) {
-					if (sameAs) {
-						addSystemToCodeMap(systemUrlToCodeMap, sourceUrl, "SAME-AS", crt.getCode());
-					} else {
-						addSystemToCodeMap(systemUrlToCodeMap, sourceUrl, mapType.getName(), crt.getCode());
-					}
+					addSystemToCodeMap(systemUrlToCodeMap, sourceUrl, sameAs ? SAME_AS : mapType.getName(), crt.getCode());
 				}
 			}
 		}
 		
-		for (String systemUrl : systemUrlToCodeMap.keySet()) {
-			Map<String, String> mapTypeToCodeMap = systemUrlToCodeMap.get(systemUrl);
-			if (mapTypeToCodeMap != null) {
-				if (mapTypeToCodeMap.size() == 1) {
-					for (String mapType : mapTypeToCodeMap.keySet()) {
-						addConceptCoding(codeableConcept.addCoding(), systemUrl, mapTypeToCodeMap.get(mapType), concept);
-					}
-				} else if (mapTypeToCodeMap.size() > 1 && mapTypeToCodeMap.containsKey("SAME-AS")) {
-					addConceptCoding(codeableConcept.addCoding(), systemUrl, mapTypeToCodeMap.get("SAME-AS"), concept);
+		for (Map.Entry<String, Map<String, Set<String>>> entry : systemUrlToCodeMap.entrySet()) {
+			String systemUrl = entry.getKey();
+			Map<String, Set<String>> mapTypeToCodes = entry.getValue();
+			
+			// Rule 1: if there are SAME-AS mappings, output all of them (and nothing else) for this source
+			Set<String> sameAsCodes = mapTypeToCodes.get(SAME_AS);
+			if (sameAsCodes != null && !sameAsCodes.isEmpty()) {
+				for (String code : sameAsCodes) {
+					addConceptCoding(codeableConcept.addCoding(), systemUrl, code, concept);
 				}
+				continue;
+			}
+			
+			// Rules 2 and 3: no SAME-AS. Count distinct codes across ALL map types.
+			// Exactly one -> output it. More than one -> ambiguous, output nothing for this source.
+			Set<String> allCodes = new LinkedHashSet<>();
+			mapTypeToCodes.values().forEach(allCodes::addAll);
+			if (allCodes.size() == 1) {
+				addConceptCoding(codeableConcept.addCoding(), systemUrl, allCodes.iterator().next(), concept);
 			}
 		}
 		return codeableConcept;
@@ -136,15 +148,24 @@ public class ConceptTranslatorImpl implements ConceptTranslator {
 							List<Concept> allMatchingConcepts = conceptService
 							        .getConceptsWithAnyMappingInSource(conceptSource.get(), coding.getCode());
 							if (!allMatchingConcepts.isEmpty()) {
-								Map<String, Concept> mapTypeToConceptMap = new HashMap<>();
-								addConceptsToMap(mapTypeToConceptMap, allMatchingConcepts, conceptSource.get(),
+								Map<String, Set<Concept>> mapTypeToConcepts = new LinkedHashMap<>();
+								addConceptsToMap(mapTypeToConcepts, allMatchingConcepts, conceptSource.get(),
 								    coding.getCode());
-								if (mapTypeToConceptMap.size() == 1) {
-									for (String mapType : mapTypeToConceptMap.keySet()) {
-										return mapTypeToConceptMap.get(mapType);
+								
+								// SAME-AS match: return it only if exactly one concept has it, otherwise ambiguous
+								Set<Concept> sameAsConcepts = mapTypeToConcepts.get(SAME_AS);
+								if (sameAsConcepts != null && !sameAsConcepts.isEmpty()) {
+									if (sameAsConcepts.size() == 1) {
+										return sameAsConcepts.iterator().next();
 									}
-								} else if (mapTypeToConceptMap.size() > 1 && mapTypeToConceptMap.containsKey("SAME-AS")) {
-									return mapTypeToConceptMap.get("SAME-AS");
+									continue;
+								}
+								
+								// no SAME-AS: return the concept only if exactly one distinct concept matches
+								Set<Concept> allConcepts = new LinkedHashSet<>();
+								mapTypeToConcepts.values().forEach(allConcepts::addAll);
+								if (allConcepts.size() == 1) {
+									return allConcepts.iterator().next();
 								}
 							}
 						}
@@ -164,18 +185,13 @@ public class ConceptTranslatorImpl implements ConceptTranslator {
 		}
 	}
 	
-	private void addSystemToCodeMap(Map<String, Map<String, String>> systemUrlToCodeMap, String systemUrl, String mapType,
-	        String code) {
-		if (systemUrlToCodeMap.containsKey(systemUrl)) {
-			systemUrlToCodeMap.get(systemUrl).put(mapType, code);
-		} else {
-			Map<String, String> mapTypeToCodeMap = new HashMap<>();
-			mapTypeToCodeMap.put(mapType, code);
-			systemUrlToCodeMap.put(systemUrl, mapTypeToCodeMap);
-		}
+	private void addSystemToCodeMap(Map<String, Map<String, Set<String>>> systemUrlToCodeMap, String systemUrl,
+	        String mapType, String code) {
+		systemUrlToCodeMap.computeIfAbsent(systemUrl, k -> new LinkedHashMap<>())
+		        .computeIfAbsent(mapType, k -> new LinkedHashSet<>()).add(code);
 	}
 	
-	private void addConceptsToMap(Map<String, Concept> mapTypeToConceptMap, List<Concept> allMatchingConcepts,
+	private void addConceptsToMap(Map<String, Set<Concept>> mapTypeToConcepts, List<Concept> allMatchingConcepts,
 	        ConceptSource conceptSource, String code) {
 		allMatchingConcepts.forEach(concept -> {
 			for (ConceptMap mapping : concept.getConceptMappings()) {
@@ -184,12 +200,9 @@ public class ConceptTranslatorImpl implements ConceptTranslator {
 				if (crt.getCode().equals(code) && crt.getConceptSource().equals(conceptSource)) {
 					boolean sameAs = mapType.getUuid() != null
 					        && mapType.getUuid().equals(ConceptMapType.SAME_AS_MAP_TYPE_UUID);
-					sameAs = sameAs || (mapType.getName() != null && mapType.getName().equalsIgnoreCase("SAME-AS"));
-					if (sameAs) {
-						mapTypeToConceptMap.put("SAME-AS", concept);
-					} else {
-						mapTypeToConceptMap.put(mapType.getName(), concept);
-					}
+					sameAs = sameAs || (mapType.getName() != null && mapType.getName().equalsIgnoreCase(SAME_AS));
+					mapTypeToConcepts.computeIfAbsent(sameAs ? SAME_AS : mapType.getName(), k -> new LinkedHashSet<>())
+					        .add(concept);
 				}
 			}
 		});
