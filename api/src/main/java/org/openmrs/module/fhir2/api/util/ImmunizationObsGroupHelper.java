@@ -43,7 +43,6 @@ import org.openmrs.Obs;
 import org.openmrs.Provider;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.EncounterService;
-import org.openmrs.api.ObsService;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -54,10 +53,6 @@ public class ImmunizationObsGroupHelper {
 	@Getter(value = PROTECTED)
 	@Setter(value = PROTECTED, onMethod_ = @Autowired)
 	private ConceptService conceptService;
-	
-	@Getter(value = PROTECTED)
-	@Setter(value = PROTECTED, onMethod_ = @Autowired)
-	private ObsService obsService;
 	
 	@Getter(value = PROTECTED)
 	@Setter(value = PROTECTED, onMethod_ = @Autowired)
@@ -135,10 +130,29 @@ public class ImmunizationObsGroupHelper {
 	public Obs replaceObs(Obs immunizationObsGroup, Obs previousObs) {
 		Obs result = Obs.newInstance(previousObs);
 		result.setPreviousVersion(previousObs);
-		obsService.voidObs(previousObs, "Value updated");
-		immunizationObsGroup.removeGroupMember(previousObs);
+		voidInMemory(previousObs, "Value updated");
 		immunizationObsGroup.addGroupMember(result);
 		return result;
+	}
+	
+	public void voidMember(Obs immunizationObsGroup, Obs member) {
+		if (member == null) {
+			return;
+		}
+		if (member.getId() == null) {
+			immunizationObsGroup.removeGroupMember(member);
+		} else if (!member.getVoided()) {
+			voidInMemory(member, "Value removed");
+		}
+	}
+	
+	/**
+	 * Voids a member without saving it, so that it is saved with its group, and nothing is saved when
+	 * the update fails first. Saving the group sets who voided it and when.
+	 */
+	private static void voidInMemory(Obs member, String reason) {
+		member.setVoided(true);
+		member.setVoidReason(reason);
 	}
 	
 	public Provider getAdministeringProvider(Obs obs) {

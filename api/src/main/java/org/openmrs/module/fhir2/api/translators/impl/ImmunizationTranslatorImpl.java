@@ -234,11 +234,6 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 		openmrsImmunization.setPerson(patient);
 		openmrsImmunization.setLocation(location);
 		openmrsImmunization.setEncounter(encounter);
-		openmrsImmunization.getGroupMembers().forEach(obs -> {
-			obs.setPerson(patient);
-			obs.setLocation(finalLocation);
-			obs.setEncounter(encounter);
-		});
 		
 		Map<String, Obs> members = helper.getObsMembersMap(openmrsImmunization);
 		
@@ -321,7 +316,7 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 				}
 			}
 		} else {
-			openmrsImmunization.removeGroupMember(members.get(CIEL_1418));
+			helper.voidMember(openmrsImmunization, members.get(CIEL_1418));
 		}
 		
 		if (fhirImmunization.hasManufacturer() && fhirImmunization.getManufacturer().hasDisplay()) {
@@ -344,7 +339,7 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 				}
 			}
 		} else {
-			openmrsImmunization.removeGroupMember(members.get(CIEL_1419));
+			helper.voidMember(openmrsImmunization, members.get(CIEL_1419));
 		}
 		
 		if (fhirImmunization.hasLotNumber()) {
@@ -367,7 +362,7 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 				}
 			}
 		} else {
-			openmrsImmunization.removeGroupMember(members.get(CIEL_1420));
+			helper.voidMember(openmrsImmunization, members.get(CIEL_1420));
 		}
 		
 		if (fhirImmunization.hasExpirationDate()) {
@@ -390,7 +385,7 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 				}
 			}
 		} else {
-			openmrsImmunization.removeGroupMember(members.get(CIEL_165907));
+			helper.voidMember(openmrsImmunization, members.get(CIEL_165907));
 		}
 		
 		Concept noteConcept = helper.conceptOrNull(CIEL_161011);
@@ -411,7 +406,7 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 				}
 			}
 		} else {
-			openmrsImmunization.removeGroupMember(members.get(CIEL_161011));
+			helper.voidMember(openmrsImmunization, members.get(CIEL_161011));
 		}
 		
 		Concept nextDoseDateConcept = helper.conceptOrNull(CIEL_170000);
@@ -440,8 +435,15 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 				}
 			}
 		} else {
-			openmrsImmunization.removeGroupMember(members.get(CIEL_170000));
+			helper.voidMember(openmrsImmunization, members.get(CIEL_170000));
 		}
+		
+		// only now, so that the members voided above keep the person, location and encounter they were saved with
+		openmrsImmunization.getGroupMembers().forEach(obs -> {
+			obs.setPerson(patient);
+			obs.setLocation(finalLocation);
+			obs.setEncounter(encounter);
+		});
 		
 		return openmrsImmunization;
 	}
