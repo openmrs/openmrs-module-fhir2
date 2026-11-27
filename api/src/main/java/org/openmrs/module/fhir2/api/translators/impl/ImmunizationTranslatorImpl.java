@@ -234,11 +234,6 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 		openmrsImmunization.setPerson(patient);
 		openmrsImmunization.setLocation(location);
 		openmrsImmunization.setEncounter(encounter);
-		openmrsImmunization.getGroupMembers().forEach(obs -> {
-			obs.setPerson(patient);
-			obs.setLocation(finalLocation);
-			obs.setEncounter(encounter);
-		});
 		
 		Map<String, Obs> members = helper.getObsMembersMap(openmrsImmunization);
 		
@@ -442,6 +437,13 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 		} else {
 			helper.voidMember(openmrsImmunization, members.get(CIEL_170000));
 		}
+		
+		// only now, so that the members voided above keep the person, location and encounter they were saved with
+		openmrsImmunization.getGroupMembers().forEach(obs -> {
+			obs.setPerson(patient);
+			obs.setLocation(finalLocation);
+			obs.setEncounter(encounter);
+		});
 		
 		return openmrsImmunization;
 	}

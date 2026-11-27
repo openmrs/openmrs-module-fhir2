@@ -43,6 +43,9 @@ import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import org.apache.commons.io.IOUtils;
+import org.hibernate.FlushMode;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
@@ -57,6 +60,7 @@ import org.openmrs.api.ObsService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.fhir2.BaseFhirContextSensitiveTest;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.translators.ImmunizationTranslator;
 import org.openmrs.module.fhir2.api.util.ImmunizationObsGroupHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -79,8 +83,16 @@ public class FhirImmunizationServiceImplTest extends BaseFhirContextSensitiveTes
 	
 	private static final String IMMUNIZATION_UUID = "9353776b-dead-4588-8723-d687197d8438";
 	
+	private static final String NEW_LOCATION_UUID = "9356400c-a5a2-4532-8f2b-2361b3446eb8";
+	
 	@Autowired
 	private FhirImmunizationServiceImpl service;
+	
+	@Autowired
+	private ImmunizationTranslator translator;
+	
+	@Autowired
+	private SessionFactory sessionFactory;
 	
 	@Autowired
 	private ConceptService conceptService;
@@ -352,6 +364,8 @@ public class FhirImmunizationServiceImplTest extends BaseFhirContextSensitiveTes
 		for (int replacedObsId : new int[] { 20, 21, 22 }) {
 			Obs replaced = obsService.getObs(replacedObsId);
 			assertTrue(replaced.getVoided());
+			assertThat(replaced.getVoidedBy(), notNullValue());
+			assertThat(replaced.getDateVoided(), notNullValue());
 			assertThat(replaced.getObsGroup(), notNullValue());
 			assertThat(replaced.getObsGroup().getUuid(), is(IMMUNIZATION_UUID));
 		}
@@ -373,12 +387,47 @@ public class FhirImmunizationServiceImplTest extends BaseFhirContextSensitiveTes
 		for (int removedObsId : new int[] { 21, 22 }) {
 			Obs removed = obsService.getObs(removedObsId);
 			assertTrue(removed.getVoided());
+			assertThat(removed.getVoidedBy(), notNullValue());
+			assertThat(removed.getDateVoided(), notNullValue());
 			assertThat(removed.getObsGroup(), notNullValue());
 			assertThat(removed.getObsGroup().getUuid(), is(IMMUNIZATION_UUID));
 		}
 		Map<String, Obs> members = helper.getObsMembersMap(obsService.getObsByUuid(IMMUNIZATION_UUID));
 		assertNull(members.get(CIEL_1420));
 		assertNull(members.get(CIEL_165907));
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldNotGiveTheMembersAnUpdateLeavesOutTheNewLocation() {
+		// the lot number and expiration date the update leaves out are saved with a location of their own
+		administrationService.executeSQL("update obs set location_id = 1 where obs_id in (21, 22)", false);
+		Context.clearSession();
+		Obs immunization = obsService.getObsByUuid(IMMUNIZATION_UUID);
+		Immunization update = parseStoredImmunizationWith("  \"location\": { \"reference\": \"Location/" + NEW_LOCATION_UUID
+		        + "\" },\n" + "  \"occurrenceDateTime\": \"2020-07-08T20:30:00\",\n"
+		        + "  \"manufacturer\": { \"display\": \"Pharma Inc.\" },\n"
+		        + "  \"protocolApplied\": [ { \"doseNumberPositiveInt\": 3 } ],\n");
+		Session session = sessionFactory.getCurrentSession();
+		FlushMode flushMode = session.getHibernateFlushMode();
+		// as in a request, the session writes nothing until the update saves the group
+		session.setHibernateFlushMode(FlushMode.MANUAL);
+		try {
+			Obs translated = translator.toOpenmrsType(immunization, update);
+			
+			// and keep it
+			Map<Integer, Obs> savedMembers = translated.getGroupMembers(true).stream().filter(m -> m.getId() != null)
+			        .collect(Collectors.toMap(Obs::getId, m -> m));
+			for (int removedObsId : new int[] { 21, 22 }) {
+				assertTrue(savedMembers.get(removedObsId).getVoided());
+				assertThat(savedMembers.get(removedObsId).getLocation().getLocationId(), is(1));
+			}
+			for (Obs kept : translated.getGroupMembers()) {
+				assertThat(kept.getLocation().getUuid(), is(NEW_LOCATION_UUID));
+			}
+		} finally {
+			Context.clearSession();
+			session.setHibernateFlushMode(flushMode);
+		}
 	}
 	
 	/**
